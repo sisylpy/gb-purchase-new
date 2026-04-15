@@ -1,0 +1,43 @@
+
+
+.custom-navbar {
+  position: fixed; /* 固定定位 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid lightgray;
+  z-index: 999; /* 确保导航栏位于最上层 */
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 50rpx;
+  height: 50rpx;
+  /* border-radius: 32rpx; */
+  margin-left: 10rpx;
+}
+
+
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.nav-button {
+  background-color: transparent;
+  border: none;
+  font-size: 32rpx;
+  padding: 0 20rpx;
+}

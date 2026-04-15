@@ -1,0 +1,12 @@
+/* styles/color.wxss - 颜色工具类 */
+
+/* 背景 */
+.bg-page { background-color: #f5f5f5; }
+.bg-white { background-color: #ffffff; }
+.bg-primary { background-color: #187e6e; }
+.bg-success { background-color: #07c160; }
+.bg-warning { background-color: #fa9d3b; }
+.bg-danger { background-color: #fa5151; }
+.bg-light { background-color: #e5f8f6; }
+.liziBack { background: #e5f8f6; }
+.pageBack { background: #f5f5f5; }

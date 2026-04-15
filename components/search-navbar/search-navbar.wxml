@@ -1,0 +1,22 @@
+<!-- components/custom-navbar/custom-navbar.wxml -->
+<view class="custom-navbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight }}px;">
+  <view class="nav-container" style="height: {{navBarContentHeight}}px; ">
+    <!-- 左侧区域 -->
+    <view class="nav-left1"  bindtap="navbuttontap" >
+      <image src="{{avatar}}" mode="aspectFill" class="user-avatar" />
+    </view>
+    <!-- 中间标题 -->
+    <view class="flex-row" style="margin-bottom: 10rpx;" bind:tap="toSearch">
+      <image src="/images/search.png" mode="aspectFill" style="width: 50rpx; height: 50rpx; position: absolute; left: 120rpx;" />
+  <input class="searchInput " placeholder="{{placeHolder}}" style="width:{{windowWidth / 2}}rpx; margin-left: 20rpx;" placeholder-class="holderClass" placeholder="      搜索商品名称" disabled="true" ></input>
+  
+    </view>
+    <!-- 右侧区域 -->
+    <view class="nav-right" style="width: {{rightWidth}}px; ">
+      <!-- 右侧内容 -->
+      <!-- 如果需要添加右侧按钮，可以放在这里 -->
+
+      
+    </view>
+  </view>
+</view>

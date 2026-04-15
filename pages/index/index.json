@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "navbar": "/components/navbar/navbar",
+    "return-type": "/components/return-type/return-type"
+  },
+  "enablePullDownRefresh": true
+}

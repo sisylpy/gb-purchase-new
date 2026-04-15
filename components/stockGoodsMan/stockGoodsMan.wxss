@@ -1,0 +1,125 @@
+.ccc {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.body {
+  background: #fff;
+  transform: translateY(-40%);
+}
+
+.bg-white {
+  background: #fff;
+}
+
+.out {
+  line-height: 80rpx;
+  height: 80rpx;
+  border-radius: 10rpx;
+  color: #187e6e;
+  border: 1px solid lightgray;
+  padding-left: 20rpx;
+}
+
+.orderInput {
+  line-height: 80rpx;
+  height: 80rpx;
+  font-size: 38rpx;
+  color: #187e6e;
+  padding-left: 10rpx;
+}
+
+.orderInput.is-active {
+  color: red;
+}
+
+.p-20 {
+  padding: 20rpx 20rpx;
+}
+
+.gray {
+  color: gray;
+}
+
+.margin-l-right {
+  margin-right: 10rpx;
+}
+
+.goodsTitle {
+  font-size: 50rpx;
+  background: #187e6e;
+  color: #fff;
+}
+
+.margin-right {
+  margin-right: 20rpx;
+}
+
+.btn {
+  width: 50%;
+  display: flex;
+}
+
+.flex-fixed {
+  flex-shrink: 0;
+}
+
+.sureBtn {
+  line-height: 70rpx;
+  border-radius: 20rpx;
+  width: 60%;
+  text-align: center;
+  margin-left: 20%;
+  background: #9c9c9c;
+  color: #fff;
+}
+
+.sureBtn.is-active {
+  background: #187e6e;
+  color: #fff;
+}
+
+.cancleBtn {
+  line-height: 70rpx;
+  border: 1px solid gray;
+  border-radius: 20rpx;
+  width: 60%;
+  text-align: center;
+  margin-left: 20%;
+}
+
+.mainColor {
+  color: #187e6e;
+}
+
+.margin-top {
+  margin-top: 30rpx;
+}
+
+.half-row {
+  width: 50%;
+}
+
+.radio-group {
+  padding: 20rpx 60rpx;
+  background-color: rgb(237, 245, 248);
+}
+
+.flex-row-between {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.warning-text {
+  color: red;
+  font-size: 24rpx;
+}

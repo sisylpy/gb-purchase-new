@@ -1,0 +1,107 @@
+<view class="flex flex-column height-100">
+
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="管理" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <view class="flex-column pt-10  font-sl">
+
+
+    <view class="flex-row-wrap bg-white pt-20 pb-20">
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toMendian" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/house-things-.png" class="icon" />
+          <text>门店</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toStaff" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/user-group-2.png" class="icon" />
+          <text>采购组</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toJrdh" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/gongyingshang.png" class="icon" />
+          <text>供货商</text>
+        </view>
+      </view>
+     
+      <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/gongyingshang.png" class="icon" />
+          <text>菜品</text>
+        </view>
+      </view>
+      <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/gongyingshang.png" class="icon" />
+          <text>优惠卷</text>
+        </view>
+      </view>
+      
+      <view class="quarter-row pt-20 pb-20" bindtap="toDaily" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/gongyingshang.png" class="icon" />
+          <text>营业额</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toReportStock" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/home/stock0.png" class="icon" />
+          <text>报表</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toPurchaseDate" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/calender.png" class="icon" />
+          <text>日看板</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toPurchaseGoods" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/Cost.png" class="icon" />
+          <text>商品看板</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toPurGoodsFenxi" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/home/caigou2.png" class="icon" />
+          <text>采购分析</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toCostGoodsFenxi" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/home/cost2.png" class="icon" />
+          <text>成本分析</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toAiChat" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/chat_record.png" class="icon" />
+          <text>AI对话</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toRestaurantProfile" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/home/caigou2.png" class="icon" />
+          <text>经营分析</text>
+        </view>
+      </view>
+
+    </view>
+
+
+  </view>
+
+</view>

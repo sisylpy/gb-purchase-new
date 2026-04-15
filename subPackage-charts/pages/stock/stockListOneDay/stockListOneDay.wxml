@@ -1,0 +1,163 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="flex flex-column">
+  <back-navbar title="{{total}}元" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column middle">
+    <view class="">
+      <view class="flex-row stock_header xia_soild five_bottome_line small">
+        <view class="stock_dep you_soild p-10 pt-20 pb-20 hidden_stock_header">a</view>
+        <view class="stock_dep you_soild p-10 pt-20 pb-20 five-weight">商品</view>
+        <view class="stock_dep p-10 pt-20 pb-20 five-weight" style="text-align: right;">库存</view>
+      </view>
+
+      <!-- 今天 in -->
+      <view class="flex-column">
+        <view class="flex-row stock_header xia_soild">
+          <view class="flex-row stock_dep you_soild p-10 pt-20 pb-20" bindtap="open" data-type="openin">
+            <image src="{{openall ? (openin === false || !in || in.total === 0 ? '/images/arrow-right-3.png' : '/images/arrow-down-3.png') : (openin ? '/images/arrow-down-3.png' : '/images/arrow-right-3.png')}}" mode="aspectFill" class="icon" />
+            <text class="five-weight {{openall ? (openin === false || !in || in.total === 0 ? '' : 'stockColor') : (openin ? 'stockColor' : '')}}">今天</text>
+          </view>
+          <view class="flex-column stock_dep you_soild p-10 pt-20 pb-20 hidden_stock_header">
+            <view style="text-align: right;">{{in ? in.total : 0}}</view>
+          </view>
+          <view class="flex-column stock_dep p-10 pt-20 pb-20 five-weight {{openall ? (openin === false || !in || in.total === 0 ? '' : 'stockColor') : (openin ? 'stockColor' : '')}}">
+            <view style="text-align: right;">{{in ? in.total : 0}}元</view>
+          </view>
+        </view>
+
+        <view wx:if="{{in && in.total > 0}}" class="stockList {{openall ? (openin === false || !in || in.total === 0 ? '' : 'is-active') : (openin ? 'is-active' : '')}}" style="margin-left: 200rpx;">
+          <view class="flex-column bg-white" wx:for="{{in.arr}}" wx:for-item="stock" wx:for-index="stockIndex" wx:key="gbDepartmentGoodsStockId">
+            <view class="production-container" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
+              <view class="flex-column p-20 border-bottom {{expandedRows[stockIndex + '_' + stockIndex + '_0'] ? 'production-row-expanded' : 'production-row-collapsed'}}" style="width: {{windowWidth - 260}}rpx;" bind:tap="showOne" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
+                <view class="flex-row-default">
+                  <image src="{{url + stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgNxFatherImg}}" mode="aspectFill" class="url_item mr-20" />
+                  <view class="flex-column">
+                    <view class="flex-row font-lg">{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsName}}</view>
+                    <view class="flex-row-between p-10 bg-light radius-10" style="width: {{windowWidth - 400}}rpx;">
+                      <view class="">库存</view>
+                      <view class="flex-row">
+                        <view class="flex-row">
+                          <text class="mr-10">{{stock.gbDgsRestSubtotal}}元</text>
+                          <text class="font-sm">({{stock.gbDgsRestWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+                        </view>
+                        <view class="flex-column-center">
+                          <image src="/images/arrow-right-3.png" mode="aspectFill" class="ml-10 arrow-icon {{expandedRows[stockIndex + '_' + stockIndex + '_0'] === 'stock' || expandedRows[stockIndex + '_' + stockIndex + '_0'] === 'purchase' ? 'expanded' : 'collapsed'}}" />
+                        </view>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <view wx:if="{{expandedRows[stockIndex + '_' + stockIndex + '_0'] === 'stock' || expandedRows[stockIndex + '_' + stockIndex + '_0'] === 'purchase'}}" class="flex-column bg-light mt-10 p-20 radius-20 expandable-content expanded" bind:tap="toCost" data-item="{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity}}">
+              <view class="flex-row align-center mb-15 border-bottom p-10">
+                <text class="font-sm">入库信息</text>
+              </view>
+              <view class="flex-column">
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">入库时间</text><text>{{stock.gbDgsDate}}</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">入库数量</text><text>{{stock.gbDgsWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">入库单价</text><text>{{stock.gbDgsPrice}}元/{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">入库金额</text><text>{{stock.gbDgsSubtotal}}元</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">现库存</text><text>{{stock.gbDgsRestWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">销售</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsProduceSubtotal}}元</text><text class="font-xs">({{stock.gbDgsProduceWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">损耗</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsLossSubtotal}}元</text><text class="font-xs">({{stock.gbDgsLossWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">废弃</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsWasteSubtotal}}元</text><text class="font-xs">({{stock.gbDgsWasteWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
+              </view>
+            </view>
+
+            <view class="flex-column-center p-20 font-xs" bind:tap="showTwo" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}" data-id="{{stock.gbDgsGbPurGoodsId}}" wx:if="{{expandedRows[stockIndex + '_' + stockIndex + '_0']}}">
+              <view class="bg-mainColor flex-column-center p-10 radius-10">
+                <text class="font-yuan">采购追踪</text>
+              </view>
+            </view>
+
+            <block wx:if="{{expandedRows[stockIndex + '_' + stockIndex + '_0'] === 'purchase'}}">
+              <view class="flex-column bg-mainColor p-20 expandable-content expanded font-xs" bind:tap="toFenxi" data-item="{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity}}" data-id="{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDistributerGoodsId}}" data-purid="{{stock.purchaseGoodsEntity.gbDistributerPurchaseGoodsId}}">
+                <view class="flex-row align-center mb-15 border-bottom p-10"><text class="font-sm">采购信息</text></view>
+                <view class="flex-row-between border-bottom p-10" style="width: {{windowWidth - 280}}rpx;"><text class="text-secondary mr-10">采购时间:</text><text>{{stock.purchaseGoodsEntity.gbDpgStockFinishDate}}</text></view>
+                <view class="flex-row-between border-bottom p-10" style="width: {{windowWidth - 280}}rpx;"><text class="text-secondary mr-10">单价:</text><text>{{stock.purchaseGoodsEntity.gbDpgBuyPrice}}元/{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">数量</text><text>{{stock.purchaseGoodsEntity.gbDpgBuyQuantity}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">采购金额</text><text>{{stock.purchaseGoodsEntity.gbDpgBuySubtotal}}元</text></view>
+                <block wx:if="{{stock.purchaseGoodsEntity.purchaseDepartmentUser !== null}}">
+                  <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">采购员</text><text>{{stock.purchaseGoodsEntity.purchaseDepartmentUser.gbDuWxNickName}}</text></view>
+                </block>
+                <block wx:elif="{{stock.purchaseGoodsEntity.nxJrdhSupplierEntity !== null}}">
+                  <view class="flex-row"><text class="text-secondary mr-10">供货商</text><text>{{stock.purchaseGoodsEntity.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text></view>
+                </block>
+              </view>
+            </block>
+          </view>
+        </view>
+      </view>
+
+      <!-- 1天 -->
+      <view class="flex-column">
+        <view class="flex-row stock_header xia_soild">
+          <view class="flex-row stock_dep you_soild p-10 pt-20 pb-20" bindtap="open" data-type="openone">
+            <image src="{{openall ? (openone === false || !one || one.total === 0 ? '/images/arrow-right-3.png' : '/images/arrow-down-3.png') : (openone ? '/images/arrow-down-3.png' : '/images/arrow-right-3.png')}}" mode="aspectFill" class="icon" />
+            <text class="five-weight {{openall ? (openone === false || !one || one.total === 0 ? '' : 'stockColor') : (openone ? 'stockColor' : '')}}">1天</text>
+          </view>
+          <view class="flex-column stock_dep you_soild p-10 pt-20 pb-20 hidden_stock_header">
+            <view style="text-align: right;">{{one ? one.total : 0}}元</view>
+          </view>
+          <view class="flex-column stock_dep p-10 pt-20 pb-20 five-weight {{openall ? (openone === false || !one || one.total === 0 ? '' : 'stockColor') : (openone ? 'stockColor' : '')}}">
+            <view style="text-align: right;">{{one ? one.total : 0}}元</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 2天 -->
+      <view class="flex-column">
+        <view class="flex-row stock_header xia_soild">
+          <view class="flex-row stock_dep you_soild p-10 pt-20 pb-20" bindtap="open" data-type="opentwo">
+            <image src="{{openall ? (opentwo === false || !two || two.total === 0 ? '/images/arrow-right-3.png' : '/images/arrow-down-3.png') : (opentwo ? '/images/arrow-down-3.png' : '/images/arrow-right-3.png')}}" mode="aspectFill" class="icon" />
+            <text class="five-weight {{openall ? (opentwo === false || !two || two.total === 0 ? '' : 'stockColor') : (opentwo ? 'stockColor' : '')}}">2天</text>
+          </view>
+          <view class="flex-column stock_dep you_soild p-10 pt-20 pb-20 hidden_stock_header">
+            <view style="text-align: right;">{{two ? two.total : 0}}元</view>
+          </view>
+          <view class="flex-column stock_dep p-10 pt-20 pb-20 five-weight {{openall ? (opentwo === false || !two || two.total === 0 ? '' : 'stockColor') : (opentwo ? 'stockColor' : '')}}">
+            <view style="text-align: right;">{{two ? two.total : 0}}元</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 3天 -->
+      <view class="flex-column">
+        <view class="flex-row stock_header xia_soild">
+          <view class="flex-row stock_dep you_soild p-10 pt-20 pb-20" bindtap="open" data-type="openthree">
+            <image src="{{openall ? (openthree === false || !three || three.total === 0 ? '/images/arrow-right-3.png' : '/images/arrow-down-3.png') : (openthree ? '/images/arrow-down-3.png' : '/images/arrow-right-3.png')}}" mode="aspectFill" class="icon" />
+            <text class="five-weight {{openall ? (openthree === false || !three || three.total === 0 ? '' : 'stockColor') : (openthree ? 'stockColor' : '')}}">3天</text>
+          </view>
+          <view class="flex-column stock_dep you_soild p-10 pt-20 pb-20 hidden_stock_header">
+            <view style="text-align: right;">{{three ? three.total : 0}}元</view>
+          </view>
+          <view class="flex-column stock_dep p-10 pt-20 pb-20 five-weight {{openall ? (openthree === false || !three || three.total === 0 ? '' : 'stockColor') : (openthree ? 'stockColor' : '')}}">
+            <view style="text-align: right;">{{three ? three.total : 0}}元</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 3天以上 -->
+      <view class="flex-column">
+        <view class="flex-row stock_header xia_soild">
+          <view class="flex-row stock_dep you_soild p-10 pt-20 pb-20" bindtap="open" data-type="openfour">
+            <image src="{{openall ? (openfour === false || !exceedThree || exceedThree.total === 0 ? '/images/arrow-right-3.png' : '/images/arrow-down-3.png') : (openfour ? '/images/arrow-down-3.png' : '/images/arrow-right-3.png')}}" mode="aspectFill" class="icon" />
+            <text class="five-weight {{openall ? (openfour === false || !exceedThree || exceedThree.total === 0 ? '' : 'stockColor') : (openfour ? 'stockColor' : '')}}">3天以上</text>
+          </view>
+          <view class="flex-column stock_dep you_soild p-10 pt-20 pb-20 hidden_stock_header">
+            <view style="text-align: right;">{{exceedThree ? exceedThree.total : 0}}元</view>
+          </view>
+          <view class="flex-column stock_dep p-10 pt-20 pb-20 five-weight {{openall ? (openfour === false || !exceedThree || exceedThree.total === 0 ? '' : 'stockColor') : (openfour ? 'stockColor' : '')}}">
+            <view style="text-align: right;">{{exceedThree ? exceedThree.total : 0}}元</view>
+          </view>
+        </view>
+      </view>
+
+    </view>
+  </view>
+</view>
+
+<stockGoodsMan show="{{showStock}}" bindconfirm="confirmStock" item="{{item}}" consultItem="{{consultItem}}" depGoods="{{depGoods}}" bindcancle="hideMask" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" nowTime="{{nowTime}}" depList="{{depList}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" />

@@ -1,0 +1,62 @@
+<view class="flex flex-column ">
+  <back-navbar title="{{fatherName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="content">
+		<view class="flex-row-between ">
+	 <view></view>
+	 <view class="flex-row with-padding " bindtap="addFood" hover-class="hover">
+			<image src="/images/add-fill.png" class="icon"></image>
+			<text class="">菜品</text>
+		</view>
+	 </view>
+
+   <view class="flex-column whiteBack with-padding with-border-bottom" wx:for="{{storeArr}}"  wx:for-item="food"  bindtap="showEdit" data-item="{{food}}" >	 
+			<view class="flex-row-default normal">
+				<text class="margin-right">{{index + 1}}.</text>
+				<view class="margin-l-right">
+				<image class="food_img" src="{{url + food.gbDistributerFoodImg}}"></image>
+				</view>
+				<view class='flex-column'>
+				<text class="with-slr-padding">{{food.gbDfFoodName}}</text>
+				<view class="flex-row small with-s-padding">
+					<text class="margin-l-right ">单价:</text>
+					<text>{{food.gbDfFoodPrice}}元/份</text>
+				</view>
+				<view class="flex-row small with-s-padding" wx:if="{{food.gbDfFoodMethod !== null && food.gbDfFoodMethod.length > 0 }}">
+					<text class="margin-l-right">售出方法:</text>
+					<text >{{food.gbDfFoodMethod}}</text>
+				</view>
+			
+				<view class="flex-row-default small with-s-padding">
+				  <text class="margin-l-right " style="width: 140rpx;">主要原料:</text>
+					<view class="flex-row-wrap">
+						<view class="flex-row margin-l-right  food_raw" wx:for="{{food.gbdisFoodGoodsEntities}}" wx:for-item="goods">
+				 <text class="margin-l-right">{{goods.gbDfgGoodsName}}</text>
+				 <text>{{goods.gbDfgGoodsAmount}}</text>
+				 <text>{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+				 </view>
+					</view>
+				</view>
+				</view>	
+			</view>
+	 </view>
+	
+	</view>
+
+</view>
+
+<!-- mask -->
+<view class='mask {{showOperation ? "is-active" : ""}}' catchtap="hideMask">
+	<view class="popup whiteBack" style="background-color: wheat;">
+		<view class="popup-item with-border-bottom" bindtap="addRaw">
+			<text>添加原料成本"{{item.gbDfFoodName}}"</text>
+		</view>
+		<view class="popup-item with-border-bottom" bindtap="editRaw">
+			<text>修改原料成本"{{item.gbDfFoodName}}"</text>
+		</view>
+		<view class="popup-item with-border-bottom" bindtap="editFood">
+			<text>编辑"{{item.gbDfFoodName}}"</text>
+		</view>
+		<view class="popup-item" bindtap="deleteFood">删除"{{item.gbDfFoodName}}"</view>
+	</view>
+</view>

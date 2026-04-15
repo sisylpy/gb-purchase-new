@@ -1,0 +1,47 @@
+page {
+  background: #f7f7f7;
+}
+
+.class_img {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 1px solid lightgray;
+  margin-top: 10rpx;
+}
+
+.group_input {
+  border-bottom: 1px solid #1fabf1;
+  margin-top: 10rpx;
+  padding-bottom: 10rpx;
+}
+
+.radio-group {}
+
+.radio {
+  width: 25%;
+  float: left;
+  line-height: 120rpx;
+}
+
+.fixed {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.saveBtn {
+  width: 300rpx;
+  border: 1px solid gray;
+  padding: 10rpx 20rpx;
+  border-radius: 10rpx;
+  margin: 0 auto;
+  text-align: center;
+  margin-top: 40rpx;
+}
+
+.saveBtn.is-active {
+  background: #187e6e;
+  color: #fff;
+}

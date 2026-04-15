@@ -1,0 +1,216 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="flex flex-column">
+
+
+  <back-navbar title="商品看板" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class="small" wx:if="{{startDateDisplay}}">{{startDateDisplay}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="small" wx:if="{{startDateDisplay}}">{{startDateDisplay}}</view>
+          <text class="plr-10">-</text>
+          <view class="small" wx:if="{{stopDateDisplay}}">{{stopDateDisplay}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../images/filter.png' : '../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+  </view>
+
+
+  <!-- 供货商和采购员选择显示 -->
+  <view class="filter-container" wx:if="{{(selectedSupplierName && selectedSupplierName.length > 0) || (selectedPurUserName && selectedPurUserName.length > 0)}}">
+    <view class="filter-row">
+      <!-- 供货商选择显示 -->
+      <view class="filter-chip" wx:if="{{selectedSupplierName && selectedSupplierName.length > 0}}">
+        <text class="filter-text">供货商: {{selectedSupplierName}}</text>
+        <view class="filter-delete" bindtap="delSearch">
+          <image src="/images/del-2.png" mode="aspectFill" class="delete-icon"></image>
+        </view>
+      </view>
+
+      <!-- 采购员选择显示 -->
+      <view class="filter-chip" wx:if="{{selectedPurUserName && selectedPurUserName.length > 0}}">
+        <text class="filter-text">采购员: {{selectedPurUserName}}</text>
+        <view class="filter-delete" bindtap="delSearch">
+          <image src="/images/del-2.png" mode="aspectFill" class="delete-icon"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+
+
+  <view class="flex-column p-20" style="background-color: #f5f5f5; min-height: 100vh;">
+    <view class="flex-column" wx:if="{{outArr.length > 0}}">
+
+      <!-- 商品类别卡片 -->
+      <view class="goods-card" wx:for="{{outArr}}" wx:for-item="great" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
+
+        <!-- 卡片头部：图标 + 标题 + 采购总额 -->
+        <view class="">
+          <view class="flex-row-default">
+            <image src="{{url + great.gbDfgFatherGoodsImg}}" mode="aspectFill" class="goods_item_lg mr-20" />
+
+            <view class="flex-row-between" style="width: {{windowWidth - 200}}rpx;">
+              <view class="flex-column">
+                <view class="font-md">{{great.gbDfgFatherGoodsName}}</view>
+                <!-- <view class="flex-column">
+                  <view class="font-xs text-secondary">采购占比总采购{{great.dailyData.purTotal}}元 {{great.dailyData.valuePercent}}%</view>
+                  <view class="font-xs text-secondary">支出占比总支出{{great.dailyData.costAllTotal}}元 {{great.dailyData.costPercent}}%</view>
+
+                  <view class="flex-row-between font-xs text-secondary">
+                    <view class="mr-30">上期库存:{{great.dailyData.lastStock2}}元 </view>
+                    <view>本期库存:{{great.dailyData.perStock}}元 </view>
+                  </view>
+                </view> -->
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!--  -->
+        <!-- 主要内容：左右两列 -->
+        <view class="flex-row-between" style="flex: 1; gap: 20rpx;">
+
+          <!-- 左侧：采购列 -->
+          <view class="flex-column" style="flex: 1;">
+            <!-- 采购卡片 -->
+            <view class="flex-column p-20" style="background-color: white; border-radius: 8rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);" bindtap="toPurGoodsByGreatId" data-id="{{great.gbDistributerFatherGoodsId}}" data-name="{{great.gbDfgFatherGoodsName}}" data-item="{{great.dailyData}}" hover-class="hover" >
+              <!-- 图标 + 标题 -->
+              <view class="flex-row-between mb-10">
+                <view class="flex-row-default align-center mb-15">
+                  <image src="../../../images/gouwuche.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                  <view class="flex-column">
+                    <view class="font-sm font-bold">采购</view>
+
+                  </view>
+
+
+                </view>
+
+                <!-- 采购环形图 -->
+                <view class="donut-chart-container">
+                  <view class="donut-chart" style="width: 60rpx; height: 60rpx; background: {{great.conicGradient}};">
+                    <!-- 百分比文字 -->
+                    <text class="donut-percent">{{great.dailyData.greatPercent}}%</text>
+                  </view>
+                </view>
+
+
+              </view>
+
+
+              <!-- 采购数据 -->
+              <view class="flex-column">
+                <view class="flex-row-between mb-8">
+                  <text class="font-xs text-secondary">自采:</text>
+                  <text class="font-xs">{{great.dailyData.zicai}}元</text>
+                </view>
+                <view class="flex-row-between mb-8">
+                  <text class="font-xs text-secondary">订货:</text>
+                  <text class="font-xs">{{great.dailyData.dinghuo}}元</text>
+                </view>
+
+              </view>
+
+              <!-- 图标 + 标题 -->
+              <view class="flex-row align-center mb-15">
+                <image src="../../../images/kucun.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                <text class="font-sm font-bold">库存</text>
+              </view>
+
+              <!-- 库存数据 -->
+              <view class="flex-column">
+                <view class="flex-row-between mb-8">
+                  <text class="font-xs text-secondary">库存:</text>
+                  <text class="font-xs">{{great.dailyData.perStock}}元</text>
+                </view>
+
+              </view>
+
+            </view>
+          </view>
+
+          <!-- 右侧：支出列 -->
+          <view class="flex-column" style="flex: 1;">
+            <!-- 支出卡片 -->
+            <view class="flex-column p-20" style="background-color: white; border-radius: 8rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);" bind:tap="toCostGoodByGreatId" data-id="{{great.gbDistributerFatherGoodsId}}" hover-class="hover"  data-item="{{great.dailyData}}" data-name="{{great.gbDfgFatherGoodsName}}">
+
+              <view class="flex-row-between">
+                <!-- 图标 + 标题 -->
+
+                <view class="flex-row align-center mb-15">
+                  <image src="../../../images/qiandaizi.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                  <text class="font-sm font-bold">支出</text>
+                </view>
+
+
+                <!-- 支出环形图  -->
+                <view class="donut-chart-container">
+                  <view class="donut-chart" style="width: 60rpx; height: 60rpx; background: {{great.costConicGradient}};">
+                    <!-- 百分比文字 -->
+                    <text class="donut-percent">{{great.dailyData.costPercent}}%</text>
+                  </view>
+                </view>
+
+
+              </view>
+
+
+              <!-- 支出数据 -->
+              <view class="flex-column">
+                <view class="flex-row-between mb-8">
+                  <text class="font-xs text-secondary">销售:</text>
+                  <text class="font-xs">{{great.dailyData.produceSubtotal}}元</text>
+                </view>
+                <view class="flex-row-between mb-8">
+                  <text class="font-xs text-secondary">损耗:</text>
+                  <text class="font-xs">{{great.dailyData.lossTotal}}元</text>
+                </view>
+                <view class="flex-row-between mb-8">
+                  <text class="font-xs text-secondary">废弃:</text>
+                  <text class="font-xs">{{great.dailyData.wasteTotal}}元</text>
+                </view>
+                <view class="flex-row-between">
+                  <text class="font-sm font-bold">合计:</text>
+                  <text class="font-sm font-bold">{{great.dailyData.costTotal}}元</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="text-secondary font-xs flex-column center-content" style="height: 200rpx;" >没有数据了！</view>
+
+    </view>
+
+
+
+    <view class="" wx:if="{{outArr.length == 0}}" style="height: {{windowHeight - 360}}rpx;">
+
+      <view class="center-content flex-column" style="padding-top: 200rpx;">
+        <image class="empty_image" src="/images/cart-Empty.png"></image>
+        <text class="big">无数据</text>
+      </view>
+
+    </view>
+    <!-- ./empty -->
+
+
+
+  </view>
+
+
+</view>

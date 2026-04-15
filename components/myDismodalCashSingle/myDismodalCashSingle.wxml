@@ -1,0 +1,139 @@
+<view class='maskCash' wx:if='{{show}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
+  <view class='modal-content' style="margin-top:{{statusBarHeight + 100}}px;">
+    <view class="top">
+      <view class='goodsTitle flex-row  with-padding'>
+        <text class="brand" wx:if="{{item.nxDgGoodsBrand.length > 0 && item.nxDgGoodsBrand !== 'null'}}">{{item.nxDgGoodsBrand}}</text>
+        <text style="font-size: {{item.nxDgGoodsName.length > 5 ? '40' : '50'}}rpx;">{{item.nxDgGoodsName}}</text>
+        <text style="font-size: {{item.nxDgGoodsName.length > 5 ? '30' : '40'}}rpx;" wx:for="{{item.nxDistributerAliasEntities}}" wx:for-item="alias" wx:key="nxDaAliasId">@{{alias.nxDaAliasName}}</text>
+        <block wx:if="{{item.nxDgGoodsStandardWeight !== 'null' && item.nxDgGoodsStandardWeight.length > 0}}">
+          <text style="font-size: {{item.nxDgGoodsName.length > 5 ? '40' : '50'}}rpx;" wx:if="{{item.nxDgGoodsStandardname !== '斤'}}">({{item.nxDgGoodsStandardWeight}}/{{item.nxDgGoodsStandardname}})</text>
+        </block>
+        <block wx:else>
+          <text style="font-size: {{item.nxDgGoodsName.length > 5 ? '40' : '50'}}rpx;" wx:if="{{item.nxDgGoodsStandardname !== '斤'}}">({{item.nxDgGoodsStandardname}})</text>
+        </block>
+      </view>
+    </view>
+
+    <view class="flex-column" style="background-color: #fff;">
+
+      <view class="flex_row_between" style=" padding: 20rpx 20rpx;">
+        <text class="explain">数量</text>
+        <input class='numberInput' focus='true' type='digit' value="{{applyNumber}}" bindinput="getApplyNumber" hold-keyboard='true'></input>
+
+      </view>
+
+
+      <block wx:if="{{level == 1}}">
+        <view class="flex-row-default" style="padding: 20rpx 20rpx;">
+        <text class="explain shrink_fix">单位</text>
+        
+        
+        <view class=" flex-row-wrap shrink_change ">
+          <text class="standardName {{applyStandardName == item.nxDgGoodsStandardname ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{item.nxDgGoodsStandardname}}">{{item.nxDgGoodsStandardname}}</text>
+
+          <text class="standardName {{applyStandardName == standard.nxDsStandardName ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{standard.nxDsStandardName}}" wx:for="{{item.nxDistributerStandardEntities}}" wx:key="nxDistributerStandardId" wx:for-item="standard">{{standard.nxDsStandardName}}</text>
+          <text class="standardName" bindtap="showInputStandard"> +</text>
+        </view>
+
+      </view>
+      <view class="flex_row_between" wx:if="{{showAddStandard}}" style="padding: 20rpx 20rpx; ">
+        <text class="explain" style="width: 300rpx;">添加规格</text>
+        <view class="flex_row_between" style="width: {{windowWidth - 300}}rpx; ">
+          <input class="standardInput" focus="{{showAddStandard ? 'true' : ''}}" bindinput="addStanard" value="{{newStandardName}}"></input>
+          <view class="flex-row" style="width: 200rpx;">
+            <text class='cancel-btn-standard with-s-padding' bindtap="cancleStandard" hover-class="hoverBtn">关闭</text>
+            <text class='confirm-btn-standard with-s-padding' catchtap='confirmStandard' hover-class="hoverBtn" style="margin-left: 30rpx;">保存</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="flex-row-default" style="padding: 20rpx 20rpx;">
+        <text class="explain shrink_fix">单价:</text>
+        <view class="flex-row-wrap shrink_change ">
+          <view class="flex-row third-row" wx:if="{{item.nxDgWillPrice !== '0.1'}}">
+            <text class="">{{item.nxDgWillPrice}}元/{{item.nxDgGoodsStandardname}}</text>
+          </view>
+          <view class="flex-row third-row" wx:else="">
+            <text class="">待报价</text>
+          </view>
+        </view>
+
+      </view>
+      <view class="flex-row-default " style="padding: 20rpx 20rpx;">
+        <text class="explain shrink_fix">预计小价:</text>
+        <view class=" flex-row-wrap shrink_change rightPart" wx:if="{{item.nxDgWillPrice !== '0.1'}}">
+          <text class="mainColor normal">{{applySubtotal}}</text>
+        </view>
+        <view class=" flex-row-wrap shrink_change rightPart" wx:else="">
+          <text class="mainColor normal">-</text>
+        </view>
+      </view>
+
+ 
+      </block>
+
+      <block wx:if="{{level == 2}}">
+        <view class="flex-row-default" style="padding: 20rpx 20rpx;">
+        <text class="explain shrink_fix">单位</text>
+        
+        
+        <view class=" flex-row-wrap shrink_change ">
+          <text class="standardName is-active" >{{item.nxDgWillPriceTwoStandard}}({{item.nxDgWillPriceTwoWeight}}{{item.nxDgGoodsStandardname}})</text>
+          
+        </view>
+
+      </view>
+     
+
+      <view class="flex-row-default" style="padding: 20rpx 20rpx;">
+        <text class="explain shrink_fix">单价:</text>
+        <view class="flex-row-wrap shrink_change ">
+          <view class="flex-row third-row">
+            <text class="">{{item.nxDgWillPriceTwo}}元/{{item.nxDgWillPriceTwoStandard}}</text>
+          </view>
+          
+        </view>
+
+      </view>
+      <view class="flex-row-default " style="padding: 20rpx 20rpx;">
+        <text class="explain shrink_fix">预计小价:</text>
+        <view class=" flex-row-wrap shrink_change rightPart" wx:if="{{item.nxDgWillPrice !== '0.1'}}">
+          <text class="mainColor normal">{{applySubtotal}}</text>
+        </view>
+        <view class=" flex-row-wrap shrink_change rightPart" wx:else="">
+          <text class="mainColor normal">-</text>
+        </view>
+      </view>
+
+      </block>
+
+      
+
+      <view class="flex_row_between " style="padding: 20rpx 20rpx;">
+        <text class="explain">备注</text>
+        <view class="rightPart">
+          <input class="remarkInput" bindinput="addRemark" value="{{applyRemark}}"></input>
+        </view>
+      </view>
+
+      <view class="flex_row_between" style="padding: 20rpx 20rpx;" wx:if="{{!editApply && depGoods !== null}}">
+            <text class="explain">库存清零</text>
+					 <view  class="">
+          <switch checked="{{stockIsZero}}" bindchange="changeStock"/>
+          </view>
+				</view>
+
+      <view class='' style="padding: 20rpx 20rpx; ">
+        <view class="flex-row-between" style="margin-left: {{editApply ? '20' : windowWidth / 4}}rpx;  padding: 20rpx 0; ">
+          <text class="btn del-btn" wx:if="{{editApply}}" bindtap="delApply" style="width: {{windowWidth / 5}}rpx;  ">删除订单</text>
+          <text class='btn cancel-btn' bindtap="cancle" hover-class="hoverBtn" style="width: {{windowWidth / 5}}rpx; text-align: center; margin-left: 10rpx;">取消</text>
+          <text class='btn {{canSave ? "confirm-btn" : "cancel-btn"}}' catchtap='{{canSave ? "confirm" : ""}}' hover-class="hoverBtn" style="width: {{windowWidth / 5}}rpx; text-align: center; margin-left: 40rpx; margin-right: 20rpx;">确定</text>
+        </view>
+
+      </view>
+    </view>
+
+
+  </view>
+
+</view>

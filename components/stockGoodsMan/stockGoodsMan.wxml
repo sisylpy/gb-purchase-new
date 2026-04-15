@@ -1,0 +1,157 @@
+<wxs src="../../utils/fn.wxs" module="tool" />
+
+<view class='ccc' wx:if='{{show}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
+  <view class='body bg-white flex-column' style="margin-top:{{scrollViewTop + windowHeight/3}}rpx; z-index: 999999999;">
+
+    <view class="flex-column">
+      <view class="flex-row-between" style="background-color: #187e6e; color: #fff;">
+        <view class='flex-row goodsTitle'>
+          <text class="margin-l-right p-20">{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+          <block wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null' && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
+            <text wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}})</text>
+          </block>
+          <block wx:else>
+            <text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
+      <view class="flex-row half-row">
+        <text class="margin-l-right">入库:</text>
+        <text class="">{{tool.getAttrFullTime(item.gbDgsFullTime)}} </text>
+      </view>
+      <view class="flex-row half-row">
+        <text class="margin-l-right">数量:</text>
+        <text class="">{{consultItem.gbDgsWeight}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+      </view>
+    </view>
+
+    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
+      <view class="flex-row half-row">
+        <text class="margin-l-right">销售:</text>
+        <text class="">{{item.gbDgsProduceWeight}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+      </view>
+      <view class="flex-row half-row">
+        <text class="margin-l-right">损耗:</text>
+        <text class="lossBack">{{item.gbDgsLossWeight}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+      </view>
+    </view>
+
+    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx; {{item.gbDistributerGoodsEntity.gbDgControlFresh == 0 ? 'padding-bottom: 20rpx;' :''}}">
+      <view class="flex-row half-row">
+        <text class="margin-l-right">退货:</text>
+        <text class="">{{item.gbDgsReturnWeight}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+      </view>
+      <view class="flex-row half-row">
+        <text class="margin-l-right">剩余:</text>
+        <text class="">{{item.gbDgsRestWeight}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+      </view>
+    </view>
+
+    <view class="flex-row" wx:if="{{item.gbDgControlFresh == 1}}" style="background-color: #187e6e; color: #fff;padding-left: 20rpx; padding-bottom: 20rpx;">
+      <view class="flex-row half-row">
+        <text class="margin-l-right">保鲜时长:</text>
+        <text class="">{{consultItem.gbDgFreshWasteHour}}小时</text>
+      </view>
+      <view class="flex-row half-row">
+        <text class="margin-l-right">废弃:</text>
+        <text class="">{{tool.getAttrFullTime(consultItem.gbDgsWasteFullTime)}} </text>
+      </view>
+    </view>
+
+    <view class='flex-column'>
+      <radio-group class="radio-group flex-row-between" bindchange="radioChange">
+        <label class="radio" wx:if="{{item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== ''}}">
+          <radio value="4" checked="{{showType == 4}}" />废弃
+        </label>
+        <label class="radio">
+          <radio value="3" checked="{{showType == 3}}" />退货
+        </label>
+        <label class="radio">
+          <radio value="6" checked="{{showType == 6}}" />转部门
+        </label>
+      </radio-group>
+
+      <view class="flex-column p-20">
+        <view class="flex-column" wx:if="{{showType == 3}}">
+          <view class="flex-column p-20">
+            <view class="flex-row" wx:if="{{item.returnReduceEntity !== null}}">
+              <text>{{item.returnReduceEntity.gbDgsrReturnWeight}}</text>
+            </view>
+            <view class="flex-row" wx:else>
+              <text class="margin-l-right">数量:</text>
+              <view class="out margin-l-right">
+                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyReturnWeight == '-1' ? '' :item.gbDgsMyReturnWeight }}" bindinput="getReturnWeight" />
+              </view>
+              <text>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="flex-column" wx:if="{{showType == 4}}">
+          <block wx:if="{{canWaste}}">
+            <view class="flex-row p-20">
+              <text class="margin-l-right flex-fixed">废弃数量:</text>
+              <view class="out">
+                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyWasteWeight == '-1' ? '' :item.gbDgsMyWasteWeight }}" bindinput="getWasteWeight" bindfocus="costFocusWaste" />
+              </view>
+              <text>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+            </view>
+            <view class="flex-row p-20">
+              <text class="margin-l-right">销售数量:</text>
+              <view class="">
+                <text class="mainColor">{{item.gbDgsMyProduceWeight == '-1' ? '0' :item.gbDgsMyProduceWeight}}</text>
+              </view>
+              <text>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+            </view>
+          </block>
+          <block wx:else>
+            <view>还有{{resultTime}}个小时</view>
+          </block>
+        </view>
+
+        <view class="flex-column" wx:if="{{showType == 6}}">
+          <view class="flex-column p-20">
+            <view class="flex-row p-20">
+              <text class="margin-l-right">原部门:</text>
+              <text class="gray">{{originalDepName}}</text>
+            </view>
+
+            <view class="target-dep-row p-20 flex-row">
+              <text class="target-dep-label margin-right">目标部门:</text>
+              <view class="target-dep-picker">
+                <picker bindchange="onDepChange" value="{{selectedDepIndex}}" range="{{depList}}" range-key="gbDepartmentName">
+                  <view class="out" style="width: {{windowWidth - 400}}rpx;">
+                    <text wx:if="{{depList && depList.length > 0 && selectedDepIndex >= 0 && depList[selectedDepIndex]}}"> {{depList[selectedDepIndex].gbDepartmentName}} </text>
+                    <text wx:else class="gray">请选择部门</text>
+                  </view>
+                </picker>
+              </view>
+            </view>
+
+            <view class="flex-row p-20" wx:if="{{showSameDepWarning}}">
+              <text class="warning-text">不能转给原部门，请选择其他部门</text>
+            </view>
+
+            <view class="flex-row p-20 gray">
+              <text class="margin-l-right">提示:</text>
+              <text class="">将整个库存批次转给目标部门</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="flex-row p-20 margin-top">
+      <view class='btn'>
+        <text class="cancleBtn" bindtap="cancle" hover-class="hover">取消</text>
+      </view>
+      <view class='btn'>
+        <text class="sureBtn {{canSure ? 'is-active' : ''}}" catchtap='confirm' hover-class="hover">确定</text>
+      </view>
+    </view>
+
+  </view>
+</view>

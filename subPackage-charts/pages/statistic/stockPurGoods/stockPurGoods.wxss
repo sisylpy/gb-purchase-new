@@ -1,0 +1,577 @@
+/* ============ 库存商品页面 - 与purGoodsByDate保持一致 ============ */
+
+.purchase-date {
+  font-size: 24rpx;
+  color: #666;
+}
+.purchase-type{
+  font-size: 24rpx;
+  color: #666;
+  background-color: #e3f2fd;
+  border-radius: 25rpx;
+  text-align: center;
+  
+}
+
+.purchase-info-value-amount {
+  color: #4A90E2;
+  font-weight: 700;
+}
+
+/* ============ 采购页面专用样式 - 蓝色主题 ============ */
+
+/* 采购批次行容器 */
+.purchase-row-container {
+  transition: all 0.3s ease-in-out;
+  position: relative;
+}
+
+/* 采购批次行基础样式 */
+.purchase-row {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  box-shadow: none; /* 移除阴影，与展开内容形成整体 */
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  /* 三栏布局 */
+  justify-content: space-between;
+}
+
+.purchase-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 6rpx;
+  height: 60%;
+  background: linear-gradient(180deg, #e3f2fd 0%, #e3f2fd 100%);
+  border-radius: 0 6rpx 6rpx 0;
+  transform: translateY(-50%);
+  transition: all 0.3s ease;
+}
+
+/* hover效果 */
+.purchase-row:hover::after {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 激活状态的采购行 */
+.purchase-row-active {
+  border-color: #4A90E2;
+  border-radius: 16rpx 16rpx 0 0 !important; /* 激活时只保留顶部圆角 */
+  border-bottom: none !important; /* 移除底部边框，连接展开区域 */
+  box-shadow: none !important; /* 移除阴影，避免视觉间隙 */
+  transform: translateY(0); /* 移除位移，保持平齐 */
+}
+
+/* 采购信息卡片 - 移除阴影，与采购行形成整体 */
+.purchase-info-card {
+  background: #ffffff !important; /* 白色背景 */
+  border: 2rpx solid #4A90E2 !important; /* 蓝色边框 */
+  border-top: none !important; /* 移除顶部边框，连接上面的卡片 */
+  border-radius: 0 0 16rpx 16rpx !important;
+  padding: 20rpx;
+  margin-top: 0 !important; /* 无间隙连接 */
+  box-shadow: none !important; /* 移除阴影，与采购行形成整体 */
+  position: relative;
+  overflow: hidden;
+}
+
+.purchase-row-active::before {
+  background: linear-gradient(180deg, #4A90E2 0%, #2E7CE6 100%);
+}
+
+/* 采购信息卡片 */
+.purchase-info-card {
+  background: #ffffff !important; /* 白色背景 */
+  border: 2rpx solid #4A90E2 !important; /* 蓝色边框 */
+  border-top: none !important; /* 移除顶部边框，连接上面的卡片 */
+  border-radius: 0 0 16rpx 16rpx !important;
+  padding: 20rpx;
+  margin-top: 0 !important; /* 无间隙连接 */
+  /* box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08) !important;  */
+  position: relative;
+  overflow: hidden;
+}
+
+/* 采购详细信息区域 */
+.purchase-detail-section {
+  background: #ffffff; /* 白色背景，保持简洁 */
+
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.purchase-detail-section:hover {
+  background: #f8f9fa; /* hover时浅灰色背景 */
+  transform: translateY(-1rpx);
+}
+
+
+/* 采购信息项样式 */
+.purchase-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* padding: 12rpx 0; */
+  transition: background-color 0.2s ease;
+}
+
+.purchase-info-item:last-child {
+  border-bottom: none;
+}
+
+.purchase-info-item:hover {
+  background-color: rgba(74, 144, 226, 0.05);
+  border-radius: 8rpx;
+  /* padding: 12rpx 8rpx; */
+  margin: 0 -8rpx;
+}
+
+.purchase-info-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+  flex: 0 0 120rpx;
+}
+
+.purchase-info-value {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+}
+
+/* 采购信息标题区域 */
+.purchase-info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+  width: 100%;
+}
+
+.purchase-info-header .flex-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.purchase-info-header .flex-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.purchase-info-header-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+}
+
+.purchase-info-header-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* search图标样式 */
+.purchase-info-header .icon {
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
+}
+
+/* 箭头动画 - 与成本页面保持一致 */
+.arrow-icon {
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrow-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.arrow-icon.collapsed {
+  transform: rotate(0deg);
+}
+
+/* 采购行布局样式 */
+.purchase-row .flex-row-default {
+  flex: 0 0 120rpx; /* 左侧固定宽度 */
+  display: flex;
+  align-items: center;
+}
+
+.purchase-row .flex-column {
+  flex: 1; /* 中间占据剩余空间 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 20rpx; /* 左右内边距 */
+}
+
+.purchase-row .flex-column-center {
+  flex: 0 0 60rpx; /* 右侧固定宽度 */
+  width: 60rpx; /* 与容器宽度一致 */
+  height: 60rpx; /* 与容器高度一致 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.purchase-row-active .flex-column-center {
+  background: rgba(74, 144, 226, 0.2);
+}
+
+/* 展开内容动画 */
+.expandable-content {
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-5rpx);
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.expandable-content.expanded {
+  opacity: 1;
+  max-height: 2000rpx;
+  transform: translateY(0);
+  margin-top: 0 !important;
+}
+
+/* 点击效果 */
+.purchase-row:active {
+  transform: scale(0.98);
+}
+/* 第1部分：部门信息 */
+.purchase-section:first-child {
+  flex: 0 0 160rpx;
+  justify-content: flex-start;
+  text-align: left;
+  border-right: 1rpx solid #e0e0e0;
+  padding-right: 16rpx;
+}
+
+/* 第2部分：金额信息对比 */
+.purchase-section-2 {
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+  padding: 0 16rpx;
+}
+
+/* 对比容器 */
+.purchase-comparison-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 8rpx 12rpx;
+  background: #ffffff;
+  border-radius: 4rpx;
+}
+
+/* 信息列 */
+.purchase-info-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 10rpx;
+  border-radius: 4rpx;
+}
+
+/* 入库列样式 */
+.purchase-inbound {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+/* 剩余列样式 - 重点突出 */
+.purchase-rest {
+  background: rgba(255, 152, 0, 0.08);
+}
+
+/* 列标签 */
+.column-label {
+  font-size: 20rpx;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+  text-align: center;
+}
+
+/* 入库列标签 */
+.purchase-inbound .column-label {
+  color: #4CAF50;
+}
+
+/* 剩余列标签 - 重点突出 */
+.purchase-rest .column-label {
+  color: #FF9800;
+  font-weight: 700;
+  font-size: 22rpx;
+}
+
+/* 列内容 */
+.column-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+/* 金额文本 */
+.amount-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 入库金额 */
+.purchase-inbound .amount-text {
+  color: #4CAF50;
+}
+
+/* 剩余金额 - 与入库保持一致 */
+.rest-amount {
+  color: #FF9800 !important;
+  font-size: 24rpx !important;
+  font-weight: 600 !important;
+}
+
+/* 重量文本 */
+.weight-text {
+  font-size: 20rpx;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* 入库重量 */
+.purchase-inbound .weight-text {
+  color: #4CAF50;
+}
+
+/* 剩余重量 - 与入库保持一致 */
+.rest-weight {
+  color: #FF9800 !important;
+  font-size: 20rpx !important;
+  font-weight: 500 !important;
+}
+
+/* 分隔线 */
+.comparison-divider {
+  width: 1rpx;
+  height: 50rpx;
+  background: #e0e0e0;
+  margin: 0 8rpx;
+}
+
+/* ============ 响应式调整 ============ */
+@media (max-width: 750rpx) {
+  .flex-column.border-bottom {
+    padding: 16rpx;
+    margin-bottom: 12rpx;
+  }
+  
+  .flex-row {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 12rpx;
+    padding-bottom: 12rpx;
+  }
+  
+  .flex-row .flex-row {
+    flex: none;
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 8rpx;
+  }
+  
+  .flex-column .flex-column {
+    width: 100%;
+  }
+  
+  .purchase-row-content {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12rpx;
+    min-height: auto;
+  }
+  
+  .purchase-section:first-child {
+    flex: none;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1rpx solid #e0e0e0;
+    padding-right: 0;
+    padding-bottom: 12rpx;
+    margin-bottom: 12rpx;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .purchase-section-2 {
+    flex: none;
+    width: 100%;
+    min-width: auto;
+    padding: 0;
+  }
+  
+  .purchase-comparison-container {
+    padding: 8rpx 12rpx;
+    flex-direction: column;
+    gap: 12rpx;
+  }
+  
+  .purchase-info-column {
+    padding: 8rpx 10rpx;
+    width: 100%;
+  }
+  
+  .comparison-divider {
+    width: 60%;
+    height: 1rpx;
+    margin: 0 auto;
+    background: #e0e0e0;
+  }
+  
+  .amount-text {
+    font-size: 22rpx;
+  }
+  
+  .rest-amount {
+    font-size: 24rpx !important;
+  }
+  
+  .weight-text {
+    font-size: 18rpx;
+  }
+  
+  .rest-weight {
+    font-size: 20rpx !important;
+  }
+  
+  .column-label {
+    font-size: 18rpx;
+    margin-bottom: 6rpx;
+  }
+  
+  .purchase-rest .column-label {
+    font-size: 20rpx;
+  }
+  
+  .font-bold {
+    font-size: 26rpx;
+  }
+  
+  .purchase-info-value-amount {
+    font-size: 24rpx;
+  }
+  
+  .font-md {
+    font-size: 22rpx;
+  }
+  
+  
+  .purchase-date {
+    font-size: 22rpx;
+  }
+  
+  .purchase-date.mr-20 {
+    font-size: 20rpx;
+  }
+}
+
+/* ============ 通用样式 ============ */
+
+/* 整体页面背景 */
+page {
+  background: #f8f9fa;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 防止页面撑开 */
+.flex-column,
+.purchase-row-content,
+.purchase-comparison-container {
+  max-width: 100%;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ============ 库存详情新样式 ============ */
+
+/* 库存信息行布局 */
+.stock-info-row {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-radius: 0;
+  padding: 16rpx 0;
+  margin-bottom: 0;
+  box-shadow: none;
+  border: none;
+}
+
+/* 部门信息区域 */
+.stock-department-info {
+  flex: 0 0 160rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* 居中对齐 */
+  padding: 12rpx;
+  border-right: 1rpx solid #e0e0e0;
+  background: rgba(0, 0, 0, 0.03); /* 淡灰色背景 */
+  border-radius: 6rpx;
+  margin-right: 12rpx;
+  min-height: 80rpx; /* 设置最小高度 */
+}
+
+/* 对比容器 */
+.stock-comparison-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 8rpx 12rpx;
+  background: transparent; /* 移除灰色背景，与整体融合 */
+  border-radius: 8rpx;
+  margin-left: 12rpx;
+}
+
+/* 信息列 */
+.stock-info-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* 垂直居中 */
+  padding: 12rpx;
+  border-radius: 6rpx;
+  min-height: 80rpx; /* 设置最小高度，与部门信息保持一致 */
+}
+
+/* 入库列样式 */
+.stock-inbound {
+  background: rgba(76, 175, 80, 0.05); /* 更淡的绿色背景 */
+}
+
+/* 剩余列样式 - 重点突出 */
+.stock-rest {
+  background: rgba(255, 152, 0, 0.08); /* 更淡的橙色背景 */
+}

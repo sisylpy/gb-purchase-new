@@ -1,0 +1,9 @@
+/* app.wxss - 全局样式入口 */
+
+@import './styles/base.wxss';
+@import './styles/layout.wxss';
+@import './styles/spacing.wxss';
+@import './styles/typography.wxss';
+@import './styles/color.wxss';
+@import './styles/visual.wxss';
+@import './styles/component.wxss';

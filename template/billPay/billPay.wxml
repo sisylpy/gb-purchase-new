@@ -1,0 +1,16 @@
+<template name="billPay">
+  <view class="order_list {{selAmount > 0 ? 'is-active' : ''}}">
+    <view class="order_list_content">
+      <view class="car">
+        <view class="order_content">
+          <text class="mr-10 small">订单金额</text>
+          <text class="big ">{{total}}</text>
+        </view>
+      </view>
+
+      <view class="order_send" bindtap="settleBills">
+        确认结账
+      </view>
+    </view>
+  </view>
+</template>

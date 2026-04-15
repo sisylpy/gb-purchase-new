@@ -1,0 +1,314 @@
+<view class="flex flex-column ">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="搜索商品下单" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <view class="flex-row p-20" style="background-color: #f0f9ff; width: {{windowWidth}}rpx; ">
+    <view class="searchInput flex-row">
+      <input class="" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" style="width:{{windowWidth - 60}}rpx;line-height: 60rpx; height: 60rpx; " placeholder-class="holderClass" bindinput="getString" confirm-type='search' focus="{{isSearching ? 'true':''}}"></input>
+      <view class="" style=" position: absolute; right: 40rpx; z-index: 99999; " bindtap="delSearch" hover-class="hover" wx:if="{{searchString.length > 0}}">
+        <image src="/images/del.png" class="icon pt-20"></image>
+      </view>
+    </view>
+  </view>
+
+  <view class="  flex-column " catchtouchmove='ture' style="height:{{windowHeight - 310}}rpx; width: {{windowWidth}}rpx; background: #FFF;">
+    <view wx:if="{{searchResult || disSearchArr.length > 0}}" style="width:{{windowWidth}}rpx;">
+      <view class='navbarSearch bg-white border-bottom '>
+        <block wx:for="{{tabsSearch}}" wx:for-item="tabsSearch" wx:key="id">
+          <view id="{{index}}" class="navbar-item {{tab1IndexSearch==index?'bar-item-on':''}}" data-index='{{index}}' bindtap='onTab1ClickSearch' hover-class="hover">
+            <view class='navbar-title'>{{tabsSearch.words}}
+              <text>({{tabsSearch.amount}})</text>
+            </view>
+          </view>
+        </block>
+
+        <view class="navbar-slider" style="left: {{sliderLeftSearch}}px; width:{{windowWidth / 4}}rpx; transform: translateX({{sliderOffsetSearch}}px); -webkit-transform: translateX({{sliderOffsetSearch}}px);">
+        </view>
+      </view>
+
+      <swiper style="height: {{windowHeight - 380}}rpx;" bindchange='swiperChangeSearch' current="{{itemIndexSearch}}" data-index='{{itemIndexSearch}}'>
+
+        <!-- depGoodsArrAi -->
+        <swiper-item>
+          <scroll-view scroll-y style="height:{{windowHeight - 420}}rpx;">
+            <!-- empty -->
+            <view class="{{depGoodsArrAi.length == 0  ? 'show' : 'hide'}}" style="height: {{windowHeight - 420}}rpx; text-align:center;">
+              <view class="normal  empty_view">
+                <view class="flex-column center-content">
+                  <image class="empty_image" src="../../../images/cart-Empty.png"></image>
+                  <text class="big">没有搜索到订购商品</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- ./empty -->
+            <view class="flex-row-default  border-bottom middle p-20 bg-white" wx:for="{{depGoodsArrAi}}" wx:key="gbDepartmentDisGoodsId" wx:for-item="goods" wx:for-index="depGoodsIndex">
+
+              <view class="img-wrapper">
+                    <image bindtap="showImageModal" data-goods="{{goods}}" src="{{goods.gbDisGoodsFile !== null ? url + goods.gbDisGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
+                  </view>
+
+
+                  <view class="flex-row">
+                    <view class="flex-column" style="width: {{windowWidth - 180}}rpx; ">
+
+                      <view class="flex-row-between ">
+                        <view class="flex-row">
+                          <text class="font-bold font-lg-2">{{goods.gbDdgDepGoodsName}}</text>
+                          <text class="ml-20" wx:if="{{goods.gbDdgDepGoodsName !== goods.gbDgGoodsName}}">({{goods.gbDgGoodsName}})</text>
+                          <block wx:if="{{goods.gbDgControlFresh == 1}}">
+                            <text class="fresh_goods ml-10">保鲜{{goods.gbDgFreshWasteHour}}小时</text>
+                          </block>
+                        </view>
+
+
+
+                        <view class="button-container" bind:tap="toBusiness" data-id="{{goods.gbDepartmentDisGoodsId}}" data-index="{{depGoodsIndex}}" data-goods="{{goods}}" hover-class="hover">
+                          <image src="{{goods.gbDepartmentGoodsStockEntities.length > 0 ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFill" class="icon" />
+
+                        </view>
+                      </view>
+
+                      <view class="flex-row small" >
+                        <view class="flex-row">
+                          <text class="text-secondary">规格:</text>
+
+                          <view class="" wx:if="{{goods.gbDgGoodsStandardWeight !== null && goods.gbDgGoodsStandardWeight !== ''}}">
+                            {{goods.gbDgGoodsStandardWeight}}/{{goods.gbDdgShowStandardName}}
+                          </view>
+                          <view wx:else="">{{goods.gbDgGoodsStandardname}}</view>
+
+
+                        </view>
+                      </view>
+                      <view class="flex-row small">
+                        <view class="flex-row half-row" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsDetail !== null && goods.gbDistributerGoodsEntity.gbDgGoodsDetail !== ''}}">
+                          <text class="text-secondary">说明:</text>
+                          <text>{{goods.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+                        </view>
+                        
+                      </view>
+
+
+                      <view class="flex-row-wrap p-20" wx:if="{{goods.gbDepartmentGoodsStockEntities.length > 0}}">
+                        <view class="flex-row  margin_bottom" wx:for="{{goods.gbDepartmentGoodsStockEntities}}" wx:for-item="stock" bindtap="showStock" wx:key="gbDepartmentGoodsStockId" hover-class="clickStock" data-item="{{stock}}" data-goods="{{goods}}" data-stockindex="{{index}}" data-goodsindex="{{depGoodsIndex}}">
+                          <block wx:if="{{stock.gbDgsWasteFullTime !== null}}">
+                            <block wx:if="{{tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime)  > 0 || tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime)  == 0 }}">
+                              <view class="flex-row pass_waste ">
+                                <view class="mr-10 "> {{stock.gbDgsRestWeight}}{{goods.gbDdgShowStandardName}}</view>
+                                <view class="font-sl">已过{{tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime)}}小时</view>
+                              </view>
+                            </block>
+                            <block wx:else>
+                              <text class="has_waste margin-right">{{stock.gbDgsRestWeight}}{{goods.gbDdgShowStandardName}}</text>
+                            </block>
+                          </block>
+                          <block wx:else>
+                            <text class="his_stock mr-20">库存:{{stock.gbDgsRestWeight}}{{goods.gbDdgShowStandardName}}</text>
+                          </block>
+                        </view>
+                      </view>
+
+                      <view class="flex-row-reverse p-10 {{goods.gbDepartmentGoodsStockEntities.length == 0 ? 'mt-20' : ''}}">
+                        <view wx:if="{{goods.gbDepartmentOrdersEntity !== null}}" class="flex-row-between middle ">
+                          <view class="flex-row " catch:tap="toEditApplyDep" data-order="{{goods.gbDepartmentOrdersEntity}}" data-disgoods="{{goods.gbDistributerGoodsEntity}}" data-index="{{depGoodsIndex}}" data-depgoods="{{goods}}" data-depgoodsid="{{goods.gbDepartmentDisGoodsId}}" hover-class="hover">
+                            <text class="five-weight save_btn has_order  {{goods.gbDepartmentOrdersEntity.gbDoPurchaseStatus > 1 ? 'is-gray' : ''}} {{goods.gbDepartmentOrdersEntity.gbDoStatus == 2 ? 'finish': ''}}">{{goods.gbDepartmentOrdersEntity.gbDoQuantity}}{{goods.gbDepartmentOrdersEntity.gbDoStandard}}</text>
+                          </view>
+                        </view>
+                        <view class="" wx:else="" catch:tap="applyGoodsDep" data-order="{{goods.gbDepartmentOrdersEntity}}" data-disgoods="{{goods.gbDistributerGoodsEntity}}"  data-index="{{depGoodsIndex}}" data-depgoods="{{goods}}" hover-class="hover">
+                          <view class="save_btn ">
+                            <text>订货</text>
+                          </view>
+
+                        </view>
+                      </view>
+
+                    </view>
+                  </view>
+
+
+            </view>
+
+            <view class="flex-column center-content" style="margin-top: 100rpx;">
+              <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+                <text>添加新商品</text>
+              </view>
+            </view>
+
+          </scroll-view>
+        </swiper-item>
+
+
+        <swiper-item>
+          <!-- disSearchArr -->
+
+          <scroll-view scroll-y style="height:{{windowHeight - 420}}rpx;">
+
+            <view class="flex-row-between border-bottom p-20 bg-white" wx:for="{{disSearchArr}}" wx:for-item="sons" wx:for-index="index" wx:key="gbDistributerGoodsId">
+
+              <view class="flex-row-default  product-item p-10">
+                  <view class="flex-row-default">
+                    <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons.nxGoodsFile !== null ? url + sons.nxGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" />
+                    <view class="flex-row-default">
+                      <view class="flex-column" style="width: {{windowWidth - 320}}rpx;  ">
+                        <view class="flex-row middle">
+                          <text class=" {{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? brand : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? sons.nxGoodsBrand : ''}}</text>
+                          <view class="font-lg-2">{{sons.nxGoodsName}}</view>
+                        </view>
+
+                        <view class="flex-row font-sm" wx:if="{{sons.nxGoodsStandardWeight !== null && sons.nxGoodsStandardWeight !== ''}}">
+                          <view class="flex-row">
+                            <text class="text-secondary">规格:</text>
+                            <block>
+                              <view class="">{{sons.nxGoodsStandardWeight}}/{{sons.nxGoodsStandardname}}
+                              </view>
+                            </block>
+
+                          </view>
+                        </view>
+                        <view wx:else="" class="flex-row">
+                          <text class="text-secondary">规格:</text>
+                          <text>{{sons.nxGoodsStandardname}}</text>
+                        </view>
+                        
+                        <view class="flex-row font-sm">
+                          <view class="flex-row" wx:if="{{sons.nxGoodsDetail !== null && sons.nxGoodsDetail !== ''}}">
+                            <text class="text-secondary">说明:</text>
+                            <text>{{sons.nxGoodsDetail}}</text>
+                          </view>
+                        </view>
+
+                      </view>
+
+                      <view class="flex-row">
+                        <view class="flex-row " catch:tap="toEditApply" data-order="{{sons.gbDepartmentOrdersEntity}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}" data-index="{{goodsIndex}}" data-nxGoods="{{sons}}" data-depgoods="{{sons.gbDepartmentDisGoodsEntity}}" hover-class="{{sons.gbDepartmentOrdersEntity == null ? 'hover' :''}}" wx:if="{{sons.gbDepartmentOrdersEntity !== null}}">
+                          <text class="five-weight save_btn has_order  {{sons.gbDepartmentOrdersEntity.gbDoPurchaseStatus > 1 ? 'is-gray' : ''}}  {{sons.gbDepartmentOrdersEntity.nxDoStatus == 2 ? 'finish': ''}}">{{sons.gbDepartmentOrdersEntity.gbDoQuantity}}{{sons.gbDepartmentOrdersEntity.gbDoStandard}}</text>
+                        </view>
+                        <block wx:else="">
+                          <view class="" style="margin-left: -30rpx;" wx:if="{{sons.nxDgPullOff == 1}}">
+                            <view class="extremeSmall">暂时无货</view>
+                          </view>
+
+                          <view class="flex-row" wx:else="" catch:tap="applyGoods" data-order="{{sons.gbDepartmentOrdersEntity}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}" data-index="{{goodsIndex}}" data-nxgoods="{{sons}}" data-depgoods="{{sons.gbDepartmentDisGoodsEntity}}" hover-class="{{sons.gbDepartmentOrdersEntity == null ? 'hover' :''}}">
+                            <view class="save_btn">
+                              <text>订货</text>
+                            </view>
+                          </view>
+                        </block>
+                      </view>
+
+                    </view>
+                  </view>
+                </view>
+            </view>
+
+            <view class="flex-column center-content" style="margin-top: 100rpx;">
+              <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+                <text>添加新商品</text>
+              </view>
+            </view>
+
+          </scroll-view>
+        </swiper-item>
+
+      </swiper>
+
+
+    </view>
+
+    <!-- // -->
+
+    <view class="flex-column center-content" style="margin-top: 40rpx;" wx:if="{{disSearchArr.length == 0}}">
+      <view class="flex-row gray p-20">
+        <image class="icon margin-right" src="../../../images/a-Nothappy.png"></image>
+        <text class="">没有搜索到商品</text>
+      </view>
+
+      <view class="flex-column center-content" style="margin-top: 100rpx;">
+        <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+          <text>添加新商品</text>
+        </view>
+      </view>
+
+    </view>
+  </view>
+
+
+
+</view>
+
+
+<view class='overlay {{showOperation ? "show" : "hide"}}' catchtap="hideMask" catchtouchmove='ture'>
+
+  <view class="popup bg-white" wx:if="{{deleteShow}}">
+    <view class="flex-cloumn">
+      <view class="weight_five  p-20 delBack" style="text-align: center;">
+        <view class="p-20 middle">删除订货</view>
+      </view>
+      <view class="flex-row p-20 normal">
+        <view class="margin-right p-20">{{itemDis.gbDgGoodsName}}</view>
+        <view class="p-20">订货: {{applyItem.gbDoQuantity}}{{applyItem.gbDoStandard}}</view>
+      </view>
+    </view>
+
+    <view class="flex-row" style="padding-bottom: 40rpx; margin-top: 20rpx;">
+      <view class="p-20 half-row cancel-btn" style="margin-left: 5%; " bindtap="deleteNo" hover-class="hover">取消</view>
+      <view class="p-20 half-row confirm-btn" bindtap="deleteYes" hover-class="hover" style="margin-left: 10%; ">确定</view>
+    </view>
+
+  </view>
+
+
+</view>
+
+
+<myDismodal show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemDis}}" applyStandardName="{{applyStandardName}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" canSave="{{canSave}}" />
+
+
+<myDismodalNx show="{{showNx}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" bindconfirmStandardNx="confirmStandardNx" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{nxGoods}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
+
+
+<delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="onClosePopup" bind:confirmWarn="confirmWarn" />
+
+
+<myIndependent show="{{showInd}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
+
+
+<myIndependentNx show="{{showIndNx}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
+
+
+<cover-view class="modal-mask" bindtap="hideModal" wx:if="{{showModal}}"></cover-view>
+<cover-view class="modal-dialog" wx:if="{{showModal}}">
+  <cover-view class="modal-title">{{item.gbDgGoodsName}}</cover-view>
+  <cover-view>{{url + item.gbDgGoodsFileLarge}}</cover-view>
+  <cover-view class="modal-content">
+    <cover-image style="width: 400rpx; height: 500rpx;" src="{{url + item.gbDgGoodsFileLarge}}"></cover-image>
+  </cover-view>
+
+</cover-view>
+
+
+
+
+
+<stockGoods show="{{showStock}}" bindconfirm="confirmStock" item="{{stockItem}}" disGoods="{{disGoods}}" bindcancle="cancle" bindupdateStars="updateStars" modalHeight="{{windowHeight > maskHeight ? windowHeight : maskHeight }}" scrollViewTop="{{scrollViewTop}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" nowTime="{{nowTime}}" src="{{src}}" reason="{{reason}}" depGoods="{{depGoods}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" item="{{item}}" />
+
+<!-- 图片弹窗 -->
+<view class="image-modal" wx:if="{{showImageModal}}" bindtap="hideImageModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">商品图片</text>
+      <view class="close-btn" bindtap="hideImageModal">×</view>
+    </view>
+    <view class="modal-body">
+      <image src="{{currentImage}}" mode="aspectFit" class="modal-image" bindload="onImageLoad" binderror="onImageError" />
+      <view class="image-info" wx:if="{{currentGoods}}">
+        <text class="goods-name">{{currentGoods.gbDdgDepGoodsName || currentGoods.nxGoodsName || currentGoods.gbDgGoodsName}}</text>
+        <text class="goods-standard" wx:if="{{currentGoods.gbDdgShowStandardName || currentGoods.nxGoodsStandardname || currentGoods.gbDgGoodsStandardname}}">
+          规格: {{currentGoods.gbDdgShowStandardName || currentGoods.nxGoodsStandardname || currentGoods.gbDgGoodsStandardname}}
+        </text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,59 @@
+
+
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="flex flex-column">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{depInfo.gbDepartmentName}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column bg-white mt-10">
+ 
+  <view class="p-20 flex-row font-lg border-bottom">
+        <text class="form-label" >门店名称:</text>
+        <input class="form-input" placeholder="请输入门店名称" bindblur="bindKeyInput" value="{{depInfo.gbDepartmentName}}" />
+   </view>
+
+     <!-- <view class="p-20 font-md text-secondary">门店订货用户:</view>
+      <scroll-view class="p-30" scroll-y="true" style="height: {{windowHeight - 580}}rpx; ">
+        <view  class="flex-row-between  p-10 border-bottom" wx:for="{{depInfo.gbDepartmentUserEntities}}" wx:for-item="user"  style="width: {{windowWidth - 80}}rpx;">
+         <view class="flex-row font-lg">
+          <text class="mr-20">{{index + 1}}.</text>
+          <image src="{{url + user.gbDuWxAvartraUrl}}" mode="aspectFill" class="itemPic mr-30"/>
+             <text class="font-xs mr-30">{{user.gbDuWxNickName}}</text>
+             <text wx:if="{{depInfo.gbDepartmentEntityList.length  > 0}}">{{user.gbDepartmentEntity.gbDepartmentName}}</text>
+         </view>
+          <view class="button-container-white" bind:tap="delUser" data-id="{{user.gbDepartmentUserId}}" hover-class="hover">
+          <image src="/images/del.png" mode="aspectFill" class="icon"/>
+          </view>
+           </view>
+
+            <view  class="flex-column text-secondary font-xs center-content" style="height: 200rpx;">没有数据了!</view>
+      </scroll-view> -->
+
+
+  </view>
+
+  <view class="popup-footer">
+      <button class="save-btn" style="width: {{windowWidth - 80}}rpx;" bindtap="toSave">保存修改内容</button>
+      <view class="flex-column center-content ">
+        <view class="flex-column text-danger p-30" bind:tap="deleteItem">删除门店</view>
+       </view>
+    </view>
+
+
+</view>
+
+<!--  操作  -->
+<view class='overlay {{showOperationUser ? "show" : "hide"}}' catchtouchmove='ture' catchtap="hideMask" catchtouchmove='ture' catchtap="hideUserMask">
+  <view class="flex-column nnn bg-white">
+
+    <view class="flex-row  p-30 operation_row " bindtap="delUser">
+      <image src="../../../images/del.png" class="icon mr-10"></image>
+      <text class=" margin-right">删除用户</text>
+    </view>
+    <view style="height: 20rpx;"></view>
+  </view>
+</view>
+
+
+<delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />

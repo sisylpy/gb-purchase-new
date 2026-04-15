@@ -1,0 +1,165 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="flex flex-column">
+  <back-navbar title="{{goodsName || '商品库存'}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+
+  <!-- 商品信息卡片 -->
+  <view class="goods-card bg-white p-20 mb-20" wx:if="{{disGoods}}">
+    <view class="flex-row">
+      <image src="{{url + disGoods.gbDgNxFatherImg}}" mode="aspectFill" class="goods-img" />
+      <view class="flex-column flex-1 ml-20">
+        <text class="font-bold font-lg">{{disGoods.gbDgGoodsName}}</text>
+        <text class="font-sm text-secondary mt-10" wx:if="{{disGoods.gbDistributerGoodsEntity}}">
+          {{disGoods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}
+        </text>
+        <view class="flex-row mt-10">
+          <text class="font-sm text-secondary">库存: </text>
+          <text class="font-bold mainColor">{{disGoods.goodsStockTotalString || 0}}元</text>
+          <text class="font-xs text-secondary ml-10">({{disGoods.goodsStockWeightTotalString || 0}})</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选条件 -->
+  <view class="filter-bar bg-white p-20 mb-20">
+    <view class="flex-row-between">
+      <view class="filter-item" bindtap="showDepPicker">
+        <text class="text-secondary font-sm">部门</text>
+        <text class="ml-10">{{selectedDepName || '全部'}}</text>
+        <text class="ml-5">v</text>
+      </view>
+      <view class="filter-item" bindtap="showDatePicker">
+        <text class="text-secondary font-sm">日期</text>
+        <text class="ml-10">{{dateRangeText || '全部'}}</text>
+        <text class="ml-5">v</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计汇总 -->
+  <view class="summary-bar bg-white p-20 mb-20" wx:if="{{stockList.length > 0}}">
+    <view class="flex-row-between">
+      <view class="summary-item">
+        <text class="text-secondary font-xs">总入库</text>
+        <text class="font-bold font-lg" style="color: #007aff;">{{totalIn}}元</text>
+      </view>
+      <view class="summary-item">
+        <text class="text-secondary font-xs">总剩余</text>
+        <text class="font-bold font-lg" style="color: #34c759;">{{totalRest}}元</text>
+      </view>
+      <view class="summary-item">
+        <text class="text-secondary font-xs">已用/报废</text>
+        <text class="font-bold font-lg" style="color: #ff9500;">{{totalUsed}}元</text>
+      </view>
+      <view class="summary-item">
+        <text class="text-secondary font-xs">记录数</text>
+        <text class="font-bold font-lg">{{stockList.length}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 库存列表 -->
+  <scroll-view scroll-y="true" style="height: {{windowHeight - navBarHeight - 300}}rpx;">
+    <view class="bg-white" wx:if="{{stockList.length > 0}}">
+      <view class="stock-item p-20 border-bottom" wx:for="{{stockList}}" wx:key="gbDepartmentGoodsStockId">
+        <!-- 头部：部门 + 日期 -->
+        <view class="flex-row-between mb-15">
+          <view class="flex-row align-center">
+            <image src="/images/store.png" class="icon-sm mr-10"></image>
+            <text class="font-sm font-bold">{{item.departmentName || '未知部门'}}</text>
+          </view>
+          <view class="flex-row align-center">
+            <image src="/images/calender.png" class="icon-sm mr-10"></image>
+            <text class="font-xs text-secondary">{{tool.getMonthDay(item.gbDgsDate)}}</text>
+            <text class="font-xs text-secondary ml-10">{{tool.getWeekDay(item.gbDgsDate)}}</text>
+          </view>
+        </view>
+
+        <!-- 入库信息 -->
+        <view class="flex-row-between">
+          <view class="flex-column flex-1">
+            <view class="info-row">
+              <text class="info-label">入库金额</text>
+              <text class="info-value">{{item.gbDgsSubtotal}}元</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">入库数量</text>
+              <text class="info-value">{{item.gbDgsWeight}}{{item.standardName || '份'}}</text>
+            </view>
+            <view class="info-row" wx:if="{{item.buyPrice}}">
+              <text class="info-label">采购单价</text>
+              <text class="info-value">{{item.buyPrice}}元/{{item.standardName || '份'}}</text>
+            </view>
+          </view>
+
+          <view class="flex-column align-end flex-1">
+            <view class="info-row">
+              <text class="info-label">剩余金额</text>
+              <text class="info-value" style="color: #34c759;">{{item.gbDgsRestSubtotal || 0}}元</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">剩余数量</text>
+              <text class="info-value">{{item.gbDgsRestWeight || 0}}{{item.standardName || '份'}}</text>
+            </view>
+            <view class="info-row" wx:if="{{item.userName}}">
+              <text class="info-label">采购员</text>
+              <text class="info-value">{{item.userName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 库存天数 + 状态 -->
+        <view class="flex-row-between mt-15">
+          <view class="flex-row align-center">
+            <view class="days-badge {{item.stockDaysClass}}">
+              <text>{{item.stockDays}}天库存</text>
+            </view>
+            <text class="font-xs text-secondary ml-10" wx:if="{{item.supplierName}}">{{item.supplierName}}</text>
+          </view>
+          <view class="status-badge {{item.statusClass}}">
+            <text>{{item.statusText}}</text>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="flex-row mt-15">
+          <view class="action-btn" bindtap="toOutStock" data-item="{{item}}">
+            <text>出库</text>
+          </view>
+          <view class="action-btn ml-20" bindtap="toWaste" data-item="{{item}}">
+            <text>报废/损耗</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="p-30 text-center text-secondary font-xs" wx:if="{{noMore}}">
+        <text>没有更多数据了</text>
+      </view>
+    </view>
+
+    <!-- 无数据 -->
+    <view class="center-content flex-column" wx:if="{{stockList.length == 0 && !loading}}" style="height: 400rpx;">
+      <image class="empty_image" src="/images/cart-Empty.png" style="width: 120rpx; height: 120rpx;"></image>
+      <text class="font-sm text-secondary mt-20">暂无库存记录</text>
+    </view>
+  </scroll-view>
+
+  <!-- 加载中 -->
+  <view class="loading-mask flex-column-center" wx:if="{{loading}}">
+    <text class="text-secondary">加载中...</text>
+  </view>
+</view>
+
+<!-- 部门选择弹窗 -->
+<view class='overlay {{showDepPicker ? "show" : "hide"}}' bindtap="hideDepPicker">
+  <view class="popup bg-white p-20" catchtap="stopBubble">
+    <view class="font-bold mb-20">选择部门</view>
+    <view class="dep-list">
+      <view class="dep-item {{selectedDepId == -1 ? 'active' : ''}}" bindtap="selectDep" data-id="-1" data-name="全部">全部</view>
+      <view class="dep-item {{selectedDepId == dep.gbDepartmentId ? 'active' : ''}}" wx:for="{{depList}}" wx:key="gbDepartmentId" bindtap="selectDep" data-id="{{item.gbDepartmentId}}" data-name="{{item.gbDepartmentName}}">
+        {{item.gbDepartmentName}}
+      </view>
+    </view>
+  </view>
+</view>

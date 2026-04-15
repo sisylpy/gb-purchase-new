@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "进出库记录",
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar"
+
+  }
+}

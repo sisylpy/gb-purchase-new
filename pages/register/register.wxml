@@ -1,0 +1,130 @@
+<view class="flex flex-column">
+
+<!-- 导航栏 -->
+<navbar 
+  style="height: {{navBarHeight}}rpx;" 
+  title="饭店注册信息" 
+  avatar="/images/back-gray.png" 
+  button-text="设置" 
+  bindnavbuttontap="toBack"
+></navbar>
+
+<!-- 表单容器 -->
+<view class="form-container font-lg" style="margin-top: 40rpx;">
+
+  <!-- 餐厅名称 -->
+  <view class="form-item">
+    <text class="form-label">餐厅名称</text>
+    <input 
+      class="form-input"
+      placeholder="请输入餐厅/饭店名称"
+      bindinput="onRestaurantNameInput"
+      value="{{restaurantName}}"
+    />
+  </view>
+
+  <!-- 联系电话 -->
+  <view class="form-item">
+    <text class="form-label">业务电话</text>
+    <input 
+      class="form-input"
+      placeholder="请输入手机或座机号码"
+      type="number"
+      bindinput="onPhoneInput"
+      value="{{phone}}"
+    />
+  </view>
+
+  <!-- 地址 (可选) -->
+  <view class="form-item">
+    <text class="form-label">公司地址</text>
+    <input 
+      class="form-input"
+      placeholder="选填：例如xx街xx号"
+      bindinput="onAddressInput"
+      value="{{address}}"
+    />
+  </view>
+
+  <!-- 预览已选头像(若有) -->
+  <view wx:if="{{avatarUrl}}" class="avatar-preview-wrap">
+    <text>已选头像预览：</text>
+    <image 
+      src="{{avatarUrl}}" 
+      class="avatar-preview" 
+    />
+  </view>
+
+</view>
+
+<!-- 同意条款区域 -->
+<view class="agreement-section">
+  <view class="agreement-item">
+    <checkbox-group bindchange="onAgreementChange">
+      <label class="agreement-label">
+        <checkbox value="agree" checked="{{agreed}}" color="#ff7200" />
+        <text class="agreement-text">我已阅读并同意</text>
+        <text class="agreement-link" bindtap="showTermsModal">《京采账本客户注册及充值条款》</text>
+      </label>
+    </checkbox-group>
+  </view>
+</view>
+
+<!-- 提交按钮：点击后调用 chooseAvatar，再在回调里进行表单校验+注册 -->
+<view class="submit-section">
+  <button 
+    class="submit-btn {{canRegister ? 'submit-btn-active' : 'submit-btn-disabled'}}"  
+    open-type="chooseAvatar"
+    bindchooseavatar="onChooseAvatar"
+    disabled="{{!canRegister}}"
+  >
+    提交注册
+  </button>
+</view>
+
+<!-- 充值条款弹窗 -->
+<view wx:if="{{showTerms}}" class="terms-modal-mask" bindtap="hideTermsModal">
+  <view class="terms-modal-content" catchtap="preventClose">
+    <!-- 标题栏 -->
+    <view class="terms-modal-header">
+      <text class="terms-modal-title">《京采账本》客户注册及充值条款</text>
+      <text class="terms-modal-close" bindtap="hideTermsModal">×</text>
+    </view>
+    
+    <!-- 内容区域 -->
+    <scroll-view class="terms-modal-body" scroll-y>
+      <view class="terms-section">
+        <view class="terms-title">一、服务说明</view>
+        <text class="terms-text">"京采账本"是为餐饮配送行业提供的智能账务管理系统，用户可通过充值方式获得系统使用权限与数据存储服务。</text>
+      </view>
+      
+      <view class="terms-section">
+        <view class="terms-title">二、充值及费用使用</view>
+        <text class="terms-text">用户可选择充值任意金额，系统将自动折算为可使用额度。</text>
+        <text class="terms-text">充值金额用于系统功能使用、账本管理、报表导出、AI助手等服务费用。</text>
+        <text class="terms-text">系统按使用量自动扣费，每次下单、生成账单或调用智能功能时会显示扣费明细。</text>
+      </view>
+      
+      <view class="terms-section">
+        <view class="terms-title">三、充值退款政策</view>
+        <text class="terms-text">充值完成后，不可随意退款。</text>
+        <text class="terms-text">若因系统异常、重复充值、或后台技术问题导致费用错误，可申请核实退款。</text>
+        <text class="terms-text">用户需提供充值记录及凭证，经后台核实后在5个工作日内处理。</text>
+      </view>
+      
+      <view class="terms-section">
+        <view class="terms-title">四、用户责任</view>
+        <text class="terms-text">用户须确保账户信息真实有效。</text>
+        <text class="terms-text">充值视为用户已阅读并同意本条款。</text>
+        <text class="terms-text">系统将不对用户操作失误（如误充值、误删数据等）承担责任。</text>
+      </view>
+    </scroll-view>
+    
+    <!-- 底部按钮 -->
+    <view class="terms-modal-footer">
+      <button class="terms-confirm-btn" bindtap="hideTermsModal">我已了解</button>
+    </view>
+  </view>
+</view>
+
+</view>

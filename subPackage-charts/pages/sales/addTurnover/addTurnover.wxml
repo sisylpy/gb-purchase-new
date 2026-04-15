@@ -1,0 +1,160 @@
+<view class="flex-column">
+<back-navbar title="添加营业额" style="height: {{navBarHeight}}rpx;" button-text="营业额"  avatar="/images/back-gray.png"  bindnavbuttontap="toBack"></back-navbar>
+
+<view class="flex flex-column p-20">
+  <!-- 单日模式 -->
+  <block wx:if="{{!isBatch}}">
+    <view class="flex-row p-20" style="justify-content: space-between; align-items: center;">
+      <view class="download-btn" bindtap="onDownloadTemplate">下载营业额模板</view>
+     <view class="upload-btn" bindtap="onUploadExcel">上传</view>
+    </view>
+
+    <!-- 下载模板弹窗 -->
+    <view class="template-modal" wx:if="{{showTemplateModal}}">
+      <view class="template-mask" bindtap="onCloseTemplateModal"></view>
+      <view class="template-content">
+        <view class="template-title">选择日期范围</view>
+        <view class="template-form">
+          <view class="form-item">
+            <text class="form-label">开始日期</text>
+            <picker mode="date" value="{{templateStartDate}}" bindchange="onTemplateStartChange">
+              <view class="form-input flex-row-between">
+                <text>{{templateStartDate || '请选择'}}</text>
+                <text class="text-secondary">></text>
+              </view>
+            </picker>
+          </view>
+          <view class="form-item">
+            <text class="form-label">结束日期</text>
+            <picker mode="date" value="{{templateEndDate}}" end="{{todayDate}}" bindchange="onTemplateEndChange">
+              <view class="form-input flex-row-between">
+                <text>{{templateEndDate || '请选择'}}</text>
+                <text class="text-secondary">></text>
+              </view>
+            </picker>
+          </view>
+        </view>
+        <view class="template-actions">
+          <button class="btn-cancel" bindtap="onCloseTemplateModal">取消</button>
+          <button class="btn-confirm" bindtap="onConfirmDownload">确认下载</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="module-card mb-20">
+      <view class="field-row date-row">
+        <text class="field-label">日期</text>
+        <picker mode="date" value="{{singleDate}}" end="{{todayDate}}" bindchange="onDateChange">
+          <view class="date-input-wrapper" style=" width: {{windowWidth - 240}}rpx;">
+            <text>{{singleDate || '请选择日期'}}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="module-title">🍽️ 堂食</view>
+      <view class="field-row">
+        <text class="field-label">营业额</text>
+        <input class="field-input" id="dineInRevenueInput" type="number" placeholder="0" bindinput="onDineInInput" bindconfirm="onDineInOrderFocus" value="{{dineInRevenue}}" />
+      </view>
+      <view class="field-row">
+        <text class="field-label">订单数</text>
+        <input class="field-input" id="dineInOrderInput" type="number" placeholder="0" bindinput="onDineInOrderInput" bindconfirm="onDineInCustomerFocus" value="{{dineInOrderCount}}" />
+      </view>
+      <view class="field-row">
+        <text class="field-label">顾客数</text>
+        <input class="field-input" id="dineInCustomerInput" type="number" placeholder="0" bindinput="onDineInCustomerInput" value="{{dineInCustomerCount}}" />
+      </view>
+    </view>
+
+    <view class="module-card mb-20">
+      <view class="module-title">🛵 外卖</view>
+      <view class="field-row">
+        <text class="field-label">营业额</text>
+        <input class="field-input" id="takeoutRevenueInput" type="number" placeholder="0" bindinput="onTakeoutInput" bindconfirm="onTakeoutOrderFocus" value="{{takeoutRevenue}}" />
+      </view>
+      <view class="field-row">
+        <text class="field-label">订单数</text>
+        <input class="field-input" id="takeoutOrderInput" type="number" placeholder="0" bindinput="onTakeoutOrderInput" bindconfirm="onPlatformFeeFocus" value="{{takeoutOrderCount}}" />
+      </view>
+      <view class="field-row">
+        <text class="field-label">平台抽成</text>
+        <input class="field-input" id="platformFeeInput" type="number" placeholder="0" bindinput="onPlatformFeeInput" value="{{platformFee}}" />
+      </view>
+    </view>
+
+    <view class="form-card">
+      <view class="form-title font-bold mb-20">金额预览</view>
+      <view class="preview-row">
+        <text class="text-secondary">总营业额</text>
+        <text class="font-lg font-bold" style="color: #007aff;">{{grossRevenue}}元</text>
+      </view>
+      <view class="preview-row">
+        <text class="text-secondary">净营业额</text>
+        <text class="font-lg font-bold" style="color: #34c759;">{{netRevenue}}元</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 批量模式 -->
+  <block wx:if="{{isBatch}}">
+    <view class="form-card mb-20">
+      <view class="form-title font-bold mb-20">日期范围</view>
+      <view class="flex-row-between mb-20">
+        <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+          <view class="form-input flex-1 mr-10">
+            <text class="text-secondary">开始日期: </text>
+            <text>{{startDate || '请选择'}}</text>
+          </view>
+        </picker>
+        <picker mode="date" value="{{endDate}}" end="{{todayDate}}" bindchange="onEndDateChange">
+          <view class="form-input flex-1 ml-10">
+            <text class="text-secondary">结束日期: </text>
+            <text>{{endDate || '请选择'}}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="text-secondary font-xs" wx:if="{{batchDays > 0}}">将添加 {{batchDays}} 天的营业额记录</view>
+    </view>
+
+    <view class="form-card mb-20">
+      <view class="form-title font-bold mb-20">每日营业额（批量设置）</view>
+      
+      <view class="form-item">
+        <text class="form-label">堂食营业额</text>
+        <input class="form-input" id="batchDineInInput" type="number" placeholder="统一设置每天的堂食营业额" bindinput="onDineInInput" bindconfirm="onTakeoutInputFocusBatch" value="{{dineInRevenue}}" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">外卖营业额</text>
+        <input class="form-input" id="batchTakeoutInput" type="number" placeholder="统一设置每天的外卖营业额" bindinput="onTakeoutInput" bindconfirm="onPlatformFeeInputFocusBatch" value="{{takeoutRevenue}}" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">平台抽成</text>
+        <input class="form-input" id="batchPlatformFeeInput" type="number" placeholder="统一设置每天的平台抽成" bindinput="onPlatformFeeInput" value="{{platformFee}}" />
+      </view>
+    </view>
+
+    <view class="form-card">
+      <view class="form-title font-bold mb-20">每日金额预览</view>
+      <view class="preview-row">
+        <text class="text-secondary">每日总营业额</text>
+        <text class="font-lg font-bold" style="color: #007aff;">{{grossRevenue}}元</text>
+      </view>
+      <view class="preview-row">
+        <text class="text-secondary">每日净营业额</text>
+        <text class="font-lg font-bold" style="color: #34c759;">{{netRevenue}}元</text>
+      </view>
+      <view class="preview-row">
+        <text class="text-secondary">批量总营业额</text>
+        <text class="font-lg font-bold" style="color: #ff9500;">{{totalGrossRevenue}}元</text>
+      </view>
+    </view>
+  </block>
+
+  <view class="save-btn-wrapper">
+    <button class="save-btn" bindtap="onSave">保存</button>
+  </view>
+</view>
+
+
+</view>

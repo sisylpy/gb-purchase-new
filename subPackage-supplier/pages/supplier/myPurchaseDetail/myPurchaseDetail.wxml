@@ -1,0 +1,251 @@
+<wxs src="../../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+
+
+  <!--  -->
+  <back-navbar title="{{batchItem.gbDpbDate}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!-- 商品详情卡片 -->
+  <view class="flex-column  bg-white">
+
+    <!-- 订单信息卡片 -->
+    <view class="order-info-card">
+      <!-- 顶部装饰条 -->
+      <view class="order-info-header">
+        <view class="order-info-title">
+          <text class="order-title-text">订单信息</text>
+        </view>
+      </view>
+      
+      <!-- 订单信息内容 -->
+      <view class="order-info-content">
+        <!-- 供货商信息 -->
+        <view class="order-info-item">
+          <view class="order-info-label">
+            <text class="label-text">供货商</text>
+          </view>
+          <view class="order-info-value">
+            <view class="supplier-info">
+              <text class="supplier-name">{{batchItem.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
+              <image src="{{url + batchItem.nxJrdhSellerEntity.nxJrdhWxAvartraUrl}}" mode="aspectFill" class="supplier-avatar" />
+            </view>
+          </view>
+        </view>
+
+        <!-- 订货方式 -->
+        <view class="order-info-item">
+          <view class="order-info-label">
+            <text class="label-text">订货方式</text>
+          </view>
+          <view class="order-info-value">
+            <text class="bill-type-text tag-return" wx:if="{{batchItem.gbDpbPurchaseType == 9}}">退货单</text>
+            <text class="bill-type-text tag-auto" wx:elif="{{batchItem.gbDpbPurchaseType == 21}}">自动订货</text>
+            <text class="bill-type-text tag-purchase" wx:else="">采购员订货</text>
+          </view>
+        </view>
+
+        <!-- 订货时间 -->
+        <view class="order-info-item">
+          <view class="order-info-label">
+            <text class="label-text">订货时间</text>
+          </view>
+          <view class="order-info-value">
+            <text class="time-value">{{tool.formatDateTimeToChinese(batchItem.gbDpbPurchaseFullTime)}}</text>
+          </view>
+        </view>
+
+        <!-- 回复时间 -->
+        <view class="order-info-item">
+          <view class="order-info-label">
+            <text class="label-text">回复时间</text>
+          </view>
+          <view class="order-info-value">
+            <text class="time-value">{{tool.formatDateTimeToChinese(batchItem.gbDpbSellerReplyFullTime)}}</text>
+          </view>
+        </view>
+
+        <!-- 完成时间 -->
+        <view class="order-info-item">
+          <view class="order-info-label">
+            <text class="label-text">完成时间</text>
+          </view>
+          <view class="order-info-value">
+            <text class="time-value">{{tool.formatDateTimeToChinese(batchItem.gbDpbFinishFullTime)}}</text>
+          </view>
+        </view>
+
+        <!-- 订单金额 -->
+        <view class="order-info-item highlight-item">
+          <view class="order-info-label">
+            <text class="label-text">订单金额</text>
+          </view>
+          <view class="order-info-value">
+            <text class="amount-value">{{value}}元</text>
+          </view>
+        </view>
+
+        <!-- 订单状态 -->
+        <view class="order-info-item">
+          <view class="order-info-label">
+            <text class="label-text">订单状态</text>
+          </view>
+          <view class="order-info-value">
+            <view class="status-badge status-uninvoiced" wx:if="{{batchItem.gbDpbStatus == 2}}">未开票</view>
+            <view class="status-badge status-pending" wx:elif="{{batchItem.gbDpbStatus == 3}}">待结账</view>
+            <view class="status-badge status-settled" wx:elif="{{batchItem.gbDpbStatus == 4}}">已结账</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品详情卡片 -->
+    <view class="flex-column border-bottom p-20" wx:for-item="goods" wx:key="gbDistributerGoodsId" wx:for="{{arr}}" id="goods-container-{{index}}">
+
+      <!-- 商品信息头部 -->
+      <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
+        <view class="flex-row-default mb-20">
+          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{url + goods.gbDgNxFatherImg}}" mode="aspectFill" class="goods-image mr-20" />
+          <view class="flex-column">
+            <text class="font-sm">第{{index + 1}}名/共{{arr.length}}个</text>
+            <view class="flex-row mb-10">
+              <text class="font-bold mr-10">{{goods.gbDgGoodsName}}</text>
+              <block wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
+                <text class="text-secondary font-xs">({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})</text>
+              </block>
+              <block wx:else>
+                <text class="text-secondary font-xs">({{goods.gbDgGoodsStandardname}})</text>
+              </block>
+            </view>
+
+          </view>
+
+        </view>
+
+        <!-- 右侧总计和按钮 -->
+        <view class="goods-price-section">
+          <view class="price-container">
+            <text class="price-label">采购</text>
+            <text class="price-value">¥{{goods.gbDgSellingPrice}}</text>
+          </view>
+          <!-- 右侧箭头 -->
+          <view class="arrow-container {{goods.showPurchaseList ? 'expanded' : 'collapsed'}}">
+            <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
+          </view>
+        </view>
+      </view>
+
+
+      <!-- 采购详情 -->
+      <!-- 采购批次列表 - 默认隐藏，点击showList后显示 -->
+      <view class="flex-column purchase-row-container expandable-content {{goods.showPurchaseList ? 'expanded' : ''}}">
+
+        <view class="flex-column " wx:for="{{goods.wastePurGoodsEntities}}" wx:for-item="pur" wx:for-index="purIndex" catch:tap="showDetail" data-goods-index="{{index}}" data-pur-index="{{purIndex}}">
+
+          <!-- 采购批次默认显示 - 蓝色主题 -->
+          <view class="flex-row purchase-row {{pur.expanded ? 'purchase-row-active' : ''}}">
+
+            <!-- 左侧时间 -->
+            <view class="flex-row mr-20">
+              <view class="flex-column">
+                <view class="font-md flex-row">{{tool.transferDateString(pur.gbDpgStockFinishDate)}}</view>
+                <block wx:if="{{pur.purchaseDepartmentUser !== null}}">
+                  <text class="purchase-type">自采</text>
+                </block>
+                <block wx:else="">
+                  <text class="purchase-type">订货</text>
+                </block>
+              </view>
+            </view>
+            <!-- 中间采购信息 -->
+            <view class="flex-column" style="flex: 1;">
+              <view class="flex-row-between">
+                <text class="font-bold">{{pur.gbDpgBuyQuantity}}{{goods.gbDgGoodsStandardname}}</text>
+                <text class="purchase-info-value-amount mr-20">{{pur.gbDpgBuySubtotal}}元</text>
+              </view>
+              <view class="flex-row-between mt-5">
+                <text class="purchase-date">{{pur.gbDpgBuyPrice}}元/{{goods.gbDgGoodsStandardname}}</text>
+                <block wx:if="{{pur.purchaseDepartmentUser !== null}}">
+                  <text class="purchase-date mr-20">{{pur.purchaseDepartmentUser.gbDuWxNickName}}</text>
+                </block>
+                <block wx:elif="{{pur.nxJrdhSupplierEntity !== null}}">
+                  <text class="purchase-date mr-20">{{pur.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
+                </block>
+
+              </view>
+            </view>
+
+            <!-- 右侧箭头 -->
+            <view class="flex-column-center">
+              <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon {{pur.expanded ? 'expanded' : 'collapsed'}}" style="width: 24rpx; height: 24rpx;" />
+            </view>
+
+          </view>
+
+
+          <!-- 修改最新的库存样式！ -->
+          <!-- 采购详细信息 - 蓝色主题 -->
+          <view wx:if="{{pur.expanded}}" class="purchase-info-card expandable-content expanded">
+
+
+
+            <!-- 库存详细信息 -->
+            <view class="purchase-detail-section" wx:for="{{pur.gbDepartmentGoodsStockEntities}}" wx:for-item="stock">
+
+              <!-- 库存信息行布局 -->
+              <view class="stock-info-row">
+                <!-- 左侧：部门信息 -->
+                <view class="stock-department-info">
+                  <text class="font-bold">{{stock.gbDepartmentEntity.gbDepartmentName}}</text>
+                </view>
+
+                <!-- 右侧：金额信息对比 -->
+                <view class="stock-comparison-container">
+                  <!-- 入库信息 -->
+                  <view class="stock-info-column stock-inbound">
+                    <view class="column-label">入库</view>
+                    <view class="column-content">
+                      <text class="amount-text">{{stock.gbDgsSubtotal}}元</text>
+                      <text class="weight-text">{{stock.gbDgsWeight}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+                  </view>
+
+                  <!-- 分隔线 -->
+                  <view class="comparison-divider"></view>
+
+                  <!-- 剩余信息 -->
+                  <view class="stock-info-column stock-rest">
+                    <view class="column-label">剩余</view>
+                    <view class="column-content">
+                      <text class="amount-text rest-amount">{{stock.gbDgsRestSubtotal}}元</text>
+                      <text class="weight-text rest-weight">{{stock.gbDgsRestWeight}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+
+            </view>
+          </view>
+
+        </view>
+      </view>
+      <!--  -->
+
+    </view>
+
+
+
+    <view class="font-sm center-content flex-column ">
+      <view class="flex-row">
+        <image src="{{url + '/userImage/daodile3.png'}}" mode="aspectFill" class="icon-lg margin-right" />
+        <view style="line-height: 200rpx;">没有数据啦!</view>
+      </view>
+
+    </view>
+  </view>
+
+
+
+
+</view>

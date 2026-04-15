@@ -1,0 +1,63 @@
+<view class="flex flex-column ">
+  <navbar title="自采商品" avatar="/images/back-gray.png" showBack="{{true}}" bindnavbuttontap="toBack" style="height: {{navBarHeight}}rpx;"></navbar>
+
+  <view style="padding-top: {{navBarHeight}}rpx;">
+    <!-- 商品列表容器 -->
+    <view class="goods-list">
+      <!-- 商品卡片 -->
+      <view class="goods-card" wx:for="{{displayPurArr}}" wx:key="gbDistributerPurchaseGoodsId" wx:for-index="index">
+
+        <!-- 商品头部信息 -->
+        <view class="goods-header">
+          <view class="goods-index">{{index + 1}}.</view>
+          <view class="goods-info">
+            <text class="goods-brand" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsBrand !== null && item.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
+            <text class="goods-name">{{item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsName : ''}}</text>
+            <text class="goods-standard">({{item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsStandardname : ''}})</text>
+            <text class="goods-detail" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+            <text class="goods-weight" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null' && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
+              <text wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+              <text wx:else>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+            </text>
+          </view>
+        </view>
+
+        <!-- 订单信息 -->
+        <view class="order-list">
+          <view class="order-item" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-item="orders" wx:for-index="orderIndex" wx:if="{{orders.isNotice}}">
+            <block wx:if="{{disInfo.mendianDepartmentList.length == 1 && disInfo.mendianDepartmentList[0].gbDepartmentSubAmount == 1}}">
+              <view>
+                <text>订货:</text>
+                <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
+              </view>
+            </block>
+            <block wx:else="">
+              <view class="order-department">
+                <view class="order-department-row">
+                  <text wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity !== null}}">{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
+                  <text>{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                </view>
+                <view class="order-quantity">
+                  <text class="mr-10 ml-20" style="color: #999; font-size: 34rpx;">订货:</text>
+                  <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
+                  <text wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale.length > 0 && orders.gbDoDsStandardScale !== '-1'}}">
+                    ({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})
+                  </text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="action-area">
+          <view class="action-btn primary" bindtap="showInputOrder" data-item="{{item}}" data-finish="true">
+            <text class="btn-text">录入单价和数量</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<inputOrder show="{{show}}" bindconfirm="confirm" bindcancle="cancle" bindfinish="markGbPurGoodsFinish" item="{{item}}" maskHeight="{{maskHeight > windowHeight ? maskHeight : windowHeight}}" scrollViewTop="{{scrollViewTop}}" scaleInput="{{scaleInput}}" foucusWeight="{{foucusWeight}}" foucusPrice="{{foucusPrice}}" canSave="{{canSave}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" disInfo="{{disInfo}}" />

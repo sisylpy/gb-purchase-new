@@ -1,0 +1,31 @@
+
+
+
+.dateGroupSmall{
+  width:100rpx;
+  height:110rpx;
+  border: 1px solid rgba(211, 211, 211, 0.7) ;
+  border-radius: 10rpx;
+  text-align: center;
+  flex-grow: 0;
+
+
+}
+
+#week{
+  font-size: 26rpx;
+  color: red;
+  margin-top: 10rpx;
+  /* background: green; */
+}
+
+#date{
+  font-size: 45rpx;
+  margin-top: -6rpx;
+
+}
+
+/* 定义hover效果，覆盖内联样式 */
+.hover {
+  background-color: #f0f0f0 !important;
+}

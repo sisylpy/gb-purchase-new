@@ -1,0 +1,35 @@
+/* styles/typography.wxss - 文字工具类 */
+
+.font-xs { font-size: 20rpx; }
+.font-sm { font-size: 24rpx; }
+.font-sl { font-size: 28rpx; }
+.font-base { font-size: 30rpx; }
+.font-md { font-size: 32rpx; }
+.font-lg { font-size: 34rpx; }
+.font-xl { font-size: 36rpx; }
+.font-xxl { font-size: 40rpx; }
+.font-bold { font-weight: bold; }
+.text-center { text-align: center; }
+
+/* 颜色文字 */
+.text-primary { color: #187e6e; }
+.text-secondary { color: #666666; }
+.text-placeholder { color: #999999; }
+.text-danger { color: #fa5151; }
+.text-success { color: #07c160; }
+.text-warning { color: #fa9d3b; }
+.text-white { color: #ffffff; }
+.gray { color: #999999; }
+.darktext-secondary { color: #999999; }
+.mainColor { color: #187e6e; }
+.brand {
+  border: 1px solid #fff;
+  color: #fff;
+  font-weight: 300;
+  padding: 0 6rpx;
+  border-radius: 10rpx;
+  font-size: 35rpx;
+  margin-right: 4rpx;
+}
+.big { font-size: 36rpx; font-weight: bold; }
+.font-lg-2 { font-size: 30rpx; }

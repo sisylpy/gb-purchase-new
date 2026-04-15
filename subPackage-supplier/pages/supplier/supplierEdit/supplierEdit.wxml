@@ -1,0 +1,31 @@
+
+
+<view class="flex flex-column h-100">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="修改用户" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <view class="flex-column p-30 font-xl bg-white" >
+  
+ <view class="flex-column p-20 border-bottom mb-20" >
+    <view class="text-secondary ">用户头像:</view>
+     <image class='class_img' src='{{url + userInfo.gbDuWxAvartraUrl}}' bindtap='choiceImg'></image>
+  </view>
+
+
+   <view class="p-20 flex-column ">
+    <text class="text-secondary mb-20">用户名:</text>
+    <input class="group_input font-lg p-10" value="{{userInfo.gbDuWxNickName}}" bindinput="getUserName"> </input>
+  </view>
+
+  <view class="center-content mt-10 mb-20">
+    <view class="saveBtn {{canSave ? 'is-active' : ''}}" bindtap="{{canSave ? 'save' : ''}}">保存</view>
+
+  </view>
+
+
+
+
+</view>
+
+
+</view>

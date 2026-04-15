@@ -1,0 +1,11 @@
+{
+  "usingComponents": {
+    "myDismodal": "/components/myDismodal/myDismodal",
+    "myDismodalNx": "/components/myDismodalNx/myDismodalNx",
+    "back-navbar": "/components/main-navbar-back/main-navbar-back",
+    "delWarnModal": "/components/delWarnModal/delWarnModal",
+    "myIndependent": "/components/myIndependent/myIndependent",
+    "myIndependentNx": "/components/myIndependentNx/myIndependentNx",
+    "stockGoods": "/components/stockGoods/stockGoods"
+  }
+}

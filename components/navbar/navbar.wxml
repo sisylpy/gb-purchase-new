@@ -1,0 +1,13 @@
+<!-- components/navbar/navbar.wxml -->
+<view class="custom-navbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
+  <view class="nav-container" style="height: {{navBarContentHeight}}px;">
+    <view class="nav-left" bindtap="onNavButtonTap" style="width: {{leftWidth}}px; height: {{navBarContentHeight}}px;">
+      <image src="{{avatar}}" mode="aspectFill" class="user-avatar" wx:if="{{avatar && !showBack}}"/>
+      <image src="{{avatar}}" mode="aspectFit" class="back-icon" wx:if="{{showBack}}"/>
+    </view>
+    <view class="nav-title">{{title}}</view>
+    <view class="nav-right" style="width: {{rightWidth}}px;">
+      <text class="nav-button-text" wx:if="{{buttonText}}" bindtap="onNavButtonTap">{{buttonText}}</text>
+    </view>
+  </view>
+</view>

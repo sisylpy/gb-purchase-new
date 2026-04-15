@@ -1,0 +1,388 @@
+<wxs module="format" src="../../../../wxs/format.wxs" />
+
+<view class="flex flex-column page-bg">
+
+  <!-- 导航栏 -->
+  <navbar title="餐厅画像" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+
+  <view class="content flex-1 flex-column">
+
+    <scroll-view scroll-y="true" class="scroll-content" style="padding-top: {{navBarHeight}}rpx;" show-scrollbar="true">
+
+      <!-- 加载中 -->
+      <view class="loading-state" wx:if="{{isLoading}}">
+        <view class="flex-column-center" style="height: 400rpx;">
+          <text class="text-secondary">加载中...</text>
+        </view>
+      </view>
+
+      <!-- 无画像 - 引导创建 -->
+      <view class="empty-state" wx:elif="{{!hasProfile && !isEditing}}">
+        <view class="flex-column-center" style="padding-top: 120rpx;">
+          <view class="empty-icon-wrap">
+            <text class="empty-icon-text">🏪</text>
+          </view>
+          <view class="font-bold font-lg p-30">
+            <text>暂无餐厅画像</text>
+          </view>
+          <view class="text-secondary font-sl mb-40">
+            <text>创建画像后，AI 营销军师能为您提供更精准的营销建议</text>
+          </view>
+          <view class="create-btn" bindtap="toggleEdit">
+            <text>创建画像</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 有画像 或 编辑模式 -->
+      <block wx:else>
+
+        <!-- ===== 顶部操作按钮 ===== -->
+        <view class="top-actions" style="padding: 24rpx 32rpx;">
+          <view class="action-row" wx:if="{{!isEditing}}">
+            <view class="btn btn-secondary" bindtap="toggleEdit">
+              <text>✏️ 编辑画像</text>
+            </view>
+          </view>
+          <view class="action-row" wx:else>
+            <view class="btn btn-cancel" bindtap="toggleEdit">
+              <text>取消</text>
+            </view>
+            <view class="btn btn-primary" bindtap="saveProfile">
+              <text>💾 保存</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- ===== 基础信息卡片 ===== -->
+        <view class="card">
+          <view class="card-title">🏪 餐厅信息</view>
+
+          <!-- 查看模式 -->
+          <block wx:if="{{!isEditing}}">
+            <view class="field-row">
+              <text class="field-label">餐厅名称</text>
+              <text class="field-value">{{profile.gbAiRestaurantProfileRestaurantName || '-'}}</text>
+            </view>
+            <view class="field-grid-2">
+              <view class="field-row">
+                <text class="field-label">菜系</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileCuisineType || '-'}}</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">经营阶段</text>
+                <text class="field-value stage-{{profile.gbAiRestaurantProfileBusinessStage || ''}}">{{profile.gbAiRestaurantProfileBusinessStage || '-'}}</text>
+              </view>
+            </view>
+            <view class="field-row">
+              <text class="field-label">地址</text>
+              <text class="field-value">{{profile.gbAiRestaurantProfileAddress || '-'}}</text>
+            </view>
+            <view class="field-grid-2">
+              <view class="field-row">
+                <text class="field-label">商圈</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileBusinessDistrict || '-'}}</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">营业时间</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileBusinessHours || '-'}}</text>
+              </view>
+            </view>
+          </block>
+
+          <!-- 编辑模式 -->
+          <block wx:else>
+            <view class="edit-field">
+              <text class="field-label">餐厅名称</text>
+              <input class="edit-input" value="{{formData.restaurantName}}" data-field="restaurantName" bindinput="onInput" placeholder="请输入餐厅名称" />
+            </view>
+            <view class="edit-grid-2">
+              <view class="edit-field">
+                <text class="field-label">菜系</text>
+                <input class="edit-input" value="{{formData.cuisineType}}" data-field="cuisineType" bindinput="onInput" placeholder="如：川菜、火锅" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">经营阶段</text>
+                <picker mode="selector" range="{{stageOptions}}" value="{{stageIndex}}" bindchange="onStageChange">
+                  <view class="edit-input picker-input">
+                    <text wx:if="{{stageIndex >= 0}}">{{stageOptions[stageIndex]}}</text>
+                    <text wx:else class="placeholder">请选择</text>
+                  </view>
+                </picker>
+              </view>
+            </view>
+            <view class="edit-field">
+              <text class="field-label">地址</text>
+              <input class="edit-input" value="{{formData.address}}" data-field="address" bindinput="onInput" placeholder="详细地址" />
+            </view>
+            <view class="edit-grid-2">
+              <view class="edit-field">
+                <text class="field-label">商圈</text>
+                <input class="edit-input" value="{{formData.businessDistrict}}" data-field="businessDistrict" bindinput="onInput" placeholder="如：万达广场" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">营业时间</text>
+                <input class="edit-input" value="{{formData.businessHours}}" data-field="businessHours" bindinput="onInput" placeholder="如：10:00-22:00" />
+              </view>
+            </view>
+          </block>
+        </view>
+
+        <!-- ===== 经营概况卡片 ===== -->
+        <view class="card">
+          <view class="card-title">📊 经营概况</view>
+
+          <block wx:if="{{!isEditing}}">
+            <view class="stat-grid">
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileSeatCount || '-'}}</text>
+                <text class="stat-label">座位数</text>
+              </view>
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileAvgPrice ? '¥' + profile.gbAiRestaurantProfileAvgPrice : '-'}}</text>
+                <text class="stat-label">客单价(元)</text>
+              </view>
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileDailyCustomers || '-'}}</text>
+                <text class="stat-label">日均客流</text>
+              </view>
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileDailyRevenue ? '¥' + profile.gbAiRestaurantProfileDailyRevenue : '-'}}</text>
+                <text class="stat-label">日均营业额(元)</text>
+              </view>
+            </view>
+            <view class="stat-grid" style="margin-top: 24rpx;">
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileRentMonthly ? '¥' + profile.gbAiRestaurantProfileRentMonthly : '-'}}</text>
+                <text class="stat-label">每月房租(元)</text>
+              </view>
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileMonthlyWage ? '¥' + profile.gbAiRestaurantProfileMonthlyWage : '-'}}</text>
+                <text class="stat-label">每月工资(元)</text>
+              </view>
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileMonthlyFixedCost ? '¥' + profile.gbAiRestaurantProfileMonthlyFixedCost : '-'}}</text>
+                <text class="stat-label">每月固定开支(元)</text>
+              </view>
+              <view class="stat-box">
+                <text class="stat-value">{{profile.gbAiRestaurantProfileFollowerCount || '-'}}</text>
+                <text class="stat-label">粉丝数</text>
+              </view>
+            </view>
+          </block>
+
+          <block wx:else>
+            <view class="edit-grid-2">
+              <view class="edit-field">
+                <text class="field-label">座位数</text>
+                <input class="edit-input" type="number" value="{{formData.seatCount}}" data-field="seatCount" bindinput="onInput" placeholder="0" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">客单价(元)</text>
+                <input class="edit-input" type="digit" value="{{formData.avgPrice}}" data-field="avgPrice" bindinput="onInput" placeholder="0" />
+              </view>
+            </view>
+            <view class="edit-grid-2">
+              <view class="edit-field">
+                <text class="field-label">日均客流</text>
+                <input class="edit-input" type="number" value="{{formData.dailyCustomers}}" data-field="dailyCustomers" bindinput="onInput" placeholder="0" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">日均营业额(元)</text>
+                <input class="edit-input" type="digit" value="{{formData.dailyRevenue}}" data-field="dailyRevenue" bindinput="onInput" placeholder="0" />
+              </view>
+            </view>
+            <view class="edit-field">
+              <text class="field-label">粉丝数</text>
+              <input class="edit-input" type="number" value="{{formData.followerCount}}" data-field="followerCount" bindinput="onInput" placeholder="0" />
+            </view>
+          </block>
+        </view>
+
+        <!-- ===== 目标客群卡片 ===== -->
+        <view class="card">
+          <view class="card-title">👥 目标客群</view>
+
+          <block wx:if="{{!isEditing}}">
+            <view class="field-grid-2">
+              <view class="field-row">
+                <text class="field-label">目标年龄</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileTargetAgeRange || '-'}}</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">消费场景</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileTargetConsumer || '-'}}</text>
+              </view>
+            </view>
+            <view class="field-row" wx:if="{{profile.gbAiRestaurantProfileFollowerCount}}">
+              <text class="field-label">粉丝数</text>
+              <text class="field-value">{{profile.gbAiRestaurantProfileFollowerCount}}</text>
+            </view>
+          </block>
+
+          <block wx:else>
+            <view class="edit-grid-2">
+              <view class="edit-field">
+                <text class="field-label">目标年龄</text>
+                <input class="edit-input" value="{{formData.targetAgeRange}}" data-field="targetAgeRange" bindinput="onInput" placeholder="如：25-40岁" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">消费场景</text>
+                <input class="edit-input" value="{{formData.targetConsumer}}" data-field="targetConsumer" bindinput="onInput" placeholder="如：家庭聚餐" />
+              </view>
+            </view>
+          </block>
+        </view>
+
+        <!-- ===== 老板画像卡片 ===== -->
+        <view class="card">
+          <view class="card-title">👤 老板画像</view>
+
+          <block wx:if="{{!isEditing}}">
+            <view class="field-row">
+              <text class="field-label">称呼</text>
+              <text class="field-value">{{profile.gbAiRestaurantProfileBossName || '-'}}</text>
+            </view>
+            <view class="field-grid-3">
+              <view class="field-row">
+                <text class="field-label">沟通风格</text>
+                <text class="field-value tag">{{profile.gbAiRestaurantProfileBossStyle || '-'}}</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">风险偏好</text>
+                <text class="field-value tag">{{profile.gbAiRestaurantProfileRiskPreference || '-'}}</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">决策速度</text>
+                <text class="field-value tag">{{profile.gbAiRestaurantProfileDecisionSpeed || '-'}}</text>
+              </view>
+            </view>
+          </block>
+
+          <block wx:else>
+            <view class="edit-field">
+              <text class="field-label">老板称呼</text>
+              <input class="edit-input" value="{{formData.bossName}}" data-field="bossName" bindinput="onInput" placeholder="如：张总" />
+            </view>
+            <view class="edit-grid-3">
+              <view class="edit-field">
+                <text class="field-label">沟通风格</text>
+                <picker mode="selector" range="{{styleOptions}}" value="{{styleIndex}}" bindchange="onStyleChange">
+                  <view class="edit-input picker-input">
+                    <text wx:if="{{styleIndex >= 0}}">{{styleOptions[styleIndex]}}</text>
+                    <text wx:else class="placeholder">请选择</text>
+                  </view>
+                </picker>
+              </view>
+              <view class="edit-field">
+                <text class="field-label">风险偏好</text>
+                <picker mode="selector" range="{{riskOptions}}" value="{{riskIndex}}" bindchange="onRiskChange">
+                  <view class="edit-input picker-input">
+                    <text wx:if="{{riskIndex >= 0}}">{{riskOptions[riskIndex]}}</text>
+                    <text wx:else class="placeholder">请选择</text>
+                  </view>
+                </picker>
+              </view>
+              <view class="edit-field">
+                <text class="field-label">决策速度</text>
+                <picker mode="selector" range="{{decisionOptions}}" value="{{decisionIndex}}" bindchange="onDecisionChange">
+                  <view class="edit-input picker-input">
+                    <text wx:if="{{decisionIndex >= 0}}">{{decisionOptions[decisionIndex]}}</text>
+                    <text wx:else class="placeholder">请选择</text>
+                  </view>
+                </picker>
+              </view>
+            </view>
+          </block>
+        </view>
+
+        <!-- ===== 经营约束卡片 ===== -->
+        <view class="card">
+          <view class="card-title">⚙️ 经营约束</view>
+
+          <block wx:if="{{!isEditing}}">
+            <view class="field-grid-3">
+              <view class="field-row">
+                <text class="field-label">成本敏感度</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileCostSensitive || '-'}} / 5</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">后厨承压</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileKitchenCapacity || '-'}} / 5</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">员工人数</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileStaffCount || '-'}}</text>
+              </view>
+            </view>
+            <view class="field-grid-3">
+              <view class="field-row">
+                <text class="field-label">每月房租</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileRentMonthly ? '¥' + profile.gbAiRestaurantProfileRentMonthly : '-'}}</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">每月工资</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileMonthlyWage ? '¥' + profile.gbAiRestaurantProfileMonthlyWage : '-'}}</text>
+              </view>
+              <view class="field-row">
+                <text class="field-label">每月固定开支</text>
+                <text class="field-value">{{profile.gbAiRestaurantProfileMonthlyFixedCost ? '¥' + profile.gbAiRestaurantProfileMonthlyFixedCost : '-'}}</text>
+              </view>
+            </view>
+          </block>
+
+          <block wx:else>
+            <view class="edit-grid-3">
+              <view class="edit-field">
+                <text class="field-label">成本敏感度(1-5)</text>
+                <input class="edit-input" type="number" value="{{formData.costSensitive}}" data-field="costSensitive" bindinput="onInput" placeholder="1-5" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">后厨承压(1-5)</text>
+                <input class="edit-input" type="number" value="{{formData.kitchenCapacity}}" data-field="kitchenCapacity" bindinput="onInput" placeholder="1-5" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">员工人数</text>
+                <input class="edit-input" type="number" value="{{formData.staffCount}}" data-field="staffCount" bindinput="onInput" placeholder="0" />
+              </view>
+            </view>
+            <view class="edit-grid-3">
+              <view class="edit-field">
+                <text class="field-label">每月房租(元)</text>
+                <input class="edit-input" type="digit" value="{{formData.rentMonthly}}" data-field="rentMonthly" bindinput="onInput" placeholder="0" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">每月工资(元)</text>
+                <input class="edit-input" type="digit" value="{{formData.monthlyWage}}" data-field="monthlyWage" bindinput="onInput" placeholder="0" />
+              </view>
+              <view class="edit-field">
+                <text class="field-label">每月固定开支(元)</text>
+                <input class="edit-input" type="digit" value="{{formData.monthlyFixedCost}}" data-field="monthlyFixedCost" bindinput="onInput" placeholder="0" />
+              </view>
+            </view>
+          </block>
+        </view>
+
+        <!-- ===== 底部操作按钮 ===== -->
+        <view class="bottom-actions" style="padding-bottom: 60rpx;">
+          <view class="action-row" wx:if="{{!isEditing}}">
+            <view class="btn btn-secondary" bindtap="toggleEdit">
+              <text>✏️ 编辑画像</text>
+            </view>
+          </view>
+          <view class="action-row" wx:else>
+            <view class="btn btn-cancel" bindtap="toggleEdit">
+              <text>取消</text>
+            </view>
+            <view class="btn btn-primary" bindtap="saveProfile">
+              <text>💾 保存</text>
+            </view>
+          </view>
+        </view>
+
+      </block>
+
+    </scroll-view>
+  </view>
+
+</view>

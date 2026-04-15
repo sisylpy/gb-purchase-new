@@ -1,0 +1,35 @@
+
+
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="flex flex-column">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="添加部门" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column bg-white mt-10">
+ 
+  <view class="p-20 flex-row font-lg">
+        <text class="form-label" >部门名称:</text>
+        <input class="form-input" placeholder="请输入部门名称" bindblur="bindKeyInput" value="{{depInfo.gbDepartmentName}}" />
+   </view>
+
+
+  </view>
+
+  <view class="popup-footer">
+      <button class="save-btn" style="width: {{windowWidth - 80}}rpx;" bindtap="toSave">保存设置</button>
+    </view>
+
+</view>
+
+<!--  操作  -->
+<view class='overlay {{showOperationUser ? "show" : "hide"}}' catchtouchmove='ture' catchtap="hideMask" catchtouchmove='ture' catchtap="hideUserMask">
+  <view class="flex-column nnn bg-white">
+
+    <view class="flex-row  p-30 operation_row " bindtap="delUser">
+      <image src="../../../images/del.png" class="icon mr-10"></image>
+      <text class=" margin-right">删除用户</text>
+    </view>
+    <view style="height: 20rpx;"></view>
+  </view>
+</view>

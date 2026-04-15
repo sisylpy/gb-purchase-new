@@ -1,0 +1,13 @@
+{
+  "navigationBarTitleText": "商品",
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar",
+    "myDismodal": "/components/myDismodal/myDismodal",
+    "myDismodalNx": "/components/myDismodalNx/myDismodalNx",
+    "delWarnModal": "/components/delWarnModal/delWarnModal",
+    "myIndependent": "/components/myIndependent/myIndependent",
+    "myIndependentNx": "/components/myIndependentNx/myIndependentNx",
+    "stockGoods": "/components/stockGoods/stockGoods"
+
+  }
+}

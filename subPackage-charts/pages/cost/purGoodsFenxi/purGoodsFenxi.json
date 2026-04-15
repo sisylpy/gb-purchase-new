@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "ec-canvas": "../../../ec-canvas/ec-canvas",
+    "back-navbar": "/components/back-navbar/back-navbar"
+  },
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50
+}

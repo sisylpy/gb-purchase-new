@@ -1,0 +1,149 @@
+<wxs src="../../../../../utils/fn.wxs" module="tool" />
+
+
+<!-- <view class="flex-row top_bar bg-white border-bottom" style=" padding-top: {{navBarHeight}}rpx; ">
+  <image src="../../../../images/back.png" class="back_icon" bindtap="toBack"></image>
+  <view class="flex-column  ">
+    <text class="top_bar_title_up">{{disGoods.gbDgGoodsName}}({{disGoods.gbDgGoodsStandardname}}) {{total}}元</text>
+  </view>
+</view> -->
+
+<back-navbar title="供货商" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+<!--  top -->
+<view class=" flex-row-between pr-10 pl-10 border-bottom-shadow bg-white">
+  <view class="flex-row">
+    <view class="p-20" bindtap="toDatePage">
+      <image src="../../../../images/calender.png" class="icon"></image>
+    </view>
+    <view class="flex-column">
+      <view class="flex-row" wx:if="{{startDate == stopDate}}">
+        <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+      </view>
+      <view class="flex-row" wx:else>
+        <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        <text class="p-10">-</text>
+        <view class=" small" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="flex-row p-20" bindtap="toFilter">
+    <image src="{{searchDepIds !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+  </view>
+</view>
+
+<block wx:if="{{searchDepIds !== -1}}">
+  <view class="center-content  ">
+    <view class="flex-row filterMy">
+      <text class=" mr-20">{{searchDepName}}</text>
+      <image src="/images/del-2.png" mode="aspectFill" class="icon" bindtap="delSearch" />
+    </view>
+  </view>
+</block>
+
+<view class="flex-column margin-top ">
+
+
+  <view class="flex-row-default  font-lg bg-white  border-bottom p-20" wx:for="{{arr}}" wx:for-index="goodsIndex" bindtap="toOrderList" data-id="{{item.gbDistributerGoodsId}}" hover-class="hover">
+    <view class="flex-row-default">
+      <view class="flex-column " style="width: {{windowWidth - 80}}rpx; ">
+        <view class="flex-row font-xs gray" style="margin-left: 40rpx;">
+            <image src="../../../../../../images/person.png" class="icon mr-20"></image>
+            <text class="mr-10">{{item.gbPurUserEntity.gbDuWxNickName}}</text>
+            <text style="margin-right:200rpx">负责采买</text>
+          </view>
+        <view class="flex-row-default  font-lg">
+          <view class=" flex-row-default">
+            <image src="{{item.jrdhUserEntity !== null ? url + item.jrdhUserEntity.nxJrdhWxAvartraUrl : '../../../../../../images/logo.png'}}" class="url mr-20"> </image>
+          </view>
+
+           <view class="flex-column">
+           
+             <view class="flex-row">
+              <text class="mr-10">{{item.nxJrdhsSupplierName}}</text>
+             </view>
+             <view class="flex-row">
+              <text class="font-xs">{{item.jrdhUserEntity.nxJrdhWxNickName}}</text>
+             </view>
+
+           </view>
+
+          <view>
+
+          </view>
+          
+        </view>
+
+        <view class="flex-row-default small border-bottom p-10" wx:for="{{item.batchEntities}}" wx:for-item="batch" style="margin-left: 60rpx;">
+          <text class="mr-10">{{index + 1}}.</text>
+
+           <view class="flex-column">
+            <view class="flex-row" style="width: {{windowWidth - 140}}rpx; ">
+            <view class="half-row">
+              <text class="mr-10">日期:</text>
+              <text>{{batch.purchaseGoodsEntity.gbDpgStockFinishDate}}</text>
+            </view>
+            <view class="flex-row half-row">
+              <text class="mr-10">单价:</text>
+              <text class="">{{batch.purchaseGoodsEntity.gbDpgBuyPrice}}元/{{disGoods.gbDgGoodsStandardname}}</text>
+            </view>
+
+          </view>
+          <view class="flex-row">
+            <view class="flex-row half-row">
+              <text class="mr-10">数量:</text>
+              <text class="">{{batch.purchaseGoodsEntity.gbDpgBuyQuantity}}{{disGoods.gbDgGoodsStandardname}}</text>
+            </view>
+
+            <view class="flex-row half-row">
+              <text class="mr-10">小计:</text>
+              <text class="">{{batch.purchaseGoodsEntity.gbDpgBuySubtotal}}</text>
+            </view>
+          </view>
+           </view>
+         
+         
+
+        </view>
+      </view>
+    </view>
+
+  </view>
+</view>
+
+
+
+
+
+
+
+
+
+
+<!-- mask -->
+<view class='overlay {{showOperation ? "show" : "hide"}}' catchtap="hideMask" style="height:{{maskHeight > windowHeight ? maskHeight : windowHeight}}rpx;">
+
+  <view class="flex-column nnn bg-white">
+    <view class="operation_row flex-row" catchtap="toStockList">
+      <image src="../../../../images/price-2.png" class="icon"></image>
+      <text class="text_operation mr-20">查看库存详细</text>
+    </view>
+
+    <view class="operation_row flex-row" catchtap="toDisGoods">
+      <image src="../../../../images/time-2.png" class="icon"></image>
+      <text class="text_operation mr-20">查看商品信息</text>
+    </view>
+
+    <view class="operation_row flex-row" catchtap="toStatistics">
+      <image src="../../../../images/edit.png" class="icon"></image>
+      <text class="text_operation mr-20">查看销售分析</text>
+    </view>
+
+    <view class="operation_row flex-row" catchtap="toStatisticsProfit">
+      <image src="../../../../images/ashbin.png" class="icon"></image>
+      <text class="text_operation mr-20">查看利润分析</text>
+    </view>
+
+  </view>
+</view>

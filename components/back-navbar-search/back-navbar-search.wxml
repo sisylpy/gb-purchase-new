@@ -1,0 +1,53 @@
+<!-- components/back-navbar-search/back-navbar-search.wxml -->
+<view class="custom-navbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
+  <view class="nav-container" style="height: {{navBarContentHeight}}px; ">
+    <!-- 左侧区域 -->
+    <view class="nav-left" bindtap="navbuttontap" style="width: {{leftWidth}}px; ">
+      <image src="{{avatar}}" mode="aspectFill" class="user-avatar"/>
+    </view>
+    
+    <!-- 中间标题区域 -->
+    <view class="nav-center">
+      <!-- 正常状态显示标题 -->
+      <view wx:if="{{!isScrolled}}">
+        <view class="nav-title-large">{{titleLarge}}</view>
+        <view class="nav-title">{{title}}</view>
+      </view>
+      
+      <!-- 滚动状态显示3个小按钮 -->
+      <view wx:if="{{isScrolled}}" class="nav-buttons-container">
+        <!-- Cost页面按钮 -->
+        <block wx:if="{{pageType === 'cost'}}">
+          <view class="nav-button {{tabIndex == 0 ? 'nav-button-active' : ''}}" data-index="0" bindtap="onTabClick" data-type="sales">
+            <text class="nav-button-text">售出</text>
+          </view>
+          <view class="nav-button {{tabIndex == 1 ? 'nav-button-active' : ''}}" data-index="1" bindtap="onTabClick" data-type="loss">
+            <text class="nav-button-text">损耗</text>
+          </view>
+          <view class="nav-button {{tabIndex == 2 ? 'nav-button-active' : ''}}" data-index="2" bindtap="onTabClick" data-type="waste">
+            <text class="nav-button-text">废弃</text>
+          </view>
+        </block>
+        
+        <!-- Purchase页面按钮 -->
+        <block wx:if="{{pageType === 'purchase'}}">
+          <view class="nav-button" data-index="0" bindtap="onTabClick" data-type="0">
+            <text class="nav-button-text">自采</text>
+          </view>
+          <view class="nav-button" data-index="1" bindtap="onTabClick" data-type="1">
+            <text class="nav-button-text">订货</text>
+          </view>
+          <view class="nav-button" data-index="2" bindtap="onTabClick" data-type="2">
+            <text class="nav-button-text">库存</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  
+    <!-- 右侧区域 -->
+    <view class="nav-right" style="width: {{rightWidth}}px; ">
+      <image src="/images/search.png" class="nav-icon" bindtap="onSearchTap"/>
+      <image src="/images/minus.png" class="nav-icon" bindtap="onMinusTap"/>
+    </view>
+  </view>
+</view>

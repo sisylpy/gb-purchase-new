@@ -1,0 +1,154 @@
+<view class='mask {{isClosing ? "closing" : ""}}' wx:if='{{show}}' catchtouchmove='ture' style="height:{{maskHeight}}rpx;top:-{{scrollViewTop}}rpx;">
+	<view class='modal-content' style="margin-top:{{scrollViewTop + 200}}rpx;">
+		<view class="modal-header">
+			<view class='goods-title'>
+				<text class="brand"
+					wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsBrand !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
+				<text>{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+				<text class="big mr-10" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+
+				<text wx:for="{{item.gbDistributerGoodsEntity.nxAliasEntities}}"
+					wx:for-item="alias">={{alias.nxDaAliasName}}</text>
+				<block
+					wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null' && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
+					<text
+						wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+				</block>
+				<block wx:else>
+					<text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+				</block>
+			</view>
+		</view>
+
+		<view class="modal-body">
+			<view class='goods-contents'>
+				<view class="row-between p-20">
+					<text class="mr-10">金额:</text>
+					<view>
+						<text wx:if="{{item.gbDpgBuySubtotal !== null}}">{{item.gbDpgBuySubtotal}}元</text>
+					</view>
+				</view>
+
+				<view class="row-between p-20">
+					<block wx:if="{{item.gbDpgBuyScale !== null && item.gbDpgBuyScale > 0}}">
+						<text class="mr-10">单价:</text>
+						<view class="flex-row">
+							<view class="input-view" style="width: {{windowWidth / 6}}rpx; margin-right: 10rpx;">
+								<input class='input' type='digit' value="{{item.gbDpgBuyScalePrice}}" bindinput="getPurchasePriceScale"
+									bindblur="_checkPrice" hold-keyboard='true'></input>
+							</view>
+							<view class="flex-column">
+								<text>元/{{item.gbDpgStandard}}({{item.gbDpgBuyScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+							</view>
+						</view>
+					</block>
+
+					<block wx:else>
+						<text class="mr-10">单价:</text>
+						<view class="flex-row">
+							<view class="input-view" style="width: {{windowWidth / 3}}rpx; margin-right: 10rpx;">
+								<input class='input' type='digit' value="{{item.gbDpgBuyPrice}}" bindinput="getPurchasePrice"
+									bindblur="_checkPrice" hold-keyboard='true' focus="{{foucusPrice}}"></input>
+							</view>
+							<text>元/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+						</view>
+					</block>
+				</view>
+
+				<view class="reason {{showReason ? 'is-active' : ''}}">
+					<view class="row-between p-20">
+						<view></view>
+						<view class="flex-row" style="font-size: 34rpx; color: red;">
+							<text class="mr-10">采购价格设置在</text>
+							<text>{{item.gbDistributerGoodsEntity.gbDgGoodsLowestPrice}}</text>
+							<text>至</text>
+							<text>{{item.gbDistributerGoodsEntity.gbDgGoodsHighestPrice}}</text>
+							<text>之间</text>
+						</view>
+					</view>
+
+					<view class="row-between p-20">
+						<text class="mr-10">原因:</text>
+						<view class="flex-row">
+							<view class="input-view" style="width: {{windowWidth / 3 * 2}}rpx; margin-right: 10rpx;">
+								<input class='input' bindinput="getPurchasePriceReason" value="{{item.gbDpgBuyPriceReason}}"
+									hold-keyboard='true'></input>
+							</view>
+						</view>
+					</view>
+				</view>
+
+				<view class="flex-row p-20">
+					<text class="mr-10" style="width: 100rpx; font-size: 32rpx;">订单:</text>
+					<scroll-view scroll-y="true" class="flex-column"
+						style="max-height: {{windowHeight / 3}}rpx; width: {{windowWidth - 180}}rpx;">
+						<view class="flex-column" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:key="gbDepartmentOrdersId"
+							style="padding-left: 20rpx; background-color:#f3f6f8; margin-bottom: 10rpx; padding-top: 10rpx;padding-right: 10rpx; font-size: 32rpx;"
+							wx:for-item="orders" wx:for-index="orderIndex">
+							<block wx:if="{{orders.isNotice}}">
+								<view class="row-between with-tbl-padding">
+									<block wx:if="{{disInfo.mendianDepartmentList.length == 1 || disInfo.mendianDepartmentList[0].gbDepartmentSubAmount == 0}}">
+										<view>订货:</view>
+									</block>
+									<block wx:else="">
+										<view class="flex-row">
+											<view wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity !== null}}">
+												{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</view>
+											<view class="mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</view>
+										</view>
+									</block>
+
+									<view class="flex-row">
+										<text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
+									</view>
+								</view>
+
+								<view class="row-between with-tbl-padding">
+									<text class="margin-right" style="width: 100rpx;">数量:</text>
+
+									<block wx:if="{{scaleInput}}">
+										<view class="flex-row" style="padding-right: 10rpx;">
+											<view class="flex-row">
+												<view class="input-view" style="margin-right: 10rpx;">
+													<input class="input" type="digit" adjust-position="true"
+														value="{{orders.gbDoScaleWeight == null || orders.gbDoScaleWeight == '0.0' ? '' : orders.gbDoScaleWeight}}"
+														bindinput="getScaleWeight" data-index="{{orderIndex}}"
+														style="width: {{windowWidth / 8}}rpx;" />
+												</view>
+												<text>{{item.gbDpgStandard}}</text>
+											</view>
+										</view>
+									</block>
+
+									<block wx:else>
+										<view class="flex-row" style="padding-right: 10rpx;">
+											<view class="input-view" style="margin-right: 10rpx;">
+												<input class="input" type="digit" adjust-position="true"
+													value="{{orders.gbDoWeight == null || orders.gbDoWeight == '0.0' ? '' : orders.gbDoWeight}}"
+													bindinput="getOrderWeight" focus="{{orderIndex == 0 && foucusWeight ? 'true' : ''}}" data-index="{{orderIndex}}" style="width: {{windowWidth / 4}}rpx;" />
+											</view>
+											<text>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+										</view>
+									</block>
+								</view>
+
+								<view class="row-between with-tbl-padding">
+									<text class="margin-right">小计:</text>
+									<text wx:if="{{orders.gbDoSubtotal !== null && orders.gbDoSubtotal !== '0.0'}}"
+										style="padding-right: 10rpx;">{{orders.gbDoSubtotal}}元</text>
+								</view>
+							</block>
+						</view>
+					</scroll-view>
+				</view>
+			</view>
+
+			<view class='modal-footer'>
+				<view class="btn-row">
+					<text class='cancel-btn' bindtap="cancle" hover-class="hoverBtn">关闭</text>
+					<text class="confirm-btn {{canSave ? 'is-active' : ''}}" catchtap='confirm' hover-class="hoverBtn">完成</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</view>

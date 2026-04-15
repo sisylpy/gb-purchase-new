@@ -1,0 +1,64 @@
+
+
+<view class="flex flex-column">
+
+<back-navbar style="height: {{navBarHeight}}rpx;" title="注册下单小程序" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+
+  <view class='p-20 with-margin-top with-lr-margin' style='height: {{windowHeight - 340}}rpx; background:white;'  bind:tap="{{showDepartment ? 'hideNumber' : ''}}">
+   
+
+    <view class='type p-20'>
+      <view class="p-10 pb-10" style="font-size: 34rpx;font-weight: 500;">选择你所在的部门</view>
+      <view class="flex-row" >
+        <view class="flex-column">
+          <input class="numInput" style="width:{{windowWidth/2}}rpx; font-size: 40rpx;  height: 90rpx; line-height: 90rpx;padding-left: 20rpx; " disabled="true" value="{{selDepartmentName}}" catchtap="showDepartment"></input>
+        </view>
+        <view class="nabla trigle" catchtap="showDepartment"></view>
+      </view>
+      <view class="result {{showDepartment ? 'is-active' : ''}}" style="width: {{windowWidth/2 + 20}}rpx; ">
+        <view style="width:{{windowWidth/2 - 20}}rpx;" class="flex-column result-row" wx:for="{{subDepArr}}" wx:for-item="item" hover-class="hover" catchtap="selDepartment" data-id="{{item.gbDepartmentId}}" data-name="{{item.gbDepartmentName}}" wx:key="gbDepartmentId" hover-class="hover">
+          {{item.gbDepartmentName}}
+        </view>
+      </view>
+    </view>
+
+
+    <view class="flex-row form-item">
+
+<text class="form-label">微信头像</text>
+<button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+  <image class="avatar" src="{{avatarUrl}}"></image>
+</button>
+</view>
+<view class="flex-row  form-item">
+<text class="mr-20 form-label">微信昵称</text>
+<mp-form bindsubmit="formSubmit">
+  <mp-cells>
+    <mp-cell title="昵称">
+      <input type="nickname" bindinput="onNicknameInput" class="form-input" placeholder="微信昵称" />
+    </mp-cell>
+  </mp-cells>
+</mp-form>
+</view>
+
+<view class="submit-section">
+<button bindtap="save" class="submit-btn {{canRegister  ? 'is-active' : ''}}">注册</button>
+</view>
+
+
+
+
+    <view class='log_btn flex-column-center'>
+      <view class="mainColor"  style="margin-top: 40rpx;" bind:tap="_userLogin">登陆</view>
+    </view>
+
+
+  </view>
+</view>
+
+
+
+
+

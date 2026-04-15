@@ -1,0 +1,40 @@
+
+
+
+<view class="page">
+  <!-- 背景渐变 + 微粒星光 -->
+  <canvas type="2d" id="spark" class="spark"></canvas>
+
+  <view class="safe">
+    <!-- 顶部 Logo / 品牌字，可按需替换 -->
+    <view class="brand" wx:if="{{show.brand}}">京采账本</view>
+
+    <!-- 主语句 -->
+    <view class="line1 {{show.l1?'show':''}}">
+      小店也是梦想
+    </view>r
+
+    <view class="line2-wrap">
+      <view class="line2 {{show.l2?'show':''}}">
+        不是将就，是坚持
+      </view>
+      <view class="underline {{show.ul?'grow':''}}"></view>
+      <view class="glint {{show.glint?'run':''}}"></view>
+    </view>
+
+    <!-- 辅助使命感语句（分两行打字机效果） -->
+    <view class="sub">
+      <view class="type-mask">
+        <text class="subline {{show.s1?'reveal':''}}">我们帮你算账</text>
+      </view>
+      <view class="type-mask">
+        <text class="subline {{show.s2?'reveal':''}}">你帮每个人喂饱生活</text>
+      </view>
+    </view>
+
+    <!-- 跳过/进入 -->
+    <view class="actions">
+      <button class="skip" bindtap="handleSkip" wx:if="{{!autoNavigated}}">跳过</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,23 @@
+<!-- components/custom-navbar/custom-navbar.wxml -->
+<view class="custom-navbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
+  <view class="nav-container" style="height: {{navBarContentHeight}}px;">
+    <!-- 左侧区域 -->
+    <view class="nav-left" bindtap="navbuttontap" style="width: {{leftWidth}}px;">
+      <image src="{{avatar}}" mode="aspectFill" class="user-avatar"/>
+    </view>
+    
+    <!-- 中间标题 -->
+    <view class="nav-title">{{title}}</view>
+    
+    <!-- 右侧区域 -->
+    <view class="nav-right" style="width: {{rightWidth}}px;">
+      <!-- 右侧内容 -->
+      <block wx:if="{{rightContent}}">
+        <image src="{{rightContent.icon}}" class="right-icon" />
+      </block>
+      <block wx:if="{{rightButton}}">
+        <button class="right-button" bindtap="rightButtonTap">{{rightButton.text}}</button>
+      </block>
+    </view>
+  </view>
+</view>

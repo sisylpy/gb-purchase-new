@@ -1,0 +1,49 @@
+/* pages/depGroupEdit/depGroupEdit.wxss */
+
+
+.class_img{
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  border: 1px solid lightgray;
+  margin-top: 10rpx;
+
+}
+.group_input{
+  border-bottom: 1px solid #187e6e;
+  margin-top: 10rpx;
+  padding-bottom: 10rpx;
+}
+
+
+.radio-group {
+  /* padding: 20rpx; */
+}
+
+.radio {
+  width: 25%;
+  /* border:1px solid red; */
+  float: left;
+  line-height: 120rpx;
+  /* padding: 40rpx; */
+}
+
+.fixed{
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.saveBtn{
+  width: 50%;
+  background-color: rgb(177, 177, 177);
+  border-radius: 20rpx;
+  text-align: center;
+  line-height: 80rpx;
+  
+}
+.saveBtn.is-active{
+  background-color: #187e6e;
+  color: #fff;
+}

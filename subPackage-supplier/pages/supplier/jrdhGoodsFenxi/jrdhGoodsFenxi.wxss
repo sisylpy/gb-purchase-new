@@ -1,0 +1,32 @@
+
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 8rpx 0;
+}
+
+.legend-color {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+
+.legend-label {
+  color: #666;
+  font-size: 24rpx;
+  margin-bottom: 4rpx;
+  font-weight: 500;
+  margin-right: 10rpx;
+}
+
+.legend-value {
+  color: #333;
+  font-weight: bold;
+  font-size: 26rpx;
+}

@@ -1,0 +1,114 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="flex flex-column">
+  <back-navbar title="{{fatherName}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="time-card1 {{currentOpen ? 'has-stock' : ''}}" bindtap="open">
+    <view class="card-header p-20">
+      <view class="time-title-section">
+        <view class="time-icon {{whichDay == 1 ? 'today' : (whichDay == 0 ? 'one-day' : (whichDay == 2 ? 'two-days' : (whichDay == 3 ? 'three-days' : (whichDay == 99 ? 'all-stock' : 'more-days'))))}}">
+          {{whichDay == 0 ? '今' : (whichDay == 1 ? '1' : (whichDay == 2 ? '2' : (whichDay == 3 ? '3' : (whichDay == 99 ? '总' : '3+'))))}}
+        </view>
+        <view class="flex-column">
+          <text class="time-text">{{dateString}}</text>
+          <view class="font-yuan">商品:{{oneDay.arr.length}}个</view>
+          <block wx:if="{{oneDay.goodsEveryWasteTotal > 0}}">
+            <view class="font-yuan text-danger">过期商品:{{oneDay.wasteGoodsCount}}个</view>
+          </block>
+        </view>
+      </view>
+      <view class="stock-amount-section flex-column">
+        <text class="stock-amount">{{oneDay ? oneDay.total : 0}}元</text>
+        <block wx:if="{{oneDay.goodsEveryWasteTotal > 0}}">
+          <view class="font-yuan text-danger">过期金额:{{oneDay.wasteSubtotal}}元</view>
+        </block>
+      </view>
+      <image src="{{currentOpen ? '/images/arrow-down-3.png' : '/images/arrow-right-3.png'}}" mode="aspectFill" class="expand-arrow {{currentOpen ? 'expanded' : ''}}" />
+    </view>
+
+    <view class="flex-column" wx:if="{{oneDay && oneDay.total > 0 && currentOpen}}">
+      <view class="flex-column bg-white border-bottom p-20" wx:for="{{oneDay.arr}}" wx:for-item="goods" wx:for-index="stockIndex" wx:key="gbDistributerGoodsId">
+
+        <view class="flex-row-between" catch:tap="showList" data-index="{{stockIndex}}">
+          <view class="flex-row-default">
+            <image src="{{url + goods.gbDgNxFatherImg}}" mode="aspectFill" class="goods-image" />
+            <view class="goods-details">
+              <text class="flex-row font-xs">第{{stockIndex + 1}}/{{oneDay.arr.length}}个</text>
+              <text class="goods-name">{{goods.gbDgGoodsName}}</text>
+            </view>
+          </view>
+
+          <view class="goods-price-section">
+            <view class="price-container stock-type1 mr-10">
+              <text class="price-label rest-weight">剩余</text>
+              <text class="price-value1">¥{{goods.goodsStockTotal}}</text>
+              <block wx:if="{{goods.goodsWasteTotal > 0}}">
+                <text class="text-danger font-yuan">过期金额:¥{{goods.goodsWasteTotal}}</text>
+              </block>
+            </view>
+            <view class="arrow-container {{goods.showStockList ? 'expanded' : 'collapsed'}}">
+              <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
+            </view>
+          </view>
+        </view>
+
+        <view class="purchase-row-content expandable-content {{goods.showStockList ? 'expanded' : ''}}" wx:for="{{goods.gbDepartmentGoodsStockSimpleEntities}}" wx:for-item="stock" wx:for-index="stockBatchIndex" catchtap="showOneDayStock" data-item-index="{{stockIndex}}" data-batch-index="{{stockBatchIndex}}">
+
+          <view class="flex-row">
+            <view class="purchase-section">
+              <view class="flex-column-center">
+                <view class="purchase-date">
+                  <text>{{tool.getHowManyDays(stock.gbDgsDate)}}天库存</text>
+                </view>
+                <text class="font-sm">{{stock.departmentName}}</text>
+                <block wx:if="{{stock.wasteGoodsCount > 0}}">
+                  <view class="flex-row-between font-yuan">
+                    <view class="flex-row text-danger">
+                      <text class="">过期</text>
+                      <text class="{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime) < 0 ? 'text-danger' : ''}}">{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime)}}小时</text>
+                    </view>
+                  </view>
+                </block>
+              </view>
+            </view>
+
+            <view class="purchase-info purchase-inbound">
+              <view class="column-label purchase-price">单价</view>
+              <view class="column-content">
+                <view class="amount-text">{{stock.gbDgsPrice}}元/{{stock.goodsStandardName}}</view>
+                <block wx:if="{{stock.purchaseGoodsEntity.purchaseDepartmentUser !== null}}">
+                  <text class="weight-text purchase-price">{{stock.purchaseGoodsEntity.purchaseDepartmentUser.gbDuWxNickName}}</text>
+                </block>
+                <block wx:elif="{{stock.purchaseGoodsEntity.nxJrdhSupplierEntity !== null}}">
+                  <text class="weight-text">{{stock.purchaseGoodsEntity.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
+                </block>
+              </view>
+            </view>
+
+            <view class="comparison-divider"></view>
+
+            <view class="purchase-info-column purchase-inbound">
+              <view class="column-label">入库</view>
+              <view class="column-content">
+                <text class="amount-text">{{stock.gbDgsSubtotal}}元</text>
+                <text class="weight-text">{{stock.goodsWeight}}{{stock.goodsStandardName}}</text>
+              </view>
+            </view>
+
+            <view class="comparison-divider"></view>
+
+            <view class="purchase-info-column purchase-rest">
+              <view class="column-label">剩余</view>
+              <view class="column-content">
+                <text class="amount-text rest-amount flex-row">{{stock.gbDgsRestSubtotal}}元</text>
+                <text class="weight-text rest-weight">{{stock.gbDgsRestWeight}}{{stock.goodsStandardName}}</text>
+              </view>
+            </view>
+          </view>
+
+        </view>
+
+      </view>
+    </view>
+  </view>
+</view>

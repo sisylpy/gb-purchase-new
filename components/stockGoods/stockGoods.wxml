@@ -1,0 +1,209 @@
+
+
+<view class='ccc' wx:if='{{show}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
+  <view class='body bg-white flex-column' style=" margin-top:{{scrollViewTop + windowHeight/3}}rpx; z-index: 9999999999; ">
+
+    <view class="flex-column">
+      <view class="flex-row-between" style="background-color: #187e6e; color: #fff;">
+        <view class='flex-row goodsTitle'>
+          <text class="margin-l-right p-20">{{depGoods.gbDdgDepGoodsName}}</text>
+          <block wx:if="{{depGoods.gbDgGoodsStandardWeight !== 'null' && depGoods.gbDgGoodsStandardWeight.length > 0}}">
+            <text wx:if="{{depGoods.gbDdgShowStandardName !== '斤'}}">({{depGoods.gbDdgShowStandardName}}/{{depGoods.gbDgGoodsStandardWeight}})</text>
+          </block>
+          <block wx:else>
+            <text>({{depGoods.gbDdgShowStandardName}})</text>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
+      <view class="flex-row half-row">
+        <text class="margin-l-right">入库:</text>
+        <text class="">{{tool.getAttrFullTime(item.gbDgsFullTime)}} </text>
+      </view>
+      <view class="flex-row half-row">
+        <text class="margin-l-right">数量:</text>
+        <text class="">{{consultItem.gbDgsWeight}}{{depGoods.gbDdgShowStandardName}}</text>
+      </view>
+    </view>
+
+    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
+      <view class="flex-row half-row">
+        <text class="margin-l-right">销售:</text>
+        <text class="">{{item.gbDgsProduceWeight}}{{depGoods.gbDdgShowStandardName}}</text>
+      </view>
+      <view class="flex-row half-row">
+        <text class="margin-l-right">损耗:</text>
+        <text class="lossBack">{{item.gbDgsLossWeight}}{{depGoods.gbDdgShowStandardName}}</text>
+      </view>
+    </view>
+
+    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx; {{item.gbDistributerGoodsEntity.gbDgControlFresh == 0 ? 'padding-bottom: 20rpx;' :''}}">
+
+      <view class="flex-row half-row">
+        <text class="margin-l-right">退货:</text>
+        <text class="">{{item.gbDgsReturnWeight}}{{depGoods.gbDdgShowStandardName}}</text>
+      </view>
+      <view class="flex-row half-row">
+        <text class="margin-l-right">剩余:</text>
+        <text class="">{{item.gbDgsRestWeight}}{{depGoods.gbDdgShowStandardName}}</text>
+      </view>
+
+    </view>
+
+    <view class="flex-row" wx:if="{{item.gbDgControlFresh == 1}}" style="background-color: #187e6e; color: #fff;padding-left: 20rpx; padding-bottom: 20rpx;">
+      <view class="flex-row half-row">
+        <text class="margin-l-right">保鲜时长:</text>
+        <text class="">{{consultItem.gbDgFreshWasteHour}}小时</text>
+      </view>
+
+      <view class="flex-row half-row">
+        <text class="margin-l-right">废弃:</text>
+        <text class="">{{tool.getAttrFullTime(consultItem.gbDgsWasteFullTime)}} </text>
+      </view>
+    </view>
+
+    <view class='flex-column '>
+      <radio-group class="radio-group flex-row-between " bindchange="radioChange">
+        <!-- <label class="radio">
+          <radio value="5" checked="{{showType == 5}}" />新鲜度
+        </label> -->
+        <label class="radio" wx:if="{{item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== ''}}">
+          <radio value="4" checked="{{showType == 4}}" />废弃
+        </label>
+
+        <label class="radio">
+          <radio value="2" checked="{{showType == 2}}" />损耗
+        </label>
+        <label class="radio">
+          <radio value="3" checked="{{showType == 3}}" />退货
+        </label>
+        <label class="radio">
+          <radio value="1" checked="{{showType == 1}}" />库存
+        </label>
+
+      </radio-group>
+      <!--  -->
+      <view class="flex-column p-20">
+        <view class="flex-column" wx:if="{{showType == 1}}">
+          <view class="flex-row  p-20 ">
+            <text class="margin-l-right">库存数量:</text>
+            <view class="out margin-l-right">
+              <input class="mainColor orderInput" type="digit" value="{{resWeight}}" bindinput="getProduceWeight" bindfocus="costFocus" />
+            </view>
+            <text>{{depGoods.gbDdgShowStandardName}}</text>
+          </view>
+          <view class="flex-row p-20">
+            <text class="margin-l-right">销售数量:</text>
+            <text class="mainColor">{{item.gbDgsMyProduceWeight}}{{depGoods.gbDdgShowStandardName}}</text>
+          </view>
+        </view>
+
+        <view class="flex-column" wx:if="{{showType == 2}}">
+          <view class="flex-column  p-20 ">
+            <view class="flex-row p-20">
+              <text class="margin-l-right">损耗数量:</text>
+              <view class="out">
+                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyLossWeight == '-1' ? '' :item.gbDgsMyLossWeight }}" bindinput="getLossWeight" />
+              </view>
+              <text>{{depGoods.gbDdgShowStandardName}}</text>
+            </view>
+
+            <view class="flex-row p-20" style="height: 90rpx;">
+              <text class="margin-l-right">照片:</text>
+              <view class="flex-column" style="margin-left: 10rpx;">
+
+                <image class='class_img' src="{{src.length > 0 ? src: '../../images/Photo.png' }}" bindtap='choiceImg'></image>
+                <view wx:if="{{src.length > 0}}" bindtap="delPic" style="margin-left: 100rpx;margin-top: -90rpx;">
+                  <image src="../../images/del.png" mode="aspectFill" class="icon" />
+                </view>
+              </view>
+            </view>
+
+            <view class="flex-row  p-20">
+              <text class="margin-l-right">说明:</text>
+              <view class="out">
+                <input class="mainColor orderInput" value="{{reason}}" bindinput="getLossReason" />
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="flex-column" wx:if="{{showType == 3}}">
+
+          <view class="flex-column p-20">
+            <view class="flex-row" wx:if="{{item.returnReduceEntity !== null}}">
+              <text>{{item.returnReduceEntity.gbDgsrReturnWeight}}</text>
+
+            </view>
+            <view class="flex-row" wx:else>
+              <text class="margin-l-right">数量:</text>
+              <view class="out margin-l-right">
+                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyReturnWeight == '-1' ? '' :item.gbDgsMyReturnWeight }}" bindinput="getReturnWeight" />
+              </view>
+              <text>{{depGoods.gbDdgShowStandardName}}</text>
+
+            </view>
+
+          </view>
+
+          <view class="flex-row p-20" style="height: 90rpx;">
+              <text class="margin-l-right">照片:</text>
+              <view class="flex-column" style="margin-left: 10rpx;">
+
+                <image class='class_img' src="{{src.length > 0 ? src: '../../images/Photo.png' }}" bindtap='choiceImg'></image>
+                <view wx:if="{{src.length > 0}}" bindtap="delPic" style="margin-left: 100rpx;margin-top: -90rpx;">
+                  <image src="../../images/del.png" mode="aspectFill" class="icon" />
+                </view>
+              </view>
+            </view>
+
+            <view class="flex-row  p-20">
+              <text class="margin-l-right">说明:</text>
+              <view class="out">
+                <input class="mainColor orderInput" value="{{reason}}" bindinput="getLossReason" />
+              </view>
+            </view>
+        </view>
+
+        <view class="flex-column" wx:if="{{showType == 4}}">
+          <block wx:if="{{canWaste}}">
+
+            <view class="flex-row p-20">
+              <text class="margin-l-right">废弃数量:</text>
+              <view class="out">
+                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyWasteWeight == '-1' ? '' :item.gbDgsMyWasteWeight }}" bindinput="getWasteWeight" bindfocus="costFocusWaste" />
+              </view>
+              <text>{{depGoods.gbDdgShowStandardName}}</text>
+            </view>
+
+            <view class="flex-row p-20">
+              <text class="margin-l-right">销售数量:</text>
+              <view class="">
+                <text class="mainColor">{{item.gbDgsMyProduceWeight == '-1' ? '0' :item.gbDgsMyProduceWeight}}</text>
+              </view>
+              <text>{{depGoods.gbDdgShowStandardName}}</text>
+            </view>
+          </block>
+          <block wx:else>
+            <view>还有{{resultTime}}个小时</view>
+          </block>
+        </view>
+      </view>
+
+    </view>
+
+    <view class="flex-row  p-20 margin-top">
+      <view class='btn'>
+        <text class="cancleBtn" bindtap="cancle" hover-class="hover">取消</text>
+      </view>
+      <view class='btn'>
+        <text class="sureBtn {{canSure ? 'is-active' : ''}}" catchtap='confirm' hover-class="hover">确定</text>
+      </view>
+
+    </view>
+
+  </view>
+
+</view>

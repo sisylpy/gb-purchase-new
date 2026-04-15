@@ -1,0 +1,85 @@
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 8rpx 0;
+}
+
+.legend-color {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+
+.legend-label {
+  color: #666;
+  font-size: 24rpx;
+  margin-bottom: 4rpx;
+  font-weight: 500;
+  margin-right: 10rpx;
+}
+
+.legend-value {
+  color: #333;
+  font-weight: bold;
+  font-size: 26rpx;
+}
+
+/* 图表容器样式 */
+.mb-20 {
+  margin-bottom: 20rpx;
+}
+
+/* 确保图表有足够的显示空间 */
+ec-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 图表间距 */
+.mt-20 {
+  margin-top: 20rpx;
+}
+
+/* 文本样式 */
+.font-sm {
+  font-size: 28rpx;
+}
+
+.font-xs {
+  font-size: 24rpx;
+}
+
+.text-gray {
+  color: #999;
+}
+
+.text-primary {
+  color: #007aff;
+}
+
+.border-bottom {
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.flex-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mt-5 {
+  margin-top: 10rpx;
+}
+
+
+/* 展开按钮样式 */
+.expand-btn {
+  width: 32rpx;
+  height: 32rpx;
+  transition: transform 0.3s ease;
+}

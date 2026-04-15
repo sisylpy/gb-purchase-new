@@ -1,0 +1,70 @@
+
+
+.custom-navbar {
+  position: fixed; /* 固定定位 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid lightgray;
+  z-index: 999; /* 确保导航栏位于最上层 */
+}
+
+.flex-row {
+  flex-direction: row;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center; 
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 50rpx;
+  height: 50rpx;
+  /* border-radius: 32rpx; */
+  margin-left: 10rpx;
+}
+
+/*  */
+.searchInput{
+  line-height: 70rpx;
+  height: 70rpx;
+  background: rgb(236, 236, 236);
+  border-radius: 40rpx;
+  padding-left: 20rpx;
+}
+
+.close_icon{
+  display: block;
+  width: 50rpx;
+  height: 50rpx;
+  margin-right: 20rpx;
+}
+
+.nav-left1{
+  margin-right: 20rpx;
+}
+
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.nav-button {
+  background-color: transparent;
+  border: none;
+  font-size: 32rpx;
+  padding: 0 20rpx;
+}

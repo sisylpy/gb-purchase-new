@@ -1,0 +1,36 @@
+<view class="flex flex-column">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="邀请您注册订货小程序" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <view class='p-20 bg-white' style="height: {{windowHeight - navBarHeight - 40}}rpx;">
+    <!-- 文字 -->
+
+
+
+    <view class="flex-row form-item">
+
+      <text class="form-label">微信头像</text>
+      <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <image class="avatar" src="{{avatarUrl}}"></image>
+      </button>
+    </view>
+    <view class="flex-row  form-item">
+      <text class="mr-20 form-label">微信昵称</text>
+      <mp-form bindsubmit="formSubmit">
+        <mp-cells>
+          <mp-cell title="昵称">
+            <input type="nickname" bindinput="onNicknameInput" class="form-input" placeholder="微信昵称" />
+          </mp-cell>
+        </mp-cells>
+      </mp-form>
+    </view>
+
+    <view class="submit-section">
+      <button bindtap="save" class="submit-btn {{canRegister  ? 'is-active' : ''}}">注册</button>
+    </view>
+
+
+  </view>
+
+</view>

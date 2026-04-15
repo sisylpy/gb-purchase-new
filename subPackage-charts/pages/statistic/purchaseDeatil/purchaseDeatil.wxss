@@ -1,0 +1,1230 @@
+/* 统计卡片容器 */
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.stat-card {
+  flex: 1;
+  background-color: white;
+  border-radius: 12rpx;
+  padding: 30rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.purchase-card {
+  background-color: #007aff;
+}
+
+.total-card {
+  background-color: #6c5ce7;
+}
+
+.ratio-card {
+  background-color: #f8f9fa;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: white;
+  margin-bottom: 10rpx;
+}
+
+.ratio-card .stat-label {
+  color: #666;
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: white;
+}
+
+.ratio-card .stat-value {
+  color: #333;
+}
+
+/* 商品详情卡片 */
+.goods-detail-card {
+  background-color: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.goods-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30rpx;
+}
+
+.goods-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  background-color: #f5f5f5;
+}
+
+.goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.goods-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.goods-alias {
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 10rpx;
+}
+
+.goods-standard {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 5rpx;
+}
+
+
+
+.detail-row.highlight {
+  background-color: #f8f9ff;
+  margin: 0 -30rpx;
+  padding: 15rpx 30rpx;
+  border-radius: 8rpx;
+}
+
+.detail-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.highlight-value {
+  color: #007aff;
+  font-weight: bold;
+}
+
+/* 期间支出详情 */
+.expense-details {
+  margin: 30rpx 0;
+  padding: 20rpx;
+  background-color: #f8f9ff;
+  border-radius: 12rpx;
+  border: 1rpx solid #e6f0ff;
+}
+
+.expense-section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.expense-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+}
+
+.expense-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  background-color: white;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+}
+
+.expense-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.expense-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+/* 图表容器 */
+.chart-container {
+  width: 100%;
+  height: 400rpx;
+  margin-top: 20rpx;
+}
+
+/* 定义hover效果，覆盖内联样式 */
+.hover {
+  background-color: #f0f0f0 !important;
+}
+
+/* 为不同类型的卡片定义专门的hover效果 */
+.purchase-card.hover {
+  background-color: #0056b3 !important; /* 深一点的蓝色 */
+}
+
+.total-card.hover {
+  background-color: #5a4fcf !important; /* 深一点的紫色 */
+}
+
+.ratio-card.hover {
+  background-color: #e9ecef !important; /* 深一点的灰色 */
+}
+
+/* 展开图标样式 */
+.expand-icon {
+  font-size: 24rpx;
+  color: #007aff;
+  margin-left: 10rpx;
+  font-weight: bold;
+}
+
+/* 用户信息卡片样式 */
+.user-info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.user-info-card.hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 12rpx 32rpx rgba(102, 126, 234, 0.4);
+}
+
+.user-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.user-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8rpx;
+}
+
+.user-self-tag {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: 10rpx;
+}
+
+.user-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15rpx;
+}
+
+.user-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 15rpx 20rpx;
+  border-radius: 12rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.user-stat-label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 5rpx;
+}
+
+.user-stat-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: white;
+}
+
+.user-expand-icon {
+  font-size: 32rpx;
+  color: white;
+  font-weight: bold;
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8rpx 12rpx;
+  border-radius: 50%;
+  min-width: 48rpx;
+  text-align: center;
+}
+
+/* 供货商信息卡片样式 */
+.supplier-info-card {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 154, 158, 0.3);
+  transition: all 0.3s ease;
+}
+
+.supplier-info-card.hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 12rpx 32rpx rgba(255, 154, 158, 0.4);
+}
+
+.supplier-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.supplier-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.supplier-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.supplier-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.supplier-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15rpx;
+}
+
+.supplier-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 15rpx 20rpx;
+  border-radius: 12rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.supplier-stat-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 5rpx;
+}
+
+.supplier-stat-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.supplier-expand-icon {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 8rpx 12rpx;
+  border-radius: 50%;
+  min-width: 48rpx;
+  text-align: center;
+}
+
+
+
+/* ///复制 */
+
+
+/* ============ 采购页面专用样式 - 蓝色主题 ============ */
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin: 20rpx 40rpx 30rpx 40rpx;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 隐藏日期选择行 */
+.hidden {
+  display: none !important;
+}
+
+
+/* 页面容器样式 */
+.page-container {
+  width: 100%;
+  display: block;
+  overflow: visible;
+  margin-top: 0;
+  transition: margin-top 0.3s ease;
+}
+
+/* 滚动状态下的页面容器 */
+.page-container.scrolled {
+  margin-top: -100rpx; /* 滚动时向上移动，补偿隐藏的日期行空间 */
+}
+
+.stat-card {
+  flex: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16rpx;
+  padding: 20rpx 15rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  backdrop-filter: blur(10rpx);
+}
+
+.stat-card:hover {
+  transform: translateY(-4rpx);
+  box-shadow: 0 12rpx 35rpx rgba(0, 0, 0, 0.15);
+}
+
+
+/* 激活状态的卡片 */
+.stat-card-active {
+  border: 2rpx solid #05c0a7;
+  box-shadow: 0 8rpx 30rpx rgba(5, 192, 167, 0.2);
+  transform: translateY(-4rpx);
+}
+
+.purchase-card {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  box-shadow: 0 8rpx 25rpx rgba(33, 150, 243, 0.15);
+}
+
+.purchase-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 20rpx;
+}
+
+.total-card {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  box-shadow: 0 8rpx 25rpx rgba(33, 150, 243, 0.15);
+}
+
+.purchase-date {
+  font-size: 24rpx;
+  color: #666;
+}
+.purchase-type{
+  font-size: 24rpx;
+  color: #666;
+  background-color: #e3f2fd;
+  border-radius: 25rpx;
+  text-align: center;
+  
+}
+.total-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 20rpx;
+}
+
+.ratio-card {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  box-shadow: 0 8rpx 25rpx rgba(255, 193, 7, 0.15);
+}
+
+.ratio-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 20rpx;
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.9);
+  margin-bottom: 6rpx;
+}
+
+/* 卡片头部 */
+.stat-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15rpx;
+  text-align: center;
+}
+
+/* 图标样式 */
+.stat-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15rpx;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 15rpx rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon .icon-image {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) saturate(100%);
+}
+
+/* 图标背景色 */
+.purchase-icon {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.15) 0%, rgba(33, 150, 243, 0.1) 100%);
+  border: 1rpx solid rgba(33, 150, 243, 0.2);
+}
+
+.total-icon {
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.15) 0%, rgba(233, 30, 99, 0.1) 100%);
+  border: 1rpx solid rgba(233, 30, 99, 0.2);
+}
+
+.ratio-icon {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.1) 100%);
+  border: 1rpx solid rgba(76, 175, 80, 0.2);
+}
+
+/* 标题样式 */
+.stat-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.8);
+  text-align: center;
+  margin-bottom: 8rpx;
+}
+
+
+/* 详情样式 */
+.stat-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 4rpx;
+}
+
+.stat-subtitle {
+  font-size: 24rpx;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* 商品详情卡片 */
+.goods-detail-card {
+  background-color: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 商品价格区域美化 */
+.goods-price-section {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e6f0ff 100%);
+  padding: 12rpx 20rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(74, 144, 226, 0.1);
+  box-shadow: 0 2rpx 8rpx rgba(74, 144, 226, 0.05);
+  transition: all 0.3s ease;
+}
+
+.price-container:hover {
+  background: linear-gradient(135deg, #e6f0ff 0%, #d1e7ff 100%);
+  border-color: rgba(74, 144, 226, 0.2);
+  box-shadow: 0 4rpx 12rpx rgba(74, 144, 226, 0.1);
+  transform: translateY(-2rpx);
+}
+
+.price-label {
+  font-size: 20rpx;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 4rpx;
+}
+
+.price-value {
+  font-size: 28rpx;
+  color: #4A90E2;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.arrow-container {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+.arrow-container:hover {
+  background: rgba(74, 144, 226, 0.2);
+  border-color: rgba(74, 144, 226, 0.3);
+  transform: scale(1.05);
+}
+
+.arrow-container.expanded {
+  background: rgba(74, 144, 226, 0.2);
+  border-color: rgba(74, 144, 226, 0.3);
+}
+
+.arrow-container .arrow-icon {
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrow-container.expanded .arrow-icon {
+  transform: rotate(90deg);
+}
+
+.arrow-container.collapsed .arrow-icon {
+  transform: rotate(0deg);
+}
+
+.goods-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30rpx;
+}
+
+.goods-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  background-color: #f5f5f5;
+}
+
+.goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.goods-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.goods-alias {
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 10rpx;
+}
+
+.goods-standard {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 5rpx;
+}
+
+
+
+.detail-row.highlight {
+  background-color: #f8f9ff;
+  margin: 0 -30rpx;
+  padding: 15rpx 30rpx;
+  border-radius: 8rpx;
+}
+
+.detail-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.highlight-value {
+  color: #007aff;
+  font-weight: bold;
+}
+
+/* 期间支出详情 */
+.expense-details {
+  margin: 30rpx 0;
+  padding: 20rpx;
+  background-color: #f8f9ff;
+  border-radius: 12rpx;
+  border: 1rpx solid #e6f0ff;
+}
+
+.expense-section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.expense-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+}
+
+.expense-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  background-color: white;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+}
+
+.expense-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.expense-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+/* 图表容器 */
+.chart-container {
+  width: 100%;
+  height: 400rpx;
+  margin-top: 20rpx;
+}
+
+/* 定义hover效果，覆盖内联样式 */
+.hover {
+  background-color: #f0f0f0 !important;
+}
+
+/* 为不同类型的卡片定义专门的hover效果 */
+.purchase-card.hover {
+  background-color: #0056b3 !important; /* 深一点的蓝色 */
+}
+
+.total-card.hover {
+  background-color: #5a4fcf !important; /* 深一点的紫色 */
+}
+
+.ratio-card.hover {
+  background-color: #e9ecef !important; /* 深一点的灰色 */
+}
+
+/* 展开图标样式 */
+.expand-icon {
+  font-size: 24rpx;
+  color: #007aff;
+  margin-left: 10rpx;
+  font-weight: bold;
+}
+/* 采购批次行容器 */
+.purchase-row-container {
+  transition: all 0.3s ease-in-out;
+  position: relative;
+}
+
+/* 商品级别采购批次列表容器 */
+.goods-purchase-list {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e6f0ff 100%);
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(74, 144, 226, 0.1);
+  box-shadow: 0 4rpx 20rpx rgba(74, 144, 226, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.goods-purchase-list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4rpx;
+  background: linear-gradient(90deg, #4A90E2 0%, #2E7CE6 50%, #4A90E2 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+/* 商品采购批次列表标题 */
+.goods-purchase-list-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #4A90E2;
+  margin-bottom: 20rpx;
+  text-align: center;
+  position: relative;
+  padding-bottom: 10rpx;
+}
+
+.goods-purchase-list-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent 0%, #4A90E2 50%, transparent 100%);
+}
+
+/* 采购批次行基础样式 */
+.purchase-row {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  /* 三栏布局 */
+  justify-content: space-between;
+}
+
+.purchase-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 6rpx;
+  height: 60%;
+  background: linear-gradient(180deg, #e3f2fd 0%, #e3f2fd 100%);
+  border-radius: 0 6rpx 6rpx 0;
+  transform: translateY(-50%);
+  transition: all 0.3s ease;
+}
+
+
+/* hover效果 */
+.purchase-row:hover::after {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 激活状态的采购行 */
+.purchase-row-active {
+  border-color: #4A90E2;
+  border-radius: 16rpx 16rpx 0 0 !important; /* 激活时只保留顶部圆角 */
+  border-bottom: none !important; /* 移除底部边框，连接展开区域 */
+  box-shadow: none !important; /* 移除阴影，避免视觉间隙 */
+  transform: translateY(0); /* 移除位移，保持平齐 */
+}
+
+.purchase-row-active::before {
+  background: linear-gradient(180deg, #4A90E2 0%, #2E7CE6 100%);
+}
+
+/* 采购信息卡片 */
+.purchase-info-card {
+  background: #ffffff !important; /* 白色背景 */
+  border: 2rpx solid #4A90E2 !important; /* 蓝色边框 */
+  border-top: none !important; /* 移除顶部边框，连接上面的卡片 */
+  border-radius: 0 0 16rpx 16rpx !important;
+  padding: 20rpx;
+  margin-top: 0 !important; /* 无间隙连接 */
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08) !important; 
+  position: relative;
+  overflow: hidden;
+}
+
+/* 采购详细信息区域 */
+.purchase-detail-section {
+  background: #ffffff; /* 白色背景，保持简洁 */
+  border-radius: 8rpx;
+  margin-top: 10rpx; /* 与标题区域分开 */
+  /* box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1); */
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.purchase-detail-section:hover {
+  background: #f8f9fa; /* hover时浅灰色背景 */
+  transform: translateY(-1rpx);
+}
+
+/* 采购分隔线 - 蓝色主题 */
+.purchase-section-divider {
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent 0%, #4A90E2 50%, transparent 100%);
+  margin: 15rpx 0;
+  opacity: 0.6;
+}
+
+/* 采购信息项样式 */
+.purchase-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #e9ecef;
+  transition: background-color 0.2s ease;
+}
+
+.purchase-info-item:last-child {
+  border-bottom: none;
+}
+
+.purchase-info-item:hover {
+  background-color: rgba(74, 144, 226, 0.05);
+  border-radius: 8rpx;
+  padding: 12rpx 8rpx;
+  margin: 0 -8rpx;
+}
+
+.purchase-info-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+  flex: 0 0 120rpx;
+}
+
+.purchase-info-value {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+}
+
+.purchase-info-value-amount {
+  color: #4A90E2;
+  font-weight: 700;
+}
+
+/* 采购信息标题区域 */
+.purchase-info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+  width: 100%;
+}
+
+.purchase-info-header .flex-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.purchase-info-header .flex-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.purchase-info-header-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+}
+
+.purchase-info-header-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* search图标样式 */
+.purchase-info-header .icon {
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
+}
+
+/* 箭头动画 - 与成本页面保持一致 */
+.arrow-icon {
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrow-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.arrow-icon.collapsed {
+  transform: rotate(0deg);
+}
+
+/* 采购行布局样式 */
+.purchase-row .flex-row-default {
+  flex: 0 0 120rpx; /* 左侧固定宽度 */
+  display: flex;
+  align-items: center;
+}
+
+.purchase-row .flex-column {
+  flex: 1; /* 中间占据剩余空间 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 20rpx; /* 左右内边距 */
+}
+
+.purchase-row .flex-column-center {
+  flex: 0 0 60rpx; /* 右侧固定宽度 */
+  width: 60rpx; /* 与容器宽度一致 */
+  height: 60rpx; /* 与容器高度一致 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.purchase-row-active .flex-column-center {
+  background: rgba(74, 144, 226, 0.2);
+}
+
+/* 展开内容动画 */
+.expandable-content {
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-5rpx);
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.expandable-content.expanded {
+  opacity: 1;
+  max-height: 2000rpx;
+  transform: translateY(0);
+  margin-top: 0 !important;
+}
+
+/* 点击效果 */
+.purchase-row:active {
+  transform: scale(0.98);
+}
+
+/* ============ 库存详情样式 - 与stockPurGoods保持一致 ============ */
+
+/* 库存信息行布局 */
+.stock-info-row {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-radius: 0;
+  padding: 16rpx 0;
+  margin-bottom: 0;
+  box-shadow: none;
+  border: none;
+}
+
+/* 部门信息区域 */
+.stock-department-info {
+  flex: 0 0 160rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* 居中对齐 */
+  padding: 12rpx;
+  border-right: 1rpx solid #e0e0e0;
+  background: rgba(0, 0, 0, 0.03); /* 淡灰色背景 */
+  border-radius: 6rpx;
+  margin-right: 12rpx;
+  min-height: 80rpx; /* 设置最小高度 */
+}
+
+/* 对比容器 */
+.stock-comparison-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 8rpx 12rpx;
+  background: transparent; /* 移除灰色背景，与整体融合 */
+  border-radius: 8rpx;
+  margin-left: 12rpx;
+}
+
+/* 信息列 */
+.stock-info-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* 垂直居中 */
+  padding: 12rpx;
+  border-radius: 6rpx;
+  min-height: 80rpx; /* 设置最小高度，与部门信息保持一致 */
+}
+
+/* 入库列样式 */
+.stock-inbound {
+  background: rgba(76, 175, 80, 0.05); /* 更淡的绿色背景 */
+}
+
+/* 剩余列样式 - 重点突出 */
+.stock-rest {
+  background: rgba(255, 152, 0, 0.08); /* 更淡的橙色背景 */
+}
+
+/* 列标签 */
+.column-label {
+  font-size: 20rpx;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+  text-align: center;
+}
+
+/* 入库列标签 */
+.stock-inbound .column-label {
+  color: #4CAF50;
+}
+
+/* 剩余列标签 - 重点突出 */
+.stock-rest .column-label {
+  color: #FF9800;
+  font-weight: 700;
+  font-size: 22rpx;
+}
+
+/* 列内容 */
+.column-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+/* 金额文本 */
+.amount-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 入库金额 */
+.stock-inbound .amount-text {
+  color: #4CAF50;
+}
+
+/* 剩余金额 - 与入库保持一致 */
+.rest-amount {
+  color: #FF9800 !important;
+  font-size: 24rpx !important;
+  font-weight: 600 !important;
+}
+
+/* 重量文本 */
+.weight-text {
+  font-size: 20rpx;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* 入库重量 */
+.stock-inbound .weight-text {
+  color: #4CAF50;
+}
+
+/* 剩余重量 - 与入库保持一致 */
+.rest-weight {
+  color: #FF9800 !important;
+  font-size: 20rpx !important;
+  font-weight: 500 !important;
+}
+
+/* 分隔线 */
+.comparison-divider {
+  width: 1rpx;
+  height: 50rpx;
+  background: #e0e0e0;
+  margin: 0 8rpx;
+}

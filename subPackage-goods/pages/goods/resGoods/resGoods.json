@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "商品",
+  "usingComponents": {
+    "search-navbar": "/components/search-navbar/search-navbar",
+    "delWarnModal": "/components/delWarnModal/delWarnModal",
+    "myIndependent": "/components/myIndependent/myIndependent",
+    "myIndependentNx": "/components/myIndependentNx/myIndependentNx"
+  }
+}

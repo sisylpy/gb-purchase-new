@@ -1,0 +1,25 @@
+/* styles/visual.wxss - 边框、圆角、阴影等视觉效果 */
+
+/* 边框 */
+.border { border: 1rpx solid #e0e0e0; }
+.border-b { border-bottom: 1rpx solid #e0e0e0; }
+.border-t { border-top: 1rpx solid #e0e0e0; }
+.border-bottom { border-bottom: 1rpx solid #e0e0e0; }
+
+/* 圆角 */
+.radius-sm { border-radius: 8rpx; }
+.radius-md { border-radius: 16rpx; }
+.radius-lg { border-radius: 24rpx; }
+.radius-20 { border-radius: 20rpx; }
+.rounded-sm { border-radius: 8rpx; }
+.rounded-md { border-radius: 16rpx; }
+.rounded-lg { border-radius: 24rpx; }
+.twenty_radius { border-radius: 20rpx; }
+
+/* 阴影 */
+.shadow-sm { box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05); }
+.shadow-md { box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1); }
+.shadow-lg { box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15); }
+
+/* 透明度 */
+.opacity-50 { opacity: 0.5; }

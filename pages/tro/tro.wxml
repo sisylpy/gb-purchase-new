@@ -1,0 +1,93 @@
+
+
+  <view class="flex flex-column">
+  <navbar title="京采账本" avatar="/images/logo.png" button-text="设置"></navbar>
+
+<view class="page " style="margin-top: {{navBarHeight}}rpx;">
+
+<!-- 顶部头图/横幅 -->
+<view class="banner-wrap font-lg">
+  <!-- <image class="banner-img" src="/assets/banner.png" mode="widthFix" /> -->
+  <view class="banner-text p-20">
+    <text class="title">三大核心功能</text>
+    <text class="sub-title">专为餐饮采购打造，简化订货流程</text>
+  </view>
+</view>
+
+<!-- 三大功能介绍区域 -->
+<view class="features-swiper-section">
+  <view class="section-header  flex-column center-content">
+    <!-- <text class="section-title">四大核心功能</text> -->
+    <!-- <text class="section-title">申请后厨订货人员</text> -->
+    <!-- <text class="section-subtitle">左右滑动，查看详细介绍</text> -->
+  </view>
+
+  <!-- Swiper容器: -->
+  <swiper 
+    class="feature-swiper" 
+    indicator-dots="true" 
+    autoplay="{{autoplay}}" 
+    interval="5000" 
+    duration="500"
+    current="{{currentSlide}}" 
+    bindchange="onSwiperChange"
+     style="height:{{windowHeight * 0.5}}rpx;"
+  >
+
+ <!-- 功能2：微信好友订货 -->
+ 
+  <swiper-item>
+      <view class="swiper-item-content">
+        <image class="" wx:if="{{url.length > 0}}" src="{{url + '/uploadImage/imPurchase/wxdinghuo.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;"/>
+        <text class="feature-title">供货商</text>
+        <text class="feature-desc" >将订单转发给微信好友，让他们接收订货需求。</text>
+      </view>
+    </swiper-item>
+
+    <!-- 功能1：自我采购 -->
+    <swiper-item >
+      <view class="swiper-item-content">
+        <image class="" wx:if="{{url.length > 0}}" src="{{url + '/uploadImage/imPurchase/zicai.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%; " />
+        <text class="feature-title">自采</text>
+        <text class="feature-desc">一键完成外出采购的订单。</text>
+      </view>
+    </swiper-item>
+
+   
+    
+
+    <!-- 功能3：指定配送商 -->
+    <!-- <swiper-item>
+      <view class="swiper-item-content">
+        <image class=""  wx:if="{{url.length > 0}}"  src="{{url + '/uploadImage/imPurchase/appSupplier.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;" />
+        <text class="feature-title">指定配送商</text>
+        <text class="feature-desc " >与合作的配送商对接，订单自动发送到配送商小程序。</text>
+      </view>
+    </swiper-item> -->
+    <swiper-item>
+      <view class="swiper-item-content invite-chef-content">
+        <image class=""  wx:if="{{url.length > 0}}"  src="{{url + '/uploadImage/imPurchase/dinghuo.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;" />
+        <text class="feature-title">邀请后厨订货</text>
+        <text class="feature-desc">
+          让后厨人员只下单功能，自行下单给您。
+        </text>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- Swiper下方可选的操作按钮或文字提示 -->
+  <view class="extra-hint">
+    <text>向左或向右滑动查看下一功能</text>
+  </view>
+</view>
+
+<!-- 注册操作区域 -->
+<view class="register-section1 flex-column center-content">
+  <button bind:tap="toNext" class="register-btn"  style="width: {{windowWidth - 40}}rpx;">
+    去注册
+  </button> 
+
+</view>
+
+</view>
+</view> 

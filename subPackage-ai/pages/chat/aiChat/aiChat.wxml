@@ -1,0 +1,76 @@
+<wxs module="format" src="../../../../wxs/format.wxs" />
+
+<!-- 导航栏 -->
+<navbar title="AI营销军师" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+
+<!-- 聊天区域 -->
+<scroll-view
+  scroll-y="true"
+  class="chat-container"
+  style="padding-top: {{navBarHeight}}rpx; height: {{windowHeight - navBarHeight/2}}px;"
+  scroll-into-view="{{scrollToView}}"
+  scroll-with-animation="true"
+>
+
+  <!-- 加载中 -->
+  <view class="loading-wrapper" wx:if="{{isLoading}}">
+    <text class="loading-text">正在连接钱多多老师...</text>
+  </view>
+
+  <!-- 欢迎语（无历史消息时显示） -->
+  <view class="welcome-card" wx:if="{{!isLoading && messages.length === 0}}">
+    <view class="welcome-avatar">💰</view>
+    <view class="welcome-title">你好，我是钱多多老师</view>
+    <view class="welcome-desc">AI营销军师，专注于餐饮营销策划。有任何经营问题，随时向我提问。</view>
+  </view>
+
+  <!-- 消息列表 -->
+  <block wx:for="{{messages}}" wx:key="id">
+    <!-- 用户消息 -->
+    <view class="msg-row msg-user" id="msg-{{index}}" wx:if="{{item.role === 'user'}}">
+      <view class="bubble bubble-user">{{item.content}}</view>
+      <view class="avatar avatar-user">👤</view>
+    </view>
+    <!-- AI 消息 -->
+    <view class="msg-row msg-ai" id="msg-{{index}}" wx:if="{{item.role === 'assistant'}}">
+      <view class="avatar avatar-ai">💰</view>
+      <view class="bubble bubble-ai">
+        <!-- 加载中动画 -->
+        <view class="typing" wx:if="{{item.isLoading}}">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+        <text wx:else class="font-lg">{{item.content}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 底部留白 -->
+  <view class="bottom-spacer"></view>
+</scroll-view>
+
+<!-- 底部输入区域 -->
+<view class="input-area">
+  <!-- 快捷问题按钮 -->
+  <view class="quick-tags">
+    <view class="quick-tag" bindtap="onQuickTap" data-type="0" data-label="经营分析">📊 经营分析</view>
+    <view class="quick-tag" bindtap="onQuickTap" data-type="1" data-label="促销活动">🎁 促销活动</view>
+    <view class="quick-tag" bindtap="onQuickTap" data-type="2" data-label="公众号文章">📝 公众号文章</view>
+  </view>
+  <view class="input-row">
+    <input
+      class="input-box"
+      type="text"
+      placeholder="输入你的问题..."
+      value="{{inputValue}}"
+      bindinput="onInputChange"
+      disabled="{{isSending}}"
+      confirm-type="send"
+    />
+    <view
+      class="send-btn {{isSending || !inputValue ? 'send-btn-disabled' : ''}}"
+      bindtap="onSendTap"
+    >发送</view>
+  </view>
+</view>

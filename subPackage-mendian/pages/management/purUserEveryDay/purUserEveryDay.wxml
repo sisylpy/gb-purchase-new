@@ -1,0 +1,78 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+
+  <back-navbar title="{{purUserItem.gbDuWxNickName}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 采购统计信息卡片 -->
+  <view class="purchase-stats-card">
+    <view class="stats-item">
+      <view class="stats-icon purchase-days-icon">
+        <image src="/images/calender.png" class="stats-icon-image"></image>
+      </view>
+      <view class="stats-content">
+        <text class="stats-label">采购天数</text>
+        <text class="stats-value">{{zicaiArr.length}}天</text>
+      </view>
+    </view>
+    
+    <view class="stats-divider"></view>
+    
+    <view class="stats-item">
+      <view class="stats-icon purchase-total-icon">
+        <image src="/images/money.png" class="stats-icon-image"></image>
+      </view>
+      <view class="stats-content">
+        <text class="stats-label">采购总额</text>
+        <text class="stats-value">{{purUserItem.itemData.billTotal}}元</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 日采购列表容器 -->
+  <view class="purchase-list-container1 p-20">
+     
+      <!-- 日采购列表项 -->
+      <view class="purchase-day-item" wx:for="{{zicaiArr}}" wx:key="index" bind:tap="toDetail" data-item="{{item}}">
+        <!-- 左侧日期信息 -->
+        <view class="purchase-day-left">
+          <text class="purchase-day-date">{{tool.transferDateString(item.day)}}</text>
+          <text class="purchase-day-weekday">{{tool.getWeekDay(item.day)}}</text>
+        </view>
+        
+        <!-- 右侧金额信息和按钮 -->
+        <view class="purchase-day-right">
+          <view class="purchase-day-info">
+            <text class="purchase-day-amount">{{item.zicai}}元</text>
+            <text class="purchase-day-label">采购总额</text>
+          </view>
+          <!-- 进入下一页按钮 -->
+          <view class="purchase-day-button">
+            <image src="/images/arrow-right-3.png" class="purchase-day-arrow" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+</view>

@@ -1,0 +1,191 @@
+/**
+ * 分销商/部门用户相关 API（从老项目 apiDistributer.js 迁移）
+ * @module services/apiDistributer
+ */
+
+var requestUtil = require('../lib/request');
+
+// ========================
+// 接口方法
+// ========================
+
+/**
+ * 获取群用户列表
+ * POST gbdistributerpurchasegoods/getDepUsersByFatherIdGb
+ */
+var getDepUsersByFatherIdGb = function (data) {
+  return requestUtil.post('gbdepartment/getDepUsersByFatherIdGb', {
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    depId: data.depId
+  }, { useUrlParams: true });
+};
+
+/**
+ * 删除用户
+ * GET gbdepartmentuser/deleteDepUser/{id}
+ */
+var deleteDepUser = function (id) {
+  return requestUtil.get('gbdepartmentuser/deleteDepUser/' + id);
+};
+
+/**
+ * 更新采购员信息
+ * POST gbdepartmentuser/updateJjPurchaserUser
+ */
+var updateJjPurchaserUser = function (data) {
+  return requestUtil.post('gbdepartmentuser/updateJjPurchaserUser', data, { useUrlParams: true });
+};
+
+/**
+ * 上传图片修改采购员信息
+ * 使用 wx.uploadFile，不走 requestUtil.js 封装
+ */
+var jjPurchaserUserUpdateWithFile = function (filePathList, userName, userId) {
+  return new Promise(function (resolve, reject) {
+    var baseUrl = requestUtil.getBaseUrl();
+    wx.uploadFile({
+      url: baseUrl + 'gbdepartmentuser/jjPurchaserUserUpdateWithFile',
+      filePath: filePathList[0],
+      name: 'file',
+      header: {
+        "Content-Type": "multipart/form-data"
+      },
+      formData: {
+        userName: userName,
+        userId: userId,
+      },
+      success: function (res) {
+        resolve({ result: res.data });
+      },
+      fail: function (e) {
+        reject(e);
+      }
+    });
+  });
+};
+
+/**
+ * 获取采购商品信息（含价格）
+ * POST gbdistributerpurchasegoods/purUserGetPurGoodsInfo
+ */
+var purUserGetPurGoodsInfo = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/purUserGetPurGoodsInfo', {
+    purUserId: data.purUserId,
+    disGoodsId: data.disGoodsId,
+  }, { useUrlParams: true });
+};
+
+/**
+ * 完成采购商品入库
+ * POST gbdistributerpurchasegoods/finishPurGoodsToStock
+ */
+var finishPurGoodsToStock = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/finishPurGoodsToStock', data);
+};
+
+/**
+ * 获取采购员每日采购数据
+ * POST gbdistributerpurchasegoods/getPurUserDate
+ */
+var getPurUserDate = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/getPurUserDate', {
+    disId: data.disId,
+    purUserId: data.purUserId,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+  }, { useUrlParams: true });
+};
+
+/**
+ * 获取采购员商品采购记录
+ * POST gbdistributerpurchasegoods/getPurchaseUserGoods
+ */
+var getPurchaseUserGoods = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/getPurchaseUserGoods', {
+    purUserId: data.purUserId,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+  }, { useUrlParams: true });
+};
+
+/**
+ * 获取采购商品统计
+ * POST gbdistributerpurchasegoods/getGbPurGoodsStatisticsForDis
+ */
+var getGbPurGoodsStatisticsForDis = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/getGbPurGoodsStatisticsForDis', {
+    purUserIds: data.purUserIds,
+    supplierIds: data.supplierIds,
+    disId: data.disId,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    greatId: data.greatId || -1,
+  }, { useUrlParams: true });
+};
+
+/**
+ * 获取商品采购明细列表
+ * POST gbdistributerpurchasegoods/getGbPurGoodsDetailList
+ */
+var getGbPurGoodsDetailList = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/getGbPurGoodsDetailList', {
+    disGoodsId: data.disGoodsId,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+  }, { useUrlParams: true });
+};
+
+/**
+ * 获取损耗商品统计
+ * POST gbdepartmentgoodsstockreduce/getGbCostGoodsStatistics
+ */
+var getGbCostGoodsStatistics = function (data) {
+  return requestUtil.post('gbdepartmentgoodsstockreduce/getGbCostGoodsStatistics', {
+    supplierIds: data.supplierIds,
+    purUserIds: data.purUserIds,
+    disId: data.disId,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    greatId: data.greatId || -1,
+  }, { useUrlParams: true });
+};
+
+// ===== supplierOrder 页面需要的 API =====
+
+var depGetAllSupplier = function (data) {
+  return requestUtil.get('nxjrdhsupplier/depGetAllSupplier/' + data);
+};
+
+// ===== settlePageGb 页面需要的 API =====
+
+/**
+ * 获取供货商账单列表（按状态筛选）
+ * POST gbdistributerpurchasebatch/disGetGbSupplierBillsWithStatus
+ */
+var disGetGbSupplierBillsWithStatus = function (data) {
+  return requestUtil.post('gbdistributerpurchasebatch/disGetGbSupplierBillsWithStatus', {
+    supplierId: data.supplierId,
+    status: data.status,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    disId: data.disId
+  }, { useUrlParams: true });
+};
+
+module.exports = {
+  getDepUsersByFatherIdGb: getDepUsersByFatherIdGb,
+  deleteDepUser: deleteDepUser,
+  updateJjPurchaserUser: updateJjPurchaserUser,
+  jjPurchaserUserUpdateWithFile: jjPurchaserUserUpdateWithFile,
+  purUserGetPurGoodsInfo: purUserGetPurGoodsInfo,
+  finishPurGoodsToStock: finishPurGoodsToStock,
+  getPurUserDate: getPurUserDate,
+  getPurchaseUserGoods: getPurchaseUserGoods,
+  getGbPurGoodsStatisticsForDis: getGbPurGoodsStatisticsForDis,
+  getGbPurGoodsDetailList: getGbPurGoodsDetailList,
+  getGbCostGoodsStatistics: getGbCostGoodsStatistics,
+  depGetAllSupplier: depGetAllSupplier,
+  // settlePageGb 需要的 API
+  disGetGbSupplierBillsWithStatus: disGetGbSupplierBillsWithStatus,
+};

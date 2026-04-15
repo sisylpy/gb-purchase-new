@@ -1,0 +1,2722 @@
+var load = require('../../../../lib/load.js');
+var apiUrl = require('../../../../config.js');
+var dateUtils = require('../../../../lib/dateUtil');
+var depOrder = require('../../../../services/depOrder');
+
+// ========================
+// 本页面使用的所有接口方法（来自 depOrder）
+// ========================
+// depOrder.depGetDepGoodsGbPage(data)          POST  gbdepartmentdisgoods/depGetDepGoodsGbPage          分页获取部门商品
+// depOrder.depGetDepGoodsCataGb(data)          POST  gbdepartmentdisgoods/depGetDepGoodsCataGb          获取部门商品分类
+// depOrder.saveGbOrderJj(data)                 POST  gbdepartmentorders/saveOrdersGbJj                  保存进价订单
+// depOrder.saveOrdersGbJjAndSaveDepGoods(data) POST  gbdepartmentorders/saveOrdersGbJjAndSaveDepGoods   保存订单并更新部门商品
+// depOrder.saveOrdersGbJjAndSaveGoods(data)    POST  gbdistributergoods/saveOrdersGbJjAndSaveGoods       保存订单并更新配送商品
+// depOrder.updateOrderGbJj(data)               POST  gbdepartmentorders/updateOrderGbJj                  更新进价订单
+// depOrder.deleteOrderGb(data)                 GET   gbdepartmentorders/deleteOrderGb/{id}               删除订单
+// depOrder.gbDepGetNxCataGoods(data)           POST  nxgoods/gbDepGetNxCataGoods                         获取牛享分类商品
+// depOrder.gbDepGetNxGoodsByGreatGrandId(data) POST  nxgoods/gbDepGetNxGoodsByGreatGrandId              根据大类获取牛享商品
+// depOrder.getNxGoodsIdsByGreatId(data)        GET   nxgoods/getNxGoodsIdsByGreatId/{id}                 根据大类获取牛享商品ID
+// depOrder.gbDisSaveStandard(data)             POST  gbdistributerstandard/gbDisSaveStandard             保存配送标准
+// depOrder.saveNxStandard(data)                POST  nxstandard/saveNxStandard                           保存牛享标准
+// depOrder.gbDisDeleteStandard(data)           GET   gbdistributerstandard/gbDisDeleteStandard/{id}      删除配送标准
+// depOrder.changeStockStars(data)              POST  gbdepartmentgoodsstock/changeStockStars             修改库存星级
+// depOrder.saveDepProduceGoodsStock(data)      POST  gbdepartmentgoodsstock/saveDepProduceGoodsStock     保存生产库存
+// depOrder.saveDepLossGoodsStock(data)         POST  gbdepartmentgoodsstock/saveDepLossGoodsStock        保存损耗库存
+// depOrder.reduceAttachmentSaveWithFile(...)   POST  gbdepartmentgoodsstockreduceattachment/reduceAttachmentSaveWithFile  上损耗附件
+// depOrder.saveDepReturnGoodsStock(data)       POST  gbdepartmentgoodsstock/saveDepReturnGoodsStock      保存退货库存
+// depOrder.saveDepWasteGoodsStock(data)        POST  gbdepartmentgoodsstock/saveDepWasteGoodsStock       保存报废库存
+// depOrder.deleteDepGoods(data)                GET   gbdepartmentdisgoods/deleteDepGoods/{id}             删除部门商品
+// ========================
+
+
+
+
+
+
+
+
+Page({
+
+
+
+  onShow() {
+    // 推荐直接用新API
+    let windowInfo = wx.getWindowInfo();
+    let globalData = getApp().globalData;
+    this.setData({
+      windowWidth: windowInfo.windowWidth * globalData.rpxR,
+      windowHeight: windowInfo.windowHeight * globalData.rpxR,
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
+      leftTopHeight: globalData.navBarHeight * globalData.rpxR + 80 * globalData.rpxR
+    });
+
+    // 检查是否有新保存的订单需要更新
+    this._checkAndUpdateOrderData();
+
+    // 检查是否有库存更新需要同步
+    this._checkAndUpdateGoodsData();
+
+    // 检查是否需要清库存
+    this._checkAndClearStock();
+
+  },
+
+
+  /**
+   * 检查并更新订单数据
+   * 如果页面保存了新订单，则根据gbDepartmentDisGoodsId更新对应商品的gbDepartmentOrdersEntity
+   */
+
+  _checkAndUpdateOrderData() {
+    console.log('=== 开始检查订单数据更新 ===');
+
+    // 从本地存储获取新保存的订单信息
+    const newOrderInfo = wx.getStorageSync('newOrderInfo');
+    console.log('从本地存储获取的订单信息:', newOrderInfo);
+
+    if (newOrderInfo && (newOrderInfo.gbDepartmentDisGoodsId || newOrderInfo.nxGoodsId)) {
+      var gbDepartmentDisGoodsId = newOrderInfo.gbDepartmentDisGoodsId;
+      var nxGoodsId = newOrderInfo.nxGoodsId;
+      var gbDepartmentOrdersEntity = newOrderInfo.gbDepartmentOrdersEntity;
+      var operationType = newOrderInfo.operationType;
+      console.log('解析的订单信息:', {
+        gbDepartmentDisGoodsId,
+        nxGoodsId,
+        gbDepartmentOrdersEntity,
+        operationType
+      });
+
+      // 处理部门商品列表的订单更新
+      if (gbDepartmentDisGoodsId) {
+        const depGoodsArrAi = this.data.depGoodsArrAi;
+        const targetIndex = depGoodsArrAi.findIndex(goods =>
+          goods.gbDepartmentDisGoodsId === gbDepartmentDisGoodsId
+        );
+
+        if (targetIndex !== -1) {
+          const updatePath = `depGoodsArrAi[${targetIndex}].gbDepartmentOrdersEntity`;
+          this.setData({
+            [updatePath]: gbDepartmentOrdersEntity
+          });
+
+          if (operationType === 'delete') {
+            console.log('depGoodsArrAi 删除订单:', updatePath);
+          } else {
+            console.log('depGoodsArrAi 新增/更新订单:', updatePath);
+          }
+        }
+      }
+
+      // 处理商品列表的订单更新
+      if (nxGoodsId && nxGoodsId !== -1 && this.data.goodsList && this.data.goodsList.length > 0) {
+        this._updateGoodsListOrder(nxGoodsId, gbDepartmentOrdersEntity, operationType);
+      }
+
+      // 清除本地存储的订单信息
+      wx.removeStorageSync('newOrderInfo');
+    }
+
+  },
+
+  /**
+   * 检查并更新库存数据
+   */
+  _checkAndUpdateGoodsData() {
+    console.log('=== 开始检查库存数据更新 ===');
+
+    // 从本地存储获取更新的商品信息
+    const updatedGoodsInfo = wx.getStorageSync('updatedGoodsInfo');
+    console.log('从本地存储获取的库存更新信息:', updatedGoodsInfo);
+
+    if (updatedGoodsInfo && updatedGoodsInfo.gbDepartmentDisGoodsId) {
+      var gbDepartmentDisGoodsId = updatedGoodsInfo.gbDepartmentDisGoodsId;
+      var updatedGoodsData = updatedGoodsInfo.updatedGoodsData;
+      console.log('解析的库存更新信息:', {
+        gbDepartmentDisGoodsId,
+        updatedGoodsData
+      });
+
+      // 在depGoodsArrAi中查找对应的商品并更新
+      const depGoodsArrAi = this.data.depGoodsArrAi;
+      console.log('当前depGoodsArrAi长度:', depGoodsArrAi.length);
+
+      const targetIndex = depGoodsArrAi.findIndex(goods => {
+        console.log('检查商品ID:', goods.gbDepartmentDisGoodsId, '目标ID:', gbDepartmentDisGoodsId);
+        return goods.gbDepartmentDisGoodsId === gbDepartmentDisGoodsId;
+      });
+
+      console.log('找到的目标索引:', targetIndex);
+
+      if (targetIndex !== -1) {
+        // 找到对应商品，清零库存
+        const updatePath = `depGoodsArrAi[${targetIndex}].gbDepartmentGoodsStockEntities`;
+        console.log('更新前库存数据:', depGoodsArrAi[targetIndex].gbDepartmentGoodsStockEntities);
+
+        this.setData({
+          [updatePath]: []
+        });
+        console.log('depGoodsArrAi 库存已清零:', updatePath);
+        console.log('更新后库存数据:', this.data.depGoodsArrAi[targetIndex].gbDepartmentGoodsStockEntities);
+      } else {
+        console.log('未找到对应的商品，无法更新库存数据');
+      }
+
+      // 清除本地存储的库存更新信息
+      wx.removeStorageSync('updatedGoodsInfo');
+    } else {
+      console.log('没有库存更新信息需要处理');
+    }
+  },
+
+  /**
+   * 检查并清零库存
+   */
+  _checkAndClearStock() {
+    console.log('=== 开始检查是否需要清零库存 ===');
+
+    const clearStockInfo = wx.getStorageSync('clearStockInfo');
+    console.log('从本地存储获取的清库存信息:', clearStockInfo);
+
+    if (clearStockInfo && clearStockInfo.gbDepartmentDisGoodsId && clearStockInfo.needClearStock) {
+      var gbDepartmentDisGoodsId = clearStockInfo.gbDepartmentDisGoodsId;
+      console.log('需要清零库存的商品ID:', gbDepartmentDisGoodsId);
+
+      // 在depGoodsArrAi中查找对应的商品
+      const depGoodsArrAi = this.data.depGoodsArrAi;
+      const targetIndex = depGoodsArrAi.findIndex(goods =>
+        goods.gbDepartmentDisGoodsId === gbDepartmentDisGoodsId
+      );
+
+      console.log('找到的目标索引:', targetIndex);
+
+      if (targetIndex !== -1) {
+        // 找到对应商品，清零库存
+        const updatePath = `depGoodsArrAi[${targetIndex}].gbDepartmentGoodsStockEntities`;
+        console.log('清零前库存数据:', depGoodsArrAi[targetIndex].gbDepartmentGoodsStockEntities);
+
+        this.setData({
+          [updatePath]: []
+        });
+
+        console.log('库存已清零:', updatePath);
+        console.log('清零后库存数据:', this.data.depGoodsArrAi[targetIndex].gbDepartmentGoodsStockEntities);
+      } else {
+        console.log('未找到对应的商品，无法清零库存');
+      }
+
+      // 清除本地存储的清库存信息
+      wx.removeStorageSync('clearStockInfo');
+    } else {
+      console.log('没有清库存信息需要处理');
+    }
+  },
+
+  /**
+   * 更新goodsList中对应商品的订单信息
+   */
+  _updateGoodsListOrder(nxGoodsId, gbDepartmentOrdersEntity, operationType = 'update') {
+
+    const goodsList = this.data.goodsList;
+
+    // 遍历goodsList中的所有商品
+    for (let i = 0; i < goodsList.length; i++) {
+      const goods = goodsList[i];
+      console.log(`检查goodsList[${i}]:`, {
+        goodsId: goods.nxGoodsId,
+        goodsName: goods.nxDgGoodsName,
+        currentOrder: goods.gbDepartmentOrdersEntity
+      });
+
+      if (goods.nxGoodsId === nxGoodsId) {
+        // 找到对应商品，更新其gbDepartmentOrdersEntity
+        const updatePath = `goodsList[${i}].gbDepartmentOrdersEntity`;
+
+        this.setData({
+          [updatePath]: gbDepartmentOrdersEntity
+        });
+
+        if (operationType === 'delete') {
+          console.log('goodsList 删除订单:', updatePath);
+        } else {
+          console.log('goodsList 新增/更新订单:', updatePath);
+        }
+
+        break;
+      }
+    }
+
+
+  },
+
+
+
+
+  data: {
+    editApply: false,
+    editOrderIndex: "",
+    applyNumber: "",
+    applyRemark: "",
+    applyStandardName: "",
+    applySubtotal: "",
+    item: {},
+    itemDis: null,
+    nxGoods: null,
+    depGoods: null,
+    statusBarHeight: "",
+    windowHeight: "",
+    windowWidth: "",
+    tab1Index: 0,
+    itemIndex: 0,
+
+    deleteShow: false,
+    showInd: false,
+    showIndNx: false,
+    totalPages: 0,
+    totalCount: 0,
+    limit: 15,
+    currentPage: 1,
+    fatherArr: [],
+    depGoodsArrAi: [],
+    selectedSub: 0, // 选中的分类
+
+    totalPageDis: 0,
+    totalCountDis: 0,
+    currentPageDis: 1,
+    grandList: [],
+    goodsList: [],
+    leftGreatId: "",
+    greatName: "",
+    leftIndex: 0,
+
+    isLoading: false,
+
+    showAllSubCat: false,
+    activeSubCatId: '', // 当前激活的分类ID
+    scrollIntoView: '', // 滚动到指定分类
+    categoryPositions: [], // 存储分类位置信息
+    leftScrollTopNx: 0, // 左侧菜单 scroll-view 的 scrollTop
+
+    // 新增的部门商品相关状态
+    showAllSubCatDep: false, // 是否展开二级分类
+    activeSubCatIdDep: '', // 当前选中的二级分类ID
+    subcatScrollIntoViewDep: '', // 二级分类横向滚动位置
+    scrollIntoViewDep: '', // 商品列表滚动位置
+
+    // 图片弹窗相关状态
+    showImageModal: false, // 是否显示图片弹窗
+    currentImage: '', // 当前显示的图片URL
+    currentGoods: null, // 当前显示图片的商品信息
+
+  },
+
+  onLoad: function (options) {
+    this.setData({
+      url: apiUrl.server,
+      nowTime: dateUtils.getNowTime(),
+    })
+    var value = wx.getStorageSync('disInfo');
+    if (value) {
+      this.setData({
+        disInfo: value,
+        disId: value.gbDistributerId,
+      })
+    }
+    var userValue = wx.getStorageSync('userInfo');
+    if (userValue) {
+      this.setData({
+        userInfo: userValue
+      })
+    }
+
+    var depValue = wx.getStorageSync('orderDepInfo');
+    if (depValue) {
+      this.setData({
+        depInfo: depValue,
+        depId: depValue.gbDepartmentId,
+        disId: depValue.gbDepartmentDisId,
+        tabs: [{
+          id: 0,
+          words: '"' + depValue.gbDepartmentName + '"' + "的商品"
+        }, {
+          id: 1,
+          words: "商品手册"
+        }],
+      })
+    }
+
+    this._getInitDataDep();
+
+  },
+
+  showDialogBtn: function (e) {
+    this.setData({
+      item: e.currentTarget.dataset.item,
+      showInd: true,
+      showIndNx: false,
+    })
+  },
+
+  showDialogBtnNx: function (e) {
+    this.setData({
+      item: e.currentTarget.dataset.item,
+      showIndNx: true,
+      showInd: false,
+    })
+  },
+
+  hideModal: function () {
+    this.setData({
+      showGoodsModal: false
+    });
+  },
+
+  // 显示图片弹窗
+  showImageModal: function (e) {
+    const goods = e.currentTarget.dataset.goods;
+    let imageUrl = '';
+
+    // 处理两种不同的商品数据结构
+    if (goods.gbDisGoodsFile) {
+      // 左侧商品列表 (depGoodsArrAi)
+      imageUrl = this.data.url + goods.gbDisGoodsFile;
+    } else if (goods.nxGoodsFile) {
+      // 右侧商品列表 (goodsList)
+      imageUrl = this.data.url + goods.nxGoodsFile;
+    } else {
+      // 默认图片
+      imageUrl = '/images/logo.jpg';
+    }
+
+    this.setData({
+      showImageModal: true,
+      currentImage: imageUrl,
+      currentGoods: goods
+    });
+  },
+
+  // 隐藏图片弹窗
+  hideImageModal: function () {
+    this.setData({
+      showImageModal: false,
+      currentImage: '',
+      currentGoods: null
+    });
+  },
+
+  // 阻止事件冒泡
+  stopPropagation: function () {
+    // 阻止事件冒泡，防止点击内容区域时关闭弹窗
+  },
+
+  // 图片加载成功
+  onImageLoad: function () {
+    console.log('图片加载成功');
+  },
+
+  // 图片加载失败
+  onImageError: function () {
+    wx.showToast({
+      title: '图片加载失败',
+      icon: 'none'
+    });
+  },
+
+
+  toBusiness(e) {
+    console.log("toBusiness")
+    this.setData({
+      goodsIndex: e.currentTarget.dataset.index,
+    })
+    var id = e.currentTarget.dataset.id;
+    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
+    wx.navigateTo({
+      url: '../../ai/stockGoodsBusiness/stockGoodsBusiness?depGoodsId=' + id + '&index=' + e.currentTarget.dataset.index,
+    })
+  },
+
+
+  _getInitDataDep() {
+    load.showLoading("获取分类");
+    var data = {
+      disId: this.data.disId,
+      depId: this.data.depInfo.gbDepartmentId
+    }
+    depOrder.depGetDepGoodsCataGb(data).then(res => {
+      load.hideLoading();
+      console.log(res.result.data);
+      if (res.result.code === 0 && res.result.data.cataArr.length > 0) {
+        const firstSubCat = res.result.data.cataArr[0].fatherGoodsEntities[0];
+        this.setData({
+
+          depGoodsCataArr: res.result.data.cataArr,
+          sortDepGoodsArr: res.result.data.depGoodsArr,
+          lastQueryEndIndex: 0,
+          hasMoreGoods: true,
+          activeSubCatIdDep: firstSubCat.gbDistributerFatherGoodsId,
+          subcatScrollIntoViewDep: `subcat-dep-${firstSubCat.gbDistributerFatherGoodsId}`,
+          fatherArr: res.result.data.cataArr[0].fatherGoodsEntities,
+          depGoodsArrAi: [],
+        }, () => {
+          this._getInitDataPageDep(true);
+        });
+      } else {
+        this.setData({
+          depGoodsArrAi: []
+        }, () => {
+          // 如果第一个swiper-item的depGoodsArrAi为空，则3秒后自动滑动到第二个swiper-item
+          setTimeout(() => {
+            this.setData({
+              tab1Index: 1,
+              itemIndex: 1
+            });
+          }, 1000);
+        })
+      }
+    });
+  },
+
+  // 全类别分页（跨分类补全）
+  _getInitDataPageDep(isRefresh = false, callback) {
+    if (this.data.isLoading) return;
+    this.setData({
+      isLoading: true
+    });
+    load.showLoading("加载商品…");
+
+    depOrder.depGetDepGoodsGbPage({
+      limit: this.data.limit,
+      page: this.data.currentPage,
+      depId: this.data.depInfo.gbDepartmentId
+    }).then(res => {
+      load.hideLoading();
+      this.setData({
+        isLoading: false
+      });
+
+      if (res.result.code !== 0) {
+        return wx.showToast({
+          title: res.result.msg,
+          icon: 'none'
+        });
+      }
+
+      // 1) 拿到这一页数据
+      const list = res.result.page.list || [];
+      const totalPages = res.result.page.totalPage || 1;
+      const totalCount = res.result.page.totalCount || 0;
+
+      // 2) 生成 viewId，让 id 唯一且连续
+      const base = isRefresh ? 0 : this.data.depGoodsArrAi.length;
+      list.forEach((item, idx) => {
+        item.viewId = 'goods_' + (base + idx);
+      });
+
+
+      // 3) 合并数据
+      const merged = this.data.depGoodsArrAi.concat(list);
+
+      // 4) 合并后按 sortDepGoodsArr 顺序排序
+      const idOrder = (this.data.sortDepGoodsArr || []).map(String);
+      // console.log('sortDepGoodsArr:', idOrder);
+      // console.log('merged ids:', merged.map(i => i.gbDepartmentDisGoodsId));
+      const sortedArr = merged.slice().sort((a, b) => {
+        const idxA = idOrder.indexOf(String(a.gbDepartmentDisGoodsId));
+        const idxB = idOrder.indexOf(String(b.gbDepartmentDisGoodsId));
+        return (idxA === -1 ? 99999 : idxA) - (idxB === -1 ? 99999 : idxB);
+      });
+
+      // 5) 处理商品数据，添加 isFirstInCategory（对全量商品处理）
+      const finalArr = this.processGoodsListDep(sortedArr);
+
+      // 5) 写入并可回调滚动
+      this.setData({
+        depGoodsArrAi: finalArr,
+        totalPages: totalPages,
+        totalCount: totalCount,
+        currentPage: this.data.currentPage,
+
+      }, () => {
+        this.calculateCategoryPositionsDep();
+        
+        // 如果数据加载完成后depGoodsArrAi仍然为空，则3秒后自动滑动到第二个swiper-item
+        if (finalArr.length === 0 && this.data.tab1Index === 0) {
+          setTimeout(() => {
+            this.setData({
+              tab1Index: 1,
+              itemIndex: 1
+            });
+          }, 3000);
+        }
+        
+        if (typeof callback === 'function') {
+          setTimeout(callback, 50);
+        }
+      });
+    });
+  },
+
+
+  /**
+   * 
+   */
+  // 点击左侧分类
+  leftMenuClickDep(e) {
+    const idx = e.currentTarget.dataset.index;
+    const firstSubCat = this.data.depGoodsCataArr[idx].fatherGoodsEntities[0];
+    this.setData({
+      selectedSub: idx,
+      fatherArr: this.data.depGoodsCataArr[idx].fatherGoodsEntities,
+      activeSubCatIdDep: firstSubCat.gbDistributerFatherGoodsId,
+      subcatScrollIntoViewDep: `subcat-dep-${firstSubCat.gbDistributerFatherGoodsId}`,
+    }, () => {
+      // 检查当前已加载的商品中是否有该二级分类的商品
+      const goodsArr = this.data.depGoodsArrAi;
+      const hasGoods = goodsArr.some(
+        item => String(item.gbDdgDisGoodsGrandId) === String(firstSubCat.gbDistributerFatherGoodsId)
+      );
+
+      if (hasGoods) {
+        console.log('[leftMenuClickDep] 商品足够，直接滚动');
+        this.setData({
+          scrollIntoViewDep: `cat-dep-${firstSubCat.gbDistributerFatherGoodsId}`
+        }, () => {
+          console.log('[leftMenuClickDep] 滚动位置已设置:', {
+            scrollIntoViewDep: `cat-dep-${firstSubCat.gbDistributerFatherGoodsId}`
+          });
+        });
+      } else {
+        console.log('[leftMenuClickDep] 商品不足，继续请求接口');
+        // 直接调用loadGoodsBySubCatIdDep方法，请求特定分类的商品
+        this.loadGoodsBySubCatIdDep(firstSubCat.gbDistributerFatherGoodsId, this.data.currentPage + 1, goodsArr);
+      }
+    });
+  },
+
+
+  // 滚动到底加载下一页（全类别模式）
+  onReachBottomDep() {
+    if (this.data.isLoading || this.data.currentPage >= this.data.totalPages) return;
+    this.setData({
+      currentPage: this.data.currentPage + 1
+    }, () => {
+      this._getInitDataPageDep(false);
+    });
+  },
+
+  onSubCatTapDep(e) {
+    const subCatId = e.currentTarget.dataset.id;
+    this.setData({
+      activeSubCatIdDep: subCatId,
+      subcatScrollIntoViewDep: `subcat-dep-${subCatId}`,
+      showAllSubCatDep: false,
+    });
+
+    // 修正：统计该二级分类商品数量
+    const goodsArr = this.data.depGoodsArrAi;
+
+    const hasGoods = goodsArr.some(
+      item => String(item.gbDdgDisGoodsGrandId) === String(subCatId)
+    );
+    if (hasGoods) {
+      console.log('[onSubCatTapDep] 商品足够，直接滚动');
+      wx.createSelectorQuery()
+        .select(`#cat-dep-${subCatId}`)
+        .boundingClientRect(rect => {
+          if (rect) {
+            this.setData({
+              scrollIntoViewDep: 'cat-dep-' + subCatId
+            });
+          }
+        })
+        .exec();
+    } else {
+      console.log('[onSubCatTapDep] 商品不足，继续请求接口');
+      // 递归请求接口，page 参数递增
+      this.loadGoodsBySubCatIdDep(subCatId, this.data.currentPage + 1, goodsArr);
+    }
+  },
+
+  // 加载指定二级分类的商品
+  loadGoodsBySubCatIdDep(subCatId, page = 1, accumulatedGoods = []) {
+    if (this.data.isLoading) return;
+
+    this.setData({
+      isLoading: true
+    });
+    load.showLoading("加载商品")
+    depOrder.depGetDepGoodsGbPage({
+      depId: this.data.depId,
+      limit: this.data.limit,
+      page: page,
+    }).then(res => {
+      this.setData({
+        isLoading: false
+      });
+      load.hideLoading();
+      if (res.result.code == 0) {
+        // 1) 拿到这一页数据
+        const list = res.result.page.list || [];
+        const totalPages = res.result.page.totalPage || 1;
+        const totalCount = res.result.page.totalCount || 0;
+
+        // 2) 生成 viewId，让 id 唯一且连续
+        const base = this.data.depGoodsArrAi.length;
+        list.forEach((item, idx) => {
+          item.viewId = 'goods_' + (base + idx);
+        });
+        for (var i = 0; i < list.length; i++) {
+          console.log("第" + page + "页面请求的数据是:" + list[i].gbDdgDepGoodsName);
+        }
+
+        // 3) 合并数据
+        const merged = this.data.depGoodsArrAi.concat(list);
+
+        // 4) 合并后按 sortDepGoodsArr 顺序排序
+        const idOrder = (this.data.sortDepGoodsArr || []).map(String);
+        console.log('sortDepGoodsArr:', idOrder);
+        console.log('merged ids:', merged.map(i => i.gbDepartmentDisGoodsId));
+        const sortedArr = merged.slice().sort((a, b) => {
+          const idxA = idOrder.indexOf(String(a.gbDepartmentDisGoodsId));
+          const idxB = idOrder.indexOf(String(b.gbDepartmentDisGoodsId));
+          return (idxA === -1 ? 99999 : idxA) - (idxB === -1 ? 99999 : idxB);
+        });
+
+        // 5) 处理商品数据，添加 isFirstInCategory（对全量商品处理）
+        const finalArr = this.processGoodsListDep(sortedArr);
+
+        // 5) 写入并可回调滚动
+        this.setData({
+          depGoodsArrAi: finalArr,
+          currentPage: page,
+          totalPages: totalPages,
+          totalCount: totalCount,
+        }, () => {
+          // 新增：数据加载后自动滚动到目标分类商品
+          const goodsArr = this.data.depGoodsArrAi;
+          const idx = goodsArr.findIndex(item => String(item.gbDdgDisGoodsGrandId) === String(subCatId));
+         
+          if (idx !== -1) {
+            console.log('[loadGoodsBySubCatIdDep] 自动滚动到目标商品', subCatId);
+            wx.createSelectorQuery()
+              .select(`#cat-dep-${subCatId}`)
+              .boundingClientRect(rect => {
+                if (rect) {
+                  this.setData({
+                    scrollIntoViewDep: 'cat-dep-' + subCatId
+                  }, () => {
+
+                  });
+                } else {
+                  console.warn('[loadGoodsBySubCatIdDep] 未找到目标商品锚点', subCatId);
+                }
+              })
+              .exec();
+          } else {
+            console.log('[loadGoodsBySubCatIdDep] 商品数量不足，继续请求下一页', subCatId);
+            // 如果还有下一页，继续请求
+            if (page < totalPages) {
+              // 递归调用自身，请求下一页
+              this.loadGoodsBySubCatIdDep(subCatId, page + 1, goodsArr);
+            } else {
+              console.log('[loadGoodsBySubCatIdDep] 已加载所有页面，仍未找到目标分类商品', subCatId);
+            }
+          }
+          this.calculateCategoryPositionsDep();
+        });
+
+
+
+      } else {
+        wx.showToast({
+          title: '商品加载失败',
+          icon: 'none'
+        });
+      }
+    }).catch(err => {
+      this.setData({
+        isLoading: false
+      });
+      wx.showToast({
+        title: '加载错误，请稍后再试',
+        icon: 'none'
+      });
+    });
+  },
+
+  // 处理商品数据，添加分类信息
+  processGoodsListDep(list) {
+    // 先按分类ID排序
+    // list.sort((a, b) => a.gbDdgDisGoodsGrandId - b.gbDdgDisGoodsGrandId);
+    let currentCategory = null;
+    const result = list.map(item => {
+      if (item.gbDdgDisGoodsGrandId !== currentCategory) {
+        currentCategory = item.gbDdgDisGoodsGrandId;
+        var obj = Object.assign({}, item, {
+          isFirstInCategory: true,
+          categoryName: this.getCategoryNameDep(item.gbDdgDisGoodsGrandId)
+        });
+
+        return obj;
+      }
+      var obj = Object.assign({}, item, {
+        isFirstInCategory: false,
+        categoryName: this.getCategoryNameDep(item.gbDdgDisGoodsGrandId)
+      });
+
+      return obj;
+    });
+    return result;
+  },
+
+  // 获取分类名称
+  getCategoryNameDep(categoryId) {
+    const category = this.data.fatherArr.find(item =>
+      item.gbDistributerFatherGoodsId === categoryId
+    );
+    return category ? category.gbDfgFatherGoodsName : '';
+  },
+
+  // 切换二级分类展开/收起状态
+  toggleSubCatDep() {
+    this.setData({
+      showAllSubCatDep: !this.data.showAllSubCatDep
+    });
+  },
+
+  // 阻止遮罩层滚动
+  stopScroll() {
+    return false;
+  },
+
+  // 部门端商品滚动时联动二级分类高亮
+  onGoodsScrollDep(e) {
+    console.log('=== onGoodsScrollDep 开始 ===');
+    console.log('滚动事件详情:', e);
+    console.log('滚动位置:', e?.detail?.scrollTop);
+
+    // 精准高亮二级分类，并联动一级分类
+    const scrollTop = e && e.detail && typeof e.detail.scrollTop === 'number' ? e.detail.scrollTop : 0;
+    const positions = this.data.categoryPositionsDep || [];
+
+    console.log('当前 scrollTop:', scrollTop);
+    console.log('分类位置数组:', positions);
+    console.log('positions 长度:', positions.length);
+
+    let activeId = '';
+    const threshold = 100;
+
+    // 遍历所有分类位置，找到当前应该高亮的分类
+    for (let i = positions.length - 1; i >= 0; i--) {
+      const position = positions[i];
+      console.log(`检查位置 ${i}: id=${position.id}, top=${position.top}, scrollTop=${scrollTop}`);
+
+      if (scrollTop >= position.top) {
+        activeId = position.id;
+        console.log(`找到匹配的分类: ${activeId}, 位置: ${position.top}`);
+        break;
+      }
+    }
+
+    // 边界兜底：如果没找到，默认第一个
+    if (!activeId && positions.length > 0) {
+      activeId = positions[0].id;
+      console.log('边界兜底，activeId 设为第一个:', activeId);
+    }
+
+    console.log('最终确定的 activeId:', activeId);
+    console.log('当前 activeSubCatIdDep:', this.data.activeSubCatIdDep);
+
+    // 二级分类高亮
+    if (activeId && activeId !== this.data.activeSubCatIdDep) {
+      console.log('需要更新二级分类高亮:', activeId);
+      this.setData({
+        activeSubCatIdDep: activeId,
+        subcatScrollIntoViewDep: `subcat-dep-${activeId}`
+      });
+      console.log('二级分类高亮更新完成');
+    } else {
+      console.log('二级分类高亮无需更新');
+    }
+
+    // 联动一级分类高亮
+    if (activeId && this.data.depGoodsCataArr) {
+      console.log('开始联动一级分类高亮');
+      console.log('depGoodsCataArr:', this.data.depGoodsCataArr);
+
+      // 从二级分类信息中获取一级分类ID，而不是从商品信息中获取
+      let greatId = '';
+
+      // 在 depGoodsCataArr 中查找包含当前二级分类的一级分类
+      for (let i = 0; i < this.data.depGoodsCataArr.length; i++) {
+        const category = this.data.depGoodsCataArr[i];
+        const hasSubCategory = category.fatherGoodsEntities &&
+          category.fatherGoodsEntities.some(sub => String(sub.gbDistributerFatherGoodsId) === String(activeId));
+
+        if (hasSubCategory) {
+          // 使用一级分类的索引作为ID，因为depGoodsCataArr是按顺序排列的
+          greatId = i;
+          console.log('找到匹配的一级分类:', category);
+          console.log('一级分类索引 (greatId):', greatId);
+          break;
+        }
+      }
+
+      if (greatId === '') {
+        console.log('未找到匹配的一级分类，activeId:', activeId);
+        console.log('depGoodsCataArr:', this.data.depGoodsCataArr.map((c, idx) => ({
+          index: idx,
+          name: c.gbDistributerFatherGoodsName || '未知',
+          subCategories: c.fatherGoodsEntities?.map(sub => sub.gbDistributerFatherGoodsId) || []
+        })));
+      }
+
+      // 直接使用索引，不需要再查找
+      const subIndex = greatId;
+
+      console.log('在 depGoodsCataArr 中查找 greatId:', greatId);
+      console.log('找到的一级分类索引:', subIndex);
+      console.log('当前 selectedSub:', this.data.selectedSub);
+
+      if (subIndex !== -1 && subIndex !== this.data.selectedSub) {
+        console.log('需要联动更新一级分类:', subIndex);
+        this.setData({
+          selectedSub: subIndex,
+          fatherArr: this.data.depGoodsCataArr[subIndex].fatherGoodsEntities
+        });
+        console.log('一级分类联动更新完成');
+      } else {
+        console.log('一级分类联动无需更新');
+      }
+    } else {
+      console.log('跳过一级分类联动，条件不满足');
+    }
+
+    console.log('=== onGoodsScrollDep 结束 ===');
+  },
+
+  // 1. 新增：部门端商品分类锚点位置缓存
+  calculateCategoryPositionsDep() {
+    console.log('=== calculateCategoryPositionsDep 开始 ===');
+    console.log('开始计算分类锚点位置');
+
+    const query = wx.createSelectorQuery();
+    query.selectAll('.goods-category-title-dep').boundingClientRect();
+    query.select('.goods-list-dep').boundingClientRect();
+
+    console.log('执行查询选择器...');
+    query.exec((res) => {
+      console.log('查询结果:', res);
+
+      if (res[0] && res[1]) {
+        const categoryRects = res[0]; // 分类标题的矩形信息
+        const listRect = res[1]; // 商品列表容器的矩形信息
+
+        console.log('分类标题矩形信息:', categoryRects);
+        console.log('商品列表容器矩形信息:', listRect);
+        console.log('找到的分类标题数量:', categoryRects.length);
+
+        // 先计算所有原始 top
+        let rawPositions = categoryRects.map((item, index) => {
+          const id = item.id.replace('cat-dep-', '');
+          const top = item.top - listRect.top;
+          console.log(`分类 ${index}: id=${id}, 原始top=${item.top}, 容器top=${listRect.top}, 相对top=${top}`);
+          return {
+            id,
+            top
+          };
+        });
+
+        // 取第一个的 top 作为基准
+        const baseTop = rawPositions.length > 0 ? rawPositions[0].top : 0;
+        console.log('基准top:', baseTop);
+
+        // 重新计算所有 top，让第一个为 0
+        let positions = rawPositions.map((item, idx) => {
+          const normalizedTop = item.top - baseTop;
+          console.log(`分类 ${idx}: id=${item.id}, 归一化后top=${normalizedTop}`);
+          return {
+            id: item.id,
+            top: normalizedTop
+          };
+        });
+
+        // 按 top 从小到大排序
+        positions.sort((a, b) => a.top - b.top);
+        console.log('排序后的位置信息:', positions);
+
+        this.setData({
+          categoryPositionsDep: positions
+        });
+
+        const goodsOrder = (this.data.depGoodsArrAi || []).map(g => g.gbDdgDisGoodsGrandId);
+        console.log('depGoodsArrAi 渲染顺序:', goodsOrder);
+        console.log('分类锚点位置(已排序):', positions);
+        console.log('categoryPositionsDep 设置完成');
+
+      } else {
+        console.warn('未获取到有效的节点信息');
+        console.warn('res[0] (分类标题):', res[0]);
+        console.warn('res[1] (商品列表):', res[1]);
+      }
+
+      console.log('=== calculateCategoryPositionsDep 结束 ===');
+    });
+  },
+
+
+
+  /**
+   * tabItme点击
+   */
+  onTab1Click(event) {
+    let index = event.currentTarget.dataset.index;
+    this.setData({
+      // sliderOffset: this.data.sliderOffsets[index],
+      tab1Index: index,
+      itemIndex: index,
+    })
+  },
+
+  swiperChange(event) {
+    this.setData({
+      // sliderOffset: this.data.sliderOffsets[event.detail.current],
+      tab1Index: event.detail.current,
+      itemIndex: event.detail.current,
+     
+
+    })
+
+    if (this.data.tab1Index == 0 && this.data.depGoodsArrAi.length == 0) {
+      this._getInitDataDep();
+    }
+    if (this.data.tab1Index == 1 && this.data.goodsList.length == 0) {
+      this.initDisData();
+
+    }
+
+  },
+
+  /**
+   * 配送申请，换订货规格
+   * @param {*} e 
+   */
+  changeStandard: function (e) {
+    console.log("echangestand", e);
+    this.setData({
+      applyStandardName: e.detail.applyStandardName
+    })
+  },
+
+
+  // 
+  applyGoodsDep(e) {
+
+    console.log("applyGoodsDepapplyGoodsDep");
+    var standard = "";
+    if (e.currentTarget.dataset.depgoods.gbDdgOrderStandard !== "") {
+      standard = e.currentTarget.dataset.depgoods.gbDdgOrderStandard
+    } else {
+      standard = e.currentTarget.dataset.depgoods.gbDgGoodsStandardname;
+    }
+    this.setData({
+      index: e.currentTarget.dataset.index,
+      depGoods: e.currentTarget.dataset.depgoods,
+      showDep: true,
+      canSave: true,
+
+      applyStandardName: standard,
+      applyRemark: e.currentTarget.dataset.depgoods.gbDdgOrderRemark,
+      printStandard: e.currentTarget.dataset.depgoods.gbDdgShowStandardName,
+
+    })
+    if (e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
+      console.log(e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length);
+      this.setData({
+        hasStock: true
+      })
+    } else {
+      this.setData({
+        hasStock: false
+      })
+    }
+
+
+  },
+
+
+  // 
+  applyGoods(e) {
+
+    console.log("applyGoodos", e);
+
+    this.setData({
+      index: e.currentTarget.dataset.index,
+      applySubtotal: "0.0元",
+      canSave: false,
+      itemDis: e.currentTarget.dataset.disgoods,
+      nxGoods: e.currentTarget.dataset.nxgoods,
+      depGoods: e.currentTarget.dataset.depgoods,
+
+    })
+
+    if (e.currentTarget.dataset.disgoods == null) {
+
+      this.setData({
+        showNx: true,
+        applyStandardName: e.currentTarget.dataset.nxgoods.nxGoodsStandardname,
+        printStandard: e.currentTarget.dataset.nxgoods.nxGoodsStandardname,
+      })
+    } else {
+      console.log("currentTarget.dataset.disgood!!!!", e.currentTarget.dataset.disgoods.gbDgPullOff);
+      if (e.currentTarget.dataset.disgoods.gbDgPullOff == 1) {
+        wx.showToast({
+          title: '停止订货',
+          icon: 'none'
+        })
+
+      } else {
+        this.setData({
+          show: true,
+          applyStandardName: e.currentTarget.dataset.disgoods.gbDgGoodsStandardname,
+          printStandard: e.currentTarget.dataset.disgoods.gbDgGoodsStandardname,
+
+        })
+      }
+
+    }
+
+    if (e.currentTarget.dataset.depgoods !== null && e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
+      console.log(e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length);
+      this.setData({
+        hasStock: true
+      })
+    } else {
+      this.setData({
+        hasStock: false
+      })
+    }
+
+  },
+
+
+  toEditApplyDep(e) {
+    var applyItem = e.currentTarget.dataset.order;
+    var itemStatus = applyItem.gbDoBuyStatus;
+    if (itemStatus > 1) {
+      wx.showModal({
+        title: "不能修改",
+        content: "订单在配送中，如果有变化，请与采购员联系.",
+        showCancel: false,
+        confirmText: "知道了",
+        success: function (res) {
+          if (res.cancel) {
+            //点击取消           
+          } else if (res.confirm) {}
+        }
+      })
+    } else {
+      this.setData({
+
+        index: e.currentTarget.dataset.index,
+        applyItem: e.currentTarget.dataset.order,
+        showDep: true,
+        applyStandardName: applyItem.gbDoStandard,
+        printStandard: applyItem.gbDoPrintStandard,
+        editApply: true,
+        applyNumber: applyItem.gbDoQuantity,
+        applyRemark: applyItem.gbDoRemark,
+        depGoods: e.currentTarget.dataset.depgoods,
+      })
+
+
+    }
+  },
+
+  toEditApply(e) {
+    var applyItem = e.currentTarget.dataset.order;
+    var itemStatus = applyItem.gbDoBuyStatus;
+    if (itemStatus > 1) {
+      wx.showModal({
+        title: "不能修改",
+        content: "订单在配送中，如果有变化，请与采购员联系.",
+        showCancel: false,
+        confirmText: "知道了",
+        success: function (res) {
+          if (res.cancel) {
+            //点击取消           
+          } else if (res.confirm) {}
+        }
+      })
+    } else {
+      this.setData({
+        applyItem: e.currentTarget.dataset.order,
+        show: true,
+        applyStandardName: applyItem.gbDoStandard,
+        itemDis: e.currentTarget.dataset.disgoods,
+        printStandard: applyItem.gbDoPrintStandard,
+        editApply: true,
+        applyNumber: applyItem.gbDoQuantity,
+        applyRemark: applyItem.gbDoRemark,
+        index: e.currentTarget.dataset.index,
+      })
+
+      if (this.data.applyItem.gbDoSubtotal !== null) {
+        console.log("eidididiiidid");
+        this.setData({
+          applySubtotal: applyItem.gbDoSubtotal + "元"
+        })
+      }
+    }
+  },
+
+
+  confirmDep(e) {
+    if (this.data.editApply) {
+      this._updateDisOrderDep(e);
+    } else {
+
+      this._saveOrderDep(e);
+
+    }
+  },
+
+  // 保存订货订单
+  confirm: function (e) {
+    if (this.data.editApply) {
+      this._updateDisOrder(e);
+    } else {
+
+      this._saveOrder(e);
+
+    }
+
+    this.setData({
+      show: false,
+      editApply: false,
+      applyItem: "",
+      item: "",
+      applyNumber: "",
+      applyStandardName: "",
+    })
+  },
+
+  showTishi() {
+    wx.showModal({
+      title: "不能修改",
+      content: "订单在配送中，如果有变化，请与采购员联系.",
+      showCancel: false,
+      confirmText: "知道了",
+      success: function (res) {
+        if (res.cancel) {
+          //点击取消           
+        } else if (res.confirm) {}
+      }
+
+    })
+  },
+
+
+
+  _saveOrder: function (e) {
+
+    var arriveDate = dateUtils.getArriveDate(0);
+    var arriveOnlyDate = dateUtils.getArriveOnlyDate(0);
+    var weekYear = dateUtils.getArriveWeeksYear(0);
+    var week = dateUtils.getArriveWhatDay(0);
+    var depDisGoodsId = -1;
+    var gbDisGoodsId = -1;
+    var gbDisGoodsFatherId = -1;
+    var gbGoodsId = "";
+    var gbGoodsFatherId = "";
+    var gbDisId = -1;
+    var gbDisGoodsId = -1;
+    var price = null;
+    var weight = null;
+    var subtotal = 0;
+    var goodsType = "";
+    var toDepId = "";
+    var doGoodsName = "";
+
+
+    if (this.data.depGoods !== null) {
+      gbDisGoodsId = this.data.depGoods.gbDdgDisGoodsId;
+      gbDisGoodsFatherId = this.data.depGoods.gbDdgDisGoodsFatherId;
+      depDisGoodsId = this.data.depGoods.gbDepartmentDisGoodsId;
+      doGoodsName = this.data.depGoods.gbDdgDepGoodsName;
+
+    } else {
+      if (this.data.itemDis !== null) {
+        gbDisGoodsId = this.data.itemDis.gbDistributerGoodsId;
+      }
+      gbGoodsId = this.data.nxGoods.nxGoodsId;
+      gbGoodsFatherId = this.data.nxGoods.nxGoodsFatherId;
+      goodsType = 2;
+      toDepId = this.data.depId;
+      doGoodsName = this.data.nxGoods.nxGoodsName;
+
+    }
+
+    var dg = {
+      gbDoOrderUserId: this.data.userInfo.gbDepartmentUserId,
+      gbDoDepDisGoodsId: depDisGoodsId, //
+      gbDoDisGoodsId: gbDisGoodsId, //
+      gbDoDisGoodsFatherId: gbDisGoodsFatherId,
+      gbDoDepartmentId: this.data.depId,
+      gbDoToDepartmentId: toDepId,
+      gbDoDistributerId: this.data.disId,
+      gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentId,
+      gbDoQuantity: e.detail.applyNumber,
+      gbDoPrice: price,
+      gbDoWeight: weight,
+      gbDoSubtotal: subtotal,
+      gbDoStandard: e.detail.applyStandardName,
+      gbDoRemark: e.detail.applyRemark,
+      gbDoIsAgent: 0,
+      gbDoArriveDate: arriveDate,
+      gbDoArriveWeeksYear: weekYear,
+      gbDoArriveOnlyDate: arriveOnlyDate,
+      gbDoArriveWhatDay: week,
+      gbDoNxGoodsId: gbGoodsId,
+      gbDoNxGoodsFatherId: gbGoodsFatherId,
+      gbDoNxDistributerGoodsId: gbDisGoodsId,
+      gbDoNxDistributerId: gbDisId,
+      gbDoGoodsType: goodsType,
+      gbDoOrderType: goodsType,
+      gbDoDsStandardScale: -1,
+      stockIsZero: e.detail.stockIsZero,
+      gbDoPrintStandard: this.data.printStandard,
+      gbDoGoodsName: doGoodsName,
+
+    };
+    console.log(dg);
+    if (this.data.itemDis == null) {
+      load.showLoading("保存订单");
+      depOrder.saveOrdersGbJjAndSaveGoods(dg).then(res => {
+        load.hideLoading();
+        if (res.result.code == 0) {
+          load.hideLoading();
+          wx.setStorageSync('needRefreshOrderData', true);
+          var newGoods = res.result.data.gbDistributerGoodsEntity;
+          var data = "goodsList[" + this.data.index + "].gbDepartmentOrdersEntity";
+          var dataDis = "goodsList[" + this.data.index + "].gbDistributerGoodsEntity";
+          this.setData({
+            [data]: res.result.data,
+            [dataDis]: newGoods,
+          })
+
+
+        } else {
+          wx.showToast({
+            title: '订单保存失败',
+            icon: 'none'
+          })
+        }
+      })
+    } else {
+      if (this.data.depGoods == null) {
+        load.showLoading("保存订单");
+        depOrder.saveOrdersGbJjAndSaveDepGoods(dg).then(res => {
+          load.hideLoading();
+          if (res.result.code == 0) {
+            wx.setStorageSync('needRefreshOrderData', true);
+
+            var data = "goodsList[" + this.data.index + "].gbDepartmentOrdersEntity";
+            this.setData({
+              [data]: res.result.data
+            })
+          
+
+
+          } else {
+            wx.showToast({
+              title: '订单保存失败',
+              icon: 'none'
+            })
+          }
+        })
+      } else {
+        load.showLoading("保存订单");
+        depOrder.saveGbOrderJj(dg).then(res => {
+          load.hideLoading();
+          if (res.result.code == 0) {
+            load.hideLoading();
+            wx.setStorageSync('needRefreshOrderData', true);
+            if (this.data.tab1Index == 0) {
+              console.log("depgodosoagupddpdd");
+              var data = "depGoodsArrAi[" + this.data.index + "].gbDepartmentOrdersEntity";
+              this.setData({
+                [data]: res.result.data,
+              })
+              console.log("eeeeeee",e.detail.stockIsZero )
+              if(e.detail.stockIsZero){
+                var dataStock = "depGoodsArrAi[" + this.data.index + "].gbDepartmentGoodsStockEntities";
+                this.setData({
+                  [dataStock]: [],
+                })
+              }
+
+            } else {
+              var data = "goodsList[" + this.data.index + "].gbDepartmentOrdersEntity";
+              this.setData({
+                [data]: res.result.data
+              })
+
+              //查找 depGoodsArrAi 的那个gbDdgDisGoodsId = res.result.data.gbDoDisGoodsId
+              //更新 depGoodsArrAi 的gbDepartmentOrdersEntity 等于res.result.data
+              const depGoodsArrAi = this.data.depGoodsArrAi;
+              const targetIndex = depGoodsArrAi.findIndex(goods =>
+                goods.gbDdgDisGoodsId === res.result.data.gbDoDisGoodsId
+              );
+
+              if (targetIndex !== -1) {
+                const updatePath = `depGoodsArrAi[${targetIndex}].gbDepartmentOrdersEntity`;
+                this.setData({
+                  [updatePath]: res.result.data
+                });
+                console.log('depGoodsArrAi 更新订单:', updatePath, res.result.data);
+              } else {
+                console.log('未找到对应的 depGoodsArrAi 商品，gbDoDisGoodsId:', res.result.data.gbDoDisGoodsId);
+              }
+            }
+
+          } else {
+            wx.showToast({
+              title: '订单保存失败',
+              icon: 'none'
+            })
+          }
+        })
+      }
+
+    }
+
+  },
+
+  /**
+   * 修改配送申请
+   * @param {} e 
+   */
+  _updateDisOrderDep(e) {
+    var that = this;
+    var dg = {
+      id: that.data.applyItem.gbDepartmentOrdersId,
+      weight: e.detail.applyNumber,
+      standard: e.detail.applyStandardName,
+      remark: e.detail.applyRemark,
+    };
+    load.showLoading("修改订单");
+    depOrder.updateOrderGbJj(dg).then(res => {
+      load.hideLoading();
+      if (res.result.code == 0) {
+        load.hideLoading();
+        wx.setStorageSync('needRefreshOrderData', true);
+
+        var data = "depGoodsArrAi[" + this.data.index + "].gbDepartmentOrdersEntity";
+        this.setData({
+          [data]: res.result.data,
+        })
+
+
+        this.cancle();
+      } else {
+        load.hideLoading();
+        wx.showToast({
+          title: res.result.msg,
+          icon: "none"
+        })
+      }
+    })
+  },
+
+
+  _saveOrderDep: function (e) {
+
+    var arriveDate = dateUtils.getArriveDate(0);
+    var arriveOnlyDate = dateUtils.getArriveOnlyDate(0);
+    var weekYear = dateUtils.getArriveWeeksYear(0);
+    var week = dateUtils.getArriveWhatDay(0);
+    var depDisGoodsId = -1;
+    var gbDisGoodsId = -1;
+    var gbDisGoodsFatherId = -1;
+    var gbGoodsId = "";
+    var gbGoodsFatherId = "";
+    var gbDisId = -1;
+    var gbDisGoodsId = -1;
+    var price = null;
+    var weight = null;
+    var subtotal = 0;
+    var goodsType = "";
+    var toDepId = "";
+
+
+    if (this.data.depGoods !== null) {
+      gbDisGoodsId = this.data.depGoods.gbDdgDisGoodsId;
+      gbDisGoodsFatherId = this.data.depGoods.gbDdgDisGoodsFatherId;
+      depDisGoodsId = this.data.depGoods.gbDepartmentDisGoodsId;
+
+    }
+
+
+    var dg = {
+      gbDoOrderUserId: this.data.userInfo.gbDepartmentUserId,
+      gbDoDepDisGoodsId: depDisGoodsId, //
+      gbDoDisGoodsId: gbDisGoodsId, //
+      gbDoDisGoodsFatherId: gbDisGoodsFatherId,
+      gbDoDepartmentId: this.data.depId,
+      gbDoToDepartmentId: toDepId,
+      gbDoDistributerId: this.data.disId,
+      gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentFatherId,
+      gbDoQuantity: e.detail.applyNumber,
+      gbDoPrice: price,
+      gbDoWeight: weight,
+      gbDoSubtotal: subtotal,
+      gbDoStandard: e.detail.applyStandardName,
+      gbDoRemark: e.detail.applyRemark,
+      gbDoIsAgent: 0,
+      gbDoArriveDate: arriveDate,
+      gbDoArriveWeeksYear: weekYear,
+      gbDoArriveOnlyDate: arriveOnlyDate,
+      gbDoArriveWhatDay: week,
+      gbDoNxGoodsId: gbGoodsId,
+      gbDoNxGoodsFatherId: gbGoodsFatherId,
+      gbDoNxDistributerGoodsId: gbDisGoodsId,
+      gbDoNxDistributerId: gbDisId,
+      gbDoGoodsType: goodsType,
+      gbDoOrderType: goodsType,
+      gbDoDsStandardScale: -1,
+      stockIsZero: e.detail.stockIsZero,
+      gbDoPrintStandard: this.data.printStandard,
+
+    };
+    console.log(dg);
+    load.showLoading("保存订单");
+    depOrder.saveGbOrderJj(dg).then(res => {
+      load.hideLoading();
+      if (res.result.code == 0) {
+        load.hideLoading();
+
+        wx.setStorageSync('needRefreshOrderData', true);
+
+        var data = "depGoodsArrAi[" + this.data.index + "].gbDepartmentOrdersEntity";
+
+        var dataGoods = "depGoodsArrAi[" + this.data.index + "].gbDistributerGoodsEntity";
+
+        this.setData({
+          [data]: res.result.data,
+          [dataGoods]: res.result.data.gbDistributerGoodsEntity,
+        })
+        console.log("eeeeeee",e.detail.stockIsZero )
+        if(e.detail.stockIsZero){
+          var dataStock = "depGoodsArrAi[" + this.data.index + "].gbDepartmentGoodsStockEntities";
+          this.setData({
+            [dataStock]: [],
+          })
+        }
+
+      } else {
+        wx.showToast({
+          title: '订单保存失败',
+          icon: 'none'
+        })
+      }
+    })
+
+  },
+
+  /**
+   * 修改配送申请
+   * @param {} e 
+   */
+  _updateDisOrder(e) {
+    var that = this;
+    var dg = {
+      id: that.data.applyItem.gbDepartmentOrdersId,
+      weight: e.detail.applyNumber,
+      standard: e.detail.applyStandardName,
+      remark: e.detail.applyRemark,
+    };
+    load.showLoading("修改订单");
+    depOrder.updateOrderGbJj(dg).then(res => {
+      wx.setStorageSync('needRefreshOrderData', true);
+      load.hideLoading();
+      if (res.result.code == 0) {
+        load.hideLoading();
+        
+        wx.setStorageSync('needRefreshOrderData', true);
+
+       //根据一下的disGoodsId更新depGoodsArrAi 的订单
+        var orderDisGoodsId = res.result.data.gbDoDisGoodsId;
+        // depGoodsArrAi的 item.gbDdgDisGoodsId
+        
+        // 查找并更新 depGoodsArrAi 中对应商品的订单信息
+        const depGoodsArrAi = this.data.depGoodsArrAi;
+        const targetIndex = depGoodsArrAi.findIndex(goods =>
+          goods.gbDdgDisGoodsId === orderDisGoodsId
+        );
+
+        if (targetIndex !== -1) {
+          const updatePath = `depGoodsArrAi[${targetIndex}].gbDepartmentOrdersEntity`;
+          this.setData({
+            [updatePath]: res.result.data
+          });
+          console.log('depGoodsArrAi 更新订单:', updatePath, res.result.data);
+        } else {
+          console.log('未找到对应的 depGoodsArrAi 商品，gbDoDisGoodsId:', orderDisGoodsId);
+        }
+
+        var data = "goodsList[" + this.data.index + "].gbDepartmentOrdersEntity";
+        this.setData({
+          [data]: res.result.data
+        })
+
+        this.cancle();
+      } else {
+        load.hideLoading();
+        wx.showToast({
+          title: res.result.msg,
+          icon: "none"
+        })
+      }
+    })
+  },
+
+
+  //获取dis数据
+  initDisData() {
+    load.showLoading("获取商品")
+    var that = this;
+   
+    depOrder.gbDepGetNxCataGoods().then(res => {
+      if (res.result.code == 0) {
+        load.hideLoading();
+        console.log(res.result.data);
+        var newId = res.result.data.cataArr[0].nxGoodsEntityList[0].nxGoodsId;
+        this.setData({
+          grandList: res.result.data.cataArr,
+          sortDepGoodsArrDis: res.result.data.depGoodsArr,
+          fatherArrDis: res.result.data.cataArr[0].nxGoodsEntityList,
+          leftGreatId: res.result.data.cataArr[0].nxGoodsId,
+          selectedSubCategoryId: res.result.data.cataArr[0].nxGoodsEntityList[0].nxGoodsId,
+          greatName: res.result.data.cataArr[0].nxDfgGoodsName,
+          fatherSonsIndex: 0,
+          activeSubCatId: newId,
+        })
+        that._getFatherGoodsDis();
+
+
+      }
+    })
+  },
+
+
+  _getFatherGoodsDis() {
+    const data = {
+      depId: this.data.depId,
+      greatGrandId: this.data.leftGreatId,
+      limit: this.data.limit,
+      page: this.data.currentPageDis,
+      disId: this.data.disId,
+    };
+
+    depOrder.gbDepGetNxGoodsByGreatGrandId(data).then(res => {
+      if (res.result.code == 0) {
+        console.log(`>>> _getFatherGoodsDis: 初始获取 ${res.result.page.list.length} 个商品`);
+        console.log(`>>> _getFatherGoodsDis: 初始商品IDs:`, res.result.page.list.map(i => i.nxGoodsId));
+
+        const processedList = this.processGoodsListDis(res.result.page.list);
+        console.log("rerssssssssss",res.result.page);
+
+        var subCatId = this.data.activeSubCatId;
+        this.setData({
+          goodsList: processedList,
+          currentPageDis: this.data.currentPageDis,
+          totalPageDis: res.result.page.totalPage,
+          totalCountDis: res.result.page.totalCount,
+
+          subcatScrollIntoView: `subcat-${subCatId}`,
+          scrollIntoView: `cat-${subCatId}` // 右侧商品区锚点
+        }, () => {
+          // 数据更新后计算分类位置
+          this.calculateCategoryPositionsDis();
+          const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
+          console.log('sortDepGoodsArrInit:', idOrder);
+          console.log('merged ids--Initt:', processedList.map(i => i.nxGoodsId));
+
+
+        });
+      }
+    });
+  },
+
+  _getGoodsIdsByGreatId() {
+    console.log("huoquxinidididiidssss")
+    depOrder.getNxGoodsIdsByGreatId(this.data.leftGreatId).then(res => {
+      if (res.result.code == 0) {
+        this.setData({
+          sortDepGoodsArrDis: res.result.data
+        })
+      }
+    })
+  },
+
+
+  changeGreatGrandDis(e) {
+    const categoryId = e.currentTarget.dataset.id;
+    this.setData({
+      leftGreatId: categoryId,
+      leftIndex: e.currentTarget.dataset.index,
+      goodsList: [],
+      currentPageDis: 1,
+      totalPageDis: 0,
+      isLoading: false,
+      greatName: e.currentTarget.dataset.name,
+      fatherArrDis: this.data.grandList[e.currentTarget.dataset.index].nxGoodsEntityList,
+      selectedSubCategoryId: this.data.grandList[e.currentTarget.dataset.index].nxGoodsEntityList[0].nxGoodsId,
+      activeSubCatId: this.data.grandList[e.currentTarget.dataset.index].nxGoodsEntityList[0].nxGoodsId,
+
+    }, () => {
+      // 用 this.createSelectorQuery() 保证作用域
+      const query = this.createSelectorQuery();
+      query.select(`#left-cat-${categoryId}`).boundingClientRect();
+      query.select('#leftScroll').boundingClientRect(); // ← 改这里
+      query.select('#leftScroll').scrollOffset(); // ← 和这里
+      query.exec(res => {
+        var itemRect = res[0];
+        var scrollRect = res[1];
+        var scrollOffset = res[2];
+        const itemTop = itemRect.top;
+        const itemH = itemRect.height;
+        const listTop = scrollRect.top;
+        const listH = scrollRect.height;
+        const scrollTop0 = scrollOffset.scrollTop;
+
+        const targetScrollTop = scrollTop0 + itemTop - listTop - (listH / 2) + (itemH / 2);
+        this.setData({
+          leftScrollTopNx: targetScrollTop
+        });
+      });
+    });
+
+    this._getGoodsIdsByGreatId();
+    this._getFatherGoodsDis();
+  },
+
+  onScrollToLowerDis: function () {
+    // 防止重复请求
+    if (this.data.isLoading || this.data.goodsList.length >= this.data.totalCountDis) return;
+
+    this.setData({
+      isLoading: true
+    });
+
+    var currentPageDis = this.data.currentPageDis;
+    var totalPageDis = this.data.totalPageDis;
+    var disId = this.data.disId;
+    var leftGreatId = this.data.leftGreatId;
+    var depId = this.data.depId;
+    var limit = this.data.limit;
+
+    // 确保非搜索模式，并且当前页数未超过总页数
+    if (currentPageDis <= totalPageDis) {
+      // 先设置下一页页码
+      const nextPage = currentPageDis + 1;
+      this.setData({
+        currentPageDis: nextPage
+      });
+
+      const data = {
+        limit: limit,
+        page: nextPage,
+        depId: depId,
+        greatGrandId: leftGreatId,
+        disId: disId,
+      };
+
+      depOrder.gbDepGetNxGoodsByGreatGrandId(data)
+        .then((res) => {
+          if (res.result.code == 0) {
+            const newItems = res.result.page.list || [];
+            console.log(`>>> onScrollToLowerDis: 第 ${nextPage} 页获取 ${newItems.length} 个商品`);
+            console.log(`>>> onScrollToLowerDis: 新商品IDs:`, newItems.map(i => i.nxGoodsId));
+            console.log(`>>> onScrollToLowerDis: 原有商品数量: ${this.data.goodsList.length}`);
+            console.log(`>>> onScrollToLowerDis: 原有商品IDs:`, this.data.goodsList.map(i => i.nxGoodsId));
+
+            const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
+            console.log('sortDepGoodsArrGetFatherGoods:', idOrder);
+
+            var updatedGoodsList = this.data.goodsList.concat(newItems);
+            console.log(`>>> onScrollToLowerDis: 合并后总数量: ${updatedGoodsList.length}`);
+            console.log(`>>> onScrollToLowerDis: 合并后所有IDs:`, updatedGoodsList.map(i => i.nxGoodsId));
+
+            // 更新商品列表和分页信息
+            this.setData({
+              goodsList: updatedGoodsList,
+              totalPageDis: res.result.page.totalPage,
+              totalCountDis: res.result.page.totalCount,
+              isLoading: false,
+            });
+
+            // 如果已达到 totalCount，停止加载
+            if (updatedGoodsList.length >= this.data.totalCount) {
+              this.setData({
+                isLoading: false
+              });
+            }
+          } else {
+            wx.showToast({
+              title: '获取商品失败',
+              icon: 'none'
+            });
+            this.setData({
+              isLoading: false
+            });
+          }
+        })
+
+    } else {
+      this.setData({
+        isLoading: false
+      });
+    }
+  },
+
+
+  onGoodsScrollDis(e) {
+    // 节流略
+    const query = wx.createSelectorQuery();
+    query.selectAll('.product-item').boundingClientRect();
+    query.select('.goods-list').boundingClientRect();
+    query.exec((res) => {
+      if (res[0] && res[1]) {
+        const productRects = res[0];
+        const listRect = res[1];
+        // 找到第一个可见商品
+        let minDiff = Infinity;
+        let firstVisibleIndex = 0;
+        for (let i = 0; i < productRects.length; i++) {
+          const diff = productRects[i].top - listRect.top;
+          if (diff >= 0 && diff < minDiff) {
+            minDiff = diff;
+            firstVisibleIndex = i;
+          }
+        }
+        const firstVisibleItem = this.data.goodsList[firstVisibleIndex];
+        if (firstVisibleItem) {
+          const activeId = firstVisibleItem.nxGoodsGrandId;
+          if (activeId && activeId !== this.data.activeSubCatId) {
+            this.setData({
+              activeSubCatId: activeId,
+              subcatScrollIntoView: `subcat-${activeId}`
+            });
+          }
+        }
+      }
+    });
+  },
+
+
+  toggleSubCatDis() {
+    this.setData({
+      showAllSubCat: !this.data.showAllSubCat
+    });
+  },
+
+
+  // Dis点击标签事件
+  onSubCatTapDis(e) {
+
+    const subCatId = e.currentTarget.dataset.id;
+    console.log("=== onSubCatTapDis 开始 ===");
+    console.log("点击的分类ID:", subCatId);
+    console.log("当前 goodsList 长度:", this.data.goodsList.length);
+    console.log("goodsList 中的所有 nxGoodsGrandId:", this.data.goodsList.map(item => item.nxGoodsGrandId));
+    
+    const hasGoods = this.data.goodsList.some(item => String(item.nxGoodsGrandId) === String(subCatId));
+    console.log("hasGoods 判断结果:", hasGoods);
+    
+    this.setData({
+      showAllSubCat: false,
+      activeSubCatId: String(subCatId),
+      subcatScrollIntoView: `subcat-${subCatId}`
+    });
+    console.log("Dis点击标签事件", subCatId);
+    if (hasGoods) {
+      // 已有商品，直接滚动
+      console.log("准备滚动到:", `cat-${subCatId}`);
+      this.setData({
+        scrollIntoView: `cat-${subCatId}`
+      });
+      console.log("scrollIntoView 已设置为:", this.data.scrollIntoView);
+    } else {
+      console.log(`>>> onSubCatTapDis: 即将为分类 ${subCatId} 加载商品。当前页码: ${this.data.currentPageDis}`);
+      this.startLoadingGoodsForSubCat(subCatId);
+    }
+  },
+
+  async startLoadingGoodsForSubCat(subCatId) {
+    if (this.data.isLoading) {
+      console.log('>>> 操作过于频繁，正在加载数据，请稍候...');
+      return;
+    }
+
+    if (this.data.currentPageDis >= this.data.totalPageDis) {
+      console.log('>>> 已经到达最后一页，没有更多商品了。');
+      wx.showToast({
+        title: '没有更多商品了',
+        icon: 'none'
+      });
+      return;
+    }
+
+    console.log(`>>> startLoadingGoodsForSubCat: 开始为分类 ${subCatId} 加载商品...`);
+    this.setData({
+      isLoading: true
+    });
+
+    // 显示loading提示
+    wx.showLoading({
+      title: '正在加载商品...',
+      mask: true
+    });
+
+    try {
+      console.log(`>>> startLoadingGoodsForSubCat: 即将从 page ${this.data.currentPageDis + 1} 开始加载`);
+      // 修复：传入现有的goodsList数据，而不是空数组
+      await this.loadGoodsBySubCatIdDis(subCatId, this.data.currentPageDis + 1, this.data.goodsList);
+      console.log(`<<< 分类 ${subCatId} 商品加载完成。`);
+    } catch (error) {
+      console.error(`<<< 分类 ${subCatId} 商品加载失败:`, error);
+    } finally {
+      this.setData({
+        isLoading: false
+      });
+      // 隐藏loading提示
+      wx.hideLoading();
+    }
+  },
+
+  async loadGoodsBySubCatIdDis(subCatId, page, loadedGoods) {
+    var limit = this.data.limit;
+    var depId = this.data.depId;
+    var leftGreatId = this.data.leftGreatId;
+    var disId = this.data.disId;
+    const data = {
+      limit: limit,
+      page: page,
+      depId: depId,
+      greatGrandId: leftGreatId,
+      disId: disId,
+    };
+
+    try {
+      console.log(`>>> loadGoodsBySubCatIdDis: 正在请求第 ${page} 页商品...`);
+      console.log(`>>> loadedGoods 初始长度: ${loadedGoods.length}`);
+      console.log(`>>> loadedGoods 初始IDs:`, loadedGoods.map(i => i.nxGoodsId));
+
+      const res = await depOrder.gbDepGetNxGoodsByGreatGrandId(data);
+      if (res.result.code === 0) {
+        const newItems = res.result.page.list || [];
+        console.log(`>>> 第 ${page} 页成功获取 ${newItems.length} 个商品。`);
+        console.log(`>>> 新获取的商品IDs:`, newItems.map(i => i.nxGoodsId));
+
+        const merged = loadedGoods.concat(newItems);
+        console.log(`>>> 合并后总长度: ${merged.length}`);
+        console.log(`>>> 合并后所有IDs:`, merged.map(i => i.nxGoodsId));
+
+        // 4) dis合并后按 sortDepGoodsArr 顺序排序
+        const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
+        console.log('sortDepGoodsArr:', idOrder);
+        console.log('merged ids:', merged.map(i => i.nxGoodsId));
+        const sortedArr = merged.slice().sort((a, b) => {
+          const idxA = idOrder.indexOf(String(a.nxGoodsId));
+          const idxB = idOrder.indexOf(String(b.nxGoodsId));
+          return (idxA === -1 ? 99999 : idxA) - (idxB === -1 ? 99999 : idxB);
+        });
+        console.log(`>>> 排序后长度: ${sortedArr.length}`);
+        console.log(`>>> 排序后IDs:`, sortedArr.map(i => i.nxGoodsId));
+
+
+        const hasGoodsInNewItems = newItems.some(item => String(item.nxGoodsGrandId) === String(subCatId));
+
+        if (hasGoodsInNewItems) {
+          console.log(`>>> 在第 ${page} 页找到目标商品，准备渲染...`);
+          const processedGoods = this.processGoodsListDis(sortedArr);
+          console.log(`>>> processGoodsListDis 处理后长度: ${processedGoods.length}`);
+          console.log(`>>> processGoodsListDis 处理后IDs:`, processedGoods.map(i => i.nxGoodsId));
+
+          this.setData({
+            goodsList: processedGoods,
+            currentPageDis: page,
+            totalPageDis: res.result.page.totalPage,
+            totalCountDis: res.result.page.totalCount,
+            isLoading: false, // 找到目标商品后关闭loading
+          });
+
+          setTimeout(() => {
+            this.setData({
+              scrollIntoView: `cat-${subCatId}`
+            });
+            console.log(`>>> 已滚动到分类 ${subCatId}。`);
+          }, 100);
+
+        } else if (page <= this.data.totalPageDis) {
+          console.log(`>>> 第 ${page} 页未找到商品，继续加载下一页(page ${page + 1})...`);
+          console.log(`>>> 递归调用前 sortedArr 长度: ${sortedArr.length}`);
+          // 继续递归加载，保持loading状态
+          await this.loadGoodsBySubCatIdDis(subCatId, page + 1, sortedArr);
+        } else {
+          console.log('>>> 已到达最后一页，未找到更多商品。');
+          const processedGoods = this.processGoodsListDis(sortedArr);
+          console.log(`>>> 最后一页 processGoodsListDis 处理后长度: ${processedGoods.length}`);
+          console.log(`>>> 最后一页 processGoodsListDis 处理后IDs:`, processedGoods.map(i => i.nxGoodsId));
+
+          this.setData({
+            goodsList: processedGoods,
+            currentPageDis: page,
+            totalPageDis: res.result.page.totalPage,
+            totalCountDis: res.result.page.totalCount,
+            isLoading: false, // 加载完所有页面后关闭loading
+          });
+
+          // 提示用户未找到目标分类商品
+          wx.showToast({
+            title: '未找到该分类商品',
+            icon: 'none'
+          });
+        }
+      } else {
+        console.error(`>>> 第 ${page} 页商品获取失败:`, res.result.msg);
+        this.setData({
+          isLoading: false // 请求失败时也要关闭loading
+        });
+        wx.showToast({
+          title: '获取商品失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      console.error(`>>> 请求第 ${page} 页商品时发生异常:`, error);
+      this.setData({
+        isLoading: false // 异常时也要关闭loading
+      });
+      throw error;
+    }
+  },
+
+  // 处理商品数据，添加分类信息
+  processGoodsListDis(list) {
+    console.log(`>>> processGoodsListDis 输入长度: ${list.length}`);
+    console.log(`>>> processGoodsListDis 输入IDs:`, list.map(i => i.nxGoodsId));
+
+    // 去重处理：确保每个商品ID只出现一次
+    const goodsMap = new Map();
+    list.forEach(item => {
+      goodsMap.set(String(item.nxGoodsId), item);
+    });
+    const uniqueList = Array.from(goodsMap.values());
+
+    console.log(`>>> 去重后长度: ${uniqueList.length}`);
+    console.log(`>>> 去重后IDs:`, uniqueList.map(i => i.nxGoodsId));
+
+    // 根据您的反馈，此处的排序是多余的，因此将其注释掉。
+    // uniqueList.sort((a, b) => a.nxGoodsGrandId - b.nxGoodsGrandId);
+    let currentCategory = null;
+    const result = uniqueList.map(item => {
+      if (item.nxGoodsGrandId !== currentCategory) {
+        currentCategory = item.nxGoodsGrandId;
+        return Object.assign({}, item, {
+          isFirstInCategory: true,
+          categoryName: this.getCategoryNameDis(item.nxGoodsGrandId)
+        });
+      }
+      return Object.assign({}, item, {
+        isFirstInCategory: false,
+        categoryName: this.getCategoryNameDis(item.nxGoodsGrandId)
+      });
+    });
+
+    console.log(`>>> processGoodsListDis 最终输出长度: ${result.length}`);
+    console.log(`>>> processGoodsListDis 最终输出IDs:`, result.map(i => i.nxGoodsId));
+
+    return result;
+  },
+
+  // 计算分类位置
+  calculateCategoryPositionsDis() {
+    const query = wx.createSelectorQuery();
+    query.selectAll('.goods-category-title').boundingClientRect();
+    query.select('.goods-list').boundingClientRect();
+
+    query.exec((res) => {
+      if (res[0] && res[1]) {
+        const listRect = res[1];
+        const positions = res[0].map(item => ({
+          id: item.id.replace('cat-', ''),
+          top: item.top - listRect.top
+        }));
+
+        this.setData({
+          categoryPositions: positions
+        });
+      }
+    });
+  },
+
+  // 获取分类名称
+  getCategoryNameDis(categoryId) {
+    const category = this.data.fatherArr.find(item =>
+      item.nxGoodsId === categoryId
+    );
+    return category ? category.nxDfgFatherGoodsName : '';
+  },
+
+
+  changeGreatGrand(e) {
+    console.log(e);
+    const categoryId = e.currentTarget.dataset.id;
+    if (categoryId !== this.data.leftGreatId) {
+      this.setData({
+        leftGreatId: categoryId,
+        leftIndex: e.currentTarget.dataset.index,
+        goodsList: [],
+        currentPage: 1,
+        totalPage: 1,
+        isLoading: false,
+        greatName: e.currentTarget.dataset.name,
+        fatherArr: this.data.grandList[e.currentTarget.dataset.index].gbGoodsEntityList,
+        selectedSubCategoryId: this.data.grandList[e.currentTarget.dataset.index].gbGoodsEntityList[0].gbGoodsId,
+      });
+      this._getFatherGoods();
+
+    }
+
+  },
+
+
+  _getFatherGoods() {
+
+    var data = {
+      depId: this.data.depId,
+      greatGrandId: this.data.leftGreatId,
+      limit: this.data.limit,
+      page: this.data.currentPage,
+      disId: this.data.disId
+    }
+    depOrder.gbDepGetNxGoodsByGreatGrandId(data).then(res => {
+      if (res.result.code == 0) {
+        console.log("rerssssssssss",res.result.page);
+
+        this.setData({
+          goodsList: res.result.page.list,
+          selectedSubCategoryId: this.data.grandList[this.data.leftIndex].gbGoodsEntityList[0].gbGoodsId,
+          currentPage: this.data.currentPage + 1,
+          totalPage: res.result.page.totalPage,
+          totalCount: res.result.page.totalCount,
+        })
+      }
+    })
+  },
+
+
+  onScrollToLower: function () {
+    // 防止重复请求
+    if (this.data.isLoading || this.data.goodsList.length >= this.data.totalCount) return;
+
+    this.setData({
+      isLoading: true
+    });
+
+    var currentPage = this.data.currentPage;
+    var totalPage = this.data.totalPage;
+    var leftGreatId = this.data.leftGreatId;
+    var depId = this.data.depId;
+    var limit = this.data.limit;
+    var disId = this.data.disId;
+
+    // 确保当前页数未超过总页数
+    if (currentPage <= totalPage) {
+      const data = {
+        limit: limit,
+        page: currentPage,
+        depId: depId,
+        greatGrandId: leftGreatId,
+        disId: disId,
+      };
+
+      depOrder.gbDepGetNxGoodsByGreatGrandId(data)
+        .then((res) => {
+          if (res.result.code == 0) {
+            const newItems = res.result.page.list || [];
+            var updatedGoodsList = this.data.goodsList.concat(newItems);
+            console.log("rerssssssssss",res.result.page);
+
+            // 更新当前页和商品列表
+            this.setData({
+              goodsList: updatedGoodsList,
+              currentPage: currentPage + 1,
+              totalPage: res.result.page.totalPage,
+              totalCount: res.result.page.totalCount,
+              isLoading: false,
+            });
+
+            // 如果已达到 totalCount，停止加载
+            if (updatedGoodsList.length >= this.data.totalCount) {
+              this.setData({
+                isLoading: false
+              });
+            }
+          } else {
+            wx.showToast({
+              title: '获取商品失败',
+              icon: 'none'
+            });
+            this.setData({
+              isLoading: false
+            });
+          }
+        })
+        .catch(() => {
+          wx.showToast({
+            title: '加载错误，请稍后再试',
+            icon: 'none'
+          });
+          this.setData({
+            isLoading: false
+          });
+        });
+    } else {
+      this.setData({
+        isLoading: false
+      });
+    }
+  },
+
+
+  delDepGoods(e) {
+    console.log(e);
+
+    var depGoods = e.currentTarget.dataset.item;
+    if (depGoods.gbDepartmentGoodsStockEntities.length == 0 && depGoods.gbDepartmentOrdersEntity == null) {
+      this.setData({
+        depGoods: depGoods,
+        editOrderIndex: e.currentTarget.dataset.index,
+        warnContent: depGoods.gbDdgDepGoodsName,
+        showDep: false,
+        show: false,
+        popupType: 'deleteGoods',
+        showPopupWarn: true,
+      })
+
+    } else {
+
+      wx.showModal({
+        title: '有未完成数据',
+        content: '有未完成订单或库存，请把该商品库存清零后，再进行删除。',
+        showCancel: false,
+        confirmText: '好的',
+        complete: (res) => {
+          if (res.confirm) {
+
+          }
+        }
+      })
+    }
+
+
+  },
+
+
+  confirmWarn() {
+    if (this.data.popupType == 'deleteStandard') {
+      this.deleteStandardApi()
+    } else {
+      if (this.data.popupType == 'deleteOrder') {
+
+        this.deleteApplyApi()
+      } else if (this.data.popupType == 'deleteGoods') {
+        this._delteDepGoods();
+      }
+
+    }
+  },
+
+
+  _delteDepGoods() {
+
+    var id = this.data.depGoods.gbDepartmentDisGoodsId;
+    depOrder.deleteDepGoods(id).then(res => {
+      if (res.result.code == 0) {
+        var arr = this.data.depGoodsArrAi;
+        arr.splice(this.data.editOrderIndex, 1);
+        this.setData({
+          depGoodsArrAi: arr
+        })
+      }
+    })
+
+  },
+
+  delStandard(e) {
+    this.setData({
+      warnContent: e.detail.standardName,
+      show: false,
+      popupType: 'deleteStandard',
+      showPopupWarn: true,
+      disStandardId: e.detail.id,
+    })
+
+  },
+
+
+  deleteApplyApi() {
+
+    this.setData({
+      popupType: "",
+      showPopupWarn: false,
+      delGoodsId: this.data.applyItem.gbDoDisGoodsId,
+
+    })
+
+    var that = this;
+    load.showLoading("删除订单");
+    depOrder.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(res => {
+      load.hideLoading();
+      if (res.result.code == 0) {
+
+        wx.setStorageSync('needRefreshOrderData', true);
+
+        if (that.data.tab1Index == 0) {
+
+          var data = "depGoodsArrAi[" + this.data.index + "].gbDepartmentOrdersEntity";
+          this.setData({
+            [data]: null
+          })
+
+        }
+        if (that.data.tab1Index == 1) {
+
+          var data1 = "goodsList[" + this.data.index + "].gbDepartmentOrdersEntity";
+          this.setData({
+            [data1]: null
+          })
+
+          //这里也把depGoodsArrAi 的同步一下
+          // 查找 depGoodsArrAi 中对应的商品并清空其订单信息
+          const depGoodsArrAi = this.data.depGoodsArrAi;
+          const targetIndex = depGoodsArrAi.findIndex(goods =>
+            goods.gbDdgDisGoodsId === this.data.delGoodsId
+          );
+
+          if (targetIndex !== -1) {
+            const updatePath = `depGoodsArrAi[${targetIndex}].gbDepartmentOrdersEntity`;
+            this.setData({
+              [updatePath]: null
+            });
+          } else {
+            console.log('未找到对应的 depGoodsArrAi 商品，gbDdgDisGoodsId:', this.data.goodsList[this.data.index].gbDdgDisGoodsId);
+          }
+
+        }
+        that.cancle()
+
+      }
+    })
+  },
+
+  deleteStandardApi(e) {
+
+      
+    depOrder.gbDisDeleteStandard(this.data.disStandardId).then(res => {
+      if (res.result.code == 0) {
+        console.log("delstttnanaa", res.result.data);
+        var standards = "depGoods.gbDistributerStandardEntities"
+        this.setData({
+          [standards]: res.result.data.gbDistributerStandardEntities,
+        })
+          var dataGoods = "depGoodsArrAi[" + this.data.index + "].gbDistributerStandardEntities";
+          this.setData({
+            [dataGoods]: res.result.data.gbDistributerStandardEntities,
+          })
+
+        this.setData({
+          popupType: "",
+          showPopupWarn: false,
+          disStandardId: "",
+          itemDis: "",
+          item: "",
+          editApply: false,
+          show: false,
+        })
+
+      } else {
+        wx.showToast({
+          title: res.result.msg,
+          icon: 'none'
+        })
+      }
+    })
+  },
+
+  confirmStandardNx(e) {
+    console.log(e);
+    console.log("confirmStandardconfirmStandardconfirmStandard")
+    var data = {
+      gbSGoodsId: this.data.nxGoods.nxGoodsId,
+      gbStandardName: e.detail.newStandardName,
+    }
+    depOrder.saveNxStandard(data).
+    then(res => {
+      if (res.result.code == 0) {
+        var standardArr = this.data.nxGoods.gbGoodsStandardEntities;
+        standardArr.push(res.result.data);
+        var standards = "nxGoods.gbGoodsStandardEntities";
+        var data = "goodsList[" + this.data.index + "].gbGoodsStandardEntities"
+        this.setData({
+          [standards]: standardArr,
+          [data]: standardArr,
+          applyStandardName: res.result.data.gbStandardName,
+
+        })
+      } else {
+        wx.showToast({
+          title: res.result.msg,
+          icon: 'none'
+        })
+      }
+    })
+  },
+
+  confirmStandard(e) {
+    var data = {
+      gbDsDisGoodsId: this.data.applyItem.gbDoDisGoodsId,
+      gbDsStandardName: e.detail.newStandardName,
+    }
+    depOrder.gbDisSaveStandard(data).
+    then(res => {
+      if (res.result.code == 0) {
+        var standardArr = this.data.depGoods.gbDistributerStandardEntities;
+        standardArr.push(res.result.data);
+        var standards = "depGoods.gbDistributerStandardEntities"
+        this.setData({
+          [standards]: standardArr,
+          applyStandardName: res.result.data.gbDsStandardName,
+        })
+          var dataGoods = "depGoodsArrAi[" + this.data.index + "].gbDistributerStandardEntities";
+          this.setData({
+            [dataGoods]: standardArr,
+          })
+       
+      } else {
+        wx.showToast({
+          title: res.result.msg,
+          icon: 'none'
+        })
+      }
+    })
+  },
+
+  /**
+   * 删除订货
+   */
+  delApplyDep() {
+    this.setData({
+      warnContent: this.data.depGoods.gbDdgDepGoodsName + "  " + this.data.applyItem.gbDoQuantity + this.data.applyItem.gbDoStandard,
+      deleteShow: true,
+      show: false,
+      popupType: 'deleteOrder',
+      showPopupWarn: true,
+      showOperationGoods: false,
+      showOperationLinshi: false
+    })
+    this.setData({
+      showOperationGoods: false,
+      showOperationLinshi: false
+    })
+    this.hideModal();
+  },
+
+  delApply() {
+    this.setData({
+      warnContent: this.data.itemDis.gbDgGoodsName + "  " + this.data.applyItem.gbDoQuantity + this.data.applyItem.gbDoStandard,
+      deleteShow: true,
+      show: false,
+      popupType: 'deleteOrder',
+      showPopupWarn: true,
+      showOperationGoods: false,
+      showOperationLinshi: false
+    })
+    this.setData({
+      showOperationGoods: false,
+      showOperationLinshi: false
+    })
+    this.hideModal();
+  },
+
+  closeWarn() {
+    this.setData({
+      applyItem: "",
+      warnContent: "",
+      show: false,
+      popupType: '',
+      showPopupWarn: false,
+    })
+  },
+
+  toSearchGoods() {
+
+    wx.navigateTo({
+      url: '../resGoodsSearch/resGoodsSearch',
+    })
+  },
+
+
+  deleteNo() {
+    this.setData({
+      applyItem: "",
+      deleteShow: false,
+    })
+  },
+
+  cancle() {
+    this.setData({
+      show: false,
+      applyItem: "",
+      applyStandardName: "",
+      editApply: false,
+      applyNumber: "",
+      applyRemark: "",
+      applySubtotal: "",
+      itemDis: null,
+      item: null,
+
+    })
+  },
+
+
+  hideMask() {
+    this.setData({
+      showOperation: false,
+    })
+  },
+
+
+  // stock business
+  showStock(e) {
+    var item = e.currentTarget.dataset.item;
+    item.gbDistributerGoodsEntity = e.currentTarget.dataset.goods.gbDistributerGoodsEntity;
+    console.log("sotscckcckkkkckc", item.gbDgsWasteFullTime)
+    var goodsIndex = e.currentTarget.dataset.goodsindex;
+    var stockIndex = e.currentTarget.dataset.stockindex;
+    if (item.gbDgsWasteFullTime != null && item.gbDgsWasteFullTime != '' && item.gbDgsWasteFullTime != undefined) {
+      var endTime = item.gbDgsWasteFullTime;
+      var startTime = this.data.nowTime;
+      var endTimeFormat = endTime.replace(/-/g, '/') //所有的- 都替换成/
+      var endTimeDown = Date.parse(new Date(endTimeFormat));
+      var startTimeFormat = startTime.replace(/-/g, '/') //所有的- 都替换成/
+      var startTimeDown = Date.parse(new Date(startTimeFormat));
+      var thisResult = Number(endTimeDown) - Number(startTimeDown);
+      thisResult = Math.floor(thisResult / 1000 / 60 / 60);
+
+      if (thisResult < 0) { // 超过废弃时间
+        var restWeight = item.gbDgsRestWeight;
+        item.gbDgsMyWasteWeight = restWeight;
+        item.gbDgsMyProduceWeight = "0";
+        this.setData({
+          canWaste: true,
+          canSure: true,
+          showType: 4,
+        })
+      } else {
+        item.gbDgsMyProduceWeight = item.gbDgsRestWeight;
+        this.setData({
+          canWaste: false,
+          resultTime: thisResult,
+          canSure: true,
+          showType: 1
+        })
+      }
+    } else {
+      item.gbDgsMyProduceWeight = item.gbDgsRestWeight;
+      this.setData({
+
+        canWaste: false,
+        canSure: true,
+        showType: 1
+      })
+    }
+
+    console.log("item.gbDgsRestWeight" + item.gbDgsRestWeight);
+    this.setData({
+      showStock: true,
+      item: item,
+      consultItem: JSON.parse(JSON.stringify(item)),
+      depGoods: e.currentTarget.dataset.goods,
+      goodsIndex: goodsIndex,
+      stockIndex: stockIndex,
+
+    })
+  },
+
+  confirmStock(e) {
+    var item = e.detail.item;
+    var showType = e.detail.showType;
+    console.log("showtypeoeoe", showType);
+    if (this.data.transfer !== '1') {
+      item.gbDgsReduceWeightUserId = this.data.userInfo.gbDepartmentUserId;
+    }
+    if (showType == 1) {
+      load.showLoading("保存数据中")
+      console.log(item);
+      depOrder.saveDepProduceGoodsStock(item)
+        .then(res => {
+          load.hideLoading();
+          if (res.result.code == 0) {
+            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
+            this.setData({
+              [data]: res.result.data,
+            })
+
+          }else{
+            wx.showToast({
+              title: res.result.msg,
+              icon: 'none'
+            })
+          }
+        })
+    } else if (showType == 2) {
+      load.showLoading("保存数据中");
+      console.log("lossss", e.detail.src)
+      this.setData({
+        src: e.detail.src,
+        reason: e.detail.reason,
+      })
+
+      depOrder.saveDepLossGoodsStock(item)
+        .then(res => {
+          load.hideLoading();
+          console.log(res.result.data);
+          console.log("---==========")
+          if (res.result.code == 0) {
+
+            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
+            this.setData({
+              [data]: res.result.data.disGoods,
+
+            })
+            var that = this;
+            var src = that.data.src;
+
+            if (src.length > 0) {
+              console.log("youusrc", src)
+              var reason = that.data.reason;
+              var id = res.result.data.id;
+              console.log(src + reason + id);
+              depOrder.reduceAttachmentSaveWithFile(src, reason, id).then((res) => {
+                console.log(res);
+                if (res.result == '{"code":0}') {
+
+
+                } else {
+                  load.hideLoading();
+                  wx.showToast({
+                    title: res.result.msg,
+                    icon: 'none'
+                  })
+                }
+
+              })
+            }
+
+
+          }else{
+            wx.showToast({
+              title: res.result.msg,
+              icon: 'none'
+            })
+          }
+        })
+    } else if (showType == 3) {
+      this.setData({
+        src: e.detail.src,
+        reason: e.detail.reason,
+      })
+
+      item.gbDgsReturnUserId = this.data.userInfo.gbDepartmentUserId;
+      console.log(item);
+      load.showLoading("保存数据中")
+      depOrder.saveDepReturnGoodsStock(item)
+        .then(res => {
+          load.hideLoading();
+          console.log(res.result.data);
+          if (res.result.code == 0) {
+            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
+            this.setData({
+              [data]: res.result.data.disGoods,
+            })
+            var that = this;
+            var src = that.data.src;
+            if (src.length > 0) {
+              var reason = that.data.reason;
+              var id = res.result.data.id;
+              console.log(src + reason + id);
+              depOrder.reduceAttachmentSaveWithFile(src, reason, id).then((res) => {
+                console.log(res);
+                if (res.result == '{"code":0}') {
+
+
+                } else {
+                  load.hideLoading();
+                  wx.showToast({
+                    title: res.result.msg,
+                    icon: 'none'
+                  })
+                }
+
+              })
+            }
+
+          } else {
+            wx.showToast({
+              title: res.result.msg,
+              icon: 'none'
+            })
+          }
+        })
+    } else if (showType == 4) {
+      load.showLoading("保存数据中");
+
+      console.log(item);
+      depOrder.saveDepWasteGoodsStock(item)
+        .then(res => {
+          load.hideLoading();
+          if (res.result.code == 0) {
+            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
+            this.setData({
+              [data]: res.result.data,
+            })
+          }else{
+            wx.showToast({
+              title: res.result.msg,
+              icon: 'none'
+            })
+          }
+        })
+
+    } 
+    
+  },
+
+
+
+  toBack() {
+    wx.navigateBack({
+      delta: 1
+    })
+  },
+
+
+
+
+
+})

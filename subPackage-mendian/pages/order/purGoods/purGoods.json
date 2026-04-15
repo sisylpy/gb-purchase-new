@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "navbar": "/components/navbar/navbar",
+    "inputOrder": "/components/inputOrder/inputOrder"
+  },
+  "navigationStyle": "custom"
+}

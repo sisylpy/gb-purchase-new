@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "market-navbar": "/components/market-navbar/market-navbar"
+  }
+}

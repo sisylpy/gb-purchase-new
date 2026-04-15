@@ -1,0 +1,173 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+
+  <back-navbar title="每日营业额" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="添加" bindnavbuttontap="toBack"></back-navbar>
+
+  <!-- 添加按钮下拉菜单 -->
+  
+
+  <!-- 顶部日期选择 -->
+  <view class="flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class="small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+  
+    <view class="add-menu-item" catchtap="addSingleDay">
+      <image src="../../../../images/add-1.png" class="icon-sm mr-10"></image>
+      <text>添加营业额</text>
+    </view>
+  
+  </view>
+
+  <!-- 统计数据卡片 -->
+  <view class="flex-column p-20" wx:if="{{stats}}">
+    <!-- 核心指标 -->
+    <view class="flex-row-between mb-20">
+      <view class="stat-card flex-1 mr-20">
+        <view class="font-xs text-secondary">总营业额</view>
+        <view class="font-lg font-bold" style="color: #007aff;">{{stats.totalRevenue}}元</view>
+        <view class="font-xs text-secondary">日均 {{stats.avgRevenuePerDay}}元</view>
+      </view>
+      <view class="stat-card flex-1">
+        <view class="font-xs text-secondary">总订单数</view>
+        <view class="font-lg font-bold" style="color: #ff9500;">{{stats.totalOrders}}单</view>
+        <view class="font-xs text-secondary">共 {{stats.days}} 天</view>
+      </view>
+    </view>
+
+    <!-- 堂食/外卖对比 -->
+    <view class="flex-row-between mb-20">
+      <view class="stat-card flex-1 mr-10 bg-dinein">
+        <view class="flex-row align-center mb-10">
+          <image src="../../../../images/chicang.png" class="icon-sm mr-10"></image>
+          <text class="font-sm font-bold">堂食</text>
+        </view>
+        <view class="font-lg font-bold" style="color: #007aff;">{{stats.totalDineIn}}元</view>
+        <view class="font-xs text-secondary">日均 {{stats.avgDineInPerDay}}元</view>
+      </view>
+      <view class="stat-card flex-1 ml-10 bg-takeout">
+        <view class="flex-row align-center mb-10">
+          <image src="../../../../images/waimai.png" class="icon-sm mr-10"></image>
+          <text class="font-sm font-bold">外卖</text>
+        </view>
+        <view class="font-lg font-bold" style="color: #34c759;">{{stats.totalTakeout}}元</view>
+        <view class="font-xs text-secondary">日均 {{stats.avgTakeoutPerDay}}元</view>
+      </view>
+    </view>
+
+    <!-- 平台抽成 -->
+    <view class="stat-card bg-platform mb-20">
+      <view class="flex-row-between">
+        <view>
+          <view class="font-xs text-secondary">平台抽成</view>
+          <view class="font-lg font-bold" style="color: #ff3b30;">{{stats.totalPlatformFee}}元</view>
+        </view>
+        <view class="text-right">
+          <view class="font-xs text-secondary">实收</view>
+          <view class="font-lg font-bold" style="color: #007aff;">{{actualRevenue}}元</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 曲线图 -->
+  <view class="bg-white p-20 mb-20" wx:if="{{chartData && chartData.length > 0}}">
+    <view class="flex-row-between mb-20">
+      <text class="font-sm font-bold">营业额趋势</text>
+      <view class="flex-row">
+        <view class="chart-legend">
+          <view class="legend-dot" style="background: #007aff;"></view>
+          <text class="font-xs">堂食</text>
+        </view>
+        <view class="chart-legend ml-20">
+          <view class="legend-dot" style="background: #34c759;"></view>
+          <text class="font-xs">外卖</text>
+        </view>
+      </view>
+    </view>
+    <view style="height: 300rpx;">
+      <ec-canvas id="turnoverChart" canvas-id="turnoverChart" ec="{{ ecTurnover }}" style="width: 100%; height: 100%;"></ec-canvas>
+    </view>
+  </view>
+
+  <!-- 每日详情列表 -->
+  <view class="bg-white" wx:if="{{dailyList && dailyList.length > 0}}">
+    <view class="p-20 border-bottom">
+      <text class="font-sm font-bold">每日详情</text>
+    </view>
+    <view class="flex-column" wx:for="{{dailyList}}" wx:key="gbAiDailyRevenueId">
+      <view class="daily-item p-20 border-bottom">
+        <!-- 日期头部 -->
+        <view class="flex-row-between mb-20">
+          <view class="flex-row align-center">
+            <view class="date-badge">
+              <text class="date-day">{{tool.getDay(item.gbAiDailyRevenueRecordDate)}}</text>
+              <text class="date-month">{{tool.getMonth(item.gbAiDailyRevenueRecordDate)}}月</text>
+            </view>
+            <view class="ml-20">
+              <text class="font-md">{{tool.getWeekDayName(item.gbAiDailyRevenueWeekday)}}</text>
+            </view>
+          </view>
+          <view class="revenue-badge">
+            <text class="font-lg font-bold" style="color: #007aff;">{{item.gbAiDailyRevenueGrossRevenue}}</text>
+            <text class="font-sm text-secondary">元</text>
+          </view>
+        </view>
+
+        <!-- 堂食/外卖数据 -->
+        <view class="flex-row-between">
+          <view class="bg-gray radius-sm p-15 flex-1 mr-10 flex flex-col">
+            <view class="flex items-center mb-10">
+              <text class="font-sm text-secondary">堂食</text>
+            </view>
+            <view class="flex items-center mb-10">
+              <text class="font-xxl font-bold" style="color: #007aff;">{{item.gbAiDailyRevenueDineInRevenue}}元</text>
+            </view>
+            <view class="flex items-center">
+              <text class="font-md text-secondary">{{item.gbAiDailyRevenueDineInOrders}}单</text>
+              <text class="font-md text-secondary ml-10">{{item.gbAiDailyRevenueDineInCustomers}}人</text>
+            </view>
+          </view>
+          <view class="bg-gray radius-sm p-15 flex-1 ml-10 flex flex-col">
+            <view class="flex items-center mb-10">
+              <text class="font-sm text-secondary">外卖</text>
+            </view>
+            <view class="flex items-center mb-10">
+              <text class="font-xxl font-bold" style="color: #34c759;">{{item.gbAiDailyRevenueTakeoutRevenue}}元</text>
+            </view>
+            <view class="flex items-center">
+              <text class="font-md text-secondary">{{item.gbAiDailyRevenueTakeoutOrders}}单</text>
+              <text class="font-md ml-10" style="color: #ff3b30;">-{{item.gbAiDailyRevenuePlatformFee}}元</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="text-secondary font-xs flex-column center-content" style="height: 100rpx;">没有更多数据了</view>
+  </view>
+
+  <!-- 无数据 -->
+  <view wx:if="{{!stats || (chartData.length == 0 && (!dailyList || dailyList.length == 0))}}" style="height: {{windowHeight - 360}}rpx;">
+    <view class="center-content flex-column" style="padding-top: 200rpx;">
+      <image class="empty_image" src="/images/cart-Empty.png"></image>
+      <text class="big">无数据</text>
+    </view>
+  </view>
+
+</view>

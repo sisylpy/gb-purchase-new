@@ -1,0 +1,52 @@
+/* components/custom-navbar/custom-navbar.wxss */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-image: url("{{backgroundImage}}");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* 设置导航栏的透明度，可以根据需求调整 */
+  opacity: 0.8;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+}
+
+.nav-left,
+.nav-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-title {
+  font-size: 18px;
+  color: white;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.right-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.right-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+}

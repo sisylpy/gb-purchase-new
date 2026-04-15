@@ -1,0 +1,162 @@
+<view class="flex flex-column ">
+  <back-navbar title="添加原料" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="content">
+
+
+		<view class="flex-column middle whiteBack" >
+	
+         <view class="flex-row-between"  style="width: {{windowWidth - 40}}rpx; ">
+			<view class="flex-row with-padding" >
+				<text class="margin-right">菜品:</text>
+				<text class="">{{foodItem.gbDfFoodName}}</text>
+			</view>
+			<block wx:if="{{type !== 'edit'}}">
+			<view class=' {{canSave ? "next" : ""}}' catchtap='addFoodGoods' style="width: 160rpx; "> 保存</view>
+		</block>
+				 </view>
+				<view class="flex-column with-padding  with-border-bottom" style="margin-top: 20rpx;">
+					<view class="flex-row-between" style="width: {{windowWidth - 80}}rpx;">
+						<text>主要原料:</text>
+						<block wx:if="{{type !== 'edit'}}">
+						<view bindtap="toAddGoods" data-type="raw">
+							<image src="/images/add-bold.png" class="icon"></image>
+						</view>
+					</block>
+					</view>
+
+					<view class="flex-column">
+					<view class="flex-row with-tb-padding with-border-bottom" wx:for="{{rawArr}}" >
+						<view class="flex-row-between" style="width: {{windowWidth - 60}}rpx;  ">
+							<view class="flex-row">
+								<text class="margin-l-right">{{index + 1}}.</text>
+					<text class="margin-l-right">{{type == 'edit' ? item.gbDfgGoodsName : item.gbDfgGoodsName}}</text>
+					<text >{{item.gbDfgGoodsAmount}}</text>
+					<text>{{type == 'edit' ? item.distributerGoodsEntity.gbDgGoodsStandardname : item.gbDfoodgGoodsStandardname }}</text>
+							</view>
+							<view class="flex-row">
+								<view class="flex-row " style="margin-right: 40rpx;" bindtap="editGoods" data-item="{{item}}" hover-class="hover">  
+					<image src="/images/edit.png" class="icon"></image>
+					</view>
+					<view class="flex-row" bindtap="deleteGoods" data-index="{{index}}" hover-class="hover">
+					<image src="/images/del.png" class="icon"></image>
+					</view>
+							</view>
+						</view>
+					</view>
+					</view>
+				</view>
+
+
+			
+			
+		</view>
+
+
+	
+
+</view>
+</view>
+
+
+<view class='nnn' wx:if='{{showFood}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
+	<view class='modal-content'>
+
+		<view class="top">
+			<view class="goodsTitle">
+				{{foodItem.gbDfFoodName}}
+			</view>
+		</view>
+
+		<view class="body">
+			<view class='goods_contents normal'>
+
+				<view class="flex-row with-padding" style="width: {{windowWidth - 120}}rpx; ">
+					<view class="margin-right" >原料:</view>
+					<view class="" style="width: {{windowWidth - 320}}rpx;">
+						<input class="numberInput" placeholder="搜索商品名称,简拼或全拼" style="width: {{windowWidth - 320}}rpx" placeholder-style="font-size: 30rpx; padding-left:10rpx;" adjust-position="{{false}}" bindinput="getSearchString" bindblur="checkGoods" value="{{type == 'edit' ? editGoods.gbDfgGoodsName : goodsName}}" focus="{{toSearch ? true: ''}}" />
+
+					</view>
+				</view>
+				<!-- //// -->
+				<view class=" flex-column with-lr-padding  searchPart {{isSearching ? 'is-active' : ''}}">
+					<scroll-view scroll-y class="searchList {{isSearching ? 'is-active' :''}} flex-column" catchtouchmove='ture' style="width:{{windowWidth - 240}}rpx; ; height: {{strArr.length < 10 ?  strArr.length * 100 : windowHeight /3}}rpx; margin-bottom: 10rpx;  margin-left: 80rpx; background-color:#e5f8f6">
+						<view class="flex-row-between with-border-bottom with-padding" wx:for="{{strArr}}" wx:for-item="goods" wx:for-index="index" wx:key="gbDistributerGoodsId" bindtap="applyGoods" data-item="{{goods}}" style="width:{{windowWidth - 40}}rpx;" hover-class="hover">
+							<view class="flex-row-default normal">
+								<!-- <text class="margin-right">{{index + 1}}.</text> -->
+
+								<view class="flex-row">
+									<text class="brand" wx:if="{{goods.gbDgGoodsBrand.length > 0 && goods.gbDgGoodsBrand !==  'null'}}">{{goods.gbDgGoodsBrand}}</text>
+									<text class="normal gray" wx:if="{{goods.gbDgPullOff == 1}}">(下架) {{goods.gbDgGoodsName}}</text>
+									<text class="normal margin-right" wx:else>{{goods.gbDgGoodsName}}</text>
+									<text class="" wx:if="{{goods.nxAliasEntities.length > 0}}" wx:for="{{goods.nxAliasEntities}}" wx:for-item="alias">={{alias.nxDaAliasName}}</text>
+
+									<block wx:if="{{goods.gbDgGoodsStandardWeight !== 'null' && goods.gbDgGoodsStandardWeight.length > 0}}">
+										<text class="normal margin-l-right" wx:if="{{goods.gbDgGoodsStandardname !== '斤'}}">({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})</text>
+									</block>
+									<block wx:else>
+										<text class="normal margin-l-right" wx:if="{{goods.gbDgGoodsStandardname !== '斤'}}">({{goods.gbDgGoodsStandardname}})</text>
+									</block>
+
+									<text class="small margin-right gray" wx:if="{{goods.gbDgGoodsPlace !== null && goods.gbDgGoodsPlace.length > 0}}">产地:{{goods.gbDgGoodsPlace}}</text>
+
+									<text class="small gray" wx:if="{{goods.gbDgGoodsDetail.length > 0 && goods.gbDgGoodsDetail !==  'null'}}">{{goods.gbDgGoodsDetail}}</text>
+								</view>
+							</view>
+							<view>
+
+							</view>
+						</view>
+
+						<view class="flex-row-between with-border-bottom with-padding" wx:for="{{pinyinArr}}" wx:for-item="goods" wx:for-index="index" wx:key="gbDistributerGoodsId" bindtap="applyGoods" data-item="{{goods}}" data-index="{{goodsIndex}}" style="width:{{windowWidth - 40}}rpx;">
+							<view class="flex-row-default normal">
+								<!-- <text class="margin-right">{{strArr.length + index + 1}}.</text> -->
+								<view class="flex-row">
+									<text class="brand" wx:if="{{goods.gbDgGoodsBrand.length > 0 && goods.gbDgGoodsBrand !==  'null'}}">{{goods.gbDgGoodsBrand}}</text>
+									<text class="normal gray" wx:if="{{goods.gbDgPullOff == 1}}">(下架) {{goods.gbDgGoodsName}}</text>
+									<text class="normal margin-right" wx:else>{{goods.gbDgGoodsName}}</text>
+									<text class="" wx:if="{{goods.nxAliasEntities.length > 0}}" wx:for="{{goods.nxAliasEntities}}" wx:for-item="alias">={{alias.nxDaAliasName}}</text>
+									<block wx:if="{{goods.gbDgGoodsStandardWeight !== 'null' && goods.gbDgGoodsStandardWeight.length > 0}}">
+										<text class="normal margin-l-right" wx:if="{{goods.gbDgGoodsStandardname !== '斤'}}">({{goods.gbDgGoodsStandardname}}
+											{{goods.gbDgGoodsStandardname}}/{{goods.gbDgGoodsStandardWeight}})</text>
+									</block>
+									<block wx:else>
+										<text class="normal margin-l-right" wx:if="{{goods.gbDgGoodsStandardname !== '斤'}}">({{goods.gbDgGoodsStandardname}})</text>
+									</block>
+
+									<text class="small margin-right gray" wx:if="{{goods.gbDgGoodsPlace !== 'null' && goods.gbDgGoodsPlace.length > 0}}">产地:{{goods.gbDgGoodsPlace}}</text>
+
+									<text class="small gray" wx:if="{{goods.gbDgGoodsDetail.length > 0 && goods.gbDgGoodsDetail !==  'null'}}">{{goods.gbDgGoodsDetail}}</text>
+								</view>
+							</view>
+
+						</view>
+					</scroll-view>
+
+
+
+
+				</view>
+
+
+				<!-- .... -->
+
+				<view class="flex-row with-padding" wx:if="{{!isSearching}}">
+					<text class="margin-right">数量:</text>
+					<view class=" flex-row">
+						<input class='numberInput' style="width: {{windowWidth - 320}}rpx" placeholder-style="font-size: 30rpx; padding-left: 10rpx;" type='digit' value="{{type == 'edit' ? editGoods.gbDfgGoodsAmount : applyNumber }}" bindinput="getApplyNumber" hold-keyboard='true'></input>
+						<text>{{type == 'edit' ? editGoods.distributerGoodsEntity.gbDgGoodsStandardname : standardName}}</text>
+					</view>
+				</view>
+			</view>
+
+			<view class='btn-wrapper flex-row p-20'>
+				<view class="btn_row">
+					<text class='cancel-btn half-row' bindtap="cancle" hover-class="hoverBtn">取消</text>
+					<text class='confirm-btn {{canSave ? "is-active" : ""}} half-row' catchtap='confirm' hover-class="hoverBtn">确定</text>
+				</view>
+			</view>
+		</view>
+
+	</view>
+</view>

@@ -1,0 +1,489 @@
+/* ============ 全选功能栏样式 ============ */
+
+.select-all-bar {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  padding: 20rpx 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid rgba(74, 144, 226, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.select-all-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #4A90E2 0%, #05c0a7 50%, #FF9800 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.select-all-content {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+}
+
+.select-all-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.select-all-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.select-all-label {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.select-count {
+  font-size: 22rpx;
+  color: #4A90E2;
+  font-weight: 500;
+}
+
+.select-all-actions {
+  display: flex;
+  align-items: center;
+}
+
+.clear-selection-btn {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
+  border: 1rpx solid rgba(255, 107, 107, 0.2);
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  transition: all 0.3s ease;
+}
+
+.clear-selection-btn:active {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(255, 107, 107, 0.1) 100%);
+  transform: scale(0.98);
+}
+
+.clear-text {
+  font-size: 24rpx;
+  color: #FF6B6B;
+  font-weight: 500;
+}
+
+.bill-item {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 16rpx;
+  margin-bottom: 10rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.bill-item:hover {
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.12);
+  transform: translateY(-2rpx);
+}
+
+/* 选中状态的账单项 */
+.bill-item.bill-item-selected {
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.12) 0%, rgba(74, 144, 226, 0.08) 100%) !important;
+  border: 2rpx solid rgba(74, 144, 226, 0.4) !important;
+  box-shadow: 0 6rpx 24rpx rgba(74, 144, 226, 0.2) !important;
+  transform: translateY(-2rpx);
+}
+
+.bill-item.bill-item-selected .bill-number {
+  background: linear-gradient(135deg, #4A90E2 0%, #2E7CE6 100%) !important;
+  box-shadow: 0 4rpx 12rpx rgba(74, 144, 226, 0.4) !important;
+}
+
+.bill-item.bill-item-selected .bill-amount {
+  color: #4A90E2 !important;
+  font-weight: 700 !important;
+}
+
+.bill-item.bill-item-selected .bill-arrow {
+  opacity: 1 !important;
+  transform: translateX(4rpx);
+}
+
+/* 更明显的选中效果 */
+.bill-item-selected {
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.2) 0%, rgba(74, 144, 226, 0.15) 100%) !important;
+  border: 3rpx solid #4A90E2 !important;
+  box-shadow: 0 8rpx 32rpx rgba(74, 144, 226, 0.3) !important;
+  transform: translateY(-3rpx);
+  position: relative;
+}
+
+.bill-item-selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.05) 0%, rgba(74, 144, 226, 0.02) 100%);
+  border-radius: 16rpx;
+  pointer-events: none;
+}
+
+.bill-item-selected .bill-number {
+  background: linear-gradient(135deg, #4A90E2 0%, #2E7CE6 100%) !important;
+  box-shadow: 0 6rpx 16rpx rgba(74, 144, 226, 0.5) !important;
+  color: #ffffff !important;
+}
+
+.bill-item-selected .bill-amount {
+  color: #4A90E2 !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2rpx 4rpx rgba(74, 144, 226, 0.2);
+  font-size: 38rpx !important;
+}
+
+.bill-item-selected .bill-arrow {
+  opacity: 1 !important;
+  transform: translateX(6rpx);
+  filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(346deg) brightness(118%) contrast(119%);
+}
+
+.bill-item-selected .bill-week {
+  background: rgba(74, 144, 226, 0.1) !important;
+  color: #4A90E2 !important;
+  border: 1rpx solid rgba(74, 144, 226, 0.3) !important;
+}
+
+.bill-checkbox {
+  padding: 0 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80rpx;
+}
+
+.bill-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10rpx 20rpx 24rpx 0;
+  min-height: 120rpx;
+}
+
+.bill-header {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.bill-number {
+  width: 48rpx;
+  height: 48rpx;
+  background: linear-gradient(135deg, #c2c2c2 0%, #525252 100%);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-right: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.3);
+}
+
+.bill-date-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.bill-date {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8rpx;
+}
+
+.bill-week {
+  font-size: 24rpx;
+  color: #7f8c8d;
+  background: #ecf0f1;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  display: inline-block;
+  width: fit-content;
+}
+
+.bill-amount-section {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.bill-amount {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #276afa;
+  text-align: right;
+}
+
+.empty_image {
+  width: 120rpx;
+  height: 120rpx;
+  opacity: 0.6;
+  margin-bottom: 32rpx;
+}
+
+.bill-type-text {
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+}
+
+.tag-return {
+  background: #ffe5e5;
+  color: #f5576c;
+}
+
+.tag-auto {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  border: 1rpx solid #e9ecef !important;
+}
+
+.tag-purchase {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  border: 1rpx solid #e9ecef !important;
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal-show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.modal-container {
+  background: #ffffff;
+  border-radius: 24rpx;
+  width: 600rpx;
+  max-width: 90%;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.3);
+  transform: scale(0.9);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.modal-show .modal-container {
+  transform: scale(1);
+}
+
+.modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx 40rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  position: relative;
+}
+
+.modal-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+  backdrop-filter: blur(10rpx);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.modal-icon-img {
+  width: 60rpx;
+  height: 60rpx;
+  filter: brightness(0) invert(1);
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.modal-content {
+  padding: 40rpx;
+}
+
+.modal-message {
+  text-align: center;
+}
+
+.modal-text-primary {
+  display: block;
+  font-size: 32rpx;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.modal-text-warning {
+  display: block;
+  font-size: 28rpx;
+  color: #e74c3c;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 24rpx;
+  padding: 0 40rpx 40rpx;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.modal-btn:active::before {
+  left: 100%;
+}
+
+.modal-btn-cancel {
+  background: #f8f9fa;
+  border: 2rpx solid #e9ecef;
+}
+
+.modal-btn-cancel:active {
+  background: #e9ecef;
+  transform: scale(0.98);
+}
+
+.modal-btn-confirm {
+  background: linear-gradient(135deg, #276afa 0%, #1e5ce6 100%);
+  box-shadow: 0 4rpx 16rpx rgba(39, 106, 250, 0.3);
+}
+
+.modal-btn-confirm:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(39, 106, 250, 0.4);
+}
+
+.modal-btn-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+
+.modal-btn-cancel .modal-btn-text {
+  color: #6c757d;
+}
+
+.modal-btn-confirm .modal-btn-text {
+  color: #ffffff;
+}
+
+/* ============ 订单状态标签样式 ============ */
+.status-badge {
+  font-size: 22rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  border: 1rpx solid transparent;
+  transition: all 0.3s ease;
+  margin-top: 8rpx;
+  width: fit-content;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 付款完成状态 */
+.status-settled {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  color: #4CAF50;
+  border-color: rgba(76, 175, 80, 0.2);
+}
+
+/* 待付款状态 */
+.status-pending {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  color: #FF9800;
+  border-color: rgba(255, 152, 0, 0.2);
+}
+
+/* 处理中状态 */
+.status-processing {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  color: #2196F3;
+  border-color: rgba(33, 150, 243, 0.2);
+}
+
+/* 已取消状态 */
+.status-cancelled {
+  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+  color: #F44336;
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
+@import "/template/billPay/billPay.wxss";

@@ -1,0 +1,88 @@
+<view class="flex flex-column ">
+  <back-navbar title="{{type == 'edit' ? '修改' : '添加'}}菜品" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="content">
+    <view class="flex-column middle whiteBack">
+      <view class="flex-row-between" style="width: {{windowWidth - 40}}rpx;">
+        <view class="flex-row with-padding">
+          <text class="margin-right">菜品类别:</text>
+          <text>{{fatherName}}</text>
+        </view>
+        <view class='save {{canSave ? "is-active" : ""}}' catchtap='{{canSave ? "addFood":"showTishi"}}' style="width: 160rpx;">保存菜品</view>
+      </view>
+
+      <view class="flex-row with-padding">
+        <view class="margin-right">菜品名称:</view>
+        <input class="numberInput" style="width:{{windowWidth/2}}rpx; font-size: 40rpx; height: 80rpx; line-height: 80rpx; padding-left: 10rpx; margin-bottom:10rpx;" bindblur="getFoodName" value="{{type == 'edit' ? foodItem.gbDfFoodName : foodName}}"></input>
+      </view>
+
+      <view class="flex-row with-padding">
+        <text class="margin-right">菜品售价:</text>
+        <view class="flex-row">
+          <input class='numberInput' style="width: {{windowWidth / 2}}rpx" placeholder-style="font-size: 30rpx; padding-left: 10rpx;" type='digit' value="{{type == 'edit' ? foodItem.gbDfFoodPrice : price}}" bindblur="getPrice"></input>
+          <text>元/份</text>
+        </view>
+      </view>
+
+      <view class="with-padding flex-row-default" style="margin-top: 40rpx;">
+        <text class="margin-right">菜品图片:</text>
+        <image class='class_img' src='{{type == "edit" && !isSelectImg ? url + foodItem.gbDistributerFoodImg : src}}' bindtap='choiceImg' style="width: {{windowWidth / 3}}rpx; height:{{windowWidth / 3}}rpx;"></image>
+      </view>
+
+      <view class="flex-row-default with-padding">
+        <view class="margin-right">售出要求:</view>
+        <textarea class="numberText" style="width:{{windowWidth - 260}}rpx; padding: 10rpx;" bindblur="getFoodMethod" value="{{type == 'edit' ? foodItem.gbDfFoodMethod : foodMethod}}"></textarea>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 搜索弹窗 -->
+<view class='nnn' wx:if='{{showFood}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
+  <view class='modal-content'>
+    <view class="top">
+      <view class="goodsTitle">{{foodName}}</view>
+    </view>
+
+    <view class="body">
+      <view class='goods_contents'>
+        <view class="flex-row with-padding" style="width: {{windowWidth - 120}}rpx;">
+          <view class="margin-right">原料:</view>
+          <view style="width: {{windowWidth - 320}}rpx;">
+            <input class="numberInput" placeholder="搜索商品名称,简拼或全拼" style="width: {{windowWidth - 320}}rpx" placeholder-style="font-size: 30rpx; padding-left: 10rpx;" adjust-position="{{false}}" bindinput="getSearchString" value="{{goodsName}}" focus="{{toSearch ? true : ''}}" />
+          </view>
+        </view>
+
+        <view class="flex-column with-lr-padding searchPart {{isSearching ? 'is-active' : ''}}">
+          <scroll-view scroll-y class="searchList {{isSearching ? 'is-active' : ''}} flex-column" catchtouchmove='ture' style="width:{{windowWidth - 40}}rpx; height: {{strArr.length < 10 ? strArr.length * 100 : windowHeight - 200}}rpx; margin-bottom: 10rpx;">
+            <view class="flex-row-between with-border-bottom with-padding" wx:for="{{strArr}}" wx:for-item="goods" wx:key="gbDistributerGoodsId" bindtap="applyGoods" data-item="{{goods}}" style="width:{{windowWidth - 40}}rpx;" hover-class="hover">
+              <view class="flex-row-default normal">
+                <text class="margin-right">{{index + 1}}.</text>
+                <view class="flex-row">
+                  <text class="brand" wx:if="{{goods.gbDgGoodsBrand.length > 0 && goods.gbDgGoodsBrand !== 'null'}}">{{goods.gbDgGoodsBrand}}</text>
+                  <text class="normal gray" wx:if="{{goods.gbDgPullOff == 1}}">(下架) {{goods.gbDgGoodsName}}</text>
+                  <text class="normal margin-right" wx:else>{{goods.gbDgGoodsName}}</text>
+                </view>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+
+        <view class="flex-row with-padding">
+          <text class="margin-right">数量:</text>
+          <view class="flex-row">
+            <input class='numberInput' style="width: {{windowWidth - 320}}rpx" placeholder-style="font-size: 30rpx; padding-left: 10rpx;" type='digit' value="{{applyNumber}}" bindinput="getApplyNumber" hold-keyboard='true'></input>
+            <text>{{standardName}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class='btn-wrapper'>
+        <view class="btn_row">
+          <text class='cancel-btn' bindtap="cancle" hover-class="hoverBtn">取消</text>
+          <text class='confirm-btn' catchtap='confirm' hover-class="hoverBtn">确定</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

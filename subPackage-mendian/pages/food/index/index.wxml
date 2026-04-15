@@ -1,0 +1,39 @@
+<view class="flex flex-column ">
+
+  <back-navbar title="菜品" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column ">
+	
+		<view class="flex-row-between p-20">
+	 <view></view>
+	 <view class="flex-row with-padding " hover-class="hover" bindtap="addFood">
+			<image src="/images/add-fill.png" class="icon"></image>
+			<text class="">菜品类别</text>
+		</view>
+	 </view>
+	
+
+		<view class="with-border-bottom flex-row-between whiteBack with-padding" wx:for="{{storeArr}}" wx:for-item="dep"
+			bindtap="toFoodList" data-id="{{dep.gbDistributerFoodId}}" 
+			data-name="{{dep.gbDfFoodName}}"
+			hover-class="hover" bindlongpress="showEdit" data-item="{{dep}}">
+			 <view class="flex-row">
+				<text class="margin-right">{{index + 1}}.</text>
+			<text class=' normal'>{{dep.gbDfFoodName}}</text>
+			 </view>
+			 <image src="/images/arrow-right-3.png" class="icon"></image>
+		
+		</view>
+	</view>
+
+</view>
+
+<!-- mask -->
+<view class='mask {{showOperation ? "is-active" : ""}}' catchtap="hideMask">
+	<view class="popup whiteBack">
+		<view class="popup-item with-border-bottom" bindtap="editFatherFood">
+			<text>编辑"{{item.gbDfFoodName}}"</text>
+		</view>
+		<view class="popup-item" bindtap="deleteFatherFood">删除"{{item.gbDfFoodName}}"</view>
+	</view>
+</view>

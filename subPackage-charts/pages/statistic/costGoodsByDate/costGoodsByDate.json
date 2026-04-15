@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "back-navbar-search": "/components/back-navbar-search/back-navbar-search"
+  }
+}

@@ -1,0 +1,591 @@
+
+function getAttrName(string){
+  if (string) {
+    var string = string.toString(string);
+    if(string.length > 3){
+    string = string.substring(0, 3);
+    string = string + "..."
+    return string;
+    }else{
+      return string;
+    }
+  }
+}
+
+function getDifferentPrice(a){
+  return Math.abs(a);
+}
+
+function getAttrDateString(string){
+  if (string) {
+    var string = string.toString(string);
+    var  month = string.substring(5, 7);
+   var monthFirst =  month.substring(0,1);
+   if(monthFirst == '0'){
+     month =  string.substring(6, 7);
+   }
+    var  date = string.substring(8, 10);
+    return month + "月" + date + "日";
+  }
+}
+
+function getGongli(a,b){
+  var bbb  = a / 1000;
+  return  bbb.toFixed(b);
+}
+
+function getPercent(a, b){
+  var c = ((a/b) * 100).toFixed(1) ;
+  return c;
+}
+
+function getProfitPercent(a,b){
+  var c =(((b - a) / a) * 100 ).toFixed(1)
+  return c;
+}
+
+function getAttrDate(string){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(5, 10);
+    return string;
+  }
+}
+
+function getAttrFullTime(string){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(5, 16);
+    return string;
+  }
+}
+
+function getAttrString(string, from, long){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(from, long);
+    return string;
+  }
+}
+
+function transferDateString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = str[1];
+    yue  =  Number(yue);
+    ri  =  Number(ri);
+    dateString = yue + "月" + ri +"日"
+  }
+  return  dateString ;
+}
+
+function getProducePercent(a,b){
+  if(b !== 0){
+    var  abc = (a / b * 100).toFixed(2);
+    return  abc;
+  }else{
+    return 0;
+  }
+}
+
+function getCostTotal(a,b,c){
+  var numA = +a || 0;
+  var numB = +b || 0;
+  var numC = +c || 0;
+  var total = numA + numB + numC;
+  if (isNaN(total)) {
+    return '0.0';
+  }
+  var rounded = Math.round(total * 100) / 100;
+  var str = rounded.toString();
+  var dotIndex = str.indexOf('.');
+  if (dotIndex === -1) {
+    str = str + '.0';
+  } else if (dotIndex === str.length - 2) {
+    // already 1 decimal
+  } else if (dotIndex === str.length - 1) {
+    str = str + '0';
+  }
+  return str;
+}
+
+function transferDateTimeString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var time = str[1].split(" ");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = time[0];
+    var clock = time[1];
+    yue  =  Number(yue);
+    ri  =  Number(ri);
+    colock = Number(clock)
+    dateString = yue + "月" + ri +"日" + " " + clock
+  }
+  return  dateString ;
+}
+
+function transferFullTimeString(date){
+  date =  date.substring(0, 10);
+  var str =  date.split("-");
+  var dateString = ""
+    var nian = str[0];
+    var yue = str[1];
+    var ri = str[2];
+    yue  =  Number(yue);
+    ri  =  Number(ri);
+    dateString = nian + "年" +  yue + "月" + ri +"日"
+  return  dateString ;
+}
+
+function getCompareTime(startTime, endTime){
+  if(startTime && endTime){
+ var  endTimeFormat =endTime.replace(getRegExp('-','g'),'/');
+  var endTimeDown = Date.parse(getDate(endTimeFormat));
+  var  startTimeFormat =startTime.replace(getRegExp('-','g'),'/');
+  var startTimeDown = Date.parse(getDate(startTimeFormat));
+  var  thisResult =  endTimeDown -  startTimeDown;
+     thisResult =  Math.floor(thisResult / 1000 / 60 / 60)
+  return thisResult;
+  }
+}
+
+function getCompareTimeSecond(startTime, endTime){
+  if(startTime && endTime){
+  var  thisResult =  startTime -  endTime;
+     thisResult =  Math.floor(thisResult / 1000 / 60 / 60)
+  return thisResult;
+  }
+}
+
+function changeDateStyleDot(dateStr){
+  return  dateStr.split("-").join(".");
+}
+
+function getSupplierPriceColor(supplierId, selectedSupplierIds) {
+  if (!supplierId || supplierId === -1 || !selectedSupplierIds || selectedSupplierIds === -1) {
+    return '#333';
+  }
+  var supplierIdArray = selectedSupplierIds.toString().split(',');
+  for (var i = 0; i < supplierIdArray.length; i++) {
+    if (supplierIdArray[i] == supplierId) {
+      return '#4CAF50';
+    }
+  }
+  return '#333';
+}
+
+function getPurchaseUserColor(purchaseUserId, selectedPurchaseUserIds) {
+  if (!purchaseUserId || !selectedPurchaseUserIds || selectedPurchaseUserIds === -1) {
+    return '#333';
+  }
+  var purchaseUserIdArray = selectedPurchaseUserIds.toString().split(',');
+  for (var i = 0; i < purchaseUserIdArray.length; i++) {
+    if (purchaseUserIdArray[i] == purchaseUserId) {
+      return '#FF6B35';
+    }
+  }
+  return '#333';
+}
+
+function getPriceColor(supplierId, purchaseUserId, selectedSupplierIds, selectedPurchaseUserIds) {
+  var hasSupplierMatch = false;
+  var hasPurchaseUserMatch = false;
+  if (supplierId && supplierId !== -1 && selectedSupplierIds && selectedSupplierIds !== -1) {
+    var supplierIdArray = selectedSupplierIds.toString().split(',');
+    for (var i = 0; i < supplierIdArray.length; i++) {
+      if (supplierIdArray[i] == supplierId) {
+        hasSupplierMatch = true;
+        break;
+      }
+    }
+  }
+  if (purchaseUserId && selectedPurchaseUserIds && selectedPurchaseUserIds !== -1) {
+    var purchaseUserIdArray = selectedPurchaseUserIds.toString().split(',');
+    for (var i = 0; i < purchaseUserIdArray.length; i++) {
+      if (purchaseUserIdArray[i] == purchaseUserId) {
+        hasPurchaseUserMatch = true;
+        break;
+      }
+    }
+  }
+  if (supplierId === -1) {
+    return '#333';
+  }
+  if (hasSupplierMatch && hasPurchaseUserMatch) {
+    return '#9B59B6';
+  } else if (hasSupplierMatch) {
+    return '#4CAF50';
+  } else if (hasPurchaseUserMatch) {
+    return '#FF6F35';
+  } else {
+    return '#333';
+  }
+}
+
+function isSupplierMatch(supplierId, selectedSupplierIds) {
+  if (!supplierId || !selectedSupplierIds || selectedSupplierIds === -1) {
+    return false;
+  }
+  var supplierIdArray = selectedSupplierIds.toString().split(',');
+  for (var i = 0; i < supplierIdArray.length; i++) {
+    if (supplierIdArray[i] == supplierId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isPurchaseUserMatch(purchaseUserId, selectedPurchaseUserIds) {
+  if (!purchaseUserId || !selectedPurchaseUserIds || selectedPurchaseUserIds === -1) {
+    return false;
+  }
+  var purchaseUserIdArray = selectedPurchaseUserIds.toString().split(',');
+  for (var i = 0; i < purchaseUserIdArray.length; i++) {
+    if (purchaseUserIdArray[i] == purchaseUserId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getRestTime(startTime, endTime){
+  if(startTime && endTime){
+    var processedEndTime = endTime;
+    var processedStartTime = startTime;
+    if(endTime.length === 16 && endTime.indexOf(':') !== -1 && endTime.lastIndexOf(':') === endTime.indexOf(':')) {
+      processedEndTime = endTime + ":00";
+    }
+    if(startTime.length === 16 && startTime.indexOf(':') !== -1 && startTime.lastIndexOf(':') === startTime.indexOf(':')) {
+      processedStartTime = startTime + ":00";
+    }
+    var endTimeFormat = processedEndTime.replace(getRegExp('-','g'),'/');
+    var startTimeFormat = processedStartTime.replace(getRegExp('-','g'),'/');
+    var endTimeDown = Date.parse(getDate(endTimeFormat));
+    var startTimeDown = Date.parse(getDate(startTimeFormat));
+    if(isNaN(endTimeDown) || isNaN(startTimeDown)) {
+      return 0;
+    }
+    var thisResult = endTimeDown - startTimeDown;
+    thisResult = Math.floor(thisResult / 1000 / 60 / 60);
+    return thisResult;
+  }
+  return 0;
+}
+
+function getHaveWasteHours(nowTime, wasteTime){
+  if(nowTime && wasteTime){
+    var processedNowTime = nowTime;
+    var processedWasteTime = wasteTime;
+    if(nowTime.length === 16 && nowTime.indexOf(':') !== -1 && nowTime.lastIndexOf(':') === nowTime.indexOf(':')) {
+      processedNowTime = nowTime + ":00";
+    }
+    if(wasteTime.length === 16 && wasteTime.indexOf(':') !== -1 && wasteTime.lastIndexOf(':') === wasteTime.indexOf(':')) {
+      processedWasteTime = wasteTime + ":00";
+    }
+    var nowTimeFormat = processedNowTime.replace(getRegExp('-','g'),'/');
+    var wasteTimeFormat = processedWasteTime.replace(getRegExp('-','g'),'/');
+    var nowTimeStamp = Date.parse(getDate(nowTimeFormat));
+    var wasteTimeStamp = Date.parse(getDate(wasteTimeFormat));
+    if(isNaN(nowTimeStamp) || isNaN(wasteTimeStamp)) {
+      return 0;
+    }
+    var wasteHours = nowTimeStamp - wasteTimeStamp;
+    wasteHours = Math.floor(wasteHours / 1000 / 60 / 60);
+    return wasteHours;
+  }
+  return 0;
+}
+
+function transferCouponTimeString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var time = str[1].split(" ");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = time[0];
+    var clock = time[1];
+    yue  =  Number(yue);
+    ri  =  Number(ri);
+    clock =  clock.substring(0,5);
+    colock = Number(clock);
+    dateString = yue + "月" + ri +"日" + " " + clock
+  }
+  return  clock ;
+}
+
+function transferCouponDateString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var time = str[1].split(" ");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = time[0];
+    var clock = time[1];
+    yue  =  Number(yue);
+    ri  =  Number(ri);
+    clock =  clock.substring(0,5);
+    colock = Number(clock);
+    dateString = yue + "月" + ri +"日"
+  }
+  return  dateString ;
+}
+
+function getWeekDay(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  var dateFormat = dateString.replace(getRegExp('-','g'),'/');
+  var date = getDate(dateFormat);
+  var dayOfWeek = date.getDay();
+  var weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+  return weekDays[dayOfWeek];
+}
+
+function getDayNumber(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  var day = dateString.substring(8, 10);
+  if (day.charAt(0) === '0') {
+    day = day.charAt(1);
+  }
+  return day;
+}
+
+function getMonthDay(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  var month = dateString.substring(5, 7);
+  var day = dateString.substring(8, 10);
+  if (month.charAt(0) === '0') {
+    month = month.charAt(1);
+  }
+  if (day.charAt(0) === '0') {
+    day = day.charAt(1);
+  }
+  return month + '月' + day + '日';
+}
+
+function getDateRange(rangeType) {
+  if (!rangeType) {
+    return { startDate: '', stopDate: '' };
+  }
+  var today = getDate();
+  var year = today.getFullYear();
+  var month = today.getMonth() + 1;
+  var date = today.getDate();
+  function formatDate(d) {
+    var y = d.getFullYear();
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    return y + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
+  }
+  var startDate = '';
+  var stopDate = '';
+  switch (rangeType) {
+    case 'today':
+      startDate = stopDate = formatDate(today);
+      break;
+    case 'yesterday':
+      var yesterday = getDate(today.getTime() - 24 * 60 * 60 * 1000);
+      startDate = stopDate = formatDate(yesterday);
+      break;
+    case 'thisWeek':
+      var dayOfWeek = today.getDay();
+      var daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      var thisWeekStart = getDate(today.getTime() + daysToMonday * 24 * 60 * 60 * 1000);
+      startDate = formatDate(thisWeekStart);
+      var daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+      var thisWeekEnd = getDate(today.getTime() + daysToSunday * 24 * 60 * 60 * 1000);
+      stopDate = formatDate(thisWeekEnd);
+      break;
+    case 'lastWeek':
+      var dayOfWeek = today.getDay();
+      var daysToLastMonday = dayOfWeek === 0 ? -13 : -6 - dayOfWeek;
+      var lastWeekStart = getDate(today.getTime() + daysToLastMonday * 24 * 60 * 60 * 1000);
+      startDate = formatDate(lastWeekStart);
+      var lastWeekEnd = getDate(lastWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+      stopDate = formatDate(lastWeekEnd);
+      break;
+    case 'lastSevenDays':
+      var sevenDaysAgo = getDate(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      startDate = formatDate(sevenDaysAgo);
+      var yesterday = getDate(today.getTime() - 24 * 60 * 60 * 1000);
+      stopDate = formatDate(yesterday);
+      break;
+    case 'thisMonth':
+      var thisMonthStart = getDate(year + '-' + (month < 10 ? '0' + month : month) + '-01');
+      startDate = formatDate(thisMonthStart);
+      stopDate = formatDate(today);
+      break;
+    case 'lastMonth':
+      var lastMonth = month === 1 ? 12 : month - 1;
+      var lastYear = month === 1 ? year - 1 : year;
+      var lastMonthStart = getDate(lastYear + '-' + (lastMonth < 10 ? '0' + lastMonth : lastMonth) + '-01');
+      startDate = formatDate(lastMonthStart);
+      var thisMonthFirst = getDate(year + '-' + (month < 10 ? '0' + month : month) + '-01');
+      var lastMonthEnd = getDate(thisMonthFirst.getTime() - 24 * 60 * 60 * 1000);
+      stopDate = formatDate(lastMonthEnd);
+      break;
+    case 'lastThirtyDays':
+      var lastMonthToday = getDate(today.getTime());
+      lastMonthToday.setMonth(lastMonthToday.getMonth() - 1);
+      startDate = formatDate(lastMonthToday);
+      stopDate = formatDate(today);
+      break;
+    default:
+      startDate = stopDate = '';
+  }
+  var chineseName = '';
+  switch (rangeType) {
+    case 'today': chineseName = '今天'; break;
+    case 'yesterday': chineseName = '昨天'; break;
+    case 'thisWeek': chineseName = '本周'; break;
+    case 'lastWeek': chineseName = '上周'; break;
+    case 'lastSevenDays': chineseName = '过去7天'; break;
+    case 'thisMonth': chineseName = '本月'; break;
+    case 'lastMonth': chineseName = '上月'; break;
+    case 'lastThirtyDays': chineseName = '过去30天'; break;
+    default: chineseName = rangeType;
+  }
+  return {
+    startDate: startDate,
+    stopDate: stopDate,
+    name: chineseName
+  };
+}
+
+function getHowManyDays(targetDate) {
+  if (!targetDate) {
+    return 0;
+  }
+  var dateStr = targetDate.toString();
+  if (dateStr.match(getRegExp('^\\d{4}-\\d{2}-\\d{2}$'))) {
+    var target = getDate(dateStr);
+  } else {
+    target = getDate(dateStr);
+  }
+  if (isNaN(target.getTime())) {
+    return 0;
+  }
+  var today = getDate();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  var timeDiff = today.getTime() - target.getTime();
+  var daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  return daysDiff;
+}
+
+function formatDateTimeToChinese(dateTimeString) {
+  if (!dateTimeString) {
+    return '';
+  }
+  var dateTimeStr = dateTimeString.toString();
+  var parts = dateTimeStr.split(' ');
+  if (parts.length !== 2) {
+    return '';
+  }
+  var datePart = parts[0];
+  var timePart = parts[1];
+  var dateArray = datePart.split('-');
+  if (dateArray.length !== 3) {
+    return '';
+  }
+  var month = dateArray[1];
+  var day = dateArray[2];
+  var timeArray = timePart.split(':');
+  if (timeArray.length < 2) {
+    return '';
+  }
+  var hour = timeArray[0];
+  var minute = timeArray[1];
+  if (month.charAt(0) === '0') {
+    month = month.charAt(1);
+  }
+  if (day.charAt(0) === '0') {
+    day = day.charAt(1);
+  }
+  if (hour.charAt(0) === '0') {
+    hour = hour.charAt(1);
+  }
+  if (minute.charAt(0) === '0') {
+    minute = minute.charAt(1);
+  }
+  return month + '月' + day + '日' + hour + '点' + minute + '分';
+}
+
+function getDay(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  var day = dateString.substring(8, 10);
+  if (day.charAt(0) === '0') {
+    day = day.charAt(1);
+  }
+  return day;
+}
+
+function getMonth(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  var month = dateString.substring(5, 7);
+  if (month.charAt(0) === '0') {
+    month = month.charAt(1);
+  }
+  return month;
+}
+
+function getWeekDayName(weekday) {
+  if (weekday === undefined || weekday === null) {
+    return '';
+  }
+  var weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return weekDays[weekday] || '';
+}
+
+module.exports = {
+  getGongli: getGongli,
+  getPercent: getPercent,
+  getProfitPercent: getProfitPercent,
+  getAttrName: getAttrName,
+  getAttrDate: getAttrDate,
+  getAttrFullTime: getAttrFullTime,
+  transferDateString: transferDateString,
+  transferDateTimeString: transferDateTimeString,
+  transferFullTimeString: transferFullTimeString,
+  getAttrString: getAttrString,
+  getAttrDateString: getAttrDateString,
+  getProducePercent: getProducePercent,
+  getCompareTime: getCompareTime,
+  getRestTime: getRestTime,
+  getHaveWasteHours: getHaveWasteHours,
+  getDifferentPrice: getDifferentPrice,
+  changeDateStyleDot: changeDateStyleDot,
+  transferCouponTimeString: transferCouponTimeString,
+  transferCouponDateString: transferCouponDateString,
+  getSupplierPriceColor: getSupplierPriceColor,
+  getPurchaseUserColor: getPurchaseUserColor,
+  getPriceColor: getPriceColor,
+  isSupplierMatch: isSupplierMatch,
+  isPurchaseUserMatch: isPurchaseUserMatch,
+  getCostTotal: getCostTotal,
+  getCompareTimeSecond: getCompareTimeSecond,
+  getWeekDay: getWeekDay,
+  getDayNumber: getDayNumber,
+  getMonthDay: getMonthDay,
+  getDateRange: getDateRange,
+  getHowManyDays: getHowManyDays,
+  formatDateTimeToChinese: formatDateTimeToChinese,
+  getDay: getDay,
+  getMonth: getMonth,
+  getWeekDayName: getWeekDayName
+};

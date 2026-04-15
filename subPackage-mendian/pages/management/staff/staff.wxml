@@ -1,0 +1,130 @@
+
+
+
+<view class="flex flex-column">
+
+ <back-navbar style="height: {{navBarHeight}}rpx;" title="采购员用户" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row" style="width: {{windowWidth - 200}}rpx;">
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <button class="big mainBack_new_btn " open-type="share" bindtap="toShareAdmin">+</button>
+
+  </view>
+
+
+
+  <view class="flex-column" >
+    <block wx:if="{{userArr.length > 0}}">
+      <scroll-view scroll-y="true"  style="height: {{windowHeight - 100 - navBarHeight}}rpx;">
+        <view class="user-card-wrapper p-20" wx:for="{{userArr}}" wx:key="gbDepartmentUserId">
+      
+      <!-- 采购员信息卡片 -->
+      <view class="user-info-card" hover-class="user-info-card-hover">
+        <view class="user-info-header">
+          <image src='{{url + item.gbDuWxAvartraUrl }}' class="user-avatar"></image>
+          <view class="user-details">
+            <view class="flex-row">
+              <text class="user-name">{{item.gbDuWxNickName}}</text>
+              <text class="user-self-tag" wx:if="{{item.gbDepartmentUserId == userInfo.gbDepartmentUserId}}">(你自己)</text>
+            </view>
+          </view>
+          <view class="user-menu-btn" bindtap="openOperation" data-id="{{item.gbDepartmentUserId}}" catchtap="openOperation" data-item="{{item}}">
+            <image src="../../../images/points.png" class="menu-icon"></image>
+          </view>
+        </view>
+        
+        <!-- 采购统计 -->
+        <view class="user-stats">
+          <view class="user-stat-item" catch:tap="toPurUserDetail" data-item="{{item}}">
+            <text class="user-stat-label">采购总额</text>
+            <text class="user-stat-value">¥{{item.itemData.billTotal}}</text>
+          </view>
+          <view class="user-stat-item" catch:tap="toPurGoodsStars" data-item="{{item}}">
+            <text class="user-stat-label">退货总额</text>
+            <text class="user-stat-value">¥{{item.itemData.returnPayTotal}}</text>
+          </view>
+        </view>
+      </view>
+
+    </view>
+
+    <view class="flex-column-center font-sl text-secondary" style="height: 200rpx;"> 没有数据了!</view>
+
+      </scroll-view>
+    
+    </block>
+
+
+    <view class="flex-column center-content text-secondary" style="height: 400rpx;" wx:if="{{userArr.length == 0}}">
+      <view class="empty_View flex-column-center" style="margin-top: 200rpx;">
+        <image class="empty_image" src="../../../images/file-empty.png"></image>
+        <text class="mt-30 text-secondary">暂无数据</text>
+      </view>
+    </view>
+   
+
+  </view>
+
+
+</view>
+
+
+<view class='overlay {{showOperation ? "show" : ""}}' catchtouchmove='ture' catchtap="hideMask">
+  <view class="flex-column nnn bg-white ">   
+
+    <view  class="flex-row p-30" catch:tap="toPurUserFenxi" >
+      <image src="../../../images/edit.png" class="icon mr-20"></image>
+      <text class=" mr-20">采购员分析</text>
+    </view>
+    <view wx:if="{{selectUserId == userInfo.gbDepartmentUserId}}" class="flex-row p-30" bindtap="editUser">
+      <image src="../../../images/edit.png" class="icon mr-20"></image>
+      <text class=" mr-20">修改用户信息</text>
+    </view>
+
+    <view wx:else class="flex-row p-30" bindtap="delUser">
+      <image src="../../../images/del.png" class="icon  mr-20"></image>
+      <text class=" mr-20">删除用户</text>
+    </view>
+    <view style="height: 40rpx;"></view>
+  </view>
+</view>
+
+
+<view class="overlay {{isTishi ? 'show' : ''}}">
+
+<view class=" bg-white" style="margin-top:{{(windowHeight - 440)/2 }}rpx;margin-left: 50rpx; width:{{windowWidth - 100}}rpx;">
+  <view class="mb-20  center-content">
+
+    <view class="tishiView" style="width:{{windowWidth/5}}rpx; height:{{windowWidth/5}}rpx; margin-top:-{{windowWidth/10 + 10}}rpx; z-index: 9999;border-radius: 50%;">
+      <image src="../../../images/aixin.png" class="tishi_icon" style="width:{{windowWidth/5 -80}}rpx; height:{{windowWidth/5 - 80}}rpx;  border-radius: 50%; margin-top:40rpx; margin-left: 40rpx;">
+      </image>
+    </view>
+
+    <view class="flex-row sentence">
+      注册成功的用户，将显示在“管理员列表”
+    </view>
+    <view class="p-20 flex-row">
+      <view class="iknow mainBack p-20" bindtap="closeMask" style="width:{{windowWidth / 3}}rpx; text-align: center;" hover-class="hover">
+        我知道了
+      </view>
+    </view>
+  </view>
+</view>
+</view>

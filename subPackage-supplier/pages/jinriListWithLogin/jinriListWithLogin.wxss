@@ -1,0 +1,609 @@
+/* ============ 供货商订单列表美化样式 ============ */
+
+/* 订单状态区域 */
+.bill-status-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.status-badge {
+  font-size: 22rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  border: 1rpx solid transparent;
+  transition: all 0.3s ease;
+}
+
+.status-unread {
+  background: #FFEBEE;
+  color: #F44336;
+}
+.status-preparing {
+  background: linear-gradient(135deg, #FFE5E5 0%, #FFCCCC 100%);
+  color: #FF6B6B;
+  border-color: rgba(255, 107, 107, 0.2);
+}
+
+.status-preparing .status-dot {
+  background: #2196F3;
+}
+
+.status-pending {
+  background: #FFF3E0;
+  color: #FF9800;
+}
+
+.status-pending .status-dot {
+  background: #FF9800;
+}
+.status-unpaid {
+  background: #E3F2FD;
+  color: #2196F3;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  color: #FF9800;
+  border-color: rgba(255, 152, 0, 0.2);
+}
+
+.status-settled {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  color: #4CAF50;
+  border-color: rgba(76, 175, 80, 0.2);
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 订单列表容器 */
+.supplier-bills-container {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 0 0 20rpx 20rpx;
+  margin: 0 20rpx 30rpx 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
+  border-top: none;
+  backdrop-filter: blur(10rpx);
+  position: relative;
+  overflow: hidden;
+  margin-top: 20rpx;
+}
+
+/* 订单项 */
+.supplier-bill-item {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16rpx;
+  padding: 24rpx 20rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* 每个订单项的彩色线条 - 多彩渐变 */
+.supplier-bill-item:nth-child(1)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.supplier-bill-item:nth-child(2)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #4ECDC4 0%, #45B7D1 50%, #96CEB4 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.supplier-bill-item:nth-child(3)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #45B7D1 0%, #96CEB4 50%, #FFEAA7 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.supplier-bill-item:nth-child(4)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #96CEB4 0%, #FFEAA7 50%, #DDA0DD 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.supplier-bill-item:nth-child(5)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #FFEAA7 0%, #DDA0DD 50%, #FF6B6B 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.supplier-bill-item:nth-child(6)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #DDA0DD 0%, #FF6B6B 50%, #4ECDC4 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.supplier-bill-item:nth-child(7)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+/* 超过7个时循环使用多彩渐变 */
+.supplier-bill-item:nth-child(n+8)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, #A8E6CF 0%, #FFD93D 50%, #6BCF7F 100%);
+  border-radius: 16rpx 16rpx 0 0;
+}
+
+.supplier-bill-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 悬停效果 */
+.supplier-bill-item:hover {
+  transform: translateY(-4rpx);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+  border-color: rgba(255, 107, 107, 0.2);
+}
+
+/* 激活效果 */
+.supplier-bill-item:active {
+  transform: scale(0.98);
+}
+
+.supplier-bill-hover {
+  transform: translateY(-4rpx);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+  border-color: rgba(255, 107, 107, 0.2);
+}
+
+/* 订单类型标签区域 */
+.bill-type-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.bill-type-tag {
+  display: flex;
+  align-items: center;
+}
+
+.bill-type-text {
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+}
+
+.tag-return {
+  background: #f5576c !important;
+  color: #fdfdfd !important;
+  border: 1rpx solid #e9ecef !important;
+}
+
+.tag-auto {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  border: 1rpx solid #e9ecef !important;
+}
+
+.tag-purchase {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  border: 1rpx solid #e9ecef !important;
+}
+
+.bill-arrow-section {
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.bill-arrow-icon {
+  width: 16rpx;
+  height: 16rpx;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.bill-arrow-section:hover {
+  background: rgba(74, 144, 226, 0.15);
+  transform: scale(1.1);
+}
+
+.bill-arrow-section:hover .bill-arrow-icon {
+  opacity: 0.8;
+}
+
+/* 订单主要信息区域 */
+.bill-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+/* 左侧日期信息 */
+.bill-date-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.bill-date-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6rpx;
+  line-height: 1.2;
+  letter-spacing: 0.5rpx;
+}
+
+.bill-weekday-text {
+  font-size: 22rpx;
+  color: #666;
+  background: rgba(74, 144, 226, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-weight: 500;
+  letter-spacing: 0.3rpx;
+}
+
+/* 右侧区域容器 */
+.bill-right-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  gap: 8rpx;
+}
+
+/* 右侧金额信息 */
+.bill-amount-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.bill-amount-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #4A90E2;
+  margin-bottom: 4rpx;
+  text-shadow: 0 2rpx 4rpx rgba(74, 144, 226, 0.1);
+  letter-spacing: 0.5rpx;
+}
+
+.bill-amount-label {
+  font-size: 20rpx;
+  color: #666;
+  font-weight: 500;
+  letter-spacing: 0.3rpx;
+}
+
+/* 订单状态区域 */
+.bill-status-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.status-badge {
+  font-size: 22rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  border: 1rpx solid transparent;
+  transition: all 0.3s ease;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 月份区域 */
+.month-section {
+  margin-bottom: 24rpx;
+}
+
+.month-container {
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  margin: 0 16rpx;
+  overflow: hidden;
+  border: 1px solid rgb(209, 209, 209);
+}
+
+/* 月份汇总卡片 */
+.month-summary-card {
+  background: linear-gradient(135deg, #eeeeee 0%, #e7e7e7 100%);
+  padding: 24rpx;
+  color: #4b4b4b;
+}
+
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.month-title {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.month-icon {
+  font-size: 28rpx;
+}
+
+.settleBtn {
+  padding: 10rpx 20rpx;
+  border-radius: 6rpx;
+}
+
+.containerIndex {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.side-menu {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  z-index: 11000;
+}
+
+.menu-content {
+  padding: 20rpx;
+  color: #fff;
+}
+
+.main {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10500;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.top-bar {
+  height: 100rpx;
+  background-color: #eee;
+  display: flex;
+  align-items: center;
+}
+
+.menu-button {
+  padding: 20rpx;
+}
+
+.selBack {
+  background-color: rgb(255, 255, 255);
+  color: #000;
+}
+
+.new_btn {
+  padding: 10rpx 30rpx;
+  background-color: #fff;
+  color: #1ba0e5;
+  font-size: 34rpx;
+  border-radius: 40rpx;
+  border: 1px solid #1ba0e5;
+}
+
+/* ========== 下拉刷新样式 ========== */
+.custom-refresher {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100rpx;
+  background-color: #f7f7f7;
+}
+
+.refresher-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.refresh-icon {
+  width: 40rpx;
+  height: 40rpx;
+  transition: transform 0.3s ease;
+}
+
+.refresh-icon.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.refresh-text {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+/* 订单统计 */
+.supplier-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15rpx;
+}
+
+.supplier-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 15rpx 20rpx;
+  border-radius: 12rpx;
+  flex: 1;
+  margin: 0 5rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.supplier-stat-item:first-child {
+  margin-left: 0;
+}
+
+.supplier-stat-item:last-child {
+  margin-right: 0;
+}
+
+.supplier-stat-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 6rpx;
+}
+
+.supplier-stat-count {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.supplier-stat-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-value-primary {
+  color: #1976D2;
+}
+
+.stat-value-success {
+  color: #11998e;
+}
+
+/* 付款详情 */
+.payment-detail {
+  display: flex;
+  justify-content: space-between;
+  gap: 10rpx;
+}
+
+.payment-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 12rpx 8rpx;
+  border-radius: 10rpx;
+}
+
+.payment-label {
+  font-size: 22rpx;
+  color: #666;
+  margin-bottom: 4rpx;
+}
+
+.payment-count {
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.payment-value {
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.payment-success {
+  color: #11998e;
+}
+
+.payment-warning {
+  color: #f5576c;
+}
+
+.payment-danger {
+  color: #fa709a;
+}
+
+.ml-20 {
+  margin-left: 20rpx;
+}
+
+.mb-10 {
+  margin-bottom: 10rpx;
+}

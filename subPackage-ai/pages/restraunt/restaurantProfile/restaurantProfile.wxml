@@ -1,0 +1,309 @@
+<wxs module="fmt" src="../../../../wxs/format.wxs" />
+
+<view class="dashboard-page {{statusClass}}">
+
+  <!-- 导航栏 -->
+  <navbar title="经营看板" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+
+  <scroll-view scroll-y="true" class="scroll-content1" style="padding-top: {{navBarHeight}}rpx;" show-scrollbar="true">
+    <view class="create-btn" bindtap="toEditProfile" wx:if="{{errorMsg == '餐厅画像不存在'}}">
+          <text>创建画像</text>
+        </view>
+    <!-- 加载中 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="flex-column-center" style="height: 400rpx;">
+        <view class="loading-dots">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+        <text class="loading-text">加载经营数据...</text>
+      </view>
+    </view>
+
+    <!-- 错误/无数据 -->
+    <view class="empty-state" wx:elif="{{!hasData}}">
+      <view class="flex-column-center" style="padding-top: 120rpx;">
+        <text class="empty-icon">📊</text>
+        <view class="font-bold p-30"><text>{{errorMsg}}</text></view>
+        <view class="text-secondary font-sl mb-40">
+          <text wx:if="{{errorMsg == '餐厅画像不存在'}}">请先创建餐厅画像，系统将根据画像数据生成看板</text>
+          <text wx:elif="{{errorMsg == '暂无营业额数据'}}">暂无营业额记录，无法生成看板</text>
+          <text wx:else>请检查网络连接后重试</text>
+        </view>
+        <view class="create-btn" bindtap="toEditProfile" wx:if="{{errorMsg == '餐厅画像不存在'}}">
+          <text>创建画像</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 看板内容 -->
+    <block wx:else>
+
+      <!-- 餐厅信息卡片 -->
+      <view class="flex-column p-20">
+      <view class="restaurant-card">
+        <view class="restaurant-name">{{profile.gbAiRestaurantProfileRestaurantName || '我的餐厅'}}</view>
+        <view class="restaurant-info">{{profile.gbAiRestaurantProfileCuisineType || ''}} · {{profile.gbAiRestaurantProfileBusinessDistrict || ''}} · {{profile.gbAiRestaurantProfileBusinessHours || ''}}</view>
+        <view class="edit-btn" bindtap="toEditProfile">经营</view>
+      </view>
+    </view>
+      <!-- ===== 天平区域 ===== -->
+      <view class="scale-section">
+
+        <!-- 收入端 vs 支出端 -->
+        <view class="scale-beam">
+
+          <!-- 左：收入 -->
+          <view class="panel income-panel">
+            <view class="panel-title">
+              <text class="panel-icon">💰</text>
+              <text>收入端</text>
+            </view>
+            <view class="big-value">¥{{fmt.formatNumber(avgDailyRevenue)}}</view>
+            <view class="value-label">日均营业额</view>
+            <view class="detail-row">
+              <text class="detail-key">堂食</text>
+              <text class="detail-val">¥{{fmt.formatNumber(avgDineInRevenue)}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-key">外卖</text>
+              <text class="detail-val">¥{{fmt.formatNumber(avgTakeoutRevenue)}}</text>
+            </view>
+            <view class="ratio-bar-wrap">
+              <view class="ratio-bar-header">
+                <text>堂食占比</text>
+                <text>{{fmt.formatNumber(dineInRatio)}}%</text>
+              </view>
+              <view class="ratio-bar-track">
+                <view class="ratio-bar-fill" style="width: {{dineInRatio}}%"></view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 中：天平指针 -->
+          <view class="scale-center">
+            <view class="pointer-wrap {{animReady ? 'anim-' + statusClass : ''}}">
+              <view class="pointer-triangle"></view>
+              <view class="pointer-glow"></view>
+            </view>
+            <view class="status-label status-label-{{statusClass}}">
+              <text>⚖️ {{statusLabel}}</text>
+            </view>
+          </view>
+
+          <!-- 右：支出 -->
+          <view class="panel expense-panel">
+            <view class="panel-title">
+              <text class="panel-icon">📊</text>
+              <text>支出端</text>
+            </view>
+            <view class="big-value">¥{{fmt.formatNumber(avgFixedCost)}}</view>
+            <view class="value-label">日均固定开支</view>
+            <view class="detail-row">
+              <text class="detail-key">工资</text>
+              <text class="detail-val">¥{{fmt.formatNumber(dailyWage)}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-key">租金</text>
+              <text class="detail-val">¥{{fmt.formatNumber(dailyRent)}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-key">成本</text>
+              <text class="detail-val">¥{{fmt.formatNumber(avgPlatformFee)}}</text>
+            </view>
+          </view>
+
+        </view>
+
+        <!-- ===== 天平底座：健康度 + 预测 ===== -->
+        <view class="scale-base">
+
+          <!-- 日期 -->
+          <view class="date-header">
+            <view class="date-left">
+              <text class="date-text">📅 {{dateStr}}</text>
+              <text class="date-week">{{weekdayStr}}</text>
+            </view>
+            <view class="month-badge">🌙 月度预测</view>
+          </view>
+
+          <!-- 经营健康度 -->
+          <view class="health-card">
+            <view class="health-card-title">💪 经营健康度</view>
+
+            <!-- 利润率进度条 -->
+            <view class="health-bar-wrap">
+              <view class="health-bar-header">
+                <text class="health-bar-label">净利润率</text>
+                <text class="health-bar-value" style="color: {{healthColor}}">{{profitMargin}}%</text>
+              </view>
+              <view class="health-bar-track">
+                <view class="health-bar-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{healthPercent}}%; background: {{healthColor}}"></view>
+              </view>
+            </view>
+
+            <!-- 安全等级 -->
+            <view class="safety-row">
+              <text class="health-bar-label">安全等级</text>
+              <view class="safety-tag safety-tag-{{safetyLevel}}">
+                <text>{{safetyText}} · {{safetyDesc}}</text>
+              </view>
+            </view>
+
+            <!-- 抗风险倍数 -->
+            <view class="risk-row">
+              <view class="risk-left">
+                <text class="risk-label">🔥 抗风险倍数</text>
+                <text class="risk-desc">{{isProfit ? '盈利是支出的' : '亏损是支出的'}}倍数</text>
+              </view>
+              <text class="risk-value risk-value-{{isProfit ? 'profit' : 'loss'}}">{{riskMultiple}}x</text>
+            </view>
+          </view>
+
+          <!-- 月度预测 -->
+          <view class="forecast-card">
+            <view class="forecast-title">🌙 {{currentMonth}}月经营预测</view>
+
+            <!-- 月度进度条 -->
+            <view class="month-progress-wrap">
+              <view class="month-progress-track">
+                <view class="month-progress-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{monthProgress}}%"></view>
+              </view>
+              <text class="month-progress-label">已过 {{daysPassed}}/{{monthDays}} 天</text>
+            </view>
+
+            <!-- 预测结果 -->
+            <view class="forecast-result">
+              <text class="forecast-result-label">预计{{currentMonth}}月{{isProfit ? '盈利' : '亏损'}}</text>
+              <text class="forecast-result-value forecast-value-{{isProfit ? 'profit' : 'loss'}}">
+                {{isProfit ? '+' : '-'}}¥{{fmt.formatNumber(absEstimatedProfit)}}
+              </text>
+
+              <view class="forecast-vs" wx:if="{{isProfit}}">
+                <text>vs 行业平均 </text>
+                <text class="vs-highlight">超过 {{vsIndustryPercent}}%</text>
+                <text> 🏆</text>
+              </view>
+              <view class="forecast-vs forecast-vs-danger" wx:else>
+                <text>⚠️ 建议调整经营策略</text>
+              </view>
+            </view>
+
+            <!-- 风险提示 -->
+            <view class="risk-alert" wx:if="{{!isProfit}}">
+              <text class="risk-alert-icon">⚠️</text>
+              <text class="risk-alert-text">按当前趋势，本月预计亏损 ¥{{fmt.formatNumber(absEstimatedProfit)}}，建议提升收入或降低开支</text>
+            </view>
+          </view>
+
+        </view>
+      </view>
+
+      
+      <view class="flex-column - p-20">
+      <!-- ===== 核心指标 ===== -->
+      <view class="metrics-grid">
+        <view class="metric-card">
+          <text class="metric-icon">👨‍🍳</text>
+          <text class="metric-value">{{staffCount}}</text>
+          <text class="metric-label">员工人数</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-icon">🪑</text>
+          <text class="metric-value">{{seatCount}}</text>
+          <text class="metric-label">座位数</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-icon">🏠</text>
+          <text class="metric-value">{{competitorCount}}</text>
+          <text class="metric-label">竞争对手</text>
+        </view>
+        <view class="metric-card">
+          <text class="metric-icon">💵</text>
+          <text class="metric-value">¥{{avgPrice}}</text>
+          <text class="metric-label">客单价</text>
+        </view>
+      </view>
+
+      <!-- ===== 盈亏分析 ===== -->
+     
+      <view class="analysis-card">
+        <view class="analysis-title">📈 经营分析</view>
+        <view class="analysis-row">
+          <text class="analysis-label">统计天数</text>
+          <text class="analysis-value">{{days}} 天</text>
+        </view>
+        <view class="analysis-row">
+          <text class="analysis-label">总营业额</text>
+          <text class="analysis-value">¥{{fmt.formatNumber(totalRevenue)}}</text>
+        </view>
+        <view class="analysis-row">
+          <text class="analysis-label">日均净收入</text>
+          <text class="analysis-value">¥{{fmt.formatNumber(dailyNetRevenue)}}</text>
+        </view>
+        <view class="analysis-row">
+          <text class="analysis-label">盈亏平衡点</text>
+          <text class="analysis-value">¥{{fmt.formatNumber(breakEvenPoint)}}/天</text>
+        </view>
+        <view class="analysis-row">
+          <text class="analysis-label">每日盈亏</text>
+          <text class="analysis-value analysis-trend-{{isProfit ? 'up' : 'down'}}">
+            {{isProfit ? '+' : ''}}¥{{fmt.formatNumber(dailyProfit)}}
+          </text>
+        </view>
+        <view class="analysis-row">
+          <text class="analysis-label">利润率</text>
+          <text class="analysis-value analysis-trend-{{profitMargin >= 0 ? 'up' : 'down'}}">{{profitMargin}}%</text>
+        </view>
+        <view class="analysis-row">
+          <text class="analysis-label">状态</text>
+          <view class="status-badge status-badge-{{statusClass}}">
+            <text>{{statusText}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 成本明细 ===== -->
+      <view class="cost-card">
+        <view class="cost-title">💰 成本明细</view>
+        <view class="cost-section">
+          <view class="cost-section-title">制作成本</view>
+          <view class="cost-row">
+            <text class="cost-label">生产成本</text>
+            <text class="cost-value">¥{{fmt.formatNumber(produceCost)}}</text>
+          </view>
+          <view class="cost-row">
+            <text class="cost-label">损耗成本</text>
+            <text class="cost-value">¥{{fmt.formatNumber(wasteCost)}}</text>
+          </view>
+          <view class="cost-row">
+            <text class="cost-label">损失成本</text>
+            <text class="cost-value">¥{{fmt.formatNumber(lossCost)}}</text>
+          </view>
+          <view class="cost-row cost-row-subtotal">
+            <text class="cost-label">制作成本合计</text>
+            <text class="cost-value">¥{{fmt.formatNumber(productionCost)}}</text>
+          </view>
+        </view>
+        <view class="cost-section">
+          <view class="cost-section-title">其他成本</view>
+          <view class="cost-row">
+            <text class="cost-label">退货成本</text>
+            <text class="cost-value">¥{{fmt.formatNumber(returnCost)}}</text>
+          </view>
+        </view>
+        <view class="cost-total-row">
+          <text class="cost-total-label">总成本</text>
+          <text class="cost-total-value">¥{{fmt.formatNumber(totalCost)}}</text>
+        </view>
+      </view>
+    </view>
+    
+      <view style="height: 60rpx;"></view>
+
+    </block>
+
+  </scroll-view>
+
+</view>

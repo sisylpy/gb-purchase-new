@@ -1,0 +1,43 @@
+<!-- components/custom-navbar/custom-navbar.wxml -->
+<view class="custom-navbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
+  <view class="nav-container" style="height: {{navBarContentHeight}}px; ">
+    <!-- 左侧区域 -->
+    <view class="nav-left"  bindtap="navbuttontap" >
+      <image src="{{avatar}}" mode="aspectFill" class="user-avatar"/>
+    </view>
+    <!-- 中间标题 -->
+    <view class="nav-title">{{title}}</view>
+    <!-- 右侧区域 -->
+    <view class="nav-right" style="width: {{rightWidth}}px; ">
+      <!-- 右侧内容 -->
+      <!-- 如果需要添加右侧按钮，可以放在这里 -->
+    </view>
+  </view>
+
+  
+  <view class="slack-search-bar">
+    <view class="slack-search-input-wrap">
+      <image src="/images/search.png" class="slack-search-icon"/>
+      <input class="slack-search-input" placeholder="搜索订单..." placeholder-class="slack-search-placeholder" bindinput="onSearchInput" value="{{searchValue}}" bindblur="onSearchBlur" bindfocus="onSearchFocus" />
+    </view>
+    <view class="slack-switch-btn-wrap">
+      <block wx:if="{{isSearching}}">
+        <view class="slack-cancel-btn" bindtap="onCancelSearch">取消</view>
+      </block>
+      <block wx:else>
+        <view class="slack-switch-btn" bindtap="onSwitchBtnTap">
+          <view class="slack-switch-icon"></view>
+        </view>
+      </block>
+    </view>
+  </view>
+</view>
+
+<!-- 菜单和遮罩层放在 custom-navbar 外面，fixed 定位，保证事件可用 -->
+<view wx:if="{{showSwitchMenu}}" class="slack-switch-menu-outer" style="position:fixed;top:260rpx;right:40rpx;z-index:2000;">
+  <!-- <view class="slack-switch-menu-item" bindtap="onSortByTime">按时间</view>
+  <view class="slack-switch-menu-item" bindtap="onSortByCategory">按类别</view> -->
+  <view class="slack-switch-menu-item {{currentType === 'time' ? 'active' : ''}}" bindtap="onSortByTime">按下单时间</view>
+<view class="slack-switch-menu-item {{currentType === 'category' ? 'active' : ''}}" bindtap="onSortByCategory">按商品类别</view>
+</view>
+<view wx:if="{{showSwitchMenu}}" class="slack-switch-menu-mask" bindtap="onSwitchMenuMask"></view>

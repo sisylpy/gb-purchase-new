@@ -1,0 +1,104 @@
+{
+  "pages": [
+   
+    "pages/index/index",
+    "pages/splash/splash",
+    "pages/common/selectDate/selectDate",
+    "pages/register/register",
+    "pages/tro/tro"
+  ],
+  "subPackages": [
+    {
+      "root": "subPackage-mendian/",
+      "name": "mendian",
+      "pages": [
+        "pages/order/chefOrder/chefOrder",
+        "pages/order/purGoods/purGoods",
+        "pages/order/resGoodsAi/resGoodsAi",
+        "pages/order/resGoodsSearch/resGoodsSearch",
+        "pages/management/homePage/homePage",
+        "pages/management/staff/staff",
+        "pages/management/disUserEdit/disUserEdit",
+        "pages/management/purUserEveryDay/purUserEveryDay",
+        "pages/management/purUserDayDeatil/purUserDayDeatil",
+        "pages/mendian/index/index",
+        "pages/mendian/mendianDetail/mendianDetail",
+        "pages/mendian/mendianEdit/mendianEdit",
+        "pages/mendian/addDepartment/addDepartment",
+        "pages/mendian/addSubDep/addSubDep",
+        "pages/mendian/depEdit/depEdit",
+        "pages/mendian/depUserRegister/depUserRegister",
+        "pages/mendian/depUserEdit/depUserEdit",
+        "pages/mendian/groupUserRegister/groupUserRegister",
+        "pages/food/index/index",
+        "pages/food/foodList/foodList",
+        "pages/food/allFood/allFood",
+        "pages/food/addFood/addFood",
+        "pages/food/addFoodFather/addFoodFather",
+        "pages/food/addRaw/addRaw"
+      ]
+    },
+    {
+      "root": "subPackage-ai/",
+      "name": "ai",
+      "pages": [
+        "pages/chat/aiChat/aiChat",
+        "pages/restraunt/restaurantProfile/restaurantProfile",
+        "pages/restraunt/restaurantEdit/restaurantEdit"
+      ]
+    },
+    {
+      "root": "subPackage-goods/",
+      "name": "goods",
+      "pages": [
+        "pages/goods/resGoods/resGoods"
+      ]
+    },
+    {
+      "root": "subPackage-supplier/",
+      "name": "supplier",
+      "pages": [
+        "pages/supplier/index/index",
+        "pages/gbOrderBatch/gbOrderBatch",
+        "pages/gbOrderWeight/gbOrderWeight",
+        "pages/gbOrderInput/gbOrderInput",
+        "pages/settlePageGb/settlePageGb",
+        "pages/jinriListWithLogin/jinriListWithLogin",
+        "pages/gbReceiveBatch/gbReceiveBatch",
+        "pages/gbOrderBatchReturn/gbOrderBatchReturn",
+        "pages/disOrderBatchDetail/disOrderBatchDetail",
+        "pages/depUserEdit/depUserEdit",
+        "pages/supplier/supplierOrder/supplierOrder"
+      ]
+    },
+    {
+      "root": "subPackage-charts/",
+      "name": "charts",
+      "pages": [
+        "pages/statistic/index/index",
+        "pages/statistic/indexGoods/indexGoods",
+        "pages/stock/index/index",
+        "pages/stock/stockList/stockList",
+        "pages/stock/stockListOneDay/stockListOneDay",
+        "pages/stock/stockGoodsList/stockGoodsList",
+        "pages/cost/purGoodsFenxi/purGoodsFenxi",
+        "pages/cost/costGoodsFenxi/costGoodsFenxi",
+        "pages/cost/goodsFenxiPurchase/goodsFenxiPurchase",
+        "pages/sales/dailyTurnover/dailyTurnover",
+        "pages/sales/addTurnover/addTurnover"
+      ]
+    }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarTitleText": "粮心乐",
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom"
+  },
+  "plugins": {
+    "QCloudAIVoice": {
+      "version": "2.3.10",
+      "provider": "wx3e17776051baf153"
+    }
+  }
+}

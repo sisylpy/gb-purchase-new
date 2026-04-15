@@ -1,0 +1,18 @@
+<view class="popup-overlay " bindtap="onCancel">
+ 
+  <view class="popup-content flex-column-center " bindtap="stopPropagation">
+    <text class="popup-title ">{{popupTitle}}</text>
+    
+    <view class="flex-row" style="font-size: 36rpx;" >
+      <text class="">{{message}}</text>
+    </view>
+    <view class="flex flex-column-center p-20 " style="font-size: 46rpx; width: 100%; padding: 20rpx 20rpx; margin-bottom: 20rpx; ">
+    <text>{{warnContent}}</text>
+  
+    </view>
+    <view class="flex  flex-row-between" style="width: 100%;">
+      <view class="cancel-button half-row" style="margin-right: 10%;margin-left: 5%;" bindtap="onCancel">取消</view>
+      <view class="confirm-button half-row" bindtap="onConfirm">确认删除</view>
+    </view>
+  </view>
+</view>

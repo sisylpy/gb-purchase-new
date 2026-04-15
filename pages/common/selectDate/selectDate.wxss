@@ -1,0 +1,90 @@
+.navbar {
+  display: flex;
+  position: relative;
+  z-index: 500;
+  width: 100%;
+  background-color: #fff;
+}
+
+.navbar .navbar-item {
+  position: relative;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 24rpx 0;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.navbar .bar-item-on {
+  color: #187e6e;
+  font-weight: 500;
+}
+
+.navbar .navbar-title {
+  font-size: 28rpx;
+}
+
+.navbar .navbar-slider {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 25%;
+  height: 4rpx;
+  background-color: #187e6e;
+  transition: transform 0.3s ease;
+}
+
+.date-list {
+  height: 100%;
+  background-color: #fff;
+}
+
+.date-item {
+  background-color: #fff;
+}
+
+.date-item:active {
+  background-color: #f5f5f5;
+}
+
+.custom-date {
+  background-color: #fff;
+}
+
+.btn-query {
+  padding: 16rpx 40rpx;
+  background-color: #187e6e;
+  color: #fff;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+
+.picker-item {
+  background-color: #fff;
+}
+
+/* 图标 */
+.icon-sm {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+/* 工具类 */
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-row-between { justify-content: space-between; align-items: center; }
+.flex-row-end { justify-content: flex-end; align-items: center; }
+.p-20 { padding: 20rpx; }
+.mb-20 { margin-bottom: 20rpx; }
+.mt-10 { margin-top: 10rpx; }
+.border-bottom { border-bottom: 1rpx solid #eee; }
+.bg-white { background-color: #fff; }
+
+/* 文字 */
+.font-lg { font-size: 32rpx; font-weight: 500; }
+.font-md { font-size: 28rpx; }
+.font-sm { font-size: 24rpx; }
+.text-main { color: #187e6e; }
+.text-secondary { color: #999; }

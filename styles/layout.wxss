@@ -1,0 +1,62 @@
+/* styles/layout.wxss - 布局工具类 */
+
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-row { display: flex; flex-direction: row; }
+.flex-wrap { display: flex; flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+/* 主轴对齐 */
+.flex-start { justify-content: flex-start; }
+.flex-center { justify-content: center; }
+.flex-end { justify-content: flex-end; }
+.flex-between { justify-content: space-between; }
+.flex-around { justify-content: space-around; }
+
+/* 交叉轴对齐 */
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+/* 居中 */
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 宽度 */
+.w-full { width: 100%; }
+.w-half { width: 50%; }
+.w-third { width: 33.33%; }
+.w-quarter { width: 25%; }
+
+/* 溢出省略 */
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ellipsis-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* 老项目兼容 */
+.flex-column { display: flex; flex-direction: column; }
+.flex-row-default { display: flex; flex-direction: row; }
+.flex-row-between { display: flex; flex-direction: row; align-items: center; justify-content: space-between; }
+.flex-row-between-default { display: flex; flex-direction: row; justify-content: space-between; }
+.flex-row-around { display: flex; flex-direction: row; justify-content: space-around; align-items: center; }
+.flex-row-reverse { display: flex; flex-direction: row-reverse; align-items: center; }
+.flex-row-wrap { display: flex; flex-direction: row; flex-wrap: wrap; }
+.flex-stretch { display: flex; flex-direction: row; align-items: stretch; }
+.flex-column-center { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.full-height { height: 100%; }
+.third-row { width: 30%; text-align: center; }
+.half-row { width: 50%; }
+.quarter-row { width: 25%; }

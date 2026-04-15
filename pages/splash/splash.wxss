@@ -1,0 +1,162 @@
+
+
+
+:root {
+  --brand: #20afb8;
+  --ink: #0f172a;       /* 深墨黑蓝 */
+  --muted: #475569;     /* 次级文字 */
+}
+
+.page {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background: linear-gradient(135deg, #e6fffb 0%, #ffffff 40%, #f0f9ff 100%);
+  overflow: hidden;
+}
+
+.safe {
+  padding: 64rpx 48rpx env(safe-area-inset-bottom);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+  gap: 28rpx;
+}
+
+.brand {
+  position: absolute;
+  top: 56rpx;
+  left: 48rpx;
+  font-weight: 700;
+  color: var(--brand);
+  letter-spacing: 2rpx;
+  opacity: 0;
+  transform: translateY(-12rpx);
+  animation: fadeUp .6s ease .1s forwards;
+}
+
+.line1, .line2 {
+  color: var(--ink);
+  font-weight: 800;
+  letter-spacing: 2rpx;
+}
+
+.line1 {
+  font-size: 56rpx;
+  line-height: 1.2;
+  opacity: 0;
+  transform: scale(.96) translateY(8rpx);
+  filter: blur(3rpx);
+  transition: all .8s cubic-bezier(.2,.7,.2,1);
+}
+.line1.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  filter: blur(0);
+}
+
+.line2-wrap { position: relative; width: fit-content; }
+
+.line2 {
+  font-size: 48rpx;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translateY(14rpx);
+  transition: all .7s cubic-bezier(.2,.7,.2,1);
+}
+.line2.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.underline {
+  height: 8rpx;
+  background: rgba(32,175,184,.18);
+  border-radius: 8rpx;
+  width: 0%;
+  margin-top: 12rpx;
+  transition: width .6s ease-in-out .05s;
+}
+.underline.grow { width: 100%; }
+
+/* 划光特效 */
+.glint {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 68rpx;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent);
+  transform: translateX(-120%);
+  opacity: 0;
+}
+.glint.run {
+  opacity: 1;
+  animation: glint 700ms ease 1 forwards;
+  animation-delay: 120ms;
+}
+@keyframes glint {
+  from { transform: translateX(-120%); }
+  to   { transform: translateX(120%); }
+}
+
+/* 打字机遮罩：用宽度揭示文本 */
+.sub { margin-top: 12rpx; }
+.type-mask {
+  overflow: hidden;
+  margin: 8rpx 0;
+}
+.subline {
+  font-size: 34rpx;
+  color: var(--muted);
+  display: inline-block;
+  transform: translateY(8rpx);
+  opacity: 0;
+  /* 初始用裁剪隐藏 */
+  max-width: 0;
+  white-space: nowrap;
+  border-right: 4rpx solid rgba(15,23,42,.25); /* 光标 */
+}
+.subline.reveal {
+  opacity: 1;
+  transform: translateY(0);
+  animation: typing 1.2s steps(16,end) forwards, caret .9s steps(1,end) infinite;
+}
+@keyframes typing {
+  from { max-width: 0; }
+  to   { max-width: 100%; }
+}
+@keyframes caret {
+  50% { border-right-color: transparent; }
+}
+
+/* 按钮/跳过 */
+.actions {
+  position: absolute;
+  right: 32rpx;
+  bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+.skip {
+  font-size: 26rpx;
+  padding: 14rpx 24rpx;
+  color: #0f172a;
+  background: rgba(255,255,255,.75);
+  border: 2rpx solid rgba(15,23,42,.08);
+  border-radius: 999rpx;
+  backdrop-filter: blur(6rpx);
+}
+
+/* 背景微粒画布 */
+.spark {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: .9;
+}
+
+/* 通用淡入上移 */
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}

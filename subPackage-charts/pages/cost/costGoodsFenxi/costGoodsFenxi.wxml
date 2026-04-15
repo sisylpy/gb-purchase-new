@@ -1,0 +1,156 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="成本分析" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+  </view>
+
+
+
+  <view class="flex-column p-20">
+
+    <!-- topFloat -->
+    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
+      <view class="flex-column font-sm mb-20 p-20">
+        <view>销售排名前10商品</view>
+
+      </view>
+      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topGoodsProduce}}" wx:key="index" wx:if="{{index < (showAllProduce ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toStatistics" data-goods="{{item}}" hover-class="hover" data-type="sales">
+        <view class="flex-row">
+          <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item_lg mr-10" />
+          <text>{{item.gbDgGoodsName}}</text>
+        </view>
+        <view class="flex-column">
+          <view class="flex-row font-sm">
+            <text>销售:{{item.goodsProduceTotal}}元</text>
+          </view>
+
+        </view>
+
+      </view>
+
+      <!-- 展开/收起按钮 -->
+      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topGoodsProduce.length > 4}}">
+        <view class="button-container-white" hover-class="hover" bind:tap="toggleProduceList">
+          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllProduce ? '180' : '0'}}"></image>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- topFloat -->
+    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
+      <view class="flex-column font-sm mb-20 p-20">
+        <view>损耗排名前10商品</view>
+
+      </view>
+      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topGoodsLoss}}" wx:key="index" wx:if="{{index < (showAllLoss ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toStatistics" data-goods="{{item}}" hover-class="hover" data-type="loss">
+        <view class="flex-row">
+          <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item_lg mr-10" />
+          <text>{{item.gbDgGoodsName}}</text>
+        </view>
+        <view class="flex-column">
+          <view class="flex-row font-sm">
+            <text>损耗:{{item.goodsLossTotal}}元</text>
+          </view>
+
+        </view>
+
+      </view>
+
+      <!-- 展开/收起按钮 -->
+      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topGoodsLoss.length > 4}}">
+        <view class="button-container-white" hover-class="hover" bind:tap="toggleLossList">
+          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllLoss ? '180' : '0'}}"></image>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- topFloat -->
+    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
+      <view class="flex-column font-sm mb-20 p-20">
+        <view>废弃排名前10商品</view>
+      </view>
+      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topGoodsWaste}}" wx:key="index" wx:if="{{index < (showAllWaste ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toStatistics" data-goods="{{item}}" hover-class="hover" data-type="waste">
+        <view class="flex-row">
+          <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item_lg mr-10" />
+          <text>{{item.gbDgGoodsName}}</text>
+        </view>
+        <view class="flex-column">
+          <view class="flex-row font-sm">
+            <text>废弃:{{item.goodsWasteTotal}}元</text>
+          </view>
+
+        </view>
+
+      </view>
+
+      <!-- 展开/收起按钮 -->
+      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topGoodsWaste.length > 4}}">
+        <view class="button-container-white" hover-class="hover" bind:tap="toggleWasteList">
+          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllWaste ? '180' : '0'}}"></image>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- topFloat -->
+    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
+      <view class="flex-column font-sm mb-20 p-20">
+        <view>按日期排名支出</view>
+      </view>
+      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topDayCost}}" wx:key="index" wx:if="{{index < (showAllDayCost ? 10 : 4)}}" bind:tap="toFenxiDate" data-item="{{item}}" hover-class="hover">
+        <view class="flex-row">
+          <text>{{item.date}}</text>
+        </view>
+        <view class="flex-column">
+          <view class="flex-row font-sm">
+            <text>支出总额:{{item.total}}元</text>
+          </view>
+
+        </view>
+
+      </view>
+
+      <!-- 展开/收起按钮 -->
+      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topDayCost.length > 4}}">
+        <view class="button-container-white" hover-class="hover" bind:tap="toggleDayCostList">
+          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllDayCost ? '180' : '0'}}"></image>
+        </view>
+
+      </view>
+    </view>
+
+
+
+
+    <view style="height: 100rpx;"></view>
+
+  </view>
+
+
+</view>
