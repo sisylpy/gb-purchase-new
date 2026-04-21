@@ -1,0 +1,23 @@
+
+
+<view class='aaa' wx:if='{{show}}' catchtouchmove='ture' >
+	<view class='' style=" margin-top:{{windowHeight/ 3}}rpx;">
+
+		<view class="body" >
+			<view class="">
+        <text class="title">{{depGoodsName}}</text>
+				<view class="number1">
+					<input class='standardInput' focus='true' type='text' bindinput="getAlias" value='{{itemAlias.gbDaAliasName}}' bindfocus="getFocus" placeholder="别名名称"/>
+				</view>
+			</view>
+
+     	<view class="btn_row" >
+       		<view class='btn sureBtn' catchtap='confirm' hover-class="hover">确定</view>
+				<view class='btn cancleBtn' bindtap="cancle" hover-class="hover">取消</view>
+			</view>
+
+	
+		</view>
+
+	</view>
+</view>

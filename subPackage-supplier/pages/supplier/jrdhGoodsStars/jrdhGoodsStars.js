@@ -2,7 +2,7 @@ var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
 // import {
 //   supplierGetStars

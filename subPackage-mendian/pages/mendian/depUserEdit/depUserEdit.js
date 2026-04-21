@@ -1,12 +1,11 @@
 const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
-
-// import {
-//   updateGbDepUserWithFile,
-//   updateGbDepUser,
-// } from '../../../../lib/apiDepOrder'
+const {
+  updateGbDepUserWithFile,
+  updateGbDepUser,
+} = require('../../../services/apiGbDepartmentUser.js');
 
 Page({
 

@@ -1,13 +1,7 @@
 const globalData = getApp().globalData;
 
-import apiUrl from '../../../../config.js'
-var load = require('../../../../lib/load.js');
-
-
-// import {
-//   saveSubDepartment
-// } from '../../../../lib/apiDistributer'
-
+import apiUrl from '../../../../config/index.js'
+import { saveSubDepartment } from '../../../services/mendian.js'
 
 Page({
 

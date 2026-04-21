@@ -1,6 +1,6 @@
 var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
-var apiUrl = require('../../../../config.js');
+var apiUrl = require('../../../../config/index.js');
 var apiDistributer = require('../../../../services/apiDistributer');
 
 Page({
@@ -67,7 +67,8 @@ Page({
         if (res.result.code == 0) {
           load.hideLoading();
           _this.setData({
-            zicaiArr: res.result.data
+            purUser: res.result.data,
+            zicaiArr: res.result.data.zicaiArr
           });
         } else {
           load.hideLoading();

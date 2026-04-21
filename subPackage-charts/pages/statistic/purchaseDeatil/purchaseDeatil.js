@@ -202,14 +202,14 @@ Page({
            
             total: res.result.data.total,
           })
-          if(this.data.type == 0){
+          if(this.data.type == 1){
             // 为用户添加展开状态
             const purUserArr = (res.result.data.purUserArr || []).map(user => ({
               ...user,
               expanded: false, // 用户级别的展开状态
               arr: user.arr.map(goods => ({
                 ...goods,
-                showPurchaseList: false, // 商品级别的采购列表展开状态
+                isSelected: false, // 商品级别的采购列表展开状态
                 wastePurGoodsEntities: goods.wastePurGoodsEntities.map(pur => ({
                   ...pur,
                   expanded: false // 采购记录详细信息的展开状态
@@ -220,23 +220,23 @@ Page({
             this.setData({
               purUserArr: purUserArr,
             })
-          } if(this.data.type == 1){
+          } if(this.data.type == 5){
             // 为供货商添加展开状态
-            const supplierArr = (res.result.data.supplierArr || []).map(supplier => ({
-              ...supplier,
-              expanded: false, // 供货商级别的展开状态
-              arr: supplier.arr.map(goods => ({
-                ...goods,
-                showPurchaseList: false, // 商品级别的采购列表展开状态
-                wastePurGoodsEntities: goods.wastePurGoodsEntities.map(pur => ({
-                  ...pur,
-                  expanded: false // 采购记录详细信息的展开状态
-                }))
-              }))
-            }));
-            console.log('初始化supplierArr数据结构:', supplierArr);
+            // const supplierArr = (res.result.data.supplierArr || []).map(supplier => ({
+            //   ...supplier,
+            //   expanded: false, // 供货商级别的展开状态
+            //   arr: supplier.arr.map(goods => ({
+            //     ...goods,
+            //     isSelected: false, // 商品级别的采购列表展开状态
+            //     wastePurGoodsEntities: goods.wastePurGoodsEntities.map(pur => ({
+            //       ...pur,
+            //       expanded: false // 采购记录详细信息的展开状态
+            //     }))
+            //   }))
+            // }));
+            console.log('初始化supplierArr数据结构:');
             this.setData({
-              supplierArr: supplierArr,
+              supplierArr: res.result.data.supplierArr,
             })
           }
          
@@ -500,10 +500,10 @@ Page({
     let dataArray = [];
     let dataKey = '';
     
-    if (this.data.type == 0) {
+    if (this.data.type == 1) {
       dataArray = this.data.purUserArr;
       dataKey = 'purUserArr';
-    } else if (this.data.type == 1) {
+    } else if (this.data.type == 5) {
       dataArray = this.data.supplierArr;
       dataKey = 'supplierArr';
     }
@@ -546,10 +546,10 @@ Page({
     let dataArray = [];
     let dataKey = '';
     
-    if (this.data.type == 0) {
+    if (this.data.type == 1) {
       dataArray = this.data.purUserArr;
       dataKey = 'purUserArr';
-    } else if (this.data.type == 1) {
+    } else if (this.data.type == 5) {
       dataArray = this.data.supplierArr;
       dataKey = 'supplierArr';
     }
@@ -636,10 +636,10 @@ Page({
     let dataArray = [];
     let dataKey = '';
     
-    if (this.data.type == 0) {
+    if (this.data.type == 1) {
       dataArray = this.data.purUserArr;
       dataKey = 'purUserArr';
-    } else if (this.data.type == 1) {
+    } else if (this.data.type == 5) {
       dataArray = this.data.supplierArr;
       dataKey = 'supplierArr';
     }
@@ -657,9 +657,9 @@ Page({
           for (let index = 0; index < newArr[userIndex].arr.length && !found; index++) {
             if (index === goodsIndex) {
               // 切换指定商品的采购批次显示状态
-              newArr[userIndex].arr[index].showPurchaseList = !newArr[userIndex].arr[index].showPurchaseList;
+              newArr[userIndex].arr[index].isSelected = !newArr[userIndex].arr[index].isSelected;
               found = true;
-              console.log('找到了对应商品，切换状态:', newArr[userIndex].arr[index].showPurchaseList);
+              console.log('找到了对应商品，切换状态:', newArr[userIndex].arr[index].isSelected);
             }
           }
         }
@@ -684,10 +684,10 @@ Page({
     let dataArray = [];
     let dataKey = '';
     
-    if (this.data.type == 0) {
+    if (this.data.type == 1) {
       dataArray = this.data.purUserArr;
       dataKey = 'purUserArr';
-    } else if (this.data.type == 1) {
+    } else if (this.data.type == 5) {
       dataArray = this.data.supplierArr;
       dataKey = 'supplierArr';
     }
@@ -703,7 +703,7 @@ Page({
     for (let userIndex = 0; userIndex < newArr.length; userIndex++) {
       if (newArr[userIndex].expanded && newArr[userIndex].arr) {
         for (let goodsIndex = 0; goodsIndex < newArr[userIndex].arr.length; goodsIndex++) {
-          if (newArr[userIndex].arr[goodsIndex].showPurchaseList) {
+          if (newArr[userIndex].arr[goodsIndex].isSelected) {
             foundExpandedGoods = true;
             
             // 使用setTimeout确保DOM已更新
@@ -730,7 +730,7 @@ Page({
                     console.log(`滚动检测：商品 ${goodsIndex} 超出屏幕，自动关闭`);
                     
                     const updatedArr = [...this.data[dataKey]];
-                    updatedArr[userIndex].arr[goodsIndex].showPurchaseList = false;
+                    updatedArr[userIndex].arr[goodsIndex].isSelected = false;
                     
                     this.setData({
                       [dataKey]: updatedArr

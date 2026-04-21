@@ -2,7 +2,7 @@ const globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
 import * as echarts from '../../../../../subPackage-charts/ec-canvas/echarts';
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
 // import {
 //   getGbPurGoodsStatistics,

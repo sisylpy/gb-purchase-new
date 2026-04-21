@@ -1,0 +1,93 @@
+.left {
+  width: 18vw;
+}
+
+.dep_left_item{
+  background-color: #eee;
+  padding: 50rpx 20rpx;
+  border-bottom: 1px solid lightgray;
+  text-align: center;
+}
+
+.dep_left_item.left-active{
+  background-color: #FFF;
+}
+.left-item {
+  padding: 30rpx 20rpx;
+  background-color: #eee;
+}
+
+.left-active {
+  background-color: #fff;
+  border-left: 6rpx solid #187e6e;
+}
+
+
+.chart-title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.chart-title {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 10rpx;
+}
+
+.chart-unit {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.chart-canvas-container {
+  width: 100%;
+  height: 300rpx;
+}
+
+/* goodsData.linkedDishList 每道菜一行 */
+.linked-dish-table {
+  border: 1rpx solid #eee;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.linked-dish-tr {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 14rpx 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.linked-dish-tr:last-child {
+  border-bottom: none;
+}
+
+.linked-dish-th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.linked-dish-col-name {
+  flex: 1;
+  min-width: 0;
+  padding-right: 12rpx;
+  word-break: break-all;
+}
+
+
+.linked-dish-col-ing {
+  flex: 0 0 160rpx;
+  text-align: right;
+  color: #333;
+}

@@ -1,15 +1,16 @@
 <wxs module="fmt" src="../../../../wxs/format.wxs" />
 
-<view class="dashboard-page {{statusClass}}">
 
-  <!-- 导航栏 -->
-  <navbar title="经营看板" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+<navbar title="经营看板" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
 
-  <scroll-view scroll-y="true" class="scroll-content1" style="padding-top: {{navBarHeight}}rpx;" show-scrollbar="true">
+<view class="dashboard-page {{dashboard && dashboard.scaleBeam && dashboard.scaleBeam.pointer ? dashboard.scaleBeam.pointer.statusClass : ''}}">
+
+
+  <scroll-view scroll-y="true" class="" style="padding-top: {{navBarHeight}}rpx;" show-scrollbar="true">
     <view class="create-btn" bindtap="toEditProfile" wx:if="{{errorMsg == '餐厅画像不存在'}}">
-          <text>创建画像</text>
-        </view>
-    <!-- 加载中 -->
+      <text>创建画像</text>
+    </view>
+
     <view class="loading-state" wx:if="{{isLoading}}">
       <view class="flex-column-center" style="height: 400rpx;">
         <view class="loading-dots">
@@ -21,7 +22,6 @@
       </view>
     </view>
 
-    <!-- 错误/无数据 -->
     <view class="empty-state" wx:elif="{{!hasData}}">
       <view class="flex-column-center" style="padding-top: 120rpx;">
         <text class="empty-icon">📊</text>
@@ -37,269 +37,214 @@
       </view>
     </view>
 
-    <!-- 看板内容 -->
     <block wx:else>
 
-      <!-- 餐厅信息卡片 -->
-      <view class="flex-column p-20">
-      <view class="restaurant-card">
-        <view class="restaurant-name">{{profile.gbAiRestaurantProfileRestaurantName || '我的餐厅'}}</view>
-        <view class="restaurant-info">{{profile.gbAiRestaurantProfileCuisineType || ''}} · {{profile.gbAiRestaurantProfileBusinessDistrict || ''}} · {{profile.gbAiRestaurantProfileBusinessHours || ''}}</view>
-        <view class="edit-btn" bindtap="toEditProfile">经营</view>
-      </view>
-    </view>
-      <!-- ===== 天平区域 ===== -->
-      <view class="scale-section">
-
-        <!-- 收入端 vs 支出端 -->
-        <view class="scale-beam">
-
-          <!-- 左：收入 -->
-          <view class="panel income-panel">
-            <view class="panel-title">
-              <text class="panel-icon">💰</text>
-              <text>收入端</text>
-            </view>
-            <view class="big-value">¥{{fmt.formatNumber(avgDailyRevenue)}}</view>
-            <view class="value-label">日均营业额</view>
-            <view class="detail-row">
-              <text class="detail-key">堂食</text>
-              <text class="detail-val">¥{{fmt.formatNumber(avgDineInRevenue)}}</text>
-            </view>
-            <view class="detail-row">
-              <text class="detail-key">外卖</text>
-              <text class="detail-val">¥{{fmt.formatNumber(avgTakeoutRevenue)}}</text>
-            </view>
-            <view class="ratio-bar-wrap">
-              <view class="ratio-bar-header">
-                <text>堂食占比</text>
-                <text>{{fmt.formatNumber(dineInRatio)}}%</text>
-              </view>
-              <view class="ratio-bar-track">
-                <view class="ratio-bar-fill" style="width: {{dineInRatio}}%"></view>
-              </view>
-            </view>
-          </view>
-
-          <!-- 中：天平指针 -->
-          <view class="scale-center">
-            <view class="pointer-wrap {{animReady ? 'anim-' + statusClass : ''}}">
-              <view class="pointer-triangle"></view>
-              <view class="pointer-glow"></view>
-            </view>
-            <view class="status-label status-label-{{statusClass}}">
-              <text>⚖️ {{statusLabel}}</text>
-            </view>
-          </view>
-
-          <!-- 右：支出 -->
-          <view class="panel expense-panel">
-            <view class="panel-title">
-              <text class="panel-icon">📊</text>
-              <text>支出端</text>
-            </view>
-            <view class="big-value">¥{{fmt.formatNumber(avgFixedCost)}}</view>
-            <view class="value-label">日均固定开支</view>
-            <view class="detail-row">
-              <text class="detail-key">工资</text>
-              <text class="detail-val">¥{{fmt.formatNumber(dailyWage)}}</text>
-            </view>
-            <view class="detail-row">
-              <text class="detail-key">租金</text>
-              <text class="detail-val">¥{{fmt.formatNumber(dailyRent)}}</text>
-            </view>
-            <view class="detail-row">
-              <text class="detail-key">成本</text>
-              <text class="detail-val">¥{{fmt.formatNumber(avgPlatformFee)}}</text>
-            </view>
-          </view>
-
-        </view>
-
-        <!-- ===== 天平底座：健康度 + 预测 ===== -->
-        <view class="scale-base">
-
-          <!-- 日期 -->
-          <view class="date-header">
-            <view class="date-left">
-              <text class="date-text">📅 {{dateStr}}</text>
-              <text class="date-week">{{weekdayStr}}</text>
-            </view>
-            <view class="month-badge">🌙 月度预测</view>
-          </view>
-
-          <!-- 经营健康度 -->
-          <view class="health-card">
-            <view class="health-card-title">💪 经营健康度</view>
-
-            <!-- 利润率进度条 -->
-            <view class="health-bar-wrap">
-              <view class="health-bar-header">
-                <text class="health-bar-label">净利润率</text>
-                <text class="health-bar-value" style="color: {{healthColor}}">{{profitMargin}}%</text>
-              </view>
-              <view class="health-bar-track">
-                <view class="health-bar-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{healthPercent}}%; background: {{healthColor}}"></view>
-              </view>
-            </view>
-
-            <!-- 安全等级 -->
-            <view class="safety-row">
-              <text class="health-bar-label">安全等级</text>
-              <view class="safety-tag safety-tag-{{safetyLevel}}">
-                <text>{{safetyText}} · {{safetyDesc}}</text>
-              </view>
-            </view>
-
-            <!-- 抗风险倍数 -->
-            <view class="risk-row">
-              <view class="risk-left">
-                <text class="risk-label">🔥 抗风险倍数</text>
-                <text class="risk-desc">{{isProfit ? '盈利是支出的' : '亏损是支出的'}}倍数</text>
-              </view>
-              <text class="risk-value risk-value-{{isProfit ? 'profit' : 'loss'}}">{{riskMultiple}}x</text>
-            </view>
-          </view>
-
-          <!-- 月度预测 -->
-          <view class="forecast-card">
-            <view class="forecast-title">🌙 {{currentMonth}}月经营预测</view>
-
-            <!-- 月度进度条 -->
-            <view class="month-progress-wrap">
-              <view class="month-progress-track">
-                <view class="month-progress-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{monthProgress}}%"></view>
-              </view>
-              <text class="month-progress-label">已过 {{daysPassed}}/{{monthDays}} 天</text>
-            </view>
-
-            <!-- 预测结果 -->
-            <view class="forecast-result">
-              <text class="forecast-result-label">预计{{currentMonth}}月{{isProfit ? '盈利' : '亏损'}}</text>
-              <text class="forecast-result-value forecast-value-{{isProfit ? 'profit' : 'loss'}}">
-                {{isProfit ? '+' : '-'}}¥{{fmt.formatNumber(absEstimatedProfit)}}
-              </text>
-
-              <view class="forecast-vs" wx:if="{{isProfit}}">
-                <text>vs 行业平均 </text>
-                <text class="vs-highlight">超过 {{vsIndustryPercent}}%</text>
-                <text> 🏆</text>
-              </view>
-              <view class="forecast-vs forecast-vs-danger" wx:else>
-                <text>⚠️ 建议调整经营策略</text>
-              </view>
-            </view>
-
-            <!-- 风险提示 -->
-            <view class="risk-alert" wx:if="{{!isProfit}}">
-              <text class="risk-alert-icon">⚠️</text>
-              <text class="risk-alert-text">按当前趋势，本月预计亏损 ¥{{fmt.formatNumber(absEstimatedProfit)}}，建议提升收入或降低开支</text>
-            </view>
-          </view>
-
+      <view class="flex-column p-20" wx:if="{{profile}}">
+        <view class="restaurant-card">
+          <view class="restaurant-name">{{profile.gbAiRestaurantProfileRestaurantName || '我的餐厅'}}</view>
+          <view class="restaurant-info">{{profile.gbAiRestaurantProfileCuisineType || ''}} · {{profile.gbAiRestaurantProfileBusinessDistrict || ''}} · {{profile.gbAiRestaurantProfileBusinessHours || ''}}</view>
+          <view class="edit-btn" bindtap="toEditProfile">经营</view>
         </view>
       </view>
 
-      
-      <view class="flex-column - p-20">
-      <!-- ===== 核心指标 ===== -->
-      <view class="metrics-grid">
-        <view class="metric-card">
-          <text class="metric-icon">👨‍🍳</text>
-          <text class="metric-value">{{staffCount}}</text>
-          <text class="metric-label">员工人数</text>
-        </view>
-        <view class="metric-card">
-          <text class="metric-icon">🪑</text>
-          <text class="metric-value">{{seatCount}}</text>
-          <text class="metric-label">座位数</text>
-        </view>
-        <view class="metric-card">
-          <text class="metric-icon">🏠</text>
-          <text class="metric-value">{{competitorCount}}</text>
-          <text class="metric-label">竞争对手</text>
-        </view>
-        <view class="metric-card">
-          <text class="metric-icon">💵</text>
-          <text class="metric-value">¥{{avgPrice}}</text>
-          <text class="metric-label">客单价</text>
-        </view>
+      <view wx:if="{{!dashboard || !dashboard.scaleBeam}}" class="p-30 text-secondary">
+        <text>接口未返回 dashboard 模块，无法渲染看板。</text>
       </view>
 
-      <!-- ===== 盈亏分析 ===== -->
-     
-      <view class="analysis-card">
-        <view class="analysis-title">📈 经营分析</view>
-        <view class="analysis-row">
-          <text class="analysis-label">统计天数</text>
-          <text class="analysis-value">{{days}} 天</text>
-        </view>
-        <view class="analysis-row">
-          <text class="analysis-label">总营业额</text>
-          <text class="analysis-value">¥{{fmt.formatNumber(totalRevenue)}}</text>
-        </view>
-        <view class="analysis-row">
-          <text class="analysis-label">日均净收入</text>
-          <text class="analysis-value">¥{{fmt.formatNumber(dailyNetRevenue)}}</text>
-        </view>
-        <view class="analysis-row">
-          <text class="analysis-label">盈亏平衡点</text>
-          <text class="analysis-value">¥{{fmt.formatNumber(breakEvenPoint)}}/天</text>
-        </view>
-        <view class="analysis-row">
-          <text class="analysis-label">每日盈亏</text>
-          <text class="analysis-value analysis-trend-{{isProfit ? 'up' : 'down'}}">
-            {{isProfit ? '+' : ''}}¥{{fmt.formatNumber(dailyProfit)}}
-          </text>
-        </view>
-        <view class="analysis-row">
-          <text class="analysis-label">利润率</text>
-          <text class="analysis-value analysis-trend-{{profitMargin >= 0 ? 'up' : 'down'}}">{{profitMargin}}%</text>
-        </view>
-        <view class="analysis-row">
-          <text class="analysis-label">状态</text>
-          <view class="status-badge status-badge-{{statusClass}}">
-            <text>{{statusText}}</text>
-          </view>
-        </view>
-      </view>
+      <block wx:else>
 
-      <!-- ===== 成本明细 ===== -->
-      <view class="cost-card">
-        <view class="cost-title">💰 成本明细</view>
-        <view class="cost-section">
-          <view class="cost-section-title">制作成本</view>
-          <view class="cost-row">
-            <text class="cost-label">生产成本</text>
-            <text class="cost-value">¥{{fmt.formatNumber(produceCost)}}</text>
+        <view class="scale-section">
+          <view class="scale-beam">
+
+            <view class="panel income-panel" wx:if="{{dashboard.scaleBeam.income}}">
+              <view class="panel-title">
+                <text class="panel-icon">💰</text>
+                <text>{{dashboard.scaleBeam.income.title}}</text>
+              </view>
+              <view class="big-value" wx:if="{{dashboard.scaleBeam.income.rows[0]}}">¥{{fmt.formatNumber(dashboard.scaleBeam.income.rows[0].value)}}</view>
+              <view class="value-label" wx:if="{{dashboard.scaleBeam.income.rows[0]}}">{{dashboard.scaleBeam.income.rows[0].label}}</view>
+              <view class="detail-row" wx:if="{{dashboard.scaleBeam.income.rows[1]}}">
+                <text class="detail-key">{{dashboard.scaleBeam.income.rows[1].key}}</text>
+                <text class="detail-val">¥{{fmt.formatNumber(dashboard.scaleBeam.income.rows[1].value)}}</text>
+              </view>
+              <view class="detail-row" wx:if="{{dashboard.scaleBeam.income.rows[2]}}">
+                <text class="detail-key">{{dashboard.scaleBeam.income.rows[2].key}}</text>
+                <text class="detail-val">¥{{fmt.formatNumber(dashboard.scaleBeam.income.rows[2].value)}}</text>
+              </view>
+              <view class="ratio-bar-wrap" wx:if="{{dashboard.scaleBeam.income.ratioBar}}">
+                <view class="ratio-bar-header">
+                  <text>{{dashboard.scaleBeam.income.ratioBar.label}}</text>
+                  <text>{{fmt.formatNumber(dashboard.scaleBeam.income.ratioBar.percent)}}%</text>
+                </view>
+                <view class="ratio-bar-track">
+                  <view class="ratio-bar-fill" style="width: {{dashboard.scaleBeam.income.ratioBar.percent}}%"></view>
+                </view>
+              </view>
+            </view>
+
+            <view class="scale-center" wx:if="{{dashboard.scaleBeam.pointer}}">
+              <view class="pointer-wrap {{animReady ? 'anim-status-' + dashboard.scaleBeam.pointer.statusClass : ''}}">
+                <view class="pointer-triangle"></view>
+                <view class="pointer-glow"></view>
+              </view>
+              <view class="status-label status-label-{{dashboard.scaleBeam.pointer.statusClass}}">
+                <text>⚖️ {{dashboard.scaleBeam.pointer.statusLabel}}</text>
+              </view>
+            </view>
+
+            <view class="panel expense-panel" wx:if="{{dashboard.scaleBeam.expense}}">
+              <view class="panel-title">
+                <text class="panel-icon">📊</text>
+                <text>{{dashboard.scaleBeam.expense.title}}</text>
+              </view>
+              <view class="big-value" wx:if="{{dashboard.scaleBeam.expense.summary}}">¥{{fmt.formatNumber(dashboard.scaleBeam.expense.summary.value)}}</view>
+              <view class="value-label" wx:if="{{dashboard.scaleBeam.expense.summary}}">{{dashboard.scaleBeam.expense.summary.label}}</view>
+              <block wx:for="{{dashboard.scaleBeam.expense.rows}}" wx:key="key">
+                <view class="detail-row">
+                  <text class="detail-key">{{item.key}}</text>
+                  <text class="detail-val">¥{{fmt.formatNumber(item.value)}}</text>
+                </view>
+              </block>
+            </view>
+
           </view>
-          <view class="cost-row">
-            <text class="cost-label">损耗成本</text>
-            <text class="cost-value">¥{{fmt.formatNumber(wasteCost)}}</text>
-          </view>
-          <view class="cost-row">
-            <text class="cost-label">损失成本</text>
-            <text class="cost-value">¥{{fmt.formatNumber(lossCost)}}</text>
-          </view>
-          <view class="cost-row cost-row-subtotal">
-            <text class="cost-label">制作成本合计</text>
-            <text class="cost-value">¥{{fmt.formatNumber(productionCost)}}</text>
+
+          <view class="scale-base" wx:if="{{dashboard.scaleBase}}">
+
+            <view class="date-header" wx:if="{{dashboard.scaleBase.dateHeader}}">
+              <view class="date-left">
+                <text class="date-text">📅 {{dashboard.scaleBase.dateHeader.dateStr}}</text>
+                <text class="date-week">{{dashboard.scaleBase.dateHeader.weekdayStr}}</text>
+              </view>
+              <view class="month-badge">🌙 {{dashboard.scaleBase.dateHeader.badge}}</view>
+            </view>
+
+            <view class="health-card" wx:if="{{dashboard.scaleBase.healthCard}}">
+              <view class="health-card-title">💪 {{dashboard.scaleBase.healthCard.title}}</view>
+
+              <view class="health-bar-wrap" wx:if="{{dashboard.scaleBase.healthCard.rows[0]}}">
+                <view class="health-bar-header">
+                  <text class="health-bar-label">{{dashboard.scaleBase.healthCard.rows[0].label}}</text>
+                  <text class="health-bar-value" style="color: {{fmt.marginTextColor(dashboard.scaleBase.healthCard.rows[0].value)}}">{{dashboard.scaleBase.healthCard.rows[0].value}}%</text>
+                </view>
+                <view class="health-bar-track">
+                  <view class="health-bar-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{fmt.healthBarWidthPercent(dashboard.scaleBase.healthCard.rows[0].value)}}%; background: {{fmt.marginTextColor(dashboard.scaleBase.healthCard.rows[0].value)}}"></view>
+                </view>
+              </view>
+
+              <view class="safety-row" wx:if="{{dashboard.scaleBase.healthCard.safety}}">
+                <text class="health-bar-label">安全等级</text>
+                <view class="safety-tag safety-tag-{{dashboard.scaleBase.healthCard.safety.level}}">
+                  <text>{{dashboard.scaleBase.healthCard.safety.text}} · {{dashboard.scaleBase.healthCard.safety.desc}}</text>
+                </view>
+              </view>
+
+              <view class="risk-row" wx:if="{{dashboard.scaleBase.healthCard.riskMultiple}}">
+                <view class="risk-left">
+                  <text class="risk-label">🔥 {{dashboard.scaleBase.healthCard.riskMultiple.label}}</text>
+                  <text class="risk-desc">{{dashboard.scaleBase.healthCard.riskMultiple.hint}}</text>
+                </view>
+                <text class="risk-value risk-value-{{dashboard.scaleBase.healthCard.riskMultiple.isProfit ? 'profit' : 'loss'}}">{{dashboard.scaleBase.healthCard.riskMultiple.value}}{{dashboard.scaleBase.healthCard.riskMultiple.unit}}</text>
+              </view>
+            </view>
+
+            <view class="forecast-card" wx:if="{{dashboard.scaleBase.monthForecast}}">
+              <view class="forecast-title">🌙 {{dashboard.scaleBase.monthForecast.title}}</view>
+
+              <view class="month-progress-wrap" wx:if="{{dashboard.scaleBase.monthForecast.rows[0]}}">
+                <view class="month-progress-track">
+                  <view class="month-progress-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{dashboard.scaleBase.monthForecast.rows[0].value}}%"></view>
+                </view>
+                <text class="month-progress-label" wx:if="{{dashboard.scaleBase.monthForecast.rows[1] && dashboard.scaleBase.monthForecast.rows[2]}}">已过 {{dashboard.scaleBase.monthForecast.rows[1].value}}/{{dashboard.scaleBase.monthForecast.rows[2].value}} 天</text>
+              </view>
+
+              <view class="forecast-result">
+                <text class="forecast-result-label">预计{{dashboard.scaleBase.dateHeader.currentMonth}}月{{dashboard.scaleBase.monthForecast.isProfit ? '盈利' : '亏损'}}</text>
+                <text class="forecast-result-value forecast-value-{{dashboard.scaleBase.monthForecast.isProfit ? 'profit' : 'loss'}}">
+                  {{dashboard.scaleBase.monthForecast.isProfit ? '+' : '-'}}¥{{fmt.formatNumber(dashboard.scaleBase.monthForecast.rows[4] ? dashboard.scaleBase.monthForecast.rows[4].value : dashboard.scaleBase.monthForecast.rows[3].value)}}
+                </text>
+
+                <view class="forecast-vs" wx:if="{{dashboard.scaleBase.monthForecast.isProfit && dashboard.scaleBase.monthForecast.hasIndustryCompare}}">
+                  <text>vs 行业平均（接口开启对标时展示）</text>
+                </view>
+                <view class="forecast-vs text-secondary font-sl" wx:elif="{{dashboard.scaleBase.monthForecast.vsIndustryHint}}">
+                  <text>{{dashboard.scaleBase.monthForecast.vsIndustryHint}}</text>
+                </view>
+                <view class="forecast-vs forecast-vs-danger" wx:elif="{{!dashboard.scaleBase.monthForecast.isProfit}}">
+                  <text>⚠️ 建议调整经营策略</text>
+                </view>
+              </view>
+
+              <view class="risk-alert" wx:if="{{!dashboard.scaleBase.monthForecast.isProfit}}">
+                <text class="risk-alert-icon">⚠️</text>
+                <text class="risk-alert-text">按当前趋势，本月预计亏损 ¥{{fmt.formatNumber(dashboard.scaleBase.monthForecast.rows[4] ? dashboard.scaleBase.monthForecast.rows[4].value : dashboard.scaleBase.monthForecast.rows[3].value)}}，建议提升收入或降低开支</text>
+              </view>
+            </view>
+
           </view>
         </view>
-        <view class="cost-section">
-          <view class="cost-section-title">其他成本</view>
-          <view class="cost-row">
-            <text class="cost-label">退货成本</text>
-            <text class="cost-value">¥{{fmt.formatNumber(returnCost)}}</text>
+
+        <view class="flex-column p-20" wx:if="{{dashboard.coreMetrics && dashboard.coreMetrics.rows}}">
+          <view class="metrics-grid">
+            <block wx:for="{{dashboard.coreMetrics.rows}}" wx:key="key">
+              <view class="metric-card">
+                <text class="metric-icon" wx:if="{{index === 0}}">👨‍🍳</text>
+                <text class="metric-icon" wx:elif="{{index === 1}}">🪑</text>
+                <text class="metric-icon" wx:elif="{{index === 2}}">🏠</text>
+                <text class="metric-icon" wx:else>💵</text>
+                <text class="metric-value" wx:if="{{index === 3}}">¥{{fmt.formatNumber(item.value)}}</text>
+                <text class="metric-value" wx:else>{{item.value}}</text>
+                <text class="metric-label">{{item.key}}</text>
+              </view>
+            </block>
           </view>
         </view>
-        <view class="cost-total-row">
-          <text class="cost-total-label">总成本</text>
-          <text class="cost-total-value">¥{{fmt.formatNumber(totalCost)}}</text>
+
+        <view class="flex-column p-20" wx:if="{{dashboard.operationAnalysis && dashboard.operationAnalysis.rows}}">
+          <view class="analysis-card">
+            <view class="analysis-title">📈 {{dashboard.operationAnalysis.title}}</view>
+            <block wx:for="{{dashboard.operationAnalysis.rows}}" wx:key="key">
+              <view class="analysis-row">
+                <text class="analysis-label">{{item.label}}</text>
+                <text class="analysis-value {{fmt.analysisTrendClass(item.key, item.value)}}" wx:if="{{item.key != '状态'}}">{{fmt.analysisRowDisplay(item.key, item.value)}}</text>
+                <view class="status-badge status-badge-status-{{dashboard.scaleBeam.pointer.statusClass}}" wx:else>
+                  <text>{{item.value}}</text>
+                </view>
+              </view>
+            </block>
+          </view>
         </view>
-      </view>
-    </view>
-    
+
+        <view class="flex-column p-20" wx:if="{{dashboard.costBreakdown}}">
+          <view class="cost-card">
+            <view class="cost-title">💰 {{dashboard.costBreakdown.title}}</view>
+            <view class="cost-section" wx:if="{{dashboard.costBreakdown.production}}">
+              <view class="cost-section-title">{{dashboard.costBreakdown.production.title}}</view>
+              <block wx:for="{{dashboard.costBreakdown.production.rows}}" wx:key="key">
+                <view class="cost-row {{item.key == '制作成本合计' ? 'cost-row-subtotal' : ''}}">
+                  <text class="cost-label">{{item.label}}</text>
+                  <text class="cost-value">¥{{fmt.formatNumber(item.value)}}</text>
+                </view>
+              </block>
+            </view>
+            <view class="cost-section" wx:if="{{dashboard.costBreakdown.other}}">
+              <view class="cost-section-title">{{dashboard.costBreakdown.other.title}}</view>
+              <block wx:for="{{dashboard.costBreakdown.other.rows}}" wx:key="key">
+                <view class="cost-row">
+                  <text class="cost-label">{{item.label}}</text>
+                  <text class="cost-value">¥{{fmt.formatNumber(item.value)}}</text>
+                </view>
+              </block>
+            </view>
+            <view class="cost-total-row" wx:if="{{dashboard.costBreakdown.total}}">
+              <text class="cost-total-label">{{dashboard.costBreakdown.total.label}}</text>
+              <text class="cost-total-value">¥{{fmt.formatNumber(dashboard.costBreakdown.total.value)}}</text>
+            </view>
+          </view>
+        </view>
+
+      </block>
+
       <view style="height: 60rpx;"></view>
 
     </block>

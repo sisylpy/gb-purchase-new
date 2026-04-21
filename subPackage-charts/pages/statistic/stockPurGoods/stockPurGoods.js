@@ -119,20 +119,20 @@ Page({
             }));
 
             this.setData({
-              arr: goodsList,
+              arr: result.goodsList,
               restSubtotal: result.restSubtotal,
               totalCount: result.totalCount || 0,
               totalPage: result.totalPages || 0
             });
           } else {
-            // 为新增的采购记录添加展开状态
-            const newGoodsList = (result.goodsList || []).map(goods => ({
-              ...goods,
-              wastePurGoodsEntities: goods.wastePurGoodsEntities.map(pur => ({
-                ...pur,
-                expanded: false
-              }))
-            }));
+            // // 为新增的采购记录添加展开状态
+            // const newGoodsList = (result.goodsList || []).map(goods => ({
+            //   ...goods,
+            //   wastePurGoodsEntities: goods.wastePurGoodsEntities.map(pur => ({
+            //     ...pur,
+            //     expanded: false
+            //   }))
+            // }));
 
             this.setData({
               arr: [...this.data.arr, ...newGoodsList],

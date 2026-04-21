@@ -1,0 +1,148 @@
+
+
+page{
+  background-color: rgb(243, 243, 243);
+}
+
+.navbar {
+  display: flex;
+  position: relative;
+  z-index: 100;
+  /* top: 0; */
+  /* width: 100%; */
+  /* border-bottom: 1rpx solid #e5e5e5; */
+  /* background-color: #0d4d43; */
+  height: 80rpx;
+}
+
+.navbar .navbar-item {
+  position: relative;
+  display: block;
+  flex: 1;
+  /* padding: 13px 0; */
+  text-align: center;
+  font-size: 30rpx;
+  line-height: 80rpx;
+  color: #425042;
+}
+
+.navbar .bar-item-on {
+  color: #187e6e;
+  
+}
+
+.navbar .navbar-title {
+  display: inline-block;
+  font-size: 32rpx;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  
+}
+
+.navbar .bar-item-on .navbar-title {
+  color: #187e6e;
+  font-weight: 600;
+}
+
+
+.navbar .navbar-slider {
+  position: absolute;
+  content: " ";
+  left: 0;
+  bottom: 10rpx;
+  width: 100rpx;
+  height: 8rpx;
+  background-color: #187e6e;
+  -webkit-transition: -webkit-transform 0.3s;
+  transition: -webkit-transform 0.3s;
+  transition: transform 0.3s, -webkit-transform 0.3s;
+}
+
+
+.orderItem{
+  border: 1px solid rgb(182, 182, 182);
+  border-radius: 20rpx;
+
+}
+
+.orderItem.is-active{
+  border: 1px solid red;
+  background-color: rgb(253, 239, 239);
+  border-radius: 20rpx;
+  
+}
+
+
+.iconBig{
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.iconBigSuper{
+  width: 120rpx;
+  height: 120rpx;
+}
+
+.shrink_fix{
+  flex-shrink: 0;
+}
+
+.shrink_change{
+  flex-shrink: 1;
+}
+
+
+.navbar {
+  display: flex;
+  position: relative;
+  z-index: 100;
+  /* top: 0; */
+  width: 100%;
+  /* border-bottom: 1rpx solid #e5e5e5; */
+  /* background-color: #0d4d43; */
+  height: 80rpx;
+}
+
+.navbar .navbar-item {
+  position: relative;
+  display: block;
+  flex: 1;
+  /* padding: 13px 0; */
+  text-align: center;
+  font-size: 30rpx;
+  line-height: 80rpx;
+  color: #425042;
+}
+
+.navbar .bar-item-on {
+  color: #187e6e;
+  
+}
+
+.navbar .navbar-title {
+  display: inline-block;
+  font-size: 32rpx;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-wrap: normal;
+}
+
+
+
+
+
+button{
+  background: none;
+  border: none;
+  background-color: none;
+  /* line-height: 50rpx; */
+  border-radius: 0;
+  /* border-radius: 40rpx; */
+  /* font-size: 30rpx; */
+
+}
+button::after { border: none; }

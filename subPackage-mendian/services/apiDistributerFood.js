@@ -2,18 +2,20 @@
  * 门店子包 Food 模块 API
  * 来源：subPackage-mendian/wailaii/apiDistributer.js
  */
-import apiUrl from '../../config.js'
+import apiUrl from '../../config/index.js'
 var load = require('../../lib/load.js');
 
 // ===== allFood 页面 =====
 export const depGetAllFood = (data) => {
   return new Promise((resolve, reject) => {
     wx.request({
-      url: apiUrl.apiUrl + 'gbdepartmentfood/depGetAllFood',
+      url: apiUrl.apiUrl + 'gbdepfood/depGetAllFood',
       method: 'POST',
       data: {
         disId: data.disId,
         depFatherId: data.depFatherId,
+        startDate: data.startDate,
+        stopDate: data.stopDate,
       },
       header: {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
@@ -34,15 +36,7 @@ export const downLoadDepFood = (data) => {
     wx.request({
       url: apiUrl.apiUrl + 'gbdepfood/downLoadDepFood',
       method: 'POST',
-      data: {
-        depId: data.depId,
-        depFatherId: data.depFatherId,
-        foodId: data.foodId,
-        price: data.price
-      },
-      header: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-      },
+      data,
       success: (res) => {
         resolve({ result: res.data })
       },

@@ -1,5 +1,26 @@
 <view class="flex flex-column ">
-  <back-navbar title="集团菜品" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="门店菜品" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="/images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
 
   <view class="content">
     <view class="flex-column" wx:for="{{foodArr}}" wx:for-item="dep">
@@ -43,7 +64,7 @@
 </view>
 
 <!-- 下载弹窗 -->
-<view class='mask {{showOperation ? "is-active" : ""}}' catchtap="hideMask">
+<view class='mask1 {{showOperation ? "is-active" : ""}}' catchtap="hideMask">
   <view class="popup whiteBack">
     <view class="popup-title mainBack big with-padding">{{item.gbDfFoodName}}</view>
     <view class="popup-content with-padding">

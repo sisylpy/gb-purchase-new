@@ -2,16 +2,16 @@
 
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 var dateUtils = require('../../../../lib/dateUtil');
 
 
-// import {
-//   depGetSupplier,
-//   deleteGbDisSuppler,
-//   addGbSupplierBlack,
-//   updateJrdhSupplier
-// } from '../../../../lib/apiDistributer.js'
+import {
+  depGetSupplier,
+  deleteGbDisSuppler,
+  addGbSupplierBlack,
+  updateJrdhSupplier
+} from '../../../services/supplier.js'
 
 Page({
 
@@ -72,9 +72,11 @@ Page({
     if(disInfo){
       this.setData({
         disInfo: disInfo,
-        depId: disInfo.purDepartmentList[0].gbDepartmentId,
+        depId: disInfo.mendianDepartmentList[0].gbDepartmentId,
     })
+    console.log("depiiddidid", disInfo.mendianDepartmentList[0].gbDepartmentId)
   }
+
     this._initData();
 
   },

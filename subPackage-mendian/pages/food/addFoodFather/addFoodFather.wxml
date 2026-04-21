@@ -1,16 +1,32 @@
-<view class="flex flex-column ">
+<view class="flex flex-column food-page">
   <back-navbar title="{{fatherFood !== null ? '修改' : '添加'}}菜品类别" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
-  <view class="content">
-    <scroll-view scroll-y class='with-padding' style='height: {{windowHeight - 340}}rpx; background:white;'>
-      <view class='with-padding'>
-        <view class="with-tb-padding" style="font-size: 38rpx; font-weight: 500;">菜品类别名称:</view>
-        <view class="flex-column">
-          <input class="numInput mainColor" style="width:{{windowWidth/2}}rpx; font-size: 40rpx; height: 80rpx; line-height: 80rpx; padding-left: 10rpx; margin-bottom:10rpx;" bindblur="getRestrauntName" value="{{fatherFood !== null ? fatherFood.gbDfFoodName: resName}}"></input>
+  <view class="food-page-body flex-column flex-1">
+    <view class="food-form-card">
+      <view class="food-form-row food-form-row--multiline">
+        <view class="flex-column" style="width: 100%; min-width: 0;">
+          <text class="food-form-section-title">菜品类别名称</text>
+          <input
+            class="numberInput"
+            style="width: {{windowWidth - 120}}rpx; margin-top: 20rpx; font-size: 32rpx; min-height: 88rpx;"
+            bindinput="getRestrauntName"
+            value="{{resName}}"
+            placeholder="例如：热菜、凉菜、主食"
+            placeholder-style="color: #bbb; font-size: 28rpx;"
+          />
+          <text class="food-form-hint">按类别整理菜品，列表更清晰，后续统计也更方便。</text>
         </view>
-        <view class="extremeSmall mainColor">菜品按类别分类</view>
       </view>
-    </scroll-view>
-    <view class='btn_main {{addFinished ? "next" : ""}}' catchtap='{{addFinished ? "saveFoodFather" : ""}}' style="width: {{windowWidth - 40}}rpx; margin-left:20rpx;" hover-class='hover'>保存</view>
+    </view>
+  </view>
+
+  <view class="food-footer-cta">
+    <view
+      class="food-submit-btn {{addFinished ? 'is-active' : ''}}"
+      catchtap="{{addFinished ? 'saveFoodFather' : ''}}"
+      hover-class="food-submit-btn--hover"
+    >
+      保存
+    </view>
   </view>
 </view>

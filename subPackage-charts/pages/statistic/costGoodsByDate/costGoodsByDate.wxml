@@ -1,4 +1,5 @@
-<wxs src="../../../utils/fn.wxs" module="tool" />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 
 <view class="flex flex-column">
@@ -113,7 +114,7 @@
             <!-- 商品信息区域 -->
             <view class="flex-row-between" bind:tap="showList" data-index="{{goodsIndex}}">
               <view class="flex-row-default mb-20">
-                <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="url_item mr-20" />
+                <image src="{{(imgUrl.resolve(url, item.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="url mr-20" />
                 <view class="flex-column" style="flex: 1;">
                   <view class="flex-row">
                     <text class="font-sm">第{{goodsIndex + 1}}名/共{{totalCount}}个</text>
@@ -139,7 +140,7 @@
                 </view>
                 <!-- 右侧箭头 -->
                 <view class="arrow-container {{item.showCostList ? 'expanded' : 'collapsed'}}">
-                  <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
+                  <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" style="width: 24rpx; height: 24rpx;" />
                 </view>
               </view>
             </view>
@@ -150,7 +151,7 @@
             <!-- 成本详情列表 - 默认隐藏，点击showList后显示 -->
             <view wx:if="{{item.showCostList}}" class="flex-column" wx:for="{{item.wasteDepartmentEntities}}" wx:key="gbDepartmentId" wx:for-item="dep" wx:for-index="depIndex">
 
-              <view class="flex-column font-xs mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
+              <view class="flex-column font-xs mb-20" wx:for="{{dep.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
 
                 <!-- 整体卡片容器 -->
                 <view class="unified-card-container {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'unified-card-expanded' : 'unified-card-collapsed'}}">
@@ -192,7 +193,7 @@
                       <!-- 右侧箭头区域 -->
                       <view class="stock-info-right">
                         <view class="stock-arrow">
-                          <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'expanded' : 'collapsed'}}" />
+                          <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'expanded' : 'collapsed'}}" />
                         </view>
                       </view>
 

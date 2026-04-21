@@ -1,0 +1,40 @@
+/**
+ * 订单明细：兼容顶层 gbDepartmentOrdersEntities 与嵌套在 gbDistributerGoodsEntity 下两种结构。
+ */
+function list(item) {
+  if (!item) {
+    return [];
+  }
+  var top = item.gbDepartmentOrdersEntities;
+  var nested = item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities;
+  /* 顶层若是 []，不能当「有数据」直接返回，否则嵌套里有订单也会显示 0 条 */
+  if (top && top.length > 0) {
+    return top;
+  }
+  if (nested && nested.length > 0) {
+    return nested;
+  }
+  if (top && top.length !== undefined) {
+    return top;
+  }
+  if (nested && nested.length !== undefined) {
+    return nested;
+  }
+  return [];
+}
+
+function len(item) {
+  return list(item).length;
+}
+
+/** orderListCount >= 0 时用父页传入条数（与列表数据一致） */
+function displayCount(item, orderListCount) {
+  if (orderListCount !== undefined && orderListCount !== null && orderListCount >= 0) {
+    return orderListCount;
+  }
+  return len(item);
+}
+
+module.exports.list = list;
+module.exports.len = len;
+module.exports.displayCount = displayCount;

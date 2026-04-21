@@ -29,6 +29,8 @@
 					<view class=" flex-row-wrap shrink_change " >
 						<text class="standardName {{applyStandardName == item.nxGoodsStandardname ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{item.nxGoodsStandardname}}" >{{item.nxGoodsStandardname}}</text>
 
+						<text wx:if="{{showOuterPack}}" class="standardName {{applyStandardName == outerPackStandard ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{outerPackStandard}}">{{outerPackStandard}}</text>
+
 						<text  class="standardName {{applyStandardName == standard.nxStandardName ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{standard.nxStandardName}}" wx:for="{{item.nxGoodsStandardEntities}}" wx:key="gbDistributerStandardId"
             wx:for-item="standard">{{standard.nxStandardName}}</text>
             <!-- <text class="standardName" bindtap="showInputStandard"> +</text> -->

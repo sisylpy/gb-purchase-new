@@ -1,0 +1,11 @@
+
+
+.register-btn {
+  display: inline-block;
+  background-color: #ff7200;
+  color: #fff;
+  font-size: 28rpx;
+  padding: 16rpx 40rpx;
+  border-radius: 8rpx;
+  width: 90%;
+}

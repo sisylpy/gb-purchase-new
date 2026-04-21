@@ -33,22 +33,21 @@ Page({
       type: options.type
     })
     var fatherFoodValue = wx.getStorageSync('fatherFood');
-    if(fatherFoodValue){
+    if (fatherFoodValue) {
       this.setData({
-        fatherFood: fatherFoodValue 
+        fatherFood: fatherFoodValue,
+        resName: fatherFoodValue.gbDfFoodName || '',
       })
+      this._ifCanSave()
     }
-
   },
 
 
-  getRestrauntName(e){
-    if(e.detail.value.length > 0){
-      this.setData({
-        resName:  e.detail.value,
-      })  
-      this._ifCanSave();
-    }
+  getRestrauntName(e) {
+    this.setData({
+      resName: e.detail.value,
+    })
+    this._ifCanSave()
   },
 
 

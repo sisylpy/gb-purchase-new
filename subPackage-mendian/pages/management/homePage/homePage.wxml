@@ -30,18 +30,24 @@
         </view>
       </view>
      
-      <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
+      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/gongyingshang.png" class="icon" />
-          <text>菜品</text>
+          <text>菜单</text>
+        </view>
+      </view> -->
+      <view class="quarter-row pt-20 pb-20" bindtap="toMendainFood" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/gongyingshang.png" class="icon" />
+          <text>门店菜品</text>
         </view>
       </view>
-      <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
+      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/gongyingshang.png" class="icon" />
           <text>优惠卷</text>
         </view>
-      </view>
+      </view> -->
       
       <view class="quarter-row pt-20 pb-20" bindtap="toDaily" hover-class="hover">
         <view class="flex-column center-content">
@@ -50,12 +56,15 @@
         </view>
       </view>
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toReportStock" hover-class="hover">
+      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toRestaurantProfile" hover-class="hover">
         <view class="flex-column center-content">
-          <image src="/images/home/stock0.png" class="icon" />
-          <text>报表</text>
+          <image src="/images/home/caigou2.png" class="icon" />
+          <text>经营分析</text>
         </view>
-      </view>
+      </view> -->
+
+     
+     
 
       <view class="quarter-row pt-20 pb-20" bindtap="toPurchaseDate" hover-class="hover">
         <view class="flex-column center-content">
@@ -70,6 +79,14 @@
           <text>商品看板</text>
         </view>
       </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toReportStock" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/home/stock0.png" class="icon" />
+          <text>报表</text>
+        </view>
+      </view>
+
 
       <view class="quarter-row pt-20 pb-20" bindtap="toPurGoodsFenxi" hover-class="hover">
         <view class="flex-column center-content">
@@ -92,12 +109,7 @@
         </view>
       </view>
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toRestaurantProfile" hover-class="hover">
-        <view class="flex-column center-content">
-          <image src="/images/home/caigou2.png" class="icon" />
-          <text>经营分析</text>
-        </view>
-      </view>
+     
 
     </view>
 

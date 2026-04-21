@@ -1,10 +1,10 @@
 const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
-// import {
-//   getDisPurchaseGoodsBatchDetail
-// } from '../../../../lib/apiDistributerGb'
+import {
+  getDisPurchaseGoodsBatchDetail
+} from '../../../../services/apiDistributer.js'
 
 
 Page({

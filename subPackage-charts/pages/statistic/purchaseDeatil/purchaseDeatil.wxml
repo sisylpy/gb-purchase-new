@@ -1,4 +1,5 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 
 <view class="flex flex-column">
@@ -53,7 +54,7 @@
 
 
   <!--  -->
-  <block wx:if="{{type == 0}}">
+  <block wx:if="{{type == 1}}">
     <block wx:if="{{purUserArr.length > 0}}">
       <view class="flex-column border-bottom  p-20 bg-white" wx:for="{{purUserArr}}" wx:for-index="userIndex" wx:key="gbDepartmentUserId">
 
@@ -90,7 +91,7 @@
             <!-- 商品信息头部 -->
             <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
               <view class="flex-row-default mb-20">
-                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{url + goods.gbDgNxFatherImg}}" mode="aspectFill" class="goods-image mr-20" />
+                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
                 <view class="flex-column">
                   <text class="font-sm">第{{index + 1}}名/共{{totalCount}}个</text>
                   <view class="flex-row mb-10">
@@ -114,7 +115,7 @@
                   <text class="price-value">¥{{goods.gbDgSellingPrice}}</text>
                 </view>
                 <!-- 右侧箭头 -->
-                <view class="arrow-container {{goods.showPurchaseList ? 'expanded' : 'collapsed'}}">
+                <view class="arrow-container {{goods.isSelected ? 'expanded' : 'collapsed'}}">
                   <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
                 </view>
               </view>
@@ -123,7 +124,7 @@
 
             <!-- 采购详情 -->
             <!-- 采购批次列表 - 默认隐藏，点击showList后显示 -->
-            <view class="flex-column purchase-row-container expandable-content {{goods.showPurchaseList ? 'expanded' : ''}}">
+            <view class="flex-column purchase-row-container expandable-content {{goods.isSelected ? 'expanded' : ''}}">
 
               <view class="flex-column " wx:for="{{goods.wastePurGoodsEntities}}" wx:for-item="pur" wx:for-index="purIndex" catch:tap="showDetail" data-user-index="{{userIndex}}" data-goods-index="{{index}}" data-pur-index="{{purIndex}}">
 
@@ -256,7 +257,7 @@
 
 
   <!-- 供货商 -->
-  <block wx:if="{{type == 1}}">
+  <block wx:if="{{type == 5}}">
 
     <block wx:if="{{supplierArr.length > 0}}">
       <view class="flex-column p-20" wx:for="{{supplierArr}}" wx:for-item="item" wx:for-index="userIndex" wx:key="nxJrdhSupplierId">
@@ -293,7 +294,7 @@
             <!-- 商品信息头部 -->
             <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
               <view class="flex-row-default mb-20">
-                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{url + goods.gbDgNxFatherImg}}" mode="aspectFill" class="goods-image mr-20" />
+                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
                 <view class="flex-column">
                   <text class="font-sm">第{{index + 1}}名/共{{totalCount}}个</text>
                   <view class="flex-row mb-10">
@@ -317,7 +318,7 @@
                   <text class="price-value">¥{{goods.gbDgSellingPrice}}</text>
                 </view>
                 <!-- 右侧箭头 -->
-                <view class="arrow-container {{goods.showPurchaseList ? 'expanded' : 'collapsed'}}">
+                <view class="arrow-container {{goods.isSelected ? 'expanded' : 'collapsed'}}">
                   <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
                 </view>
               </view>
@@ -326,7 +327,7 @@
 
             <!-- 采购详情 -->
             <!-- 采购批次列表 - 默认隐藏，点击showList后显示 -->
-            <view class="flex-column purchase-row-container expandable-content {{goods.showPurchaseList ? 'expanded' : ''}}">
+            <view class="flex-column purchase-row-container expandable-content {{goods.isSelected ? 'expanded' : ''}}">
 
               <view class="flex-column " wx:for="{{goods.wastePurGoodsEntities}}" wx:for-item="pur" wx:for-index="purIndex" catch:tap="showDetail" data-user-index="{{userIndex}}" data-goods-index="{{index}}" data-pur-index="{{purIndex}}">
 

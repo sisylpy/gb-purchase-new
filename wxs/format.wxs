@@ -185,6 +185,18 @@ function getCompareTime(startTime, endTime){
   
 }
 
+// 距废弃剩余整小时数（与 getCompareTime 同一套时间差逻辑：已过废弃则返回 0）
+function getHoursUntilWaste(wasteFullTime, nowTime){
+  var delta = getCompareTime(wasteFullTime, nowTime);
+  if(delta == undefined){
+    return 0;
+  }
+  if(delta >= 0){
+    return 0;
+  }
+  return -delta;
+}
+
 function getCompareTimeSecond(startTime, endTime){
   if(startTime && endTime){
   
@@ -754,6 +766,43 @@ function formatNumber(num) {
   return rounded.toString();
 }
 
+/** 看板利润率进度条宽度（与旧页一致：margin/15*100，上限 100） */
+function healthBarWidthPercent(margin) {
+  var m = parseFloat(margin);
+  if (!m || m <= 0) return 0;
+  var p = (m / 15) * 100;
+  if (p > 100) return 100;
+  return +p.toFixed(1);
+}
+
+/** 看板利润率文字颜色 */
+function marginTextColor(margin) {
+  var m = parseFloat(margin) || 0;
+  if (m < 1) return '#eb3349';
+  if (m < 5) return '#f45c43';
+  if (m < 10) return '#ffd700';
+  return '#38ef7d';
+}
+
+/** 经营分析行展示（按 key 简单区分金额/百分比/天数/状态） */
+function analysisRowDisplay(key, value) {
+  key = key + '';
+  if (key === '状态') return value + '';
+  if (key === '统计天数') return value + ' 天';
+  if (key === '利润率') return value + '%';
+  var n = +value;
+  if (n !== n) return value + '';
+  return '¥' + formatNumber(n);
+}
+
+function analysisTrendClass(key, value) {
+  key = key + '';
+  if (key !== '每日盈亏' && key !== '利润率') return '';
+  var n = +value;
+  if (n !== n) return '';
+  return n >= 0 ? 'analysis-trend-up' : 'analysis-trend-down';
+}
+
 module.exports = {
   getGongli:getGongli,
   getPercent: getPercent,
@@ -768,6 +817,7 @@ module.exports = {
   getAttrDateString: getAttrDateString,
   getProducePercent: getProducePercent,
   getCompareTime: getCompareTime,
+  getHoursUntilWaste: getHoursUntilWaste,
   getRestTime: getRestTime,
   getHaveWasteHours: getHaveWasteHours,
   getDifferentPrice: getDifferentPrice,
@@ -786,6 +836,10 @@ module.exports = {
   getHowManyDays: getHowManyDays,
   formatDateTimeToChinese: formatDateTimeToChinese,
   formatDistance: formatDistance,
-  formatNumber: formatNumber
+  formatNumber: formatNumber,
+  healthBarWidthPercent: healthBarWidthPercent,
+  marginTextColor: marginTextColor,
+  analysisRowDisplay: analysisRowDisplay,
+  analysisTrendClass: analysisTrendClass
 
 }

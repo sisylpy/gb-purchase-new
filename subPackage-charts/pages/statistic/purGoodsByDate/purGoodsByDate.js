@@ -1,6 +1,5 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
-var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
 
@@ -241,19 +240,20 @@ Page({
   toDetail(e) {
     const type = e.currentTarget.dataset.type;
     console.log("hanzi",this.data.hanzi);
-    if (type === '0') {
+    // if (type === '1') {
       // 自采 - 跳转到采购详情页面
       wx.navigateTo({
         url: '../purchaseDeatil/purchaseDeatil?startDate=' + this.data.startDate + '&stopDate=' + 
-        this.data.stopDate + '&type=0&hanzi=' + this.data.hanzi + '&greatId=' + this.data.greatId,
+        this.data.stopDate + '&hanzi=' + this.data.hanzi + '&greatId=' + this.data.greatId + '&type='
+        + type,
       })
-    } else if (type === '1') {
-      // 订货 - 跳转到订货详情页面
-      wx.navigateTo({
-        url: '../purchaseDeatil/purchaseDeatil?startDate=' + this.data.startDate + '&stopDate=' + 
-        this.data.stopDate + '&type=1&hanzi=' + this.data.hanzi  + '&greatId=' + this.data.greatId,
-      })
-    }
+    // } else if (type === '5') {
+    //   // 订货 - 跳转到订货详情页面
+    //   wx.navigateTo({
+    //     url: '../purchaseDeatil/purchaseDeatil?startDate=' + this.data.startDate + '&stopDate=' + 
+    //     this.data.stopDate + '&type=1&hanzi=' + this.data.hanzi  + '&greatId=' + this.data.greatId,
+    //   })
+    // }
   },
 
 
@@ -469,13 +469,13 @@ Page({
     console.log('事件目标:', event.currentTarget);
 
     // 根据按钮类型执行相应操作
-    if (type === '0') {
+    if (type !== '2') {
+      this.toDetail({ currentTarget: { dataset: { type: type } } });
+
       // 自采按钮
-      this.toDetail({ currentTarget: { dataset: { type: '0' } } });
-    } else if (type === '1') {
-      // 订货按钮
-      this.toDetail({ currentTarget: { dataset: { type: '1' } } });
-    } else if (type === '2') {
+    // } else if (type === '1') {
+    //   // 订货按钮
+    } else {
       // 库存按钮
       this.toStockPage();
     }

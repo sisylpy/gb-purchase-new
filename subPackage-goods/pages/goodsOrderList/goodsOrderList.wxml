@@ -1,0 +1,146 @@
+<wxs src="../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="订货历史" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+  </view>
+
+
+  <block wx:if="{{searchDepIds !== -1 }}">
+
+    <view class="flex-column center-content  " wx:if="{{showType == 1  || showType == 3 || showType ==  4}}">
+      <view class="flex-row filterMy">
+        <text class=" margin-right">{{searchDepName}}</text>
+        <image src="/images/del-2.png" mode="aspectFill" class="iconfont-xs" bindtap="delSearch" />
+      </view>
+    </view>
+
+  </block>
+
+  <!-- 供货商选择显示 -->
+  <view class="supplier-filter-container" wx:if="{{selectedSupplierNames && selectedSupplierNames.length > 0}}">
+    <view class="supplier-filter-chip">
+      <text class="supplier-filter-text">{{selectedSupplierNames}}</text>
+      <view class="supplier-filter-delete" bindtap="delSupplierSearch">
+        <image src="/images/del-2.png" mode="aspectFill" class="supplier-delete-icon"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 采购员选择显示 -->
+  <view class="supplier-filter-container" wx:if="{{selectedPurchaseUserNames && selectedPurchaseUserNames.length > 0}}">
+    <view class="supplier-filter-chip purchase-user-chip">
+      <text class="supplier-filter-text">{{selectedPurchaseUserNames}}</text>
+      <view class="supplier-filter-delete" bindtap="delPurchaseUserSearch">
+        <image src="/images/del-2.png" mode="aspectFill" class="supplier-delete-icon"></image>
+      </view>
+    </view>
+  </view>
+
+
+  <scroll-view scroll-y="true" style="height: {{windowHeight - 120 - navBarHeight}}rpx; ">
+    <!-- 商品信息头部 -->
+    <!-- <view class="flex-row plr-20 mt-30">
+      <view class="goods-title">{{disGoods.gbDgGoodsName}}</view>
+      <view class="goods-standard">({{disGoods.gbDgGoodsStandardname}})</view>
+    </view> -->
+
+    <!-- 表格容器 -->
+    <view class="table-container" wx:if="{{businessArr.length > 0}}">
+      <!-- 表格头部 -->
+      <view class="table-header">
+        <view class="header-cell date-column">日期</view>
+        <view class="header-cell store-column">门店</view>
+        <view class="header-cell order-column">订货信息</view>
+        <view class="header-cell delivery-column">入库数量</view>
+      </view>
+
+      <!-- 表格内容 -->
+      <view class="table-content">
+        <view class="date-group " wx:for="{{businessArr}}" wx:key="date">
+         
+
+          <!-- 订单详情行 -->
+          <view class="order-rows">
+            <view class="order-row border-bottom"  wx:for="{{item.arr}}" wx:for-item="stock" wx:key="index">
+              <view class="row-cell date-column">
+                <view class="date-cell" style="width: 100rpx;">
+              <view class="date-main">{{tool.transferDateString(item.date)}}</view>
+              <view class="date-weekday">{{tool.getWeekDay(item.date)}}</view>
+            </view>
+            </view>
+              <view class="row-cell store-column">
+                <view class="store-name">{{stock.gbDepartmentEntity.gbDepartmentName}}</view>
+              </view>
+              <view class="row-cell order-column">
+                <view class="order-info">
+                  <view class="order-quantity">{{stock.gbDoQuantity}}{{stock.gbDoStandard}}</view>
+                  <view class="user-name">{{stock.gbDepartmentUserEntity.gbDuWxNickName}}</view>
+                </view>
+              </view>
+              <view class="row-cell order-column flex-column">
+                <view  class="font-yuan text-danger" wx:if="{{stock.gbDoOrderType == 9}}">退货</view>
+                <view class="delivery-quantity highlight">{{stock.gbDoWeight}}{{standard}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+      <view class="empty-container">
+        <view class="empty-icon-wrapper">
+          <image src="/images/file-empty.png" mode="aspectFit" class="empty-icon"/>
+        </view>
+        <view class="empty-title">暂无订货数据</view>
+        <view class="empty-description">选择的时间范围内没有找到相关订货记录</view>
+        <view class="empty-suggestions">
+          <text class="suggestion-item">• 尝试调整查询时间范围</text>
+          <text class="suggestion-item">• 检查筛选条件设置</text>
+          <text class="suggestion-item">• 确认该商品是否有订货记录</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+
+
+
+</view>
+
+
+
+
+
+
+
+<wasteGoods show="{{showWaste}}" bindconfirm="confirm" item="{{item}}" disGoods="{{disGoods}}" bindcancle="cancle" modalHeight="{{windowHeight}}" scrollViewTop="{{scrollViewTop}}" modalContentHeight="{{modalContentHeight}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" />

@@ -1,0 +1,71 @@
+<view class="flex flex-column">
+
+<!-- 导航栏 -->
+<back-navbar 
+  style="height: {{navBarHeight}}rpx;" 
+  title="饭店注册信息" 
+  avatar="/images/back-gray.png" 
+  button-text="设置" 
+  bindnavbuttontap="toBack"
+></back-navbar>
+
+<!-- 表单容器 -->
+<view class="form-container font-lg" style="margin-top: 40rpx;">
+
+  <!-- 餐厅名称 -->
+  <view class="form-item">
+    <text class="form-label">餐厅名称</text>
+    <input 
+      class="form-input"
+      placeholder="请输入餐厅/饭店名称"
+      bindinput="onRestaurantNameInput"
+      value="{{restaurantName}}"
+    />
+  </view>
+
+  <!-- 联系电话 -->
+  <view class="form-item">
+    <text class="form-label">联系电话</text>
+    <input 
+      class="form-input"
+      placeholder="请输入手机或座机号码"
+      type="number"
+      bindinput="onPhoneInput"
+      value="{{phone}}"
+    />
+  </view>
+
+  <!-- 地址 (可选) -->
+  <view class="form-item">
+    <text class="form-label">地址</text>
+    <input 
+      class="form-input"
+      placeholder="选填：例如xx街xx号"
+      bindinput="onAddressInput"
+      value="{{address}}"
+    />
+  </view>
+
+  <!-- 预览已选头像(若有) -->
+  <view wx:if="{{avatarUrl}}" class="avatar-preview-wrap">
+    <text>已选头像预览：</text>
+    <image 
+      src="{{avatarUrl}}" 
+      class="avatar-preview" 
+    />
+  </view>
+
+</view>
+
+<!-- 提交按钮：点击后调用 chooseAvatar，再在回调里进行表单校验+注册 -->
+<view class="submit-section">
+  <button 
+    class="submit-btn"  
+    open-type="chooseAvatar"
+    bindchooseavatar="onChooseAvatar"
+  >
+    提交注册
+  </button>
+</view>
+
+</view>

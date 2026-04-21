@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="../../../utils/fn.wxs" module="tool" />
 
 <!-- 供货商打开页面，订单处于编辑状态 -->
 <block wx:if="{{ batchStatus == 0}}">

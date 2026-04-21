@@ -97,24 +97,24 @@ var gbDisDeleteStandard = function (id) {
   return requestUtil.get('gbdistributerstandard/gbDisDeleteStandard/' + id);
 };
 
-var saveGbOrderJj = function (data) {
-  return requestUtil.post('gbdepartmentorders/saveOrdersGbJj', data);
+var createDepartmentOrderForJj = function (data) {
+  return requestUtil.post('gbdepartmentorders/createDepartmentOrderForJj', data);
 };
 
 var saveGbOrderJjSx = function (data) {
   return requestUtil.post('gbdepartmentorders/saveOrdersGbJjSx', data);
 };
 
-var saveOrdersGbJjAndSaveDepGoods = function (data) {
-  return requestUtil.post('gbdepartmentorders/saveOrdersGbJjAndSaveDepGoods', data);
+var createDepartmentOrderWithNewDepDisGoods = function (data) {
+  return requestUtil.post('gbdepartmentorders/createDepartmentOrderWithNewDepDisGoods', data);
 };
 
 var saveOrdersGbJjAndSaveDepGoodsSx = function (data) {
   return requestUtil.post('gbdepartmentorders/saveOrdersGbJjAndSaveDepGoodsSx', data);
 };
 
-var saveOrdersGbJjAndSaveGoods = function (data) {
-  return requestUtil.post('gbdistributergoods/saveOrdersGbJjAndSaveGoods', data);
+var createDepartmentOrderFromNxGoodsImport = function (data) {
+  return requestUtil.post('gbdistributergoods/createDepartmentOrderFromNxGoodsImport', data);
 };
 
 var saveOrdersGbJjAndSaveGoodsSx = function (data) {
@@ -139,8 +139,8 @@ var depGetDepGoodsCataGb = function (data) {
   return requestUtil.post('gbdepartmentdisgoods/depGetDepGoodsCataGb', data, { useUrlParams: true });
 };
 
-var gbDepGetNxCataGoods = function (data) {
-  return requestUtil.post('nxgoods/gbDepGetNxCataGoods', data, { useUrlParams: true });
+var gbGetNxGoodsCataGoods = function (data) {
+  return requestUtil.post('nxgoods/gbGetNxGoodsCataGoods', data, { useUrlParams: true });
 };
 
 var gbDepGetNxGoodsByGreatGrandId = function (data) {
@@ -394,18 +394,18 @@ module.exports = {
   disSaveStandard: disSaveStandard,
   gbDisSaveStandard: gbDisSaveStandard,
   gbDisDeleteStandard: gbDisDeleteStandard,
-  saveGbOrderJj: saveGbOrderJj,
+  createDepartmentOrderForJj: createDepartmentOrderForJj,
   saveGbOrderJjSx: saveGbOrderJjSx,
-  saveOrdersGbJjAndSaveDepGoods: saveOrdersGbJjAndSaveDepGoods,
+  createDepartmentOrderWithNewDepDisGoods: createDepartmentOrderWithNewDepDisGoods,
   saveOrdersGbJjAndSaveDepGoodsSx: saveOrdersGbJjAndSaveDepGoodsSx,
-  saveOrdersGbJjAndSaveGoods: saveOrdersGbJjAndSaveGoods,
+  createDepartmentOrderFromNxGoodsImport: createDepartmentOrderFromNxGoodsImport,
   saveOrdersGbJjAndSaveGoodsSx: saveOrdersGbJjAndSaveGoodsSx,
   gbDisGetGoodsDetail: gbDisGetGoodsDetail,
   getDate: getDate,
   // resGoodsAi 需要的 API
   depGetDepGoodsGbPage: depGetDepGoodsGbPage,
   depGetDepGoodsCataGb: depGetDepGoodsCataGb,
-  gbDepGetNxCataGoods: gbDepGetNxCataGoods,
+  gbGetNxGoodsCataGoods: gbGetNxGoodsCataGoods,
   gbDepGetNxGoodsByGreatGrandId: gbDepGetNxGoodsByGreatGrandId,
   getNxGoodsIdsByGreatId: getNxGoodsIdsByGreatId,
   saveNxStandard: saveNxStandard,

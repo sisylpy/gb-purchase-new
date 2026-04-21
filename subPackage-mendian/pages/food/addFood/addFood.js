@@ -1,7 +1,7 @@
 const app = getApp()
 const globalData = app.globalData;
 var load = require('../../../../lib/load.js');
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
 
 import {
@@ -361,6 +361,8 @@ Page({
       })
     }
   },
+
+  stopMove() {},
 
   toBack(){
     wx.navigateBack({

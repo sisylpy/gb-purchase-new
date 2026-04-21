@@ -1,32 +1,47 @@
 var load = require('../../../../lib/load.js');
-var apiUrl = require('../../../../config.js');
+var apiUrl = require('../../../../config/index.js');
 var dateUtils = require('../../../../lib/dateUtil');
-var depOrder = require('../../../../services/depOrder');
+var orderApi = require('../../../services/resGoodsAiApi.js');
 
 // ========================
-// 本页面使用的所有接口方法（来自 depOrder）
+// 本页面使用的接口（实现已拷贝至 subPackage-mendian/services/resGoodsAiApi.js，与 depOrder 路径一致）
 // ========================
-// depOrder.depGetDepGoodsGbPage(data)          POST  gbdepartmentdisgoods/depGetDepGoodsGbPage          分页获取部门商品
-// depOrder.depGetDepGoodsCataGb(data)          POST  gbdepartmentdisgoods/depGetDepGoodsCataGb          获取部门商品分类
-// depOrder.saveGbOrderJj(data)                 POST  gbdepartmentorders/saveOrdersGbJj                  保存进价订单
-// depOrder.saveOrdersGbJjAndSaveDepGoods(data) POST  gbdepartmentorders/saveOrdersGbJjAndSaveDepGoods   保存订单并更新部门商品
-// depOrder.saveOrdersGbJjAndSaveGoods(data)    POST  gbdistributergoods/saveOrdersGbJjAndSaveGoods       保存订单并更新配送商品
-// depOrder.updateOrderGbJj(data)               POST  gbdepartmentorders/updateOrderGbJj                  更新进价订单
-// depOrder.deleteOrderGb(data)                 GET   gbdepartmentorders/deleteOrderGb/{id}               删除订单
-// depOrder.gbDepGetNxCataGoods(data)           POST  nxgoods/gbDepGetNxCataGoods                         获取牛享分类商品
-// depOrder.gbDepGetNxGoodsByGreatGrandId(data) POST  nxgoods/gbDepGetNxGoodsByGreatGrandId              根据大类获取牛享商品
-// depOrder.getNxGoodsIdsByGreatId(data)        GET   nxgoods/getNxGoodsIdsByGreatId/{id}                 根据大类获取牛享商品ID
-// depOrder.gbDisSaveStandard(data)             POST  gbdistributerstandard/gbDisSaveStandard             保存配送标准
-// depOrder.saveNxStandard(data)                POST  nxstandard/saveNxStandard                           保存牛享标准
-// depOrder.gbDisDeleteStandard(data)           GET   gbdistributerstandard/gbDisDeleteStandard/{id}      删除配送标准
-// depOrder.changeStockStars(data)              POST  gbdepartmentgoodsstock/changeStockStars             修改库存星级
-// depOrder.saveDepProduceGoodsStock(data)      POST  gbdepartmentgoodsstock/saveDepProduceGoodsStock     保存生产库存
-// depOrder.saveDepLossGoodsStock(data)         POST  gbdepartmentgoodsstock/saveDepLossGoodsStock        保存损耗库存
-// depOrder.reduceAttachmentSaveWithFile(...)   POST  gbdepartmentgoodsstockreduceattachment/reduceAttachmentSaveWithFile  上损耗附件
-// depOrder.saveDepReturnGoodsStock(data)       POST  gbdepartmentgoodsstock/saveDepReturnGoodsStock      保存退货库存
-// depOrder.saveDepWasteGoodsStock(data)        POST  gbdepartmentgoodsstock/saveDepWasteGoodsStock       保存报废库存
-// depOrder.deleteDepGoods(data)                GET   gbdepartmentdisgoods/deleteDepGoods/{id}             删除部门商品
+// orderApi.depGetDepGoodsGbPage(data)          POST  gbdepartmentdisgoods/depGetDepGoodsGbPage          分页获取部门商品
+// orderApi.depGetDepGoodsCataGb(data)          POST  gbdepartmentdisgoods/depGetDepGoodsCataGb          获取部门商品分类
+// orderApi.createDepartmentOrderForJj(data)                 POST  gbdepartmentorders/createDepartmentOrderForJj                  保存进价订单
+// orderApi.createDepartmentOrderWithNewDepDisGoods(data) POST  gbdepartmentorders/createDepartmentOrderWithNewDepDisGoods   保存订单并更新部门商品
+// orderApi.createDepartmentOrderFromNxGoodsImport(data)    POST  gbdistributergoods/createDepartmentOrderFromNxGoodsImport       保存订单并更新配送商品
+// orderApi.updateOrderGbJj(data)               POST  gbdepartmentorders/updateOrderGbJj                  更新进价订单
+// orderApi.deleteOrderGb(data)                 GET   gbdepartmentorders/deleteOrderGb/{id}               删除订单
+// orderApi.gbGetNxGoodsCataGoods(data)           POST  nxgoods/gbGetNxGoodsCataGoods                         获取Nx分类商品
+// orderApi.gbDepGetNxGoodsByGreatGrandId(data) POST  nxgoods/gbDepGetNxGoodsByGreatGrandId              根据大类获取牛享商品
+// orderApi.getNxGoodsIdsByGreatId(data)        GET   nxgoods/getNxGoodsIdsByGreatId/{id}                 根据大类获取牛享商品ID
+// orderApi.gbDisSaveStandard(data)             POST  gbdistributerstandard/gbDisSaveStandard             保存配送标准
+// orderApi.saveNxStandard(data)                POST  nxstandard/saveNxStandard                           保存nx标准
+// orderApi.gbDisDeleteStandard(data)           GET   gbdistributerstandard/gbDisDeleteStandard/{id}      删除配送标准
+// orderApi.changeStockStars(data)              POST  gbdepartmentgoodsstock/changeStockStars             修改库存星级
+// orderApi.saveDepGoodsStockAdjust(kind, stock)  POST  gbdepartmentdisgoods/saveDepGoodsStockAdjust  部门库存统一调整（kind: produce|loss|return|waste）
+// orderApi.reduceAttachmentSaveWithFile(...)   POST  gbdepartmentgoodsstockreduceattachment/reduceAttachmentSaveWithFile  损耗/退货附件（依赖返回 data.id）
+// orderApi.deleteDepGoods(data)                GET   gbdepartmentdisgoods/deleteDepGoods/{id}             删除部门商品
 // ========================
+
+/** 调试「全部配送」：gbDepGetNxGoodsByGreatGrandId 返回列表前 10 条顺序与 nxGoodsGrandId 类型，用于排查子类高亮闪烁 */
+function logDisApiGoodsFirst10(tag, list) {
+  if (!list || !list.length) {
+    console.log(`[resGoodsAi/dis][${tag}] first10 (empty)`);
+    return;
+  }
+  const rows = list.slice(0, 10).map((g, idx) => ({
+    idx,
+    nxGoodsId: g.nxGoodsId,
+    nxGoodsGrandId: g.nxGoodsGrandId,
+    grandType: typeof g.nxGoodsGrandId,
+    nxGoodsName: g.nxGoodsName,
+  }));
+  const grandSeq = list.slice(0, 10).map(g => g.nxGoodsGrandId);
+  console.log(`[resGoodsAi/dis][${tag}] first10 nxGoodsGrandId sequence:`, grandSeq);
+  console.log(`[resGoodsAi/dis][${tag}] first10 detail:`, rows);
+}
 
 
 
@@ -270,8 +285,6 @@ Page({
     itemIndex: 0,
 
     deleteShow: false,
-    showInd: false,
-    showIndNx: false,
     totalPages: 0,
     totalCount: 0,
     limit: 15,
@@ -349,22 +362,6 @@ Page({
 
   },
 
-  showDialogBtn: function (e) {
-    this.setData({
-      item: e.currentTarget.dataset.item,
-      showInd: true,
-      showIndNx: false,
-    })
-  },
-
-  showDialogBtnNx: function (e) {
-    this.setData({
-      item: e.currentTarget.dataset.item,
-      showIndNx: true,
-      showInd: false,
-    })
-  },
-
   hideModal: function () {
     this.setData({
       showGoodsModal: false
@@ -431,7 +428,7 @@ Page({
     var id = e.currentTarget.dataset.id;
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
     wx.navigateTo({
-      url: '../../ai/stockGoodsBusiness/stockGoodsBusiness?depGoodsId=' + id + '&index=' + e.currentTarget.dataset.index,
+      url: '../stockGoodsBusiness/stockGoodsBusiness?depGoodsId=' + id + '&index=' + e.currentTarget.dataset.index,
     })
   },
 
@@ -442,7 +439,7 @@ Page({
       disId: this.data.disId,
       depId: this.data.depInfo.gbDepartmentId
     }
-    depOrder.depGetDepGoodsCataGb(data).then(res => {
+    orderApi.depGetDepGoodsCataGb(data).then(res => {
       load.hideLoading();
       console.log(res.result.data);
       if (res.result.code === 0 && res.result.data.cataArr.length > 0) {
@@ -484,7 +481,7 @@ Page({
     });
     load.showLoading("加载商品…");
 
-    depOrder.depGetDepGoodsGbPage({
+    orderApi.depGetDepGoodsGbPage({
       limit: this.data.limit,
       page: this.data.currentPage,
       depId: this.data.depInfo.gbDepartmentId
@@ -645,7 +642,7 @@ Page({
       isLoading: true
     });
     load.showLoading("加载商品")
-    depOrder.depGetDepGoodsGbPage({
+    orderApi.depGetDepGoodsGbPage({
       depId: this.data.depId,
       limit: this.data.limit,
       page: page,
@@ -1003,22 +1000,25 @@ Page({
    */
   changeStandard: function (e) {
     console.log("echangestand", e);
+    var name = e.detail.applyStandardName;
     this.setData({
-      applyStandardName: e.detail.applyStandardName
+      applyStandardName: name,
+      printStandard: name,
     })
   },
 
 
   // 
   applyGoodsDep(e) {
-
-    console.log("applyGoodsDepapplyGoodsDep");
+     console.log("applyGoodsDep", e);
+    console.log("applyGoodsDepapplyGoodsDep",e.currentTarget.dataset.depgoods);
     var standard = "";
-    if (e.currentTarget.dataset.depgoods.gbDdgOrderStandard !== "") {
+    if (e.currentTarget.dataset.depgoods.gbDdgOrderStandard) {
       standard = e.currentTarget.dataset.depgoods.gbDdgOrderStandard
     } else {
       standard = e.currentTarget.dataset.depgoods.gbDgGoodsStandardname;
     }
+    console.log("standrd==" , standard);
     this.setData({
       index: e.currentTarget.dataset.index,
       depGoods: e.currentTarget.dataset.depgoods,
@@ -1026,8 +1026,8 @@ Page({
       canSave: true,
 
       applyStandardName: standard,
-      applyRemark: e.currentTarget.dataset.depgoods.gbDdgOrderRemark,
-      printStandard: e.currentTarget.dataset.depgoods.gbDdgShowStandardName,
+      // applyRemark: e.currentTarget.dataset.depgoods.gbDdgOrderRemark,
+      // printStandard: e.currentTarget.dataset.depgoods.gbDdgShowStandardName,
 
     })
     if (e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
@@ -1049,6 +1049,17 @@ Page({
   applyGoods(e) {
 
     console.log("applyGoodos", e);
+    var nx = e.currentTarget.dataset.nxgoods;
+    console.log(
+      "[resGoodsAi applyGoods] nxGoods keys",
+      nx ? Object.keys(nx).filter(function (k) { return k.indexOf("Carton") !== -1 || k.indexOf("carton") !== -1 || k.indexOf("Standard") !== -1; }) : null,
+      "nxGoodsItemsPerCarton",
+      nx && nx.nxGoodsItemsPerCarton,
+      "nxGoodsStandardname",
+      nx && nx.nxGoodsStandardname,
+      "nxGoodsCartonUnit",
+      nx && nx.nxGoodsCartonUnit
+    );
 
     this.setData({
       index: e.currentTarget.dataset.index,
@@ -1154,6 +1165,7 @@ Page({
         show: true,
         applyStandardName: applyItem.gbDoStandard,
         itemDis: e.currentTarget.dataset.disgoods,
+        nxGoods: e.currentTarget.dataset.nxgoods,
         printStandard: applyItem.gbDoPrintStandard,
         editApply: true,
         applyNumber: applyItem.gbDoQuantity,
@@ -1198,6 +1210,7 @@ Page({
       item: "",
       applyNumber: "",
       applyStandardName: "",
+      nxGoods: null,
     })
   },
 
@@ -1216,7 +1229,30 @@ Page({
     })
   },
 
-
+  /**
+   * 选中外包装单位（nxGoodsCartonUnit）时，gbDoDsStandardScale 使用 nxGoodsItemsPerCarton（每件外包装含基准规格数量）；否则 -1。
+   */
+  _gbDoDsStandardScaleForOuterPack: function (applyStandardName) {
+    var nx = this.data.nxGoods;
+    if (!nx || typeof nx !== "object") {
+      return -1;
+    }
+    var cartonUnit = nx.nxGoodsCartonUnit != null ? String(nx.nxGoodsCartonUnit).trim() : "";
+    var std = applyStandardName != null ? String(applyStandardName).trim() : "";
+    if (!cartonUnit || std !== cartonUnit) {
+      return -1;
+    }
+    var ipc = nx.nxGoodsItemsPerCarton;
+    if (ipc === undefined || ipc === null || ipc === "") {
+      return -1;
+    }
+    var n = Number(ipc);
+    if (!isFinite(n) || n <= 0) {
+      return -1;
+    }
+    return n;
+  },
+  
 
   _saveOrder: function (e) {
 
@@ -1235,10 +1271,7 @@ Page({
     var weight = null;
     var subtotal = 0;
     var goodsType = "";
-    var toDepId = "";
     var doGoodsName = "";
-
-
     if (this.data.depGoods !== null) {
       gbDisGoodsId = this.data.depGoods.gbDdgDisGoodsId;
       gbDisGoodsFatherId = this.data.depGoods.gbDdgDisGoodsFatherId;
@@ -1251,10 +1284,8 @@ Page({
       }
       gbGoodsId = this.data.nxGoods.nxGoodsId;
       gbGoodsFatherId = this.data.nxGoods.nxGoodsFatherId;
-      goodsType = 2;
-      toDepId = this.data.depId;
+      goodsType = 1;
       doGoodsName = this.data.nxGoods.nxGoodsName;
-
     }
 
     var dg = {
@@ -1263,9 +1294,9 @@ Page({
       gbDoDisGoodsId: gbDisGoodsId, //
       gbDoDisGoodsFatherId: gbDisGoodsFatherId,
       gbDoDepartmentId: this.data.depId,
-      gbDoToDepartmentId: toDepId,
+      gbDoToDepartmentId: this.data.depInfo.gbDepartmentFatherId,
       gbDoDistributerId: this.data.disId,
-      gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentId,
+      gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentFatherId,
       gbDoQuantity: e.detail.applyNumber,
       gbDoPrice: price,
       gbDoWeight: weight,
@@ -1283,7 +1314,7 @@ Page({
       gbDoNxDistributerId: gbDisId,
       gbDoGoodsType: goodsType,
       gbDoOrderType: goodsType,
-      gbDoDsStandardScale: -1,
+      gbDoDsStandardScale: this._gbDoDsStandardScaleForOuterPack(e.detail.applyStandardName),
       stockIsZero: e.detail.stockIsZero,
       gbDoPrintStandard: this.data.printStandard,
       gbDoGoodsName: doGoodsName,
@@ -1292,7 +1323,7 @@ Page({
     console.log(dg);
     if (this.data.itemDis == null) {
       load.showLoading("保存订单");
-      depOrder.saveOrdersGbJjAndSaveGoods(dg).then(res => {
+      orderApi.createDepartmentOrderFromNxGoodsImport(dg).then(res => {
         load.hideLoading();
         if (res.result.code == 0) {
           load.hideLoading();
@@ -1305,7 +1336,6 @@ Page({
             [dataDis]: newGoods,
           })
 
-
         } else {
           wx.showToast({
             title: '订单保存失败',
@@ -1316,7 +1346,7 @@ Page({
     } else {
       if (this.data.depGoods == null) {
         load.showLoading("保存订单");
-        depOrder.saveOrdersGbJjAndSaveDepGoods(dg).then(res => {
+        orderApi.createDepartmentOrderWithNewDepDisGoods(dg).then(res => {
           load.hideLoading();
           if (res.result.code == 0) {
             wx.setStorageSync('needRefreshOrderData', true);
@@ -1337,7 +1367,7 @@ Page({
         })
       } else {
         load.showLoading("保存订单");
-        depOrder.saveGbOrderJj(dg).then(res => {
+        orderApi.createDepartmentOrderForJj(dg).then(res => {
           load.hideLoading();
           if (res.result.code == 0) {
             load.hideLoading();
@@ -1390,8 +1420,8 @@ Page({
       }
 
     }
-
   },
+
 
   /**
    * 修改配送申请
@@ -1404,9 +1434,10 @@ Page({
       weight: e.detail.applyNumber,
       standard: e.detail.applyStandardName,
       remark: e.detail.applyRemark,
+      gbDoDsStandardScale: this._gbDoDsStandardScaleForOuterPack(e.detail.applyStandardName),
     };
     load.showLoading("修改订单");
-    depOrder.updateOrderGbJj(dg).then(res => {
+    orderApi.updateOrderGbJj(dg).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
         load.hideLoading();
@@ -1447,7 +1478,6 @@ Page({
     var weight = null;
     var subtotal = 0;
     var goodsType = "";
-    var toDepId = "";
 
 
     if (this.data.depGoods !== null) {
@@ -1464,7 +1494,7 @@ Page({
       gbDoDisGoodsId: gbDisGoodsId, //
       gbDoDisGoodsFatherId: gbDisGoodsFatherId,
       gbDoDepartmentId: this.data.depId,
-      gbDoToDepartmentId: toDepId,
+      gbDoToDepartmentId: this.data.depInfo.gbDepartmentFatherId,
       gbDoDistributerId: this.data.disId,
       gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentFatherId,
       gbDoQuantity: e.detail.applyNumber,
@@ -1484,14 +1514,14 @@ Page({
       gbDoNxDistributerId: gbDisId,
       gbDoGoodsType: goodsType,
       gbDoOrderType: goodsType,
-      gbDoDsStandardScale: -1,
+      gbDoDsStandardScale: this._gbDoDsStandardScaleForOuterPack(e.detail.applyStandardName),
       stockIsZero: e.detail.stockIsZero,
       gbDoPrintStandard: this.data.printStandard,
 
     };
     console.log(dg);
     load.showLoading("保存订单");
-    depOrder.saveGbOrderJj(dg).then(res => {
+    orderApi.createDepartmentOrderForJj(dg).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
         load.hideLoading();
@@ -1535,9 +1565,10 @@ Page({
       weight: e.detail.applyNumber,
       standard: e.detail.applyStandardName,
       remark: e.detail.applyRemark,
+      gbDoDsStandardScale: this._gbDoDsStandardScaleForOuterPack(e.detail.applyStandardName),
     };
     load.showLoading("修改订单");
-    depOrder.updateOrderGbJj(dg).then(res => {
+    orderApi.updateOrderGbJj(dg).then(res => {
       wx.setStorageSync('needRefreshOrderData', true);
       load.hideLoading();
       if (res.result.code == 0) {
@@ -1587,20 +1618,22 @@ Page({
     load.showLoading("获取商品")
     var that = this;
    
-    depOrder.gbDepGetNxCataGoods().then(res => {
+    orderApi.gbGetNxGoodsCataGoods().then(res => {
       if (res.result.code == 0) {
         load.hideLoading();
         console.log(res.result.data);
-        var newId = res.result.data.cataArr[0].nxGoodsEntityList[0].nxGoodsId;
+        const firstCata = res.result.data.cataArr[0];
+        var newId = firstCata.nxGoodsEntityList[0].nxGoodsId;
+        const greatLabel = firstCata.nxDfgGoodsName || firstCata.nxGoodsName || '';
         this.setData({
           grandList: res.result.data.cataArr,
           sortDepGoodsArrDis: res.result.data.depGoodsArr,
-          fatherArrDis: res.result.data.cataArr[0].nxGoodsEntityList,
-          leftGreatId: res.result.data.cataArr[0].nxGoodsId,
-          selectedSubCategoryId: res.result.data.cataArr[0].nxGoodsEntityList[0].nxGoodsId,
-          greatName: res.result.data.cataArr[0].nxDfgGoodsName,
+          fatherArrDis: firstCata.nxGoodsEntityList,
+          leftGreatId: firstCata.nxGoodsId,
+          selectedSubCategoryId: firstCata.nxGoodsEntityList[0].nxGoodsId,
+          greatName: greatLabel,
           fatherSonsIndex: 0,
-          activeSubCatId: newId,
+          activeSubCatId: String(newId),
         })
         that._getFatherGoodsDis();
 
@@ -1619,12 +1652,12 @@ Page({
       disId: this.data.disId,
     };
 
-    depOrder.gbDepGetNxGoodsByGreatGrandId(data).then(res => {
+    orderApi.gbDepGetNxGoodsByGreatGrandId(data).then(res => {
       if (res.result.code == 0) {
-        console.log(`>>> _getFatherGoodsDis: 初始获取 ${res.result.page.list.length} 个商品`);
-        console.log(`>>> _getFatherGoodsDis: 初始商品IDs:`, res.result.page.list.map(i => i.nxGoodsId));
-
-        const processedList = this.processGoodsListDis(res.result.page.list);
+        const rawList = res.result.page.list || [];
+    
+        const orderedList = this.sortGoodsListDisForDisplay(rawList);
+        const processedList = this.processGoodsListDis(orderedList);
         console.log("rerssssssssss",res.result.page);
 
         var subCatId = this.data.activeSubCatId;
@@ -1639,9 +1672,9 @@ Page({
         }, () => {
           // 数据更新后计算分类位置
           this.calculateCategoryPositionsDis();
-          const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
-          console.log('sortDepGoodsArrInit:', idOrder);
-          console.log('merged ids--Initt:', processedList.map(i => i.nxGoodsId));
+          // const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
+          // console.log('sortDepGoodsArrInit:', idOrder);
+          // console.log('merged ids--Initt:', processedList.map(i => i.nxGoodsId));
 
 
         });
@@ -1651,7 +1684,7 @@ Page({
 
   _getGoodsIdsByGreatId() {
     console.log("huoquxinidididiidssss")
-    depOrder.getNxGoodsIdsByGreatId(this.data.leftGreatId).then(res => {
+    orderApi.getNxGoodsIdsByGreatId(this.data.leftGreatId).then(res => {
       if (res.result.code == 0) {
         this.setData({
           sortDepGoodsArrDis: res.result.data
@@ -1673,7 +1706,7 @@ Page({
       greatName: e.currentTarget.dataset.name,
       fatherArrDis: this.data.grandList[e.currentTarget.dataset.index].nxGoodsEntityList,
       selectedSubCategoryId: this.data.grandList[e.currentTarget.dataset.index].nxGoodsEntityList[0].nxGoodsId,
-      activeSubCatId: this.data.grandList[e.currentTarget.dataset.index].nxGoodsEntityList[0].nxGoodsId,
+      activeSubCatId: String(this.data.grandList[e.currentTarget.dataset.index].nxGoodsEntityList[0].nxGoodsId),
 
     }, () => {
       // 用 this.createSelectorQuery() 保证作用域
@@ -1733,10 +1766,11 @@ Page({
         disId: disId,
       };
 
-      depOrder.gbDepGetNxGoodsByGreatGrandId(data)
+      orderApi.gbDepGetNxGoodsByGreatGrandId(data)
         .then((res) => {
           if (res.result.code == 0) {
             const newItems = res.result.page.list || [];
+            logDisApiGoodsFirst10(`onScrollToLowerDis page=${nextPage}`, newItems);
             console.log(`>>> onScrollToLowerDis: 第 ${nextPage} 页获取 ${newItems.length} 个商品`);
             console.log(`>>> onScrollToLowerDis: 新商品IDs:`, newItems.map(i => i.nxGoodsId));
             console.log(`>>> onScrollToLowerDis: 原有商品数量: ${this.data.goodsList.length}`);
@@ -1745,7 +1779,8 @@ Page({
             const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
             console.log('sortDepGoodsArrGetFatherGoods:', idOrder);
 
-            var updatedGoodsList = this.data.goodsList.concat(newItems);
+            const mergedSorted = this.sortGoodsListDisForDisplay(this.data.goodsList.concat(newItems));
+            const updatedGoodsList = this.processGoodsListDis(mergedSorted);
             console.log(`>>> onScrollToLowerDis: 合并后总数量: ${updatedGoodsList.length}`);
             console.log(`>>> onScrollToLowerDis: 合并后所有IDs:`, updatedGoodsList.map(i => i.nxGoodsId));
 
@@ -1803,8 +1838,10 @@ Page({
         }
         const firstVisibleItem = this.data.goodsList[firstVisibleIndex];
         if (firstVisibleItem) {
-          const activeId = firstVisibleItem.nxGoodsGrandId;
-          if (activeId && activeId !== this.data.activeSubCatId) {
+          const rawGrand = firstVisibleItem.nxGoodsGrandId;
+          const activeId = rawGrand == null || rawGrand === '' ? '' : String(rawGrand);
+          const cur = this.data.activeSubCatId == null || this.data.activeSubCatId === '' ? '' : String(this.data.activeSubCatId);
+          if (activeId && activeId !== cur) {
             this.setData({
               activeSubCatId: activeId,
               subcatScrollIntoView: `subcat-${activeId}`
@@ -1914,9 +1951,10 @@ Page({
       console.log(`>>> loadedGoods 初始长度: ${loadedGoods.length}`);
       console.log(`>>> loadedGoods 初始IDs:`, loadedGoods.map(i => i.nxGoodsId));
 
-      const res = await depOrder.gbDepGetNxGoodsByGreatGrandId(data);
+      const res = await orderApi.gbDepGetNxGoodsByGreatGrandId(data);
       if (res.result.code === 0) {
         const newItems = res.result.page.list || [];
+        logDisApiGoodsFirst10(`loadGoodsBySubCatIdDis page=${page}`, newItems);
         console.log(`>>> 第 ${page} 页成功获取 ${newItems.length} 个商品。`);
         console.log(`>>> 新获取的商品IDs:`, newItems.map(i => i.nxGoodsId));
 
@@ -1924,15 +1962,7 @@ Page({
         console.log(`>>> 合并后总长度: ${merged.length}`);
         console.log(`>>> 合并后所有IDs:`, merged.map(i => i.nxGoodsId));
 
-        // 4) dis合并后按 sortDepGoodsArr 顺序排序
-        const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
-        console.log('sortDepGoodsArr:', idOrder);
-        console.log('merged ids:', merged.map(i => i.nxGoodsId));
-        const sortedArr = merged.slice().sort((a, b) => {
-          const idxA = idOrder.indexOf(String(a.nxGoodsId));
-          const idxB = idOrder.indexOf(String(b.nxGoodsId));
-          return (idxA === -1 ? 99999 : idxA) - (idxB === -1 ? 99999 : idxB);
-        });
+        const sortedArr = this.sortGoodsListDisForDisplay(merged);
         console.log(`>>> 排序后长度: ${sortedArr.length}`);
         console.log(`>>> 排序后IDs:`, sortedArr.map(i => i.nxGoodsId));
 
@@ -2004,6 +2034,28 @@ Page({
     }
   },
 
+  // 按顶部子类标签顺序聚合，再在同类内按部门常用顺序(depGoodsArr)排列，避免接口按 dep 顺序交错 nxGoodsGrandId 导致滚动高亮乱跳
+  sortGoodsListDisForDisplay(list) {
+    const father = this.data.fatherArrDis || [];
+    const grandRank = {};
+    father.forEach((f, idx) => {
+      grandRank[String(f.nxGoodsId)] = idx;
+    });
+    const sortOrder = (this.data.sortDepGoodsArrDis || []).map(String);
+    const depIdx = (nid) => {
+      const i = sortOrder.indexOf(String(nid));
+      return i === -1 ? 999999 : i;
+    };
+    return list.slice().sort((a, b) => {
+      const ra = grandRank[String(a.nxGoodsGrandId)];
+      const rb = grandRank[String(b.nxGoodsGrandId)];
+      const raN = ra === undefined ? 9999 : ra;
+      const rbN = rb === undefined ? 9999 : rb;
+      if (raN !== rbN) return raN - rbN;
+      return depIdx(a.nxGoodsId) - depIdx(b.nxGoodsId);
+    });
+  },
+
   // 处理商品数据，添加分类信息
   processGoodsListDis(list) {
     console.log(`>>> processGoodsListDis 输入长度: ${list.length}`);
@@ -2019,12 +2071,11 @@ Page({
     console.log(`>>> 去重后长度: ${uniqueList.length}`);
     console.log(`>>> 去重后IDs:`, uniqueList.map(i => i.nxGoodsId));
 
-    // 根据您的反馈，此处的排序是多余的，因此将其注释掉。
-    // uniqueList.sort((a, b) => a.nxGoodsGrandId - b.nxGoodsGrandId);
     let currentCategory = null;
     const result = uniqueList.map(item => {
-      if (item.nxGoodsGrandId !== currentCategory) {
-        currentCategory = item.nxGoodsGrandId;
+      const grandKey = item.nxGoodsGrandId == null || item.nxGoodsGrandId === '' ? item.nxGoodsGrandId : String(item.nxGoodsGrandId);
+      if (grandKey !== currentCategory) {
+        currentCategory = grandKey;
         return Object.assign({}, item, {
           isFirstInCategory: true,
           categoryName: this.getCategoryNameDis(item.nxGoodsGrandId)
@@ -2038,6 +2089,14 @@ Page({
 
     console.log(`>>> processGoodsListDis 最终输出长度: ${result.length}`);
     console.log(`>>> processGoodsListDis 最终输出IDs:`, result.map(i => i.nxGoodsId));
+    const head = result.slice(0, 10).map((g, idx) => ({
+      idx,
+      nxGoodsId: g.nxGoodsId,
+      nxGoodsGrandId: g.nxGoodsGrandId,
+      grandType: typeof g.nxGoodsGrandId,
+      isFirstInCategory: g.isFirstInCategory,
+    }));
+    console.log('[resGoodsAi/dis][processGoodsListDis] first10 after flags:', head);
 
     return result;
   },
@@ -2103,7 +2162,7 @@ Page({
       page: this.data.currentPage,
       disId: this.data.disId
     }
-    depOrder.gbDepGetNxGoodsByGreatGrandId(data).then(res => {
+    orderApi.gbDepGetNxGoodsByGreatGrandId(data).then(res => {
       if (res.result.code == 0) {
         console.log("rerssssssssss",res.result.page);
 
@@ -2144,7 +2203,7 @@ Page({
         disId: disId,
       };
 
-      depOrder.gbDepGetNxGoodsByGreatGrandId(data)
+      orderApi.gbDepGetNxGoodsByGreatGrandId(data)
         .then((res) => {
           if (res.result.code == 0) {
             const newItems = res.result.page.list || [];
@@ -2245,7 +2304,7 @@ Page({
   _delteDepGoods() {
 
     var id = this.data.depGoods.gbDepartmentDisGoodsId;
-    depOrder.deleteDepGoods(id).then(res => {
+    orderApi.deleteDepGoods(id).then(res => {
       if (res.result.code == 0) {
         var arr = this.data.depGoodsArrAi;
         arr.splice(this.data.editOrderIndex, 1);
@@ -2280,7 +2339,7 @@ Page({
 
     var that = this;
     load.showLoading("删除订单");
-    depOrder.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(res => {
+    orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
 
@@ -2327,7 +2386,7 @@ Page({
   deleteStandardApi(e) {
 
       
-    depOrder.gbDisDeleteStandard(this.data.disStandardId).then(res => {
+    orderApi.gbDisDeleteStandard(this.data.disStandardId).then(res => {
       if (res.result.code == 0) {
         console.log("delstttnanaa", res.result.data);
         var standards = "depGoods.gbDistributerStandardEntities"
@@ -2365,7 +2424,7 @@ Page({
       gbSGoodsId: this.data.nxGoods.nxGoodsId,
       gbStandardName: e.detail.newStandardName,
     }
-    depOrder.saveNxStandard(data).
+    orderApi.saveNxStandard(data).
     then(res => {
       if (res.result.code == 0) {
         var standardArr = this.data.nxGoods.gbGoodsStandardEntities;
@@ -2392,7 +2451,7 @@ Page({
       gbDsDisGoodsId: this.data.applyItem.gbDoDisGoodsId,
       gbDsStandardName: e.detail.newStandardName,
     }
-    depOrder.gbDisSaveStandard(data).
+    orderApi.gbDisSaveStandard(data).
     then(res => {
       if (res.result.code == 0) {
         var standardArr = this.data.depGoods.gbDistributerStandardEntities;
@@ -2489,6 +2548,7 @@ Page({
       applySubtotal: "",
       itemDis: null,
       item: null,
+      nxGoods: null,
 
     })
   },
@@ -2565,146 +2625,59 @@ Page({
     if (this.data.transfer !== '1') {
       item.gbDgsReduceWeightUserId = this.data.userInfo.gbDepartmentUserId;
     }
-    if (showType == 1) {
-      load.showLoading("保存数据中")
-      console.log(item);
-      depOrder.saveDepProduceGoodsStock(item)
-        .then(res => {
-          load.hideLoading();
-          if (res.result.code == 0) {
-            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
-            this.setData({
-              [data]: res.result.data,
-            })
 
-          }else{
-            wx.showToast({
-              title: res.result.msg,
-              icon: 'none'
-            })
-          }
-        })
-    } else if (showType == 2) {
-      load.showLoading("保存数据中");
-      console.log("lossss", e.detail.src)
+    var kindMap = { 1: 'produce', 2: 'loss', 3: 'return', 4: 'waste' };
+    var kind = kindMap[showType];
+    if (!kind) {
+      return;
+    }
+
+    if (showType == 2 || showType == 3) {
       this.setData({
         src: e.detail.src,
         reason: e.detail.reason,
-      })
-
-      depOrder.saveDepLossGoodsStock(item)
-        .then(res => {
-          load.hideLoading();
-          console.log(res.result.data);
-          console.log("---==========")
-          if (res.result.code == 0) {
-
-            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
-            this.setData({
-              [data]: res.result.data.disGoods,
-
-            })
-            var that = this;
-            var src = that.data.src;
-
-            if (src.length > 0) {
-              console.log("youusrc", src)
-              var reason = that.data.reason;
-              var id = res.result.data.id;
-              console.log(src + reason + id);
-              depOrder.reduceAttachmentSaveWithFile(src, reason, id).then((res) => {
-                console.log(res);
-                if (res.result == '{"code":0}') {
-
-
-                } else {
-                  load.hideLoading();
-                  wx.showToast({
-                    title: res.result.msg,
-                    icon: 'none'
-                  })
-                }
-
-              })
-            }
-
-
-          }else{
-            wx.showToast({
-              title: res.result.msg,
-              icon: 'none'
-            })
-          }
-        })
-    } else if (showType == 3) {
-      this.setData({
-        src: e.detail.src,
-        reason: e.detail.reason,
-      })
-
+      });
+    }
+    if (showType == 3) {
       item.gbDgsReturnUserId = this.data.userInfo.gbDepartmentUserId;
-      console.log(item);
-      load.showLoading("保存数据中")
-      depOrder.saveDepReturnGoodsStock(item)
-        .then(res => {
-          load.hideLoading();
-          console.log(res.result.data);
-          if (res.result.code == 0) {
-            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
-            this.setData({
-              [data]: res.result.data.disGoods,
-            })
-            var that = this;
-            var src = that.data.src;
-            if (src.length > 0) {
-              var reason = that.data.reason;
-              var id = res.result.data.id;
-              console.log(src + reason + id);
-              depOrder.reduceAttachmentSaveWithFile(src, reason, id).then((res) => {
-                console.log(res);
-                if (res.result == '{"code":0}') {
+    }
 
+    var that = this;
+    load.showLoading("保存数据中");
+    console.log(item);
+    orderApi.saveDepGoodsStockAdjust(kind, item).then(function (res) {
+      load.hideLoading();
+      if (res.result.code != 0) {
+        wx.showToast({
+          title: res.result.msg,
+          icon: 'none',
+        });
+        return;
+      }
 
-                } else {
-                  load.hideLoading();
-                  wx.showToast({
-                    title: res.result.msg,
-                    icon: 'none'
-                  })
-                }
+      var payload = res.result.data || {};
+      var disGoods = payload.disGoods != null ? payload.disGoods : payload;
+      var dataKey = "depGoodsArrAi[" + that.data.goodsIndex + "]";
+      that.setData({
+        [dataKey]: disGoods,
+      });
 
-              })
+      if (showType == 2 || showType == 3) {
+        var src = that.data.src;
+        if (src && src.length > 0 && payload.id != null && payload.id !== "") {
+          var reason = that.data.reason;
+          orderApi.reduceAttachmentSaveWithFile(src, reason, payload.id).then(function (attachRes) {
+            console.log(attachRes);
+            if (attachRes.result != '{"code":0}') {
+              wx.showToast({
+                title: (attachRes.result && attachRes.result.msg) || "附件上传失败",
+                icon: "none",
+              });
             }
-
-          } else {
-            wx.showToast({
-              title: res.result.msg,
-              icon: 'none'
-            })
-          }
-        })
-    } else if (showType == 4) {
-      load.showLoading("保存数据中");
-
-      console.log(item);
-      depOrder.saveDepWasteGoodsStock(item)
-        .then(res => {
-          load.hideLoading();
-          if (res.result.code == 0) {
-            var data = "depGoodsArrAi[" + this.data.goodsIndex + "]";
-            this.setData({
-              [data]: res.result.data,
-            })
-          }else{
-            wx.showToast({
-              title: res.result.msg,
-              icon: 'none'
-            })
-          }
-        })
-
-    } 
-    
+          });
+        }
+      }
+    });
   },
 
 

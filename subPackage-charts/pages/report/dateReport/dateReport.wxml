@@ -1,0 +1,168 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+<back-navbar  style="height: {{navBarHeight}}rpx;" title="供货商" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+<view class='navbar bg-white border-bottom'>
+  <block wx:for="{{tabs}}" wx:for-item="tabs" wx:key="id">
+    <view id="{{index}}" class="navbar-item p-20 {{tab1Index==index?'bar-item-on1':''}}" data-index='{{index}}' bindtap='onTab1Click' hover-class="hover">
+      <view class='navbar-title flex-column'>
+        <text>{{tabs}}</text>
+        <view class="" style="color: #000; font-size: 40rpx; padding-top: 10rpx; padding-bottom: 10rpx;">{{tabs.total}}</view>
+      </view>
+    </view>
+    <view class="navbar-slider" style="left: {{sliderLeft}}px;  transform: translateX({{sliderOffset}}px); -webkit-transform: translateX({{sliderOffset}}px);">
+    </view>
+  </block>
+</view>
+
+<swiper style="height: {{windowHeight - 300}}rpx;" bindanimationfinish="animationfinish" current="{{itemIndex}}" data-index='{{itemIndex}}'>
+
+  <!-- 1 day -->
+  <swiper-item>
+    <view class="flex-column bg-white" style="height: {{windowHeight - 300}}rpx;">
+      <view class="flex-column p-20">
+
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="day" data-startdate="{{dayMap.yesterday.yesterdayStartDate}}" data-stopdate="{{dayMap.yesterday.yesterdayStopDate}}" data-name="yesterday"  data-hanzi="昨天">
+          <view class="flex-column">
+            <view class="font-lg {{dateType == 'day' && startDate == dayMap.yesterday.yesterdayStartDate && stopDate ==  dayMap.yesterday.yesterdayStopDate ? 'text-main' :''}}">昨天</view>
+            <view class="font-md text-secondary">{{dayMap.yesterday.yesterdayString}} {{dayMap.yesterday.yesterdayWeek}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'day' && startDate == dayMap.yesterday.yesterdayStartDate && stopDate ==  dayMap.yesterday.yesterdayStopDate ? 'show' :'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="day" data-startdate="{{dayMap.today.todayStartDate}}" data-stopdate="{{dayMap.today.todayStopDate}}" data-name="today"   data-hanzi="今天">
+          <view class="flex-column">
+            <view class="font-lg {{dateType == 'day' && startDate == dayMap.today.todayStartDate && stopDate ==  dayMap.today.todayStopDate ? 'text-main' :''}}">今天</view>
+            <view class="font-md text-secondary">{{dayMap.today.todayString}} {{dayMap.today.todayWeek}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'day' && startDate == dayMap.today.todayStartDate && stopDate ==  dayMap.today.todayStopDate  ? 'show' :'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+      </view>
+    </view>
+  </swiper-item>
+
+  <!-- 2 week -->
+  <swiper-item>
+
+    <view class="flex-column  bg-white" style="height: {{windowHeight - 300}}rpx;">
+      <view class="flex-column p-20">
+
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="week" data-startdate="{{weekMap.lastSevenDay.lastSevenDayStartDate}}" data-stopdate="{{weekMap.lastSevenDay.lastSevenDayStopDate}}" data-name="lastSevenDays" data-hanzi="过去7天">
+          <view class="flex-column">
+            <view class="font-lg  {{dateType == 'week'  && startDate == weekMap.lastSevenDay.lastSevenDayStartDate && stopDate == weekMap.lastSevenDay.lastSevenDayStopDate ? 'text-main' :''}}">过去7天</view>
+            <view class="font-md text-secondary">{{weekMap.lastSevenDay.lastSevenDayStartDateString}}-{{weekMap.lastSevenDay.lastSevenDayStopDateString}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'week'  && startDate == weekMap.lastSevenDay.lastSevenDayStartDate && stopDate ==  weekMap.lastSevenDay.lastSevenDayStopDate  ? 'show' :'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="week" data-startdate="{{weekMap.thisWeek.thisWeekStartDate}}" data-stopdate="{{weekMap.thisWeek.thisWeekStopDate}}" data-name="thisWeek"   data-hanzi="本周">
+          <view class="flex-column">
+            <view class="font-lg   {{dateType == 'week'  && startDate == weekMap.thisWeek.thisWeekStartDate && stopDate ==  weekMap.thisWeek.thisWeekStopDate ? 'text-succuss' :''}}">本周</view>
+            <view class="font-md text-secondary">{{weekMap.thisWeek.thisWeekStartString}}-{{weekMap.thisWeek.thisWeekStopString}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'week'  && startDate == weekMap.thisWeek.thisWeekStartDate && stopDate ==  weekMap.thisWeek.thisWeekStopDate ? 'show' :'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="week" data-startdate="{{weekMap.lastWeek.lastWeekStartDate.monday}}" data-stopdate="{{weekMap.lastWeek.lastWeekStartDate.sunday}}" data-name="lastWeek"    data-hanzi="上周">
+          <view class="flex-column">
+            <view class="font-lg   {{dateType == 'week'  && startDate == weekMap.lastWeek.lastWeekStartDate.monday && stopDate ==  weekMap.lastWeek.lastWeekStartDate.sunday  ? 'text-main' :''}}">上周</view>
+            <view class="font-md text-secondary">{{weekMap.lastWeek.lastWeekStartDate.mondayString}}-{{weekMap.lastWeek.lastWeekStartDate.sundayString}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'week'  && startDate == weekMap.lastWeek.lastWeekStartDate.monday && stopDate ==  weekMap.lastWeek.lastWeekStartDate.sunday   ? 'show' :'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+      </view>
+
+
+    </view>
+
+  </swiper-item>
+
+  <!-- 3 month -->
+  <swiper-item>
+
+    <view class="flex-column  bg-white" style="height: {{windowHeight - 300}}rpx;">
+      <view class="flex-column p-20">
+
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="month" data-startdate="{{monthArr.lastThirtyDay.lastThirtyDayStartDate}}" data-stopdate="{{monthArr.lastThirtyDay.lastThirtyDayStopDate}}" data-name="lastThirtyDays"    data-hanzi="过去30天">
+          <view class="flex-column">
+            <view class="font-lg  {{dateType == 'month'  && startDate == monthArr.lastThirtyDay.lastThirtyDayStartDate && stopDate ==  monthArr.lastThirtyDay.lastThirtyDayStopDate  ? 'text-main' :''}}">过去30天</view>
+            <view class="font-md text-secondary">{{monthArr.lastThirtyDay.lastThirtyDayStartDateString}}-{{monthArr.lastThirtyDay.lastThirtyDayStopDateString}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'month'  && startDate == monthArr.lastThirtyDay.lastThirtyDayStartDate && stopDate ==  monthArr.lastThirtyDay.lastThirtyDayStopDate ? 'show' : 'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="month" data-startdate="{{monthArr.thisMonth.thisMonthStartDate}}" data-stopdate="{{monthArr.thisMonth.thisMonthStopDate}}" data-name="thisMonth"     data-hanzi="本月">
+          <view class="flex-column">
+            <view class="font-lg   {{dateType == 'month'  && startDate == monthArr.thisMonth.thisMonthStartDate && stopDate ==  monthArr.thisMonth.thisMonthStopDate ? 'text-main' :''}}">本月</view>
+            <view class="font-md text-secondary">{{monthArr.thisMonth.thisMonthStartDateString}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'month'  && startDate == monthArr.thisMonth.thisMonthStartDate && stopDate ==  monthArr.thisMonth.thisMonthStopDate ? 'show' :'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+        <view class="flex-row-between p-20 border-bottom" bindtap="selectDay" data-type="month" data-startdate="{{monthArr.lastMonth.lastMonthStartDate}}" data-stopdate="{{monthArr.lastMonth.lastMonthStopDate}}" data-startdatestring="{{monthArr.lastMonth.lastMonthStartDate}}" data-name="lastMonth"    data-hanzi="上月">
+          <view class="flex-column">
+            <view class="font-lg   {{dateType == 'month'  && startDate == monthArr.lastMonth.lastMonthStartDate && stopDate ==  monthArr.lastMonth.lastMonthStopDate ? 'text-main' :''}}">上月</view>
+            <view class="font-md text-secondary">{{monthArr.lastMonth.lastMonthStartDateString}}</view>
+          </view>
+          <view class="flex-row  {{dateType == 'month'  && startDate == monthArr.lastMonth.lastMonthStartDate && stopDate ==  monthArr.lastMonth.lastMonthStopDate ? 'show' :'hide'}}">
+            <image src="../../../../images/correct.png" class="icon"></image>
+          </view>
+        </view>
+      </view>
+
+    </view>
+
+  </swiper-item>
+
+  <!-- 4 zidingyi -->
+  <swiper-item>
+    <view class="flex-column" style="height: {{windowHeight - 300}}rpx;">
+      <view class="flex-column p-20">
+        <view class="flex-row-between p-20">
+          <text></text>
+          <view class="mainBack_new_btn" bindtap="selectSelfDate" >
+            查询
+          </view>
+        </view>
+
+           
+            <picker mode="date" fields="day" class="datePicker flex-column p-20 border-bottom" value="{{startDate}}" bindchange="bindChange" style="width: {{windowWidth- 80}}rpx;">
+              <view class="flex-row-between" >
+                <view class="font-lg">开始日期</view>
+              <image src="../../../../images/arrow-down-3.png" mode="aspectFill" class="icon" />
+              </view>
+              <view class="font-md text-main">{{startDate}}</view>
+            </picker>
+
+            <picker mode="date" fields="day" class="datePicker flex-column p-20 border-bottom" value="{{stopDate}}" bindchange="bindChangeStop" style="width: {{windowWidth- 80}}rpx;">
+              <view class="flex-row-between" >
+                <view class="font-lg">结束日期</view>
+              <image src="../../../../images/arrow-down-3.png" mode="aspectFill" class="icon" />
+              </view>
+              <view class="font-md text-main">{{stopDate}}</view>
+            </picker>
+
+
+      </view>
+    </view>
+
+
+
+
+  </swiper-item>
+
+</swiper>
+
+</view>

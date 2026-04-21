@@ -1,0 +1,98 @@
+
+.aaa {
+  /* position: absolute;   */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* display: flex; *//* justify-content: center; */
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.p-20{
+  padding: 20rpx 20rpx;
+}
+
+.body{
+  background: #fff;
+  position: relative;
+  margin: 0 auto;
+  top: 50%;
+  transform: translateY(-50%);
+  /* padding: 20rpx 20rpx; */
+
+}
+
+.title{
+  padding: 10rpx 0 ;
+  font-size: 48rpx;
+  background-color: #1295d6;
+  color: #fff;
+
+
+}
+
+.left_name{
+  width: 280rpx;
+  color: gray;
+}
+
+.flex-row {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  align-content: space-between;
+}
+
+
+.input{
+  border-bottom: 1px solid gray;
+  padding: 10rpx 10rpx ;
+  font-size: 34rpx;
+  color: #1295d6;
+}
+
+.showInput{
+  border-bottom: 1px solid rgb(190, 190, 190);
+  padding: 10rpx 10rpx;
+  font-size: 34rpx;
+  color: #1295d6;
+}
+
+.input.is-active{
+  border-bottom: 1px solid #1295d6;
+}
+
+.scaleInput{
+  width: 30%;
+  border-bottom: 1px solid gray;
+  padding: 10rpx 10rpx ;
+  font-size: 34rpx;
+  color: #1295d6;
+}
+
+.btn_row{
+  padding: 30rpx 20rpx;
+  display: flex;
+  flex-flow: row-reverse nowrap;
+  /* align-items: flex-end; */
+  /* background: red; */
+
+  
+}
+
+.sureBtn{
+  margin-left: 60rpx;
+  color: #1295d6;
+}
+.btn{
+  font-size: 34rpx;
+}
+.mr-20{
+  margin-right:20rpx;
+}

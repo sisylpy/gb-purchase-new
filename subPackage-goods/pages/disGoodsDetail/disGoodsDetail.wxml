@@ -1,0 +1,167 @@
+
+
+
+<view class="flex flex-column ">
+ <back-navbar style="height: {{navBarHeight}}rpx;" title="修改商品" 
+avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+<view class="bg-white p-20  flex-column  font-lg">
+  <!-- <text class="">基本信息:</text> -->
+  <view class=" flex-row ">
+      <text class="text-secondary flex-fixed">商品名称:</text>
+   
+    <input class="inputAddGoods pt-20 pb-20  " bindinput="getComGoodsContent" data-type="0" value="{{goods.gbDgGoodsName}}"></input>
+  </view>
+
+
+
+  <view class="flex-row with-l-margin-bottom">
+    <view class=" flex-row half-row">
+      <view class="flex-row flex-fixed">
+        <text class="  mr-10 text-secondary">单位:</text>
+      </view>
+      <input class="inputAddGoods pt-20 pb-20" value="{{goods.gbDgGoodsStandardname}}" bindinput="getComGoodsContent" data-type="1"></input>
+    </view>
+    <view class=" flex-row half-row" wx:if="{{disInfo.gbDistributerBusinessType == 21 || disInfo.gbDistributerBusinessType  == 22}}">
+      <text class="  mr-10 flex-fixed text-secondary">售价:</text>
+      <input class="inputAddGoodsBehind pt-20 pb-20" value="{{goods.gbDgSellingPrice}}" bindinput="getComGoodsContent" data-type="6" type="digit"></input>
+      <text>元/{{goods.gbDgGoodsStandardname}}</text>
+    </view>
+
+  </view>
+
+  <view class="flex-row">
+    <view class=" flex-row  half-row">
+      <text class="  mr-10 flex-fixed text-secondary">单位重量:</text>
+      <input value="{{goods.gbDgGoodsStandardWeight}}" class="inputAddGoods pt-20 pb-20" bindinput="getComGoodsContent" data-type="2"></input>
+    </view>
+
+    <view class=" flex-row half-row">
+      <text class="  mr-10 flex-fixed text-secondary">口味:</text>
+      <input class="inputAddGoods pt-20 pb-20" value="{{goods.gbDgGoodsDetail}}" bindinput="getComGoodsContent" data-type="5"></input>
+    </view>
+  </view>
+
+  <view class="flex-row">
+    <view class=" flex-row half-row">
+      <text class=" flex-fixed mr-10 text-secondary">产地:</text>
+      <input class="inputAddGoods pt-20 pb-20" value="{{goods.gbDgGoodsPlace}}" bindinput="getComGoodsContent" data-type="4"></input>
+    </view>
+    <view class=" flex-row half-row">
+      <text class=" flex-fixed mr-10 text-secondary">品牌:</text>
+      <input class="inputAddGoods pt-20 pb-20" bindinput="getComGoodsContent" data-type="3" value="{{goods.gbDgGoodsBrand}}"></input>
+    </view>
+  </view>
+
+
+  <!--  -->
+
+
+
+</view>
+
+<view class="bg-white p-20  flex-column font-lg">
+
+
+  <view class="pt-20 pb-20  flex-column ">
+    <view class="bg-white">
+      <view class=" flex-row-default pt-20 pb-20 border-bottom">
+        <text class=" flex-fixed mr-20 text-secondary flex-fixed">采购方式:</text>
+          <radio-group class="radio-group" bindchange="radioChange">
+            <label class="radio" wx:for="{{items}}" wx:key="name" style="font-size: 34rpx;margin-right: 10rpx; ">
+              <radio value="{{item.name}}" checked="{{goods.gbDgGoodsType == item.name ? 'true' : ''}}" style="margin-right: 4rpx; " />{{item.value}}
+            </label>
+          </radio-group>
+         
+      </view>
+ 
+       <!-- <view class="flex-row-between pt-20 pb-20 mt-10 " wx:if="{{goods.gbDgGoodsType == 5}}" bind:tap="toNxDis" hover-class="hover">
+        <view class="flex-row">
+          <text  class="mr-10 text-secondary"> 配送商:</text>
+        <text  class="" style="width: {{windowWidth - 300}}rpx;border-bottom: 1px solid #15b5bb;height: 50rpx;">{{goods.nxDistributerEntity.nxDistributerName !== null ? goods.nxDistributerEntity.nxDistributerName :''}}</text>
+        </view>
+      
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
+       </view> -->
+       <view class="flex-row-between pt-20 pb-20 " wx:if="{{goods.gbDgGoodsType == 21}}" bind:tap="toSupplier" hover-class="hover">
+
+         <view class="flex-row">
+          <text class="mr-10 text-secondary"> 自动订货供货商:</text>
+        <text class="border-bottom" style="width: {{windowWidth - 500}}rpx;border-bottom: 1px solid #15b5bb; height: 50rpx;">{{goods.gbDistributerAppointSupplierEntity.nxJrdhsSupplierName}}</text>
+         </view>
+         <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
+      
+       </view>
+     
+    </view>
+  </view>
+
+
+  <!-- zizhi -->
+  <view class="flex-row-between" wx:if="{{goods.gbDgGoodsType == 4}}">
+    <text class=" flex-fixedmr-20 pt-20 pb-20 ">自制商品:</text>
+    <view class=" flex-column ">
+      <switch checked="{{goods.gbDgIsSelfControl == 1 ? 'checked' : ''}}" bindchange="switchIsSelfControl" />
+    </view>
+  </view>
+<!-- gonghuoshang -->
+  <!-- <view class="flex-row-between" wx:if="{{goods.gbDistributerAppointSupplierEntity !== null}}">
+    <view class="flex-row half-row">
+      <text class=" flex-fixedmr-20 pt-20 pb-20 ">供货商:</text>
+    <view class=" flex-row">
+      <text>{{goods.gbDistributerAppointSupplierEntity.nxJrdhsSupplierName}}</text>
+    </view>
+    </view>
+   
+  </view> -->
+
+  <view class="flex-row-between pt-10 pb-10" style="width:{{windowWidth - 40}}rpx; " wx:if="{{goods.gbDgIsSelfControl == 1 }}">
+    <text class="mr-20" style="width: 180rpx;">成本价格:</text>
+    <view class="flex-row" style="width: {{windowWidth - 280}}rpx;">
+      <input type="digit" class="inputAddGoods" value="{{goods.gbDgSelfPrice !== -1 ? goods.gbDgSelfPrice : ''}}" bindinput="getGoodsSelfPrice" />
+      <text>元</text>
+    </view>
+  </view>
+
+  <!-- <view class=" flex-column pt-20 pb-20 ">
+
+    <view class="flex-row-between">
+      <text class=" flex-fixedmr-20 pt-20 pb-20 ">加盟商品:</text>
+      <view class=" flex-column ">
+        <switch checked="{{goods.gbDgIsFranchisePrice == 1 ? 'checked' : ''}}" bindchange="switchIsFranchisee" />
+      </view>
+    </view>
+
+    <block wx:if="{{goods.gbDgIsFranchisePrice == 1}}">
+
+      <view class="flex-row pt-10 pb-10">
+        <text class=" flex-fixed mr-10">加盟一级:</text>
+        <input class="numberInput" type="digtal" value="{{goods.gbDgFranchisePriceOne}}" bindinput="getPrice" data-level="one" />
+        <text>元/{{goods.gbDgGoodsStandardname}}</text>
+      </view>
+      <view class="flex-row pt-10 pb-10">
+        <text class=" flex-fixed mr-10">加盟二级:</text>
+        <input class="numberInput" type="digtal" value="{{goods.gbDgFranchisePriceTwo}}" bindinput="getPrice" data-level="two" />
+        <text>元/{{goods.gbDgGoodsStandardname}}</text>
+      </view>
+      <view class="flex-row pt-10 pb-10">
+        <text class=" flex-fixed mr-10">加盟三级:</text>
+        <input class="numberInput" type="digtal" value="{{goods.gbDgFranchisePriceThree}}" bindinput="getPrice" data-level="three" />
+        <text>元/{{goods.gbDgGoodsStandardname}}</text>
+      </view>
+
+
+    </block>
+  </view> -->
+
+
+</view>
+
+</view>
+
+
+
+<view class="p-20 ">
+  <view class=" saveBtn {{canSave ? 'is-active' : ''}}" bindtap="updateComGoods">保存</view>
+</view>

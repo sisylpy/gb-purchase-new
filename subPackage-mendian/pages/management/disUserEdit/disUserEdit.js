@@ -1,5 +1,5 @@
 var load = require('../../../../lib/load.js');
-var apiUrl = require('../../../../config.js');
+var apiUrl = require('../../../../config/index.js');
 var apiDistributer = require('../../../../services/apiDistributer');
 
 // ========================

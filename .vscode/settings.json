@@ -1,0 +1,4 @@
+{
+  "minapp-vscode.globalStyleFiles": ["app.wxss"],
+  "minapp-vscode.styleExtensions": ["wxss"]
+}

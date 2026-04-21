@@ -1,3 +1,4 @@
+<wxs src="./orderEntities.wxs" module="ord" />
 <view class='mask {{isClosing ? "closing" : ""}}' wx:if='{{show}}' catchtouchmove='ture' style="height:{{maskHeight}}rpx;top:-{{scrollViewTop}}rpx;">
 	<view class='modal-content' style="margin-top:{{scrollViewTop + 200}}rpx;">
 		<view class="modal-header">
@@ -7,12 +8,10 @@
 				<text>{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
 				<text class="big mr-10" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
 
-				<text wx:for="{{item.gbDistributerGoodsEntity.nxAliasEntities}}"
-					wx:for-item="alias">={{alias.nxDaAliasName}}</text>
 				<block
 					wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null' && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
 					<text
-						wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+						wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}" class="brand">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
 				</block>
 				<block wx:else>
 					<text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
@@ -50,7 +49,7 @@
 								<input class='input' type='digit' value="{{item.gbDpgBuyPrice}}" bindinput="getPurchasePrice"
 									bindblur="_checkPrice" hold-keyboard='true' focus="{{foucusPrice}}"></input>
 							</view>
-							<text>元/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+							<text>元/{{priceUnitSuffix ? priceUnitSuffix : item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
 						</view>
 					</block>
 				</view>
@@ -79,10 +78,10 @@
 				</view>
 
 				<view class="flex-row p-20">
-					<text class="mr-10" style="width: 100rpx; font-size: 32rpx;">订单:</text>
+					<text class="mr-10" style="width: 100rpx; font-size: 32rpx;">订单:{{ord.displayCount(item, orderListCount)}}条</text>
 					<scroll-view scroll-y="true" class="flex-column"
 						style="max-height: {{windowHeight / 3}}rpx; width: {{windowWidth - 180}}rpx;">
-						<view class="flex-column" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:key="gbDepartmentOrdersId"
+						<view class="flex-column" wx:for="{{ord.list(item)}}" wx:key="gbDepartmentOrdersId"
 							style="padding-left: 20rpx; background-color:#f3f6f8; margin-bottom: 10rpx; padding-top: 10rpx;padding-right: 10rpx; font-size: 32rpx;"
 							wx:for-item="orders" wx:for-index="orderIndex">
 							<block wx:if="{{orders.isNotice}}">
@@ -91,10 +90,8 @@
 										<view>订货:</view>
 									</block>
 									<block wx:else="">
-										<view class="flex-row">
-											<view wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity !== null}}">
-												{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</view>
-											<view class="mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</view>
+										<view class="flex-row mr-10">
+											<text>{{orders.gbDoParentDepartmentName}}{{orders.gbDoParentDepartmentName ? '.' : ''}}{{orders.gbDoOrderDepartmentName}}</text>
 										</view>
 									</block>
 
@@ -127,7 +124,8 @@
 													value="{{orders.gbDoWeight == null || orders.gbDoWeight == '0.0' ? '' : orders.gbDoWeight}}"
 													bindinput="getOrderWeight" focus="{{orderIndex == 0 && foucusWeight ? 'true' : ''}}" data-index="{{orderIndex}}" style="width: {{windowWidth / 4}}rpx;" />
 											</view>
-											<text>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+											<text wx:if="{{orders.gbDoStandard && item.gbDistributerGoodsEntity.gbDgGoodsStandardname && orders.gbDoStandard != item.gbDistributerGoodsEntity.gbDgGoodsStandardname && orders.gbDoDsStandardScale && orders.gbDoDsStandardScale != '-1'}}">{{orders.gbDoStandard}}</text>
+											<text wx:else="">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
 										</view>
 									</block>
 								</view>

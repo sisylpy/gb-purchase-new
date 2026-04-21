@@ -1,0 +1,149 @@
+<view class="food-page">
+  <back-navbar title="门店菜品" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="/images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="food-toolbar food-toolbar--wrap flex-row-items-center">
+      <view class="food-tool-link food-tool-link--blue flex-row-items-center" hover-class="food-add-btn--hover" bindtap="onDownloadFoodSalesTemplate">
+        <text>下载销量模板</text>
+      </view>
+      <view class="food-tool-link food-tool-link--green flex-row-items-center" hover-class="food-add-btn--hover" bindtap="onUploadFoodSalesExcel">
+        <text>上传销量</text>
+      </view>
+     
+    </view>
+  </view>
+
+
+ 
+
+
+  <view class="p-20">
+    <view class="dfl-group" wx:for="{{foodArr}}" wx:for-item="food" wx:key="index">
+     
+
+      <view class="dfl-list-card">
+        <view class="dfl-item flex-row-between" >
+          <view class="dfl-item__main">
+            <view class="dfl-item__index">{{index + 1}}</view>
+            <view class="dfl-item__image-wrap">
+              <image class="food_img dfl-item__img" src="{{url + food.gbDistributerFoodEntity.gbDfFoodImg}}" mode="aspectFill"></image>
+            </view>
+
+
+            <view class="dfl-item__body">
+              <text class="dfl-item__name">{{food.gbDfFoodName}}</text>
+              <view class="dfl-item__meta">
+                <text class="dfl-item__price">¥{{food.gbDfFoodPrice}}/份</text>
+                <text class="dfl-item__sales">销量 {{food.gbDfSalesAmount}}</text>
+              </view>
+              <text class="dfl-item__method" wx:if="{{food.gbDfFoodMethod}}">{{food.gbDfFoodMethod}}</text>
+              <text class="dfl-item__method dfl-item__method--empty" wx:else>暂无做法说明</text>
+
+
+              <view class="font-md">
+            <view class=" dfl-action-btn--green"  hover-class="food-add-btn--hover" wx:for="{{food.gbDistributerFoodEntity.gbdisFoodGoodsEntities}}" wx:for-item="goods">
+              <text class="dfl-action-text">{{goods.gbDfgGoodsName}}</text>
+              <text class="dfl-action-text">{{goods.gbDfgGoodsAmount}}</text>
+              <text class="dfl-action-text">{{goods.gbDfgGoodsStandardname}}</text>
+            </view>
+          </view>
+
+
+            </view>
+          </view>
+
+         
+        </view>
+
+        
+      </view>
+    </view>
+    <view class="dfl-empty" wx:if="{{!foodArr || foodArr.length === 0}}">当前日期范围暂无菜品数据</view>
+  </view>
+</view>
+
+<!-- 菜品销量模板：日期范围 -->
+<view class="food-tpl-modal" wx:if="{{showFoodSalesTemplateModal}}">
+  <view class="food-tpl-mask" bindtap="onCloseFoodSalesTemplateModal"></view>
+  <view class="food-tpl-panel">
+    <view class="food-tpl-title">选择日期范围</view>
+    <view class="food-tpl-form">
+      <view class="food-tpl-form-item">
+        <text class="food-tpl-form-label">开始日期</text>
+        <picker mode="date" value="{{foodSalesTemplateStartDate}}" bindchange="onFoodSalesTemplateStartChange">
+          <view class="food-tpl-form-input flex-row-items-center">
+            <text>{{foodSalesTemplateStartDate || '请选择'}}</text>
+            <text class="text-secondary">›</text>
+          </view>
+        </picker>
+      </view>
+      <view class="food-tpl-form-item">
+        <text class="food-tpl-form-label">结束日期</text>
+        <picker mode="date" value="{{foodSalesTemplateEndDate}}" end="{{todayDate}}" bindchange="onFoodSalesTemplateEndChange">
+          <view class="food-tpl-form-input flex-row-items-center">
+            <text>{{foodSalesTemplateEndDate || '请选择'}}</text>
+            <text class="text-secondary">›</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="food-tpl-actions">
+      <view class="food-tpl-btn food-tpl-btn--ghost" bindtap="onCloseFoodSalesTemplateModal">取消</view>
+      <view class="food-tpl-btn food-tpl-btn--primary" bindtap="onConfirmDownloadFoodSales">确认下载</view>
+    </view>
+  </view>
+</view>
+
+<!-- 配料详情弹窗 -->
+<view class="ingredients-modal" wx:if="{{showIngredientsModal}}">
+  <view class="ingredients-mask" bindtap="onCloseIngredientsModal"></view>
+  <view class="ingredients-panel">
+    <view class="ingredients-header">
+      <text class="ingredients-title">菜品配料详情</text>
+      <view class="ingredients-close" bindtap="onCloseIngredientsModal">✕</view>
+    </view>
+    <view class="ingredients-info">
+      <text class="ingredients-name">{{currentFood.gbDfFoodName}}</text>
+      <view class="ingredients-meta">
+        <text class="ingredients-price">¥{{currentFood._displayPrice}}/份</text>
+        <text class="ingredients-sales">销量 {{currentFood._displaySalesAmount}}</text>
+      </view>
+    </view>
+    <view class="ingredients-list">
+      <view class="ingredients-table-header">
+        <text class="th-name">配料名称</text>
+        <text class="th-amount">用量</text>
+        <text class="th-unit">单位</text>
+      </view>
+      <scroll-view scroll-y class="ingredients-scroll">
+        <view class="ingredients-row" wx:for="{{ingredientList}}" wx:key="index">
+          <text class="td-name">{{item.name}}</text>
+          <text class="td-amount">{{item.amount}}</text>
+          <text class="td-unit">{{item.unit}}</text>
+        </view>
+        <view class="ingredients-empty" wx:if="{{!ingredientList || ingredientList.length === 0}}">
+          <text>暂无配料信息</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

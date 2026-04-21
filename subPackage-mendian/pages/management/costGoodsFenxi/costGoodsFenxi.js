@@ -1,7 +1,7 @@
 var load = require('../../../../lib/load.js');
 var globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
-var apiUrl = require('../../../../config.js');
+var apiUrl = require('../../../../config/index.js');
 var apiDistributer = require('../../../../services/apiDistributer');
 
 // 动态导入 echarts

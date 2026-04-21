@@ -1,6 +1,7 @@
 
 
 <wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 <view class="flex flex-column">
 
@@ -51,7 +52,7 @@
                wx:for-item="father" wx:for-index="fatherIndex">
                 <view class="flex-row-default  border-bottom  p-10" wx:for-item="goods" wx:key="gbDepartmentDisGoodsId" wx:for-index="depGoodsIndex"  
                 wx:for="{{father.gbDepartmentDisGoodsEntities}}">
-                  <image bindtap="showDialogBtn" data-item="{{goods.gbDistributerGoodsEntity}}" src="{{url + goods.gbDistributerGoodsEntity.gbDgNxFatherImg}}" mode="aspectFill" class="url_item margin-right" />
+                  <image bindtap="showDialogBtn" data-item="{{goods.gbDistributerGoodsEntity}}" src="{{(imgUrl.resolve(url, goods.gbDistributerGoodsEntity.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="url_item margin-right" />
 
                   <view class="flex-row" catch:tap="{{goods.gbDepartmentOrdersEntity == null ? 'applyGoodsDep' : 'toEditApplyDep'}}" data-order="{{goods.gbDepartmentOrdersEntity}}" data-disgoods="{{goods.gbDistributerGoodsEntity}}" data-grandindex="{{grandIndex}}"  data-fatherindex="{{fatherIndex}}" data-index="{{depGoodsIndex}}" data-depgoods="{{goods}}" hover-class="hover">
                     <view class="flex-column " style="width: {{windowWidth - 400}}rpx; ">

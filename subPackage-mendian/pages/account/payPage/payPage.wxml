@@ -1,0 +1,339 @@
+<back-navbar style="height: {{navBarHeight}}rpx;" title="价格方案" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+<view class="flex-column" style=" margin-top: {{navBarHeight}}rpx; ">
+<view class="flex-row " >
+  
+
+  <view class='navbar'>
+    <block wx:for="{{tabs}}" wx:key="index">
+      <view class="navbar-item {{currentTab == index ? 'bar-item-on':''}}" data-current='{{index}}' bindtap='onTab1Click'>
+        <view class='navbar-title'>{{item.name}}</view>
+      </view>
+    </block>
+  </view>
+
+
+</view>
+
+
+</view>
+
+<view class="flex-column">
+
+  <!-- body -->
+  <view class="flex-column page">
+
+
+    <swiper style="height: {{windowHeight - 100 - statusBarHeight}}rpx" current="{{currentTab}}" wx:key="currentTab" bindchange="bindChange">
+
+      <!-- 1 -->
+      <swiper-item>
+
+        <scroll-view scroll-y="true" style="height: {{windowHeight - 300}}rpx;">
+
+          <view class="flex-row ">
+            <scroll-view scroll-x="true" style="width: {{windowWidth}}rpx; ">
+              <view class="flex-row p-20" style="width: {{(windowWidth / 3 - 20) * payArr.length}}rpx ;">
+
+                <view class=" flex-column-center p-20 mr-20 orderItem {{selIndex == index ? 'is-active' : ''}}" style="width: {{windowWidth / 3 - 20}}rpx;" wx:for="{{payArr}}" wx:for-index="index" wx:key="index" bind:tap="changeIndex" data-index="{{index}}">
+                  <view class="flex-row">
+                    <text>{{item.nxNdpBuyQuantity}}万条</text>
+                  </view>
+                  <view class="flex-row">
+                    <text class="" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                  </view>
+                  <view class="flex-row">
+                    <text>{{item.perPrice}}分/条</text>
+                  </view>
+               
+                </view>
+              </view>
+            </scroll-view>
+          </view>
+
+          <!-- font-md-->
+
+          <view class="flex-column p-20">
+
+            <view class="p-20">
+              <text class="font-lg">订单流量</text>
+            </view>
+            <view class="flex-column">
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+             
+                <view class="flex-column">
+                  <text class="font-md ">灵活性高</text>
+                  <view class="tb-10 font-sm">您可以根据订单数量灵活购买，避免过度订购套餐的情况。无论是大批量还是少量订单，都需要根据业务需求选择适合的订单条数。</view>
+                </view>
+              </view>
+
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-md ">成本可控</text>
+                  <view class="tb-10 font-sm">按订单数量收费让您可以准确计算运营成本。根据订单数量付费，可以避免无效支出，非常适合业务量不确定或业务量新增的情况。</view>
+                </view>
+              </view>
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-md ">扩充扩展</text>
+                  <view class="tb-10 font-sm">当业务扩展或订单量增加时，可以随时购买更多的订单条数，保证业务的连续性和扩展性，不受订单的限制。</view>
+                </view>
+
+              </view>
+
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-md ">阶梯式优惠</text>
+                  <view class="tb-10 font-sm">随着订单数量增加，单笔订单的成本会降低，购买条数越多越划算。例如，购买10万条订单的费用远低于分散购买，适合大批量订单需求的您。</view>
+                </view>
+              </view>
+
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-md ">不需要长期绑定</text>
+                  <view class="tb-10 font-sm">商品选择不需要包年，可以灵活调整订单条数，避免因为订阅未使用完造成浪费，更适合短期或临时项目的精确管理。</view>
+                </view>
+              </view>
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-md ">适合多类型客户</text>
+                  <view class="tb-10 font-sm">套餐方案适合订单体量大小不同的客户，从小型餐厅到大型连锁餐饮都可以依次选择合适的套餐。</view>
+                </view>
+
+              </view>
+
+            </view>
+
+
+          </view>
+
+          <!-- ../font-md-->
+
+
+          <!-- service -->
+
+          <view class="flex-column p-20">
+
+            <view class=" p-20">
+              <text class="font-lg">享受服务</text>
+            </view>
+            <view class="flex-column">
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-lg">新产品归类协助</text>
+                  <view class="tb-10 font-sm">在您每天的下单过程中，经常会出现目录中还没有的新商品。我们会为您提供专属客服，每天帮您检查并把这些新商品归类到正确的目录下。这样您的商品目录始终完整清晰，新商品也能自动进入成本分析、库存管理和报表统计，不会遗漏。您只需要专心下单，其余繁琐的整理工作我们来做，让您真正省心省力</view>
+                </view>
+
+              </view>
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-lg">数据分析支持</text>
+                  <view class="tb-10 font-sm">系统完整记录您的每笔采购与下单，自动生成采购对比、价格监控、重点商品追踪、损耗与浪费统计等报表。您可按时间、采购员、供应商多维度分析，清楚掌握资金流向和成本构成，快速发现问题点并改进，从源头降低浪费，有效把控整体经营成本，助您提升盈利能力。</view>
+                </view>
+              </view>
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-lg">7*24小时操作咨询</text>
+                  <view class="tb-10 font-sm">最大提供技术支持和咨询，随时解决操作问题，保证业务持续进行。</view>
+                </view>
+
+              </view>
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-lg">3次上门免费计算机培训</text>
+                  <view class="tb-10 font-sm">为您及其团队提供专业的现场培训，快速掌握小程序操作技能。</view>
+                </view>
+
+              </view>
+
+
+             
+
+              <view class="flex-row p-20 bg-white twenty_radius mb-20">
+                <view class="flex-column">
+                  <text class="font-lg">订单个性系统化定制</text>
+                  <view class="tb-10 font-sm">根据您的特定需求，灵活定制小程序功能和界面，确保符合其业务模式。</view>
+                </view>
+
+              </view>
+
+            </view>
+
+          </view>
+          <!-- ../font-md-->
+
+        </scroll-view>
+
+      </swiper-item>
+
+      <!-- 2 -->
+      <swiper-item>
+
+        <scroll-view scroll-y="true" style="height: {{windowHeight - 300}}rpx;">
+
+          <view class="flex-column p-20">
+            <view class=" flex-column p-20 twenty_radius bg-white mb-20" wx:for="{{payArr}}" wx:for-index="index" wx:key="index" bind:tap="changeIndex" data-index="{{index}}">
+
+              <view class="flex-row-default border-bottom tb-10 font-sm">
+                <image src="{{url + item.nxNdpImgUrl}}" mode="aspectFill" class="p-20" style="width: 140rpx; height: 140rpx; margin: 20rpx;" />
+                <view class="flex-column">
+                  <text class="font-lg">{{item.perPrice}}</text>
+                  <view class="flex-row" style="width: {{windowWidth - 340}}rpx; ">
+                    <text class="auto" style="white-space: font-lg; word-break: break-word;">{{item.nxNdpSellDetail}}</text>
+                  </view>
+                </view>
+
+              </view>
+
+              <view class="flex-row-reverse tb-10 font-sm">
+
+
+                <block wx:if="{{index == 0}}">
+
+                  <block wx:if="{{disInfo.gbDistributerBusinessType == 1}}">
+                    <view class="flex-row p-20 text-success">
+                      管理端已开通
+                    </view>
+
+                  </block>
+
+                  <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
+                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                  </view>
+
+                </block>
+
+                <block wx:if="{{index == 1}}">
+                  <view wx:if="{{disInfo.gbDistributerModuleEntity.gbDmStockNumber == -1}}" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
+                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                  </view>
+                  <block wx:else="">
+
+                    <view class="flex-row p-20 text-success">
+                      库房端已开通
+                    </view>
+                  </block>
+                </block>
+                <block wx:if="{{index == 2}}">
+                  <view wx:if="{{disInfo.gbDistributerModuleEntity.gbDmCentralKitchenNumber == -1}}" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
+                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                  </view>
+                  <block wx:else="">
+
+                    <view class="flex-row p-20 text-success">
+                      销售中心已开通
+                    </view>
+                  </block>
+                </block>
+
+                <block wx:if="{{index == 3}}">
+                  <block wx:if="{{disInfo.gbDistributerBusinessType == 2}}">
+
+                    <view class="flex-row p-20 text-success">
+                      销售中心已开通
+                    </view>
+                  </block>
+                  <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
+                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                  </view>
+
+                </block>
+
+                <block wx:if="{{index == 4}}">
+
+                  <block wx:if="{{disInfo.gbDistributerBusinessType == 3}}">
+
+                    <view class="flex-row p-20 text-success">
+                      私域会员已开通
+                    </view>
+                  </block>
+
+                  <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
+                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                  </view>
+
+                </block>
+
+              </view>
+
+            </view>
+
+
+          </view>
+
+
+
+
+
+        </scroll-view>
+
+      </swiper-item>
+
+    </swiper>
+  </view>
+</view>
+
+
+<view class="bottom_view bg-light" style="padding-bottom: 20rpx;">
+  <view class="flex-row p-20">
+  
+    <view wx:if="{{currentTab == 0}}">
+
+      <view class="flex-row-between" style="width: {{windowWidth - 40}}rpx;">
+
+        <block wx:if="{{!expired && !haveLiwu}}">
+
+          <view class="flex-column">
+            <view class="flex-column-center twenty_radius p-20" style="width: {{(windowWidth - 60) / 2 - 80}}rpx; background-color: #fd5310;line-height: 40rpx; height: 100rpx; font-weight: 500; border-radius: 10rpx; color: #fff;" bind:tap="getLiwu">
+              <text class="countdown">{{countdownText}}</text>
+            <view class="font-lg text-center">领取{{liwu}}点</view>
+          </view>
+            
+          </view>
+        </block>
+        
+        <block wx:else="">
+        
+          <button style="width: {{(windowWidth - 40) / 2   + 20}}rpx; background-color: #fd5310; line-height: 100rpx; height: 100rpx; font-weight: 500; border-radius: 10rpx; color: #fff;" class="font-md" open-type="share">邀请好友奖励1000点</button>
+        </block>
+
+
+
+        <view class="flex-column-center twenty_radius p-20" style="width: {{(windowWidth - 60) / 2 - 80}}rpx; background-color: #ffbc65; line-height: 60rpx;border-radius: 10rpx;" bind:tap="gorRunnerLobby">
+            <view class="font-lg text-center">{{orderSubtotal}} 购买</view>
+          </view>
+      </view>
+
+
+    </view>
+    <view wx:elif="{{currentTab == 1}}">
+      <view class="center-content twenty_radius p-20" style="width: {{windowWidth  - 100}}rpx; background-color: #0660d6; color: #fff;border-radius: 10rpx; line-height: 60rpx; height: 60rpx;" bind:tap="toCustomerServicePages">
+        <view class="font-lg">咨询人工</view>
+      </view>
+    </view>
+
+
+    <view wx:else>
+      <view class="center-content twenty_radius p-20" style="width: {{windowWidth  - 100}}rpx; background-color: {{aaa > 0 ?  '#ffbc65' : '#d3d3d3'}};  line-height: 60rpx; border-radius: 10rpx;" bind:tap="gorRunnerLobbyList">
+        <view class="font-lg">{{aaa}} 购买</view>
+      </view>
+    </view>
+
+  </view>
+
+
+</view>

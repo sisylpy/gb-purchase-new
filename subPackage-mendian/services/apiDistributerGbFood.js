@@ -2,7 +2,7 @@
  * 门店子包 Food 模块 API (Gb后端)
  * 来源：subPackage-mendian/wailaii/apiDistributerGb.js
  */
-import apiUrl from '../../config.js'
+import apiUrl from '../../config/index.js'
 var load = require('../../lib/load.js');
 
 // ===== addFood 页面 =====

@@ -2,14 +2,13 @@
 
 const globalData = getApp().globalData;
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 var load = require('../../../../lib/load.js');
 
-// import {
-//   gbPurchaserRegitsteWithFile,
-//   gbLogin,
-// } from '../../../../lib/apiDistributer'
-
+const {
+  gbPurchaserRegitsteWithFile,
+  gbLogin,
+} = require('../../../services/apiDistributerGbUser.js');
 
 Page({
 
@@ -159,7 +158,7 @@ save(e) {
               wx.setStorageSync('userInfo', jsonObject.data.depUser);
 
               wx.redirectTo({
-                url: '/subPackage-ai/pages/ai/chefOrder/chefOrder',
+                url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
               });
 
             }

@@ -1,4 +1,5 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 <view class="flex flex-column">
 
@@ -61,7 +62,7 @@
         <!-- 卡片头部：图标 + 标题 + 采购总额 -->
         <view class="">
           <view class="flex-row-default">
-            <image src="{{url + great.gbDfgFatherGoodsImg}}" mode="aspectFill" class="goods_item_lg mr-20" />
+            <image src="{{(imgUrl.resolve(url, great.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-20" />
 
             <view class="flex-row-between" style="width: {{windowWidth - 200}}rpx;">
               <view class="flex-column">
@@ -94,10 +95,7 @@
                   <image src="../../../images/gouwuche.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
                   <view class="flex-column">
                     <view class="font-sm font-bold">采购</view>
-
                   </view>
-
-
                 </view>
 
                 <!-- 采购环形图 -->

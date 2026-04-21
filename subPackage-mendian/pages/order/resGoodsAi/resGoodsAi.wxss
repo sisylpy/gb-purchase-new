@@ -410,7 +410,7 @@ show-btn {
 .save_btn{
   background-color: #f08308;
   color: #fff;
-  font-size: 34rpx;
+  font-size: 28rpx;
   font-weight: 500;
   border-radius: 20rpx;
   padding: 10rpx 20rpx;
@@ -742,4 +742,153 @@ show-btn {
   display: block;
   font-size: 24rpx;
   color: #666;
+}
+
+/* 部门商品下：库存批次列表（点击打开 showStock 弹窗） */
+.stock-batches-wrap {
+  margin-top: 12rpx;
+  padding: 8rpx 0 4rpx;
+  width: 100%;
+}
+
+.stock-batches-title {
+  font-size: 22rpx;
+  color: #8a8a8a;
+  margin-bottom: 12rpx;
+  padding-left: 4rpx;
+}
+
+.stock-batch-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin-bottom: 16rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #f7f8fa;
+  border: 1rpx solid #e8eaed;
+  box-sizing: border-box;
+}
+
+.stock-batch-card__accent {
+  width: 8rpx;
+  flex-shrink: 0;
+  background: #5ab464;
+}
+
+.stock-batch-card--plain .stock-batch-card__accent {
+  background: #5ab464;
+}
+
+.stock-batch-card--countdown .stock-batch-card__accent {
+  background: #e8a317;
+}
+
+.stock-batch-card--expired .stock-batch-card__accent {
+  background: #d9534f;
+}
+
+.stock-batch-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 14rpx 16rpx 18rpx;
+  min-height: 88rpx;
+  box-sizing: border-box;
+}
+
+.stock-batch-card__left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stock-batch-card__badge {
+  font-size: 20rpx;
+  color: #888;
+  margin-bottom: 6rpx;
+}
+
+.stock-batch-card__weight-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.stock-batch-card__weight {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222;
+  line-height: 1.2;
+}
+
+.stock-batch-card__unit {
+  font-size: 24rpx;
+  color: #666;
+  margin-left: 6rpx;
+}
+
+.stock-batch-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  margin-right: 8rpx;
+  max-width: 52%;
+}
+
+.stock-batch-card__status {
+  font-size: 22rpx;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.stock-batch-card__status--muted {
+  color: #6b7c6f;
+}
+
+.stock-batch-card__status--warn {
+  color: #b8860b;
+}
+
+.stock-batch-card__status--danger {
+  color: #c0392b;
+}
+
+.stock-batch-card__action {
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: #5ab464;
+}
+
+.stock-batch-card__chevron {
+  font-size: 36rpx;
+  color: #c0c4cc;
+  line-height: 1;
+  padding-left: 4rpx;
+  align-self: center;
+}
+
+.stock-batch-card--pressed {
+  opacity: 0.88;
+  transform: scale(0.99);
+}
+
+.stock-batch-card--plain {
+  background: #f4faf5;
+}
+
+.stock-batch-card--countdown {
+  background: #fffbf0;
+  border-color: #f5e6c8;
+}
+
+.stock-batch-card--expired {
+  background: #fdf5f5;
+  border-color: #f0d4d4;
 }

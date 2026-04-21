@@ -8,7 +8,7 @@
 
   <view class="flex-column">
 
-    <view class='navbar1' style="width: {{windowWidth}}rpx;">
+    <view class='' style="width: {{windowWidth}}rpx;">
 
       <view class="tabs-container">
         <block wx:for="{{tabs}}" wx:key="index">
@@ -82,14 +82,13 @@
                     <image bindtap="showImageModal" data-goods="{{goods}}" src="{{goods.gbDisGoodsFile !== null ? url + goods.gbDisGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
                   </view>
 
-
                   <view class="flex-row">
                     <view class="flex-column" style="width: {{windowWidth - 320}}rpx;">
 
                       <view class="flex-row-between ">
                         <view class="flex-row">
-                          <text class="font-bold font-lg-2">{{goods.gbDdgDepGoodsName}}</text>
-                          <text class="ml-20" wx:if="{{goods.gbDdgDepGoodsName !== goods.gbDgGoodsName}}">({{goods.gbDgGoodsName}})</text>
+                          <text class="font-bold font-xl">{{goods.gbDdgDepGoodsName}}</text>
+
                           <block wx:if="{{goods.gbDgControlFresh == 1}}">
                             <text class="fresh_goods ml-10">保鲜{{goods.gbDgFreshWasteHour}}小时</text>
                           </block>
@@ -103,19 +102,19 @@
                         </view>
                       </view>
 
-                      <view class="flex-row small" >
+                      <view class="flex-row " >
                         <view class="flex-row">
                           <text class="gray">规格:</text>
 
-                          <view class="" wx:if="{{goods.gbDgGoodsStandardWeight !== null && goods.gbDgGoodsStandardWeight !== ''}}">
-                            {{goods.gbDgGoodsStandardWeight}}/{{goods.gbDdgShowStandardName}}
+                          <view class="" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}">
+                            {{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{goods.gbDdgShowStandardName}}
                           </view>
-                          <view wx:else="">{{goods.gbDgGoodsStandardname}}</view>
+                          <view wx:else="">{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</view>
 
                         </view>
                       </view>
-                      <view class="flex-row small">
-                        <view class="flex-row half-row" wx:if="{{goods.gbDdgDepGoodsDetail !== null && goods.gbDdgDepGoodsDetail !== ''}}">
+                      <view class="flex-row ">
+                        <view class="flex-row half-row" wx:if="{{goods.gbDdgDepGoodsDetail}}">
                           <text class="gray">说明:</text>
                           <text>{{goods.gbDdgDepGoodsDetail}}</text>
                         </view>
@@ -123,27 +122,51 @@
                       </view>
 
 
-                      <view class="flex-row-wrap p-20" wx:if="{{goods.gbDepartmentGoodsStockEntities.length > 0}}">
-                        <view class="flex-row  mb-20" wx:for="{{goods.gbDepartmentGoodsStockEntities}}" wx:for-item="stock" bindtap="showStock" wx:key="gbDepartmentGoodsStockId" hover-class="clickStock" data-item="{{stock}}" data-goods="{{goods}}" data-stockindex="{{index}}" data-goodsindex="{{depGoodsIndex}}">
-                          <block wx:if="{{stock.gbDgsWasteFullTime !== null}}">
-                            <block wx:if="{{tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime)  > 0 || tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime)  == 0 }}">
-                              <view class="flex-row pass_waste mr-20">
-                                <view class="mr-10 "> {{stock.gbDgsRestWeight}}{{goods.gbDdgShowStandardName}}</view>
-                                <view class="font-sl">已过{{tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime)}}小时</view>
+                      <view class="stock-batches-wrap" wx:if="{{goods.gbDepartmentGoodsStockEntities.length > 0}}">
+                        <view class="stock-batches-title">库存批次（点击可处理）</view>
+                        <view
+                          class="stock-batch-card {{stock.gbDgsWasteFullTime !== null ? ((tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime) > 0 || tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime) == 0) ? 'stock-batch-card--expired' : 'stock-batch-card--countdown') : 'stock-batch-card--plain'}}"
+                          wx:for="{{goods.gbDepartmentGoodsStockEntities}}"
+                          wx:for-item="stock"
+                          wx:for-index="batchIdx"
+                          bindtap="showStock"
+                          wx:key="gbDepartmentGoodsStockId"
+                          hover-class="stock-batch-card--pressed"
+                          data-item="{{stock}}"
+                          data-goods="{{goods}}"
+                          data-stockindex="{{batchIdx}}"
+                          data-goodsindex="{{depGoodsIndex}}"
+                        >
+                          <view class="stock-batch-card__accent"></view>
+                          <view class="stock-batch-card__body">
+                            <view class="stock-batch-card__left">
+                              <text class="stock-batch-card__badge">批次 {{batchIdx + 1}}</text>
+                              <view class="stock-batch-card__weight-row">
+                                <text class="stock-batch-card__weight">{{stock.gbDgsRestWeight}}</text>
+                                <text class="stock-batch-card__unit">{{goods.gbDdgShowStandardName}}</text>
                               </view>
-                            </block>
-                            <block wx:else>
-                              <text class="has_waste margin-right">{{stock.gbDgsRestWeight}}{{goods.gbDdgShowStandardName}}</text>
-                            </block>
-                          </block>
-                          <block wx:else>
-                            <text class="his_stock mr-20">库存:{{stock.gbDgsRestWeight}}{{goods.gbDdgShowStandardName}}</text>
-                          </block>
+                            </view>
+                            <view class="stock-batch-card__right">
+                              <block wx:if="{{stock.gbDgsWasteFullTime !== null}}">
+                                <block wx:if="{{tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime) > 0 || tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime) == 0}}">
+                                  <text class="stock-batch-card__status stock-batch-card__status--danger">已过废弃 {{tool.getCompareTime(stock.gbDgsWasteFullTime, nowTime)}} 小时</text>
+                                </block>
+                                <block wx:else>
+                                  <text class="stock-batch-card__status stock-batch-card__status--warn">剩余时间：约 {{tool.getHoursUntilWaste(stock.gbDgsWasteFullTime, nowTime)}} 小时</text>
+                                </block>
+                              </block>
+                              <block wx:else>
+                                <text class="stock-batch-card__status stock-batch-card__status--muted">在库</text>
+                              </block>
+                              <text class="stock-batch-card__action">详情</text>
+                            </view>
+                            <text class="stock-batch-card__chevron">›</text>
+                          </view>
                         </view>
                       </view>
 
                       <view class="flex-row-reverse p-10 {{goods.gbDepartmentGoodsStockEntities.length == 0 ? 'mt-20' : ''}}">
-                        <view wx:if="{{goods.gbDepartmentOrdersEntity !== null}}" class="flex-row-between middle ">
+                        <view wx:if="{{goods.gbDepartmentOrdersEntity}}" class="flex-row-between middle ">
                           <view class="flex-row " catch:tap="toEditApplyDep" data-order="{{goods.gbDepartmentOrdersEntity}}" data-index="{{depGoodsIndex}}" data-depgoods="{{goods}}" hover-class="hover">
                             <text class="five-weight save_btn has_order  {{goods.gbDepartmentOrdersEntity.gbDoPurchaseStatus > 1 ? 'is-gray' : ''}} {{goods.gbDepartmentOrdersEntity.gbDoStatus == 2 ? 'finish': ''}}">{{goods.gbDepartmentOrdersEntity.gbDoQuantity}}{{goods.gbDepartmentOrdersEntity.gbDoStandard}}</text>
                           </view>
@@ -245,21 +268,21 @@
                       <view class="flex-column" style="width: {{windowWidth - 480}}rpx;  ">
                         <view class="flex-row middle">
                           <text class=" {{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? brand : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? sons.nxGoodsBrand : ''}}</text>
-                          <view class="font-lg-2">{{sons.nxGoodsName}}</view>
-                          <view>{{sons.nxGoodsDetail}}</view>
+                          <view class="font-xl">{{sons.nxGoodsName}}</view>
+                          <!-- <view>{{sons.nxGoodsDetail}}</view> -->
                         </view>
 
-                        <view class="flex-row font-sm" wx:if="{{sons.nxGoodsStandardWeight !== null && sons.nxGoodsStandardWeight !== ''}}">
-                          <view class="flex-row">
+                        <view class="flex-row font-sl" wx:if="{{sons.nxGoodsStandardWeight !== null && sons.nxGoodsStandardWeight !== ''}}">
+                          <view class="flex-row-wrap">
                             <text class="gray">规格:</text>
                             <block>
                               <view class="">{{sons.nxGoodsStandardWeight}}/{{sons.nxGoodsStandardname}}
                               </view>
+                              <view class="ml-10" wx:if="{{sons.nxGoodsItemsPerCarton != ''}}">{{sons.nxGoodsItemsPerCarton}}{{sons.nxGoodsStandardname}}*{{sons.nxGoodsCartonUnit}}</view>
                             </block>
-
                           </view>
                         </view>
-                        <view class="flex-row font-sm" wx:else="">
+                        <view class="flex-row font-sl" wx:else="">
                           <view class="flex-row">
                             <text class="text-secondary">规格:</text>
                             <block>
@@ -272,7 +295,7 @@
                      
                       </view>
 
-                      <view class="flex-row">
+                      <view class="flex-">
                         <view class="flex-row " catch:tap="toEditApply" data-order="{{sons.gbDepartmentOrdersEntity}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}" data-index="{{goodsIndex}}" data-nxGoods="{{sons}}" data-depgoods="{{sons.gbDepartmentDisGoodsEntity}}" hover-class="{{sons.gbDepartmentOrdersEntity == null ? 'hover' :''}}" wx:if="{{sons.gbDepartmentOrdersEntity !== null}}">
                           <text class="five-weight save_btn has_order  {{sons.gbDepartmentOrdersEntity.gbDoPurchaseStatus > 1 ? 'is-gray' : ''}}  {{sons.gbDepartmentOrdersEntity.nxDoStatus == 2 ? 'finish': ''}}">{{sons.gbDepartmentOrdersEntity.gbDoQuantity}}{{sons.gbDepartmentOrdersEntity.gbDoStandard}}</text>
                         </view>
@@ -335,23 +358,14 @@
 
 
 
-<myDismodalDep show="{{showDep}}" bindconfirm="confirmDep" bindcancle="cancle" binddelApply="delApplyDep" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{depGoods}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
+<myDismodalDep show="{{showDep}}" bindconfirm="confirmDep" bindcancle="cancle" binddelApply="delApplyDep" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{depGoods}}"  applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
 
-<myDismodal show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemDis}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
+<myDismodal show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemDis}}" nxGoods="{{nxGoods}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
 
 <!--  -->
 <myDismodalNx show="{{showNx}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" bindconfirmStandardNx="confirmStandardNx" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{nxGoods}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" depGoods="{{depGoods}}" hasStock="{{hasStock}}" />
 
 <delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />
-
-
-<myIndependent show="{{showInd}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
-
-
-<myIndependentNx show="{{showIndNx}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
-
-
-
 
 <stockGoods show="{{showStock}}" bindconfirm="confirmStock" item="{{stockItem}}" disGoods="{{disGoods}}" bindcancle="cancle" bindupdateStars="updateStars" modalHeight="{{windowHeight > maskHeight ? windowHeight : maskHeight }}" scrollViewTop="{{scrollViewTop}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" nowTime="{{nowTime}}" src="{{src}}" reason="{{reason}}" depGoods="{{depGoods}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" item="{{item}}" />
 

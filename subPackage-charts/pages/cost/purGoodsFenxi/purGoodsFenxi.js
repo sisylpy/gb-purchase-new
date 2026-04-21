@@ -3,7 +3,7 @@ const globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
 import * as echarts from '../../../ec-canvas/echarts';
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 import apiDistributer from '../../../../services/apiDistributer.js'
 
 
@@ -41,7 +41,7 @@ Page({
       url: apiUrl.server,
       supplierIds: -1,
       purUserIds: -1,
-      disId: options.disId || wx.getStorageSync('userInfo').disId,
+      disId: options.disId || wx.getStorageSync('userInfo').gbDuDistributerId,
     })
     var myDate = wx.getStorageSync('myDate');
       if(myDate){
@@ -394,7 +394,7 @@ Page({
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
 
     wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id ,
+      url: '../goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id ,
     })
 
   },

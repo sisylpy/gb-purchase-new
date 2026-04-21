@@ -1,0 +1,231 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+
+<view class="flex flex-column ">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{disGoods.gbDdgDepGoodsName}} {{disGoods.gbDdgShowStandardName}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <!-- <view class=" flex-row-between pl-20 pr-20  bg-white border-bottom ">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="/images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column">
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" font-xs"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class=" font-xs" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="p-10">-</text>
+          <view class=" font-xs" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+    <text></text>
+    <view class="flex-row p-20" bindtap="toDate">
+      <image src="/images/search-3.png" class="icon mr-20"></image>
+    </view>
+  </view> -->
+
+
+  <view class="p-10 ">
+
+
+    <view class=" {{stockArr.length == 0  ? 'show' : 'hide'}}" style="height: {{windowHeight - 260 - navBarHeight}}rpx; text-align:center;">
+      <view class="normal  empty_view">
+        <view class="flex-column-center">
+          <image class="empty_image" src="/images/cart-Empty.png"></image>
+          <text class="big">暂时无订购商品</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="flex-column p-10">
+
+      <view class="flex-column font-sl radius-10 border bg-white mb-30" wx:for="{{stockArr}}">
+
+        <view class="flex-column" style="background-color: #ececec;">
+          <view class="flex-row p-20 border-bottom">
+            <view class="flex-row half-row ">
+              <text class="mr-10">时间:</text>
+              <text class="">{{tool.getAttrDateString(item.gbDgsDate)}}</text>
+            </view>
+
+            <view class="flex-row half-row" wx:if="{{item.nxDistributerEntity !== null}}">
+              <text class="mr-10">配送商:</text>
+              <text class="">京京送货</text>
+            </view>
+            <view class="flex-row half-row" wx:elif="{{item.nxJrdhSupplierEntity !== null}}">
+              <text class="mr-10">订货商:</text>
+              <text class="">{{item.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
+            </view>
+
+            <view class="flex-row half-row" wx:else>
+              <text class="mr-10">自采:</text>
+              <text class="">{{disInfo.purDepartmentList[0].gbDepartmentName}}</text>
+            </view>
+          </view>
+
+          <view class="flex-row  p-20 border-bottom">
+
+            <view class="flex-row half-row ">
+              <text class="mr-10">进货:</text>
+              <text>{{item.gbDgsWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+            </view>
+            <view class="flex-row half-row ">
+              <text class="mr-10">单价:</text>
+              <text>{{item.gbDgsPrice}}元/{{disGoods.gbDgGoodsStandardname}}</text>
+            </view>
+
+          </view>
+          <view class="flex-row  p-20 border-bottom">
+
+            <view class="flex-row half-row ">
+              <text class="mr-10">金额:</text>
+              <text>{{item.gbDgsSubtotal}}元</text>
+            </view>
+            <view class="flex-row half-row ">
+              <text class="mr-10">库存:</text>
+              <text>{{item.gbDgsRestWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+            </view>
+
+          </view>
+
+          <block wx:if="{{item.gbDgsWasteFullTime !== null  && item.gbDgsWasteFullTime !== ''}}">
+            <view class="flex-row p-20 border-bottom">
+              <view class="flex-row half-row">
+                <text class="mr-10">废弃剩余: </text>
+                <text class="{{tool.getRestTime(item.gbDgsWasteFullTime, nowTime) < 0 ? 'text-danger' :''}}">{{tool.getRestTime(item.gbDgsWasteFullTime, nowTime)}}小时</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10">废弃时间: </text>
+                <text>{{tool.getAttrFullTime(item.gbDgsWasteFullTime)}}</text>
+              </view>
+            </view>
+          </block>
+
+          <!-- <view class="flex-row  p-20 border-bottom">
+
+            <view class="flex-row  ">
+              <text class="mr-10 flex-fixed">新鲜度:</text>
+              <image wx:for="{{item.gbDgsStars}}" src="/images/starGreen.png" mode="aspectFill" class="icon-sm mr-30" />
+           
+            </view>
+
+          </view> -->
+        </view>
+
+        <view class="flex-column font-md p-10" style="width: {{windowWidth - 40}}rpx; ; ">
+        
+          <view class="flex-row-default p-20 ">
+            <view class="flex-row flex-fixed mr-20">
+              <text class="line_father icon mr-10"></text>
+              <text class="">销售</text>
+            </view>
+
+            <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="mr-20 flex-row mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == '1'}}">
+                <view class="flex-row line_father_item  mr-20">
+                  <text class="mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
+                  <text>{{reduce.gbDgsrProduceWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                </view>
+                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                  <image class="icon" src="/images/delok.png" mode="aspectFill" />
+                </view>
+              </view>
+            </view>
+
+          </view>
+
+          <view class="flex-row-default p-20 ">
+
+            <view class="flex-row flex-fixed mr-20">
+              <text class="line_father_loss icon mr-10"></text>
+              <text class="">损耗</text>
+            </view>
+
+
+            <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 3}}">
+                <view class="flex-row line_father_item  mr-20">
+                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
+                  <text>{{reduce.gbDgsrLossWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                </view>
+                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                  <image class="icon" src="/images/delok.png" mode="aspectFill" />
+                </view>
+              </view>
+            </view>
+          </view>
+
+
+          <view class="flex-row-default p-20 ">
+
+            <view class="flex-row flex-fixed mr-20">
+              <text class="line_father_waste icon mr-10"></text>
+              <text class="">废弃</text>
+            </view>
+
+
+            <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 2}}">
+                <view class="flex-row line_father_item  mr-20">
+                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
+                  <text>{{reduce.gbDgsrWasteWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                </view>
+                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                  <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
+                </view>
+              </view>
+            </view>
+
+          </view>
+
+
+          <view class="flex-row-default p-20 ">
+
+            <view class="flex-row flex-fixed mr-20">
+              <text class="line_father_return icon mr-10"></text>
+              <text class="">退货</text>
+            </view>
+
+            <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 4}}">
+                <view class="flex-row line_father_item  mr-20">
+                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
+                  <text>{{reduce.gbDgsrReturnWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                </view>
+                <view class="flex-row p-10" wx:if="{{reduce.gbDgsrStatus == '-1' }}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                  <image class="icon" src="/images/delok.png" mode="aspectFill" />
+                </view>
+              </view>
+            </view>
+
+          </view>
+
+        </view>
+
+        <!-- <view class="p-20" wx:if="{{item.gbDgsRestWeight > 0}}">
+       
+          <view class="save-btn" bindtap="showStock"  wx:key="gbDepartmentDisGoodsId" hover-class="clickStock" data-item="{{item}}" data-index="{{index}}">修改库存</view>
+        </view> -->
+
+      </view>
+
+    </view>
+
+
+  </view>
+
+
+</view>
+
+
+
+
+
+<stockGoods show="{{showStock}}" bindconfirm="confirmStock" bindupdateStars="updateStars" item="{{item}}" disGoods="{{disGoods}}" bindcancle="cancle" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" nowTime="{{nowTime}}" src="{{src}}" reason="{{reason}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" url="{{url}}" />
+
+
+<stockStar show="{{showStar}}" bindconfirm="confirmStar" bindupdateStars="updateStars" binddelAttem="delAttem" item="{{item}}" disGoods="{{disGoods}}" bindcancle="cancle" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" nowTime="{{nowTime}}" src="{{src}}" reason="{{reason}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" url="{{url}}" />

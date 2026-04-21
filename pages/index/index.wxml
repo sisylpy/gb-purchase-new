@@ -57,7 +57,7 @@
           <block wx:if="{{purArr.length > 0}}">
             <view class="flex-column bg-white" wx:for="{{purArr}}" wx:for-item="item" wx:for-index="index">
 
-              <block wx:if="{{disInfo.mendianDepartmentList.length == 1 && disInfo.mendianDepartmentList[0].gbDepartmentSubAmount == 0}}">
+              <block wx:if="{{disInfo.mendianDepartmentList.length == 1 && disInfo.mendianDepartmentList[0].gbDepartmentSubAmount == 1}}">
                 <view class="flex-column font-lg">
                   <view class="flex-row-between p-20 border-bottom">
                     <view class="flex-row-default" style="width: {{windowWidth - 140}}rpx;">
@@ -116,17 +116,13 @@
                         <text wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
                       </view>
                       <view class="flex-column" style="width:{{windowWidth - 160}}rpx;">
-                        <view class="flex-row  pt-10" wx:for="{{item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities}}" wx:for-item="orders" wx:for-index="orderIndex">
-                          <image src="{{orders.isNotice ? '../../images/selected-2.png' : '../../images/radiobuttonunselect-2.png'}}" class="icon mr-10" bindtap="selectOrders" data-index="{{index}}" data-orderindex="{{orderIndex}}"></image>
-                          <block wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity !== null}}">
-                            <text class="mr-30">{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
-                          </block>
-                          <block wx:else>
-                            <text class="mr-30">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
-                          </block>
+                        <view class="flex-row-items-center" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-item="orders" wx:for-index="orderIndex">
+                          <image src="{{orders.isNotice ? '../../images/selected-2.png' : '../../images/radiobuttonunselect-2.png'}}" class="icon mr-10 flex-shrink-0 " mode="aspectFit" bindtap="selectOrders" data-index="{{index}}" data-orderindex="{{orderIndex}}"></image>
+                            <text class="mr-30">{{orders.gbDoParentDepartmentName}}.{{orders.gbDoOrderDepartmentName}}</text>
+                         
                           <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
                           <block wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale.length > 0 && orders.gbDoDsStandardScale !== '-1'}}">
-                            <text class="small">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
+                            <text class="text-secondary font-sl">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
                           </block>
                         </view>
                       </view>
@@ -244,10 +240,10 @@
                             </view>
                           </view>
                           <view class="flex-column  mr-20" wx:for-item="order" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-index="orderIndex" wx:key="gbDepartmentOrdersId">
-                            <block wx:if="{{disInfo.mendianDepartmentList.length > 1 || disInfo.mendianDepartmentList[0].gbDepartmentSubAmount > 1}}">
+                            <block wx:if="{{disInfo.mendianDepartmentList[0].gbDepartmentSubAmount > 1}}">
                               <view class="flex-row mr-10">
-                                <text wx:if="{{order.gbDepartmentEntity.fatherGbDepartmentEntity !== null && order.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName !== order.gbDepartmentEntity.gbDepartmentName}}">{{order.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
-                                <text class="mr-10">{{order.gbDepartmentEntity.gbDepartmentName}}</text>
+                                <text >{{order.gbDoParentDepartmentName}}.</text>
+                                <text class="mr-10">{{order.gbDoOrderDepartmentName}}</text>
                                 <text class="ml-20">{{order.gbDoQuantity}}{{order.gbDoStandard}}</text>
                                 <block wx:if="{{item.gbDpgStatus == 2 && batch.gbDpbStatus == 1}}"><text class="ml-20 text-success font-sl">出货中</text></block>
                               </view>

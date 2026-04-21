@@ -1,4 +1,5 @@
-<wxs src="../../../../../utils/fn.wxs" module="tool" />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 
 <view class="flex flex-column">
@@ -106,7 +107,7 @@
       <!-- 商品信息头部 -->
       <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
         <view class="flex-row-default mb-20">
-          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{url + goods.gbDgNxFatherImg}}" mode="aspectFill" class="goods-image mr-20" />
+          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
           <view class="flex-column">
             <text class="font-sm">第{{index + 1}}名/共{{arr.length}}个</text>
             <view class="flex-row mb-10">
@@ -238,7 +239,7 @@
 
     <view class="font-sm center-content flex-column ">
       <view class="flex-row">
-        <image src="{{url + '/userImage/daodile3.png'}}" mode="aspectFill" class="icon-lg margin-right" />
+        <image src="{{url + '/userImage/daodile3.png'}}" mode="aspectFill" class="icon margin-right" />
         <view style="line-height: 200rpx;">没有数据啦!</view>
       </view>
 

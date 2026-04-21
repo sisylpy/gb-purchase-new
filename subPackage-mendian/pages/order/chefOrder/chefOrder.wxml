@@ -58,7 +58,7 @@
                 <view>
                   <image src="/images/search.png" mode="aspectFill" class="url_item" style="width: 80rpx; height: 80rpx; opacity: 0.5;" />
                 </view>
-                <view class="font-bold font-lg-2 p-20">
+                <view class="font-bold font-xl p-20">
                   <text>没有搜索到订单</text>
                 </view>
                 <view>
@@ -78,7 +78,7 @@
               <view>
                 <image src="/images/cart-Empty.png" mode="aspectFill" class="url_item" />
               </view>
-              <view class="font-bold font-lg-2 p-20">
+              <view class="font-bold font-xl p-20">
                 <text>暂无订货记录</text>
               </view>
               <view>
@@ -277,7 +277,7 @@
               <view>
                 <image src="/images/cart-Empty.png" mode="aspectFill" class="url_item" />
               </view>
-              <view class="font-bold font-lg-2 p-20">
+              <view class="font-bold font-xl p-20">
                 <text>暂无订货记录</text>
               </view>
               <view>

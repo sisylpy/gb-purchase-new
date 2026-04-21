@@ -66,12 +66,37 @@ Component({
 
   },
 
+  lifetimes: {
+    attached() {
+      this._updateOuterPackChip(this.properties.item);
+    },
+  },
+
+  observers: {
+    item: function (item) {
+      this._updateOuterPackChip(item);
+    },
+  },
+
   data: {
     showInput: false,
-
+    showOuterPack: false,
+    outerPackStandard: "",
   },
 
   methods: {
+
+    _updateOuterPackChip(nxGoods) {
+      if (!nxGoods || typeof nxGoods !== "object") {
+        this.setData({ showOuterPack: false, outerPackStandard: "" });
+        return;
+      }
+      const name = nxGoods.nxGoodsCartonUnit != null ? String(nxGoods.nxGoodsCartonUnit).trim() : "";
+      this.setData({
+        outerPackStandard: name,
+        showOuterPack: !!name,
+      });
+    },
 
     showInputStandard() {
       this.setData({

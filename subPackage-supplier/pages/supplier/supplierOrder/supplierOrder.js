@@ -2,7 +2,7 @@
 
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
 import {
   saveDisPurGoodsBatchGbSupplier
@@ -40,7 +40,7 @@ Page({
     if(disInfo){
       this.setData({
         disInfo: disInfo,
-        depId: disInfo.purDepartmentList[0].gbDepartmentId,
+        depId: disInfo.mendianDepartmentList[0].gbDepartmentId,
     })
   }
   var userInfo = wx.getStorageSync('userInfo');

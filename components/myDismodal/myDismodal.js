@@ -17,7 +17,11 @@ Component({
       type: Object,
       value: ""
     },
-
+    /** 可选：订货列表里的 nx 商品，用于展示外包装规格 */
+    nxGoods: {
+      type: Object,
+      value: null
+    },
 
     applyNumber: {
       type: String,
@@ -60,12 +64,38 @@ Component({
 
   },
 
+  lifetimes: {
+    attached() {
+      this._updateOuterPackChip(this.properties.nxGoods);
+    },
+  },
+
+  observers: {
+    nxGoods: function (nxGoods) {
+      this._updateOuterPackChip(nxGoods);
+    },
+  },
+
   data: {
     showInput: false,
-
+    showOuterPack: false,
+    /** nxGoodsCartonUnit：外包装单位名称，订货规格 */
+    outerPackStandard: "",
   },
 
   methods: {
+
+    _updateOuterPackChip(nxGoods) {
+      if (!nxGoods || typeof nxGoods !== "object") {
+        this.setData({ showOuterPack: false, outerPackStandard: "" });
+        return;
+      }
+      const name = nxGoods.nxGoodsCartonUnit != null ? String(nxGoods.nxGoodsCartonUnit).trim() : "";
+      this.setData({
+        outerPackStandard: name,
+        showOuterPack: !!name,
+      });
+    },
 
     showInputStandard() {
       this.setData({

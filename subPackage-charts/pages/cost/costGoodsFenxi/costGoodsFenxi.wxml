@@ -1,156 +1,587 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
+<view class="page-root flex flex-column">
+  <back-navbar class="flex-shrink-0" style="height: {{navBarHeight}}rpx;" title="成本/出库分析" avatar="/images/back-gray.png"
+    button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
-<view class="flex flex-column">
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="成本分析" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
-
-  <!--  top -->
-  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
-    <view class="flex-row">
-      <view class="p-20" bindtap="toDatePageSearch">
+  <view class="flex-shrink-0 flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row" bindtap="toDatePageSearch">
+      <view class="p-20">
         <image src="../../../../images/calender.png" class="icon"></image>
       </view>
-      <view class="flex-column pt-10">
+      <view class="flex-column pt-10 pb-10">
         <view class="font-yuan">{{hanzi}}</view>
         <view class="flex-row" wx:if="{{startDate == stopDate}}">
-          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <view class=" text-secondary" wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
         </view>
         <view class="flex-row" wx:else>
-          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
-          <text class="plr-10">-</text>
-          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+          <view wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
+          <text class="pl-10 pr-10 text-secondary">-</text>
+          <view wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
         </view>
       </view>
     </view>
-
-    <!-- <view class="flex-row p-20" bindtap="toFilterType">
-      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
-    </view> -->
+    <view class="cost-report-toolbar flex-row flex-row-items-center pr-20">
+      <image class="mode-seg-img mode-seg-img--on"
+        src="{{reportKind === 'salesDish' ? '/images/logo.jpg' : '/images/add.png'}}" mode="aspectFit"
+        bindtap="onToggleReportKind" />
+    </view>
   </view>
 
+  <!-- 蓝系底色示意：与 costGoodsFenxi.js 中 lerp(248,92)、(252,175)、(255,218) + mapQtyR1ToBgIntensity 一致；267.1%/413.4% 按公式算完四舍五入后同色 -->
+  <!-- <view class="ing-diff-palette-demo flex-row flex-row-items-center pl-20 pr-20 pt-16 pb-16 bg-white border-bottom">
+    <view class="ing-diff-palette-item flex-column flex-row-items-center">
+      <view class="ing-diff-palette-swatch" style="background-color: rgb(248, 252, 255);"></view>
+      <text class="ing-diff-palette-cap">默认浅蓝</text>
+    </view>
+    <view class="ing-diff-palette-item flex-column flex-row-items-center">
+      <view class="ing-diff-palette-swatch" style="background-color: rgb(92, 175, 218);"></view>
+      <text class="ing-diff-palette-cap">267.1%</text>
+    </view>
+    <view class="ing-diff-palette-item flex-column flex-row-items-center">
+      <view class="ing-diff-palette-swatch" style="background-color: rgb(92, 175, 218);"></view>
+      <text class="ing-diff-palette-cap">413.4%</text>
+    </view>
+  </view> -->
 
-
-  <view class="flex-column p-20">
-
-    <!-- topFloat -->
-    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
-      <view class="flex-column font-sm mb-20 p-20">
-        <view>销售排名前10商品</view>
-
+  <scroll-view scroll-y class="list-scroll">
+    <!-- salesDish -->
+    <block wx:if="{{reportKind === 'salesDish'}}">
+      <view class="empty-panel" wx:if="{{!loading && salesDishRows.length === 0}}">
+        <text class="text-secondary">{{emptyHint || '暂无数据'}}</text>
       </view>
-      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topGoodsProduce}}" wx:key="index" wx:if="{{index < (showAllProduce ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toStatistics" data-goods="{{item}}" hover-class="hover" data-type="sales">
-        <view class="flex-row">
-          <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item_lg mr-10" />
-          <text>{{item.gbDgGoodsName}}</text>
-        </view>
-        <view class="flex-column">
-          <view class="flex-row font-sm">
-            <text>销售:{{item.goodsProduceTotal}}元</text>
+      <block wx:for="{{salesDishRows}}" wx:key="foodId">
+        <view class="dish-card">
+          <view class="dish-card-head flex-row-between ">
+            <view class="dish-card-head-main flex-row flex-row-items-center flex-1 min-w-0 mt-10">
+              <view class="dish-rank-badge {{item._rankClass}}">#{{item._rank}}</view>
+              <text class="dish-name dish-name--card">{{item.foodName}}</text>
+            </view>
+            <view class="flex-row-between bg-gray twenty_radius p-10">
+              <text class="text-secondary">售卖</text>
+              <view class="flex-row items-center">
+                <text class="dish-summary-val">{{item.soldPortions}}</text>
+                <text class="small darktext-secondary">份</text>
+              </view>
+            </view>
+         
           </view>
 
-        </view>
+          <view class="dish-summary-pane">
+            <view class="flex-column half-row pr-10">
+              <view class="flex-row-between">
+                <text class="text-secondary">售卖用量</text>
+                <view class="flex-row items-center">
+                  <text class="dish-summary-val">{{item.actualInboundQtyTotal}}</text>
+                </view>
+              </view>
 
-      </view>
+              <view class="flex-row-between">
+                <text class="text-secondary">售卖成本</text>
+                <view class="flex-row items-center">
+                  <text class="dish-summary-val">{{item.theoryCostAmount}}</text>
+                  <text class="small darktext-secondary">元</text>
+                </view>
+              </view>
+            </view>
+            <view class="dish-summary-vline"></view>
+            <view class="flex-column half-row pl-10">
 
-      <!-- 展开/收起按钮 -->
-      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topGoodsProduce.length > 4}}">
-        <view class="button-container-white" hover-class="hover" bind:tap="toggleProduceList">
-          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllProduce ? '180' : '0'}}"></image>
-        </view>
+              <view class="flex-row-between ">
+                <text class="flex-row half-row">出库用量</text>
+                <view class="flex-row-items-center">
+                  <text class="dish-summary-val">{{item.outboundAllocatedQtyTotal}}</text>
+                </view>
+              </view>
 
-      </view>
-    </view>
+              <view class="flex-row-between">
+                <text class="flex-row half-row">出库成本</text>
+                <view class="flex-row-items-center">
+                  <text class="dish-summary-val">{{item.actualCostAmount}}</text>
+                  <text class="dish-summary-unit">元</text>
+                </view>
+              </view>
 
-    <!-- topFloat -->
-    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
-      <view class="flex-column font-sm mb-20 p-20">
-        <view>损耗排名前10商品</view>
-
-      </view>
-      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topGoodsLoss}}" wx:key="index" wx:if="{{index < (showAllLoss ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toStatistics" data-goods="{{item}}" hover-class="hover" data-type="loss">
-        <view class="flex-row">
-          <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item_lg mr-10" />
-          <text>{{item.gbDgGoodsName}}</text>
-        </view>
-        <view class="flex-column">
-          <view class="flex-row font-sm">
-            <text>损耗:{{item.goodsLossTotal}}元</text>
+            </view>
           </view>
 
-        </view>
+          <!-- bottle -->
+          <!-- <view class="hint-box hint-box--bottle" wx:if="{{item.bottle}}">
+            <view class="hint-box-head flex-row flex-row-items-center">
+              <text class="hint-label">瓶颈原料</text>
+            </view>
+            <text class="bottle-goods-name">{{item.bottle.gbDgGoodsName}}</text>
+            <view class="bottle-kpi-row">
+              <view class="bottle-kpi-cell">
+                <text class="bottle-kpi-label">用量差</text>
+                <text class="bottle-kpi-val">{{item.bottle.recipeTheoryQtyVsOutboundAllocDiff}}</text>
+                <text wx:if="{{item.bottle.gbDgGoodsStandardname}}" class="bottle-kpi-unit">{{item.bottle.gbDgGoodsStandardname}}</text>
+              </view>
+              <text class="bottle-kpi-sep text-secondary">|</text>
+              <view class="bottle-kpi-cell">
+                <text class="bottle-kpi-label">份数差</text>
+                <text class="bottle-kpi-val">{{item.bottle.soldVsSupportedPortionDiff}}</text>
+                <text class="bottle-kpi-unit">份</text>
+              </view>
+              <text class="bottle-kpi-sep text-secondary">|</text>
+              <view class="bottle-kpi-cell">
+                <text class="bottle-kpi-label">成本差</text>
+                <text class="bottle-kpi-val bottle-kpi-val--accent">{{item.bottle.recipeSalesVsOutboundCostDiff}}</text>
+                <text class="bottle-kpi-unit">元</text>
+              </view>
+            </view>
+            <view class="dish-ing-metrics font-sm">
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">配方用量</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.bottle.theoryOutboundQtyByRecipe}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">{{item.bottle.gbDgGoodsStandardname}}</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库用量</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.bottle.outboundAllocatedQty}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">{{item.bottle.gbDgGoodsStandardname}}</text>
+                      </view>
+                    </view>
+                  </view>
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">售卖</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.bottle.soldPortions}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">份</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库份数</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.bottle.supportedPortions}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">份</text>
+                      </view>
+                    </view>
+                  </view>
 
-      </view>
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">售卖成本</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.bottle.recipeSalesCostAmount}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">元</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库成本</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.bottle.outboundAllocatedCostAmount}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">元</text>
+                      </view>
+                    </view>
+                  </view>
+            </view>
+          </view> -->
 
-      <!-- 展开/收起按钮 -->
-      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topGoodsLoss.length > 4}}">
-        <view class="button-container-white" hover-class="hover" bind:tap="toggleLossList">
-          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllLoss ? '180' : '0'}}"></image>
-        </view>
+          <!-- ../bottle -->
 
-      </view>
-    </view>
+          <view class="dish-ing-title text-secondary pt-10">配料（配方顺序·同料合并）</view>
 
-    <!-- topFloat -->
-    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
-      <view class="flex-column font-sm mb-20 p-20">
-        <view>废弃排名前10商品</view>
-      </view>
-      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topGoodsWaste}}" wx:key="index" wx:if="{{index < (showAllWaste ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toStatistics" data-goods="{{item}}" hover-class="hover" data-type="waste">
-        <view class="flex-row">
-          <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item_lg mr-10" />
-          <text>{{item.gbDgGoodsName}}</text>
-        </view>
-        <view class="flex-column">
-          <view class="flex-row font-sm">
-            <text>废弃:{{item.goodsWasteTotal}}元</text>
+          <view class="dish-ing-panel1" wx:if="{{item.ingredientRows.length > 0}}">
+            <view class="dish-ing-row1" wx:for="{{item.ingredientRows}}" wx:for-item="goods" wx:key="disGoodsId">
+              <view class="ing-card-head flex-row-between">
+                <view class="ing-card-title-wrap min-w-0">
+                  <view class="ing-name-line1 flex-column">
+                     <view class="flex-row">
+                      <image wx:if="{{goods.gbDgGoodsFileImg}}" class="good-og-goods-thumb"
+              src="{{(imgUrl.resolve(url, goods.gbDgGoodsFileImg) || '/images/logo.jpg')}}" mode="aspectFill" />
+
+                     <view class="flex-column">
+                      <text class="dish-ing-name ing-name-inline">{{goods.goodsName}}</text>
+                      <view class="flex-row">
+                      <view class="mr-20">
+                        <text class="mr-10">规格:</text>
+                        <text
+                          wx:if="{{goods.gbDgGoodsStandardWeight}}">{{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}}</text>
+                        <text wx:else="">{{goods.gbDgGoodsStandardname}}</text>
+                      </view>
+                      <view class="flex-row-items-center">
+                        <image src="/images/weddight-2.png" mode="aspectFill" class="icon-sm" />
+                        <text class="font-sl">{{goods.recipeUnitPerDish}}{{goods.gbDgGoodsStandardname}}/份</text>
+                      </view>
+                    </view>
+                     </view> 
+
+                     </view>
+                   
+
+                  </view>
+                </view>
+                <view class="ing-diff-badge-wrap flex-row flex-row-items-end">
+                  <view class="ing-diff-badge" style="background-color: {{goods.recipeTheoryQtyDiffBg}};">
+                    <view class="ing-diff-line">
+                      <text class="ing-diff-val" style="color: {{goods.recipeTheoryQtyDiffColor}};">{{goods.recipeTheoryQtyVsOutboundAllocDiff}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+                    <view class="ing-diff-line">
+                      <text class="ing-diff-val" style="color: {{goods.recipeTheoryQtyDiffColor}};">{{goods.soldVsSupportedPortionDiff}}份</text>
+                    </view>
+                    <view class="ing-diff-line">
+                      <text class="ing-diff-val" style="color: {{goods.recipeTheoryQtyDiffColor}};">{{goods.recipeSalesVsOutboundCostDiff}}元</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+
+              <view class="ing-compare-head">
+                <text class="ing-compare-title flex-row-items-center">标准配方</text>
+                <text class="ing-compare-sep text-secondary">|</text>
+                <text class="ing-compare-title flex-row-items-center">实际出库</text>
+              </view>
+
+              <view class="ing-compare-body">
+                <view class="dish-ing-metrics font-sl">
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">配方用量</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.theoryOutboundQtyByRecipe}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">{{goods.gbDgGoodsStandardname}}</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库用量</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.outboundAllocatedQty}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">{{goods.gbDgGoodsStandardname}}</text>
+                      </view>
+                    </view>
+                  </view>
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">售卖</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.soldPortions}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">份</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库份数</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.supportedPortionsThisGood}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">份</text>
+                      </view>
+                    </view>
+                  </view>
+
+
+
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">售卖成本</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.salesIngredientCostAmount}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">元</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库成本</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.outboundAllocatedIngredientCostAmount}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">元</text>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
           </view>
 
-        </view>
 
+
+
+        </view>
+      </block>
+    </block>
+
+    <!-- outboundQty -->
+    <block wx:else>
+      <view class="empty-panel" wx:if="{{!loading && outboundGoodsRows.length === 0}}">
+        <text class="text-secondary">{{emptyHint || '暂无数据'}}</text>
       </view>
 
-      <!-- 展开/收起按钮 -->
-      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topGoodsWaste.length > 4}}">
-        <view class="button-container-white" hover-class="hover" bind:tap="toggleWasteList">
-          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllWaste ? '180' : '0'}}"></image>
-        </view>
+      <view class="section-title" wx:if="{{outboundGoodsRows.length > 0}}">按商品 · 生产成本出库</view>
 
-      </view>
-    </view>
+      <view class="good-card good-card--outbound" wx:for="{{outboundGoodsRows}}" wx:for-item="goods" wx:key="disGoodsId">
+      
+        <view class="ing-card-head flex-row-between">
+                <view class="ing-card-title-wrap min-w-0">
+                  <view class="ing-name-line1 flex-column">
+                     <view class="flex-row">
+                      <image wx:if="{{goods.gbDgGoodsFileImg}}" class="good-og-goods-thumb"
+              src="{{(imgUrl.resolve(url, goods.gbDgGoodsFileImg) || '/images/logo.jpg')}}" mode="aspectFill" />
 
-    <!-- topFloat -->
-    <view class="flex-column bg-white p-20 border radius-10 mt-30 mb-30">
-      <view class="flex-column font-sm mb-20 p-20">
-        <view>按日期排名支出</view>
-      </view>
-      <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topDayCost}}" wx:key="index" wx:if="{{index < (showAllDayCost ? 10 : 4)}}" bind:tap="toFenxiDate" data-item="{{item}}" hover-class="hover">
-        <view class="flex-row">
-          <text>{{item.date}}</text>
-        </view>
-        <view class="flex-column">
-          <view class="flex-row font-sm">
-            <text>支出总额:{{item.total}}元</text>
+                     <view class="flex-column">
+                      <text class="dish-ing-name ing-name-inline">{{goods.goodsName}}</text>
+                      <view class="flex-row">
+                      <view class="mr-20">
+                        <text class="mr-10">规格:</text>
+                        <text
+                          wx:if="{{goods.gbDgGoodsStandardWeight}}">{{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}}</text>
+                        <text wx:else="">{{goods.gbDgGoodsStandardname}}</text>
+                      </view>
+                      <view class="flex-row-items-center">
+                        <image src="/images/weddight-2.png" mode="aspectFill" class="icon-sm" />
+                        <text class="font-sl">{{goods.recipeUnitPerDish}}{{goods.gbDgGoodsStandardname}}/份</text>
+                      </view>
+                    </view>
+                     </view> 
+
+                     </view>
+                   
+                  </view>
+                </view>
+                <view class="ing-diff-badge-wrap flex-row flex-row-items-end">
+                  <view class="ing-diff-badge" style="background-color: {{goods.recipeTheoryQtyDiffBg}};">
+                    <view class="ing-diff-line">
+                      <text class="ing-diff-val" style="color: {{goods.recipeTheoryQtyDiffColor}};">{{goods.recipeTheoryQtyVsOutboundAllocDiff}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+                    <view class="ing-diff-line">
+                      <text class="ing-diff-val" style="color: {{goods.recipeTheoryQtyDiffColor}};">{{goods.soldVsSupportedPortionDiff}}份</text>
+                    </view>
+                    <view class="ing-diff-line">
+                      <text class="ing-diff-val" style="color: {{goods.recipeTheoryQtyDiffColor}};">{{goods.recipeSalesVsOutboundCostDiff}}元</text>
+                    </view>
+                  </view>
+                  <!-- <view wx:if="{{ingDiffDebugSwatch}}" class="ing-diff-debug-compare">
+                    <view class="ing-diff-debug-swatch" style="background-color: {{goods.recipeTheoryQtyDiffBg}};"></view>
+                    <text class="ing-diff-debug-ratio">|差|/出库×100 {{goods.ingDiffQtyOutboundRatioText}}</text>
+                    <text class="ing-diff-debug-val">{{goods.recipeTheoryQtyDiffBg}}</text>
+                  </view> -->
+                </view>
+              </view>
+
+              <view class="ing-compare-head">
+                <text class="ing-compare-title flex-row-items-center">标准配方</text>
+                <text class="ing-compare-sep text-secondary">|</text>
+                <text class="ing-compare-title flex-row-items-center">实际出库</text>
+              </view>
+
+              <view class="ing-compare-body">
+                <view class="dish-ing-metrics font-sl">
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">配方用量</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.theoryOutboundQtyByRecipe}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">{{goods.gbDgGoodsStandardname}}</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库用量</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.outboundAllocatedQty}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">{{goods.gbDgGoodsStandardname}}</text>
+                      </view>
+                    </view>
+                  </view>
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">售卖</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{item.soldPortions}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">份</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库份数</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.supportedPortionsThisGood}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">份</text>
+                      </view>
+                    </view>
+                  </view>
+
+
+
+                  <view class="dish-ing-metric-row">
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">售卖成本</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.salesIngredientCostAmount}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">元</text>
+                      </view>
+                    </view>
+                    <text class="dish-ing-metric-sep text-secondary">|</text>
+                    <view class="dish-ing-metric-part flex-row-between flex-row-items-center min-w-0">
+                      <text class="text-secondary dish-ing-metric-label">出库成本</text>
+                      <view class="dish-ing-metric-val flex-row flex-row-items-center">
+                        <text class="">{{goods.outboundAllocatedIngredientCostAmount}}</text>
+                        <text class="text-secondary dish-ing-metric-unit">元</text>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+              
+
+
+        <view class="sub-empty good-og-sub-empty text-secondary" wx:if="{{goods.linkingDishRows.length === 0}}">
+          有出库但报表内无使用该料的菜品</view>
+
+        <view wx:if="{{goods.linkingDishRows.length > 0}}">
+          <view class="pt-20">销售菜品</view>
+          <view class="" wx:for="{{goods.linkingDishRows}}" wx:for-item="item" wx:key="foodId">
+             
+             <!-- aaa -->
+             <view class="dish-card">
+          <view class="dish-card-head flex-row-between ">
+            <view class="dish-card-head-main flex-row flex-row-items-center flex-1 min-w-0 mt-10">
+              <view class="dish-rank-badge {{item._rankClass}}">#{{item._rank}}</view>
+              <text class="dish-name dish-name--card">{{item.foodName}}</text>
+            </view>
+            <view class="flex-row-between bg-gray twenty_radius p-10">
+              <text class="text-secondary">售卖</text>
+              <view class="flex-row items-center">
+                <text class="dish-summary-val">{{item.soldPortions}}</text>
+                <text class="small darktext-secondary">份</text>
+              </view>
+            </view>
+         
           </view>
 
+          <view class="dish-summary-pane">
+            <view class="flex-column half-row pr-10">
+              <view class="flex-row-between">
+                <text class="text-secondary">售卖用量</text>
+                <view class="flex-row items-center">
+                  <text class="dish-summary-val">{{item.actualInboundQtyTotal}}</text>
+                </view>
+              </view>
+
+              <view class="flex-row-between">
+                <text class="text-secondary">售卖成本</text>
+                <view class="flex-row items-center">
+                  <text class="dish-summary-val">{{item.theoryCostAmount}}</text>
+                  <text class="small darktext-secondary">元</text>
+                </view>
+              </view>
+            </view>
+            <view class="dish-summary-vline"></view>
+            <view class="flex-column half-row pl-10">
+
+              <view class="flex-row-between ">
+                <text class="flex-row half-row">出库用量</text>
+                <view class="flex-row-items-center">
+                  <text class="dish-summary-val">{{item.outboundAllocatedQtyTotal}}</text>
+                </view>
+              </view>
+
+              <view class="flex-row-between">
+                <text class="flex-row half-row">出库成本</text>
+                <view class="flex-row-items-center">
+                  <text class="dish-summary-val">{{item.actualCostAmount}}</text>
+                  <text class="dish-summary-unit">元</text>
+                </view>
+              </view>
+
+            </view>
+          </view>
+
+
+
+
         </view>
 
-      </view>
+             <!-- ../aaa -->
+            </view>
+            
+          <!-- <view class="good-og-dish flex-row flex-row-items-center" wx:for="{{goods.linkingDishRows}}" wx:for-item="drow"
+            wx:key="rowKey">
 
-      <!-- 展开/收起按钮 -->
-      <view class="flex-column-center mt-30 mb-30 " wx:if="{{topDayCost.length > 4}}">
-        <view class="button-container-white" hover-class="hover" bind:tap="toggleDayCostList">
-          <image class="expand-btn" src="/images/arrow-down-3.png" data-rotate="{{showAllDayCost ? '180' : '0'}}"></image>
+            <view class="good-og-dish-main flex-1 min-w-0">
+              <view class="good-og-dish-inner">
+                <view class=" flex-row-between">
+                  <text class="font-lg font-bold">{{drow.foodName}}</text>
+                  <view class=" flex-row flex-row-items-center">
+                    <view class="flex-row-items-center">
+                      <image src="/images/weddight-2.png" mode="aspectFill" class="icon-sm" />
+                      <text class="font-sl">{{goods.recipeUnitPerDish}}{{goods.gbDgGoodsStandardname}}/份</text>
+                    </view>
+                  </view>
+
+                </view>
+
+                <view class="flex-row">
+
+                  <view class="flex-column half-row">
+
+
+                    <view class="flex-row-items-center">
+                      <text class="good-og-usage-piece text-secondary">售卖</text>
+                      <text class="good-og-portion-flow">{{drow.soldPortions}}份</text>
+                    </view>
+
+                    <view class="flex-row-items-center">
+                      <text class="good-og-usage-piece text-secondary">配方用量</text>
+                      <text
+                        class="good-og-portion-flow">{{drow.theoryQtyFromSalesRecords}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+
+                    <view class="flex-row-items-center">
+                      <text class="good-og-usage-piece text-secondary">配方用量</text>
+                      <text
+                        class="good-og-portion-flow">{{drow.theoryQtyFromSalesRecords}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+
+
+                  </view>
+        
+                  <view class="flex-column half-row">
+
+                    <view class="flex-row-items-center">
+                      <text class="good-og-usage-piece text-secondary">出库</text>
+                      <text class="good-og-portion-flow">{{drow.supportedPortionsOnThisGoodOnly}}份</text>
+                    </view>
+
+                    <view class="flex-row-items-center">
+                      <text class="good-og-usage-piece text-secondary">出库用量</text>
+                      <text
+                        class="good-og-portion-flow">{{drow.outboundQtyAllocatedToDish}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+
+                    <view class="flex-row-items-center">
+                      <text class="good-og-usage-piece text-secondary">配方用量</text>
+                      <text
+                        class="good-og-portion-flow">{{drow.theoryQtyFromSalesRecords}}{{goods.gbDgGoodsStandardname}}</text>
+                    </view>
+
+
+                  </view>
+                </view>
+
+
+
+              </view>
+            </view>
+          </view> -->
+
+
+
         </view>
-
       </view>
-    </view>
 
 
+    </block>
 
-
-    <view style="height: 100rpx;"></view>
-
-  </view>
-
-
+    <view class="pb-40"></view>
+  </scroll-view>
 </view>

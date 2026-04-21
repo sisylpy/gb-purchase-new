@@ -1,76 +1,208 @@
-<wxs module="format" src="../../../../wxs/format.wxs" />
-
-<!-- 导航栏 -->
-<navbar title="AI营销军师" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
-
-<!-- 聊天区域 -->
-<scroll-view
-  scroll-y="true"
-  class="chat-container"
-  style="padding-top: {{navBarHeight}}rpx; height: {{windowHeight - navBarHeight/2}}px;"
-  scroll-into-view="{{scrollToView}}"
-  scroll-with-animation="true"
->
-
-  <!-- 加载中 -->
-  <view class="loading-wrapper" wx:if="{{isLoading}}">
-    <text class="loading-text">正在连接钱多多老师...</text>
-  </view>
-
-  <!-- 欢迎语（无历史消息时显示） -->
-  <view class="welcome-card" wx:if="{{!isLoading && messages.length === 0}}">
-    <view class="welcome-avatar">💰</view>
-    <view class="welcome-title">你好，我是钱多多老师</view>
-    <view class="welcome-desc">AI营销军师，专注于餐饮营销策划。有任何经营问题，随时向我提问。</view>
-  </view>
-
-  <!-- 消息列表 -->
-  <block wx:for="{{messages}}" wx:key="id">
-    <!-- 用户消息 -->
-    <view class="msg-row msg-user" id="msg-{{index}}" wx:if="{{item.role === 'user'}}">
-      <view class="bubble bubble-user">{{item.content}}</view>
-      <view class="avatar avatar-user">👤</view>
-    </view>
-    <!-- AI 消息 -->
-    <view class="msg-row msg-ai" id="msg-{{index}}" wx:if="{{item.role === 'assistant'}}">
-      <view class="avatar avatar-ai">💰</view>
-      <view class="bubble bubble-ai">
-        <!-- 加载中动画 -->
-        <view class="typing" wx:if="{{item.isLoading}}">
-          <view class="dot"></view>
-          <view class="dot"></view>
-          <view class="dot"></view>
+<!-- Gemini 风格：自定义顶栏 + 主内容 + 底部输入面板 -->
+<view class="gem-page" style="height: {{windowHeight}}px;">
+  <!-- 顶栏 -->
+  <view class="gem-nav" style="padding-top: {{statusBarHeight}}px;">
+    <!-- <view class="gem-nav-inner">
+      <view class="gem-nav-side gem-nav-left" catchtap="onMenuTap">
+        <view class="gem-icon-menu">
+          <view class="gem-menu-line"></view>
+          <view class="gem-menu-line"></view>
+          <view class="gem-menu-line"></view>
         </view>
-        <text wx:else class="font-lg">{{item.content}}</text>
+      </view>
+      <text class="gem-nav-brand">{{topicPageTitle || '钱多多'}}</text>
+      <view class="gem-nav-side gem-nav-right" catchtap="onProfileTap">
+        <view class="gem-avatar-ring">
+          <text class="gem-avatar-char">{{userInitial}}</text>
+        </view>
+      </view>
+    </view> -->
+
+
+<navbar title="经营看板" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+     
+  </view>
+
+  <view class="p-20">{{topicPageTitle}}</view>
+
+  <!-- 主区域 -->
+  <scroll-view
+    scroll-y="{{true}}"
+    class="gem-scroll"
+    scroll-into-view="{{scrollToView}}"
+    scroll-with-animation="{{true}}"
+    show-scrollbar="{{false}}"
+  >
+    <!-- 连接中 -->
+    <view class="gem-loading" wx:if="{{isLoading}}">
+      <text class="gem-loading-text">正在连接…</text>
+    </view>
+
+    <!-- 空会话：问候 + 推荐主题（Gemini 首页） -->
+    <block wx:if="{{!isLoading && messages.length === 0}}">
+      <view class="gem-home">
+        <view class="gem-greet">{{greetLine1}}</view>
+        <view class="gem-greet-sub">需要我为你做些什么？</view>
+        <view class="gem-subtitle" wx:if="{{topicPageSubtitle}}">{{topicPageSubtitle}}</view>
+        <view class="gem-pill-list">
+          <view class="gem-topic-block" wx:for="{{topics}}" wx:for-item="topic" wx:key="id">
+            <view
+              class="gem-pill {{expandedTopicId === topic.id ? 'gem-pill-open' : ''}}"
+              hover-class="gem-pill-hover"
+              catchtap="onTopicHeaderTap"
+              data-id="{{topic.id}}"
+            >
+              <text class="gem-pill-emoji">{{topic.emoji}}</text>
+              <text class="gem-pill-title">{{topic.title}}</text>
+              <text class="gem-pill-chevron">{{expandedTopicId === topic.id ? '⌃' : '⌄'}}</text>
+            </view>
+            <view class="gem-sublist" wx:if="{{expandedTopicId === topic.id}}">
+              <view wx:if="{{topic.questions.length}}" class="gem-sublist-inner">
+                <view
+                  class="gem-q-row"
+                  wx:for="{{topic.questions}}"
+                  wx:for-item="q"
+                  wx:key="id"
+                  hover-class="gem-q-row-hover"
+                  catchtap="onQuestionTap"
+                  data-prompt="{{q.prompt}}"
+                >
+                  <text class="gem-q-label">{{q.label}}</text>
+                  <text class="gem-q-arrow">›</text>
+                </view>
+              </view>
+              <view wx:else class="gem-sublist-empty">暂无具体问题</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 有消息：对话流 -->
+    <block wx:if="{{!isLoading && messages.length > 0}}">
+      <view class="gem-chat-inner">
+        <block wx:for="{{messages}}" wx:key="id">
+          <view class="gem-msg-row gem-msg-user" id="msg-{{index}}" wx:if="{{item.role === 'user'}}">
+            <view class="gem-bubble gem-bubble-user">{{item.content}}</view>
+          </view>
+          <view class="gem-msg-row gem-msg-ai" id="msg-{{index}}" wx:if="{{item.role === 'assistant'}}">
+            <view class="gem-bubble gem-bubble-ai">
+              <view class="gem-typing" wx:if="{{item.isLoading}}">
+                <view class="gem-dot"></view>
+                <view class="gem-dot"></view>
+                <view class="gem-dot"></view>
+              </view>
+              <rich-text
+                wx:elif="{{item.role === 'assistant' && item.richNodes}}"
+                class="gem-rich-md"
+                nodes="{{item.richNodes}}"
+              />
+              <text wx:else class="gem-bubble-text">{{item.content}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+    </block>
+
+    <view class="gem-scroll-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部输入区：侧栏 + 输入框 + 发送 -->
+  <view class="gem-composer-wrap" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
+    <view class="gem-composer-card">
+      <view class="gem-composer-row">
+        <view class="gem-side-btn" catchtap="onOpenDrawerTap" hover-class="gem-side-btn-hover">
+          <text class="gem-side-btn-icon">☰</text>
+        </view>
+        <input
+          class="gem-input gem-input--row"
+          type="text"
+          placeholder="问问钱多多"
+          placeholder-class="gem-input-ph"
+          value="{{inputValue}}"
+          cursor-spacing="16"
+          adjust-position="{{true}}"
+          disabled="{{isSending}}"
+          bindinput="onInputChange"
+          bindconfirm="onSendTap"
+          confirm-type="send"
+        />
+        <view
+          class="gem-send-pill {{isSending || !inputValue ? 'gem-send-pill-off' : ''}}"
+          catchtap="onSendTap"
+        >发送</view>
       </view>
     </view>
-  </block>
-
-  <!-- 底部留白 -->
-  <view class="bottom-spacer"></view>
-</scroll-view>
-
-<!-- 底部输入区域 -->
-<view class="input-area">
-  <!-- 快捷问题按钮 -->
-  <view class="quick-tags">
-    <view class="quick-tag" bindtap="onQuickTap" data-type="0" data-label="经营分析">📊 经营分析</view>
-    <view class="quick-tag" bindtap="onQuickTap" data-type="1" data-label="促销活动">🎁 促销活动</view>
-    <view class="quick-tag" bindtap="onQuickTap" data-type="2" data-label="公众号文章">📝 公众号文章</view>
   </view>
-  <view class="input-row">
-    <input
-      class="input-box"
-      type="text"
-      placeholder="输入你的问题..."
-      value="{{inputValue}}"
-      bindinput="onInputChange"
-      disabled="{{isSending}}"
-      confirm-type="send"
-    />
-    <view
-      class="send-btn {{isSending || !inputValue ? 'send-btn-disabled' : ''}}"
-      bindtap="onSendTap"
-    >发送</view>
+
+  <!-- 左侧抽屉：推荐问题 + 历史会话（用 class 控制显隐以做过渡动画） -->
+  <view
+    class="gem-drawer-mask {{drawerOpen ? 'gem-drawer-mask--show' : ''}}"
+    catchtap="onDrawerMaskTap"
+    catchtouchmove="onDrawerTouchMove"
+  ></view>
+  <view
+    class="gem-drawer-sheet {{drawerOpen ? 'gem-drawer-sheet--open' : ''}}"
+    style="padding-top: {{drawerPaddingTop}}px;"
+  >
+      <view class="gem-drawer-head">
+        <text class="gem-drawer-head-title">主题与历史</text>
+        <view class="gem-drawer-close" catchtap="onDrawerCloseTap">✕</view>
+      </view>
+      <scroll-view
+        scroll-y="{{true}}"
+        class="gem-drawer-scroll"
+        style="height: {{drawerScrollHeight}}px;"
+      >
+        <view class="gem-drawer-section-title">推荐问题</view>
+        <view class="gem-drawer-pills">
+          <view class="gem-topic-block" wx:for="{{topics}}" wx:for-item="topic" wx:key="id">
+            <view
+              class="gem-pill gem-pill--drawer {{drawerExpandedTopicId === topic.id ? 'gem-pill-open' : ''}}"
+              hover-class="gem-pill-hover"
+              catchtap="onDrawerTopicHeaderTap"
+              data-id="{{topic.id}}"
+            >
+              <text class="gem-pill-emoji">{{topic.emoji}}</text>
+              <text class="gem-pill-title">{{topic.title}}</text>
+              <text class="gem-pill-chevron">{{drawerExpandedTopicId === topic.id ? '⌃' : '⌄'}}</text>
+            </view>
+            <view class="gem-sublist" wx:if="{{drawerExpandedTopicId === topic.id}}">
+              <view wx:if="{{topic.questions.length}}" class="gem-sublist-inner">
+                <view
+                  class="gem-q-row"
+                  wx:for="{{topic.questions}}"
+                  wx:for-item="q"
+                  wx:key="id"
+                  hover-class="gem-q-row-hover"
+                  catchtap="onDrawerQuestionTap"
+                  data-prompt="{{q.prompt}}"
+                >
+                  <text class="gem-q-label">{{q.label}}</text>
+                  <text class="gem-q-arrow">›</text>
+                </view>
+              </view>
+              <view wx:else class="gem-sublist-empty">暂无具体问题</view>
+            </view>
+          </view>
+        </view>
+        <view class="gem-drawer-section-title gem-drawer-section-title--history">历史对话</view>
+        <view wx:if="{{conversationHistoryLoading}}" class="gem-drawer-loading">加载中…</view>
+        <block wx:else>
+          <view
+            class="gem-drawer-history-row {{item.id == conversationId && histIdx > 0 ? 'gem-drawer-history-row--active' : ''}}"
+            wx:for="{{conversationHistoryList}}"
+            wx:for-index="histIdx"
+            wx:key="id"
+            catchtap="onHistoryConversationTap"
+            data-id="{{item.id}}"
+          >
+            <text class="gem-drawer-history-title">{{item.title}}</text>
+            <text class="gem-drawer-history-time" wx:if="{{item.time}}">{{item.time}}</text>
+          </view>
+          <view wx:if="{{!conversationHistoryList.length}}" class="gem-drawer-empty">暂无历史对话</view>
+        </block>
+        <view class="gem-drawer-scroll-bottom"></view>
+      </scroll-view>
   </view>
 </view>

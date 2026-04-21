@@ -101,18 +101,7 @@ Page({
       depId: options.depId,
     })
 
-    var nxDisId = wx.getStorageSync('nxDisId');
-    if (nxDisId) {
-      this.setData({
-        nxDisId: nxDisId
-      })
-    } else {
-      this.setData({
-        nxDisId: -1
-      })
-    }
-
-    // this._userLogin();
+   
 
   },
 
@@ -464,7 +453,7 @@ Page({
               var userName = this.data.nickName;
               var gbDisId = this.data.disId;
               var code = this.data.code;
-              var admin = 3;
+              var admin = 4;
               var buyUserId = this.data.buyUserId;
               load.showLoading("保存修改内容")
               console.log(filePathList, userName, code, admin, gbDisId, buyUserId, this.data.depId);

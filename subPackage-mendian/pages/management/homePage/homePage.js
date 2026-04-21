@@ -1,6 +1,6 @@
 var globalData = getApp().globalData;
 
-var apiUrl = require('../../../../config.js');
+var apiUrl = require('../../../../config/index');
 
 Page({
 
@@ -47,13 +47,15 @@ Page({
 
 
 
+
+  
+  
   toMendian(){
     wx.navigateTo({
-      url: '../../mendian/index/index',
+      url: '/subPackage-mendian/pages/account/userEdit/userEdit',
     })
 
   },
-  
 
   toGoods(){
     wx.navigateTo({
@@ -156,9 +158,15 @@ toFood(){
   })
 },
 
+toMendainFood(){
+  wx.navigateTo({
+    url: '../../food/depFoodList/depFoodList?disId=' + this.data.disId,
+  })
+},
+
   toReportStock(){
     wx.navigateTo({
-      url: '/subPackage-mendian/pages/data/reportPageUnified/reportPageUnified',
+      url: '/subPackage-charts/pages/report/reportPage/reportPage',
     })
   },
 

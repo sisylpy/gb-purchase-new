@@ -1,0 +1,28 @@
+<view class="flex flex-column">
+
+<!-- 导航栏 -->
+<back-navbar 
+  style="height: {{navBarHeight}}rpx;" 
+  title="专业配送小程序接单" 
+  avatar="/images/back-gray.png" 
+  button-text="设置" 
+  bindnavbuttontap="toBack"
+></back-navbar>
+
+<!-- 表单容器 -->
+<view class="p-30 font-lg flex-column" >
+  <view class="flex-column center-content">
+        <image class="" src="{{url + '/userImage/say.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 80%;" />
+        <view class="big p-30">指定配送商</view>
+        <view class="text-center  " >与合作的配送商对接，订单自动发送到配送商小程序。</view>
+      </view>
+</view>
+
+<!-- 提交按钮：点击后调用 chooseAvatar，再在回调里进行表单校验+注册 -->
+<view class="flex-column center-content" >
+  <button  class="register-btn"  bind:tap="pasteAppToNx">
+    复制“京京送货”小程序注册链接发送给供货商
+  </button>
+</view>
+
+</view>

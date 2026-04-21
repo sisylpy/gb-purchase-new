@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "customer-navbar": "/components/custom-navbar/custom-navbar"
+
+  }
+}

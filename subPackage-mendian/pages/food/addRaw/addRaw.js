@@ -16,8 +16,13 @@ Page({
    * 页面的初始数据
    */
   data: {
-
-    canSave: false
+    canSave: false,
+    pageTitle: '添加原料',
+    pageType: 'add',
+    modalType: 'add',
+    amount: '',
+    goodsName: '',
+    standardName: '',
   },
 
 
@@ -30,6 +35,8 @@ Page({
       windowHeight: globalData.windowHeight * globalData.rpxR,
       statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      pageTitle: options.type === 'edit' ? '修改原料' : '添加原料',
+      pageType: options.type === 'edit' ? 'edit' : 'add',
     })
 
     var foodItem = wx.getStorageSync('Food');
@@ -40,7 +47,6 @@ Page({
     })
     if (options.type == 'edit') {
       this.setData({
-        type: options.type,
         rawArr: foodItem.gbdisFoodGoodsEntities
       })
     } else {
@@ -59,7 +65,15 @@ Page({
     }
   },
   deleteGoods(e) {
-    var id = this.data.rawArr[e.currentTarget.dataset.index].gbDistributerFoodGoodsId;
+    var idx = e.currentTarget.dataset.index;
+    var row = this.data.rawArr[idx];
+    var id = row.gbDistributerFoodGoodsId;
+    if (!id) {
+      var rawArr = this.data.rawArr.slice();
+      rawArr.splice(idx, 1);
+      this.setData({ rawArr: rawArr });
+      return;
+    }
    load.showLoading("删除原料")
     deleteGbFoodGoods(id).then(res => {
       load.hideLoading();
@@ -76,15 +90,22 @@ Page({
   editGoods(e) {
     this.setData({
       editGoods: e.currentTarget.dataset.item,
-      type: "edit",
+      modalType: 'edit',
       showFood: true,
+      isSearching: false,
+      strArr: [],
     })
   },
 
   toAddGoods(e) {
     this.setData({
-      type: "add",
-      showFood: true
+      modalType: 'add',
+      showFood: true,
+      isSearching: false,
+      strArr: [],
+      goodsName: "",
+      amount: "",
+      standardName: "",
     })
   },
 
@@ -94,7 +115,7 @@ Page({
     })
   },
   getApplyNumber(e) {
-    if(this.data.type == 'edit'){
+    if(this.data.modalType == 'edit'){
       var editGoodsData = "editGoods.gbDfgGoodsAmount";
       this.setData({
         [editGoodsData]: e.detail.value
@@ -147,14 +168,23 @@ Page({
     }
   },
 
-  checkGoods(e){
-     var goodsName = e.detail.value;
-     if(goodsName !== this.data.editGoods.gbDfgGoodsName){
-        
-     }
-     this.setData({
-       isSearching: false
-     })
+  checkGoods(e) {
+    var goodsName = e.detail.value;
+    if (this.data.modalType === 'edit' && this.data.editGoods && goodsName !== this.data.editGoods.gbDfgGoodsName) {
+      // 名称变更时由搜索流程处理
+    }
+    this.setData({
+      isSearching: false
+    })
+  },
+
+  stopMove() {},
+
+  showSaveHint() {
+    wx.showToast({
+      title: '请先添加至少一条原料',
+      icon: 'none'
+    })
   },
 
   /**
@@ -162,7 +192,7 @@ Page({
    * @param {}} e 
    */
   applyGoods(e) {
-    if(this.data.type == 'edit'){
+    if(this.data.modalType == 'edit'){
      var disGoodsId =  e.currentTarget.dataset.item.gbDistributerGoodsId;
      var  goodsName =  e.currentTarget.dataset.item.gbDgGoodsName;
     var  standardName =  e.currentTarget.dataset.item.gbDgGoodsStandardname;
@@ -200,7 +230,7 @@ Page({
     })
   },
   confirm(e) {
-    if(this.data.type == 'edit'){
+    if(this.data.modalType == 'edit'){
       var goodsName = this.data.editGoods.gbDfgGoodsName;
       var amount = this.data.editGoods.gbDfgGoodsAmount;
       if(goodsName.length > 0 && Number(amount) > 0){
@@ -229,6 +259,7 @@ Page({
 
     }else{
       var item = {
+        gbDfgDisId: this.data.disId,
         gbDfgGoodsName: this.data.goodsName,
         gbDfgFoodId: this.data.foodId,
         gbDfgDisGoodsId: this.data.disGoodsId,
@@ -242,6 +273,7 @@ Page({
         goodsName: "",
         disGoodsId: "",
         standardName: "",
+        amount: "",
         rawArr: arr
   
       })

@@ -1,0 +1,45 @@
+
+
+<view class='mask1 aaa' wx:if='{{show}}' catchtouchmove='ture' >
+	<view style="margin-top: {{windowHeight / 3}}rpx;">
+
+		<view class="body" >
+			<view class="">
+			  <view class="flex-row title">
+					<text class="p-20">{{goods.gbDgGoodsName}}({{goods.gbDgGoodsStandardname}})</text>	
+				</view>
+				<view class="flex-row p-20">
+				   <text class="left_name">订货单位名称:</text>
+					<input class='input {{inputStandard ? "is-active" : ""}}' focus='true' type='text' bindinput="getStandard" value='{{itemStandard.gbDsStandardName}}' bindfocus="getFocus" placeholder="订货单位名称"  bindblur="getblue" />
+				</view>
+				<view class="flex-row p-20">
+				   <text class="left_name">订货单位比例:</text>
+
+					 <!-- edit -->
+					 <block wx:if="{{itemStandard !== null && itemStandard.gbDsStandardScale > 0}}">
+				   <text class="mr-20">1 </text>
+					 <input class='showInput {{inputScale ? "is-active" : ""}}'  type='text' value='{{standardName}}'  style="width: 80rpx;"/>
+					 <text class="mr-20"> = </text>
+					</block>
+					<block wx:else>
+					 <block wx:if="{{inputScale}}">
+						<text class="mr-20">1 </text>
+					 <input class='showInput {{inputScale ? "is-active" : ""}}'  type='text' value='{{standardName}}'  style="width: 80rpx;"/>
+					 <text class="mr-20"> = </text>
+					</block>
+					</block>
+					<input class='scaleInput input {{inputScale ? "is-active" : ""}}' type='digit'  bindfocus="getFocusScale"  bindinput="getScale" value='{{standardScale == "-1" ? "" : standardScale}}' placeholder="单位比例" bindblur="getblue"  />
+					<text>{{goods.gbDgGoodsStandardname}}</text>
+				</view>
+			</view>
+
+     	<view class="btn_row" >
+       		<view class='btn sureBtn' catchtap='confirm' hover-class="hover">确定</view>
+				<view class='btn cancleBtn' bindtap="cancle" hover-class="hover">取消</view>
+			</view>
+
+	
+		</view>
+
+	</view>
+</view>

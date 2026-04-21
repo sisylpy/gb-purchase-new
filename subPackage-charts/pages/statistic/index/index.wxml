@@ -99,7 +99,7 @@
           </view>
 
           <!-- 主要内容：左右两列 -->
-          <view class="flex-row-between" style="flex: 1; gap: 20rpx;" wx:if="{{item.purTotal > 0 || item.costTotal  > 0}}">
+          <view class="flex-row-between" style="flex: 1; gap: 20rpx;" wx:if="{{item.allStock > 0 || item.costTotal  > 0}}">
 
             <!-- 左侧：采购列 -->
             <view class="flex-column" style="flex: 1;">
@@ -134,10 +134,8 @@
                 <view class="flex-column">
                   <view class="flex-row-between mb-8">
                     <text class="font-xs text-secondary">库存:</text>
-                    <text class="font-xs">{{item.stockRest}}元</text>
+                    <text class="font-xs">{{item.restStock}}元</text>
                   </view>
-
-
                 </view>
 
               </view>

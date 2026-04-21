@@ -2,7 +2,7 @@
 
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
 import {
   depGetAllFood,
@@ -135,11 +135,20 @@ Page({
         gbDepId: this.data.depItem.gbDepartmentId,
       })
     }
+    // var data = {
+    //   depId: this.data.gbDepId,
+    //   depFatherId: this.data.depItem.gbDepartmentId,
+    //   foodId: this.data.foodId,
+    //   price: this.data.price,
+    // }
     var data = {
-      depId: this.data.gbDepId,
-      depFatherId: this.data.depItem.gbDepartmentId,
-      foodId: this.data.foodId,
-      price: this.data.price,
+      gbDfDepId: 1,
+      gbDfDepFatherId: 2,
+      gbDfFoodFatherId: 1,
+      gbDfFoodId: 3,
+      gbDfFoodPrice:55,
+      gbDfDistributerId: 1,
+      gbDfStatus: 0,
     }
     load.showLoading("保存部门菜品")
     downLoadDepFood(data).then(res => {
@@ -151,13 +160,13 @@ Page({
           foodId: "",
           price: "",
         })
-        var pages = getCurrentPages();
-        var prevPage = pages[pages.length - 2]; //上一个页面
-        //直接调用上一个页面的setData()方法，把数据存到上一个页面中去
-        prevPage.setData({
-          updateFood: true
-        })
-        this._initData();
+        // var pages = getCurrentPages();
+        // var prevPage = pages[pages.length - 2]; //上一个页面
+        // //直接调用上一个页面的setData()方法，把数据存到上一个页面中去
+        // prevPage.setData({
+        //   updateFood: true
+        // })
+        // this._initData();
       }
     })
   },

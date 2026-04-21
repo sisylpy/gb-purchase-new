@@ -5,7 +5,12 @@
     "pages/splash/splash",
     "pages/common/selectDate/selectDate",
     "pages/register/register",
-    "pages/tro/tro"
+    "pages/tro/tro" ,
+    "pages/inviteRegister/inviteRegister",
+    "pages/inviteTro/inviteTro",
+    "pages/inviteTroNx/inviteTroNx",
+    "pages/inviteAndOrder/inviteAndOrder",
+    "pages/inviteAdmin/inviteAdmin"
   ],
   "subPackages": [
     {
@@ -13,9 +18,11 @@
       "name": "mendian",
       "pages": [
         "pages/order/chefOrder/chefOrder",
+        "pages/order/chefOrderDep/chefOrderDep",
         "pages/order/purGoods/purGoods",
         "pages/order/resGoodsAi/resGoodsAi",
         "pages/order/resGoodsSearch/resGoodsSearch",
+        "pages/order/stockGoodsBusiness/stockGoodsBusiness",
         "pages/management/homePage/homePage",
         "pages/management/staff/staff",
         "pages/management/disUserEdit/disUserEdit",
@@ -30,9 +37,17 @@
         "pages/mendian/depUserRegister/depUserRegister",
         "pages/mendian/depUserEdit/depUserEdit",
         "pages/mendian/groupUserRegister/groupUserRegister",
+        
+        "pages/account/payPage/payPage",
+        "pages/account/payList/payList",
+        "pages/account/couponList/couponList",
+        "pages/account/payDetail/payDetail",
+        "pages/account/userEdit/userEdit",
+        "pages/account/loginPay/loginPay",
+
         "pages/food/index/index",
         "pages/food/foodList/foodList",
-        "pages/food/allFood/allFood",
+        "pages/food/depFoodList/depFoodList",
         "pages/food/addFood/addFood",
         "pages/food/addFoodFather/addFoodFather",
         "pages/food/addRaw/addRaw"
@@ -51,7 +66,13 @@
       "root": "subPackage-goods/",
       "name": "goods",
       "pages": [
-        "pages/goods/resGoods/resGoods"
+        "pages/resGoods/resGoods",
+        "pages/searchGoods/searchGoods",
+        "pages/disGoodsDetail/disGoodsDetail",
+        "pages/disGoodsPage/disGoodsPage",
+        "pages/goodsOrderList/goodsOrderList",
+        "pages/stockGoodsList/stockGoodsList",
+        "pages/goodsFenxi/goodsFenxi"
       ]
     },
     {
@@ -68,7 +89,9 @@
         "pages/gbOrderBatchReturn/gbOrderBatchReturn",
         "pages/disOrderBatchDetail/disOrderBatchDetail",
         "pages/depUserEdit/depUserEdit",
-        "pages/supplier/supplierOrder/supplierOrder"
+        "pages/supplier/supplierOrder/supplierOrder",
+        "pages/supplier/supplierBills/supplierBills",
+        "pages/supplier/myPurchaseDetail/myPurchaseDetail"
       ]
     },
     {
@@ -77,15 +100,24 @@
       "pages": [
         "pages/statistic/index/index",
         "pages/statistic/indexGoods/indexGoods",
+        "pages/statistic/costGoodsByDate/costGoodsByDate",
+        "pages/statistic/purGoodsByDate/purGoodsByDate",
+        "pages/statistic/purchaseDeatil/purchaseDeatil",
+        "pages/statistic/stockPurGoods/stockPurGoods",
         "pages/stock/index/index",
         "pages/stock/stockList/stockList",
         "pages/stock/stockListOneDay/stockListOneDay",
         "pages/stock/stockGoodsList/stockGoodsList",
         "pages/cost/purGoodsFenxi/purGoodsFenxi",
         "pages/cost/costGoodsFenxi/costGoodsFenxi",
+        "pages/cost/goodsFenxiCost/goodsFenxiCost",
+        "pages/cost/costGoodsByDate/costGoodsByDate",
         "pages/cost/goodsFenxiPurchase/goodsFenxiPurchase",
         "pages/sales/dailyTurnover/dailyTurnover",
-        "pages/sales/addTurnover/addTurnover"
+        "pages/sales/addTurnover/addTurnover",
+        "pages/report/reportPage/reportPage",
+        "pages/report/dateReport/dateReport",
+        "pages/report/subDepCost/subDepCost"
       ]
     }
   ],

@@ -1,7 +1,7 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
 // import {
 //   getJrdhGoodsOrders

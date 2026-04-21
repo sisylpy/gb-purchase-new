@@ -3,7 +3,7 @@ const globalData = getApp().globalData;
 var dateUtils = require('../../../../utils/dateUtil');
 import * as echarts from '../../../ec-canvas/echarts';
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 import apiDistributer from '../../../../services/apiDistributer.js'
 
 
@@ -33,9 +33,7 @@ Page({
           })
         }
       }
-      this.setData({
-       
-      })
+     
       // 重新请求接口
       this._getGoodsList();
     }

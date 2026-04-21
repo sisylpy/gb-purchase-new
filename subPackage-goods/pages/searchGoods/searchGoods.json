@@ -1,0 +1,10 @@
+
+{
+  
+  "usingComponents": {
+    
+    "back-navbar": "/components/back-navbar/back-navbar"
+
+  }
+}
+

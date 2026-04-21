@@ -1,16 +1,12 @@
 const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 
-// import {
-//   getSubDepartmentsGb,
-// } from '../../../../lib/apiDepOrder'
-
-// import {
-//   gbPurchaserRegitsteWithFile,
-//   depOrderUserSaveWithFileGb,
-//   gbLogin,
-// } from '../../../../lib/apiDistributer'
+const { getSubDepartmentsGb } = require('../../../services/mendian.js');
+const {
+  gbPurchaserRegitsteWithFile,
+  gbLogin,
+} = require('../../../services/apiDistributerGbUser.js');
 
 Page({
 
@@ -274,7 +270,7 @@ save(e) {
               wx.setStorageSync('userInfo', jsonObject.data.depUserInfo);
               wx.setStorageSync('orderDepInfo', jsonObject.data.depInfo);
               wx.redirectTo({
-                url: '/subPackage-ai/pages/ai/chefOrderDep/chefOrderDep',
+                url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
               });
 
             }else{

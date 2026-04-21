@@ -24,7 +24,7 @@ var dateUtils = require('../../lib/dateUtil');
 var load = require('../../lib/load');
 var requestUtil = require('../../lib/request');
 var depOrderApi = require('../../services/depOrder');
-var distributorApi = require('../../services/distributor');
+var pagesApi = require('../services/pages');
 
 // --- 本页面用到的所有 API 接口 ---
 // depOrderApi.getPurchaseGoodsGbWithTabCount(disId)    获取采购商品列表（含Tab统计数量）
@@ -37,7 +37,7 @@ var distributorApi = require('../../services/distributor');
 // depOrderApi.puraserReturnPurGoods(data)               退货操作
 // depOrderApi.addAutoOrderGoods(data)                   切换自动订货
 // depOrderApi.cancleTuihuoByPurGoodsId(id)              取消退货
-// distributorApi.gbLoginIndex(code)                     微信登录
+// pagesApi.gbLoginIndex(code)                           微信登录
 
 
 Page({
@@ -269,14 +269,14 @@ Page({
   _userLogin: function () {
     wx.login({
       success: function (resLogin) {
-        distributorApi.gbLoginIndex(resLogin.code)
+        pagesApi.gbLoginIndex(resLogin.code)
           .then(function (res) {
             if (res.result.code !== -1) {
               if (res.result.data !== "noBuyer") {
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
                 wx.setStorageSync('userInfo', res.result.data.depUserInfo);
                 var admin = res.result.data.depUserInfo.gbDuAdmin;
-                if (admin == 2) {
+                if (admin == 11) {
                   var avatarUrl = '';
                   if (res.result.data.depUserInfo.gbDuWxAvartraUrl) {
                     avatarUrl = requestUtil.getServerUrl() + res.result.data.depUserInfo.gbDuWxAvartraUrl;
@@ -296,7 +296,7 @@ Page({
                 } else {
                   wx.setStorageSync('orderDepInfo', res.result.data.depInfo);
                   wx.redirectTo({
-                    url: '../../subPackage-ai/pages/ai/chefOrderDep/chefOrderDep',
+                    url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
                   });
                 }
               } else {
@@ -657,9 +657,8 @@ Page({
         gbDpbPurUserId: that.data.userInfo.gbDepartmentUserId,
         gbDpbDistributerId: that.data.disInfo.gbDistributerId,
         gbDpbPurDepartmentId: that.data.depId,
-        gbDpbUserAdminType: 2,
+        gbDpbUserAdminType: 1,
         gbDPGEntities: arr,
-        gbDpbPurchaseType: 2,
         gbDpbBuyUserOpenId: that.data.userInfo.gbDuWxOpenId,
       };
 
@@ -813,12 +812,15 @@ Page({
     wx.navigateTo({ url: '../../subPackage/pages/account/payPage/payPage?type=0' });
   },
 
+  // toEditUser: function () {
+  //   wx.navigateTo({ url: '../../subPackage-mendian/pages/account/userEdit/userEdit' });
+  // },
   toEditUser: function () {
-    wx.navigateTo({ url: '../../subPackage-mendian/pages/management/userEdit/userEdit' });
+    wx.navigateTo({ url: '../../subPackage-ai/pages/restraunt/restaurantProfile/restaurantProfile' });
   },
 
   toResGoods: function () {
-    wx.navigateTo({ url: '../../subPackage-goods/pages/goods/resGoods/resGoods' });
+    wx.navigateTo({ url: '../../subPackage-goods/pages/resGoods/resGoods' });
   },
 
   // ============================================

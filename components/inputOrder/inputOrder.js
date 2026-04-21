@@ -9,7 +9,12 @@ Component({
     },
     item: {
       type: Object,
-      value: ""
+      value: null,
+    },
+    /** 父页传入的订单条数；>=0 时优先用于展示，避免 wxs 对 item 解析为 0 条 */
+    orderListCount: {
+      type: Number,
+      value: -1,
     },
     maskHeight: {
       type: Number,
@@ -55,6 +60,20 @@ Component({
   data: {
     showReason: false,
     isClosing: false,
+    /** 单价后缀：外包装订货时为 gbDoStandard（如箱），否则为商品基准规格名 */
+    priceUnitSuffix: "",
+  },
+
+  observers: {
+    item: function (item) {
+      this._refreshPriceUnitSuffix(item);
+    },
+  },
+
+  lifetimes: {
+    attached: function () {
+      this._refreshPriceUnitSuffix(this.properties.item);
+    },
   },
 
   /**
@@ -62,16 +81,84 @@ Component({
    */
   methods: {
 
-    // 获取订单列表，双路径兼容新旧系统数据
-    _getOrders: function () {
-      var item = this.data.item;
-      return item.gbDepartmentOrdersEntities || (item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities) || [];
+    /** 订货单位为外包装（有系数且 gbDoStandard 与商品基准规格不同） */
+    _isOrderOuterPack: function (order, entity) {
+      if (!order || !entity) {
+        return false;
+      }
+      var scale = order.gbDoDsStandardScale;
+      if (scale === null || scale === undefined || scale === "" || scale === "-1") {
+        return false;
+      }
+      var n = Number(scale);
+      if (isNaN(n) || n <= 0) {
+        return false;
+      }
+      var ordStd = order.gbDoStandard;
+      var baseStd = entity.gbDgGoodsStandardname;
+      return !!(ordStd && baseStd && String(ordStd) !== String(baseStd));
     },
 
-    // 获取 setData 的 key 路径
+    /** 顶部「元/xxx」：录入单价与商品基准规格一致（外包装订货时小计仍按基准价×箱数×系数） */
+    _refreshPriceUnitSuffix: function (item) {
+      if (!item || typeof item !== "object" || !item.gbDistributerGoodsEntity) {
+        if (this.data.priceUnitSuffix !== "") {
+          this.setData({ priceUnitSuffix: "" });
+        }
+        return;
+      }
+      var suffix = item.gbDistributerGoodsEntity.gbDgGoodsStandardname || "";
+      if (this.data.priceUnitSuffix !== suffix) {
+        this.setData({ priceUnitSuffix: suffix });
+      }
+    },
+
+    /**
+     * 行小计：单价为基准规格价时，普通订货 = 单价×数量；外包装（件数×系数）= 单价×外包装件数×gbDoDsStandardScale。
+     * 例：16.5 元/基准 × 2 箱 × 每箱 2 基准 = 66。
+     */
+    _lineSubtotal: function (price, weightStr, order) {
+      var p = Number(price);
+      var w = Number(weightStr);
+      if (isNaN(p) || isNaN(w)) {
+        return "";
+      }
+      var entity = this.data.item.gbDistributerGoodsEntity;
+      if (order && entity && this._isOrderOuterPack(order, entity)) {
+        var scale = Number(order.gbDoDsStandardScale);
+        if (!isNaN(scale) && scale > 0) {
+          return (p * w * scale).toFixed(1);
+        }
+      }
+      return (p * w).toFixed(1);
+    },
+
+    // 获取订单列表，双路径兼容；顶层为 [] 时仍用嵌套（与 orderEntities.wxs 一致）
+    _getOrders: function () {
+      var item = this.data.item;
+      if (!item) {
+        return [];
+      }
+      var top = item.gbDepartmentOrdersEntities;
+      var nested =
+        item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities;
+      if (top && top.length > 0) {
+        return top;
+      }
+      if (nested && nested.length > 0) {
+        return nested;
+      }
+      return top || nested || [];
+    },
+
+    // 获取 setData 的 key 路径（与 _getOrders / wxs 选用数据源一致）
     _getOrderKey: function (index, field) {
       var item = this.data.item;
-      var prefix = item.gbDepartmentOrdersEntities
+      var top = item.gbDepartmentOrdersEntities;
+      var nested =
+        item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities;
+      var useTop = top && top.length > 0;
+      var prefix = useTop
         ? "item.gbDepartmentOrdersEntities[" + index + "]"
         : "item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities[" + index + "]";
       return prefix + "." + field;
@@ -105,7 +192,7 @@ Component({
         that.setData({
           show: false,
           editApply: false,
-          item: "",
+          item: null,
           showReason: false,
           scaleInput: false,
           isClosing: false
@@ -123,7 +210,7 @@ Component({
         that.setData({
           show: false,
           editApply: false,
-          item: "",
+          item: null,
           showReason: false,
           scaleInput: false,
           isClosing: false
@@ -136,27 +223,51 @@ Component({
       var aaa = this._checkPriceAndReason();
       console.log(aaa);
       if (aaa) {
-        if (this.data.item.gbDpgBuyPrice == null || !this.data.item.gbDpgBuyPrice > 0) {
-          var price = this.data.item.gbDpgBuyPrice;
-          if (price && price.length == 0) {
+        var scalePack = this.data.item.gbDpgBuyScale != null && this.data.item.gbDpgBuyScale !== "" && Number(this.data.item.gbDpgBuyScale) > 0;
+        if (scalePack) {
+          var sp = this.data.item.gbDpgBuyScalePrice;
+          if (sp == null || sp === "" || !(Number(sp) > 0)) {
             wx.showToast({
-              title: '单价不能为空',
+              title: '请填写大包装单价',
               icon: 'none'
             });
             return;
           }
-        }
-        var orderArr = this._getOrders();
-        for (var j = 0; j < orderArr.length; j++) {
-          var choice = orderArr[j].hasChoice;
-          if (choice) {
-            var orderWeight = orderArr[j].gbDoWeight;
-            if (orderWeight == null || orderWeight.length == 0) {
+        } else {
+          if (this.data.item.gbDpgBuyPrice == null || !this.data.item.gbDpgBuyPrice > 0) {
+            var price = this.data.item.gbDpgBuyPrice;
+            if (price && price.length == 0) {
               wx.showToast({
-                title: '订单重量不能为空',
+                title: '单价不能为空',
                 icon: 'none'
               });
               return;
+            }
+          }
+        }
+        var orderArr = this._getOrders();
+        var useScaleQty = this.data.scaleInput || scalePack;
+        for (var j = 0; j < orderArr.length; j++) {
+          var choice = orderArr[j].hasChoice;
+          if (choice) {
+            if (useScaleQty) {
+              var sw = orderArr[j].gbDoScaleWeight;
+              if (sw == null || sw === "" || String(sw).length === 0) {
+                wx.showToast({
+                  title: '订单数量不能为空',
+                  icon: 'none'
+                });
+                return;
+              }
+            } else {
+              var orderWeight = orderArr[j].gbDoWeight;
+              if (orderWeight == null || orderWeight.length == 0) {
+                wx.showToast({
+                  title: '订单重量不能为空',
+                  icon: 'none'
+                });
+                return;
+              }
             }
           }
         }
@@ -228,7 +339,7 @@ Component({
       var numberStr = e.detail.value;
       if (e.detail.value.length > 0) {
         this.setData({
-          itemData: numberStr
+          [itemData]: numberStr
         });
         var y = String(numberStr).indexOf(".");
         var count = 0;
@@ -240,7 +351,7 @@ Component({
             title: '小数点只能保留一位',
           });
           this.setData({
-            itemData: numberStr.substring(0, numberStr.length - 1),
+            [itemData]: numberStr.substring(0, numberStr.length - 1),
           });
         }
         if (numberStr > 99999) {
@@ -249,15 +360,17 @@ Component({
             icon: "none"
           });
           this.setData({
-            itemData: numberStr.substring(0, numberStr.length - 1),
+            [itemData]: numberStr.substring(0, numberStr.length - 1),
           });
         }
 
         var itemPriceData = "item.gbDpgBuyPrice";
         var scale = this.data.item.gbDpgBuyScale;
-        var buyPrice = (Number(this.data.item.gbDpgBuyScalePrice) / Number(scale)).toFixed(2);
+        var nScale = Number(scale);
+        var raw = Number(this.data.item.gbDpgBuyScalePrice) / nScale;
+        var buyPrice = (!nScale || isNaN(raw)) ? "" : raw.toFixed(2);
         this.setData({
-          itemPriceData: buyPrice
+          [itemPriceData]: buyPrice
         });
 
         this._getBuySubtotalScale();
@@ -276,9 +389,10 @@ Component({
       var orderPriceData = this._getOrderKey(index, "gbDoPrice");
       var subData = this._getOrderKey(index, "gbDoSubtotal");
       var orderWeighValue = e.detail.value;
+      var orderRow = this._getOrders()[index];
       if (orderWeighValue.length > 0) {
-        var sub = (isNaN(price) || price === 0) ? '' : (Number(price) * Number(orderWeighValue)).toFixed(1);
-        console.log('[inputOrder] getOrderWeight - weightKey:', orderWeightData, 'weightValue:', orderWeighValue, 'subKey:', subData, 'sub:', sub);
+        var sub = (isNaN(price) || price === 0) ? "" : this._lineSubtotal(price, orderWeighValue, orderRow);
+        console.log('[inputOrder] getOrderWeight - weightKey:', orderWeightData, 'weightValue:', orderWeighValue, 'subKey:', subData, 'sub:', sub, 'outerPack:', orderRow && this._isOrderOuterPack(orderRow, this.data.item.gbDistributerGoodsEntity));
         this.setData({
           [orderWeightData]: orderWeighValue,
           [orderPriceData]: price,
@@ -296,7 +410,7 @@ Component({
             title: '小数点只能保留一位',
           });
           var newWeight = Number(orderWeighValue.substring(0, orderWeighValue.length - 1));
-          var newSub = (isNaN(price) || price === 0) ? '' : (Number(price) * newWeight).toFixed(1);
+          var newSub = (isNaN(price) || price === 0) ? "" : this._lineSubtotal(price, String(newWeight), orderRow);
           this.setData({
             [orderWeightData]: newWeight,
             [orderPriceData]: price,
@@ -309,7 +423,7 @@ Component({
             icon: "none"
           });
           var newWeight2 = Number(orderWeighValue.substring(0, orderWeighValue.length - 1));
-          var newSub2 = (isNaN(price) || price === 0) ? '' : (Number(price) * newWeight2).toFixed(1);
+          var newSub2 = (isNaN(price) || price === 0) ? "" : this._lineSubtotal(price, String(newWeight2), orderRow);
           this.setData({
             [orderWeightData]: newWeight2,
             [orderPriceData]: price,
@@ -344,7 +458,7 @@ Component({
         var itemData = "item.gbDpgBuyPriceReason";
         var resonStr = e.detail.value;
         this.setData({
-          itemData: resonStr,
+          [itemData]: resonStr,
         });
       } else {
         wx.showToast({
@@ -359,10 +473,10 @@ Component({
       for (var i = 0; i < arr.length; i++) {
         var orderPriceData = this._getOrderKey(i, "gbDoPrice");
         var subData = this._getOrderKey(i, "gbDoSubtotal");
-        this.setData({
-          orderPriceData: "",
-          subData: ""
-        });
+        var clearRow = {};
+        clearRow[orderPriceData] = "";
+        clearRow[subData] = "";
+        this.setData(clearRow);
       }
       this.setData({
         "item.gbDpgBuySubtotal": "",
@@ -377,11 +491,11 @@ Component({
         var orderPriceData = this._getOrderKey(i, "gbDoPrice");
         var subData = this._getOrderKey(i, "gbDoSubtotal");
         var sellingSubData = this._getOrderKey(i, "gbDoSellingSubtotal");
-        this.setData({
-          orderPriceData: "",
-          subData: "",
-          sellingSubData: ""
-        });
+        var clearRow = {};
+        clearRow[orderPriceData] = "";
+        clearRow[subData] = "";
+        clearRow[sellingSubData] = "";
+        this.setData(clearRow);
       }
       this.setData({
         "item.gbDpgBuySubtotal": "",
@@ -402,7 +516,7 @@ Component({
           console.log('[inputOrder] _countOrderData - i:', i, 'weight:', weight, 'price:', price);
           // 只有 weight 有值时才计算小计
           if (weight != null && weight !== '' && !isNaN(Number(weight))) {
-            var sub = (Number(price) * Number(weight)).toFixed(1);
+            var sub = this._lineSubtotal(price, String(weight), arr[i]);
             console.log('[inputOrder] _countOrderData - sub:', sub, 'key:', subData);
             this.setData({
               [orderPriceData]: price,
@@ -452,6 +566,7 @@ Component({
       }
     },
 
+    /** 大包装件数录入：写订单 gbDoScaleWeight；折算基准量 gbDoWeight = 件数×gbDoDsStandardScale */
     getScaleWeight: function (e) {
       var value = e.detail.value;
       var orderIndex = e.currentTarget.dataset.index;
@@ -461,11 +576,10 @@ Component({
 
       var itemData = this._getOrderKey(orderIndex, "gbDoScaleWeight");
       var itemOrderData = this._getOrderKey(orderIndex, "gbDoWeight");
-      this.setData({
-        orderIndex: orderIndex,
-        itemData: value,
-        itemOrderData: orderWeight
-      });
+      var patch = { orderIndex: orderIndex };
+      patch[itemData] = value;
+      patch[itemOrderData] = isNaN(orderWeight) ? "" : orderWeight;
+      this.setData(patch);
 
       this._getTotalWeightScale();
       this._getOrderSubtotalScale();
@@ -488,16 +602,18 @@ Component({
       this._getBuySubtotalScale();
     },
 
+    /** 行小计：gbDoScaleWeight × gbDoScalePrice（大包装件数 × 大包装单价） */
     _getOrderSubtotalScale: function () {
       var arr = this._getOrders();
       for (var i = 0; i < arr.length; i++) {
         var subData = this._getOrderKey(i, "gbDoSubtotal");
         var weight = arr[i].gbDoScaleWeight;
         var price = arr[i].gbDoScalePrice;
-        var subtotal = (Number(weight) * Number(price)).toFixed(1);
-        this.setData({
-          subData: subtotal,
-        });
+        var raw = Number(weight) * Number(price);
+        var subtotal = isNaN(raw) ? "" : raw.toFixed(1);
+        var patch = {};
+        patch[subData] = subtotal;
+        this.setData(patch);
       }
     },
 
@@ -513,17 +629,20 @@ Component({
       this._countOrderPrice();
     },
 
+    /** 把采购基准单价、大包装单价同步到每条订单的 gbDoPrice、gbDoScalePrice */
     _countOrderPrice: function () {
       var doPrice = this.data.item.gbDpgBuyPrice;
       var scalePrice = this.data.item.gbDpgBuyScalePrice;
+      var doPriceVal = doPrice === undefined || doPrice === null ? "" : doPrice;
+      var scalePriceVal = scalePrice === undefined || scalePrice === null ? "" : scalePrice;
       var arr = this._getOrders();
       for (var i = 0; i < arr.length; i++) {
         var priceData = this._getOrderKey(i, "gbDoPrice");
         var scalePriceData = this._getOrderKey(i, "gbDoScalePrice");
-        this.setData({
-          priceData: doPrice,
-          scalePriceData: scalePrice
-        });
+        var patch = {};
+        patch[priceData] = doPriceVal;
+        patch[scalePriceData] = scalePriceVal;
+        this.setData(patch);
       }
     },
 

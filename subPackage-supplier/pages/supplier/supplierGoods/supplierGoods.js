@@ -2,7 +2,7 @@ const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
 import download from "../../../../utils/download"
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
 // import {
 //   depGetGbAppointSupplierGoods,
 //   disCancleSupplierGoods,

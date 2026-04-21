@@ -1,6 +1,6 @@
 var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
-var config = require('../../../../config.js');
+var config = require('../../../../config/index.js');
 var depOrder = require('../../../../services/depOrder');
 
 // ========================

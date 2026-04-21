@@ -3,7 +3,7 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
 import * as echarts from '../../../../../subPackage-charts/ec-canvas/echarts';
 
-import apiUrl from '../../../../config.js';
+import apiUrl from '../../../../config/index.js';
 let windowWidth = 0;
 let itemWidth = 0;
 

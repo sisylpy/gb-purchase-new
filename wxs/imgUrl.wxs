@@ -1,0 +1,32 @@
+/**
+ * 全项目公用：在 wxml 首行引入
+ *   <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+ * 使用：{{ imgUrl.resolve(url, 相对路径或完整https) }}
+ * 对路径按 / 分段 encodeURIComponent，避免中文、空格导致 <image> 加载失败。
+ */
+function trimStr(s) {
+  if (s == null || s === undefined) return '';
+  return ('' + s).replace(getRegExp('^\\s+|\\s+$', 'g'), '');
+}
+
+function resolve(server, relPath) {
+  var s = trimStr(relPath);
+  if (s === '') return '';
+  // 后端占位：磁盘上常无此文件，配合 wxml 里 || '/images/logo.jpg'
+  if (s === 'goodsImage/logo.jpg' || s === '/goodsImage/logo.jpg') return '';
+  if (getRegExp('^https?://', 'i').test(s)) return s;
+  var base = trimStr(server);
+  base = base.replace(getRegExp('/+$'), '');
+  if (base === '') return s;
+  base = base + '/';
+  var path = s.replace(getRegExp('^/+'), '');
+  var parts = path.split('/');
+  var enc = [];
+  var i = 0;
+  for (i = 0; i < parts.length; i++) {
+    if (parts[i] !== '') enc.push(encodeURIComponent(parts[i]));
+  }
+  return base + enc.join('/');
+}
+
+module.exports.resolve = resolve;

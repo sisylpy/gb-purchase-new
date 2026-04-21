@@ -4,6 +4,9 @@
  */
 var request = require('../../lib/request');
 var apiUrl = require('../../config/index');
+var depOrder = require('../../services/depOrder');
+
+
 
 // ===================== 日看板 =====================
 
@@ -44,7 +47,7 @@ var disGetPurchaseDetailType = function (data) {
  * 页面：statistic/costGoodsByDate/costGoodsByDate
  */
 var getGbGoodsCostStatistics = function (data) {
-  return request.post('gbdepartmentgoodsdaily/getGbGoodsCostStatistics', {
+  return request.post('gbdepartmentgoodsstockreduce/getGbGoodsCostStatistics', {
     startDate: data.startDate,
     stopDate: data.stopDate,
     disId: data.disId,
@@ -58,7 +61,7 @@ var getGbGoodsCostStatistics = function (data) {
  * 页面：statistic/costGoodsByDate/costGoodsByDate
  */
 var getGoodsCostBySearchDate = function (data) {
-  return request.post('gbdepartmentgoodsdaily/getGoodsCostBySearchDate', {
+  return request.post('gbdepartmentgoodsstockreduce/getGoodsCostBySearchDate', {
     startDate: data.startDate,
     stopDate: data.stopDate,
     type: data.type,
@@ -68,6 +71,41 @@ var getGoodsCostBySearchDate = function (data) {
     limit: data.limit,
     greatId: data.greatId
   }, { useUrlParams: true });
+};
+
+/**
+ * 商品制作/损耗/废弃等按日汇总（成本分析）
+ * 页面：cost/goodsFenxiCost/goodsFenxiCost
+ * POST gbdepartmentgoodsstockreduce/getGoodsReduceWithDayData
+ */
+var getGoodsReduceWithDayData = function (data) {
+  return request.post('gbdepartmentgoodsstockreduce/getGoodsReduceWithDayData', {
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    disGoodsId: data.disGoodsId,
+    searchDepId: data.searchDepId != null && data.searchDepId !== '' ? String(data.searchDepId) : '-1',
+  }, { useUrlParams: true });
+};
+
+/**
+ * 菜品成本 / 出库分析
+ * POST gbDishCostAnalysis/report
+ * reportKind: salesDish（默认）| outboundQty
+ * 页面：cost/costGoodsFenxi/costGoodsFenxi
+ */
+var getGbDishCostAnalysisReport = function (data) {
+  var rk = (data.reportKind || 'salesDish').toString();
+  var body = {
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    disId: data.disId,
+    searchDepId: data.searchDepId != null && data.searchDepId !== '' ? String(data.searchDepId) : '-1',
+    reportKind: rk,
+  };
+  if (data.depFatherId != null && data.depFatherId !== '') {
+    body.depFatherId = String(data.depFatherId);
+  }
+  return request.post('gbDishCostAnalysis/report', body, { useUrlParams: true });
 };
 
 /**
@@ -142,7 +180,7 @@ var getGbPurGoodsListSearchDate = function (data) {
  * 页面：statistic/stockPurGoods/stockPurGoods
  */
 var getGbStockPurGoods = function (data) {
-  return request.post('gbdistributerpurchasegoods/getGbStockPurGoods', {
+  return request.post('gbdepartmentgoodsstock/getGbStockPurGoods', {
     supplierId: data.supplierId,
     purUserId: data.purUserId,
     disId: data.disId,
@@ -251,6 +289,73 @@ var saveDepReturnGoodsStock = function (data) {
   return request.post('gbdepartmentgoodsstock/saveDepReturnGoodsStock', data, { useUrlParams: true });
 };
 
+// ===================== 报表 report（pages/report） =====================
+
+/**
+ * 获取服务器日期维度（日/周/月）
+ * 页面：report/dateReport/dateReport
+ * GET gbdistributer/getDate
+ */
+var getDate = depOrder.getDate;
+
+/**
+ * 用户经营类报表列表
+ * GET gbreport/getDisUserReportsBusiness/{userId}
+ */
+var getDisUserReportsBusiness = function (userId) {
+  return request.get('gbreport/getDisUserReportsBusiness/' + userId);
+};
+
+/**
+ * 用户成本报表列表
+ * GET gbreport/getDisUserReportsCost/{userId}
+ */
+var getDisUserReportsCost = function (userId) {
+  return request.get('gbreport/getDisUserReportsCost/' + userId);
+};
+
+/**
+ * 用户采购报表列表
+ * GET gbreport/getDisUserReportsPurchase/{userId}
+ */
+var getDisUserReportsPurchase = function (userId) {
+  return request.get('gbreport/getDisUserReportsPurchase/' + userId);
+};
+
+/**
+ * 用户库存报表列表
+ * GET gbreport/getDisUserReportsStock/{userId}
+ */
+var getDisUserReportsStock = function (userId) {
+  return request.get('gbreport/getDisUserReportsStock/' + userId);
+};
+
+/**
+ * 删除报表（方法名与历史接口一致：delte）
+ * GET gbreport/delteReport/{repId}
+ */
+var delteReport = function (repId) {
+  return request.get('gbreport/delteReport/' + repId);
+};
+
+/**
+ * 保存成本/经营报表配置
+ * POST gbreport/saveReportCost
+ * 页面：report/subDepCost/subDepCost
+ */
+var saveReportCost = function (data) {
+  return request.post(
+    'gbreport/saveReportCost',
+    {
+      gbRepDisUserId: data.gbRepDisUserId,
+      gbRepIds: data.gbRepIds,
+      gbRepType: data.gbRepType,
+      gbRepStartDate: data.gbRepStartDate,
+      gbRepStopDate: data.gbRepStopDate,
+    },
+  );
+};
+
 // ===================== 每日营业额 =====================
 
 /**
@@ -310,6 +415,14 @@ var uploadTurnoverExcel = function (filePath, departmentId, distributerId) {
 };
 
 module.exports = {
+  // 报表 report
+  getDate: getDate,
+  getDisUserReportsBusiness: getDisUserReportsBusiness,
+  getDisUserReportsCost: getDisUserReportsCost,
+  getDisUserReportsPurchase: getDisUserReportsPurchase,
+  getDisUserReportsStock: getDisUserReportsStock,
+  delteReport: delteReport,
+  saveReportCost: saveReportCost,
   // 每日营业额
   getDailyTurnover: getDailyTurnover,
   saveDailyTurnover: saveDailyTurnover,
@@ -321,6 +434,8 @@ module.exports = {
   // 按日期成本
   getGbGoodsCostStatistics: getGbGoodsCostStatistics,
   getGoodsCostBySearchDate: getGoodsCostBySearchDate,
+  getGoodsReduceWithDayData: getGoodsReduceWithDayData,
+  getGbDishCostAnalysisReport: getGbDishCostAnalysisReport,
   getGbCostGoodsStatistics: getGbCostGoodsStatistics,
   // 商品看板
   disGetPurchaseCata: disGetPurchaseCata,

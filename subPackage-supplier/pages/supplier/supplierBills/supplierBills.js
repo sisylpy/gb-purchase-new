@@ -2,10 +2,12 @@ const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
 
-import apiUrl from '../../../../config.js'
-// import {
-//   disGetGbSupplierBillsWithStatus,
-// } from '../../../../lib/apiDistributerGb'
+import apiUrl from '../../../../config/index.js'
+
+
+import {
+  disGetGbSupplierBillsWithStatus,
+} from '../../../../services/apiDistributer.js'
 
 
 

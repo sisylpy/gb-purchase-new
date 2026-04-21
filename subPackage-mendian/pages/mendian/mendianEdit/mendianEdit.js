@@ -1,16 +1,8 @@
 const globalData = getApp().globalData;
 
-import apiUrl from '../../../../config.js'
-var load = require('../../../../lib/load.js');
-
-
-// import {
-//   updateGroupNameGb,
-//   deleteDepUser,
-//   getDepInfoGb,
-//   deleteMendian
-// } from '../../../../lib/apiDistributer'
-
+import apiUrl from '../../../../config/index.js'
+import { updateGroupNameGb } from '../../../services/mendian.js'
+var load = require('../../../../lib/load.js')
 
 Page({
 

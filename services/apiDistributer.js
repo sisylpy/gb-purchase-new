@@ -43,9 +43,8 @@ var updateJjPurchaserUser = function (data) {
  */
 var jjPurchaserUserUpdateWithFile = function (filePathList, userName, userId) {
   return new Promise(function (resolve, reject) {
-    var baseUrl = requestUtil.getBaseUrl();
     wx.uploadFile({
-      url: baseUrl + 'gbdepartmentuser/jjPurchaserUserUpdateWithFile',
+      url: requestUtil.apiUrl + 'gbdepartmentuser/jjPurchaserUserUpdateWithFile',
       filePath: filePathList[0],
       name: 'file',
       header: {
@@ -173,6 +172,16 @@ var disGetGbSupplierBillsWithStatus = function (data) {
   }, { useUrlParams: true });
 };
 
+// ===== myPurchaseDetail 页面需要的 API =====
+
+/**
+ * 获取采购批次详情
+ * GET gbdistributerpurchasebatch/getDisPurchaseGoodsBatchDetail/{id}
+ */
+var getDisPurchaseGoodsBatchDetail = function (id) {
+  return requestUtil.get('gbdistributerpurchasebatch/getDisPurchaseGoodsBatchDetail/' + id);
+};
+
 module.exports = {
   getDepUsersByFatherIdGb: getDepUsersByFatherIdGb,
   deleteDepUser: deleteDepUser,
@@ -188,4 +197,6 @@ module.exports = {
   depGetAllSupplier: depGetAllSupplier,
   // settlePageGb 需要的 API
   disGetGbSupplierBillsWithStatus: disGetGbSupplierBillsWithStatus,
+  // myPurchaseDetail 需要的 API
+  getDisPurchaseGoodsBatchDetail: getDisPurchaseGoodsBatchDetail,
 };

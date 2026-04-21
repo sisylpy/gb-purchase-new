@@ -2,19 +2,13 @@
 
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
-import apiUrl from '../../../../config.js'
-
-// import {
-//   getDisDepartmentGbMendianJing,
-//   updateGroupNameGb,
-//   deleteDepartment,
-//   changeSingleMendian,
-//   getDepUsersByFatherIdGb,
-//   deleteDepUser
-
-// } from '/services/apiDistributer.js'
-
-
+import apiUrl from '../../../../config/index.js'
+import {
+  getDepUsersByFatherIdGb,
+  getDisDepartmentGbMendianJing,
+  updateGroupNameGb,
+  deleteDepartment,
+} from '../../../services/mendian.js'
 
 Page({
 
@@ -29,9 +23,9 @@ Page({
 
   onShow() {
    
-      // this._initData();
+      this._initData();
 
-      // this._initDataUser();
+      this._initDataUser();
    
   },
 

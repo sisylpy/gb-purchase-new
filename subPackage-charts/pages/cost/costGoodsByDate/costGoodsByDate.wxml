@@ -1,0 +1,325 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+
+  <block wx:if="{{greatId != -1}}">
+    <back-navbar-search style="height: {{navBarHeight}}rpx;" titleLarge="{{name}}" title="" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack" isScrolled="{{isScrolled}}" tabIndex="{{tab1Index}}" bindtabclick="onNavTabClick" pageType="cost">
+    </back-navbar-search>
+  </block>
+
+  <block wx:else="">
+    <back-navbar-search style="height: {{navBarHeight}}rpx;" titleLarge="{{value}}元" title="" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack" isScrolled="{{isScrolled}}" tabIndex="{{tab1Index}}" bindtabclick="onNavTabClick" pageType="cost">
+    </back-navbar-search>
+  </block>
+
+
+  <!--  search-top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white {{isScrolled ? 'hidden' : ''}}">
+
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" font-md" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+  </view>
+
+
+  <!-- 部门筛选显示区域 -->
+  <view class="filter-container" wx:if="{{selectedDepartment}}">
+    <view class="filter-row">
+      <view class="filter-chip">
+        <text class="filter-text">部门: {{selectedDepartment.depName}}</text>
+        <view class="filter-delete" bindtap="clearDepartmentFilter">
+          <image src="/images/del-2.png" mode="aspectFill" class="delete-icon"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <swiper class="swiper-box {{isScrolled ? 'collapsed' : ''}}" duration="300" bindanimationfinish="animationfinish" current="{{tab1Index}}" data-index='{{tab1Index}}' lazy-load="{{false}}">
+
+    <!-- 制作成本 -->
+    <swiper-item>
+      <scroll-view scroll-y="true" bindscrolltolower="onReachBottom" bindscroll="onScroll">
+
+        <!-- 成本统计卡片区域 -->
+        <view class="cost-stats-container">
+
+          <!-- 售出成本卡片 -->
+          <view class="cost-card {{tab1Index == 0 ? 'cost-card-active' : ''}} {{isScrolled ? 'collapsed' : ''}}" data-index='0' bindtap='onTab1Click' data-type="sales">
+            <view class="cost-card-header  mt-10">
+              <view class="cost-icon sales-icon">
+                <image src="/images/money.png" class="icon-image"></image>
+              </view>
+              <view class="cost-title" wx:if="{{!isScrolled}}">售出成本</view>
+              <view class="cost-title-collapsed" wx:if="{{isScrolled}}">售出成本</view>
+            </view>
+            <view class="cost-amount" wx:if="{{!isScrolled}}">{{salesTotal}}元</view>
+
+            <view class="cost-total" wx:if="{{!isScrolled}}">商品{{produceCount}}个</view>
+          </view>
+
+          <!-- 损耗成本卡片 -->
+          <view class="cost-card {{tab1Index == 1 ? 'cost-card-active' : ''}} {{isScrolled ? 'collapsed' : ''}}" data-index='1' bindtap='onTab1Click' data-type="loss">
+            <view class="cost-card-header  mt-10">
+              <view class="cost-icon loss-icon">
+                <image src="/images/warning.png" class="icon-image"></image>
+              </view>
+              <view class="cost-title" wx:if="{{!isScrolled}}">损耗成本</view>
+              <view class="cost-title-collapsed" wx:if="{{isScrolled}}">损耗成本</view>
+            </view>
+            <view class="cost-amount" wx:if="{{!isScrolled}}">{{lossTotal}}元</view>
+
+            <view class="cost-total" wx:if="{{!isScrolled}}">商品{{lossCount}}个</view>
+          </view>
+
+          <!-- 废弃成本卡片 -->
+          <view class="cost-card {{tab1Index == 2 ? 'cost-card-active' : ''}} {{isScrolled ? 'collapsed' : ''}}" data-index='2' bindtap='onTab1Click' data-type="waste">
+            <view class="cost-card-header mt-10">
+              <view class="cost-icon waste-icon">
+                <image src="/images/delete.png" class="icon-image"></image>
+              </view>
+              <view class="cost-title" wx:if="{{!isScrolled}}">废弃成本</view>
+              <view class="cost-title-collapsed" wx:if="{{isScrolled}}">废弃成本</view>
+            </view>
+            <view class="cost-amount" wx:if="{{!isScrolled}}">{{wasteTotal}}元</view>
+
+            <view class="cost-total" wx:if="{{!isScrolled}}">商品{{wasteCount}}个</view>
+          </view>
+
+        </view>
+
+        <!-- 今日总支出 -->
+        <view class="flex-column " wx:if="{{produceArr.length > 0}}">
+
+          <view id="goods-container-{{goodsIndex}}" class="flex-column p-20 bg-white border-bottom" wx:for="{{produceArr}}" wx:for-index="goodsIndex" wx:key="gbDistributerGoodsId">
+
+            <!-- 商品信息区域 -->
+            <view class="flex-row-between" bind:tap="showList" data-index="{{goodsIndex}}">
+              <view class="flex-row-default mb-20">
+                <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="url_item mr-20" />
+                <view class="flex-column" style="flex: 1;">
+                  <view class="flex-row">
+                    <text class="font-sm">第{{goodsIndex + 1}}名/共{{totalCount}}个</text>
+                  </view>
+                  <view class="flex-row">
+                    <text class="font-bold mr-10">{{item.gbDgGoodsName}}</text>
+                    <block wx:if="{{item.gbDgGoodsStandardWeight.length > 0}}">
+                      <text class="text-secondary font-xs">({{item.gbDgGoodsStandardWeight}}/{{item.gbDgGoodsStandardname}})</text>
+                    </block>
+                    <block wx:else>
+                      <text class="text-secondary font-xs">({{item.gbDgGoodsStandardname}})</text>
+                    </block>
+                  </view>
+                </view>
+
+              </view>
+
+              <!-- 右侧总计和按钮 -->
+              <view class="goods-price-section">
+                <view class="price-container {{itemIndex == 0 ? 'sales-type' : (itemIndex == 1 ? 'loss-type' : (itemIndex == 2 ? 'waste-type' : 'return-type'))}}">
+                  <text class="price-label">{{itemIndex == 0 ? '售出' : (itemIndex == 1 ? '损耗' : (itemIndex == 2 ? '废弃' : '退货'))}}</text>
+                  <text class="price-value">¥{{itemIndex == 0 ? item.goodsProduceTotal : (itemIndex == 1 ? item.goodsLossTotal : (itemIndex == 2 ? item.goodsWasteTotal : item.goodsReturnTotal))}}</text>
+                </view>
+                <!-- 右侧箭头 -->
+                <view class="arrow-container {{item.showCostList ? 'expanded' : 'collapsed'}}">
+                  <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
+                </view>
+              </view>
+            </view>
+
+
+            <!-- 第二行 -->
+            <!-- 部门信息区域 -->
+            <!-- 成本详情列表 - 默认隐藏，点击showList后显示 -->
+            <view wx:if="{{item.showCostList}}" class="flex-column" wx:for="{{item.wasteDepartmentEntities}}" wx:key="gbDepartmentId" wx:for-item="dep" wx:for-index="depIndex">
+
+              <view class="flex-column font-xs mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
+
+                <!-- 整体卡片容器 -->
+                <view class="unified-card-container {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'unified-card-expanded' : 'unified-card-collapsed'}}">
+
+                  <!-- 默认显示--中间部分 -->
+                  <view id="src-{{goodsIndex}}-{{depIndex}}-{{reduceIndex}}" class="stock-row-container" data-index="{{reduceIndex}}" data-item-index="{{goodsIndex}}" data-day-index="{{depIndex}}">
+                    <view class="stock-row {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'stock-row-active' : ''}}" bind:tap="showOne" data-index="{{reduceIndex}}" data-item-index="{{goodsIndex}}" data-day-index="{{depIndex}}">
+
+                      <!-- 左侧信息区域 -->
+                      <view class="stock-info-left">
+                        <view class="stock-department">{{dep.gbDepartmentName}}</view>
+                        <view class="stock-date">{{tool.transferDateString(reduceDay.gbDgsrDate)}}</view>
+                      </view>
+
+                      <!-- 中间价格数量区域 -->
+                      <view class="stock-info-center">
+                        <block wx:if="{{reduceDay.gbDgsrType == 1}}">
+                          <view class="stock-amount">{{reduceDay.gbDgsrProduceSubtotal}}元</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrProduceWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-type sales-type">售出</view>
+                        </block>
+                        <block wx:if="{{reduceDay.gbDgsrType == 2}}">
+                          <view class="stock-amount">{{reduceDay.gbDgsrWasteSubtotal}}元</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWasteWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-type waste-type">废弃</view>
+                        </block>
+                        <block wx:if="{{reduceDay.gbDgsrType == 3}}">
+                          <view class="stock-amount">{{reduceDay.gbDgsrLossSubtotal}}元</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrLossWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-type loss-type">损耗</view>
+                        </block>
+                        <block wx:if="{{reduceDay.gbDgsrType == 4}}">
+                          <view class="stock-amount">{{reduceDay.gbDgsrReturnSubtotal}}元</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrReturnWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-type return-type">退货</view>
+                        </block>
+                      </view>
+
+                      <!-- 右侧箭头区域 -->
+                      <view class="stock-info-right">
+                        <view class="stock-arrow">
+                          <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'expanded' : 'collapsed'}}" />
+                        </view>
+                      </view>
+
+                    </view>
+                  </view>
+
+                  <!-- 采购信息 - 蓝色主题 -->
+                  <view wx:if="{{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex]}}" class="purchase-info-card expandable-content expanded">
+
+                    <!-- 分隔线 -->
+                    <view class="section-divider"></view>
+
+                    <!-- 库存详细信息 - 蓝色主题 -->
+                    <view class="purchase-info-card">
+
+
+                      <!-- 库存详细信息 -->
+                      <view class="purchase-detail-section">
+
+                        <!-- 库存信息行布局 -->
+                        <view class="stock-info-row">
+
+                          <!-- 左侧：部门信息 -->
+                          <view class="purchase-info">
+                            <text class="font-bold">{{tool.transferDateString(reduceDay.gbDepartmentGoodsStockEntity.gbDgsDate)}}</text>
+                            <block wx:if="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.purchaseDepartmentUser !== null}}">
+                              <text class="purchase-type">自采</text>
+                            </block>
+                            <block wx:else="">
+                              <text class="purchase-type">订货</text>
+                            </block>
+
+
+                          </view>
+                          <!-- 分隔线1 -->
+                          <view class="comparison-divider"></view>
+
+                          <!-- 左侧：部门信息 -->
+                          <view class="purchase-info purchase-inbound">
+                            <view class="column-label purchase-price">单价</view>
+                            <view class="column-content">
+
+                              <view class="amount-text">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgBuyPrice}}元/{{item.gbDgGoodsStandardname}}</view>
+                              <block wx:if="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.purchaseDepartmentUser !== null}}">
+                                <text class="weight-text purchase-price">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.purchaseDepartmentUser.gbDuWxNickName}}</text>
+                              </block>
+                              <block wx:elif="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.nxJrdhSupplierEntity !== null}}">
+                                <text class="weight-text">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
+                              </block>
+                            </view>
+                          </view>
+                          <!-- 分隔线2 -->
+                          <view class="comparison-divider"></view>
+
+                          <!-- 右侧：金额信息对比 -->
+                          <view class="stock-comparison-container">
+                            <!-- 入库信息 -->
+                            <view class="stock-info-column stock-inbound">
+                              <view class="column-label">入库</view>
+                              <view class="column-content">
+                                <text class="amount-text purchase-amount">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsSubtotal}}元</text>
+                                <text class="weight-text">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsWeight}}{{item.gbDgGoodsStandardname}}</text>
+                              </view>
+                            </view>
+
+                            <!-- 分隔线3 -->
+                            <view class="comparison-divider"></view>
+
+                            <!-- 剩余信息 -->
+                            <view class="stock-info-column stock-rest">
+                              <view class="column-label">剩余</view>
+                              <view class="column-content">
+                                <text class="amount-text rest-amount">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsRestSubtotal}}元</text>
+                                <text class="weight-text rest-weight">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsRestWeight}}{{item.gbDgGoodsStandardname}}</text>
+                              </view>
+                            </view>
+                          </view>
+                        </view>
+
+                      </view>
+                    </view>
+
+
+                  </view>
+
+                </view>
+              </view>
+            </view>
+
+          </view>
+
+          <view class="flex-column center-content text-secondary" style="height: 100rpx;" wx:if="{{produceArr.length == 0}}">
+            <view class="empty_View flex-column-center" style="margin-top: 200rpx;">
+              <text class="empty-emoji">🌶️</text>
+              <text class="big">没有数据啦!</text>
+            </view>
+          </view>
+
+          <!-- 分页状态显示 -->
+          <view class="flex-column-center mt-30 text-secondary" wx:if="{{produceArr.length > 0}}">
+            <!-- 分页信息 -->
+            <view class="flex-row">
+              <text class="pagination-text">共{{totalCount}}条记录,第{{currentPage}}/{{totalPage}}页</text>
+            </view>
+
+            <!-- 加载中状态 -->
+            <view class="loading-more" wx:if="{{isLoading}}">
+              <text class="loading-text">加载中...</text>
+            </view>
+
+            <!-- 加载更多提示 -->
+            <view class="load-more-tip" wx:elif="{{currentPage < totalPage}}">
+              <text class="tip-text">上拉加载更多</text>
+            </view>
+
+            <!-- 已加载全部 -->
+            <view class="load-complete" wx:elif="{{currentPage >= totalPage && totalPage > 0}}">
+              <text class="complete-text">已加载全部数据</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </swiper-item>
+
+
+  </swiper>
+
+
+
+</view>

@@ -1,4 +1,4 @@
-<wxs src="../../../../../utils/fn.wxs" module="tool" />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
 <import src='../../../../template/jrdhFenxi/jrdhFenxi.wxml' />
 
 

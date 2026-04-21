@@ -83,7 +83,7 @@ Page({
       
       if (res.result.code == 0) {
         var data = res.result.data || [];
-        
+         console.log("rreee",res.result.data);
         // 处理数据，计算汇总
         var totalIn = 0;
         var totalRest = 0;

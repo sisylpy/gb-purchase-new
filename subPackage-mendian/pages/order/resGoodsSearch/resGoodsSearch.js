@@ -1,5 +1,5 @@
 var load = require('../../../../lib/load.js');
-var config = require('../../../../config.js');
+var config = require('../../../../config/index.js');
 var dateUtils = require('../../../../lib/dateUtil');
 var depOrder = require('../../../../services/depOrder');
 
@@ -10,9 +10,9 @@ var depOrder = require('../../../../services/depOrder');
 // depOrder.gbDisSaveStandard(data)                POST  gbdistributerstandard/gbDisSaveStandard               保存配送标准
 // depOrder.saveNxStandard(data)                   POST  nxstandard/saveNxStandard                             保存牛享标准
 // depOrder.gbDisDeleteStandard(data)              GET   gbdistributerstandard/gbDisDeleteStandard/{id}         删除配送标准
-// depOrder.saveGbOrderJj(data)                    POST  gbdepartmentorders/saveOrdersGbJj                     保存进价订单
-// depOrder.saveOrdersGbJjAndSaveDepGoods(data)    POST  gbdepartmentorders/saveOrdersGbJjAndSaveDepGoods       保存订单并更新部门商品
-// depOrder.saveOrdersGbJjAndSaveGoods(data)       POST  gbdistributergoods/saveOrdersGbJjAndSaveGoods          保存订单并更新配送商品
+// depOrder.createDepartmentOrderForJj(data)                    POST  gbdepartmentorders/saveOrdersGbJj                     保存进价订单
+// depOrder.createDepartmentOrderWithNewDepDisGoods(data)    POST  gbdepartmentorders/createDepartmentOrderWithNewDepDisGoods       保存订单并更新部门商品
+// depOrder.createDepartmentOrderFromNxGoodsImport(data)       POST  gbdistributergoods/createDepartmentOrderFromNxGoodsImport          保存订单并更新配送商品
 // depOrder.updateOrderGbJj(data)                  POST  gbdepartmentorders/updateOrderGbJj                     更新进价订单
 // depOrder.deleteOrderGb(data)                    GET   gbdepartmentorders/deleteOrderGb/{id}                   删除订单
 // depOrder.saveDepProduceGoodsStock(data)         POST  gbdepartmentgoodsstock/saveDepProduceGoodsStock         保存生产库存
@@ -546,13 +546,13 @@ Page({
 
     if (this.data.itemDis == null) {
       // 牛享商品订货
-      this._saveOrderToBackend(dg, 'saveOrdersGbJjAndSaveGoods');
+      this._saveOrderToBackend(dg, 'createDepartmentOrderFromNxGoodsImport');
     } else if (this.data.depGoods == null) {
       // 配送商品订货（新部门商品）
-      this._saveOrderToBackend(dg, 'saveOrdersGbJjAndSaveDepGoods');
+      this._saveOrderToBackend(dg, 'createDepartmentOrderWithNewDepDisGoods');
     } else {
       // 部门商品直接订货
-      this._saveOrderToBackend(dg, 'saveGbOrderJj');
+      this._saveOrderToBackend(dg, 'createDepartmentOrderForJj');
     }
 
     wx.setStorageSync('needRefreshOrderData', true);

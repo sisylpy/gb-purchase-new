@@ -1,46 +1,27 @@
 <wxs module="format" src="../../../../wxs/format.wxs" />
 
-<view class="flex flex-column page-bg">
+<view class="flex flex-column">
 
   <!-- 导航栏 -->
   <navbar title="餐厅画像" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
 
-  <view class="content flex-1 flex-column">
+  <view class="flex-column p-20">
 
     <scroll-view scroll-y="true" class="scroll-content" style="padding-top: {{navBarHeight}}rpx;" show-scrollbar="true">
 
       <!-- 加载中 -->
-      <view class="loading-state" wx:if="{{isLoading}}">
+      <!-- <view class="loading-state" wx:if="{{isLoading}}">
         <view class="flex-column-center" style="height: 400rpx;">
           <text class="text-secondary">加载中...</text>
         </view>
-      </view>
+      </view> -->
 
-      <!-- 无画像 - 引导创建 -->
-      <view class="empty-state" wx:elif="{{!hasProfile && !isEditing}}">
-        <view class="flex-column-center" style="padding-top: 120rpx;">
-          <view class="empty-icon-wrap">
-            <text class="empty-icon-text">🏪</text>
-          </view>
-          <view class="font-bold font-lg p-30">
-            <text>暂无餐厅画像</text>
-          </view>
-          <view class="text-secondary font-sl mb-40">
-            <text>创建画像后，AI 营销军师能为您提供更精准的营销建议</text>
-          </view>
-          <view class="create-btn" bindtap="toggleEdit">
-            <text>创建画像</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 有画像 或 编辑模式 -->
-      <block wx:else>
+    
 
         <!-- ===== 顶部操作按钮 ===== -->
-        <view class="top-actions" style="padding: 24rpx 32rpx;">
+        <view class="" >
           <view class="action-row" wx:if="{{!isEditing}}">
-            <view class="btn btn-secondary" bindtap="toggleEdit">
+            <view class="btn btn-secondary flex-row" bindtap="toggleEdit">
               <text>✏️ 编辑画像</text>
             </view>
           </view>
@@ -363,24 +344,7 @@
           </block>
         </view>
 
-        <!-- ===== 底部操作按钮 ===== -->
-        <view class="bottom-actions" style="padding-bottom: 60rpx;">
-          <view class="action-row" wx:if="{{!isEditing}}">
-            <view class="btn btn-secondary" bindtap="toggleEdit">
-              <text>✏️ 编辑画像</text>
-            </view>
-          </view>
-          <view class="action-row" wx:else>
-            <view class="btn btn-cancel" bindtap="toggleEdit">
-              <text>取消</text>
-            </view>
-            <view class="btn btn-primary" bindtap="saveProfile">
-              <text>💾 保存</text>
-            </view>
-          </view>
-        </view>
-
-      </block>
+     
 
     </scroll-view>
   </view>

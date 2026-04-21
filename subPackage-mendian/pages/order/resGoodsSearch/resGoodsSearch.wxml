@@ -55,7 +55,7 @@
 
                       <view class="flex-row-between ">
                         <view class="flex-row">
-                          <text class="font-bold font-lg-2">{{goods.gbDdgDepGoodsName}}</text>
+                          <text class="font-bold font-xl">{{goods.gbDdgDepGoodsName}}</text>
                           <text class="ml-20" wx:if="{{goods.gbDdgDepGoodsName !== goods.gbDgGoodsName}}">({{goods.gbDgGoodsName}})</text>
                           <block wx:if="{{goods.gbDgControlFresh == 1}}">
                             <text class="fresh_goods ml-10">保鲜{{goods.gbDgFreshWasteHour}}小时</text>
@@ -154,7 +154,7 @@
                       <view class="flex-column" style="width: {{windowWidth - 320}}rpx;  ">
                         <view class="flex-row middle">
                           <text class=" {{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? brand : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? sons.nxGoodsBrand : ''}}</text>
-                          <view class="font-lg-2">{{sons.nxGoodsName}}</view>
+                          <view class="font-xl">{{sons.nxGoodsName}}</view>
                         </view>
 
                         <view class="flex-row font-sm" wx:if="{{sons.nxGoodsStandardWeight !== null && sons.nxGoodsStandardWeight !== ''}}">

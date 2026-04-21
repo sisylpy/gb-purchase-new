@@ -1,4 +1,5 @@
-<wxs src="../../../../../utils/fn.wxs" module="tool" />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 
  <view class="flex flex-column">
@@ -17,13 +18,13 @@
             <view wx:if="{{goods.isFirstInCategory}}" id="cat-dep-{{goods.gbDgDfgGoodsGrandId}}" class="goods-category-title-dep"></view>
             <view class="flex-row-default  goods-item-dep p-20" id="{{goods.viewId}}">
               <view class="img-wrapper">
-                <image bindtap="showDialogBtnDep" data-item="{{goods}}" src="{{goods.gbDgNxFatherImg !== null ? url + goods.gbDgNxFatherImg : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
+                <image bindtap="showDialogBtnDep" data-item="{{goods}}" src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ? (imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg') : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
               </view>
 
               <view class="flex-row">
                 <view class="flex-column" style="width: {{windowWidth - 360}}rpx;">
                   <view class="flex-row">
-                    <text class="font-bold font-lg-2">{{goods.gbDgGoodsName}}</text>
+                    <text class="font-bold font-xl">{{goods.gbDgGoodsName}}</text>
                     <block wx:if="{{goods.gbDgControlFresh == 1}}">
                                 <text class="fresh_goods">保鲜{{goods.gbDgFreshWasteHour}}小时</text>
                               </block>

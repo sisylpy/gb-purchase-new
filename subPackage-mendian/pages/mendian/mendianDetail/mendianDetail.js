@@ -1,7 +1,8 @@
 
 const globalData = getApp().globalData;
 
-import apiUrl from '../../../../config.js'
+import apiUrl from '../../../../config/index.js'
+import { getDepUsersByFatherIdGb } from '../../../services/mendian.js'
 var load = require('../../../../lib/load.js');
 
 let scrollDdirection = 0; // 用来计算滚动的方向
@@ -11,7 +12,6 @@ let itemWidth = 0;
 // import {
 //   depGetDepFood,
 //   depGetDepGoodsGb,
-//   getDepUsersByFatherIdGb,
 //   updateDepUserAdminGb,
 //   deleteDepUser,
 // } from '../../../../lib/apiDepOrder'

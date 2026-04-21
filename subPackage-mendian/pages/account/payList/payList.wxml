@@ -1,0 +1,80 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+
+<back-navbar style="height: {{navBarHeight}}rpx;" title="充值记录" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+<view class="flex-column p-30" style="margin-top: {{navBarHeight}}rpx;">
+
+  <view class="flex-row-between p-20" bind:tap="toPayDetail">
+    <text></text>
+    <text class="">支付记录</text>
+  </view>
+  <!-- emptyView -->
+  <view class=" {{payArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
+    <view class="font-lg  empty_view">
+      <view class="flex-column center-content">
+        <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
+        <text class="big">没有充值记录</text>
+        <text class="mainBack_new_btn mt-10" bind:tap="toPayPage">去充值</text>
+      </view>
+    </view>
+  </view>
+  <!-- ./emptyView -->
+
+  <block wx:if="{{payArr.length > 0}}">
+    <view class="flex-column twenty_radius bg-white p-20 mb-20" wx:for="{{payArr}}">
+
+
+      <view class="flex-column p-10">
+        <view class="flex-row-between">
+          <text class="small text-secondary">支付金额</text>
+          <text class="big">{{item.gbGdpPaySubtotal}}元</text>
+        </view>
+        <view wx:if="{{item.gbGdpStatus == -1}}">
+          <view class="flex-column-center twenty_radius p-20" style="width: {{windowWidth - 140}}rpx; background-color: #ffbc65; line-height: 60rpx;" bind:tap="toPay" data-item="{{item}}">
+            <view class="font-lg text-center">完成支付</view>
+          </view>
+        </view>
+
+      </view>
+
+      <view class="flex-row p-10">
+        <text class="mr-20  text-secondary">购买时间</text>
+        <text>{{item.gbGdpPayTime}}</text>
+      </view>
+      <view class="flex-row p-10 ">
+        <text class="mr-20 text-secondary">购买数量</text>
+        <text>{{item.gbGdpBuyQuantity}}万</text>
+      </view>
+      <view class="flex-row p-10" wx:if="{{item.newDistributer !== null}}">
+        <text class="mr-20 text-secondary">邀请用户</text>
+        <text class="mr-10">{{item.newDistributer.gbDistributerName}}</text>
+      </view>
+
+    </view>
+  </block>
+
+
+
+
+
+
+
+</view>
+
+
+<view class="overlay {{showLogin ? 'show' : 'hide'}}">
+
+  <!-- 表单容器 -->
+  <view class="flex-column font-lg popup">
+    <view class="flex-column center-content ">
+      <text class="title  p-20">京采账本</text>
+      <text class="sub-title">专为餐饮采购打造，简化订货流程</text>
+    </view>
+    <view class="submit-section p-30">
+      <view class="submit-btn" bind:tap="_userLogin" style="width: {{windowWidth - 140}}rpx;">登录</view>
+    </view>
+  </view>
+
+</view>
