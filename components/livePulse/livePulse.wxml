@@ -1,0 +1,11 @@
+<!-- 金元宝：无指针、无深色底，暖金 + 轻浮动 + 光泽 -->
+<view class="live-pulse" aria-label="经营顺遂">
+  <view class="yb">
+    <view class="yb-shine"></view>
+    <view class="yb-humps">
+      <view class="yb-hump"></view>
+      <view class="yb-hump"></view>
+    </view>
+    <view class="yb-belly"></view>
+  </view>
+</view>

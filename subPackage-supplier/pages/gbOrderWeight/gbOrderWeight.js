@@ -7,12 +7,10 @@ import {
   supplierGetUnWeightOutPurGoods,
 } from '../../../services/depOrder'
 
-import dateUtil from '../../../utils/dateUtil';
 
 Page({
 
   onShow() {
-      let windowInfo = wx.getWindowInfo();
       let globalData = getApp().globalData;
       this.setData({
         windowWidth: globalData.windowWidth * globalData.rpxR,
@@ -487,7 +485,7 @@ Page({
       const remark = (goodsDetail && goodsDetail !== 'null' && goodsDetail.length > 0) ? goodsDetail : '';
       const standardName = item.gbDistributerGoodsEntity?.gbDgGoodsStandardname || '';
 
-      if (item.gbDistributerGoodsEntity?.gbDepartmentOrdersEntities &&
+      if (item.gbDepartmentOrdersEntities &&
         item.gbDepartmentOrdersEntities.length > 0) {
 
         item.gbDepartmentOrdersEntities.forEach((order) => {

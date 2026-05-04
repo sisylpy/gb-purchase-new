@@ -118,3 +118,11 @@ button {
 button::after { 
   border: none; 
 }
+
+
+.shareBtn{
+  border: 1px solid rgb(75, 5, 122);
+  border-radius: 199rpx;
+  padding: 6rpx 30rpx;
+  color: #000;
+}

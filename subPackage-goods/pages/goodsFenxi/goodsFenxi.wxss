@@ -91,3 +91,132 @@
   text-align: right;
   color: #333;
 }
+
+/* 菜品用量表：独立圆角白底模块，与上方统计卡片区隔 */
+.cog-sub-table {
+  margin-top: 30rpx;
+  background-color: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #eee;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.cog-sub-table .cog-tr--head {
+  border-radius: 0;
+}
+
+.cog-sub-table .cog-tr:last-child {
+  border-bottom: none;
+}
+
+.cog-tr {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  border-bottom: 1rpx solid #f0f0f0;
+  padding: 12rpx 8rpx;
+  box-sizing: border-box;
+}
+
+.cog-tr--head {
+  padding: 10rpx 8rpx 12rpx;
+  border-bottom: 1rpx solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 10rpx;
+}
+
+.cog-tr--head .cog-td {
+  font-size: 28rpx;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.cog-td {
+  flex: 1;
+  min-width: 0;
+  font-size: 30rpx;
+  /* font-weight: 600; */
+  color: #1f2937;
+  line-height: 1.45;
+  text-align: center;
+  padding: 10rpx 16rpx;
+  word-break: break-all;
+}
+
+.cog-td--name {
+  flex: 1.35;
+  text-align: left;
+}
+
+.cog-td--right {
+  text-align: right;
+}
+
+
+/* 统计区：左侧圆底小图标（与稿一致：蓝 / 绿 / 橙） */
+.goods-fenxi-stat-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.goods-fenxi-stat-icon {
+  width: 72rpx;
+  height: 72rpx;
+  min-width: 72rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  margin-top: 4rpx;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 40rpx 40rpx;
+}
+
+.goods-fenxi-stat-text {
+  min-width: 0;
+}
+
+/* 对比模式下 chip 与正文左对齐（跳过圆形图标占位） */
+.goods-fenxi-stat-chip-indent {
+  margin-left: 88rpx;
+}
+
+.goods-fenxi-stat-icon--cart {
+  background-color: #e8f0fe;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'%232B7CE9'%20stroke-width%3D'2'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Ccircle%20cx%3D'9'%20cy%3D'21'%20r%3D'1'%2F%3E%3Ccircle%20cx%3D'20'%20cy%3D'21'%20r%3D'1'%2F%3E%3Cpath%20d%3D'M1%201h4l2.68%2013.39a2%202%200%200%200%202%201.61h9.72a2%202%200%200%200%202-1.61L23%206H6'%2F%3E%3C%2Fsvg%3E");
+}
+
+.goods-fenxi-stat-icon--tag {
+  background-color: #e8f0fe;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'%232B7CE9'%20stroke-width%3D'2'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpath%20d%3D'M20.59%2013.41l-7.17%207.17a2%202%200%200%201-2.83%200L2%2012V2h10l8.59%208.59a2%202%200%200%201%200%202.82z'%2F%3E%3Cline%20x1%3D'7'%20y1%3D'7'%20x2%3D'7.01'%20y2%3D'7'%2F%3E%3C%2Fsvg%3E");
+}
+
+.goods-fenxi-stat-icon--stack {
+  background-color: #e8f5e9;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'%2334A853'%20stroke-width%3D'2'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpolygon%20points%3D'12%202%202%207%2012%2012%2022%207%2012%202'%2F%3E%3Cpolyline%20points%3D'2%2017%2012%2022%2022%2017'%2F%3E%3Cpolyline%20points%3D'2%2012%2012%2017%2022%2012'%2F%3E%3C%2Fsvg%3E");
+}
+
+.goods-fenxi-stat-icon--doc {
+  background-color: #e8f5e9;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'%2334A853'%20stroke-width%3D'2'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpath%20d%3D'M14%202H6a2%202%200%200%200-2%202v16a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2V8z'%2F%3E%3Cpolyline%20points%3D'14%202%2014%208%2020%208'%2F%3E%3Cline%20x1%3D'9'%20y1%3D'15'%20x2%3D'15'%20y2%3D'15'%2F%3E%3Cline%20x1%3D'9'%20y1%3D'11'%20x2%3D'15'%20y2%3D'11'%2F%3E%3C%2Fsvg%3E");
+}
+
+.goods-fenxi-stat-icon--chart {
+  background-color: #fff3e0;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'%23FF7A45'%20stroke-width%3D'2'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cline%20x1%3D'4'%20y1%3D'19'%20x2%3D'4'%20y2%3D'23'%2F%3E%3Cline%20x1%3D'9'%20y1%3D'14'%20x2%3D'9'%20y2%3D'23'%2F%3E%3Cline%20x1%3D'14'%20y1%3D'9'%20x2%3D'14'%20y2%3D'23'%2F%3E%3Cline%20x1%3D'19'%20y1%3D'4'%20x2%3D'19'%20y2%3D'23'%2F%3E%3Cpolyline%20points%3D'23%206%2013.5%2015.5%208.5%2010.5%201%2018'%2F%3E%3Cpolyline%20points%3D'17%206%2023%206%2023%2012'%2F%3E%3C%2Fsvg%3E");
+}
+
+.goods-fenxi-stat-icon--pie {
+  background-color: #e8f0fe;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%232B7CE9'%20d%3D'M10.08%202.5A10%2010%200%201%201%202.5%2013.92L12%2012V2.5h-1.92z'%2F%3E%3Cpath%20fill%3D'none'%20stroke%3D'%232B7CE9'%20stroke-width%3D'1.5'%20d%3D'M12%202a10%2010%200%201%201-1%2019.98'%2F%3E%3C%2Fsvg%3E");
+}
+
+.goods-fenxi-stat-icon--box {
+  background-color: #e8f0fe;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'%232B7CE9'%20stroke-width%3D'2'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpolyline%20points%3D'21%208%2021%2021%203%2021%203%208'%2F%3E%3Crect%20x%3D'1'%20y%3D'3'%20width%3D'22'%20height%3D'5'%2F%3E%3Cline%20x1%3D'10'%20y1%3D'12'%20x2%3D'14'%20y2%3D'12'%2F%3E%3C%2Fsvg%3E");
+}
+
+@import "/reportPage.wxss";

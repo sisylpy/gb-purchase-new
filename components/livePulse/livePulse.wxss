@@ -1,0 +1,111 @@
+/* 导航左侧占位 64rpx；纯金色元宝，阴影用暖褐金不用黑 */
+.live-pulse {
+  width: 64rpx;
+  height: 64rpx;
+  position: relative;
+  margin-left: 20rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yb {
+  position: relative;
+  width: 56rpx;
+  height: 52rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 4rpx;
+  box-sizing: border-box;
+  animation: ybFloat 2.6s ease-in-out infinite;
+}
+
+/* 元宝腹部：饱满椭圆 */
+.yb-belly {
+  width: 48rpx;
+  height: 26rpx;
+  border-radius: 50%;
+  z-index: 1;
+  background: linear-gradient(
+    165deg,
+    #fff9e8 0%,
+    #ffe9a0 18%,
+    #ffd34d 42%,
+    #ffc400 62%,
+    #e8a928 100%
+  );
+  box-shadow:
+    inset 0 3rpx 8rpx rgba(255, 255, 255, 0.65),
+    inset 0 -2rpx 6rpx rgba(200, 130, 30, 0.25),
+    0 5rpx 14rpx rgba(210, 150, 50, 0.38);
+}
+
+/* 双凸顶：元宝特征 */
+.yb-humps {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2rpx;
+  margin-bottom: -12rpx;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.yb-hump {
+  width: 20rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: linear-gradient(200deg, #fff6d4 0%, #ffe566 35%, #f5c028 100%);
+  box-shadow:
+    inset 0 2rpx 5rpx rgba(255, 255, 255, 0.55),
+    0 2rpx 6rpx rgba(200, 130, 40, 0.28);
+}
+
+/* 高光扫过 */
+.yb-shine {
+  position: absolute;
+  left: -30%;
+  top: -10%;
+  width: 160%;
+  height: 120%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.55) 48%,
+    rgba(255, 255, 255, 0.15) 52%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: ybShine 3.2s ease-in-out infinite;
+  opacity: 0.88;
+}
+
+@keyframes ybFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5rpx) scale(1.04);
+  }
+}
+
+@keyframes ybShine {
+  0%,
+  100% {
+    background-position: 5% 30%;
+    opacity: 0.55;
+  }
+  50% {
+    background-position: 95% 70%;
+    opacity: 1;
+  }
+}

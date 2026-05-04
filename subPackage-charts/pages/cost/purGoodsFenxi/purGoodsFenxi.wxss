@@ -34,6 +34,13 @@
   margin-bottom: 20rpx;
 }
 
+/* 图表区域：固定高度，避免 flex + height:100% 在小程序里把 ec-canvas 压成一条 */
+.pur-goods-fenxi-chart-wrap {
+  width: 100%;
+  height: 420rpx;
+  flex-shrink: 0;
+}
+
 /* 确保图表有足够的显示空间 */
 ec-canvas {
   width: 100% !important;

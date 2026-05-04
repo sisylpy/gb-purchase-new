@@ -88,11 +88,7 @@ Component({
         name: '4',
         value: '废弃',
       },
-      // ,
-      // {
-      //   name: '5',
-      //   value: '新鲜度',
-      // }
+    
     ],
 
     greenStars: [], // 绿色星星数组

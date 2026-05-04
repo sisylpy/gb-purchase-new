@@ -16,7 +16,7 @@
         <view class="flex-row mt-10">
           <text class="font-sm text-secondary">库存: </text>
           <text class="font-bold mainColor">{{disGoods.goodsStockTotalString || 0}}元</text>
-          <text class="font-xs text-secondary ml-10">({{disGoods.goodsStockWeightTotalString || 0}})</text>
+          <text class="font-sl text-secondary ml-10">({{disGoods.goodsStockWeightTotalString || 0}})</text>
         </view>
       </view>
     </view>
@@ -42,19 +42,19 @@
   <view class="summary-bar bg-white p-20 mb-20" wx:if="{{stockList.length > 0}}">
     <view class="flex-row-between">
       <view class="summary-item">
-        <text class="text-secondary font-xs">总入库</text>
+        <text class="text-secondary font-sl">总入库</text>
         <text class="font-bold font-lg" style="color: #007aff;">{{totalIn}}元</text>
       </view>
       <view class="summary-item">
-        <text class="text-secondary font-xs">总剩余</text>
+        <text class="text-secondary font-sl">总剩余</text>
         <text class="font-bold font-lg" style="color: #34c759;">{{totalRest}}元</text>
       </view>
       <view class="summary-item">
-        <text class="text-secondary font-xs">已用/报废</text>
+        <text class="text-secondary font-sl">已用/报废</text>
         <text class="font-bold font-lg" style="color: #ff9500;">{{totalUsed}}元</text>
       </view>
       <view class="summary-item">
-        <text class="text-secondary font-xs">记录数</text>
+        <text class="text-secondary font-sl">记录数</text>
         <text class="font-bold font-lg">{{stockList.length}}</text>
       </view>
     </view>
@@ -72,8 +72,8 @@
           </view>
           <view class="flex-row align-center">
             <image src="/images/calender.png" class="icon-sm mr-10"></image>
-            <text class="font-xs text-secondary">{{tool.getMonthDay(item.gbDgsDate)}}</text>
-            <text class="font-xs text-secondary ml-10">{{tool.getWeekDay(item.gbDgsDate)}}</text>
+            <text class="font-sl text-secondary">{{tool.getMonthDay(item.gbDgsDate)}}</text>
+            <text class="font-sl text-secondary ml-10">{{tool.getWeekDay(item.gbDgsDate)}}</text>
           </view>
         </view>
 
@@ -116,7 +116,7 @@
             <view class="days-badge {{item.stockDaysClass}}">
               <text>{{item.stockDays}}天库存</text>
             </view>
-            <text class="font-xs text-secondary ml-10" wx:if="{{item.supplierName}}">{{item.supplierName}}</text>
+            <text class="font-sl text-secondary ml-10" wx:if="{{item.supplierName}}">{{item.supplierName}}</text>
           </view>
           <view class="status-badge {{item.statusClass}}">
             <text>{{item.statusText}}</text>
@@ -134,7 +134,7 @@
         </view>
       </view>
 
-      <view class="p-30 text-center text-secondary font-xs" wx:if="{{noMore}}">
+      <view class="p-30 text-center text-secondary font-sl" wx:if="{{noMore}}">
         <text>没有更多数据了</text>
       </view>
     </view>

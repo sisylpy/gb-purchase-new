@@ -177,7 +177,54 @@
 }
 
 
+
+
 .inputPrice{
-  border-bottom: 1px solid lightgray;
-  
+  border-bottom: 1px solid rgb(233, 231, 231);
+  line-height: 80rpx;
+  padding: 10rpx 10rpx;
+}
+
+/* 废弃时间弹窗底部按钮 */
+.fresh-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24rpx;
+  padding: 8rpx 28rpx 36rpx;
+  box-sizing: border-box;
+}
+
+.fresh-btn {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 24rpx 20rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.35;
+  border-radius: 12rpx;
+}
+
+.fresh-btn--cancel {
+  color: #425042;
+  background: #f1f3f2;
+  border: 2rpx solid #dfe3e1;
+}
+
+.fresh-btn--confirm {
+  color: #9aa29a;
+  background: #e8ebea;
+  border: 2rpx solid #d5dad7;
+}
+
+.fresh-btn--confirm.is-active {
+  color: #ffffff;
+  background: linear-gradient(145deg, #1a8a78 0%, #187e6e 45%, #146b5c 100%);
+  border-color: #146b5c;
+  box-shadow: 0 6rpx 16rpx rgba(24, 126, 110, 0.28);
+}
+
+.fresh-btn-hover {
+  opacity: 0.88;
 }

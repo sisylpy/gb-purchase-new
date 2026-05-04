@@ -42,7 +42,7 @@
         <text class="food-form-label" style="padding-top: 8rpx;">菜品图片</text>
         <image
           class="class_img"
-          src="{{type == 'edit' && !isSelectImg ? url + foodItem.gbDistributerFoodImg : src}}"
+          src="{{type == 'edit' && !isSelectImg ? url + foodItem.gbDfFoodImg : src}}"
           bindtap="choiceImg"
           mode="aspectFill"
           style="width: {{windowWidth / 3}}rpx; height: {{windowWidth / 3}}rpx;"
@@ -50,7 +50,7 @@
       </view>
 
       <view class="food-form-row food-form-row--multiline">
-        <text class="food-form-label" style="padding-top: 12rpx;">售出要求</text>
+        <text class="food-form-label" style="padding-top: 12rpx;">制作要求</text>
         <textarea
           class="numberText"
           style="width: {{windowWidth - 260}}rpx;"
@@ -62,7 +62,7 @@
     </view>
   </view>
 </view>
-
+<!-- 
 <view class="food-search-modal" wx:if="{{showFood}}" catchtouchmove="stopMove">
   <view class="food-search-modal__panel">
     <view class="food-search-modal__head">
@@ -134,4 +134,4 @@
       </view>
     </view>
   </view>
-</view>
+</view> -->

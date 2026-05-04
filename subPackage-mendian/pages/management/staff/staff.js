@@ -38,30 +38,29 @@ Page({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: apiUrl.server,
     });
-
     var myDate = wx.getStorageSync('myDate');
-    if (myDate) {
+    if(myDate){
       // 如果是自定义日期，传递具体的开始和结束日期
       var dateRange;
-      if (myDate.name === 'custom') {
+      if (myDate.name === 'custom' ) {
         dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
       } else {
         dateRange = dateUtils.getDateRange(myDate.name);
       }
-
+      
       this.setData({
         startDate: dateRange.startDate,
         stopDate: dateRange.stopDate,
         dateType: myDate.dateType,
         hanzi: myDate.hanzi || dateRange.name,
-      });
-    } else {
+      })
+    }else{
       this.setData({
         dateType: 'month',
         startDate: dateUtils.getFirstDateInMonth(),
         stopDate: dateUtils.getArriveDate(0),
-        hanzi: "本月",
-      });
+        hanzi:  "本月",
+      })
     }
 
     var userInfo = wx.getStorageSync('userInfo');
@@ -144,8 +143,9 @@ Page({
     this.setData({
       editUser: true
     });
+   
     wx.navigateTo({
-      url: '../disUserEdit/disUserEdit',
+      url: '../../mendian/depUserEdit/depUserEdit',
     });
   },
 
@@ -173,7 +173,7 @@ Page({
     var purUserId = item.gbDepartmentUserId;
     console.log('purUserId:', purUserId);
     wx.setStorageSync('purUserItem', item);
-    var url = '/subPackage-mendian/pages/management/purUserEveryDay/purUserEveryDay?purUserId=' + purUserId + '&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType;
+    var url = '../purUserEveryDay/purUserEveryDay?purUserId=' + purUserId + '&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType;
     console.log('跳转url:', url);
     wx.navigateTo({
       url: url,
@@ -182,12 +182,13 @@ Page({
 
   /** 跳转采购员分析 */
   toPurUserFenxi: function () {
+    console.log("toPurUserFenxitoPurUserFenxitoPurUserFenxi")
     this.setData({
       showOperation: false,
     });
     wx.setStorageSync('purUserItem', this.data.purUserItem);
     wx.navigateTo({
-      url: '../purUserFenxi/purUserFenxi?purUserId=' + this.data.purUserItem.gbDepartmentUserId
+      url: '/subPackage-supplier/pages/supplier/purUserFenxi/purUserFenxi?purUserId=' + this.data.purUserItem.gbDepartmentUserId
         + '&type=0&supplierId=-1&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate
         + '&dateType=' + this.data.dateType,
     });

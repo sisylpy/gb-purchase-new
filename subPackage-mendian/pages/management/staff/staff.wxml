@@ -1,4 +1,5 @@
 
+<wxs src="../../../../utils/fn.wxs" module="tool" />
 
 
 <view class="flex flex-column">
@@ -9,7 +10,7 @@
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
     <view class="flex-row" style="width: {{windowWidth - 200}}rpx;">
       <view class="p-20" bindtap="toDatePageSearch">
-        <image src="../../../images/calender.png" class="icon"></image>
+        <image src="../../../../images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">
         <view class="font-yuan">{{hanzi}}</view>
@@ -24,7 +25,7 @@
       </view>
     </view>
 
-    <button class="big mainBack_new_btn " open-type="share" bindtap="toShareAdmin">+</button>
+    <button class="big  shareBtn " open-type="share" bindtap="toShareAdmin">+</button>
 
   </view>
 
@@ -46,7 +47,7 @@
             </view>
           </view>
           <view class="user-menu-btn" bindtap="openOperation" data-id="{{item.gbDepartmentUserId}}" catchtap="openOperation" data-item="{{item}}">
-            <image src="../../../images/points.png" class="menu-icon"></image>
+            <image src="../../../../images/points.png" class="menu-icon"></image>
           </view>
         </view>
         
@@ -74,7 +75,7 @@
 
     <view class="flex-column center-content text-secondary" style="height: 400rpx;" wx:if="{{userArr.length == 0}}">
       <view class="empty_View flex-column-center" style="margin-top: 200rpx;">
-        <image class="empty_image" src="../../../images/file-empty.png"></image>
+        <image class="empty_image" src="../../../../images/file-empty.png"></image>
         <text class="mt-30 text-secondary">暂无数据</text>
       </view>
     </view>
@@ -90,16 +91,16 @@
   <view class="flex-column nnn bg-white ">   
 
     <view  class="flex-row p-30" catch:tap="toPurUserFenxi" >
-      <image src="../../../images/edit.png" class="icon mr-20"></image>
+      <image src="../../../../images/edit.png" class="icon mr-20"></image>
       <text class=" mr-20">采购员分析</text>
     </view>
     <view wx:if="{{selectUserId == userInfo.gbDepartmentUserId}}" class="flex-row p-30" bindtap="editUser">
-      <image src="../../../images/edit.png" class="icon mr-20"></image>
+      <image src="../../../../images/edit.png" class="icon mr-20"></image>
       <text class=" mr-20">修改用户信息</text>
     </view>
 
     <view wx:else class="flex-row p-30" bindtap="delUser">
-      <image src="../../../images/del.png" class="icon  mr-20"></image>
+      <image src="../../../../images/del.png" class="icon  mr-20"></image>
       <text class=" mr-20">删除用户</text>
     </view>
     <view style="height: 40rpx;"></view>
@@ -113,7 +114,7 @@
   <view class="mb-20  center-content">
 
     <view class="tishiView" style="width:{{windowWidth/5}}rpx; height:{{windowWidth/5}}rpx; margin-top:-{{windowWidth/10 + 10}}rpx; z-index: 9999;border-radius: 50%;">
-      <image src="../../../images/aixin.png" class="tishi_icon" style="width:{{windowWidth/5 -80}}rpx; height:{{windowWidth/5 - 80}}rpx;  border-radius: 50%; margin-top:40rpx; margin-left: 40rpx;">
+      <image src="../../../../images/aixin.png" class="tishi_icon" style="width:{{windowWidth/5 -80}}rpx; height:{{windowWidth/5 - 80}}rpx;  border-radius: 50%; margin-top:40rpx; margin-left: 40rpx;">
       </image>
     </view>
 

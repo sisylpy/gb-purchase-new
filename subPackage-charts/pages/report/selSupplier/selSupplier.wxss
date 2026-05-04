@@ -1,0 +1,14 @@
+
+
+.member_url{
+  width: 70rpx;
+  height: 70rpx;
+  border-radius: 50%;
+}
+
+.icon{
+  width: 40rpx;
+  height: 40rpx;
+}
+
+

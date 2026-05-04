@@ -50,8 +50,9 @@ Page({
           update: false
         })
       }
-      this._initData();
+     
     }
+    this._initData();
   },
 
   /**
@@ -92,7 +93,7 @@ Page({
     if (disInfo) {
       this.setData({
         disInfo: disInfo,
-        departmentId: disInfo.gbDepartmentId,  // 部门ID
+        departmentId: disInfo.mendianDepartmentList[0].gbDepartmentId,  // 部门ID
       })
     }
 
@@ -105,24 +106,8 @@ Page({
   _initData() {
     load.showLoading("获取数据中")
 
-    // 获取 departmentId
-    var departmentId = '';
-    if (this.data.disInfo) {
-      // 尝试多种可能的字段
-      if (this.data.disInfo.gbDepartmentId) {
-        departmentId = this.data.disInfo.gbDepartmentId;
-      } else if (this.data.disInfo.gbDistributerId) {
-        departmentId = this.data.disInfo.gbDistributerId;
-      } else if (this.data.disInfo.mendianDepartmentList && this.data.disInfo.mendianDepartmentList.length > 0) {
-        departmentId = this.data.disInfo.mendianDepartmentList[0].gbDepartmentId;
-      }
-    }
-    
-    console.log('departmentId:', departmentId);
-    console.log('disInfo:', this.data.disInfo);
-
     var params = {
-      departmentId: departmentId,
+      departmentId: this.data.departmentId,
       startDate: this.data.startDate,
       endDate: this.data.stopDate,
     }
@@ -417,22 +402,43 @@ Page({
     this.setData({
       showAddMenu: false
     })
+    /** 列表当前筛选区间的最后一天，用于添加页模板起算日（不从当月 1 号起） */
+    var anchor =
+      (this.data.stopDate && String(this.data.stopDate).substring(0, 10)) ||
+      (this.data.startDate && String(this.data.startDate).substring(0, 10)) ||
+      dateUtils.getArriveDate(0);
     wx.navigateTo({
-      url: '../addTurnover/addTurnover?type=single&departmentId=' + this.data.departmentId
+      url:
+        '../addFoodSales/addFoodSales?type=single&departmentId=' +
+        this.data.departmentId +
+        '&anchorDate=' +
+        encodeURIComponent(anchor),
     })
   },
 
   /**
-   * 批量添加多日营业额
+   * 每日详情某一行：进入「修改菜品销量」（拉取当日已有数据）
    */
-  addBatchDays() {
-    this.setData({
-      showAddMenu: false
-    })
+  openFoodSalesEdit(e) {
+    var raw = e.currentTarget.dataset.recordDate
+    if (raw == null || raw === '') {
+      wx.showToast({ title: '日期缺失', icon: 'none' })
+      return
+    }
+    var day = String(raw).trim().substring(0, 10)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+      wx.showToast({ title: '日期格式异常', icon: 'none' })
+      return
+    }
     wx.navigateTo({
-      url: '../addTurnover/addTurnover?type=batch&departmentId=' + this.data.departmentId
+      url:
+        '../addFoodSales/addFoodSales?edit=1&type=single&departmentId=' +
+        (this.data.departmentId || '') +
+        '&anchorDate=' +
+        encodeURIComponent(day),
     })
   },
+
 
   /**
    * 页面卸载时清除缓存

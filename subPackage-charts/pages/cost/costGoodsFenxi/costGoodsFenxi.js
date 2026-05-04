@@ -3,256 +3,77 @@ var globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
 var chartsApi = require('../../../services/api.js');
 var config = require('../../../../config/index.js');
+var echarts = require('../../../ec-canvas/echarts');
 
-/** 用量差 / 份数差 / 成本差 共用一块底色；全零灰；任一为负红系否则蓝系；深浅取三指标相对比例的最大值 */
-var EPS = 1e-6;
+var UTIL_BUCKET_COLOR = {
+  CRITICAL: '#dc2626',
+  HIGH: '#ea580c',
+  NORMAL: '#16a34a',
+  LOW: '#2563eb',
+};
 
-/** 设为 true 时在控制台输出用量差/出库与底色；确认后改回 false */
-var DEBUG_ING_DIFF_BADGE = false;
-
-function parseNum(v) {
-  if (v === null || v === undefined || v === '') return NaN;
-  return Number(String(v).trim());
-}
-
-function lerp(a, b, t) {
-  return Math.round(a + (b - a) * t);
-}
-
-function rgb(r, g, b) {
-  return 'rgb(' + r + ',' + g + ',' + b + ')';
-}
-
-/**
- * 用量差通道：先把 |差|/出库 转成「相对出库的百分制」再映射，严重偏差（如 2.67 倍）时底色明显加深。
- * x = (|diff|/outbound) * QTY_RATIO_INTENSITY_SCALE，再 x/(1+x)。
- */
-var QTY_RATIO_INTENSITY_SCALE = 100;
-
-function ratioForIntensityQtyDiff(absDiff, outbound) {
-  if (!(absDiff > EPS)) return 0;
-  if (!(outbound > EPS)) {
-    return Math.min(absDiff / (absDiff + 1), 1);
-  }
-  var rawRatio = absDiff / outbound;
-  var x = rawRatio * QTY_RATIO_INTENSITY_SCALE;
-  return x / (1 + x);
-}
-
-/**
- * 份数 / 成本通道：x=|diff|/denom 映射为 x/(1+x)。
- */
-function ratioForIntensity(absDiff, denom) {
-  if (!(absDiff > EPS)) return 0;
-  if (!(denom > EPS)) {
-    return Math.min(absDiff / (absDiff + 1), 1);
-  }
-  var x = absDiff / denom;
-  return x / (1 + x);
-}
-
-/**
- * 底色深浅只跟「用量差/出库」算出的 r1 走，避免 r2/r3 把多行 max 成同一深度、肉眼无差别。
- * 再对 r1 做 sqrt + 抬底，让常见区间（约 0.35～0.95）在屏幕上拉开。
- */
-function mapQtyR1ToBgIntensity(r1) {
-  var x = Math.min(Math.max(r1, 0), 1);
-  var spread = Math.sqrt(x);
-  return Math.min(1, 0.1 + 0.9 * spread);
-}
-
-/** |用量差|/出库×100，以百分比展示（如 267.1% 表示差值约为出库的 2.67 倍） */
-function formatAbsDiffOverOutboundPercent(d1, outbound) {
-  if (!(outbound > EPS)) {
-    return '—';
-  }
-  return (Math.abs(d1) / outbound * 100).toFixed(1) + '%';
-}
-
-function computeIngDiffBadgeColors(goods, ctx) {
-  ctx = ctx || {};
-  var d1 = parseNum(goods.recipeTheoryQtyVsOutboundAllocDiff);
-  var d2 = parseNum(goods.soldVsSupportedPortionDiff);
-  var d3 = parseNum(goods.recipeSalesVsOutboundCostDiff);
-  if (isNaN(d1)) d1 = 0;
-  if (isNaN(d2)) d2 = 0;
-  if (isNaN(d3)) d3 = 0;
-
-  var outbound = parseNum(goods.outboundAllocatedQty);
-  if (isNaN(outbound)) outbound = 0;
-  var ingDiffQtyOutboundRatioText = formatAbsDiffOverOutboundPercent(d1, outbound);
-
-  if (Math.abs(d1) < EPS && Math.abs(d2) < EPS && Math.abs(d3) < EPS) {
-    if (DEBUG_ING_DIFF_BADGE) {
-      console.log('[ingDiffBadge]', ctx.__debugTag || '', '→ 全零灰', {
-        goodsName: goods.goodsName,
-        disGoodsId: goods.disGoodsId,
-        raw: {
-          recipeTheoryQtyVsOutboundAllocDiff: goods.recipeTheoryQtyVsOutboundAllocDiff,
-          soldVsSupportedPortionDiff: goods.soldVsSupportedPortionDiff,
-          recipeSalesVsOutboundCostDiff: goods.recipeSalesVsOutboundCostDiff,
-        },
-      });
-    }
-    return {
-      recipeTheoryQtyDiffBg: '#F3F4F6',
-      recipeTheoryQtyDiffColor: '#6B7280',
-      ingDiffQtyOutboundRatioText: ingDiffQtyOutboundRatioText,
-    };
-  }
-
-  var spSold = parseNum(ctx.soldPortions != null ? ctx.soldPortions : goods.soldPortions);
-  if (isNaN(spSold)) spSold = 0;
-  var spSup = parseNum(goods.supportedPortionsThisGood);
-  if (isNaN(spSup)) spSup = 0;
-  var denomPortion = Math.max(spSold, spSup, EPS);
-
-  var cSales = parseNum(goods.salesIngredientCostAmount);
-  var cOut = parseNum(goods.outboundAllocatedIngredientCostAmount);
-  if (isNaN(cSales)) cSales = 0;
-  if (isNaN(cOut)) cOut = 0;
-  var denomCost = Math.max(Math.abs(cSales), Math.abs(cOut), EPS);
-
-  var r1 = ratioForIntensityQtyDiff(Math.abs(d1), outbound);
-  var r2 = ratioForIntensity(Math.abs(d2), denomPortion);
-  var r3 = ratioForIntensity(Math.abs(d3), denomCost);
-  var t = mapQtyR1ToBgIntensity(r1);
-
-  var hasNeg = d1 < -EPS || d2 < -EPS || d3 < -EPS;
-
-  // 浅色 → 深色：端点再拉开，同样 Δt 时 RGB 差更大，肉眼好分辨
-  var result;
-  if (hasNeg) {
-    result = {
-      recipeTheoryQtyDiffBg: rgb(lerp(255, 218, t), lerp(248, 150, t), lerp(248, 150, t)),
-      recipeTheoryQtyDiffColor: '#9B2C2C',
-      ingDiffQtyOutboundRatioText: ingDiffQtyOutboundRatioText,
-    };
-  } else {
-    result = {
-      recipeTheoryQtyDiffBg: rgb(lerp(248, 92, t), lerp(252, 175, t), lerp(255, 218, t)),
-      recipeTheoryQtyDiffColor: '#1E4E8C',
-      ingDiffQtyOutboundRatioText: ingDiffQtyOutboundRatioText,
-    };
-  }
-
-  if (DEBUG_ING_DIFF_BADGE) {
-    var rMax = Math.max(r1, r2, r3);
-    var rawQtyRatio =
-      outbound > EPS ? Math.abs(d1) / outbound : null;
-    var whichWins =
-      rMax <= EPS
-        ? 'none'
-        : r1 >= r2 && r1 >= r3
-          ? 'r1用量差通道'
-          : r2 >= r1 && r2 >= r3
-            ? 'r2份数差通道'
-            : 'r3成本差通道';
-    console.log('[ingDiffBadge]', ctx.__debugTag || '', hasNeg ? '红系' : '蓝系', {
-      goodsName: goods.goodsName,
-      disGoodsId: goods.disGoodsId,
-      /** 用量差 vs 出库量：原始比值 |recipeTheoryQtyVsOutboundAllocDiff| / outboundAllocatedQty */
-      qtyVsOutbound: {
-        recipeTheoryQtyVsOutboundAllocDiff: d1,
-        outboundAllocatedQty: outbound,
-        rawRatio: rawQtyRatio,
-        rawRatioDesc:
-          rawQtyRatio == null
-            ? 'outbound 为 0，无法算比值，r1 走无分母分支'
-            : '|diff|/outbound=' + rawQtyRatio.toFixed(6),
-        /** r1：x=(|差|/出库)×' + QTY_RATIO_INTENSITY_SCALE + '，再 x/(1+x) */
-        xForR1:
-          rawQtyRatio == null ? null : rawQtyRatio * QTY_RATIO_INTENSITY_SCALE,
-        r1Mapped: r1,
-      },
-      otherRatios: {
-        portion: { absD2: Math.abs(d2), denom: denomPortion, raw: denomPortion > EPS ? Math.abs(d2) / denomPortion : null, r2: r2 },
-        cost: { absD3: Math.abs(d3), denom: denomCost, raw: denomCost > EPS ? Math.abs(d3) / denomCost : null, r3: r3 },
-      },
-      depthRule:
-        '底色深浅仅由 r1：(|差|/出库)×' +
-        QTY_RATIO_INTENSITY_SCALE +
-        ' → x/(1+x)，再 sqrt 映射；r2/r3 不参与底色',
-      whichChannelWins: whichWins,
-      intensityChannels: { r1: r1, r2: r2, r3: r3, rMax: rMax },
-      bgIntensityT: t,
-      note: 't 只来自 r1，与 rMax 无关',
-      /** 实际设置到页面的底色、字色 */
-      recipeTheoryQtyDiffBg: result.recipeTheoryQtyDiffBg,
-      recipeTheoryQtyDiffColor: result.recipeTheoryQtyDiffColor,
-    });
-  }
-
-  return result;
-}
-
-function enrichOutboundGoodsRows(rows) {
-  if (!rows || !rows.length) return [];
-  return rows.map(function (item) {
-    return Object.assign({}, item, computeIngDiffBadgeColors(item, { __debugTag: 'outboundQty' }));
-  });
-}
-
-function enrichSalesDishRows(rows) {
-  if (!rows || !rows.length) return [];
-  return rows.map(function (dish) {
-    var next = Object.assign({}, dish);
-    if (dish.ingredientRows && dish.ingredientRows.length) {
-      var tag = 'salesDish:' + (dish.foodName || dish.foodId || '');
-      next.ingredientRows = dish.ingredientRows.map(function (g) {
-        return Object.assign({}, g, computeIngDiffBadgeColors(g, {
-          soldPortions: dish.soldPortions,
-          __debugTag: tag,
-        }));
-      });
-    }
-    return next;
-  });
-}
+var DEFAULT_INGREDIENT_PAGE_SIZE = 20;
 
 Page({
   data: {
-    reportKind: 'salesDish',
-    salesDishRows: [],
+    ecUtil: {
+      lazyLoad: false,
+    },
+    summary: null,
+    utilizationDistribution: null,
+    ingredientsAnalysis: [],
     outboundGoodsRows: [],
     loading: false,
+    listLoadingMore: false,
+    ingredientHasMore: true,
+    ingredientListPage: 0,
+    ingredientPageSize: DEFAULT_INGREDIENT_PAGE_SIZE,
+    ingredientTotal: null,
+    searchBarOpen: false,
+    searchInputFocus: false,
+    goodsNameSearch: '',
+    goodsNameSearchDraft: '',
     emptyHint: '',
     update: false,
     searchDepId: '-1',
-    /** true：配料 badge 旁显示调试色块 + 色值字符串，便于与底色对比；上线前改 false */
-    ingDiffDebugSwatch: true,
+    /**
+     * outboundIngredientAnalysis sortBy（与后端一致）：
+     * outbound | outboundAmount | 出库金额
+     * util | utilization | 制作率
+     * wasteloss | wasteAndLoss | 损耗
+     */
+    ingredientSortBy: 'outbound',
+    /** sortOrder：asc 升序（当前默认）、desc 降序；与 sortBy 联用 */
+    ingredientSortOrder: 'asc',
+    expandedDisGoodsId: null,
+    /** 仅用于展开/收起后恢复滚动，不用来跟手滚动同步，避免与子高度变化时被重置冲突 */
+    ingredientScrollRestoreTop: '',
   },
 
   onShow: function () {
     if (this.data.update) {
-      var myDate = wx.getStorageSync('myDate');
-      if (myDate) {
-        var dateRange;
-        if (myDate.name === 'custom') {
-          dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-        } else {
-          dateRange = dateUtils.getDateRange(myDate.name);
-        }
-        this.setData({
-          startDate: dateRange.startDate,
-          stopDate: dateRange.stopDate,
-          dateType: myDate.dateType,
-          hanzi: myDate.hanzi || dateRange.name,
-          update: false,
-        });
-      } else {
-        this.setData({ update: false });
-      }
+      this._syncDatesFromMyDateStorage();
+      this.setData({ update: false });
       this._fetchReport();
+    }
+  },
+
+  onUnload: function () {
+    if (this._searchDebounceTimer) {
+      clearTimeout(this._searchDebounceTimer);
+      this._searchDebounceTimer = null;
+    }
+    if (this._utilDonutChart) {
+      try {
+        this._utilDonutChart.dispose();
+      } catch (e) {}
+      this._utilDonutChart = null;
     }
   },
 
   onLoad: function (options) {
     var userInfo = wx.getStorageSync('userInfo');
     var disId = (options && options.disId) || (userInfo && userInfo.gbDuDistributerId);
-    var searchDepId =
-      (options && options.searchDepId != null && String(options.searchDepId)) || '-1';
-    var rk = options && options.reportKind ? normalizeReportKind(options.reportKind) : 'salesDish';
 
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
@@ -260,10 +81,21 @@ Page({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: config.server,
       disId: disId,
-      searchDepId: searchDepId,
-      reportKind: rk,
     });
 
+    this._syncDatesFromMyDateStorage();
+
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo && mendianInfo.gbDepartmentId) {
+      this.setData({
+        depFatherId: mendianInfo.gbDepartmentId,
+      });
+    }
+
+    this._fetchReport();
+  },
+
+  _syncDatesFromMyDateStorage() {
     var myDate = wx.getStorageSync('myDate');
     if (myDate) {
       var dateRange;
@@ -286,80 +118,457 @@ Page({
         hanzi: '本月',
       });
     }
+  },
 
-    var mendianInfo = wx.getStorageSync('mendianInfo');
-    if (mendianInfo && mendianInfo.gbDepartmentId) {
-      this.setData({
-        depFatherId: mendianInfo.gbDepartmentId,
+  _getUtilDonutOption: function () {
+    var dist = this.data.utilizationDistribution;
+    if (!dist || !dist.buckets || !dist.buckets.length) {
+      return {
+        title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { fontSize: 12 } },
+      };
+    }
+    var total = dist.totalKindsWithUtilization;
+    var buckets = dist.buckets;
+    var seriesData = buckets.map(function (b) {
+      var lvl = b.level;
+      return {
+        name: b.labelZh || lvl,
+        value: typeof b.count === 'number' ? b.count : parseFloat(b.count) || 0,
+        itemStyle: { color: UTIL_BUCKET_COLOR[lvl] || '#9ca3af' },
+      };
+    });
+    var sum = seriesData.reduce(function (a, x) {
+      return a + x.value;
+    }, 0);
+    if (sum <= 0) {
+      return {
+        title: {
+          text: total + '\n种配料',
+          left: 'center',
+          top: 'center',
+          textAlign: 'center',
+          textStyle: { fontSize: 13, color: '#6b7280', lineHeight: 18 },
+        },
+        series: [],
+      };
+    }
+    return {
+      animation: true,
+      tooltip: { show: false },
+      series: [
+        {
+          type: 'pie',
+          radius: ['48%', '72%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: false,
+          label: { show: false },
+          labelLine: { show: false },
+          data: seriesData,
+        },
+      ],
+      graphic: [
+        {
+          type: 'text',
+          left: 'center',
+          top: '42%',
+          style: {
+            text: String(total),
+            textAlign: 'center',
+            fill: '#111827',
+            fontSize: 18,
+            fontWeight: 'bold',
+          },
+        },
+        {
+          type: 'text',
+          left: 'center',
+          top: '54%',
+          style: {
+            text: '种配料',
+            textAlign: 'center',
+            fill: '#6b7280',
+            fontSize: 12,
+          },
+        },
+      ],
+    };
+  },
+
+  _initUtilDonutChart: function () {
+    var that = this;
+    if (!this.data.utilizationDistribution || !this.data.utilizationDistribution.buckets) {
+      if (this._utilDonutChart) {
+        try {
+          this._utilDonutChart.dispose();
+        } catch (e) {}
+        this._utilDonutChart = null;
+      }
+      return;
+    }
+    var comp = this.selectComponent('#utilDonut');
+    if (!comp) {
+      return;
+    }
+    if (this._utilDonutChart) {
+      this._utilDonutChart.setOption(this._getUtilDonutOption(), true);
+      return;
+    }
+    comp.init(function (canvas, width, height) {
+      var Chart = echarts.init(canvas, null, {
+        width: width,
+        height: height,
+        devicePixelRatio: globalData.rpxR,
       });
+      that._utilDonutChart = Chart;
+      Chart.setOption(that._getUtilDonutOption());
+      return Chart;
+    });
+  },
+
+  _pickTotalCount: function (data) {
+    if (data == null) {
+      return null;
+    }
+    var t =
+      data.ingredientTotal != null
+        ? data.ingredientTotal
+        : data.total != null
+          ? data.total
+          : data.totalCount != null
+            ? data.totalCount
+            : data.listTotal != null
+              ? data.listTotal
+              : null;
+    if (t == null || t === '') {
+      return null;
+    }
+    var n = parseInt(String(t), 10);
+    return isNaN(n) ? null : n;
+  },
+
+  _mergeIngredientRows: function (prev, incoming) {
+    var prevArr = prev || [];
+    var add = incoming || [];
+    if (!add.length) {
+      return prevArr;
+    }
+    var seen = {};
+    var i;
+    for (i = 0; i < prevArr.length; i++) {
+      var id = prevArr[i].disGoodsId;
+      if (id != null) {
+        seen[id] = 1;
+      }
+    }
+    var out = prevArr.slice();
+    for (i = 0; i < add.length; i++) {
+      var row = add[i];
+      var rid = row.disGoodsId;
+      if (rid != null && seen[rid]) {
+        continue;
+      }
+      if (rid != null) {
+        seen[rid] = 1;
+      }
+      out.push(row);
+    }
+    return out;
+  },
+
+  _fetchIngredientReport: function (append) {
+    var that = this;
+    var isAppend = !!append;
+    if (!this.data.disId) {
+      wx.showToast({ title: '缺少配送商信息', icon: 'none' });
+      return;
+    }
+    if (isAppend) {
+      if (!that.data.ingredientHasMore || that.data.listLoadingMore || that.data.loading) {
+        return;
+      }
+      that.setData({ listLoadingMore: true });
+    } else {
+      this.setData({ loading: true });
+      load.showLoading('加载中');
     }
 
-    this._fetchReport();
+    var pageSize = this.data.ingredientPageSize || DEFAULT_INGREDIENT_PAGE_SIZE;
+    var lastPage = this.data.ingredientListPage || 0;
+    var reqPage = isAppend ? lastPage + 1 : 1;
+
+    chartsApi
+      .outboundIngredientAnalysis({
+        startDate: this.data.startDate,
+        stopDate: this.data.stopDate,
+        endDate: this.data.stopDate,
+        disId: this.data.disId,
+        searchDepId: this.data.searchDepId,
+        depFatherId: this.data.depFatherId,
+        sortBy: this.data.ingredientSortBy || 'outbound',
+        sortOrder: this.data.ingredientSortOrder || 'asc',
+        goodsNameSearch: this.data.goodsNameSearch || '',
+        page: reqPage,
+        pageSize: pageSize,
+      })
+      .then(function (res) {
+        if (!isAppend) {
+          load.hideLoading();
+        }
+        var data = (res.result && res.result.data) || {};
+        var rows = data.ingredientsAnalysis || data.list || [];
+        var sortOrderEcho = data.sortOrder;
+        var nextSortOrder =
+          sortOrderEcho === 'desc' || sortOrderEcho === 'asc' ? sortOrderEcho : that.data.ingredientSortOrder;
+        var pageEcho = data.page != null ? data.page : data.currentPage;
+        var resolvedPage = pageEcho != null ? parseInt(String(pageEcho), 10) : reqPage;
+        if (isNaN(resolvedPage)) {
+          resolvedPage = reqPage;
+        }
+        var sizeEcho = data.pageSize != null ? parseInt(String(data.pageSize), 10) : pageSize;
+        if (!isNaN(sizeEcho) && sizeEcho > 0 && sizeEcho !== that.data.ingredientPageSize) {
+          that.setData({ ingredientPageSize: sizeEcho });
+        }
+
+        var totalCount = that._pickTotalCount(data);
+        var prevList = that.data.ingredientsAnalysis || [];
+        var nextList = isAppend ? that._mergeIngredientRows(prevList, rows) : rows;
+
+        var hasMore;
+        if (totalCount != null) {
+          hasMore = nextList.length < totalCount;
+        } else {
+          hasMore = rows.length >= pageSize;
+        }
+
+        var firstId = nextList.length ? nextList[0].disGoodsId : null;
+        var summary = data.summary;
+        var utilDist = data.utilizationDistribution;
+        if (isAppend) {
+          if (summary == null || summary === undefined) {
+            summary = that.data.summary;
+          }
+          if (utilDist == null || utilDist === undefined) {
+            utilDist = that.data.utilizationDistribution;
+          }
+        } else {
+          if (summary === undefined) {
+            summary = null;
+          }
+          if (utilDist === undefined) {
+            utilDist = null;
+          }
+        }
+
+        var emptyHint = '';
+        if (!nextList.length && !isAppend) {
+          emptyHint = that.data.goodsNameSearch
+            ? '未找到「' + that.data.goodsNameSearch + '」相关配料'
+            : '';
+        }
+
+        that.setData(
+          {
+            loading: false,
+            listLoadingMore: false,
+            summary: summary,
+            utilizationDistribution: utilDist,
+            ingredientsAnalysis: nextList,
+            ingredientListPage: resolvedPage,
+            ingredientTotal: totalCount != null ? totalCount : isAppend ? that.data.ingredientTotal : null,
+            ingredientHasMore: hasMore,
+            expandedDisGoodsId: isAppend ? that.data.expandedDisGoodsId : firstId,
+            ingredientSortOrder: nextSortOrder,
+            emptyHint: emptyHint,
+          },
+          function () {
+            if (!isAppend) {
+              wx.nextTick(function () {
+                that._initUtilDonutChart();
+              });
+            }
+          }
+        );
+      })
+      .catch(function () {
+        if (!isAppend) {
+          load.hideLoading();
+        }
+        that.setData({
+          loading: false,
+          listLoadingMore: false,
+        });
+        if (!isAppend) {
+          that.setData({
+            summary: null,
+            utilizationDistribution: null,
+            ingredientsAnalysis: [],
+            expandedDisGoodsId: null,
+            ingredientListPage: 0,
+            ingredientTotal: null,
+            ingredientHasMore: false,
+            emptyHint: '',
+          });
+        }
+      });
   },
 
   _fetchReport: function () {
     var that = this;
-    if (!this.data.disId) {
-      load.showToast('缺少配送商信息');
+    this.setData(
+      {
+        ingredientListPage: 0,
+        ingredientTotal: null,
+        ingredientHasMore: true,
+        listLoadingMore: false,
+      },
+      function () {
+        that._fetchIngredientReport(false);
+      }
+    );
+  },
+
+  onIngredientScrollToLower: function () {
+    this._fetchIngredientReport(true);
+  },
+
+  onToggleSearchBar: function () {
+    var open = !this.data.searchBarOpen;
+    if (open) {
+      this.setData({
+        searchBarOpen: true,
+        searchInputFocus: true,
+        goodsNameSearchDraft: this.data.goodsNameSearch || this.data.goodsNameSearchDraft || '',
+      });
+    } else {
+      this.setData({
+        searchBarOpen: false,
+        searchInputFocus: false,
+      });
+    }
+  },
+
+  onGoodsSearchInput: function (e) {
+    var that = this;
+    var v = (e.detail && e.detail.value) || '';
+    this.setData({ goodsNameSearchDraft: v });
+    if (this._searchDebounceTimer) {
+      clearTimeout(this._searchDebounceTimer);
+    }
+    this._searchDebounceTimer = setTimeout(function () {
+      var t = (that.data.goodsNameSearchDraft || '').trim();
+      if (t === (that.data.goodsNameSearch || '')) {
+        return;
+      }
+      that.setData({ goodsNameSearch: t }, function () {
+        that._fetchReport();
+      });
+    }, 400);
+  },
+
+  onGoodsSearchConfirm: function (e) {
+    var v = ((e.detail && e.detail.value) || this.data.goodsNameSearchDraft || '').trim();
+    if (this._searchDebounceTimer) {
+      clearTimeout(this._searchDebounceTimer);
+      this._searchDebounceTimer = null;
+    }
+    this.setData({ goodsNameSearch: v, goodsNameSearchDraft: v }, function () {
+      this._fetchReport();
+    });
+  },
+
+  onGoodsSearchClear: function () {
+    if (this._searchDebounceTimer) {
+      clearTimeout(this._searchDebounceTimer);
+      this._searchDebounceTimer = null;
+    }
+    this.setData({ goodsNameSearch: '', goodsNameSearchDraft: '' }, function () {
+      this._fetchReport();
+    });
+  },
+
+  onIngredientSort: function (e) {
+    var that = this;
+    var sort = e.currentTarget.dataset.sort;
+    if (!sort) {
       return;
     }
-    this.setData({ loading: true });
-    load.showLoading('加载中');
-    chartsApi
-      .getGbDishCostAnalysisReport({
-        startDate: this.data.startDate,
-        stopDate: this.data.stopDate,
-        disId: this.data.disId,
-        searchDepId: this.data.searchDepId,
-        depFatherId: this.data.depFatherId,
-        reportKind: this.data.reportKind,
-      })
-      .then(function (res) {
-        load.hideLoading();
-        console.log("res",res.result.data);
-        var data = res.result.data ;
-        if(res.result.data.reportKind ==  "salesDish"){
-          that.setData({
-            salesDishRows: enrichSalesDishRows(data.salesDishRows || []),
-            loading: false,
-          });
-        }else{
-          that.setData({
-            outboundGoodsRows: enrichOutboundGoodsRows(data.outboundGoodsRows || []),
-            loading: false,
-          });
+    var curBy = this.data.ingredientSortBy;
+    var curOrder = this.data.ingredientSortOrder || 'asc';
+    if (sort === curBy) {
+      var nextOrder = curOrder === 'asc' ? 'desc' : 'asc';
+      this.setData({ ingredientSortOrder: nextOrder }, function () {
+        that._fetchReport();
+      });
+    } else {
+      this.setData({ ingredientSortBy: sort, ingredientSortOrder: 'asc' }, function () {
+        that._fetchReport();
+      });
+    }
+  },
+
+  onIngredientFilter: function () {
+    wx.showToast({ title: '筛选开发中', icon: 'none' });
+  },
+
+  onIngredientListScroll: function (e) {
+    var d = e.detail;
+    if (d && typeof d.scrollTop === 'number') {
+      this._lastIngredientScrollTop = d.scrollTop;
+    }
+  },
+
+  /**
+   * scroll-view 在子节点高度变化时往往会把 scrollTop 置 0，表现为展开/收起「跳一下」。
+   * 在布局更新后把滚动位置写回（优先 node.scrollTo，其次 scroll-top 双次 setData 触发）。
+   */
+  _restoreIngredientListScroll: function (top) {
+    var that = this;
+    var y = typeof top === 'number' && !isNaN(top) ? top : 0;
+    wx.createSelectorQuery()
+      .in(this)
+      .select('#cogIngredientScroll')
+      .node()
+      .exec(function (res) {
+        var node = res && res[0] && res[0].node;
+        if (node && typeof node.scrollTo === 'function') {
+          try {
+            node.scrollTo({ scrollTop: y, animated: false });
+            return;
+          } catch (err) {}
         }
-        that.setData({
-          reportKind: res.result.data.reportKind,
+        var bump = y + 0.01;
+        that.setData({ ingredientScrollRestoreTop: bump }, function () {
+          wx.nextTick(function () {
+            that.setData({ ingredientScrollRestoreTop: y }, function () {
+              wx.nextTick(function () {
+                that.setData({ ingredientScrollRestoreTop: '' });
+              });
+            });
+          });
         });
-      })
-      .catch(function () {
-        load.hideLoading();
-        that.setData({ loading: false });
-        load.showToast('网络异常');
       });
   },
 
-  /** 顶栏单图：在销售菜品 / 出库数量 间切换 */
-  onToggleReportKind: function () {
-    var next = this.data.reportKind === 'salesDish' ? 'outboundQty' : 'salesDish';
-    this.setData({ reportKind: next });
-    this._fetchReport();
+  onToggleIngredientExpand: function (e) {
+    var id = e.currentTarget.dataset.id;
+    if (id === undefined || id === null) {
+      return;
+    }
+    var saved =
+      typeof this._lastIngredientScrollTop === 'number' ? this._lastIngredientScrollTop : 0;
+    var cur = this.data.expandedDisGoodsId;
+    var next = cur == id ? null : id;
+    var that = this;
+    this.setData({ expandedDisGoodsId: next }, function () {
+      wx.nextTick(function () {
+        setTimeout(function () {
+          that._restoreIngredientListScroll(saved);
+        }, 32);
+      });
+    });
   },
 
-  onReportSalesDish: function () {
-    if (this.data.reportKind === 'salesDish') return;
-    this.setData({ reportKind: 'salesDish' });
-    this._fetchReport();
-  },
-
-  onReportOutboundQty: function () {
-    if (this.data.reportKind === 'outboundQty') return;
-    this.setData({ reportKind: 'outboundQty' });
-    this._fetchReport();
-  },
-
-  toDatePageSearch: function () {
+  toDatePage: function () {
     this.setData({ update: true });
     wx.navigateTo({
       url:

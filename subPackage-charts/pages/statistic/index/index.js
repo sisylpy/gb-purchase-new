@@ -4,7 +4,7 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
-var echarts = require('../../../../ec-canvas/echarts');
+var echarts = require('../../../ec-canvas/echarts');
 
 Page({
 
@@ -144,15 +144,10 @@ Page({
     
         this.setData({
           allTotal: res.result.data.allTotal,
-          costTotalPer: res.result.data.costTotalPer,
           costTotal: res.result.data.costTotal,
           costPerDay: res.result.data.costPerDay,
-          purchaseTotal: res.result.data.purchaseTotal,
           purchasePerDay: res.result.data.purchasePerDay,
-          orderTotal: res.result.data.orderTotal,
           arr: res.result.data.arr,
-          purUserList: res.result.data.purUserList,
-          supplierList: res.result.data.supplierList,
         });
     
         // 初始化合并图表
@@ -198,10 +193,17 @@ Page({
     });
   },
 
+  // 单日采购额：接口有时不给 purTotal，与列表一致用自采+订货兜底
+  _dayPurchaseAmount(item) {
+    var p = parseFloat(item.purTotal);
+    var hasPur = item.purTotal != null && item.purTotal !== '' && !isNaN(p);
+    if (hasPur) return p;
+    return (parseFloat(item.zicai) || 0) + (parseFloat(item.dinghuo) || 0);
+  },
+
   // 获取合并图表配置（采购+成本）
   getCombinedChartOption() {
     const purchaseArr = this.data.arr || [];
-    const costDayData = this.data.costDayData || {};
     if (!purchaseArr || purchaseArr.length === 0) {
       return {
         title: {
@@ -212,33 +214,29 @@ Page({
       };
     }
 
-    // 处理采购数据
     const purchaseDates = purchaseArr.map(item => item.day.split('-')[2]);
-    const purchaseAmounts = purchaseArr.map(item => item.purTotal);
-
-    // 处理成本数据 - 从arr数组中获取costTotal
+    const purchaseAmounts = purchaseArr.map(item => this._dayPurchaseAmount(item));
     const costAmounts = purchaseArr.map(item => parseFloat(item.costTotal) || 0);
 
     return {
-      // 禁用所有交互功能
       animation: false,
       tooltip: {
-        show: false // 禁用提示框
+        show: false
       },
 
-      // legend: {
-      //   data: ['采购金额', '成本金额'],
-      //   top: 10,
-      //   textStyle: {
-      //     fontSize: 12
-      //   }
-      // },
+      legend: {
+        data: ['采购金额', '成本金额'],
+        top: 4,
+        textStyle: {
+          fontSize: 12
+        }
+      },
 
       grid: {
         left: '3%',
         right: '3%',
         bottom: '8%',
-        top: '15%',
+        top: '22%',
         containLabel: true
       },
       xAxis: {

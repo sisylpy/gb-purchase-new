@@ -56,7 +56,7 @@
             <view class="flex-column-center" style="height: 300rpx;">
               <view class="flex-column-center">
                 <view>
-                  <image src="/images/search.png" mode="aspectFill" class="url_item" style="width: 80rpx; height: 80rpx; opacity: 0.5;" />
+                  <image src="/images/search.png" mode="aspectFill" class="empty_image" style="width: 80rpx; height: 80rpx; opacity: 0.5;" />
                 </view>
                 <view class="font-bold font-xl p-20">
                   <text>没有搜索到订单</text>
@@ -76,7 +76,7 @@
           <view class="flex-column-center" wx:if="{{applyArr.length == 0}}" style="height: {{windowHeight - navBarHeight - 400}}rpx; ">
             <view class="flex-column-center">
               <view>
-                <image src="/images/cart-Empty.png" mode="aspectFill" class="url_item" />
+                <image src="/images/cart-Empty.png" mode="aspectFill" class="empty_image" />
               </view>
               <view class="font-bold font-xl p-20">
                 <text>暂无订货记录</text>
@@ -271,12 +271,10 @@
       </block>
 
       <block wx:if="{{showType == 'time'}}">
-        <block wx:if="{{depHasSubs == 0 || isSubDep}}">
+        <block wx:if="{{depHasSubs == 1 || isSubDep}}">
           <view class="flex-column-center" wx:if="{{applyArr.length == 0}}" style="height: {{windowHeight - navBarHeight - 400}}rpx; ">
             <view class="flex-column-center">
-              <view>
-                <image src="/images/cart-Empty.png" mode="aspectFill" class="url_item" />
-              </view>
+                <image src="/images/cart-Empty.png" mode="aspectFill" class="empty_image" />
               <view class="font-bold font-xl p-20">
                 <text>暂无订货记录</text>
               </view>
@@ -285,53 +283,18 @@
               </view>
             </view>
           </view>
-          <view class="flex flex-row-between  border-bottom p-10 {{order.gbDoBuyStatus < 3 ? 'liziBack' : 'bg-white'}} " wx:for="{{applyArr}}" wx:for-item="order" wx:key="nxDepartmentOrdersId" wx:for-index="applyIndex" wx:if="{{applyArr.length > 0}}">
-            <block wx:if="{{order.gbDoStatus == -2}}">
-              <view class="flex-row font-md">
+          <view class="flex flex-row-between  border-bottom p-20 {{order.gbDoBuyStatus < 3 ? 'liziBack' : 'bg-white'}} " wx:for="{{applyArr}}" wx:for-item="order" wx:key="nxDepartmentOrdersId" wx:for-index="applyIndex" wx:if="{{applyArr.length > 0}}">
+          
+              <view class="flex  font-lg">
                 <text class="mr-10">{{order.globalOrderIndex || (applyIndex + 1)}}.</text>
-                <view class="flex-cloumn" style="width: {{windowWidth - 160}}rpx; ">
-                  <view class="flex-row-wrap align-center">
-                    <text class="text-danger font-sl">[新商品]</text>
-                    <text class="brand" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsBrand !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{order.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
-                    <text class="font-bold ">{{order.gbDoGoodsName}}</text>
-                    <text class="" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsPlace !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsPlace.length > 0}}">{{order.gbDistributerGoodsEntity.gbDgGoodsPlace}}</text>
-                    <text class="" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && order.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{order.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
-                    <text class="ml-20">订:{{order.gbDoQuantity}}{{order.gbDoStandard}}</text>
-                    <text class="text-danger font-sl" wx:if="{{order.gbDoRemark !== null  && order.gbDoRemark.length > 0}}">({{order.gbDoRemark}})</text>
-                  </view>
-                  <view class="flex flex-row font-sl" wx:if="{{order.gbDoStatus == 2}}">
-                    <view class="third-row">
-                      <text class="text-secondary">出货:</text>
-                      <text class="" wx:if="{{order.gbDoWeight !== null}}">{{order.gbDoWeight}}{{order.gbDoPrintStandard}}</text>
-                    </view>
-                    <view class="third-row">
-                      <text class="text-secondary">单价:</text>
-                      <text class="" wx:if="{{order.gbDoPrice !== null}}">{{order.gbDoPrice}}/{{order.gbDoPrintStandard}}</text>
-                    </view>
-                    <view class="third-row" wx:if="{{order.gbDoSubtotal !== null || order.gbDoSubtotal == '' }}">
-                      <text class="text-secondary">小计:</text>
-                      <text class="">{{order.gbDoSubtotal}}元</text>
-                    </view>
-                  </view>
-                </view>
-              </view>
-              <view bindtap="openOperationLinshi" data-dep="{{dep.depInfo}}" data-order="{{order}}" data-id="{{order.gbDistributerGoodsEntity.gbDistributerGoodsId}}" data-name="{{order.gbDistributerGoodsEntity.gbDgGoodsName}}" data-goods="{{order.gbDistributerGoodsEntity}}" data-item="{{order.nxDistributerGoodsEntity}}" hover-class="hover" data-depid="{{dep.depId}}" class="p-10">
-                <image src="/images/points.png" class="icon"></image>
-              </view>
-            </block>
-            <block wx:else="">
-              <view class="flex  font-md">
-                <text class="mr-10">{{order.globalOrderIndex || (applyIndex + 1)}}.</text>
-                <view class="flex-cloumn" style="width: {{windowWidth - 180}}rpx; ">
+                <view class="flex-cloumn" style="width: {{windowWidth - 200}}rpx; ">
                   <view class="flex-row-wrap align-center">
                     <text class="brand" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsBrand !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{order.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                     <text class="font-bold mr-10">{{order.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
-                    <text wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsName !== order.gbDoGoodsName  && order.gbDoGoodsName !== ''}}">({{order.gbDoGoodsName}})</text>
-                    <text class="font-sm" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsPlace !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsPlace.length > 0}}">({{order.gbDistributerGoodsEntity.gbDgGoodsPlace}})</text>
-                    <text class="font-sm" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && order.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{order.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
-                    <text class="mr-20" wx:if="{{order.gbDoNxGoodsId !== null}}">({{order.gbDoPrintStandard}})</text>
-                    <text class="mr-20 font-sl text-secondary" wx:else="">(临时商品)</text>
-                    <text class="">订:{{order.gbDoQuantity}}{{order.gbDoStandard}}</text>
+                  
+                    <text class="font-md" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsPlace !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsPlace.length > 0}}">({{order.gbDistributerGoodsEntity.gbDgGoodsPlace}})</text>
+                    <text class="font-md" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && order.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{order.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+                    <text class="font-lg">订:{{order.gbDoQuantity}}{{order.gbDoStandard}}</text>
                     <text class="text-danger font-sl" wx:if="{{order.gbDoRemark !== null  && order.gbDoRemark.length > 0}}">({{order.gbDoRemark}})</text>
                   </view>
                   <view class="flex flex-row font-sl" wx:if="{{order.gbDoStatus == 2}}">
@@ -357,7 +320,7 @@
               <view wx:else="" class="button-container-white" bindtap="toEditApply" data-order="{{order}}" data-subname="" data-id="{{order.gbDistributerGoodsEntity.gbDistributerGoodsId}}" data-name="{{order.gbDistributerGoodsEntity.gbDgGoodsName}}" data-type="goods" data-color="{{order.gbDistributerGoodsEntity.gbDgNxGoodsFatherColor}}" data-goods="{{order.gbDistributerGoodsEntity}}" hover-class="hover" data-depid="{{depId}}">
                 <image src="/images/edit.png" class="icon"></image>
               </view>
-            </block>
+           
           </view>
           <view class="p-20" style="height: 200rpx;" wx:if="{{applyArr.length > 0}}">
             <view class="p-20 text-secondary font-sl" style="text-align:center;">没有数据啦！</view>

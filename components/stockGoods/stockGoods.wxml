@@ -134,7 +134,7 @@
 
           <view class="flex-column p-20">
             <view class="flex-row" wx:if="{{item.returnReduceEntity !== null}}">
-              <text>{{item.returnReduceEntity.gbDgsrReturnWeight}}</text>
+              <text>{{item.returnReduceEntity.gbDgsrWeight}}</text>
 
             </view>
             <view class="flex-row" wx:else>

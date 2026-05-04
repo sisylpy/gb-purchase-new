@@ -55,8 +55,8 @@ Page({
         disId: disInfo.gbDistributerId,
       };
       var depIdVal =
-        disInfo.purDepartmentList && disInfo.purDepartmentList.length > 0
-          ? disInfo.purDepartmentList[0].gbDepartmentId
+        disInfo.mendianDepartmentList && disInfo.mendianDepartmentList.length > 0
+          ? disInfo.mendianDepartmentList[0].gbDepartmentId
           : disInfo.gbDepartmentId;
       if (depIdVal !== undefined && depIdVal !== null && depIdVal !== '') {
         depPatch.depId = depIdVal;
@@ -112,6 +112,27 @@ Page({
       console.log('[purGoods onLoad] displayPurArr length:', displayPurArr.length);
       console.log('[purGoods onLoad] displayPurArr:', displayPurArr);
     }
+  },
+
+  /**
+   * 弹层打开后短时保留 foucusWeight/foucusPrice 用于首帧自动聚焦，随后关掉，
+   * 避免 quantity 的 focus 一直为 true 与单价输入抢焦点。
+   */
+  _scheduleResetInputOrderFocus: function () {
+    var that = this;
+    if (this._inputOrderFocusTimer) {
+      clearTimeout(this._inputOrderFocusTimer);
+    }
+    this._inputOrderFocusTimer = setTimeout(function () {
+      that._inputOrderFocusTimer = null;
+      if (!that.data.show) {
+        return;
+      }
+      that.setData({
+        foucusWeight: false,
+        foucusPrice: false,
+      });
+    }, 400);
   },
 
   showInputOrder: function (e) {
@@ -240,6 +261,7 @@ Page({
             canSave: true,
             windowHeight: that.data.windowHeight,
           });
+          that._scheduleResetInputOrderFocus();
         } else {
           displayItem.gbDpgBuyScale = 0;
           displayItem.gbDpgBuyScalePrice = "";
@@ -309,6 +331,7 @@ Page({
           } else {
             that.setData({ canSave: false });
           }
+          that._scheduleResetInputOrderFocus();
         }
       } else {
         if (needScalePack && scalePackMeta) {
@@ -333,6 +356,7 @@ Page({
           canSave: false,
           windowHeight: that.data.windowHeight,
         });
+        that._scheduleResetInputOrderFocus();
       }
     }).catch(function (err) {
       logPurInput('purUserGetPurGoodsInfo 请求异常', err);
@@ -429,11 +453,17 @@ Page({
 
   cancle: function () {
     console.log('[purGoods inputOrder cancle] 取消录入');
+    if (this._inputOrderFocusTimer) {
+      clearTimeout(this._inputOrderFocusTimer);
+      this._inputOrderFocusTimer = null;
+    }
     this.setData({
       show: false,
       item: null,
       orderListCount: -1,
       scaleInput: false,
+      foucusWeight: false,
+      foucusPrice: false,
     });
   },
 

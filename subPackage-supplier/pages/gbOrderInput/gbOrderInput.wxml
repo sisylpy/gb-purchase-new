@@ -1,15 +1,21 @@
 <wxs src="../../../utils/fn.wxs" module="tool" />
 
-<view class="">
-  <view class="top_img_fixed flex-row" style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx;">
-    <image src="../../../../images/back-2.png" class="back_icon" bindtap="toBack"></image>
-    <text>录入单价</text>
-  </view>
-  <image src="../../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
-</view>
 
 
 <view class="flex-column">
+
+  <view class="flex-column">
+      <view class="top_img_fixed"
+        style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+        <view class="flex-row" bindtap="toBack">
+          <view class=" flex-column-center">
+            <image src="../../../images/back-2.png" class="back_icon"></image>
+          </view>
+          <text class="">输入单价</text>
+        </view>
+      </view>
+      <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
+    </view>
 
   <view class="section">
     <view class="maodian flex-row" style="margin-top: {{statusBarHeight}}rpx;">
@@ -32,7 +38,7 @@
               </block>
             </view>
             <view class="flex-row font-lg" bindtap="changeFocusIndex" data-index="{{index}}">
-              <text class="mr-10 empty">{{index + 1}}.</text>
+              <text class="mr-10 text-white">{{index + 1}}.</text>
               <text class="mr-10">今日单价:</text>
               <block wx:if="{{item.gbDpgStandard !== item.gbDistributerGoodsEntity.gbDgGoodsStandardname && item.gbDpgBuyScale !== '-1'}}">
                 <view class="inputTotal flex-row mr-10" style="margin-left:50rpx; width:{{(windowWidth - 240)/2}}rpx; ">
@@ -52,21 +58,21 @@
               </block>
             </view>
 
-            <view class="flex-cloumn pt-10 border-bottom font-md" wx:for-item="orders" wx:for="{{item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities}}" wx:for-index="orderIndex">
+            <view class="flex-cloumn pt-10 border-bottom font-md" wx:for-item="orders" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-index="orderIndex">
               <view class="flex-row">
-                <text class="mr-10 empty">{{index + 1}}.</text>
-                <block wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity !== null}}">
-                  <text>{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
-                  <text class="mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                <text class="mr-10 text-white">{{index + 1}}.</text>
+                <block wx:if="{{orders.gbDoParentDepartmentName}}">
+                  <text>{{orders.gbDoParentDepartmentName}}.</text>
+                  <text class="mr-10">{{orders.gbDoOrderDepartmentName}}</text>
                 </block>
                 <block wx:else>
-                  <text class="mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                  <text class="mr-10">{{orders.gbDoOrderDepartmentName}}</text>
                 </block>
                 <text class="ml-20"> 订货:{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
               </view>
 
               <view class="flex-row">
-                <text class="mr-10 empty">{{index + 1}}.</text>
+                <text class="mr-10 text-white">{{index + 1}}.</text>
                 <view class="flex-row" style="width:{{(windowWidth - 80)}}rpx;">
                   <view class="half-row">
                     <text class="mr-10">出货:</text>

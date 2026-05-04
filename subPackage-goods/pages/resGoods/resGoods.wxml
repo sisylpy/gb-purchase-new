@@ -1,4 +1,3 @@
-<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 <view class="flex flex-column">
 
@@ -20,7 +19,7 @@
 
 <view class="p-10">
   <view class="button-container-white" hover-class="button-hover" bindtap="openOperation" >
-    <image src="../../../../images/filter.png" class="icon"></image>
+    <image src="../../../images/filter.png" class="icon"></image>
   </view>
 </view>
 
@@ -46,9 +45,9 @@
         <scroll-view id="leftScrollDep" scroll-y="true" style="height: {{windowHeight - 200 - statusBarHeight}}rpx; " scroll-top="{{leftScrollTop}}" scroll-with-animation show-scrollbar="false">
           <view class="left-item {{selectedSub == index ? 'left-active' : ''}}" wx:for="{{disGoodsCataArr}}" wx:key="gbDistributerFatherGoodsId" id="left-cat-{{grand.gbDistributerFatherGoodsId}}" wx:for-item="grand" bindtap="leftMenuClickDep" data-index="{{index}}" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}">
             <view class="flex-column-center">
-              <view class="picView ">
-                <image src="{{grand.gbDfgFatherGoodsImg != null && grand.gbDfgFatherGoodsImg !== '' ? (imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg') : '/images/logo.jpg'}}" mode="aspectFill" class="url" />
-              </view>
+              <!-- <view class="picView ">
+                <image src="{{grand.gbDfgFatherGoodsImg != null && grand.gbDfgFatherGoodsImg !== '' ? url + grand.gbDfgFatherGoodsImg  : '/images/logo.jpg'}}" mode="aspectFill" class="url" />
+              </view> -->
               <view class="extremeSmall text_center">
                 <text>{{grand.gbDfgFatherGoodsName}}</text>
               </view>
@@ -93,14 +92,23 @@
             <view wx:if="{{goods.isFirstInCategory}}" id="cat-dep-{{goods.gbDgDfgGoodsGrandId}}" class="goods-category-title-dep"></view>
             <view class="flex-row-default goods-item-dep p-20" id="{{goods.viewId}}" style="align-items: flex-start;">
               <view class="img-wrapper">
+                <!-- <image
+                  bindtap="showDialogBtnDep"
+                  data-item="{{goods}}"
+                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ?  url+ goods.gbDgNxFatherImg : '/images/logo.jpg'}}"
+                  mode="aspectFill"
+                  class="logoimg"
+                  data-raw-path="{{goods.gbDgNxFatherImg}}"
+                  binderror="onGoodsFatherImgError"
+                /> -->
                 <image
                   bindtap="showDialogBtnDep"
                   data-item="{{goods}}"
-                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ? (imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg') : '/images/logo.jpg'}}"
+                  src="{{ url + goods.gbDgNxFatherImg }}"
                   mode="aspectFill"
-                  class="icon"
+                  class="logoimg"
                   data-raw-path="{{goods.gbDgNxFatherImg}}"
-                  binderror="onGoodsFatherImgError"
+                 
                 />
               </view>
 
@@ -148,13 +156,12 @@
                   <image src="/images/time-2.png" mode="aspectFill" class="icon" />
                 </view>
 
-
               <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toFenxi" data-id="{{goods.gbDistributerGoodsId}}">
                 <image src="/images/statistic.png" mode="aspectFill" class="icon" />
               </view>
 
               <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toStock" data-id="{{goods.gbDistributerGoodsId}}" data-item="{{goods}}">
-                <image src="{{goods.goodsStockTotalString > 0 ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFill" class="icon" />
+                <image src="{{goods.goodsStockWeightTotal > 0 ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFill" class="icon" />
               </view>
 
             </view>
@@ -228,7 +235,7 @@
 
 <!-- goodsType -->
 <view class='overlay {{showOperationGoods ? "show" : ""}}' catchtouchmove='ture' catchtap="hideMask">
-  <view class="flex-column nnn bg-white font-lg" wx:if="{{chooseSize}}" animation='{{animationData}}'>
+  <view class="flex-column nnn bg-white font-lg"  wx:if="{{chooseSize}}" animation='{{animationData}}'>
 
     <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="99">
       <image src="../../../images/icon_goods_active.png" class="icon mr-20 ml-20"></image>

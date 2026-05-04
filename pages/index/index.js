@@ -73,6 +73,7 @@ Page({
         amount: ""
       }
     ],
+    goodsSupplierId: null
   },
 
   // ============================================
@@ -167,6 +168,7 @@ Page({
           wx.setStorageSync('disInfo', res.result.data.disInfo);
           this.calculateSlider(0);
         } else {
+          load.hideLoading()
           this.setData({ purArr: [] });
           wx.showToast({ title: res.result.msg, icon: 'none' });
           this.setData({ purArr: [] });
@@ -276,7 +278,7 @@ Page({
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
                 wx.setStorageSync('userInfo', res.result.data.depUserInfo);
                 var admin = res.result.data.depUserInfo.gbDuAdmin;
-                if (admin == 11) {
+                if (admin == 11 ) {
                   var avatarUrl = '';
                   if (res.result.data.depUserInfo.gbDuWxAvartraUrl) {
                     avatarUrl = requestUtil.getServerUrl() + res.result.data.depUserInfo.gbDuWxAvartraUrl;
@@ -528,14 +530,16 @@ Page({
 
   /** 切换自动订货 */
   changeAutoGoods: function (e) {
-    var goodsId = this.data.editPurGoods.gbDistributerGoodsEntity.gbDistributerGoodsId;
-    var supplierId = this.data.batchSupplier.nxJrdhSupplierId;
-    var currentGsId = this.data.editPurGoods.gbDistributerGoodsEntity.gbDgGbSupplierId;
-    var changeSupplierId = (supplierId !== currentGsId) ? supplierId : -1;
+    var goodsId = this.data.editPurGoods.gbDpgDisGoodsId;
+    var supplierId = this.data.editBatch.gbDpbSupplierId;
+    var currentGsId = this.data.editPurGoods.gbDgGbSupplierId;
+    // 接口/列表里常见 number 与 string 混用，用 != 判断“是否为同一供货商”；!== 会把 1 与 "1" 当成不同
+    var isEnablingAuto = supplierId != currentGsId;
+    var changeSupplierId = isEnablingAuto ? supplierId : -1;
     var that = this;
 
     this.setData({ showTip: true, showOperation: false });
-    load.showLoading((supplierId !== currentGsId) ? "开启自动订货中..." : "取消自动订货中...");
+    load.showLoading(isEnablingAuto ? "开启自动订货中..." : "取消自动订货中...");
 
     depOrderApi.addAutoOrderGoods({
       supplierId: changeSupplierId,
@@ -544,13 +548,13 @@ Page({
       load.hideLoading();
       if (res.result.code === 0) {
         wx.showToast({
-          title: (supplierId !== currentGsId) ? '已开启自动订货' : '已关闭自动订货',
+          title: isEnablingAuto ? '已开启自动订货' : '已关闭自动订货',
           icon: 'success',
           duration: 2000,
         });
-        var data = "batchArr[" + that.data.bIndex + "].gbDPGEntities[" + that.data.gIndex + "].gbDistributerGoodsEntity";
-        res.result.data.gbDepartmentOrdersEntities = that.data.gDepArr;
-        that.setData({ [data]: res.result.data });
+        var data = "batchArr[" + that.data.bIndex + "].gbDPGEntities[" + that.data.gIndex + "].gbDgGbSupplierId";
+        var newGbDgGbSupplierId = isEnablingAuto ? supplierId : -1;
+        that.setData({ [data]: newGbDgGbSupplierId });
       } else {
         wx.showToast({ title: res.result.msg || '操作失败', icon: 'none' });
         that.setData({ showTip: false });
@@ -568,7 +572,6 @@ Page({
       selSupplerId: e.currentTarget.dataset.item.gbDpgPurchaseNxSupplierId,
       showOperation: true,
       editPurGoods: e.currentTarget.dataset.item,
-      // batchSupplier: e.currentTarget.dataset.supplier,
       editBatch: e.currentTarget.dataset.batch,
     });
   },

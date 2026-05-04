@@ -1,9 +1,9 @@
 <wxs src="/wxs/format.wxs" module="tool" />
 
-<view class="flex flex-column" >
+<view class="flex-column" >
   <back-navbar title="选择日期" avatar="/images/back.png"  style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
-  <view class="navbar bg-white border-bottom">
+  <view class="navbar bg-white border-bottom" style="margin-top: {{navBarHeight}}rpx;">
     <block wx:for="{{tabs}}" wx:for-item="tab" wx:key="index">
       <view id="{{index}}" class="navbar-item p-20 {{tabIndex==index?'bar-item-on':''}}" data-index="{{index}}" bindtap="onTabClick" hover-class="hover">
         <text class="navbar-title">{{tab}}</text>

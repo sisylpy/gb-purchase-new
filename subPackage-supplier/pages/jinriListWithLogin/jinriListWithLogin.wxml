@@ -7,17 +7,17 @@
   <view class="flex-column">
     <view class="top_img_fixed flex-row" style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx;">
       <view class="p-20" bindtap="toggleMenu">
-        <image src="/images/list.png" mode="aspectFill" class="icon-lg" />
+        <image src="../../../images/list.png" mode="aspectFill" class="icon" />
       </view>
     </view>
-    <image src="../../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
+    <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
   </view>
 
   <!-- 侧边菜单 -->
   <view class="side-menu" animation="{{menuAnimationData}}" style="width: {{windowWidth * 0.8}}rpx; left: -{{sideMenuWidth * rpxR}}rpx; background-color: #05668d; color: #fff; " bindtouchstart="sideMenuTouchStart" bindtouchmove="sideMenuTouchMove" bindtouchend="sideMenuTouchEnd">
 
     <view class="p-30" style="margin-top: {{statusBarHeight + 10}}rpx;" bind:tap="toEditUserGb">
-      <image src="{{url + jrdhUserInfo.nxJrdhWxAvartraUrl}}" mode="aspectFill" class="url_item" />
+      <image src="{{url + jrdhUserInfo.nxJrdhWxAvartraUrl}}" mode="aspectFill" class="face_img" />
     </view>
     <view class="flex-column">
       <view class="text-white p-20">客户列表</view>
@@ -60,7 +60,7 @@
 
           <view class="flex-column">
             <view class=" p-20 font-lg five-weight">{{gbDisInfo.gbDistributerName}}</view>
-            <view class="p-10 status-unpaid font-xs text-center radius-20" bind:tap="requestSubscribeMessage"> 订阅通知</view>
+            <view class="p-10 status-unpaid font-sl text-center radius-20" bind:tap="requestSubscribeMessage"> 订阅通知</view>
           </view>
 
         </view>
@@ -159,7 +159,7 @@
           </view>
         </view>
 
-        <view class="text-secondary font-xs p-20  " style="text-align:center; height: 200rpx; line-height: 200rpx;">显示最近3个月的账单</view>
+        <view class="text-secondary font-sl p-20  " style="text-align:center; height: 200rpx; line-height: 200rpx;">显示最近3个月的账单</view>
         <!-- ../ -->
       </view>
 

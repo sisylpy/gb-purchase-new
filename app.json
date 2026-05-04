@@ -21,12 +21,15 @@
         "pages/order/chefOrderDep/chefOrderDep",
         "pages/order/purGoods/purGoods",
         "pages/order/resGoodsAi/resGoodsAi",
+        "pages/order/disAddGoods/disAddGoods",
+        "pages/order/aiAddGoods/aiAddGoods",
         "pages/order/resGoodsSearch/resGoodsSearch",
         "pages/order/stockGoodsBusiness/stockGoodsBusiness",
+        "pages/order/customerGoodsAi/customerGoodsAi",
         "pages/management/homePage/homePage",
         "pages/management/staff/staff",
-        "pages/management/disUserEdit/disUserEdit",
         "pages/management/purUserEveryDay/purUserEveryDay",
+        "pages/management/disUserEdit/disUserEdit",
         "pages/management/purUserDayDeatil/purUserDayDeatil",
         "pages/mendian/index/index",
         "pages/mendian/mendianDetail/mendianDetail",
@@ -46,8 +49,8 @@
         "pages/account/loginPay/loginPay",
 
         "pages/food/index/index",
-        "pages/food/foodList/foodList",
         "pages/food/depFoodList/depFoodList",
+        "pages/food/dishIngredientDashboard/dishIngredientDashboard",
         "pages/food/addFood/addFood",
         "pages/food/addFoodFather/addFoodFather",
         "pages/food/addRaw/addRaw"
@@ -91,6 +94,9 @@
         "pages/depUserEdit/depUserEdit",
         "pages/supplier/supplierOrder/supplierOrder",
         "pages/supplier/supplierBills/supplierBills",
+        "pages/supplier/purUserFenxi/purUserFenxi",
+        "pages/supplier/resGoods/resGoods",
+        "pages/supplier/appointSupplierList/appointSupplierList",
         "pages/supplier/myPurchaseDetail/myPurchaseDetail"
       ]
     },
@@ -110,13 +116,17 @@
         "pages/stock/stockGoodsList/stockGoodsList",
         "pages/cost/purGoodsFenxi/purGoodsFenxi",
         "pages/cost/costGoodsFenxi/costGoodsFenxi",
+        "pages/cost/foodGoodsFenxi/foodGoodsFenxi",
         "pages/cost/goodsFenxiCost/goodsFenxiCost",
         "pages/cost/costGoodsByDate/costGoodsByDate",
         "pages/cost/goodsFenxiPurchase/goodsFenxiPurchase",
         "pages/sales/dailyTurnover/dailyTurnover",
         "pages/sales/addTurnover/addTurnover",
+        "pages/sales/addFoodSales/addFoodSales",
         "pages/report/reportPage/reportPage",
         "pages/report/dateReport/dateReport",
+        "pages/report/selSupplier/selSupplier",
+        "pages/report/subDepStock/subDepStock",
         "pages/report/subDepCost/subDepCost"
       ]
     }
@@ -126,6 +136,9 @@
     "navigationBarTitleText": "粮心乐",
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
+  },
+  "networkTimeout": {
+    "request": 300000
   },
   "plugins": {
     "QCloudAIVoice": {

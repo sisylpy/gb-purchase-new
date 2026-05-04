@@ -1,0 +1,157 @@
+<view class="flex flex-column">
+
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{depInfo.gbDepartmentName || depInfo.nxDepartmentName}}-订货习惯" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <block wx:if="{{depGoodsArr.length == 0}}">
+
+    <view class="flex-column center-content" style="height: {{windowHeight  - navBarHeight}}rpx; background:#fff6df">
+
+      <view wx:if="{{showSkeleton}}" class="ai-loading">
+        <view animation="{{fadeAnimation}}" class="ai-bubble">
+          <image src="/images/CE.png" class="ai-icon" />
+          <text class="loading-text">分析订货习惯中{{dots}}</text>
+        </view>
+      </view>
+      <view class="flex flex-column center-content" wx:else="">
+        <image class="empty-bg" style="width: {{windowWidth / 3}}rpx; height: {{windowHeight / 5}}rpx; margin-bottom: 40rpx;"></image>
+        <text class="font-xl " style="padding: 0 60rpx;">根据历史到货推断订货节奏：习惯日到或单次订货下库存偏紧的会进入本列表</text>
+        <text class=" darktext-secondary mt-10">到货完成订单越多，习惯推断越稳</text>
+        <text class=" darktext-secondary">有未收货订单的商品不会出现在此列表</text>
+        <text class=" darktext-secondary mt-10">接口总条数/页数按候选池统计，与每页实际「今日提醒」条数可能不完全一致</text>
+        <text class=" darktext-secondary mt-10">第一页若未满一页，可能附带「单次到货+库存偏紧」的补充提醒（不计入候选总条数）</text>
+      </view>
+
+    </view>
+  </block>
+  <view wx:else="" class="flex-column p-20">
+
+    <view class="flex-row goods_back mb-10" wx:for="{{depGoodsArr}}" wx:key="gbDepartmentDisGoodsId">
+      <view class="flex-row-default p-20 customer-ai-card-inner">
+
+        <view class="flex-row-default mr-20 customer-ai-thumb-wrap">
+          <image class="goods_url" src="{{url + item.gbDistributerGoodsEntity.gbDgNxFatherImg}}" mode="aspectFit" />
+           </view>
+
+        <view class="flex-column font-lg customer-ai-detail">
+          <view class="customer-ai-title-row">
+            <text class="font-lg-2 customer-ai-wrap-text customer-ai-title-name">{{item.gbDdgDepGoodsName}}</text>
+            <text wx:if="{{item.aiShouldRemindToday === 'true'}}" class="font-sl customer-ai-remind-chip">今日提醒</text>
+          </view>
+          <view class="customer-ai-line font-sl mt-6" wx:if="{{item.aiRemindReasonText}}" style="color:#666;">
+            <view class="customer-ai-line-body">
+              <text class="customer-ai-wrap-text">提醒原因: {{item.aiRemindReasonText}}</text>
+            </view>
+          </view>
+
+          <view class="customer-ai-line font-sl">
+            <text class="customer-ai-line-prefix">🛒</text>
+            <view class="customer-ai-line-body">
+              <text class="mr-10">习惯参考订货量:</text>
+              <text style="font-weight:bold; color:#FF8C00">{{item.aiOrderQuantity}}</text>
+              <text style="font-weight:bold; color:#FF8C00"> {{item.aiOrderStandard}}</text>
+            </view>
+          </view>
+          <view class="customer-ai-line font-sl" wx:if="{{item.aiDailyUsage}}">
+            <text class="customer-ai-line-prefix">📅</text>
+            <view class="customer-ai-line-body">
+              <text class="mr-10">订货节奏:</text>
+              <text class="customer-ai-wrap-text">{{item.aiDailyUsage}}</text>
+            </view>
+          </view>
+          <view class="customer-ai-line font-sl" wx:if="{{item.aiStockEstimateDailyUsage}}">
+            <text class="customer-ai-line-prefix">📐</text>
+            <view class="customer-ai-line-body">
+              <text class="mr-10">单次到货·估算日均消耗:</text>
+              <text class="customer-ai-wrap-text">{{item.aiStockEstimateDailyUsage}}</text>
+            </view>
+          </view>
+          <view class="customer-ai-line font-sl" wx:if="{{item.aiNextHabitOrderDate}}">
+            <text class="customer-ai-line-prefix">➡️</text>
+            <view class="customer-ai-line-body">
+              <text class="mr-10">下次习惯订货日:</text>
+              <text>{{item.aiNextHabitOrderDate}}</text>
+              <text wx:if="{{item.aiHabitIntervalDays}}" class="ml-10">（约每 {{item.aiHabitIntervalDays}} 天一次）</text>
+            </view>
+          </view>
+          <view class="customer-ai-line font-sl">
+            <text class="customer-ai-line-prefix">🛡️</text>
+            <view class="customer-ai-line-body">
+              <text class="mr-10">安全库存:</text>
+              <text>{{item.aiSafetyStock}}</text>
+            </view>
+          </view>
+          <view class="customer-ai-line font-sl">
+            <text class="customer-ai-line-prefix">🕓</text>
+            <view class="customer-ai-line-body">
+              <text class="mr-10">上次到货:</text>
+              <text>{{item.aiLastOrderDate || '—'}}</text>
+              <text class="ml-10" wx:if="{{item.aiLastOrderQuantity}}">{{item.aiLastOrderQuantity}}{{item.aiLastOrderUnit}}</text>
+              <text class="ml-10" wx:if="{{item.aiDaysSinceLastOrder !== '' && item.aiDaysSinceLastOrder != null}}">（{{item.aiDaysSinceLastOrder}} 天前）</text>
+            </view>
+          </view>
+          <view class="customer-ai-line font-sl">
+            <text class="customer-ai-line-prefix">📦</text>
+            <view class="customer-ai-line-body">
+              <text class="mr-10">现在库存:</text>
+              <text>{{item.aiCurrentStock || item.gbDdgStockTotalWeight}}{{item.gbDdgOrderStandard}}</text>
+              <text wx:if="{{item.aiAvailableDays}}" class="ml-10" style="color:#666;">（约可支撑 {{item.aiAvailableDays}} 天）</text>
+            </view>
+          </view>
+          <view class="flex-column font-sl mt-10 p-10" wx:if="{{item._showAiReducePanel}}" style="background:#f8f9fa; border-radius: 12rpx;">
+            <text style="font-weight:600; color:#333;">补货参考（窗口内出库推算）</text>
+            <view class="customer-ai-block-line font-sl mt-6" wx:if="{{item.aiReduceProductionDailyAvg && item.aiReduceProductionDailyAvg != '0'}}">
+              <text class="customer-ai-wrap-text">生产日均出库: {{item.aiReduceProductionDailyAvg}}{{item.gbDdgOrderStandard}}/天</text>
+            </view>
+            <view class="customer-ai-block-line font-sl mt-4" wx:if="{{item.aiReduceLossWasteDailyAvg && item.aiReduceLossWasteDailyAvg != '0'}}">
+              <text class="customer-ai-wrap-text">损耗+损失日均: {{item.aiReduceLossWasteDailyAvg}}{{item.gbDdgOrderStandard}}/天</text>
+            </view>
+            <view class="customer-ai-block-line font-sl mt-6" wx:if="{{item.aiRecommendGapWeightProductionOnly != null && item.aiRecommendGapWeightProductionOnly !== '' && item.aiRecommendGapWeightProductionOnly != '0'}}">
+              <text class="customer-ai-wrap-text">约{{item.aiRecommendCoverDaysUsed || '3'}}天缺口（生产口径）: </text>
+              <text style="font-weight:600;">{{item.aiRecommendGapWeightProductionOnly}}</text>
+              <text>{{item.gbDdgOrderStandard}}</text>
+            </view>
+            <view class="customer-ai-block-line font-sl mt-4" wx:if="{{item.aiRecommendGapWeightWithLossWaste != null && item.aiRecommendGapWeightWithLossWaste !== '' && item.aiRecommendGapWeightWithLossWaste != '0'}}">
+              <text class="customer-ai-wrap-text">约{{item.aiRecommendCoverDaysUsed || '3'}}天缺口（含损耗损失）: </text>
+              <text style="font-weight:600;">{{item.aiRecommendGapWeightWithLossWaste}}</text>
+              <text>{{item.gbDdgOrderStandard}}</text>
+            </view>
+            <view class="customer-ai-block-line font-sl mt-4" wx:if="{{item.aiEstimateDepleteDateProductionOnly}}">
+              <text class="customer-ai-wrap-text">预估耗尽（仅生产）: {{item.aiEstimateDepleteDateProductionOnly}}</text>
+            </view>
+            <view class="customer-ai-block-line font-sl mt-4" wx:if="{{item.aiEstimateDepleteDateWithLossWaste}}">
+              <text class="customer-ai-wrap-text">预估耗尽（含损耗损失）: {{item.aiEstimateDepleteDateWithLossWaste}}</text>
+            </view>
+            <text class="font-sl mt-8 customer-ai-wrap-text" style="color:#888; line-height:1.5;">提示：是否出现在本列表时，会结合习惯/单次估算消耗与生产出库日均（取较高者）判断是否因库存仍富余而暂不提醒。</text>
+          </view>
+          <view class="flex-column font-sl mt-10" wx:if="{{item.aiAuxHints && item.aiAuxHints.length}}">
+            <view class="customer-ai-line" wx:for="{{item.aiAuxHints}}" wx:for-item="hint" wx:for-index="hintIdx" wx:key="hintIdx">
+              <text class="customer-ai-line-prefix">💡</text>
+              <view class="customer-ai-line-body">
+                <text class="customer-ai-wrap-text" style="color:#856404;">{{hint.message}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="flex-row-reverse p-20">
+
+            <view class="save_btn text-center" bind:tap="applyGoodsDep" data-index="{{index}}" data-depgoods="{{item}}" data-disgoods="{{item.gbDistributerGoodsEntity}}">
+              <text>订货</text>
+            </view>
+
+          </view>
+        </view>
+
+      </view>
+
+
+    </view>
+    <view class="p-20 flex-column-center" style="height: 100rpx;" wx:if="{{!hasMore}}">没有更多数据了！</view>
+  </view>
+</view>
+
+ 
+<myDismodal show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" item="{{itemDis}}" canSave="{{canSave}}" windowHeight="{{windowHeight}}" />
+
+<!--  -->

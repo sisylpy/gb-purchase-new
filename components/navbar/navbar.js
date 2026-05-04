@@ -4,6 +4,8 @@ Component({
     avatar: { type: String, value: '' },
     buttonText: { type: String, value: '' },
     showBack: { type: Boolean, value: false },
+    /** 为 true 时左侧用呼吸涟漪动画替代头像（与 showBack 互斥） */
+    livePulse: { type: Boolean, value: false },
   },
 
   data: {

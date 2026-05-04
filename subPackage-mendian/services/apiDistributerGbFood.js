@@ -6,30 +6,64 @@ import apiUrl from '../../config/index.js'
 var load = require('../../lib/load.js');
 
 // ===== addFood 页面 =====
+const normalizeSaveGbFoodResult = (data) => {
+  if (typeof data === 'string') return data
+  if (data && typeof data === 'object') return JSON.stringify(data)
+  return String(data)
+}
+
 export const saveGbFood = (filePathList, foodName, fatherId, disId, price, method) => {
+  const firstPath = Array.isArray(filePathList)
+    ? filePathList[0]
+    : filePathList
+  const hasFile = !!(firstPath && String(firstPath).length > 0)
+
   return new Promise((resolve, reject) => {
-    wx.uploadFile({
-      url: apiUrl.apiUrl + 'gbdistributerfood/saveGbFood',
-      filePath: filePathList[0],
-      name: 'file',
-      header: {
-        "Content-Type": "multipart/form-data"
-      },
-      formData: {
-        foodName: foodName,
-        fatherId: fatherId,
-        disId: disId,
-        price: price,
-        method: method
-      },
-      success: (res) => {
-        resolve({ result: res.data })
-      },
-      fail: (e) => {
-        reject(e);
-        load.hideLoading();
-      }
-    })
+    const onSuccess = (res) => {
+      resolve({ result: normalizeSaveGbFoodResult(res.data) })
+    }
+    if (hasFile) {
+      wx.uploadFile({
+        url: apiUrl.apiUrl + 'gbdistributerfood/saveGbFood',
+        filePath: firstPath,
+        name: 'file',
+        header: {
+          'Content-Type': 'multipart/form-data'
+        },
+        formData: {
+          foodName: foodName,
+          fatherId: fatherId,
+          disId: disId,
+          price: price,
+          method: method != null ? method : ''
+        },
+        success: onSuccess,
+        fail: (e) => {
+          reject(e)
+          load.hideLoading()
+        }
+      })
+    } else {
+      wx.request({
+        url: apiUrl.apiUrl + 'gbdistributerfood/saveGbFood',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        },
+        data: {
+          foodName: foodName,
+          fatherId: fatherId,
+          disId: disId,
+          price: price,
+          method: method != null ? method : ''
+        },
+        success: onSuccess,
+        fail: (e) => {
+          reject(e)
+          load.hideLoading()
+        }
+      })
+    }
   })
 }
 
@@ -86,7 +120,32 @@ export const queryDisGoodsByQuickSearchGb = (data) => {
         searchStr: data.searchStr,
       },
       header: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+      },
+      success: (res) => {
+        resolve({ result: res.data })
+      },
+      fail: (e) => {
+        reject(e);
+        load.hideLoading();
+      }
+    })
+  })
+}
+
+/** 菜品配料搜索（带 foodId，与后端 quickSearchDisGoodsForFoodIngredient 对应） */
+export const quickSearchDisGoodsForFoodIngredient = (data) => {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: apiUrl.apiUrl + 'gbdistributerfoodgoods/quickSearchDisGoodsForFoodIngredient',
+      method: 'POST',
+      data: {
+        disId: data.disId != null ? String(data.disId) : '',
+        searchStr: data.searchStr != null ? String(data.searchStr) : '',
+        foodId: data.foodId != null ? data.foodId : '',
+      },
+      header: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
       },
       success: (res) => {
         resolve({ result: res.data })
@@ -121,6 +180,26 @@ export const updateGbFood = (data) => {
   return new Promise((resolve, reject) => {
     wx.request({
       url: apiUrl.apiUrl + 'gbdistributerfood/updateGbFood',
+      method: 'POST',
+      data,
+      success: (res) => {
+        resolve({ result: res.data })
+      },
+      fail: (e) => {
+        reject(e);
+        load.hideLoading();
+      }
+    })
+  })
+}
+
+
+
+// ===== addRaw 页面 =====
+export const saveGbFoodGoodsItem = (data) => {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: apiUrl.apiUrl + 'gbdistributerfoodgoods/saveGbFoodGoodsItem',
       method: 'POST',
       data,
       success: (res) => {
@@ -189,6 +268,8 @@ export const updateGbFoodGoods = (data) => {
 }
 
 // ===== foodList 页面 =====
+
+
 export const deleteFood = (data) => {
   return new Promise((resolve, reject) => {
     wx.request({
@@ -200,6 +281,24 @@ export const deleteFood = (data) => {
       header: {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
       },
+      success: (res) => {
+        resolve({ result: res.data })
+      },
+      fail: (e) => {
+        reject(e);
+        load.hideLoading();
+      }
+    })
+  })
+}
+
+
+
+export const reStartFood = (data) => {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: apiUrl.apiUrl + 'gbdistributerfood/reStartFood/' + data,
+      method: 'GET',
       success: (res) => {
         resolve({ result: res.data })
       },

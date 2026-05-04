@@ -51,7 +51,7 @@ Page({
       this.setData({
         disId: value.gbDistributerId,
         disInfo: value,
-        purDepInfo: value.purDepartmentList[0]
+        purDepInfo: value.mendianDepartmentList[0]
       })
     }
   

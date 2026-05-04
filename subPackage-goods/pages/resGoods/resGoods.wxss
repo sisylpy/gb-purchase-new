@@ -109,7 +109,7 @@
 .logoimg{
   width: 140rpx;
   height: 140rpx;
-  border-radius: 50%;
+  /* border-radius: 50%; */
 
 }
 
@@ -340,7 +340,6 @@ show-btn {
   border-radius: 20rpx;
   padding: 10rpx 10rpx;
   background-color: #fff;
-   /* background-image: url('https://grainservice.club:8443/nongxinle/uploadImage/book_back.png'); */
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

@@ -92,9 +92,9 @@
                 </view>
                 <view class="flex-row half-row">
                   <text class="mr-10">是否结账:</text>
-                  <text wx:if="{{item.gbDpbStatus < 3}}" class=" font-xs red">未收到票据</text>
-                  <text wx:elif="{{item.gbDpbStatus == 3}}" class="font-xs red">未结账</text>
-                  <text wx:elif="{{item.gbDpbStatus == 4}}" class="font-xs gray">已结账</text>
+                  <text wx:if="{{item.gbDpbStatus < 3}}" class=" font-sl red">未收到票据</text>
+                  <text wx:elif="{{item.gbDpbStatus == 3}}" class="font-sl red">未结账</text>
+                  <text wx:elif="{{item.gbDpbStatus == 4}}" class="font-sl gray">已结账</text>
                 </view>
 
               </view>

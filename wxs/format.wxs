@@ -766,13 +766,25 @@ function formatNumber(num) {
   return rounded.toString();
 }
 
-/** 看板利润率进度条宽度（与旧页一致：margin/15*100，上限 100） */
-function healthBarWidthPercent(margin) {
-  var m = parseFloat(margin);
-  if (!m || m <= 0) return 0;
-  var p = (m / 15) * 100;
-  if (p > 100) return 100;
-  return +p.toFixed(1);
+/** 实际每份用量 = 实际用量 / 销售份数（无效份数返回 —） */
+function actualUsagePerPortion(actualUsage, salesPortions) {
+  var u = +actualUsage;
+  var p = +salesPortions;
+  if (p !== p || p <= 0) {
+    return '—';
+  }
+  if (u !== u) {
+    u = 0;
+  }
+  return formatNumber(u / p);
+}
+
+/** 进度条宽度：value 已为 0～100 百分数（如毛利率），与 WXML 「xx%」一致，直接映射到 track 百分比 */
+function healthBarWidthPercent(percentVal) {
+  var m = +percentVal;
+  if (m !== m || m <= 0) return 0;
+  if (m >= 100) return 100;
+  return +m.toFixed(1);
 }
 
 /** 看板利润率文字颜色 */
@@ -782,6 +794,74 @@ function marginTextColor(margin) {
   if (m < 5) return '#f45c43';
   if (m < 10) return '#ffd700';
   return '#38ef7d';
+}
+
+/** 经营净利率等可负的百分数字体色 */
+function signedPercentRateColor(val) {
+  var n = +val;
+  if (n !== n) return '#8892b0';
+  if (n >= 10) return '#38ef7d';
+  if (n > 0) return '#a7f3d0';
+  if (n === 0) return '#8892b0';
+  return '#eb3349';
+}
+
+/** 健康卡 KPI 数值颜色 */
+function healthKpiValueColor(rowKey, val) {
+  rowKey = rowKey + '';
+  if (rowKey === '经营净利率') return signedPercentRateColor(val);
+  if (rowKey.indexOf('毛利率') >= 0) return marginTextColor(val);
+  return '#cbd5f5';
+}
+
+/** scaleBase.healthCard 行右侧百分数字符串（净利率带正号，其余正数不带 +） */
+function healthPercentText(val, rowKey) {
+  var n = +val;
+  if (n !== n) return '—';
+  var s = (+n.toFixed(1)).toString();
+  rowKey = rowKey + '';
+  if (rowKey === '经营净利率' && n > 0) s = '+' + s;
+  return s + '%';
+}
+
+/** 仅对占比类 KPI 展示 0～100 进度条（净利率不参与条形） */
+function healthKpiUsePercentBar(rowKey) {
+  rowKey = rowKey + '';
+  if (rowKey === '经营净利率') return false;
+  var n = rowKey.indexOf('占比');
+  if (n >= 0) return true;
+  if (rowKey.indexOf('毛利率') >= 0) return true;
+  return false;
+}
+
+/** 条形填充色（占比类用渐变主色片段，毛利率沿用 margin 色谱） */
+function healthKpiBarColor(rowKey, value) {
+  rowKey = rowKey + '';
+  if (rowKey.indexOf('毛利率') >= 0) return marginTextColor(value);
+  return '#667eea';
+}
+
+/** scaleBase.monthForecast.rows 明细值展示 */
+function scaleBaseForecastCellValue(rowKey, value) {
+  rowKey = rowKey + '';
+  var n = +value;
+  if (n !== n) return value + '';
+  if (rowKey.indexOf('进度') >= 0) return formatNumber(n) + '%';
+  if (rowKey.indexOf('天数') >= 0) {
+    return formatNumber(n) + ' 天';
+  }
+  if (rowKey.indexOf('盈亏') >= 0) {
+    if (rowKey.indexOf('绝对值') >= 0) return '¥' + formatNumber(Math.abs(n));
+    var sign = n >= 0 ? '+' : '-';
+    return sign + '¥' + formatNumber(Math.abs(n));
+  }
+  return formatNumber(n);
+}
+
+/** forecast 明细行是否为金额类（右对齐字体略大） */
+function scaleBaseForecastCellIsMoney(rowKey) {
+  rowKey = rowKey + '';
+  return rowKey.indexOf('盈亏') >= 0;
 }
 
 /** 经营分析行展示（按 key 简单区分金额/百分比/天数/状态） */
@@ -801,6 +881,14 @@ function analysisTrendClass(key, value) {
   var n = +value;
   if (n !== n) return '';
   return n >= 0 ? 'analysis-trend-up' : 'analysis-trend-down';
+}
+
+/** 毛利率小数字符串列展示；空/未返回时「—」，否则「xx.xx%」（与 GbDepFoodBusinessInsight 口径的字符串一致） */
+function marginRateStringForCell(s) {
+  if (s == null) return '—';
+  s = s + '';
+  if (s === '') return '—';
+  return s + '%';
 }
 
 module.exports = {
@@ -837,9 +925,18 @@ module.exports = {
   formatDateTimeToChinese: formatDateTimeToChinese,
   formatDistance: formatDistance,
   formatNumber: formatNumber,
+  actualUsagePerPortion: actualUsagePerPortion,
   healthBarWidthPercent: healthBarWidthPercent,
   marginTextColor: marginTextColor,
+  signedPercentRateColor: signedPercentRateColor,
+  healthKpiValueColor: healthKpiValueColor,
+  healthPercentText: healthPercentText,
+  healthKpiUsePercentBar: healthKpiUsePercentBar,
+  healthKpiBarColor: healthKpiBarColor,
+  scaleBaseForecastCellValue: scaleBaseForecastCellValue,
+  scaleBaseForecastCellIsMoney: scaleBaseForecastCellIsMoney,
   analysisRowDisplay: analysisRowDisplay,
-  analysisTrendClass: analysisTrendClass
+  analysisTrendClass: analysisTrendClass,
+  marginRateStringForCell: marginRateStringForCell
 
 }

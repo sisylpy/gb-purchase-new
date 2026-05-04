@@ -76,7 +76,7 @@ var disUpdateDisGoodsGb = function (goods) {
 };
 
 var gbDisUpdateStandard = function (data) {
-  return request.post('gbdistributerstandard/gbDisUpdateStandard', data, { useUrlParams: true });
+  return request.post('gbdistributerstandard/gbDisUpdateStandard', data);
 };
 
 var updateGbGoods = function (goods) {

@@ -552,6 +552,180 @@ function getWeekDayName(weekday) {
   return weekDays[weekday] || '';
 }
 
+function trimStrForNum(v) {
+  if (v === undefined || v === null) {
+    return '';
+  }
+  var s = '' + v;
+  var start = 0;
+  var end = s.length - 1;
+  var ws = ' \n\r\t';
+  while (start <= end && ws.indexOf(s.charAt(start)) >= 0) {
+    start++;
+  }
+  while (end >= start && ws.indexOf(s.charAt(end)) >= 0) {
+    end--;
+  }
+  return start > end ? '' : s.substring(start, end + 1);
+}
+
+/**
+ * 总额 ÷ 销售份数 → 元/份（保留两位小数）。份数≤0 或无法解析时返回「—」。
+ * 注意：WXS 不支持正则字面量，trim 用手写循环。
+ */
+function pricePerPortion(totalAmount, soldPortions) {
+  if (totalAmount === undefined || totalAmount === null || soldPortions === undefined || soldPortions === null) {
+    return '—';
+  }
+  var sa = trimStrForNum(totalAmount);
+  var sp = trimStrForNum(soldPortions);
+  if (sa === '' || sp === '') {
+    return '—';
+  }
+  var t = parseFloat(sa);
+  var p = parseFloat(sp);
+  if (t !== t || p !== p || !(p > 0)) {
+    return '—';
+  }
+  var per = t / p;
+  return per.toFixed(2);
+}
+
+/**
+ * 根据综合实际毛利率字符串给出运营提示（用于菜品卡底部条）。
+ */
+function marginPerformanceHint(actualGrossStr) {
+  if (actualGrossStr == null) {
+    return '';
+  }
+  var s = trimStrForNum(actualGrossStr);
+  if (s === '') {
+    return '';
+  }
+  var n = parseFloat(s);
+  if (n !== n) {
+    return '持续优化成本与毛利';
+  }
+  if (n >= 50) {
+    return '表现优秀，继续保持！';
+  }
+  if (n >= 30) {
+    return '表现良好，可继续优化';
+  }
+  if (n >= 0) {
+    return '建议关注成本与售价';
+  }
+  return '建议核查经营数据';
+}
+
+/** 归一化 grossMarginLevel（接口：IN_BAND / BELOW / ABOVE / UNKNOWN） */
+function _marginLevel(ins) {
+  if (!ins) {
+    return 'UNKNOWN';
+  }
+  var level = ins.grossMarginLevel;
+  if (level === undefined || level === null || level === '') {
+    return 'UNKNOWN';
+  }
+  return '' + level;
+}
+
+/**
+ * 类别标准文字：目标 T、浮动 F、标准范围 [T−F, T+F]（接口字段为字符串 %）。
+ */
+function marginStandardMetaLine(ins) {
+  if (!ins) {
+    return '';
+  }
+  var T = ins.grossMarginStandardTarget;
+  var F = ins.grossMarginStandardFloatAbs;
+  var lo = ins.grossMarginStandardBandLower;
+  var hi = ins.grossMarginStandardBandUpper;
+  var hasT = T !== undefined && T !== null && trimStrForNum(T) !== '';
+  var hasF = F !== undefined && F !== null && trimStrForNum(F) !== '';
+  var hasLo = lo !== undefined && lo !== null && trimStrForNum(lo) !== '';
+  var hasHi = hi !== undefined && hi !== null && trimStrForNum(hi) !== '';
+  if (!hasT && !hasF && !(hasLo && hasHi)) {
+    return '';
+  }
+  var parts = [];
+  if (hasT) {
+    parts.push('目标 ' + trimStrForNum(T) + '%');
+  }
+  if (hasF) {
+    parts.push('浮动 ±' + trimStrForNum(F) + '%');
+  }
+  if (hasLo && hasHi) {
+    parts.push('标准范围 ' + trimStrForNum(lo) + '%～' + trimStrForNum(hi) + '%');
+  }
+  if (parts.length === 0) {
+    return '';
+  }
+  return parts.join(' · ');
+}
+
+/**
+ * 相对类别标准（grossMarginLevel）的短文案（与图标同区展示）。
+ */
+function marginStandardHint(ins) {
+  if (!ins) {
+    return '';
+  }
+  var level = _marginLevel(ins);
+  if (level === 'UNKNOWN') {
+    return '无对照标准';
+  }
+  if (level === 'IN_BAND') {
+    return '在目标区间内';
+  }
+  if (level === 'BELOW') {
+    return '低于目标区间';
+  }
+  if (level === 'ABOVE') {
+    return '高于目标区间';
+  }
+  return '';
+}
+
+function marginStandardShowBlock(ins) {
+  if (!ins) {
+    return '';
+  }
+  var m = marginStandardMetaLine(ins);
+  var h = marginStandardHint(ins);
+  return (m !== '' || h !== '') ? '1' : '';
+}
+
+/** 附加 class：dfl-blend-hero__hint--ok / --warn / --good / --muted */
+function marginStandardHintMod(ins) {
+  var level = _marginLevel(ins);
+  if (level === 'IN_BAND') {
+    return 'dfl-blend-hero__hint--ok';
+  }
+  if (level === 'BELOW') {
+    return 'dfl-blend-hero__hint--warn';
+  }
+  if (level === 'ABOVE') {
+    return 'dfl-blend-hero__hint--good';
+  }
+  return 'dfl-blend-hero__hint--muted';
+}
+
+/** 配料看板页：与 marginStandardHintMod 同级逻辑，class 前缀 dga-hero__margin-- */
+function marginStandardHintModDga(ins) {
+  var level = _marginLevel(ins);
+  if (level === 'IN_BAND') {
+    return 'dga-hero__margin--ok';
+  }
+  if (level === 'BELOW') {
+    return 'dga-hero__margin--warn';
+  }
+  if (level === 'ABOVE') {
+    return 'dga-hero__margin--good';
+  }
+  return 'dga-hero__margin--muted';
+}
+
 module.exports = {
   getGongli: getGongli,
   getPercent: getPercent,
@@ -587,5 +761,12 @@ module.exports = {
   formatDateTimeToChinese: formatDateTimeToChinese,
   getDay: getDay,
   getMonth: getMonth,
-  getWeekDayName: getWeekDayName
+  getWeekDayName: getWeekDayName,
+  pricePerPortion: pricePerPortion,
+  marginPerformanceHint: marginPerformanceHint,
+  marginStandardMetaLine: marginStandardMetaLine,
+  marginStandardHint: marginStandardHint,
+  marginStandardShowBlock: marginStandardShowBlock,
+  marginStandardHintMod: marginStandardHintMod,
+  marginStandardHintModDga: marginStandardHintModDga
 };

@@ -1,15 +1,729 @@
 {
-  "libVersion": "3.15.2",
+  "libVersion": "3.14.3",
   "projectname": "jj-purchase-new",
   "condition": {
     "miniprogram": {
       "list": [
         {
+          "name": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "pathName": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "query": "disGoodsId=5&startDate=2026-05-01&stopDate=2026-05-04&dateType=month&searchType=total&fenxiType=weightEcharts&searchDepId=-1",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
+          "name": "subPackage-charts/pages/sales/dailyTurnover/dailyTurnover",
+          "pathName": "subPackage-charts/pages/sales/dailyTurnover/dailyTurnover",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "pathName": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "query": "disGoodsId=5&startDate=2026-04-04&stopDate=2026-05-04&dateType=month&searchType=total&fenxiType=weightEcharts&searchDepId=-1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "pathName": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "query": "disGoodsId=6&startDate=2026-04-04&stopDate=2026-05-04&dateType=month&searchType=total&fenxiType=weightEcharts&searchDepId=-1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "pathName": "subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost",
+          "query": "disGoodsId=6&startDate=2026-04-04&stopDate=2026-05-04&dateType=month&searchType=total&fenxiType=weightEcharts&searchDepId=-1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/costGoodsFenxi/costGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/costGoodsFenxi/costGoodsFenxi",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/report/reportPage/reportPage",
+          "pathName": "subPackage-charts/pages/report/reportPage/reportPage",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/purGoodsFenxi/purGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/purGoodsFenxi/purGoodsFenxi",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/management/staff/staff",
+          "pathName": "subPackage-mendian/pages/management/staff/staff",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/searchGoods/searchGoods",
+          "pathName": "subPackage-goods/pages/searchGoods/searchGoods",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/goodsOrderList/goodsOrderList",
+          "pathName": "subPackage-goods/pages/goodsOrderList/goodsOrderList",
+          "query": "disGoodsId=12&type=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "pathName": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "query": "id=12",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/sales/addFoodSales/addFoodSales",
+          "pathName": "subPackage-charts/pages/sales/addFoodSales/addFoodSales",
+          "query": "type=single&departmentId=3&anchorDate=2026-05-02",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/sales/addFoodSales/addFoodSales",
+          "pathName": "subPackage-charts/pages/sales/addFoodSales/addFoodSales",
+          "query": "type=single&departmentId=3",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/sales/addTurnover/addTurnover",
+          "pathName": "subPackage-charts/pages/sales/addTurnover/addTurnover",
+          "query": "type=single&departmentId=3",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-ai/pages/restraunt/restaurantProfile/restaurantProfile",
+          "pathName": "subPackage-ai/pages/restraunt/restaurantProfile/restaurantProfile",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "pathName": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "query": "type=edit",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/index/index",
+          "pathName": "subPackage-mendian/pages/food/index/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/account/payPage/payPage",
+          "pathName": "subPackage-mendian/pages/account/payPage/payPage",
+          "query": "type=0",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "pathName": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "query": "id=5",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "pathName": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "pathName": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "query": "goodsName=牛肉串",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/appointSupplierList/appointSupplierList",
+          "pathName": "subPackage-supplier/pages/supplier/appointSupplierList/appointSupplierList",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/appointSupplierList/appointSupplierList",
+          "pathName": "subPackage-goods/pages/appointSupplierList/appointSupplierList",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/disGoodsPage/disGoodsPage",
+          "pathName": "subPackage-goods/pages/disGoodsPage/disGoodsPage",
+          "query": "disGoodsId=6&index=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/report/reportPage/reportPage",
+          "pathName": "subPackage-charts/pages/report/reportPage/reportPage",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/resGoods/resGoods",
+          "pathName": "subPackage-supplier/pages/supplier/resGoods/resGoods",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/index/index",
+          "pathName": "subPackage-supplier/pages/supplier/index/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/management/staff/staff",
+          "pathName": "subPackage-mendian/pages/management/staff/staff",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/management/homePage/homePage",
+          "pathName": "subPackage-mendian/pages/management/homePage/homePage",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "subPackage-ai/pages/chat/aiChat/aiChat",
           "pathName": "subPackage-ai/pages/chat/aiChat/aiChat",
           "query": "",
-          "scene": null,
-          "launchMode": "default"
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/statistic/costGoodsByDate/costGoodsByDate",
+          "pathName": "subPackage-charts/pages/statistic/costGoodsByDate/costGoodsByDate",
+          "query": "disId=2&startDate=2026-04-30&stopDate=2026-04-30&dateType=customer&fenxiType=costEcharts&searchDepId=-1&value=13&allCostTotal=740.2&id=-1&type=sales&hanzi=%E6%98%9F%E6%9C%9F%E5%9B%9B",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-ai/pages/chat/aiChat/aiChat",
+          "pathName": "subPackage-ai/pages/chat/aiChat/aiChat",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/index/index",
+          "pathName": "subPackage-supplier/pages/supplier/index/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/customerGoodsAi/customerGoodsAi",
+          "pathName": "subPackage-mendian/pages/order/customerGoodsAi/customerGoodsAi",
+          "query": "depId=4&disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/customerGoodsAi/customerGoodsAi",
+          "pathName": "subPackage-mendian/pages/order/customerGoodsAi/customerGoodsAi",
+          "query": "depId=4&disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/stock/stockList/stockList",
+          "pathName": "subPackage-charts/pages/stock/stockList/stockList",
+          "query": "greatId=22&fatherName=%E6%96%B0%E9%B2%9C%E8%94%AC%E8%8F%9C&dateString=%E5%85%A8%E9%83%A8&color=&fatherTotal=38.5&whichDay=99&searchDepIds=-1&disId=2&type=0&goodsIndex=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "pathName": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "query": "goodsName=万字酱油",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/customerGoodsAi/customerGoodsAi",
+          "pathName": "subPackage-mendian/pages/order/customerGoodsAi/customerGoodsAi",
+          "query": "depId=4&disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "pathName": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "query": "goodsName=紫葡萄干",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "pathName": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "query": "id=10",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "pathName": "subPackage-goods/pages/goodsFenxi/goodsFenxi",
+          "query": "id=10",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/stockGoodsList/stockGoodsList",
+          "pathName": "subPackage-goods/pages/stockGoodsList/stockGoodsList",
+          "query": "disGoodsId=12",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/stockGoodsList/stockGoodsList",
+          "pathName": "subPackage-goods/pages/stockGoodsList/stockGoodsList",
+          "query": "disGoodsId=10",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "pathName": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "query": "goodsName=烧烤炉",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/statistic/index/index",
+          "pathName": "subPackage-charts/pages/statistic/index/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/management/homePage/homePage",
+          "pathName": "subPackage-mendian/pages/management/homePage/homePage",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-ai/pages/chat/aiChat/aiChat",
+          "pathName": "subPackage-ai/pages/chat/aiChat/aiChat",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "pathName": "subPackage-mendian/pages/order/aiAddGoods/aiAddGoods",
+          "query": "goodsName=中华烟",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=2",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/dishIngredientDashboard/dishIngredientDashboard",
+          "pathName": "subPackage-mendian/pages/food/dishIngredientDashboard/dishIngredientDashboard",
+          "query": "foodId=2&startDate=2026-04-01&stopDate=2026-04-26&endDate=2026-04-26&disId=1&depFatherId=1&foodName=%25E7%2583%25A9%25E8%258F%259C&hanzi=%25E6%259C%25AC%25E6%259C%2588",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/dishIngredientDashboard/dishIngredientDashboard",
+          "pathName": "subPackage-mendian/pages/food/dishIngredientDashboard/dishIngredientDashboard",
+          "query": "foodId=2&startDate=2026-04-01&stopDate=2026-04-26&endDate=2026-04-26&disId=1&depFatherId=1&foodName=%25E7%2583%25A9%25E8%258F%259C",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "pathName": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "query": "type=edit",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/index/index",
+          "pathName": "subPackage-mendian/pages/food/index/index",
+          "query": "fatherId=1&name=%E7%83%AD%E8%8F%9C",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/costGoodsFenxi/costGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/costGoodsFenxi/costGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "pathName": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "query": "type=add",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/gbReceiveBatch/gbReceiveBatch",
+          "pathName": "subPackage-supplier/pages/gbReceiveBatch/gbReceiveBatch",
+          "query": "batchId=7&retName=%E6%B1%80%E5%85%B0%E9%A4%90%E5%8E%85&disId=3&buyUserId=12&depId=6&from=supplier",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/costGoodsFenxi/costGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/costGoodsFenxi/costGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "pathName": "subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "pathName": "subPackage-mendian/pages/food/addRaw/addRaw",
+          "query": "type=add",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/jinriListWithLogin/jinriListWithLogin",
+          "pathName": "subPackage-supplier/pages/jinriListWithLogin/jinriListWithLogin",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/resGoods/resGoods",
+          "pathName": "subPackage-supplier/pages/supplier/resGoods/resGoods",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/gbOrderBatch/gbOrderBatch",
+          "pathName": "subPackage-supplier/pages/gbOrderBatch/gbOrderBatch",
+          "query": "batchId=2&retName=%E6%B1%80%E5%85%B0%E9%A4%90%E5%8E%85&disId=3&fromBuyer=1&depId=6&buyUserId=12",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/purUserFenxi/purUserFenxi",
+          "pathName": "subPackage-supplier/pages/supplier/purUserFenxi/purUserFenxi",
+          "query": "purUserId=7&type=0&supplierId=-1&startDate=2026-04-01&stopDate=2026-04-24&dateType=month",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/purUserFenxi/purUserFenxi",
+          "pathName": "subPackage-supplier/pages/supplier/purUserFenxi/purUserFenxi",
+          "query": "supplierId=1&type=1&purUserId=-1&startDate=2026-04-01&stopDate=2026-04-24&dateType=month",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/management/purUserFenxi/purUserFenxi",
+          "pathName": "subPackage-mendian/pages/management/purUserFenxi/purUserFenxi",
+          "query": "purUserId=7&type=0&supplierId=-1&startDate=2026-04-01&stopDate=2026-04-24&dateType=month",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/myPurchaseDetail/myPurchaseDetail",
+          "pathName": "subPackage-supplier/pages/supplier/myPurchaseDetail/myPurchaseDetail",
+          "query": "batchId=1&value=20.0",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-supplier/pages/supplier/supplierBills/supplierBills",
+          "pathName": "subPackage-supplier/pages/supplier/supplierBills/supplierBills",
+          "query": "type=allUnPay&supplierId=1&value=20.0",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=3",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=3",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/index/index",
+          "pathName": "subPackage-mendian/pages/food/index/index",
+          "query": "fatherId=1&name=%E7%83%AD%E8%8F%9C",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/chefOrder/chefOrder",
+          "pathName": "subPackage-mendian/pages/order/chefOrder/chefOrder",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-goods/pages/resGoods/resGoods",
+          "pathName": "subPackage-goods/pages/resGoods/resGoods",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "pathName": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-mendian/pages/food/depFoodList/depFoodList",
+          "query": "disId=1",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "pathName": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "pathName": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "subPackage-ai/pages/chat/aiChat/aiChat",
+          "pathName": "subPackage-ai/pages/chat/aiChat/aiChat",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
@@ -75,8 +789,8 @@
           "scene": null
         },
         {
-          "name": "subPackage-mendian/pages/food/foodList/foodList",
-          "pathName": "subPackage-mendian/pages/food/foodList/foodList",
+          "name": "subPackage-mendian/pages/food/index/index",
+          "pathName": "subPackage-mendian/pages/food/index/index",
           "query": "fatherId=1&name=%E5%87%89%E8%8F%9C",
           "launchMode": "default",
           "scene": null

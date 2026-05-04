@@ -1,0 +1,35 @@
+
+<view class="flex flex-column">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="选择订货商" 
+avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column" wx:if="{{supplierArr.length == 0 ? 'show' : ''}}" style="height: {{windowHeight - 360}}rpx; margin-top:160rpx;">
+    <view class="font-lg">
+        <view class="center-content flex-column">
+          <image class="empty_image" src="../../../../images/xiuxi-2.png"></image>
+          <text class="big">暂无订货微信供货商</text>
+          <text class="font-xs text-secondary pt-20 p-10">这里显示已经订货成功的供货商</text>
+        </view>
+      </view>
+  
+  </view>
+
+  <view class="flex-row-between bg-white p-20 font-lg border-bottom }}" wx:for="{{supplierArr}}" style="width: {{windowWidth - 40}}rpx;" bindtap="choiceSupplier" data-item="{{item}}" >
+    <view class="">
+      <text class="mr-10">{{index + 1}}.</text>
+      <text>{{item.nxJrdhsSupplierName}}</text>
+    </view>
+    <view class="" wx:if="{{item.isSelected}}" >
+      <image src="/images/correct.png" mode="aspectFill" class="icon"/>
+    </view>
+  </view>
+
+
+
+
+
+</view>
+
+
+

@@ -6,16 +6,20 @@ var orderApi = require('../../../services/resGoodsAiApi.js');
 // ========================
 // 本页面使用的接口（实现已拷贝至 subPackage-mendian/services/resGoodsAiApi.js，与 depOrder 路径一致）
 // ========================
+
+// orderApi.gbGetNxGoodsCataGoods(data)           POST  nxgoods/gbGetNxGoodsCataGoods                         获取Nx分类商品
+// orderApi.gbDepGetNxGoodsByGreatGrandId(data) POST  nxgoods/gbDepGetNxGoodsByGreatGrandId              根据大类获取nx商品
+
+
 // orderApi.depGetDepGoodsGbPage(data)          POST  gbdepartmentdisgoods/depGetDepGoodsGbPage          分页获取部门商品
 // orderApi.depGetDepGoodsCataGb(data)          POST  gbdepartmentdisgoods/depGetDepGoodsCataGb          获取部门商品分类
+
 // orderApi.createDepartmentOrderForJj(data)                 POST  gbdepartmentorders/createDepartmentOrderForJj                  保存进价订单
 // orderApi.createDepartmentOrderWithNewDepDisGoods(data) POST  gbdepartmentorders/createDepartmentOrderWithNewDepDisGoods   保存订单并更新部门商品
 // orderApi.createDepartmentOrderFromNxGoodsImport(data)    POST  gbdistributergoods/createDepartmentOrderFromNxGoodsImport       保存订单并更新配送商品
 // orderApi.updateOrderGbJj(data)               POST  gbdepartmentorders/updateOrderGbJj                  更新进价订单
 // orderApi.deleteOrderGb(data)                 GET   gbdepartmentorders/deleteOrderGb/{id}               删除订单
-// orderApi.gbGetNxGoodsCataGoods(data)           POST  nxgoods/gbGetNxGoodsCataGoods                         获取Nx分类商品
-// orderApi.gbDepGetNxGoodsByGreatGrandId(data) POST  nxgoods/gbDepGetNxGoodsByGreatGrandId              根据大类获取牛享商品
-// orderApi.getNxGoodsIdsByGreatId(data)        GET   nxgoods/getNxGoodsIdsByGreatId/{id}                 根据大类获取牛享商品ID
+
 // orderApi.gbDisSaveStandard(data)             POST  gbdistributerstandard/gbDisSaveStandard             保存配送标准
 // orderApi.saveNxStandard(data)                POST  nxstandard/saveNxStandard                           保存nx标准
 // orderApi.gbDisDeleteStandard(data)           GET   gbdistributerstandard/gbDisDeleteStandard/{id}      删除配送标准
@@ -25,7 +29,34 @@ var orderApi = require('../../../services/resGoodsAiApi.js');
 // orderApi.deleteDepGoods(data)                GET   gbdepartmentdisgoods/deleteDepGoods/{id}             删除部门商品
 // ========================
 
-/** 调试「全部配送」：gbDepGetNxGoodsByGreatGrandId 返回列表前 10 条顺序与 nxGoodsGrandId 类型，用于排查子类高亮闪烁 */
+/** 配送侧 Nx 列表：商品图相对路径（wxml 里用 imgUrl.resolve(url, rel)，勿写成 resolve(url+rel)） */
+function pickDisGoodsImageRel(item) {
+  if (!item) return '';
+  if (item.nxGoodsFile) return String(item.nxGoodsFile);
+  var e = item.gbDistributerGoodsEntity;
+  if (!e) return '';
+  if (e.gbDgGoodsFile) return String(e.gbDgGoodsFile);
+  if (e.gbDgGoodsFileImg) return String(e.gbDgGoodsFileImg);
+  if (e.gbDgGoodsFileLarge) return String(e.gbDgGoodsFileLarge);
+  return '';
+}
+
+/** 与 wxs/imgUrl.wxs 的 resolve 一致，供图片弹窗等 JS 场景 */
+function encodePathJoin(base, rel) {
+  var r = rel == null ? '' : String(rel).replace(/^\s+|\s+$/g, '');
+  if (r === '' || r === 'goodsImage/logo.jpg' || r === '/goodsImage/logo.jpg') return '';
+  if (/^https?:\/\//i.test(r)) return r;
+  var b = String(base || '').replace(/\/+$/, '');
+  if (b === '') return r;
+  var p = r.replace(/^\/+/, '');
+  var parts = p.split('/');
+  var enc = [];
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i] !== '') enc.push(encodeURIComponent(parts[i]));
+  }
+  return b + '/' + enc.join('/');
+}
+
 function logDisApiGoodsFirst10(tag, list) {
   if (!list || !list.length) {
     console.log(`[resGoodsAi/dis][${tag}] first10 (empty)`);
@@ -43,10 +74,12 @@ function logDisApiGoodsFirst10(tag, list) {
   console.log(`[resGoodsAi/dis][${tag}] first10 detail:`, rows);
 }
 
-
-
-
-
+/**
+ * 右侧「全部配送」商品列表：滚动到子类锚点 cat-${id}，并打日志（便于排查 scroll-into-view 不生效）
+ */
+function logDisScrollStep(reason, payload) {
+  console.log(`[resGoodsAi/dis-scroll] ${reason}`, payload);
+}
 
 
 
@@ -66,8 +99,23 @@ Page({
       leftTopHeight: globalData.navBarHeight * globalData.rpxR + 80 * globalData.rpxR
     });
 
-    // 检查是否有新保存的订单需要更新
-    this._checkAndUpdateOrderData();
+    // 从搜索页 / AI 添加商品等返回后，与其它订单页一致：根据标记全量刷新部门商品（再合并 newOrderInfo）
+    var needImmediateRefresh = wx.getStorageSync('needRefreshOrderData');
+    if (needImmediateRefresh) {
+      wx.removeStorageSync('needRefreshOrderData');
+      var that = this;
+      if (this.data.depInfo && this.data.depInfo.gbDepartmentId) {
+        this.setData({ currentPage: 1 }, function () {
+          that._getInitDataDep(function () {
+            that._checkAndUpdateOrderData();
+          });
+        });
+      } else {
+        this._checkAndUpdateOrderData();
+      }
+    } else {
+      this._checkAndUpdateOrderData();
+    }
 
     // 检查是否有库存更新需要同步
     this._checkAndUpdateGoodsData();
@@ -371,19 +419,20 @@ Page({
   // 显示图片弹窗
   showImageModal: function (e) {
     const goods = e.currentTarget.dataset.goods;
-    let imageUrl = '';
-
-    // 处理两种不同的商品数据结构
+    var rel = '';
     if (goods.gbDisGoodsFile) {
-      // 左侧商品列表 (depGoodsArrAi)
-      imageUrl = this.data.url + goods.gbDisGoodsFile;
+      rel = goods.gbDisGoodsFile;
+    } else if (goods._disGoodsImageRel) {
+      rel = goods._disGoodsImageRel;
     } else if (goods.nxGoodsFile) {
-      // 右侧商品列表 (goodsList)
-      imageUrl = this.data.url + goods.nxGoodsFile;
+      rel = goods.nxGoodsFile;
     } else {
-      // 默认图片
-      imageUrl = '/images/logo.jpg';
+      var ent = goods.gbDistributerGoodsEntity;
+      if (ent) {
+        rel = ent.gbDgGoodsFile || ent.gbDgGoodsFileImg || ent.gbDgGoodsFileLarge || '';
+      }
     }
+    var imageUrl = rel ? encodePathJoin(this.data.url, rel) : '/images/logo.jpg';
 
     this.setData({
       showImageModal: true,
@@ -433,7 +482,11 @@ Page({
   },
 
 
-  _getInitDataDep() {
+  /**
+   * 拉取部门商品分类并重载第一页列表（onLoad / 全量刷新）
+   * @param {function=} onComplete 列表首屏写入完成后的回调（如 onShow 里再跑 _checkAndUpdateOrderData）
+   */
+  _getInitDataDep(onComplete) {
     load.showLoading("获取分类");
     var data = {
       disId: this.data.disId,
@@ -454,8 +507,9 @@ Page({
           subcatScrollIntoViewDep: `subcat-dep-${firstSubCat.gbDistributerFatherGoodsId}`,
           fatherArr: res.result.data.cataArr[0].fatherGoodsEntities,
           depGoodsArrAi: [],
+          currentPage: 1,
         }, () => {
-          this._getInitDataPageDep(true);
+          this._getInitDataPageDep(true, onComplete);
         });
       } else {
         this.setData({
@@ -469,6 +523,9 @@ Page({
             });
           }, 1000);
         })
+        if (typeof onComplete === 'function') {
+          onComplete();
+        }
       }
     });
   },
@@ -1026,8 +1083,7 @@ Page({
       canSave: true,
 
       applyStandardName: standard,
-      // applyRemark: e.currentTarget.dataset.depgoods.gbDdgOrderRemark,
-      // printStandard: e.currentTarget.dataset.depgoods.gbDdgShowStandardName,
+      applyRemark: e.currentTarget.dataset.depgoods.gbDdgOrderRemark,
 
     })
     if (e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
@@ -1133,7 +1189,6 @@ Page({
         applyItem: e.currentTarget.dataset.order,
         showDep: true,
         applyStandardName: applyItem.gbDoStandard,
-        printStandard: applyItem.gbDoPrintStandard,
         editApply: true,
         applyNumber: applyItem.gbDoQuantity,
         applyRemark: applyItem.gbDoRemark,
@@ -1166,7 +1221,6 @@ Page({
         applyStandardName: applyItem.gbDoStandard,
         itemDis: e.currentTarget.dataset.disgoods,
         nxGoods: e.currentTarget.dataset.nxgoods,
-        printStandard: applyItem.gbDoPrintStandard,
         editApply: true,
         applyNumber: applyItem.gbDoQuantity,
         applyRemark: applyItem.gbDoRemark,
@@ -1262,21 +1316,13 @@ Page({
     var week = dateUtils.getArriveWhatDay(0);
     var depDisGoodsId = -1;
     var gbDisGoodsId = -1;
-    var gbDisGoodsFatherId = -1;
     var gbGoodsId = "";
     var gbGoodsFatherId = "";
-    var gbDisId = -1;
-    var gbDisGoodsId = -1;
-    var price = null;
-    var weight = null;
-    var subtotal = 0;
-    var goodsType = "";
-    var doGoodsName = "";
+   
     if (this.data.depGoods !== null) {
       gbDisGoodsId = this.data.depGoods.gbDdgDisGoodsId;
-      gbDisGoodsFatherId = this.data.depGoods.gbDdgDisGoodsFatherId;
+      // gbDisGoodsFatherId = this.data.depGoods.gbDdgDisGoodsFatherId;
       depDisGoodsId = this.data.depGoods.gbDepartmentDisGoodsId;
-      doGoodsName = this.data.depGoods.gbDdgDepGoodsName;
 
     } else {
       if (this.data.itemDis !== null) {
@@ -1284,23 +1330,16 @@ Page({
       }
       gbGoodsId = this.data.nxGoods.nxGoodsId;
       gbGoodsFatherId = this.data.nxGoods.nxGoodsFatherId;
-      goodsType = 1;
-      doGoodsName = this.data.nxGoods.nxGoodsName;
     }
 
     var dg = {
       gbDoOrderUserId: this.data.userInfo.gbDepartmentUserId,
       gbDoDepDisGoodsId: depDisGoodsId, //
       gbDoDisGoodsId: gbDisGoodsId, //
-      gbDoDisGoodsFatherId: gbDisGoodsFatherId,
       gbDoDepartmentId: this.data.depId,
-      gbDoToDepartmentId: this.data.depInfo.gbDepartmentFatherId,
       gbDoDistributerId: this.data.disId,
       gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentFatherId,
       gbDoQuantity: e.detail.applyNumber,
-      gbDoPrice: price,
-      gbDoWeight: weight,
-      gbDoSubtotal: subtotal,
       gbDoStandard: e.detail.applyStandardName,
       gbDoRemark: e.detail.applyRemark,
       gbDoIsAgent: 0,
@@ -1310,14 +1349,8 @@ Page({
       gbDoArriveWhatDay: week,
       gbDoNxGoodsId: gbGoodsId,
       gbDoNxGoodsFatherId: gbGoodsFatherId,
-      gbDoNxDistributerGoodsId: gbDisGoodsId,
-      gbDoNxDistributerId: gbDisId,
-      gbDoGoodsType: goodsType,
-      gbDoOrderType: goodsType,
       gbDoDsStandardScale: this._gbDoDsStandardScaleForOuterPack(e.detail.applyStandardName),
       stockIsZero: e.detail.stockIsZero,
-      gbDoPrintStandard: this.data.printStandard,
-      gbDoGoodsName: doGoodsName,
 
     };
     console.log(dg);
@@ -1355,9 +1388,7 @@ Page({
             this.setData({
               [data]: res.result.data
             })
-          
-
-
+        
           } else {
             wx.showToast({
               title: '订单保存失败',
@@ -1627,7 +1658,7 @@ Page({
         const greatLabel = firstCata.nxDfgGoodsName || firstCata.nxGoodsName || '';
         this.setData({
           grandList: res.result.data.cataArr,
-          sortDepGoodsArrDis: res.result.data.depGoodsArr,
+          sortDepGoodsArrDis: res.result.data.nxGoodsIdsSort,
           fatherArrDis: firstCata.nxGoodsEntityList,
           leftGreatId: firstCata.nxGoodsId,
           selectedSubCategoryId: firstCata.nxGoodsEntityList[0].nxGoodsId,
@@ -1661,6 +1692,18 @@ Page({
         console.log("rerssssssssss",res.result.page);
 
         var subCatId = this.data.activeSubCatId;
+        const anchor = `cat-${subCatId}`;
+        logDisScrollStep('_getFatherGoodsDis 即将写入列表并滚动', {
+          page: this.data.currentPageDis,
+          activeSubCatId: subCatId,
+          anchor,
+          listLen: processedList.length,
+          anchorsFirst: processedList
+            .filter((g) => g.isFirstInCategory)
+            .slice(0, 15)
+            .map((g) => ({ grand: g.nxGoodsGrandId, a: `cat-${g.nxGoodsGrandId}` })),
+        });
+
         this.setData({
           goodsList: processedList,
           currentPageDis: this.data.currentPageDis,
@@ -1668,29 +1711,14 @@ Page({
           totalCountDis: res.result.page.totalCount,
 
           subcatScrollIntoView: `subcat-${subCatId}`,
-          scrollIntoView: `cat-${subCatId}` // 右侧商品区锚点
+          scrollIntoView: '', // 由回调里 _scrollDisGoodsToAnchor 统一处理，避免与查询竞态
         }, () => {
-          // 数据更新后计算分类位置
+          this._disSubCatScrollLockUntil = Math.max(this._disSubCatScrollLockUntil || 0, Date.now() + 500);
           this.calculateCategoryPositionsDis();
-          // const idOrder = (this.data.sortDepGoodsArrDis || []).map(String);
-          // console.log('sortDepGoodsArrInit:', idOrder);
-          // console.log('merged ids--Initt:', processedList.map(i => i.nxGoodsId));
-
-
+          this._scrollDisGoodsToAnchor(anchor, subCatId, '_getFatherGoodsDis');
         });
       }
     });
-  },
-
-  _getGoodsIdsByGreatId() {
-    console.log("huoquxinidididiidssss")
-    orderApi.getNxGoodsIdsByGreatId(this.data.leftGreatId).then(res => {
-      if (res.result.code == 0) {
-        this.setData({
-          sortDepGoodsArrDis: res.result.data
-        })
-      }
-    })
   },
 
 
@@ -1731,7 +1759,6 @@ Page({
       });
     });
 
-    this._getGoodsIdsByGreatId();
     this._getFatherGoodsDis();
   },
 
@@ -1784,12 +1811,19 @@ Page({
             console.log(`>>> onScrollToLowerDis: 合并后总数量: ${updatedGoodsList.length}`);
             console.log(`>>> onScrollToLowerDis: 合并后所有IDs:`, updatedGoodsList.map(i => i.nxGoodsId));
 
+            const activeSubKeep = this.data.activeSubCatId;
+
             // 更新商品列表和分页信息
             this.setData({
               goodsList: updatedGoodsList,
               totalPageDis: res.result.page.totalPage,
               totalCountDis: res.result.page.totalCount,
               isLoading: false,
+            }, () => {
+              // 追加页后列表重排，首屏可能仍是上一子类，短暂不要让 onGoodsScrollDis 改回顶部标签
+              if (activeSubKeep != null && activeSubKeep !== '') {
+                this._disSubCatScrollLockUntil = Math.max(this._disSubCatScrollLockUntil || 0, Date.now() + 500);
+              }
             });
 
             // 如果已达到 totalCount，停止加载
@@ -1818,6 +1852,10 @@ Page({
 
 
   onGoodsScrollDis(e) {
+    // 程序化 scroll-into-view 后仍会触发 scroll，此时首屏可能短暂落在上一分类，避免把顶部标签抢改回去
+    if (Date.now() < (this._disSubCatScrollLockUntil || 0)) {
+      return;
+    }
     // 节流略
     const query = wx.createSelectorQuery();
     query.selectAll('.product-item').boundingClientRect();
@@ -1859,46 +1897,145 @@ Page({
     });
   },
 
+  /**
+   * 滚动右侧 goods-list 到子分类锚点。带日志；若 DOM 未就绪会延时重试（关闭展开层后常见）。
+   * @param {string} anchor 如 cat-123
+   * @param {*} subCatId 子类 id（仅用于日志）
+   * @param {string} from 调用来源
+   */
+  _scrollDisGoodsToAnchor(anchor, subCatId, from) {
+    const delays = [0, 50, 200];
+    const tryAt = (idx) => {
+      const delay = delays[idx];
+      const run = () => {
+        this.setData({ scrollIntoView: '' }, () => {
+          this.createSelectorQuery()
+            .select(`#${anchor}`)
+            .boundingClientRect((rect) => {
+              const hit = rect != null;
+              logDisScrollStep(`${from} #${anchor} delay=${delay}ms`, {
+                subCatId,
+                subCatStr: String(subCatId),
+                hit,
+                rect: rect
+                  ? { id: rect.id, top: rect.top, left: rect.left, width: rect.width, height: rect.height }
+                  : null,
+                scrollIntoView_before: this.data.scrollIntoView,
+              });
+              if (hit) {
+                this._disSubCatScrollLockUntil = Date.now() + 550;
+                this.setData({ scrollIntoView: anchor }, () => {
+                  logDisScrollStep(`${from} set scrollIntoView OK`, {
+                    scrollIntoView: this.data.scrollIntoView,
+                  });
+                });
+              } else if (idx < delays.length - 1) {
+                logDisScrollStep(`${from} 锚点未就绪，${delays[idx + 1]}ms 再试`, { anchor, tryIndex: idx + 1 });
+                tryAt(idx + 1);
+              } else {
+                console.warn('[resGoodsAi/dis-scroll] 重试用尽仍无锚点', {
+                  from,
+                  anchor,
+                  subCatId,
+                  goodsLen: this.data.goodsList.length,
+                  anchorsExpected: this.data.goodsList
+                    .filter((g) => g.isFirstInCategory)
+                    .map((g) => ({ nxGoodsGrandId: g.nxGoodsGrandId, anchor: `cat-${g.nxGoodsGrandId}` })),
+                });
+              }
+            })
+            .exec();
+        });
+      };
+      if (delay === 0) {
+        run();
+      } else {
+        setTimeout(run, delay);
+      }
+    };
+    tryAt(0);
+  },
+
 
   // Dis点击标签事件
   onSubCatTapDis(e) {
-
+    this._disSubCatScrollLockUntil = Date.now() + 600;
     const subCatId = e.currentTarget.dataset.id;
-    console.log("=== onSubCatTapDis 开始 ===");
-    console.log("点击的分类ID:", subCatId);
-    console.log("当前 goodsList 长度:", this.data.goodsList.length);
-    console.log("goodsList 中的所有 nxGoodsGrandId:", this.data.goodsList.map(item => item.nxGoodsGrandId));
-    
-    const hasGoods = this.data.goodsList.some(item => String(item.nxGoodsGrandId) === String(subCatId));
-    console.log("hasGoods 判断结果:", hasGoods);
-    
-    this.setData({
-      showAllSubCat: false,
-      activeSubCatId: String(subCatId),
-      subcatScrollIntoView: `subcat-${subCatId}`
+    const anchor = `cat-${subCatId}`;
+
+    const fatherIds = (this.data.fatherArrDis || []).map((f) => String(f.nxGoodsId));
+    const grandsInGoods = [...new Set(this.data.goodsList.map((g) => String(g.nxGoodsGrandId)))];
+    const anchorsFirst = this.data.goodsList
+      .filter((g) => g.isFirstInCategory)
+      .map((g) => ({
+        nxGoodsGrandId: g.nxGoodsGrandId,
+        t: typeof g.nxGoodsGrandId,
+        anchor: `cat-${g.nxGoodsGrandId}`,
+      }));
+
+    logDisScrollStep('onSubCatTapDis 点击', {
+      dataset: e.currentTarget.dataset,
+      subCatId,
+      typeofSubCatId: typeof subCatId,
+      leftGreatId: this.data.leftGreatId,
+      currentPageDis: this.data.currentPageDis,
+      totalPageDis: this.data.totalPageDis,
+      showAllSubCat: this.data.showAllSubCat,
+      goodsLen: this.data.goodsList.length,
+      fatherArrDisLen: fatherIds.length,
+      fatherIdsHead: fatherIds.slice(0, 12),
+      grandsInGoodsHead: grandsInGoods.slice(0, 20),
+      anchorsFirstInCategory: anchorsFirst,
+      targetAnchor: anchor,
     });
-    console.log("Dis点击标签事件", subCatId);
-    if (hasGoods) {
-      // 已有商品，直接滚动
-      console.log("准备滚动到:", `cat-${subCatId}`);
-      this.setData({
-        scrollIntoView: `cat-${subCatId}`
-      });
-      console.log("scrollIntoView 已设置为:", this.data.scrollIntoView);
-    } else {
-      console.log(`>>> onSubCatTapDis: 即将为分类 ${subCatId} 加载商品。当前页码: ${this.data.currentPageDis}`);
+
+    const hasGoods = this.data.goodsList.some((item) => String(item.nxGoodsGrandId) === String(subCatId));
+    const matchIndices = [];
+    this.data.goodsList.forEach((item, i) => {
+      if (String(item.nxGoodsGrandId) === String(subCatId)) matchIndices.push(i);
+    });
+    logDisScrollStep('onSubCatTapDis hasGoods', {
+      hasGoods,
+      matchCount: matchIndices.length,
+      firstIndex: matchIndices[0],
+      lastIndex: matchIndices.length ? matchIndices[matchIndices.length - 1] : -1,
+    });
+
+    this.setData(
+      {
+        showAllSubCat: false,
+        activeSubCatId: String(subCatId),
+        subcatScrollIntoView: `subcat-${subCatId}`,
+      },
+      () => {
+        logDisScrollStep('onSubCatTapDis setData(关展开) 回调', {
+          showAllSubCat: this.data.showAllSubCat,
+          activeSubCatId: this.data.activeSubCatId,
+        });
+        if (hasGoods) {
+          this._scrollDisGoodsToAnchor(anchor, subCatId, 'onSubCatTapDis');
+        }
+      }
+    );
+
+    if (!hasGoods) {
+      logDisScrollStep('onSubCatTapDis 列表无该子类，走后加载', { subCatId });
       this.startLoadingGoodsForSubCat(subCatId);
     }
   },
 
   async startLoadingGoodsForSubCat(subCatId) {
     if (this.data.isLoading) {
-      console.log('>>> 操作过于频繁，正在加载数据，请稍候...');
+      logDisScrollStep('startLoadingGoodsForSubCat 跳过 isLoading', { subCatId });
       return;
     }
 
     if (this.data.currentPageDis >= this.data.totalPageDis) {
-      console.log('>>> 已经到达最后一页，没有更多商品了。');
+      logDisScrollStep('startLoadingGoodsForSubCat 已到最后一页', {
+        subCatId,
+        currentPageDis: this.data.currentPageDis,
+        totalPageDis: this.data.totalPageDis,
+      });
       wx.showToast({
         title: '没有更多商品了',
         icon: 'none'
@@ -1947,33 +2084,27 @@ Page({
     };
 
     try {
-      console.log(`>>> loadGoodsBySubCatIdDis: 正在请求第 ${page} 页商品...`);
-      console.log(`>>> loadedGoods 初始长度: ${loadedGoods.length}`);
-      console.log(`>>> loadedGoods 初始IDs:`, loadedGoods.map(i => i.nxGoodsId));
 
       const res = await orderApi.gbDepGetNxGoodsByGreatGrandId(data);
       if (res.result.code === 0) {
         const newItems = res.result.page.list || [];
-        logDisApiGoodsFirst10(`loadGoodsBySubCatIdDis page=${page}`, newItems);
-        console.log(`>>> 第 ${page} 页成功获取 ${newItems.length} 个商品。`);
-        console.log(`>>> 新获取的商品IDs:`, newItems.map(i => i.nxGoodsId));
-
         const merged = loadedGoods.concat(newItems);
-        console.log(`>>> 合并后总长度: ${merged.length}`);
-        console.log(`>>> 合并后所有IDs:`, merged.map(i => i.nxGoodsId));
-
         const sortedArr = this.sortGoodsListDisForDisplay(merged);
-        console.log(`>>> 排序后长度: ${sortedArr.length}`);
-        console.log(`>>> 排序后IDs:`, sortedArr.map(i => i.nxGoodsId));
-
-
         const hasGoodsInNewItems = newItems.some(item => String(item.nxGoodsGrandId) === String(subCatId));
-
         if (hasGoodsInNewItems) {
-          console.log(`>>> 在第 ${page} 页找到目标商品，准备渲染...`);
           const processedGoods = this.processGoodsListDis(sortedArr);
-          console.log(`>>> processGoodsListDis 处理后长度: ${processedGoods.length}`);
-          console.log(`>>> processGoodsListDis 处理后IDs:`, processedGoods.map(i => i.nxGoodsId));
+          const anchor = `cat-${subCatId}`;
+          logDisScrollStep('loadGoodsBySubCatIdDis 找到本页含目标子类', {
+            subCatId,
+            page,
+            newItemsLen: newItems.length,
+            mergedLen: sortedArr.length,
+            processedLen: processedGoods.length,
+            anchorsFirst: processedGoods
+              .filter((g) => g.isFirstInCategory)
+              .map((g) => ({ grand: g.nxGoodsGrandId, a: `cat-${g.nxGoodsGrandId}` })),
+            targetAnchor: anchor,
+          });
 
           this.setData({
             goodsList: processedGoods,
@@ -1984,19 +2115,14 @@ Page({
           });
 
           setTimeout(() => {
-            this.setData({
-              scrollIntoView: `cat-${subCatId}`
-            });
-            console.log(`>>> 已滚动到分类 ${subCatId}。`);
+            this._disSubCatScrollLockUntil = Math.max(this._disSubCatScrollLockUntil || 0, Date.now() + 500);
+            this._scrollDisGoodsToAnchor(anchor, subCatId, 'loadGoodsBySubCatIdDis');
           }, 100);
 
         } else if (page <= this.data.totalPageDis) {
-          console.log(`>>> 第 ${page} 页未找到商品，继续加载下一页(page ${page + 1})...`);
-          console.log(`>>> 递归调用前 sortedArr 长度: ${sortedArr.length}`);
           // 继续递归加载，保持loading状态
           await this.loadGoodsBySubCatIdDis(subCatId, page + 1, sortedArr);
         } else {
-          console.log('>>> 已到达最后一页，未找到更多商品。');
           const processedGoods = this.processGoodsListDis(sortedArr);
           console.log(`>>> 最后一页 processGoodsListDis 处理后长度: ${processedGoods.length}`);
           console.log(`>>> 最后一页 processGoodsListDis 处理后IDs:`, processedGoods.map(i => i.nxGoodsId));
@@ -2058,9 +2184,6 @@ Page({
 
   // 处理商品数据，添加分类信息
   processGoodsListDis(list) {
-    console.log(`>>> processGoodsListDis 输入长度: ${list.length}`);
-    console.log(`>>> processGoodsListDis 输入IDs:`, list.map(i => i.nxGoodsId));
-
     // 去重处理：确保每个商品ID只出现一次
     const goodsMap = new Map();
     list.forEach(item => {
@@ -2068,12 +2191,11 @@ Page({
     });
     const uniqueList = Array.from(goodsMap.values());
 
-    console.log(`>>> 去重后长度: ${uniqueList.length}`);
-    console.log(`>>> 去重后IDs:`, uniqueList.map(i => i.nxGoodsId));
 
     let currentCategory = null;
     const result = uniqueList.map(item => {
       const grandKey = item.nxGoodsGrandId == null || item.nxGoodsGrandId === '' ? item.nxGoodsGrandId : String(item.nxGoodsGrandId);
+      // var imgPatch = { _disGoodsImageRel: pickDisGoodsImageRel(item) };
       if (grandKey !== currentCategory) {
         currentCategory = grandKey;
         return Object.assign({}, item, {
@@ -2087,33 +2209,26 @@ Page({
       });
     });
 
-    console.log(`>>> processGoodsListDis 最终输出长度: ${result.length}`);
-    console.log(`>>> processGoodsListDis 最终输出IDs:`, result.map(i => i.nxGoodsId));
-    const head = result.slice(0, 10).map((g, idx) => ({
-      idx,
-      nxGoodsId: g.nxGoodsId,
-      nxGoodsGrandId: g.nxGoodsGrandId,
-      grandType: typeof g.nxGoodsGrandId,
-      isFirstInCategory: g.isFirstInCategory,
-    }));
-    console.log('[resGoodsAi/dis][processGoodsListDis] first10 after flags:', head);
-
+   
     return result;
   },
 
-  // 计算分类位置
+  // 计算分类位置（锚点在首行 .product-item.dis-cat-anchor 上，与 scroll-into-view 一致）
   calculateCategoryPositionsDis() {
-    const query = wx.createSelectorQuery();
-    query.selectAll('.goods-category-title').boundingClientRect();
+    const query = this.createSelectorQuery();
+    query.selectAll('.dis-cat-anchor').boundingClientRect();
     query.select('.goods-list').boundingClientRect();
 
     query.exec((res) => {
-      if (res[0] && res[1]) {
+      if (res[0] && res[1] && res[0].length) {
         const listRect = res[1];
-        const positions = res[0].map(item => ({
-          id: item.id.replace('cat-', ''),
-          top: item.top - listRect.top
-        }));
+        const positions = res[0]
+          .map((item) => {
+            const sid = item.id || '';
+            const id = sid.indexOf('cat-') === 0 ? sid.replace('cat-', '') : '';
+            return id ? { id, top: item.top - listRect.top } : null;
+          })
+          .filter(Boolean);
 
         this.setData({
           categoryPositions: positions
@@ -2122,12 +2237,14 @@ Page({
     });
   },
 
-  // 获取分类名称
+  // 获取分类名称（全部配送 tab：须用 fatherArrDis，与顶部子类标签一致）
   getCategoryNameDis(categoryId) {
-    const category = this.data.fatherArr.find(item =>
-      item.nxGoodsId === categoryId
-    );
-    return category ? category.nxDfgFatherGoodsName : '';
+    const cid = categoryId == null || categoryId === '' ? '' : String(categoryId);
+    if (!cid) return '';
+    const list = this.data.fatherArrDis || [];
+    const category = list.find((item) => String(item.nxGoodsId) === cid);
+    if (!category) return '';
+    return category.nxGoodsName || category.nxDfgFatherGoodsName || '';
   },
 
 
@@ -2647,6 +2764,7 @@ Page({
     console.log(item);
     orderApi.saveDepGoodsStockAdjust(kind, item).then(function (res) {
       load.hideLoading();
+      console.log("sttockresult", res.result.data);
       if (res.result.code != 0) {
         wx.showToast({
           title: res.result.msg,

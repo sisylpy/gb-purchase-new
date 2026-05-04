@@ -33,7 +33,7 @@
                       <text class="font-sm" wx:if="{{order.gbDistributerGoodsEntity && order.gbDistributerGoodsEntity.gbDgGoodsPlace !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsPlace.length > 0}}">({{order.gbDistributerGoodsEntity.gbDgGoodsPlace}})</text>
                       <text class="font-sm" wx:if="{{order.gbDistributerGoodsEntity && order.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && order.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{order.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
                       <text class="mr-20" wx:if="{{order.gbDoNxGoodsId !== null}}">({{order.gbDoPrintStandard}})</text>
-                      <text class="mr-20 font-xs text-secondary" wx:else="">(临时商品)</text>
+                      <text class="mr-20 font-sl text-secondary" wx:else="">(临时商品)</text>
                       <text class="">订:{{order.gbDoQuantity}}{{order.gbDoStandard}}</text>
                       <text class="text-danger font-sl" wx:if="{{order.gbDoRemark !== null  && order.gbDoRemark.length > 0}}">({{order.gbDoRemark}})</text>
                     </view>
@@ -53,10 +53,10 @@
                     </view>
                   </view>
                 </view>
-                <view class="font-xs pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
+                <view class="font-sl pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
                   已称重
                 </view>
-                <view class="font-xs pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
+                <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
                   <view class="bg-mainColor p-20 radius-20" bind:tap="receiveStock" data-item="{{order}}">收货</view>
                 </view>
                 <view class="p-10" wx:elif="{{order.gbDoBuyStatus == 5}}" bindtap="haveReceive">
@@ -72,7 +72,7 @@
             <view class="flex-column-center" style="height: 300rpx;">
               <view class="flex-column-center">
                 <view>
-                  <image src="/images/search.png" mode="aspectFill" class="url_item" style="width: 80rpx; height: 80rpx; opacity: 0.5;" />
+                  <image src="/images/search.png" mode="aspectFill" class="empty_image" style="width: 80rpx; height: 80rpx; opacity: 0.5;" />
                 </view>
                 <view class="font-bold font-lg-2 p-20">
                   <text>没有搜索到订单</text>
@@ -96,7 +96,7 @@
           <view class="flex-column-center">
 
             <view>
-              <image src="/images/cart-Empty.png" mode="aspectFill" class="url_item" />
+              <image src="/images/cart-Empty.png" mode="aspectFill" class="empty_image" />
             </view>
             <view class="font-bold font-lg-2 p-20">
               <text>暂无订货记录</text>
@@ -110,7 +110,7 @@
         </view>
 
         <view class="p-10" wx:for="{{applyArr}}" wx:for-item="father">
-          <view class="flex-row font-xs" style="padding: 20rpx 20rpx 10rpx 20rpx; color: rgb(236, 135, 3);">{{father.gbDfgFatherGoodsName || '未分类'}}</view>
+          <view class="flex-row font-sl" style="padding: 20rpx 20rpx 10rpx 20rpx; color: rgb(236, 135, 3);">{{father.gbDfgFatherGoodsName || '未分类'}}</view>
           <view class="" wx:for="{{father.gbDistributerGoodsEntities}}" wx:for-item="goods">
             <view class="flex flex-row-between  border-bottom p-10 {{order.gbDoBuyStatus < 3 ? 'liziBack' : 'bg-white'}}" wx:for="{{goods.gbDepartmentOrdersEntities}}" wx:for-item="order" wx:key="gbDepartmentOrdersId" wx:for-index="applyIndex">
 
@@ -119,7 +119,7 @@
                   <text class="mr-10">{{order.globalOrderIndex || (applyIndex + 1)}}.</text>
                   <view class="flex-cloumn" style="width: {{windowWidth - 160}}rpx; ">
                     <view class="flex-row-wrap align-center">
-                      <text class="text-danger font-xs">[未知商品]</text>
+                      <text class="text-danger font-sl">[未知商品]</text>
                       <text class="brand" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsBrand !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{order.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                       <text class="font-bold ">{{order.gbDoGoodsName}}</text>
 
@@ -155,7 +155,7 @@
                       <text class="font-sm" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && order.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{order.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
 
                       <text class="mr-20" wx:if="{{order.gbDoNxGoodsId !== null}}">({{order.gbDoPrintStandard}})</text>
-                      <text class="mr-20 font-xs text-secondary" wx:else="">(临时商品)</text>
+                      <text class="mr-20 font-sl text-secondary" wx:else="">(临时商品)</text>
 
                       <text class="">订:{{order.gbDoQuantity}}{{order.gbDoStandard}}</text>
                       <text class="text-danger font-sl" wx:if="{{order.gbDoRemark !== null  && order.gbDoRemark.length > 0}}">({{order.gbDoRemark}})</text>
@@ -183,10 +183,10 @@
                   </view>
                 </view>
 
-                <view class="font-xs pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
+                <view class="font-sl pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
                   已称重
                 </view>
-                <view class="font-xs pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
+                <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
                   <view class="bg-mainColor p-20 radius-20" bind:tap="receiveStock" data-item="{{order}}">收货</view>
                 </view>
 
@@ -215,7 +215,7 @@
           <view class="flex-column-center">
 
             <view>
-              <image src="/images/cart-Empty.png" mode="aspectFill" class="url_item" />
+              <image src="/images/cart-Empty.png" mode="aspectFill" class="empty_image" />
             </view>
             <view class="font-bold font-lg-2 p-20">
               <text>暂无订货记录</text>
@@ -239,7 +239,7 @@
                 <view class="flex-row-wrap " style="width: {{windowWidth - 260}}rpx;">
                   <text class="brand" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsBrand !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{order.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                   <text class="font-bold ">{{order.gbDoGoodsName}}</text>
-                  <text class="font-xs ml-10 text-danger">[未完成订单]</text>
+                  <text class="font-sl ml-10 text-danger">[未完成订单]</text>
 
                   <text class="" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsPlace !== 'null' && order.gbDistributerGoodsEntity.gbDgGoodsPlace.length > 0}}">{{order.gbDistributerGoodsEntity.gbDgGoodsPlace}}</text>
 
@@ -275,7 +275,7 @@
                     <text class="font-sm" wx:if="{{order.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && order.gbDistributerGoodsEntity.gbDgGoodsDetail !==  'null'}}">{{order.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
 
                     <text class="mr-20" wx:if="{{order.gbDoNxGoodsId !== null}}">({{order.gbDoPrintStandard}})</text>
-                    <text class="mr-20 font-xs text-secondary" wx:else="">(临时商品)</text>
+                    <text class="mr-20 font-sl text-secondary" wx:else="">(临时商品)</text>
 
                     <text class="">订:{{order.gbDoQuantity}}{{order.gbDoStandard}}</text>
                     <text class="text-danger font-sl" wx:if="{{order.gbDoRemark !== null  && order.gbDoRemark.length > 0}}">({{order.gbDoRemark}})</text>
@@ -303,10 +303,10 @@
                 </view>
               </view>
 
-              <view class="font-xs pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
+              <view class="font-sl pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
                 已称重
               </view>
-              <view class="font-xs pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
+              <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
                 <view class="bg-mainColor p-20 radius-20" bind:tap="receiveStock" data-item="{{order}}">收货</view>
               </view>
 

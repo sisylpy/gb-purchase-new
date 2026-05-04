@@ -90,7 +90,8 @@ Page({
     var disGoods = wx.getStorageSync('disGoods');
     if (disGoods) {
       this.setData({
-        disGoods: disGoods
+        depGoods: disGoods,
+        disGoods: disGoods.gbDistributerGoodsEntity,
       })
     }
 

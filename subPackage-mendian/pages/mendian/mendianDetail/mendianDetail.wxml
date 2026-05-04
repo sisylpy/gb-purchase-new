@@ -36,7 +36,7 @@
           <scroll-view scroll-y="true" style="height: {{windowHeight - 200 - statusBarHeight}}rpx; " scroll-top="{{scrollTopLeft}}" scroll-with-animation="true">
             <view class="dep_left_item {{selectedSub == index ? 'left-active' : ''}}" wx:for="{{depGoodsArr}}" wx:key="gbDistributerFatherGoodsId" wx:for-item="grand" bindtap="leftMenuClick" data-index="{{index}}" style="position: relative; float: left; ">
               <text class="" style="position: absolute; left: 80rpx; top: 10rpx; background-color: rgb(23, 102, 248); color: #fff; border-radius: 50%; width: 40rpx; height: 40rpx;text-align: center; " wx:if="{{grand.newOrderCount > 0}}">{{grand.newOrderCount}}</text>
-              <view class="font-xs" style="width: 90rpx; text-align: center; white-space: normal;">
+              <view class="font-sl" style="width: 90rpx; text-align: center; white-space: normal;">
                 <text>{{grand.gbDfgFatherGoodsName}}</text>
               </view>
             </view>
@@ -52,7 +52,7 @@
                wx:for-item="father" wx:for-index="fatherIndex">
                 <view class="flex-row-default  border-bottom  p-10" wx:for-item="goods" wx:key="gbDepartmentDisGoodsId" wx:for-index="depGoodsIndex"  
                 wx:for="{{father.gbDepartmentDisGoodsEntities}}">
-                  <image bindtap="showDialogBtn" data-item="{{goods.gbDistributerGoodsEntity}}" src="{{(imgUrl.resolve(url, goods.gbDistributerGoodsEntity.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="url_item margin-right" />
+                  <image bindtap="showDialogBtn" data-item="{{goods.gbDistributerGoodsEntity}}" src="{{(imgUrl.resolve(url, goods.gbDistributerGoodsEntity.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="empty_image margin-right" />
 
                   <view class="flex-row" catch:tap="{{goods.gbDepartmentOrdersEntity == null ? 'applyGoodsDep' : 'toEditApplyDep'}}" data-order="{{goods.gbDepartmentOrdersEntity}}" data-disgoods="{{goods.gbDistributerGoodsEntity}}" data-grandindex="{{grandIndex}}"  data-fatherindex="{{fatherIndex}}" data-index="{{depGoodsIndex}}" data-depgoods="{{goods}}" hover-class="hover">
                     <view class="flex-column " style="width: {{windowWidth - 400}}rpx; ">
@@ -82,7 +82,7 @@
                         <text>京京送货</text>
                   
                       </view>
-                      <view class="flex-row font-xs">
+                      <view class="flex-row font-sl">
                         <view class="flex-row half-row" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsDetail !== null && goods.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0}}">
                           <text class="gray">说明:</text>
                           <text>{{goods.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
@@ -102,7 +102,7 @@
               </view>
             </view>
 
-            <view class="flex-column font-xs center-content ">
+            <view class="flex-column font-sl center-content ">
               <view class="flex-row">  
                 <view style="line-height: 200rpx;">没有数据啦!</view>
               </view>

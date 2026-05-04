@@ -27,9 +27,9 @@
       </view>
     </view>
   
-    <view class="add-menu-item" catchtap="addSingleDay">
-      <image src="../../../../images/add-1.png" class="icon-sm mr-10"></image>
-      <text>添加营业额</text>
+    <view class="turnover-add-btn" hover-class="turnover-add-btn--hover" catchtap="addSingleDay">
+      <image src="../../../../images/add.png" class="turnover-add-btn__icon" mode="aspectFit"></image>
+      <text class="turnover-add-btn__text">添加营业额</text>
     </view>
   
   </view>
@@ -39,14 +39,14 @@
     <!-- 核心指标 -->
     <view class="flex-row-between mb-20">
       <view class="stat-card flex-1 mr-20">
-        <view class="font-xs text-secondary">总营业额</view>
+        <view class="font-sl text-secondary">总营业额</view>
         <view class="font-lg font-bold" style="color: #007aff;">{{stats.totalRevenue}}元</view>
-        <view class="font-xs text-secondary">日均 {{stats.avgRevenuePerDay}}元</view>
+        <view class="font-sl text-secondary">日均 {{stats.avgRevenuePerDay}}元</view>
       </view>
       <view class="stat-card flex-1">
-        <view class="font-xs text-secondary">总订单数</view>
+        <view class="font-sl text-secondary">总订单数</view>
         <view class="font-lg font-bold" style="color: #ff9500;">{{stats.totalOrders}}单</view>
-        <view class="font-xs text-secondary">共 {{stats.days}} 天</view>
+        <view class="font-sl text-secondary">共 {{stats.days}} 天</view>
       </view>
     </view>
 
@@ -58,7 +58,7 @@
           <text class="font-sm font-bold">堂食</text>
         </view>
         <view class="font-lg font-bold" style="color: #007aff;">{{stats.totalDineIn}}元</view>
-        <view class="font-xs text-secondary">日均 {{stats.avgDineInPerDay}}元</view>
+        <view class="font-sl text-secondary">日均 {{stats.avgDineInPerDay}}元</view>
       </view>
       <view class="stat-card flex-1 ml-10 bg-takeout">
         <view class="flex-row align-center mb-10">
@@ -66,7 +66,7 @@
           <text class="font-sm font-bold">外卖</text>
         </view>
         <view class="font-lg font-bold" style="color: #34c759;">{{stats.totalTakeout}}元</view>
-        <view class="font-xs text-secondary">日均 {{stats.avgTakeoutPerDay}}元</view>
+        <view class="font-sl text-secondary">日均 {{stats.avgTakeoutPerDay}}元</view>
       </view>
     </view>
 
@@ -74,11 +74,11 @@
     <view class="stat-card bg-platform mb-20">
       <view class="flex-row-between">
         <view>
-          <view class="font-xs text-secondary">平台抽成</view>
+          <view class="font-sl text-secondary">平台抽成</view>
           <view class="font-lg font-bold" style="color: #ff3b30;">{{stats.totalPlatformFee}}元</view>
         </view>
         <view class="text-right">
-          <view class="font-xs text-secondary">实收</view>
+          <view class="font-sl text-secondary">实收</view>
           <view class="font-lg font-bold" style="color: #007aff;">{{actualRevenue}}元</view>
         </view>
       </view>
@@ -92,11 +92,11 @@
       <view class="flex-row">
         <view class="chart-legend">
           <view class="legend-dot" style="background: #007aff;"></view>
-          <text class="font-xs">堂食</text>
+          <text class="font-sl">堂食</text>
         </view>
         <view class="chart-legend ml-20">
           <view class="legend-dot" style="background: #34c759;"></view>
-          <text class="font-xs">外卖</text>
+          <text class="font-sl">外卖</text>
         </view>
       </view>
     </view>
@@ -111,7 +111,7 @@
       <text class="font-sm font-bold">每日详情</text>
     </view>
     <view class="flex-column" wx:for="{{dailyList}}" wx:key="gbAiDailyRevenueId">
-      <view class="daily-item p-20 border-bottom">
+      <view class="daily-item daily-item--tappable p-20 border-bottom" hover-class="daily-item--hover" bindtap="openFoodSalesEdit" data-record-date="{{item.gbAiDailyRevenueRecordDate}}">
         <!-- 日期头部 -->
         <view class="flex-row-between mb-20">
           <view class="flex-row align-center">
@@ -159,7 +159,7 @@
       </view>
     </view>
 
-    <view class="text-secondary font-xs flex-column center-content" style="height: 100rpx;">没有更多数据了</view>
+    <view class="text-secondary font-sl flex-column center-content" style="height: 100rpx;">没有更多数据了</view>
   </view>
 
   <!-- 无数据 -->

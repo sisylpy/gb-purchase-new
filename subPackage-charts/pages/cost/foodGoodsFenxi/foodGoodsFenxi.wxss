@@ -1,0 +1,766 @@
+/**
+ * 菜品销售 / 配料分析 — 三卡汇总 + 菜品明细卡片 + 配料横向表
+ */
+
+page {
+  height: 100%;
+  background-color: #eef0f4;
+  box-sizing: border-box;
+}
+
+.food-fgf-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.food-fgf-search-top-ico {
+  opacity: 0.72;
+}
+
+.food-fgf-search-top-ico--on {
+  opacity: 1;
+}
+
+.food-fgf-search-panel {
+  padding: 12rpx 24rpx 16rpx;
+  flex-shrink: 0;
+}
+
+.food-fgf-search-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 999rpx;
+  padding: 12rpx 20rpx;
+  min-height: 72rpx;
+  box-sizing: border-box;
+}
+
+.food-fgf-search-inner-ico {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+  opacity: 0.45;
+}
+
+.food-fgf-search-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  color: #111827;
+  height: 44rpx;
+  line-height: 44rpx;
+}
+
+.food-fgf-search-clear {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 40rpx;
+  text-align: center;
+  font-size: 40rpx;
+  color: #9ca3af;
+  margin-left: 8rpx;
+}
+
+.food-fgf-list-empty-local {
+  padding: 40rpx 28rpx 24rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.food-fgf-toolbar {
+  border-bottom: 1rpx solid #ececec;
+  flex-shrink: 0;
+}
+
+.food-fgf-cal {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 12rpx;
+}
+
+.food-fgf-hanzi {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.food-fgf-date-pill {
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  color: #888;
+}
+
+.food-fgf-sort-row {
+  gap: 12rpx;
+}
+
+.food-fgf-chip {
+  margin: 0;
+  padding: 10rpx 20rpx;
+  font-size: 26rpx;
+  line-height: 1.25;
+  background: #f5f6f8;
+  color: #333;
+  border-radius: 999rpx;
+  border: none;
+}
+
+.food-fgf-chip::after {
+  border: none;
+}
+
+.food-fgf-chip--on {
+  background: #e8f5ef;
+  color: #187e6e;
+  font-weight: 600;
+  border: 1rpx solid rgba(7, 193, 96, 0.35);
+}
+
+.food-fgf-scroll {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* ========== 顶部三卡（浅粉 / 浅蓝 / 浅橙底 + 色边，与设计图一致） ========== */
+.food-fgf-sum-row {
+  display: flex;
+  flex-direction: row;
+  padding: 16rpx 16rpx 8rpx;
+  gap: 12rpx;
+}
+
+.food-fgf-sum-card {
+  flex: 1;
+  min-width: 0;
+  border-radius: 20rpx;
+  padding: 18rpx 12rpx 14rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.food-fgf-sum-card--red {
+  background: #fff5f5;
+  border: 2rpx solid #ffcccc;
+}
+
+.food-fgf-sum-card--blue {
+  background: #f0f7ff;
+  border: 2rpx solid #d0e1fd;
+}
+
+.food-fgf-sum-card--orange {
+  background: #fff7ec;
+  border: 2rpx solid #fde8c9;
+}
+
+.food-fgf-sum-hd {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 12rpx;
+  width: 100%;
+  padding: 0 4rpx;
+}
+
+.food-fgf-sum-ico {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.food-fgf-sum-card--red .food-fgf-sum-ico {
+  background: #ef4444;
+}
+
+.food-fgf-sum-card--blue .food-fgf-sum-ico {
+  background: #3b82f6;
+}
+
+.food-fgf-sum-card--orange .food-fgf-sum-ico {
+  background: #fb923c;
+}
+
+.food-fgf-sum-tit {
+  flex: 1;
+  min-width: 0;
+  font-size: 22rpx;
+  color: #4b5563;
+  font-weight: 500;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.food-fgf-sum-val {
+  font-size: 34rpx;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #111827;
+}
+
+.food-fgf-sum-unit {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}
+
+.food-fgf-sum-trend {
+  margin-top: 10rpx;
+  font-size: 20rpx;
+  color: #6b7280;
+}
+
+.food-fgf-sum-card--red .food-fgf-sum-trend,
+.food-fgf-sum-card--blue .food-fgf-sum-trend {
+  color: #dc2626;
+}
+
+.food-fgf-sum-card--orange .food-fgf-sum-trend {
+  color: #059669;
+}
+
+/* ========== 列表头 ========== */
+.food-fgf-section-title-row {
+  padding: 16rpx 20rpx 8rpx;
+  background: #fff;
+}
+
+.food-fgf-list-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #111827;
+  margin-right: 16rpx;
+}
+
+.food-fgf-ab-pill {
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #666;
+  background: #f3f4f6;
+  border: 1rpx solid #e5e7eb;
+}
+
+.food-fgf-ab-pill.is-on {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+  font-weight: 600;
+}
+
+/* ---------- 排序条（与配料分析 costGoodsFenxi 一致） ---------- */
+.cog-sort-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12rpx 16rpx 8rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #eee;
+}
+
+.cog-sort-left {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 12rpx;
+}
+
+.cog-sort-arrows {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 10rpx;
+  gap: 2rpx;
+}
+
+.cog-sort-arrow {
+  font-size: 30rpx;
+  color: #d1d5db;
+  line-height: 1;
+  font-weight: 700;
+  padding: 0 2rpx;
+}
+
+.cog-sort-arrow.is-on {
+  color: #2563eb;
+}
+
+.cog-sort-label {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.cog-sort-scroll {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.cog-sort-scroll--row .cog-sort-chips {
+  flex-wrap: wrap;
+}
+
+.cog-sort-chips {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4rpx 0 8rpx;
+  gap: 12rpx;
+}
+
+.cog-sort-chip {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #333;
+  background: #fff;
+  border: 1rpx solid #e5e5e5;
+}
+
+.cog-sort-chip-ico {
+  margin-right: 6rpx;
+  font-size: 26rpx;
+}
+
+.cog-sort-chip.is-on {
+  font-weight: 600;
+}
+
+.cog-sort-chip--outbound.is-on {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.cog-sort-chip--util.is-on {
+  color: #059669;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.cog-sort-chip--wasteloss.is-on {
+  color: #c2410c;
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.food-fgf-list {
+  padding: 8rpx 16rpx 24rpx;
+}
+
+/* ========== 菜品卡 ========== */
+.food-fgf-dish-card {
+  background: #fff;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  padding: 20rpx 18rpx 0;
+  border: 1rpx solid #e8e8e8;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.food-fgf-dish-hd {
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.food-fgf-dish-cover-wrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+
+.food-fgf-dish-cover {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 14rpx;
+  border: 1rpx solid #eee;
+  background: #f5f5f5;
+}
+
+.food-fgf-cover-badge {
+  position: absolute;
+  top: 6rpx;
+  left: 6rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.food-fgf-cover-badge--bad {
+  background: rgba(220, 38, 38, 0.92);
+}
+
+.food-fgf-cover-badge--ok {
+  background: rgba(5, 150, 105, 0.9);
+}
+
+.food-fgf-dish-hd-main {
+  min-width: 0;
+}
+
+.food-fgf-dish-name-line {
+  align-items: flex-start;
+  margin-bottom: 10rpx;
+}
+
+
+.dfl-dish-head__idx {
+  flex-shrink: 0;
+  width: 40rpx;
+  margin-right: 8rpx;
+  font-size: 32rpx;
+  color: var(--gb-text-muted);
+  line-height: 44rpx;
+  text-align: center;
+}
+
+
+.food-fgf-dish-title {
+  flex: 1;
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+  margin-right: 8rpx;
+}
+
+.food-fgf-dish-util {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.food-fgf-dish-util-lab {
+  font-size: 24rpx;
+  color: #9ca3af;
+  margin-right: 4rpx;
+}
+
+.food-fgf-dish-util-num {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #374151;
+}
+
+.food-fgf-dish-util-pct {
+  font-size: 24rpx;
+  color: #6b7280;
+  margin-right: 6rpx;
+}
+
+.food-fgf-dish-util-pill {
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  background: #fff;
+  border: 1rpx solid #e5e7eb;
+}
+
+.food-fgf-dish-util-pill .util-text {
+  font-size: 22rpx;
+}
+
+.food-fgf-dish-sub {
+  font-size: 28rpx;
+  color: #4b5563;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.food-fgf-dot {
+  margin: 0 8rpx;
+  color: #d1d5db;
+}
+
+/* 成本条：实际 / 理论 / 偏差 / 销售额 */
+.food-fgf-cost-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: #f9fafb;
+  border-radius: 14rpx;
+  border: 1rpx solid #ececec;
+  padding: 16rpx 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.food-fgf-cost-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.food-fgf-cost-div {
+  width: 1rpx;
+  background: #e5e7eb;
+  align-self: stretch;
+  margin: 4rpx 0;
+}
+
+.food-fgf-cost-cap {
+  font-size: 24rpx;
+  color: #6b7280;
+  margin-bottom: 8rpx;
+  font-weight: 500;
+}
+
+.food-fgf-cost-cap--sort-active {
+  color: #059669;
+  font-weight: 600;
+}
+
+.food-fgf-cost-val {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.food-fgf-cost-val--sort-active {
+  color: #059669;
+}
+
+.food-fgf-cost-unit {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}
+
+.food-fgf-cost-unit--sort-active {
+  color: #059669;
+  font-weight: 500;
+}
+
+.food-fgf-cost-diff-line {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.food-fgf-diff-arrow {
+  margin-left: 6rpx;
+  font-size: 26rpx;
+  color: #9ca3af;
+}
+
+.food-fgf-diff-arrow.is-up {
+  color: #fa5151;
+}
+
+.food-fgf-diff-arrow.is-down {
+  color: #07c160;
+}
+
+.food-fgf-diff-arrow.food-fgf-diff-arrow--sort-active {
+  color: #059669;
+}
+
+/* signedNumber.wxs 输出 cog-diff */
+.cog-diff--pos {
+  color: #fa5151;
+}
+
+.cog-diff--neg {
+  color: #07c160;
+}
+
+.cog-diff--zero {
+  color: #6b7280;
+}
+
+.cog-diff--na {
+  color: #9ca3af;
+}
+
+/* ========== 配料表（横向滚动） ========== */
+.food-fgf-ing-sec {
+  padding-bottom: 8rpx;
+}
+
+.food-fgf-ing-sec-cap {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 10rpx;
+}
+
+.food-fgf-ing-scroll {
+  width: 100%;
+}
+
+.food-fgf-ing-table {
+  display: inline-block;
+  min-width: 100%;
+  padding-bottom: 8rpx;
+}
+
+.food-fgf-ing-tr {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-bottom: 1rpx solid #f3f4f6;
+  padding: 12rpx 8rpx;
+  box-sizing: border-box;
+}
+
+.food-fgf-ing-tr--head {
+  background: #f9fafb;
+  border-radius: 10rpx;
+  border-bottom: none;
+}
+
+/* 列宽：表头与表体同一套（仅直接子节点，避免单元格内多行 text 再套一列宽） */
+.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(1) {
+  width: 220rpx;
+}
+
+.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(2),
+.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(3),
+.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(4),
+.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(5) {
+  width: 152rpx;
+}
+
+.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(6),
+.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(7) {
+  width: 132rpx;
+}
+
+.food-fgf-ing-td {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  font-size: 26rpx;
+  color: #1f2937;
+  text-align: center;
+  padding: 0 6rpx;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.food-fgf-ing-td--name {
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.food-fgf-ing-td--util {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+}
+
+/* 单元格内多行文案（不占列宽） */
+.food-fgf-ing-line {
+  display: block;
+  width: 100%;
+  font-size: 28rpx;
+  color: #1f2937;
+  text-align: center;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.food-fgf-ing-line--sub {
+  font-size: 24rpx;
+  color: #5b616d;
+}
+
+.food-fgf-ing-ico {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+  border: 1rpx solid #eee;
+}
+
+.food-fgf-ing-name-txt {
+  flex: 1;
+  min-width: 0;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.food-fgf-ing-tr--head .food-fgf-ing-td {
+  font-size: 24rpx;
+  color: #555a64;
+  font-weight: 600;
+}
+
+.food-fgf-ing-tag {
+  font-size: 20rpx;
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  background: #f9fafb;
+  border: 1rpx solid #e5e7eb;
+}
+
+.food-fgf-dish-foot {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0 18rpx;
+  font-size: 28rpx;
+  color: #6b7280;
+  font-weight: 500;
+  border-top: 1rpx solid #f3f4f6;
+}
+
+.food-fgf-foot-arrow {
+  margin-left: 6rpx;
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+.food-fgf-scroll-pad {
+  height: 32rpx;
+}
+
+.food-fgf-empty {
+  padding: 60rpx 32rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.min-w-0 {
+  min-width: 0;
+}

@@ -176,7 +176,7 @@ page {
 }
 
 .analog_cursor {
-  height: 50rpx;
+  height: 70rpx;
   width: 4rpx;
   background: rgb(31, 31, 190);
   display: none;

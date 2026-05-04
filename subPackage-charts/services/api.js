@@ -108,6 +108,62 @@ var getGbDishCostAnalysisReport = function (data) {
   return request.post('gbDishCostAnalysis/report', body, { useUrlParams: true });
 };
 
+
+/**
+ * 菜品成本
+ * 页面：cost/footGoodsFenxi/foodGoodsFenxi
+ */
+var getGbIngredientAnalysis = function (data) {
+  var body = {
+    sortBy: data.sortBy,
+    sortOrder: data.sortOrder != null && data.sortOrder !== '' ? data.sortOrder : undefined,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    disId: data.disId,
+    searchDepId: data.searchDepId != null && data.searchDepId !== '' ? String(data.searchDepId) : '-1',
+  };
+  if (data.depFatherId != null && data.depFatherId !== '') {
+    body.depFatherId = String(data.depFatherId);
+  }
+  if (data.endDate != null && data.endDate !== '') {
+    body.endDate = data.endDate;
+  }
+  return request.post('gbDishCostAnalysis/ingredientAnalysis', body, { useUrlParams: true });
+};
+
+
+
+/**
+ * 菜品成本 / 出库分析
+ * POST gbDishCostAnalysis/report
+ * 页面：cost/costGoodsFenxi/costGoodsFenxi
+ */
+var outboundIngredientAnalysis = function (data) {
+  var body = {
+    sortBy: data.sortBy,
+    sortOrder: data.sortOrder != null && data.sortOrder !== '' ? data.sortOrder : undefined,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    disId: data.disId,
+    searchDepId: data.searchDepId != null && data.searchDepId !== '' ? String(data.searchDepId) : '-1',
+  };
+  if (data.depFatherId != null && data.depFatherId !== '') {
+    body.depFatherId = String(data.depFatherId);
+  }
+  if (data.endDate != null && data.endDate !== '') {
+    body.endDate = data.endDate;
+  }
+  if (data.goodsNameSearch != null && String(data.goodsNameSearch).trim() !== '') {
+    body.goodsNameSearch = String(data.goodsNameSearch).trim();
+  }
+  if (data.page != null && data.page !== '') {
+    body.page = data.page;
+  }
+  if (data.pageSize != null && data.pageSize !== '') {
+    body.pageSize = data.pageSize;
+  }
+  return request.post('gbDishCostAnalysis/outboundIngredientAnalysis', body, { useUrlParams: true });
+};
 /**
  * 获取损耗商品统计
  * 页面：
@@ -356,6 +412,19 @@ var saveReportCost = function (data) {
   );
 };
 
+/**
+ * 部门下供货商列表（采购报表选供应商）
+ * POST nxjrdhsupplier/depGetSupplier
+ * 注：不可从 subPackage-charts require 供应商分包内模块，故接口放在本包 api
+ */
+var depGetSupplier = function (data) {
+  return request.post('nxjrdhsupplier/depGetSupplier', {
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    depId: data.depId,
+  }, { useUrlParams: true });
+};
+
 // ===================== 每日营业额 =====================
 
 /**
@@ -414,6 +483,40 @@ var uploadTurnoverExcel = function (filePath, departmentId, distributerId) {
   });
 };
 
+/**
+ * 提交某日菜品销量（份数）及日营业额指标
+ * POST gbdepfood/submitDailyFoodSalesAndRevenue
+ */
+var submitDailyFoodSalesAndRevenue = function (body) {
+  return request.post('gbdepfood/submitDailyFoodSalesAndRevenue', body);
+};
+
+/**
+ * 获取某日菜品销量及日营收（用于回填）
+ * POST gbdepfood/getDailyFoodSalesAndRevenue
+ * body: depFatherId、distributerId 必填；recordDate 可选。
+ * data: submitShape → 回填编辑表单；dailyRevenue → 只读展示 gb_ai_daily_revenue；
+ * lineCount → 有效销量行数。
+ */
+var getDailyFoodSalesAndRevenue = function (body) {
+  var payload = {
+    depFatherId: body.depFatherId,
+    distributerId: body.distributerId,
+  };
+  if (body.recordDate != null && body.recordDate !== '') {
+    payload.recordDate = body.recordDate;
+  }
+  return request.post('gbdepfood/getDailyFoodSalesAndRevenue', payload);
+};
+
+/**
+ * 更新（与 submit 请求体一致，后端内部仍走 upsert）
+ * POST gbdepfood/updateDailyFoodSalesAndRevenue
+ */
+var updateDailyFoodSalesAndRevenue = function (body) {
+  return request.post('gbdepfood/updateDailyFoodSalesAndRevenue', body);
+};
+
 module.exports = {
   // 报表 report
   getDate: getDate,
@@ -423,11 +526,15 @@ module.exports = {
   getDisUserReportsStock: getDisUserReportsStock,
   delteReport: delteReport,
   saveReportCost: saveReportCost,
+  depGetSupplier: depGetSupplier,
   // 每日营业额
   getDailyTurnover: getDailyTurnover,
   saveDailyTurnover: saveDailyTurnover,
   saveBatchDailyTurnover: saveBatchDailyTurnover,
   uploadTurnoverExcel: uploadTurnoverExcel,
+  submitDailyFoodSalesAndRevenue: submitDailyFoodSalesAndRevenue,
+  getDailyFoodSalesAndRevenue: getDailyFoodSalesAndRevenue,
+  updateDailyFoodSalesAndRevenue: updateDailyFoodSalesAndRevenue,
   // 日看板
   disGetPurchaseDate: disGetPurchaseDate,
   disGetPurchaseDetailType: disGetPurchaseDetailType,
@@ -453,5 +560,7 @@ module.exports = {
   saveDepProduceGoodsStock: saveDepProduceGoodsStock,
   saveDepLossGoodsStock: saveDepLossGoodsStock,
   saveDepWasteGoodsStock: saveDepWasteGoodsStock,
-  saveDepReturnGoodsStock: saveDepReturnGoodsStock
+  saveDepReturnGoodsStock: saveDepReturnGoodsStock,
+  getGbIngredientAnalysis: getGbIngredientAnalysis,
+  outboundIngredientAnalysis: outboundIngredientAnalysis
 };

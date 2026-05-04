@@ -1232,17 +1232,17 @@ ec-canvas {
   white-space: pre-line;
 }
 
-/* 门店菜品 / 菜品原料卡片 */
+/* 门店菜品 / 菜品原料卡片（菜品统计对齐 depFoodList：大号标题、销量强调、表格可读性） */
 .food-sales-root {
-  margin: 0 20rpx 24rpx;
+  margin: 24rpx 24rpx 32rpx;
 }
 
 .food-sales-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f3f8ff 100%);
-  border-radius: 16rpx;
-  padding: 28rpx 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
-  border: 2rpx solid #e6f0ff;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 28rpx 24rpx 32rpx;
+  box-shadow: 0 4rpx 18rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
 }
@@ -1254,32 +1254,34 @@ ec-canvas {
   left: 0;
   right: 0;
   height: 6rpx;
-  background: linear-gradient(90deg, #1677ff 0%, #69b1ff 100%);
+  background: linear-gradient(90deg, #187e6e 0%, #07c160 50%, #69b1ff 100%);
 }
 
 .food-sales-card-head {
-  margin-bottom: 24rpx;
+  margin-bottom: 28rpx;
 }
 
 .food-sales-card-title {
   display: block;
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 700;
-  color: #1d39c4;
-  margin-bottom: 8rpx;
+  color: #333333;
+  margin-bottom: 10rpx;
+  letter-spacing: 0.02em;
 }
 
 .food-sales-card-sub {
   display: block;
-  font-size: 22rpx;
-  color: #666;
-  line-height: 1.5;
+  font-size: 26rpx;
+  color: #666666;
+  line-height: 1.55;
+  font-weight: 400;
 }
 
 .food-sales-section {
-  margin-bottom: 28rpx;
-  padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #e8e8e8;
+  margin-bottom: 32rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid #eef0f4;
 }
 
 .food-sales-section:last-child {
@@ -1289,16 +1291,56 @@ ec-canvas {
 }
 
 .food-sales-section-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 18rpx;
 }
 
 .food-sales-section-sub {
-  font-size: 24rpx;
-  color: #666;
-  margin: 12rpx 0;
+  font-size: 26rpx;
+  color: #666666;
+  margin: 16rpx 0 12rpx;
+  font-weight: 500;
+}
+
+/* 菜品销售关联 · 双 KPI（参考 depFoodList 区间概览） */
+.food-sales-dish-kpi-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+
+.food-sales-dish-kpi {
+  flex: 1;
+  min-width: 0;
+  background: #f9fafb;
+  border-radius: 16rpx;
+  padding: 20rpx 18rpx;
+  border: 1rpx solid #eef0f4;
+}
+
+.food-sales-dish-kpi-lab {
+  display: block;
+  font-size: 26rpx;
+  color: #666666;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: 10rpx;
+}
+
+.food-sales-dish-kpi-val {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #333333;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.food-sales-dish-kpi-val--accent {
+  color: #07c160;
 }
 
 .food-sales-kv {
@@ -1306,101 +1348,791 @@ ec-canvas {
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 12rpx 0;
-  border-bottom: 1rpx dashed #f0f0f0;
-  gap: 16rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx dashed #e8eaef;
+  gap: 20rpx;
 }
 
 .food-sales-k {
-  font-size: 22rpx;
-  color: #888;
+  font-size: 26rpx;
+  color: #666666;
   flex: 1;
   word-break: break-all;
+  font-weight: 500;
 }
 
 .food-sales-v {
-  font-size: 24rpx;
-  color: #333;
-  font-weight: 500;
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 700;
   text-align: right;
-  max-width: 55%;
+  max-width: 58%;
   word-break: break-all;
+  line-height: 1.45;
 }
 
 .food-sales-empty {
-  font-size: 24rpx;
-  color: #999;
-  padding: 16rpx 0;
+  font-size: 26rpx;
+  color: #999999;
+  padding: 20rpx 0;
+  text-align: center;
 }
 
 .food-sales-ingredient-scroll {
-  max-height: 360rpx;
-  margin-top: 12rpx;
+  max-height: 400rpx;
+  margin-top: 16rpx;
 }
 
 .food-sales-table-scroll {
-  max-height: 480rpx;
-  margin-top: 12rpx;
+  max-height: 520rpx;
+  margin-top: 16rpx;
 }
 
 .food-sales-table-scroll-tall {
-  max-height: 640rpx;
+  max-height: 680rpx;
 }
 
 .food-sales-table {
   width: 100%;
-  font-size: 22rpx;
+  font-size: 28rpx;
+  color: #333333;
 }
 
 .food-sales-table-wide {
-  min-width: 960rpx;
+  min-width: 1020rpx;
 }
 
 .food-sales-tr {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  border-bottom: 1rpx solid #f0f0f0;
-  padding: 10rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+  padding: 14rpx 0;
 }
 
 .food-sales-th {
-  background: #f5f8ff;
-  font-weight: 600;
-  color: #1d39c4;
-  padding: 12rpx 8rpx;
-  border-radius: 8rpx 8rpx 0 0;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ecfdf5 100%);
+  font-weight: 700;
+  font-size: 26rpx;
+  color: #166534;
+  padding: 16rpx 10rpx;
+  border-radius: 12rpx 12rpx 0 0;
+  border-bottom: 1rpx solid #bbf7d0;
 }
 
 .food-sales-td {
-  padding: 0 6rpx;
+  padding: 4rpx 8rpx;
   word-break: break-all;
   flex-shrink: 0;
+  font-size: 28rpx;
+  line-height: 1.45;
 }
 
-.food-sales-td.w-date { flex: 1; min-width: 160rpx; }
-.food-sales-td.w-val { flex: 0 0 120rpx; text-align: right; }
-.food-sales-td.w-sm { flex: 0 0 120rpx; }
-.food-sales-td.w-qty { flex: 0 0 100rpx; text-align: right; }
-.food-sales-td.w-amt { flex: 0 0 140rpx; text-align: right; }
-.food-sales-td.w-num { flex: 0 0 120rpx; text-align: right; }
-.food-sales-td.w-pct { flex: 0 0 100rpx; text-align: right; }
-.food-sales-td.w-food { flex: 1; min-width: 160rpx; }
-.food-sales-td.w-dep { flex: 0 0 140rpx; }
+/* 菜品名列：与 depFoodList 菜名同级强调 */
+.food-sales-td.w-food {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333333;
+}
+
+/* 销量列：绿色大号 */
+.food-sales-td.w-qty {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #07c160;
+  text-align: right;
+}
+
+.food-sales-td.w-amt,
+.food-sales-td.w-num,
+.food-sales-td.w-val {
+  font-weight: 600;
+  color: #111827;
+  text-align: right;
+}
+
+.food-sales-td.w-sm {
+  font-size: 26rpx;
+  color: #4b5563;
+}
+
+.food-sales-td.w-date {
+  font-weight: 500;
+}
+
+.food-sales-td.w-pct {
+  font-weight: 600;
+  color: #1d4ed8;
+  text-align: right;
+}
+
+.food-sales-td.w-dep {
+  font-weight: 600;
+  color: #374151;
+}
+
+.food-sales-td.w-date { flex: 1; min-width: 176rpx; }
+.food-sales-td.w-val { flex: 0 0 132rpx; text-align: right; }
+.food-sales-td.w-sm { flex: 0 0 132rpx; }
+.food-sales-td.w-qty { flex: 0 0 112rpx; text-align: right; }
+.food-sales-td.w-amt { flex: 0 0 152rpx; text-align: right; }
+.food-sales-td.w-num { flex: 0 0 132rpx; text-align: right; }
+.food-sales-td.w-pct { flex: 0 0 108rpx; text-align: right; }
+.food-sales-td.w-food { flex: 1; min-width: 176rpx; }
+.food-sales-td.w-dep { flex: 0 0 152rpx; }
+
+/* 图表区与下方「每日」明细之间的分隔（与小程序常见灰底留白一致） */
+.gfc-chart-to-list-gap {
+  width: 100%;
+  height: 24rpx;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  box-sizing: border-box;
+  border-top: 1rpx solid #e5e7eb;
+  border-bottom: 1rpx solid #e5e7eb;
+}
+
+.gfc-chart-section {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.gfc-block-caption {
+  flex-shrink: 0;
+  margin-bottom: 12rpx;
+}
+
+.gfc-block-caption.gfc-block-caption--in-module {
+  margin-bottom: 0;
+}
+
+.gfc-block-caption-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8rpx;
+}
+
+.gfc-block-caption-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.gfc-chart-body {
+  flex: 1;
+  min-height: 0;
+}
 
 .chart-daily-wrap .chart-container {
   width: 100%;
   height: 360rpx;
 }
 
+.chart-daily-wrap .chart-container.gfc-chart-body {
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* dailyChart：覆盖全局 ec-canvas 400rpx / .chart 450rpx，避免画出父级盖住下方 gfc-chart-to-list-gap */
+.chart-daily-wrap {
+  overflow: hidden;
+}
+
+.chart-daily-wrap ec-canvas {
+  flex: 1;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.chart-daily-wrap .chart.chart {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
 .food-sales-xscroll {
   width: 100%;
-  margin-top: 12rpx;
+  margin-top: 16rpx;
 }
 
 .food-sales-inner-y {
-  min-width: 960rpx;
-  max-height: 640rpx;
+  min-width: 1020rpx;
+  max-height: 680rpx;
 }
 
+/* ---------- 与 foodGoodsFenxi 菜品卡「成本条」一致（本页「理论与实际对比」） ---------- */
+.food-fgf-section-title-row {
+  padding: 16rpx 20rpx 8rpx;
+  background: #fff;
+}
 
+.food-fgf-list-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #111827;
+  margin-right: 16rpx;
+}
+
+.food-fgf-cost-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: #f9fafb;
+  border-radius: 14rpx;
+  border: 1rpx solid #ececec;
+  padding: 16rpx 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.food-fgf-cost-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.food-fgf-cost-div {
+  width: 1rpx;
+  background: #e5e7eb;
+  align-self: stretch;
+  margin: 4rpx 0;
+}
+
+.food-fgf-cost-cap {
+  font-size: 24rpx;
+  color: #6b7280;
+  margin-bottom: 8rpx;
+  font-weight: 500;
+}
+
+.food-fgf-cost-cap--sort-active {
+  color: #059669;
+  font-weight: 600;
+}
+
+.food-fgf-cost-val {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.food-fgf-cost-val--sort-active {
+  color: #059669;
+}
+
+.food-fgf-cost-unit {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}
+
+.food-fgf-cost-unit--sort-active {
+  color: #059669;
+  font-weight: 500;
+}
+
+.food-fgf-cost-diff-line {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.food-fgf-diff-arrow {
+  margin-left: 6rpx;
+  font-size: 26rpx;
+  color: #9ca3af;
+}
+
+.food-fgf-diff-arrow.is-up {
+  color: #fa5151;
+}
+
+.food-fgf-diff-arrow.is-down {
+  color: #07c160;
+}
+
+.food-fgf-diff-arrow.food-fgf-diff-arrow--sort-active {
+  color: #059669;
+}
+
+/* 嵌入「门店菜品」卡片 */
+.food-sales-theory-block .food-fgf-section-title-row {
+  padding-left: 0;
+  padding-right: 0;
+  background: transparent;
+}
+
+.food-sales-theory-block .food-fgf-cost-strip {
+  margin-bottom: 0;
+}
+
+/* 关联菜品明细宽表（supportedDishes） */
+.food-sales-section-sub--inline {
+  display: block;
+  margin-top: -8rpx;
+  margin-bottom: 14rpx;
+  font-size: 24rpx;
+  color: #888888;
+  line-height: 1.45;
+}
+
+.food-sales-table-supported {
+  min-width: 1180rpx;
+}
+
+.food-sales-inner-y--supported {
+  min-width: 1180rpx;
+}
+
+.food-sales-td.w-sd-id {
+  flex: 0 0 92rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.food-sales-td.w-sd-name {
+  flex: 1;
+  min-width: 168rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #333333;
+}
+
+.food-sales-td.w-sd-num {
+  flex: 0 0 116rpx;
+  text-align: right;
+  font-weight: 600;
+}
+
+.food-sales-td.w-sd-qty {
+  flex: 0 0 104rpx;
+  text-align: right;
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #07c160;
+}
+
+.food-sales-td.w-sd-diff {
+  flex: 0 0 128rpx;
+  text-align: right;
+  font-weight: 700;
+}
+
+/* signedNumber.wxs → diffUsage */
+.cog-diff--pos {
+  color: #fa5151;
+}
+
+.cog-diff--neg {
+  color: #07c160;
+}
+
+.cog-diff--zero {
+  color: #6b7280;
+}
+
+.cog-diff--na {
+  color: #9ca3af;
+}
+
+/* --- 按日部门：出库 vs 菜品销售 + 菜品分摊明细（goodsFenxiCost itemList） --- */
+.gfc-itemlist-day-inner {
+  padding-bottom: 8rpx;
+}
+
+.gfc-dep-summary-row.stock-row {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.gfc-dep-summary-row.stock-row::after {
+  content: none;
+}
+
+.gfc-dep-summary-stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* 顶部一行：日期 · 部门（门店） */
+.gfc-dep-head-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6rpx 10rpx;
+  margin-bottom: 18rpx;
+  padding-bottom: 14rpx;
+  border-bottom: 1rpx solid #eef1f4;
+}
+
+.gfc-dep-head-date {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.5rpx;
+}
+
+.gfc-dep-head-sep {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #d1d5db;
+}
+
+.gfc-dep-head-dept {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4b5563;
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.gfc-dep-head-attr {
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #9ca3af;
+  word-break: break-all;
+}
+
+/* 三模块横排：出库 | 菜品销售 | 本原料收支 */
+.gfc-day-balance-cols {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.gfc-day-balance-cols--triple {
+  gap: 10rpx;
+}
+
+.gfc-day-col {
+  flex: 1;
+  min-width: 0;
+  padding: 14rpx 10rpx;
+  border-radius: 14rpx;
+  box-sizing: border-box;
+}
+
+.gfc-day-col--out {
+  background: rgba(234, 88, 12, 0.06);
+  border: 1rpx solid rgba(234, 88, 12, 0.18);
+}
+
+.gfc-day-col--sales {
+  background: rgba(5, 192, 167, 0.06);
+  border: 1rpx solid rgba(5, 192, 167, 0.2);
+}
+
+.gfc-day-col--money {
+  background: rgba(79, 70, 229, 0.06);
+  border: 1rpx solid rgba(79, 70, 229, 0.2);
+}
+
+.gfc-day-col-tag {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 8rpx;
+}
+
+.gfc-day-col-qty {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  letter-spacing: -0.5rpx;
+  word-break: break-all;
+}
+
+.gfc-day-col-qty--muted {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #d1d5db;
+}
+
+.gfc-day-col-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #4b5563;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.gfc-day-col-hint {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: #9ca3af;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.gfc-day-col-hint-profit {
+  margin-top: 8rpx;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.gfc-day-col-money-rev {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #059669;
+  line-height: 1.2;
+  letter-spacing: -0.5rpx;
+  word-break: break-all;
+}
+
+.gfc-day-col-money-rev--na {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #d1d5db;
+}
+
+.gfc-day-extra {
+  margin-top: 14rpx;
+  margin-bottom: 0;
+}
+
+.gfc-metric-extra {
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx dashed rgba(0, 0, 0, 0.08);
+}
+
+.gfc-metric-extra-line {
+  display: block;
+  font-size: 22rpx;
+  color: #777777;
+  line-height: 1.5;
+}
+
+/* 菜品卡片：销量 + 三分收支 */
+.gfc-dish-quick-line {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8rpx 12rpx;
+  margin-bottom: 6rpx;
+}
+
+.gfc-dish-quick-label {
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.gfc-dish-quick-strong {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #111827;
+}
+
+.gfc-dish-quick-sub {
+  display: block;
+  font-size: 24rpx;
+  color: #9ca3af;
+  margin-bottom: 14rpx;
+}
+
+.gfc-dish-money-trio {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 14rpx;
+}
+
+.gfc-dish-mt-item {
+  flex: 1;
+  min-width: 168rpx;
+  padding: 12rpx 10rpx;
+  background: #ffffff;
+  border-radius: 10rpx;
+  border: 1rpx solid #ececec;
+  box-sizing: border-box;
+}
+
+.gfc-dish-mt-k {
+  display: block;
+  font-size: 22rpx;
+  color: #9ca3af;
+  margin-bottom: 6rpx;
+}
+
+.gfc-dish-mt-v {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.gfc-dish-mt-v--in {
+  color: #059669;
+}
+
+.gfc-dish-mt-v--out {
+  color: #ea580c;
+}
+
+.gfc-dish-mt-v--profit {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.gfc-dish-meta-line {
+  font-size: 22rpx;
+  color: #9ca3af;
+  line-height: 1.55;
+  word-break: break-all;
+}
+
+.gfc-dish-meta-dot {
+  margin: 0 8rpx;
+  color: #d1d5db;
+}
+
+/* 卡片底部：菜品明细入口 */
+.gfc-dish-toggle-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16rpx -30rpx -25rpx -30rpx;
+  padding: 22rpx 30rpx 22rpx;
+  border-top: 1rpx solid #eef1f4;
+  box-sizing: border-box;
+}
+
+.gfc-dish-toggle-footer--disabled {
+  justify-content: center;
+  padding-top: 20rpx;
+  padding-bottom: 16rpx;
+}
+
+.gfc-dish-toggle-foot-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.gfc-dish-toggle-foot-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #05c0a7;
+}
+
+.gfc-dish-toggle-foot-title--muted {
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.gfc-dish-toggle-foot-sub {
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+.gfc-dish-toggle-foot-arrow {
+  flex-shrink: 0;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12rpx;
+  background: rgba(5, 192, 167, 0.12);
+  border-radius: 50%;
+}
+
+.gfc-dish-toggle-foot-arrow .arrow-icon {
+  width: 26rpx;
+  height: 26rpx;
+}
+
+.stock-row-active .gfc-dish-toggle-footer:not(.gfc-dish-toggle-footer--disabled) {
+  background: rgba(5, 192, 167, 0.05);
+  border-top-color: rgba(5, 192, 167, 0.18);
+}
+
+.gfc-dish-expand.stock-info-card {
+  margin-top: -14rpx !important;
+}
+
+.gfc-dish-expand-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 16rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #eeeeee;
+}
+
+.gfc-dish-card {
+  background: #f7f8fa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.gfc-dish-card:last-child {
+  margin-bottom: 0;
+}
+
+.gfc-dish-card-hd {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.gfc-dish-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #222222;
+  flex: 1;
+  min-width: 0;
+}
+
+.gfc-dish-id {
+  font-size: 22rpx;
+  color: #999999;
+  flex-shrink: 0;
+}
+
+.gfc-dish-expand-empty {
+  padding: 36rpx 24rpx !important;
+  text-align: center;
+}
+
+.gfc-dish-expand-empty-txt {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.gfc-dep-card-wrap {
+  margin-bottom: 8rpx;
+}

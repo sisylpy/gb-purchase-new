@@ -20,7 +20,6 @@ Page({
     canSave: false,
     imgChanged: false,
     isSelectImg: false,
-    showFood: false,
   },
 
 
@@ -64,17 +63,6 @@ Page({
   },
 
   
-  toAddGoods(e) {
-    this.setData({
-      showFood: true
-    })
-  },
-
-  cancle() {
-    this.setData({
-      showFood: false
-    })
-  },
 
   getFoodName(e) {
     if(this.data.type == 'edit'){
@@ -164,7 +152,7 @@ Page({
         var name = this.data.foodItem.gbDfFoodName;
         var price = this.data.foodItem.gbDfFoodPrice;
         var isSelectImg = this.data.foodItem.gbDistributerFoodImg;
-        if(name !== null  && name.length  > 0 && price !== null  && price.length  > 0&& isSelectImg.length > 0){
+        if(name !== null  && name.length  > 0 && price !== null  && price.length  > 0){
           this.setData({
             canSave: true
           })
@@ -177,7 +165,7 @@ Page({
         var name = this.data.foodName;
         var price = this.data.price;
         var isSelectImg = this.data.isSelectImg;
-        if(name !== null  && name.length  > 0 && price !== null  && price.length  > 0&& isSelectImg){
+        if(name !== null  && name.length  > 0 && price !== null  && price.length  > 0){
           this.setData({
             canSave: true
           })
@@ -258,7 +246,6 @@ Page({
     var arr  = this.data.rawArr;
       arr.push(item);
     this.setData({
-      showFood: false,
       goodsName: "",
       disGoodsId: "",
       standardName: "",
@@ -346,6 +333,9 @@ Page({
       var disId = this.data.disId;
       var price = this.data.price;
       var method = this.data.method;
+      if (method == null) {
+        method = "";
+      }
       saveGbFood(filePathList, foodName, fatherId, disId, price, method).then(res => {
         console.log(res)
         if (res.result == '{"code":0}') {

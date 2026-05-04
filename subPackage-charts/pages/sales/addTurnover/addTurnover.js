@@ -4,6 +4,8 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
+var foodSalesTemplateWx = require('../../../../lib/foodSalesTemplateWx.js');
+var foodSalesExcelApi = require('../../../../lib/foodSalesExcelApi.js');
 
 Page({
 
@@ -41,6 +43,11 @@ Page({
     templateStartDate: '',
     templateEndDate: '',
 
+    // 菜品销量模板
+    showFoodSalesTemplateModal: false,
+    foodSalesTemplateStartDate: '',
+    foodSalesTemplateEndDate: '',
+
     // 当天日期（用于限制日期选择）
     todayDate: '',
   },
@@ -50,6 +57,7 @@ Page({
    */
   onLoad: function (options) {
     const today = dateUtils.getArriveDate(0);
+    const firstDay = today.substring(0, 8) + '01';
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
@@ -57,6 +65,8 @@ Page({
       departmentId: options.departmentId || '',
       isBatch: options.type === 'batch',
       todayDate: today,
+      foodSalesTemplateStartDate: firstDay,
+      foodSalesTemplateEndDate: today,
     })
 
     // 默认今天
@@ -314,7 +324,7 @@ Page({
       gbAiDailyRevenuePlatformFee: parseFloat(this.data.platformFee) || 0,
     }
     
-    api.saveDailyTurnover(data).then(res => {
+    api.saveDailyTuxrnover(data).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
         wx.showToast({ title: '保存成功', icon: 'success' });
@@ -486,6 +496,7 @@ Page({
               wx.openDocument({
                 filePath: filePath,
                 fileType: 'xls',
+                showMenu: true,
                 success(openRes) {
                   console.log('文件已打开');
                   wx.showToast({ title: '模板已打开，请编辑后保存', icon: 'none' });
@@ -493,7 +504,7 @@ Page({
                 fail(openErr) {
                   console.error('打开文件失败:', openErr);
                   wx.showToast({ title: '打开文件失败', icon: 'none' });
-                }
+                },
               });
             },
             fail(writeErr) {
@@ -576,6 +587,194 @@ Page({
       .catch(err => {
         wx.hideLoading();
         console.error('上传失败:', err);
+        wx.showToast({ title: '网络请求失败', icon: 'none' });
+      });
+  },
+
+  _resolveDepartmentIdForFood(disInfo) {
+    if (!disInfo) return '';
+    if (disInfo.mendianDepartmentList && disInfo.mendianDepartmentList.length) {
+      return disInfo.mendianDepartmentList[0].gbDepartmentId;
+    }
+    return '';
+  },
+
+  _ensureDepartmentForFoodExcel() {
+    const disInfo = wx.getStorageSync('disInfo');
+    const departmentId = disInfo ? this._resolveDepartmentIdForFood(disInfo) : this.data.departmentId;
+    if (!departmentId) {
+      wx.showToast({ title: '请先登录门店并选择部门', icon: 'none' });
+      return '';
+    }
+    if (departmentId !== this.data.departmentId) {
+      this.setData({ departmentId: departmentId, disInfo: disInfo || this.data.disInfo });
+    }
+    return departmentId;
+  },
+
+  _resolveFoodDistributerId() {
+    const disInfo = this.data.disInfo || wx.getStorageSync('disInfo');
+    if (disInfo && disInfo.gbDistributerId) {
+      return disInfo.gbDistributerId;
+    }
+    return '';
+  },
+
+  onDownloadFoodSalesTemplate() {
+    if (!this._ensureDepartmentForFoodExcel()) return;
+    const today = dateUtils.getArriveDate(0);
+    const patch = { showFoodSalesTemplateModal: true, todayDate: today };
+    if (this.data.foodSalesTemplateStartDate > today) {
+      patch.foodSalesTemplateStartDate = today;
+    }
+    if (this.data.foodSalesTemplateEndDate > today) {
+      patch.foodSalesTemplateEndDate = today;
+    }
+    this.setData(patch);
+  },
+
+  onCloseFoodSalesTemplateModal() {
+    this.setData({ showFoodSalesTemplateModal: false });
+  },
+
+  onFoodSalesTemplateStartChange(e) {
+    const value = e.detail.value;
+    const today = dateUtils.getArriveDate(0);
+    let v = value > today ? today : value;
+    const { foodSalesTemplateEndDate: end0 } = this.data;
+    const patch = { foodSalesTemplateStartDate: v };
+    if (end0 && v > end0) {
+      patch.foodSalesTemplateEndDate = v;
+    }
+    this.setData(patch);
+  },
+
+  onFoodSalesTemplateEndChange(e) {
+    const value = e.detail.value;
+    const today = dateUtils.getArriveDate(0);
+    let v = value > today ? today : value;
+    const { foodSalesTemplateStartDate: start0 } = this.data;
+    if (start0 && v < start0) {
+      v = start0;
+    }
+    this.setData({ foodSalesTemplateEndDate: v });
+  },
+
+  onConfirmDownloadFoodSales() {
+    const startDate = this.data.foodSalesTemplateStartDate;
+    const endDate = this.data.foodSalesTemplateEndDate;
+    if (!startDate || !endDate) {
+      wx.showToast({ title: '请选择日期范围', icon: 'none' });
+      return;
+    }
+    if (startDate > endDate) {
+      wx.showToast({ title: '开始日期不能晚于结束日期', icon: 'none' });
+      return;
+    }
+    const today = dateUtils.getArriveDate(0);
+    if (startDate > today || endDate > today) {
+      wx.showToast({ title: '开始/结束日期不能晚于今天', icon: 'none' });
+      return;
+    }
+    const departmentId = this._ensureDepartmentForFoodExcel();
+    if (!departmentId) return;
+    this.onCloseFoodSalesTemplateModal();
+    foodSalesTemplateWx.downloadFoodSalesSmartTemplate(apiUrl.apiUrl, startDate, endDate, departmentId);
+  },
+
+  _isExcelChatFile(f) {
+    if (!f) return false;
+    var name = String(f.name || '').toLowerCase();
+    var path = String(f.path || '').toLowerCase();
+    return (
+      name.endsWith('.xlsx') ||
+      name.endsWith('.xls') ||
+      path.endsWith('.xlsx') ||
+      path.endsWith('.xls')
+    );
+  },
+
+  _promptNonExcelChatFile(f) {
+    var name = String((f && f.name) || '').toLowerCase();
+    if (name.endsWith('.numbers')) {
+      wx.showModal({
+        title: '当前是 Numbers 格式',
+        content:
+          '您选的是 Apple「Numbers」表格（.numbers），与 Excel（.xlsx/.xls）不同，无法直接导入。\n\n请用 Numbers 打开后：右上角「共享」→「Excel」→ 导出 .xlsx，再发到微信里上传。',
+        showCancel: false,
+        confirmText: '知道了',
+      });
+      return;
+    }
+    wx.showToast({
+      title: '请选 .xlsx 或 .xls（Excel）',
+      icon: 'none',
+      duration: 2800,
+    });
+  },
+
+  onUploadFoodSalesExcel() {
+    const departmentId = this._ensureDepartmentForFoodExcel();
+    if (!departmentId) return;
+    const distributerId = this._resolveFoodDistributerId();
+    if (!distributerId) {
+      wx.showToast({ title: '缺少批发商信息', icon: 'none' });
+      return;
+    }
+    const that = this;
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      success(res) {
+        var list = res.tempFiles || [];
+        var f = list[0];
+        if (!f || !f.path) {
+          wx.showToast({ title: '未获取到文件', icon: 'none' });
+          return;
+        }
+        var okExcel = that._isExcelChatFile(f);
+        if (!okExcel) {
+          that._promptNonExcelChatFile(f);
+          return;
+        }
+        const tempFilePath = f.path;
+        wx.showModal({
+          title: '确认上传',
+          content: '确定上传该 Excel 导入菜品销量数据？',
+          success(modalRes) {
+            if (modalRes.confirm) {
+              that._uploadFoodSalesExcelFile(tempFilePath, departmentId, distributerId);
+            }
+          },
+        });
+      },
+      fail(err) {
+        var msg = err && err.errMsg ? String(err.errMsg) : '';
+        if (msg.indexOf('cancel') >= 0 || msg.indexOf('取消') >= 0) {
+          return;
+        }
+        wx.showToast({ title: '未选择文件', icon: 'none' });
+      },
+    });
+  },
+
+  _uploadFoodSalesExcelFile(filePath, departmentId, distributerId) {
+    wx.showLoading({ title: '正在上传...', mask: true });
+    foodSalesExcelApi
+      .uploadFoodSalesExcel(filePath, departmentId, distributerId)
+      .then((res) => {
+        wx.hideLoading();
+        const code = res.result && res.result.code;
+        const msg = res.result && res.result.msg;
+        if (code === 0 || code === '0') {
+          wx.showToast({ title: '菜品销量导入成功', icon: 'success' });
+        } else {
+          wx.showToast({ title: msg || '上传失败', icon: 'none' });
+        }
+      })
+      .catch((err) => {
+        wx.hideLoading();
+        console.error('upload food sales excel', err);
         wx.showToast({ title: '网络请求失败', icon: 'none' });
       });
   },

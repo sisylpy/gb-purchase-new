@@ -1,0 +1,127 @@
+/**
+ * 带符号数值 → 展示 class（正红负绿零灰）
+ * 用于 diffUsage、diffCostAmount 等
+ */
+
+function parseNum(s) {
+  if (s === null || s === undefined || s === '') {
+    return NaN;
+  }
+  return parseFloat(('' + s).trim());
+}
+
+function signKind(s) {
+  var n = parseNum(s);
+  if (isNaN(n)) {
+    return 'na';
+  }
+  if (n > 0) {
+    return 'pos';
+  }
+  if (n < 0) {
+    return 'neg';
+  }
+  return 'zero';
+}
+
+/** 文案色：cog-diff cog-diff--pos | --neg | --zero | --na */
+function diffClass(s) {
+  var k = signKind(s);
+  if (k === 'pos') {
+    return 'cog-diff cog-diff--pos';
+  }
+  if (k === 'neg') {
+    return 'cog-diff cog-diff--neg';
+  }
+  if (k === 'zero') {
+    return 'cog-diff cog-diff--zero';
+  }
+  return 'cog-diff cog-diff--na';
+}
+
+/** 成本格额外 class，与 .cog-stat-cell 组合：--cost-alert | --cost-good */
+function costCellExtra(s) {
+  var k = signKind(s);
+  if (k === 'pos') {
+    return 'cog-stat-cell--cost-alert';
+  }
+  if (k === 'neg') {
+    return 'cog-stat-cell--cost-good';
+  }
+  return '';
+}
+
+/** 正数前加 +，便于阅读 */
+function formatSigned(s) {
+  var t = s == null || s === undefined ? '' : ('' + s).trim();
+  var n = parseNum(t);
+  if (isNaN(n)) {
+    return t === '' ? '—' : t;
+  }
+  if (n > 0) {
+    return '+' + t;
+  }
+  return t;
+}
+
+/** a - b 的展示 class（传理论、实际等字符串） */
+function diffClassTwo(a, b) {
+  var d = parseNum(a) - parseNum(b);
+  if (isNaN(d)) {
+    return 'cog-diff cog-diff--na';
+  }
+  return diffClass(String(d));
+}
+
+/** a - b 的展示值，保留两位小数；无效为 00 */
+function formatDiffTwo(a, b) {
+  var d = parseNum(a) - parseNum(b);
+  if (isNaN(d)) {
+    return '00';
+  }
+  var fix = d.toFixed(2);
+  if (d > 0) {
+    return '+' + fix;
+  }
+  return fix;
+}
+
+/** 异常配料环比箭头（多为升序有害）：正 ↑、负 ↓ */
+function momArrowIng(s) {
+  var n = parseNum(s);
+  if (isNaN(n) || n === 0) {
+    return '';
+  }
+  return n > 0 ? '↑' : '↓';
+}
+
+/** 环比数字着色：增多为警示红，减少为绿 */
+function momDeltaClassIng(s) {
+  var n = parseNum(s);
+  if (isNaN(n) || n === 0) {
+    return 'cog-mom--flat';
+  }
+  return n > 0 ? 'cog-mom--worse' : 'cog-mom--better';
+}
+
+/** |Δ| + 道 */
+function momAbsKinds(s) {
+  var n = parseNum(s);
+  if (isNaN(n)) {
+    return '—';
+  }
+  if (n === 0) {
+    return '0 道';
+  }
+  return Math.abs(n) + ' 道';
+}
+
+module.exports.diffClass = diffClass;
+module.exports.costCellExtra = costCellExtra;
+module.exports.formatSigned = formatSigned;
+module.exports.signKind = signKind;
+module.exports.diffClassTwo = diffClassTwo;
+module.exports.formatDiffTwo = formatDiffTwo;
+module.exports.momArrowIng = momArrowIng;
+module.exports.momDeltaClassIng = momDeltaClassIng;
+module.exports.momAbsKinds = momAbsKinds;

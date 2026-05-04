@@ -43,7 +43,7 @@ Page({
     // ],
     items: [{
         name: '2',
-        value: '集采',
+        value: '自采',
         checked: ""
       },
 
@@ -89,8 +89,7 @@ Page({
       this.setData({
         disId: value.gbDistributerId,
         disInfo: value,
-        appDepId: value.appSupplierDepartment.gbDepartmentId,
-        purDepId: value.purDepartmentList[0].gbDepartmentId
+        purDepId: value.mendianDepartmentList[0].gbDepartmentId
       })
     }
     var value = wx.getStorageSync('disGoods');
@@ -305,7 +304,6 @@ Page({
       this.setData({
         showPurDeps: true,
         showSupplier: false,
-        showNxDistributer: false,
       })
     }
 
@@ -313,14 +311,12 @@ Page({
       this.setData({
         showPurDeps: false,
         showSupplier: true,
-        showNxDistributer: false,
       })
     }
     if (value == 5) {
       this.setData({
         showPurDeps: false,
         showSupplier: false,
-        showNxDistributer: true,
       })
     }
 
@@ -340,7 +336,7 @@ Page({
       }
       //如果是集采
       if (toDep.gbDepartmentType == 2) {
-        var purTemp = this.data.disInfo.purDepartmentList;
+        var purTemp = this.data.disInfo.mendianDepartmentList;
         for (var i = 0; i < purTemp.length; i++) {
           var id = purTemp[i].gbDepartmentId;
           if (toDepId == id) {
@@ -373,7 +369,7 @@ Page({
             stockTemp[i].isSelected = true;
           }
         }
-        var purTemp = this.data.disInfo.purDepartmentList;
+        var purTemp = this.data.disInfo.mendianDepartmentList;
         if (purTemp.length > 0) {
           purTemp[0].isSelected = true;
         }
@@ -398,7 +394,7 @@ Page({
             kitchenTemp[i].isSelected = true;
           }
         }
-        var purTemp = this.data.disInfo.purDepartmentList;
+        var purTemp = this.data.disInfo.mendianDepartmentList;
         if (purTemp.length > 0) {
           purTemp[0].isSelected = true;
         }
@@ -426,7 +422,7 @@ Page({
               nxDgdNxDistributerId[i].isSelected = true;
             }
           }
-          var purTemp = this.data.disInfo.purDepartmentList;
+          var purTemp = this.data.disInfo.mendianDepartmentList;
           if (purTemp.length > 0) {
             purTemp[0].isSelected = true;
           }
@@ -455,7 +451,7 @@ Page({
   _getNoToDepartmentSetDeps() {
     console.log("_getNoToDepartmentSetDeps_getNoToDepartmentSetDeps")
     var disInfo = this.data.disInfo;
-    var purTemp = disInfo.purDepartmentList;
+    var purTemp = disInfo.mendianDepartmentList;
     var stockTemp = disInfo.stockDepartmentList;
     var kitchenTemp = disInfo.kitchenDepartmentList;
     if (purTemp.length > 0) {
@@ -624,9 +620,7 @@ Page({
         gbDepId: this.data.purDepId,
         showPurDeps: true,
         showSupplier: false,
-        showNxDistributer: false,
         nxGoodsId: -1,
-        nxDisId: -1,
         supplierId: -1
 
       })
@@ -637,20 +631,9 @@ Page({
         gbDepId: this.data.purDepId,
         showPurDeps: false,
         showSupplier: true,
-        showNxDistributer: false
-      })
-    } else if (type == "5") {
-      var data = "goods.gbDgNxDistributerId";
-      this.setData({
-        gbDepId: this.data.appDepId,
-        showPurDeps: false,
-        showSupplier: false,
-        showNxDistributer: true,
-        nxDisId: this.data.nxDistributerList[0].nxDgdNxDistributerId,
-        [data]: this.data.nxDistributerList[0].nxDgdNxDistributerId,
-
       })
     }
+    
     this._ifCanSave();
 
   },
@@ -718,40 +701,14 @@ Page({
         }
       }
     }
-    if (this.data.showNxDistributer) {
-      for (var i = 0; i < this.data.nxDistributerList.length; i++) {
-        var selItemData = "nxDistributerList[" + i + "].isSelected";
-        if (i == index) {
-          var nxDisIdData = "goods.gbDgNxDistributerId";
-          this.setData({
-            [selItemData]: true,
-            gbDepId: this.data.disInfo.appSupplierDepartment.gbDepartmentId,
-            nxDisId: this.data.nxDistributerList[i].nxDgdNxDistributerId,
-            [goodsData]: this.data.disInfo.appSupplierDepartment.gbDepartmentId,
-            [nxDisIdData]: this.data.nxDistributerList[i].nxDgdNxDistributerI
-          })
-        } else {
-          this.setData({
-            [selItemData]: false,
-          })
-        }
-      }
-      wx.setStorageSync('disGoods', this.data.goods)
-      this._ifCanSave();
-
-    }
+   
   },
 
-  toNxDis() {
-    wx.navigateTo({
-      url: '../../yishang/addAppGoods/addAppGoods',
-    })
-  },
 
 
   toSupplier() {
     wx.navigateTo({
-      url: '../appointSupplierList/appointSupplierList',
+      url: '/subPackage-supplier/pages/supplier/appointSupplierList/appointSupplierList',
     })
   },
 

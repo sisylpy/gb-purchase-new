@@ -10,7 +10,7 @@
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
     <view class="flex-row">
       <view class="p-20" bindtap="toDatePage">
-        <image src="../../../images/calender.png" class="icon"></image>
+        <image src="../../../../images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">
         <view class="font-yuan">{{hanzi}}</view>
@@ -26,7 +26,7 @@
     </view>
 
     <!-- <view class="flex-row p-20" bindtap="toFilterType">
-      <image src="{{searchDepId !== -1 ? '../../../images/filter.png' : '../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
     </view> -->
   </view>
 
@@ -60,23 +60,23 @@
         <view class="flex-row-between p-20">
           <view class="flex-column">
             <view>
-              <view class="font-xs text-secondary">采购总额</view>
+              <view class="font-sl text-secondary">采购总额</view>
               <view class="font-lg font-bold" style="color: #007aff;">{{allTotal}}元</view>
             </view>
-            <view class="font-sm">
-              <view class="font-xs text-secondary">平均</view>
+            <view class="font-md">
+              <view class="font-sl text-secondary">平均</view>
               <view class="font-lg font-bold" style="color: #007aff;">{{purchasePerDay}}元/天</view>
             </view>
           </view>
 
           <view class="flex-column">
             <view class="flex-column">
-              <view class="font-xs text-secondary">成本金额</view>
+              <view class="font-sl text-secondary">成本金额</view>
               <view class="font-lg font-bold" style="color: #05c0a7;">{{costTotal}}元</view>
-              <view class="font-xs font-bold text-secondary" >本期:{{costTotalPer}}元</view>
+              <view class="font-sl font-bold text-secondary" >本期:{{costTotalPer}}元</view>
             </view>
-            <view class="flex-column font-sm">
-              <view class="font-xs text-secondary">平均</view>
+            <view class="flex-column font-md">
+              <view class="font-sl text-secondary">平均</view>
               <view class="font-lg font-bold" style="color: #05c0a7;">{{costPerDay}}元/天</view>
             </view>
           </view>
@@ -91,7 +91,7 @@
 
 
       <view class="bg-white">
-        <view class="flex-column border-bottom p-20" wx:for="{{arr}}" wx:key="day" style="width: {{windowWidth - 40}}rpx; background-color: #f5f5f5;">
+        <view class="flex-column border-bottom p-20" wx:for="{{arr}}" wx:key="day" style="width: {{windowWidth}}rpx; background-color: #f5f5f5;">
 
           <!-- 日期显示在顶部 - 按照图片样式 -->
           <view class="flex-row-center mb-20">
@@ -108,33 +108,33 @@
                
                 <!-- 图标 + 标题 -->
                 <view class="flex-row align-center mb-15">
-                  <image src="../../../images/gouwuche.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                  <text class="font-sm font-bold" >采购</text>
+                  <image src="../../../../images/gouwuche.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                  <text class="font-md font-bold" >采购</text>
                 </view>
 
                 <!-- 采购数据 -->
                 <view class="flex-column">
                   <view class="flex-row-between mb-8">
-                    <text class="font-xs text-secondary">自采:</text>
-                    <text class="font-xs">{{item.zicai}}元</text>
+                    <text class="font-sl text-secondary">自采:</text>
+                    <text class="font-sl">{{item.zicai}}元</text>
                   </view>
                   <view class="flex-row-between mb-8">
-                    <text class="font-xs text-secondary">订货:</text>
-                    <text class="font-xs">{{item.dinghuo}}元</text>
+                    <text class="font-sl text-secondary">订货:</text>
+                    <text class="font-sl">{{item.dinghuo}}元</text>
                   </view>
                 </view>
 
                 <!-- 图标 + 标题 -->
                 <view class="flex-row align-center mb-15">
-                  <image src="../../../images/kucun.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                  <text class="font-sm font-bold" >库存</text>
+                  <image src="../../../../images/kucun.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                  <text class="font-md font-bold" >库存</text>
                 </view>
 
                 <!-- 库存数据 -->
                 <view class="flex-column">
                   <view class="flex-row-between mb-8">
-                    <text class="font-xs text-secondary">库存:</text>
-                    <text class="font-xs">{{item.restStock}}元</text>
+                    <text class="font-sl text-secondary">库存:</text>
+                    <text class="font-sl">{{item.restStock}}元</text>
                   </view>
                 </view>
 
@@ -147,27 +147,27 @@
               <view class="flex-column p-20" style="background-color: white; border-radius: 8rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);" bind:tap="toFenxiDate" data-index="{{index}}" hover-class="hover">
                 <!-- 图标 + 标题 -->
                 <view class="flex-row align-center mb-15">
-                  <image src="../../../images/qiandaizi.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                  <text class="font-sm font-bold" >支出</text>
+                  <image src="../../../../images/qiandaizi.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                  <text class="font-md font-bold" >支出</text>
                 </view>
 
                 <!-- 支出数据 -->
                 <view class="flex-column">
                   <view class="flex-row-between mb-8">
-                    <text class="font-xs text-secondary">销售:</text>
-                    <text class="font-xs" >{{item.saleCostTotal}}元</text>
+                    <text class="font-sl text-secondary">销售:</text>
+                    <text class="font-sl" >{{item.saleCostTotal}}元</text>
                   </view>
                   <view class="flex-row-between mb-8">
-                    <text class="font-xs text-secondary">损耗:</text>
-                    <text class="font-xs">{{item.lossCostTotal}}元</text>
+                    <text class="font-sl text-secondary">损耗:</text>
+                    <text class="font-sl">{{item.lossCostTotal}}元</text>
                   </view>
                   <view class="flex-row-between mb-8">
-                    <text class="font-xs text-secondary">废弃:</text>
-                    <text class="font-xs">{{item.wasteTotal}}元</text>
+                    <text class="font-sl text-secondary">废弃:</text>
+                    <text class="font-sl">{{item.wasteTotal}}元</text>
                   </view>
                   <view class="flex-row-between">
-                    <text class="font-sm font-bold">合计:</text>
-                    <text class="font-sm font-bold" >{{item.costTotal}}元</text>
+                    <text class="font-md font-bold">合计:</text>
+                    <text class="font-md font-bold" >{{item.costTotal}}元</text>
                   </view>
                 </view>
               </view>
@@ -176,7 +176,7 @@
         </view>
       </view>
 
-      <view class="text-secondary font-xs flex-column center-content" style="height: 200rpx;">没有数据了！</view>
+      <view class="text-secondary font-sl flex-column center-content" style="height: 200rpx;">没有数据了！</view>
 
     </view>
 

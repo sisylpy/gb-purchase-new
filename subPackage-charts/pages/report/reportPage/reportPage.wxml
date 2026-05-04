@@ -36,7 +36,7 @@
       <swiper-item>
         <scroll-view scroll-y="true" wx:if="{{businessReportArr.length > 0}}" style="height: 100%;">
           <view class="flex-column">
-            <view class="mt-30" wx:for="{{businessReportArr}}" wx:key="report.gbReportId">
+            <view class="mt-30" wx:for="{{businessReportArr}}" wx:key="_listKey">
               <!-- 成本报表完整内容 -->
               <block>
                 <view class="form_body form_body_dep">
@@ -269,7 +269,7 @@
       <swiper-item>
         <scroll-view scroll-y="true" wx:if="{{costReportArr.length > 0}}" style="height: 100%;">
           <view class="flex-column">
-            <view class="mt-30" wx:for="{{costReportArr}}" wx:key="report.gbReportId">
+            <view class="mt-30" wx:for="{{costReportArr}}" wx:key="_listKey">
               <!-- 成本报表完整内容 -->
               <block>
                 <view class="form_body form_body_dep">
@@ -441,7 +441,7 @@
       <swiper-item>
         <scroll-view scroll-y="true" wx:if="{{purchaseReportArr.length > 0}}" style="height: 100%;">
           <view class="flex-column">
-            <view class="mt-30" wx:for="{{purchaseReportArr}}" wx:key="report.gbReportId">
+            <view class="mt-30" wx:for="{{purchaseReportArr}}" wx:key="_listKey">
               <!-- 采购报表完整内容 -->
               <view class="form_body form_body_dep">
                 <view class="flex-row-between p-20">
@@ -527,7 +527,7 @@
                         <view class="flex-row xia">
                           <view class="flex-column-center half-row you p-30">
                             <view class="text-secondary">未结账</view>
-                            <view class="form_data">{{item.totalSubtotal}}元</view>
+                            <view class="form_data">{{item.unPaySubtotal}}元</view>
                           </view>
                           <view class="flex-column-center half-row p-30">
                             <view class="text-secondary">日均采购</view>
@@ -568,7 +568,7 @@
       <swiper-item>
         <scroll-view scroll-y="true" wx:if="{{stockReportArr.length > 0}}" style="height: 100%;">
           <view class="flex-column">
-            <view class="mt-30" wx:for="{{stockReportArr}}" wx:key="report.gbReportId">
+            <view class="mt-30" wx:for="{{stockReportArr}}" wx:key="_listKey">
               <!-- 库存报表完整内容 - 这里需要包含所有gbRepType的完整逻辑 -->
               <block wx:if="{{item.report.gbRepType == 'disStockNow' || item.report.gbRepType == 'subDepStockNow'}}">
                 <view class="form_body form_body_dep">

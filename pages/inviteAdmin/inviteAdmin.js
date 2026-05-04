@@ -41,7 +41,7 @@ Page({
       depName: options.depName,
       depFatherId: options.depFatherId,
       depId: options.depId,
-      admin: options.admin,
+      admin: 11,
       avatarUrl: "/images/user.png",
       canRegister: false,
     })
@@ -175,7 +175,7 @@ Page({
                   wx.setStorageSync('userInfo', jsonObject.data.depUser);
 
                   wx.redirectTo({
-                    url: '../index/index?depId=' + jsonObject.data.disInfo.purDepartmentList[0].gbDepartmentId,
+                    url: '../index/index',
                   });
 
                 }
@@ -245,7 +245,7 @@ Page({
 
   //       // 跳转到首页 or 其他页面
   //       wx.redirectTo({
-  //         url: '../index/index?depId=' + jsonObject.data.disInfo.purDepartmentList[0].gbDepartmentId,
+  //         url: '../index/index?depId=' + jsonObject.data.disInfo.mendianDepartmentList[0].gbDepartmentId,
   //       });
   //     } else {
   //       load.hideLoading();

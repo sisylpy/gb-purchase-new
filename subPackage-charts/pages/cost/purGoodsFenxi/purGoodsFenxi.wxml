@@ -34,31 +34,32 @@
 
   <view class="flex-column p-20" wx:if="{{mapEveryDay !== null}}">
 
-   
-
     <view class="flex-column bg-white radius-10 border p-20 mt-30">
-      <view class="flex-column p-20" style="height: 400rpx;">
-        <view class="flex-row-between">
+      <view class="flex-column p-20">
+        <view class="flex-row-between flex-shrink-0">
           <view class="font-sm mb-20">自采购总额</view>
           <view class="button-container-white" bind:tap="toPurchaser" hover-class="hover">
           <image src="/images/points.png" mode="aspectFill" class="icon"/>
           </view>
         </view>
-       
-        <ec-canvas id="purUserChart" canvas-id="purUserChart" ec="{{ ecPurUser }}" style="width: 100%; height: 100%;"></ec-canvas>
+        <view class="pur-goods-fenxi-chart-wrap">
+          <ec-canvas id="purUserChart" canvas-id="purUserChart" ec="{{ ecPurUser }}" style="width: 100%; height: 100%;"></ec-canvas>
+        </view>
       </view>
     </view>
 
     <!-- 供货商采购总额图表 -->
     <view class="flex-column bg-white radius-10 border p-20 mt-20 mb-30">
-      <view class="flex-column p-20" style="height: 400rpx;">
-        <view class="flex-row-between">
+      <view class="flex-column p-20">
+        <view class="flex-row-between flex-shrink-0">
           <view class="font-sm mb-20">供货商</view>
           <view class="button-container-white" bind:tap="toSupplier" hover-class="hover">
           <image src="/images/points.png" mode="aspectFill" class="icon"/>
           </view>
         </view>
-        <ec-canvas id="supplierChart" canvas-id="supplierChart" ec="{{ ecSupplier }}" style="width: 100%; height: 100%;"></ec-canvas>
+        <view class="pur-goods-fenxi-chart-wrap">
+          <ec-canvas id="supplierChart" canvas-id="supplierChart" ec="{{ ecSupplier }}" style="width: 100%; height: 100%;"></ec-canvas>
+        </view>
       </view>
     </view>
 

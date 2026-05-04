@@ -1,5 +1,6 @@
 <wxs src="../../../../wxs/format.wxs" module="tool" />
 
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 <view class="flex flex-column">
 
@@ -79,7 +80,7 @@
                 <view wx:if="{{goods.isFirstInCategory}}" id="cat-dep-{{goods.gbDdgDisGoodsGrandId}}" class="goods-category-title-dep"></view>
                 <view bind:longpress="delDepGoods" data-item="{{goods}}" data-index="{{depGoodsIndex}}" class="flex-row-default   goods-item-dep p-20" id="{{goods.viewId}}">
                   <view class="img-wrapper">
-                    <image bindtap="showImageModal" data-goods="{{goods}}" src="{{goods.gbDisGoodsFile !== null ? url + goods.gbDisGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
+                    <image bindtap="showImageModal" data-goods="{{goods}}" src="{{goods.gbDistributerGoodsEntity.gbDgNxFatherImg ? url +  goods.gbDistributerGoodsEntity.gbDgNxFatherImg : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
                   </view>
 
                   <view class="flex-row">
@@ -230,8 +231,8 @@
             <view wx:if="{{showAllSubCat}}">
               <view class="subcat-popup" style="top: {{navBarHeight}}rpx;">
                 <view class="subcat-bar expand">
-                  <view class="subcat-tag {{activeSubCatId == item.nxGoodsId ? 'active' : ''}}" wx:for="{{fatherArrDis}}" wx:key="nxGoodsId" bindtap="onSubCatTapDis" data-id="{{item.nxGoodsId}}">
-                    {{item.nxGoodsName}}
+                  <view class="subcat-tag {{activeSubCatId == subCat.nxGoodsId ? 'active' : ''}}" wx:for="{{fatherArrDis}}" wx:for-item="subCat" wx:key="nxGoodsId" bindtap="onSubCatTapDis" data-id="{{subCat.nxGoodsId}}">
+                    {{subCat.nxGoodsName}}
                   </view>
                 </view>
               </view>
@@ -241,9 +242,9 @@
             <!-- 收起时横向滚动 -->
             <view class="flex-row" style="width: {{windowWidth - 140}}rpx;" wx:else>
               <scroll-view class="subcat-bar-scroll" scroll-x="true" scroll-into-view="{{subcatScrollIntoView}}" scroll-with-animation show-scrollbar="false" style="width:{{windowWidth - 240}}rpx; margin-right: 20rpx; ">
-                <block wx:for="{{fatherArrDis}}" wx:key="nxGoodsId">
-                  <view class="subcat-tag {{activeSubCatId == item.nxGoodsId ? 'active' : ''}}" id="subcat-{{item.nxGoodsId}}" bindtap="onSubCatTapDis" data-id="{{item.nxGoodsId}}">
-                    {{item.nxGoodsName}}
+                <block wx:for="{{fatherArrDis}}" wx:for-item="subCat" wx:key="nxGoodsId">
+                  <view class="subcat-tag {{activeSubCatId == subCat.nxGoodsId ? 'active' : ''}}" id="subcat-{{subCat.nxGoodsId}}" bindtap="onSubCatTapDis" data-id="{{subCat.nxGoodsId}}">
+                    {{subCat.nxGoodsName}}
                   </view>
                 </block>
               </scroll-view>
@@ -258,18 +259,19 @@
 
             <scroll-view class="goods-list" scroll-y="true" style="width: {{windowWidth - 180}}rpx; height: {{windowHeight - 200- statusBarHeight}}rpx; " bindscroll="onGoodsScrollDis" bindscrolltolower="onScrollToLowerDis" scroll-with-animation scroll-into-view="{{scrollIntoView}}" show-scrollbar="false">
               <block wx:for="{{goodsList}}" wx:for-item="sons" wx:key="nxGoodsId" wx:for-index="goodsIndex">
-                <view wx:if="{{sons.isFirstInCategory}}" id="cat-{{sons.nxGoodsGrandId}}" class="goods-category-title">
+                <view wx:if="{{sons.isFirstInCategory}}" class="goods-category-title">
                   <!-- {{item.categoryName}} -->
                 </view>
-                <view class="flex-row-default  product-item p-10">
+                <!-- cat-* 锚点放在首行商品上：空标题区高度为 0 时 scroll-into-view 对齐后首屏仍是上一分类，onGoodsScrollDis 会把标签改回去 -->
+                <view class="flex-row-default product-item p-10 {{sons.isFirstInCategory ? 'dis-cat-anchor' : ''}}" id="{{sons.isFirstInCategory ? 'cat-' + sons.nxGoodsGrandId : 'goods-row-' + sons.nxGoodsId}}">
                   <view class="flex-row-default">
-                    <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons.nxGoodsFile !== null ? url + sons.nxGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" />
+                    <!-- <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons._disGoodsImageRel ? imgUrl.resolve(url, sons._disGoodsImageRel) : '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" /> -->
+                    <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons.nxGoodsFile ? url+  sons.nxGoodsFile: '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" />
                     <view class="flex-row-default">
                       <view class="flex-column" style="width: {{windowWidth - 480}}rpx;  ">
                         <view class="flex-row middle">
                           <text class=" {{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? brand : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? sons.nxGoodsBrand : ''}}</text>
                           <view class="font-xl">{{sons.nxGoodsName}}</view>
-                          <!-- <view>{{sons.nxGoodsDetail}}</view> -->
                         </view>
 
                         <view class="flex-row font-sl" wx:if="{{sons.nxGoodsStandardWeight !== null && sons.nxGoodsStandardWeight !== ''}}">
@@ -296,7 +298,7 @@
                       </view>
 
                       <view class="flex-">
-                        <view class="flex-row " catch:tap="toEditApply" data-order="{{sons.gbDepartmentOrdersEntity}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}" data-index="{{goodsIndex}}" data-nxGoods="{{sons}}" data-depgoods="{{sons.gbDepartmentDisGoodsEntity}}" hover-class="{{sons.gbDepartmentOrdersEntity == null ? 'hover' :''}}" wx:if="{{sons.gbDepartmentOrdersEntity !== null}}">
+                        <view class="flex-row " catch:tap="toEditApply" data-order="{{sons.gbDepartmentOrdersEntity}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}" data-index="{{goodsIndex}}" data-nxGoods="{{sons}}" data-depgoods="{{sons.gbDepartmentDisGoodsEntity}}" hover-class="{{sons.gbDepartmentOrdersEntity == null ? 'hover' :''}}" wx:if="{{sons.gbDepartmentOrdersEntity}}">
                           <text class="five-weight save_btn has_order  {{sons.gbDepartmentOrdersEntity.gbDoPurchaseStatus > 1 ? 'is-gray' : ''}}  {{sons.gbDepartmentOrdersEntity.nxDoStatus == 2 ? 'finish': ''}}">{{sons.gbDepartmentOrdersEntity.gbDoQuantity}}{{sons.gbDepartmentOrdersEntity.gbDoStandard}}</text>
                         </view>
                         <block wx:else="">
@@ -358,12 +360,13 @@
 
 
 
-<myDismodalDep show="{{showDep}}" bindconfirm="confirmDep" bindcancle="cancle" binddelApply="delApplyDep" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{depGoods}}"  applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
+<myDismodalDep show="{{showDep}}" bindconfirm="confirmDep" bindcancle="cancle" binddelApply="delApplyDep" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{depGoods}}"   canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
 
 <myDismodal show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" binddelStandard="delStandard" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" hasStock="{{hasStock}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemDis}}" nxGoods="{{nxGoods}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />
 
 <!--  -->
 <myDismodalNx show="{{showNx}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" bindconfirmStandardNx="confirmStandardNx" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{nxGoods}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" depGoods="{{depGoods}}" hasStock="{{hasStock}}" />
+
 
 <delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />
 

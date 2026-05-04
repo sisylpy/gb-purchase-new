@@ -32,7 +32,7 @@
             <view class="production-container" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
               <view class="flex-column p-20 border-bottom {{expandedRows[stockIndex + '_' + stockIndex + '_0'] ? 'production-row-expanded' : 'production-row-collapsed'}}" style="width: {{windowWidth - 260}}rpx;" bind:tap="showOne" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
                 <view class="flex-row-default">
-                  <image src="{{(imgUrl.resolve(url, stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="url_item mr-20" />
+                  <image src="{{(imgUrl.resolve(url, stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="empty_image mr-20" />
                   <view class="flex-column">
                     <view class="flex-row font-lg">{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsName}}</view>
                     <view class="flex-row-between p-10 bg-light radius-10" style="width: {{windowWidth - 400}}rpx;">
@@ -62,20 +62,20 @@
                 <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">入库单价</text><text>{{stock.gbDgsPrice}}元/{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
                 <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">入库金额</text><text>{{stock.gbDgsSubtotal}}元</text></view>
                 <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">现库存</text><text>{{stock.gbDgsRestWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
-                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">销售</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsProduceSubtotal}}元</text><text class="font-xs">({{stock.gbDgsProduceWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
-                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">损耗</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsLossSubtotal}}元</text><text class="font-xs">({{stock.gbDgsLossWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
-                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">废弃</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsWasteSubtotal}}元</text><text class="font-xs">({{stock.gbDgsWasteWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">销售</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsProduceSubtotal}}元</text><text class="font-sl">({{stock.gbDgsProduceWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">损耗</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsLossSubtotal}}元</text><text class="font-sl">({{stock.gbDgsLossWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">废弃</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsWasteSubtotal}}元</text><text class="font-sl">({{stock.gbDgsWasteWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
               </view>
             </view>
 
-            <view class="flex-column-center p-20 font-xs" bind:tap="showTwo" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}" data-id="{{stock.gbDgsGbPurGoodsId}}" wx:if="{{expandedRows[stockIndex + '_' + stockIndex + '_0']}}">
+            <view class="flex-column-center p-20 font-sl" bind:tap="showTwo" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}" data-id="{{stock.gbDgsGbPurGoodsId}}" wx:if="{{expandedRows[stockIndex + '_' + stockIndex + '_0']}}">
               <view class="bg-mainColor flex-column-center p-10 radius-10">
                 <text class="font-yuan">采购追踪</text>
               </view>
             </view>
 
             <block wx:if="{{expandedRows[stockIndex + '_' + stockIndex + '_0'] === 'purchase'}}">
-              <view class="flex-column bg-mainColor p-20 expandable-content expanded font-xs" bind:tap="toFenxi" data-item="{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity}}" data-id="{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDistributerGoodsId}}" data-purid="{{stock.purchaseGoodsEntity.gbDistributerPurchaseGoodsId}}">
+              <view class="flex-column bg-mainColor p-20 expandable-content expanded font-sl" bind:tap="toFenxi" data-item="{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity}}" data-id="{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDistributerGoodsId}}" data-purid="{{stock.purchaseGoodsEntity.gbDistributerPurchaseGoodsId}}">
                 <view class="flex-row align-center mb-15 border-bottom p-10"><text class="font-sm">采购信息</text></view>
                 <view class="flex-row-between border-bottom p-10" style="width: {{windowWidth - 280}}rpx;"><text class="text-secondary mr-10">采购时间:</text><text>{{stock.purchaseGoodsEntity.gbDpgStockFinishDate}}</text></view>
                 <view class="flex-row-between border-bottom p-10" style="width: {{windowWidth - 280}}rpx;"><text class="text-secondary mr-10">单价:</text><text>{{stock.purchaseGoodsEntity.gbDpgBuyPrice}}元/{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>

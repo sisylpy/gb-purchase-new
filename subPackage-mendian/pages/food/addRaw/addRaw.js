@@ -4,10 +4,10 @@ var load = require('../../../../lib/load.js');
 
 
 import {
-  saveGbFoodGoods,
+  saveGbFoodGoodsItem,
   deleteGbFoodGoods,
   updateGbFoodGoods,
-  queryDisGoodsByQuickSearchGb
+  quickSearchDisGoodsForFoodIngredient,
 } from '../../../services/apiDistributerGbFood'
 
 
@@ -30,9 +30,17 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    var wh = globalData.windowHeight * globalData.rpxR;
+    var padTop = Math.round(wh * 0.23);
+    var panelMax = Math.max(400, Math.round(wh - padTop - 40));
+    var inner = Math.round(wh - padTop - 56);
+    var scrollLong = Math.max(320, Math.round(inner * 0.68));
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
-      windowHeight: globalData.windowHeight * globalData.rpxR,
+      windowHeight: wh,
+      foodSearchModalPadTopRpx: padTop,
+      foodSearchModalPanelMaxRpx: panelMax,
+      foodSearchScrollRpx: scrollLong,
       statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       pageTitle: options.type === 'edit' ? '修改原料' : '添加原料',
@@ -43,17 +51,9 @@ Page({
     this.setData({
       foodItem: foodItem,
       foodId: foodItem.gbDistributerFoodId,
-      dataUrl: foodItem.gbDistributerFoodImg
+      rawArr: foodItem.gbdisFoodGoodsEntities
     })
-    if (options.type == 'edit') {
-      this.setData({
-        rawArr: foodItem.gbdisFoodGoodsEntities
-      })
-    } else {
-      this.setData({
-        rawArr: [],
-      })
-    }
+     
 
 
     var value = wx.getStorageSync('disInfo');
@@ -138,14 +138,26 @@ Page({
 
     if (e.detail.value.length > 0) {
       var string = e.detail.value;
-      string  = string.replace(/\s*/g,"");
+      string = string.replace(/\s*/g, '');
+      var fid = this.data.foodId;
+      if (fid == null || fid === '') {
+        this.setData({ isSearching: false });
+        wx.showToast({ title: '缺少菜品ID', icon: 'none' });
+        return;
+      }
       var data = {
         disId: this.data.disId,
         searchStr: string,
-        depId: this.data.depFatherId
+        foodId: typeof fid === 'number' ? fid : parseInt(String(fid), 10),
+      };
+      if (isNaN(data.foodId)) {
+        this.setData({ isSearching: false });
+        wx.showToast({ title: '菜品ID无效', icon: 'none' });
+        return;
       }
      load.showLoading("查询原料")
-      queryDisGoodsByQuickSearchGb(data).then(res => {
+      quickSearchDisGoodsForFoodIngredient(data)
+        .then(res => {
         console.log(res)
         load.hideLoading();
         if (res.result.code == 0) {
@@ -159,6 +171,9 @@ Page({
             })
           }
         }
+      })
+      .catch(function () {
+        load.hideLoading();
       })
     } else {
       this.setData({
@@ -229,6 +244,7 @@ Page({
       icon: 'none'
     })
   },
+
   confirm(e) {
     if(this.data.modalType == 'edit'){
       var goodsName = this.data.editGoods.gbDfgGoodsName;
@@ -266,36 +282,33 @@ Page({
         gbDfgGoodsAmount: this.data.amount,
         gbDfgGoodsStandardname: this.data.standardName,
       }
-      var arr = this.data.rawArr;
-      arr.push(item);
+    
+       saveGbFoodGoodsItem(item).then(res => {
+      load.hideLoading();
+      if (res.result.code == 0) {
+        var rawArr = this.data.rawArr;
+        var data = "rawArr"
+        rawArr.push(res.result.data);
+        this.setData({
+          [data]: rawArr
+        })
+
+        
+      }
+    })
       this.setData({
         showFood: false,
         goodsName: "",
         disGoodsId: "",
         standardName: "",
         amount: "",
-        rawArr: arr
   
       })
     }
    
-    // }
-
   },
 
 
-  addFoodGoods() {
-    var data = this.data.rawArr;
-    load.showLoading("保存原料");
-    saveGbFoodGoods(data).then(res => {
-      load.hideLoading();
-      if (res.result.code == 0) {
-        wx.navigateBack({
-          delta: 1,
-        })
-      }
-    })
-  },
 
   toBack() {
     wx.navigateBack({

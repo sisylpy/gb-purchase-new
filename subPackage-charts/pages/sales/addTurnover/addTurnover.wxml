@@ -6,7 +6,11 @@
   <block wx:if="{{!isBatch}}">
     <view class="flex-row p-20" style="justify-content: space-between; align-items: center;">
       <view class="download-btn" bindtap="onDownloadTemplate">下载营业额模板</view>
-     <view class="upload-btn" bindtap="onUploadExcel">上传</view>
+      <view class="upload-btn" bindtap="onUploadExcel">上传</view>
+    </view>
+    <view class="flex-row p-20 pt-0 food-sales-tool-row">
+      <view class="download-btn" bindtap="onDownloadFoodSalesTemplate">下载销量模板</view>
+      <view class="upload-btn" bindtap="onUploadFoodSalesExcel">上传销量</view>
     </view>
 
     <!-- 下载模板弹窗 -->
@@ -37,6 +41,40 @@
         <view class="template-actions">
           <button class="btn-cancel" bindtap="onCloseTemplateModal">取消</button>
           <button class="btn-confirm" bindtap="onConfirmDownload">确认下载</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 菜品销量模板：日期范围 -->
+    <view class="food-tpl-modal" wx:if="{{showFoodSalesTemplateModal}}">
+      <view class="food-tpl-mask" bindtap="onCloseFoodSalesTemplateModal"></view>
+      <view class="food-tpl-panel">
+        <view class="food-tpl-title">选择日期范围</view>
+        <view class="food-tpl-form">
+          <view class="food-tpl-form-item">
+            <text class="food-tpl-form-label">开始日期</text>
+            <picker mode="date" value="{{foodSalesTemplateStartDate}}" end="{{todayDate}}"
+              bindchange="onFoodSalesTemplateStartChange">
+              <view class="food-tpl-form-input flex-row-between">
+                <text>{{foodSalesTemplateStartDate || '请选择'}}</text>
+                <text class="text-secondary">›</text>
+              </view>
+            </picker>
+          </view>
+          <view class="food-tpl-form-item">
+            <text class="food-tpl-form-label">结束日期</text>
+            <picker mode="date" value="{{foodSalesTemplateEndDate}}" start="{{foodSalesTemplateStartDate}}"
+              end="{{todayDate}}" bindchange="onFoodSalesTemplateEndChange">
+              <view class="food-tpl-form-input flex-row-between">
+                <text>{{foodSalesTemplateEndDate || '请选择'}}</text>
+                <text class="text-secondary">›</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+        <view class="food-tpl-actions">
+          <view class="food-tpl-btn food-tpl-btn--ghost" bindtap="onCloseFoodSalesTemplateModal">取消</view>
+          <view class="food-tpl-btn food-tpl-btn--primary" bindtap="onConfirmDownloadFoodSales">确认下载</view>
         </view>
       </view>
     </view>
@@ -112,7 +150,7 @@
           </view>
         </picker>
       </view>
-      <view class="text-secondary font-xs" wx:if="{{batchDays > 0}}">将添加 {{batchDays}} 天的营业额记录</view>
+      <view class="text-secondary font-sl" wx:if="{{batchDays > 0}}">将添加 {{batchDays}} 天的营业额记录</view>
     </view>
 
     <view class="form-card mb-20">

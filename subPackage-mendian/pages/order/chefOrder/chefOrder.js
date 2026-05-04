@@ -56,14 +56,11 @@ Page({
         this.setData({
           mendianInfo: mendianInfo,
           depFatherId: mendianInfo.gbDepartmentId,
-          depId: mendianInfo.gbDepartmentId,
+          depId: mendianInfo.gbDepartmentEntityList[0].gbDepartmentId,
           depHasSubs: mendianInfo.gbDepartmentSubAmount,
+          orderDepList: mendianInfo.gbDepartmentEntityList,
         });
-        if (mendianInfo.gbDepartmentSubAmount > 0) {
-          this.setData({
-            depId: mendianInfo.gbDepartmentEntityList[0].gbDepartmentId,
-          });
-        }
+        
       }
     }
 
@@ -100,7 +97,7 @@ Page({
         load.hideLoading();
         if (res.result.code == 0) {
           console.log("rers", res.result.data);
-          if (this.data.depHasSubs > 0) {
+          if (this.data.depHasSubs > 1) {
             var depArrWithGlobalIndex = this._calculateGlobalOrderIndexForDepArr(res.result.data.arr);
             this.setData({
               depArr: depArrWithGlobalIndex,
@@ -370,7 +367,7 @@ Page({
     if (this.data.depHasSubs > 1) {
       this.setData({ showChoice: true, openType: type });
     } else {
-      wx.setStorageSync('orderDepInfo', this.data.mendianInfo);
+      wx.setStorageSync('orderDepInfo', this.data.orderDepList[0]);
       if (type == 'paste') {
         wx.navigateTo({ url: '../paste/paste?depFatherId=' + this.data.depFatherId + '&depId=' + this.data.depId + '&disId=' + this.data.disId });
       } else if (type == 'ai') {

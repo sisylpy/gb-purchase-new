@@ -11,7 +11,6 @@ var load = require('../../../lib/load.js');
 var config = require('../../../config/index.js');
 var dateUtils = require('../../../lib/dateUtil.js');
 
-var globalData = getApp().globalData;
 
 
 

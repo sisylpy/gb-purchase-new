@@ -85,12 +85,9 @@ var depSearchTodayOrders = function (data) {
   return requestUtil.post('gbdepartmentorders/depSearchTodayOrders', data, { useUrlParams: true });
 };
 
-var disSaveStandard = function (data) {
-  return requestUtil.post('nxdistributerstandard/disSaveStandard', data, { useUrlParams: true });
-};
 
 var gbDisSaveStandard = function (data) {
-  return requestUtil.post('gbdistributerstandard/gbDisSaveStandard', data, { useUrlParams: true });
+  return requestUtil.post('gbdistributerstandard/gbDisSaveStandard', data);
 };
 
 var gbDisDeleteStandard = function (id) {
@@ -147,9 +144,6 @@ var gbDepGetNxGoodsByGreatGrandId = function (data) {
   return requestUtil.post('nxgoods/gbDepGetNxGoodsByGreatGrandId', data, { useUrlParams: true });
 };
 
-var getNxGoodsIdsByGreatId = function (id) {
-  return requestUtil.get('nxgoods/getNxGoodsIdsByGreatId/' + id);
-};
 
 var saveNxStandard = function (data) {
   return requestUtil.post('nxstandard/saveNxStandard', data, { useUrlParams: true });
@@ -277,7 +271,7 @@ var supplierDeleteDisPurBatchGbItem = function (data) {
 };
 
 var supplierInitWeightPurItem = function (data) {
-  return requestUtil.get('gbdistributerpurchasebatch/supplierInitWeightPurItem/' + data);
+  return requestUtil.get('gbdistributerpurchasegoods/supplierInitWeightPurItem/' + data);
 };
 
 var whichJrdhUserLoginGbJj = function (data) {
@@ -319,17 +313,21 @@ var getJrdhUser = function (data) {
   return requestUtil.get('nxjrdhuser/getJrdhUser/' + data);
 };
 
-var updateJrdhUser = function (data) {
-  return requestUtil.post('nxjrdhuser/updateJrdhUser', data, { useUrlParams: true });
-};
-
-var updateJrdhUserWithFile = function (filePathList, userName, userId) {
-  return requestUtil.uploadFile(
-    'nxjrdhuser/updateJrdhUserWithFile',
-    filePathList[0],
-    'file',
-    { userName, userId }
-  );
+/**
+ * 更新昵称；可选 multipart 头像。与后端统一路径 nxjrdhuser/updateJrdhUser（原为双路径合并）。
+ * @param {string} userName
+ * @param {number|string} userId
+ * @param {string} [tempFilePath] 本地临时文件路径，传入则走 wx.uploadFile
+ */
+var updateJrdhUser = function (userName, userId, tempFilePath) {
+  var path = 'nxjrdhuser/updateJrdhUser';
+  if (tempFilePath) {
+    return requestUtil.uploadFile(path, tempFilePath, 'file', {
+      userName: userName,
+      userId: userId,
+    });
+  }
+  return requestUtil.post(path, { userName: userName, userId: userId }, { useUrlParams: true });
 };
 
 // ===== supplierOrder 页面需要的 API =====
@@ -391,7 +389,6 @@ module.exports = {
   depGetApplyAiFather: depGetApplyAiFather,
   depReceiveStock: depReceiveStock,
   depSearchTodayOrders: depSearchTodayOrders,
-  disSaveStandard: disSaveStandard,
   gbDisSaveStandard: gbDisSaveStandard,
   gbDisDeleteStandard: gbDisDeleteStandard,
   createDepartmentOrderForJj: createDepartmentOrderForJj,
@@ -407,7 +404,6 @@ module.exports = {
   depGetDepGoodsCataGb: depGetDepGoodsCataGb,
   gbGetNxGoodsCataGoods: gbGetNxGoodsCataGoods,
   gbDepGetNxGoodsByGreatGrandId: gbDepGetNxGoodsByGreatGrandId,
-  getNxGoodsIdsByGreatId: getNxGoodsIdsByGreatId,
   saveNxStandard: saveNxStandard,
   changeStockStars: changeStockStars,
   saveDepProduceGoodsStock: saveDepProduceGoodsStock,
@@ -450,7 +446,6 @@ module.exports = {
   // depUserEdit 需要的 API
   getJrdhUser: getJrdhUser,
   updateJrdhUser: updateJrdhUser,
-  updateJrdhUserWithFile: updateJrdhUserWithFile,
   // jinriListWithLogin 需要的 API
   indexJrdhUserLoginJj: indexJrdhUserLoginJj,
   sellerDistributerPurchaseBatchsGb: sellerDistributerPurchaseBatchsGb,

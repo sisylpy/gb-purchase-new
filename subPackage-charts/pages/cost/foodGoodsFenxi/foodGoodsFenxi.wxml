@@ -1,0 +1,247 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+<wxs module="utilLv" src="/wxs/utilizationLevel.wxs" />
+<wxs module="num" src="/wxs/signedNumber.wxs" />
+<wxs module="fmt" src="/wxs/format.wxs" />
+
+<view class="flex flex-column food-fgf-page">
+  <back-navbar class="" style="height: {{navBarHeight}}rpx;" title="菜品分析" avatar="/images/back-gray.png"
+    button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="flex-row p-20" bindtap="onToggleSearchBar">
+      <image src="/images/search-3.png" class="icon mr-20 food-fgf-search-top-ico {{dishNameSearch ? 'food-fgf-search-top-ico--on' : ''}}"></image>
+    </view>
+  </view>
+
+  <view class="food-fgf-search-panel bg-white border-bottom" wx:if="{{searchBarOpen}}">
+    <view class="food-fgf-search-inner">
+      <image class="food-fgf-search-inner-ico" src="/images/search-3.png" mode="aspectFit" />
+      <input
+        class="food-fgf-search-input"
+        value="{{dishNameSearchDraft}}"
+        placeholder="搜索菜品名称"
+        confirm-type="search"
+        focus="{{searchInputFocus}}"
+        bindinput="onDishNameSearchInput"
+        bindconfirm="onDishNameSearchConfirm"
+      />
+      <text class="food-fgf-search-clear" wx:if="{{dishNameSearchDraft}}" catchtap="onDishNameSearchClear">×</text>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="food-fgf-scroll flex-1">
+    <view class="food-fgf-sum-row" wx:if="{{scopeSalesSubtotals}}">
+      <view class="food-fgf-sum-card food-fgf-sum-card--red">
+        <view class="food-fgf-sum-hd">
+          <view class="food-fgf-sum-ico">￥</view>
+          <text class="food-fgf-sum-tit">总销售额</text>
+        </view>
+        <text class="food-fgf-sum-val">{{scopeSalesSubtotals.totalSalesAmount || '00'}}</text>
+        <text class="food-fgf-sum-unit">元</text>
+        <text class="food-fgf-sum-trend" wx:if="{{scopeSalesSubtotals.totalSalesAmountMom}}">较上月 {{scopeSalesSubtotals.totalSalesAmountMom}}</text>
+        <text class="food-fgf-sum-trend" wx:else>较上月 00%</text>
+      </view>
+      <view class="food-fgf-sum-card food-fgf-sum-card--blue">
+        <view class="food-fgf-sum-hd">
+          <view class="food-fgf-sum-ico">份</view>
+          <text class="food-fgf-sum-tit">总销量</text>
+        </view>
+        <text class="food-fgf-sum-val">{{scopeSalesSubtotals.totalSalesPortions || '00'}}</text>
+        <text class="food-fgf-sum-unit">份</text>
+        <text class="food-fgf-sum-trend" wx:if="{{scopeSalesSubtotals.totalSalesPortionsMom}}">较上月 {{scopeSalesSubtotals.totalSalesPortionsMom}}</text>
+        <text class="food-fgf-sum-trend" wx:else>较上月 00%</text>
+      </view>
+      <view class="food-fgf-sum-card food-fgf-sum-card--orange">
+        <view class="food-fgf-sum-hd">
+          <view class="food-fgf-sum-ico">均</view>
+          <text class="food-fgf-sum-tit">平均售价</text>
+        </view>
+        <text class="food-fgf-sum-val">{{scopeSalesSubtotals.averagePricePerPortion || '00'}}</text>
+        <text class="food-fgf-sum-unit">元/份</text>
+        <text class="food-fgf-sum-trend" wx:if="{{scopeSalesSubtotals.averagePricePerPortionMom}}">较上月 {{scopeSalesSubtotals.averagePricePerPortionMom}}</text>
+        <text class="food-fgf-sum-trend" wx:else>较上月 00%</text>
+      </view>
+    </view>
+
+    <block wx:if="{{salesDishRowsAll.length}}">
+      <view class="food-fgf-section-title-row">
+        <text class="food-fgf-list-title">菜品明细</text>
+      </view>
+      <view class="cog-sort-wrap">
+        <view class="cog-sort-left">
+          <view class="cog-sort-arrows">
+            <text class="cog-sort-arrow cog-sort-arrow--up {{sortOrder === 'asc' ? 'is-on' : ''}}">↑</text>
+            <text class="cog-sort-arrow cog-sort-arrow--down {{sortOrder === 'desc' ? 'is-on' : ''}}">↓</text>
+          </view>
+          <text class="cog-sort-label">排序{{sortOrder === 'asc' ? '·升序' : '·降序'}}</text>
+        </view>
+        <view class="cog-sort-scroll cog-sort-scroll--row">
+          <view class="cog-sort-chips">
+
+            <view class="cog-sort-chip cog-sort-chip--util {{sortBy === 'actualCost' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="actualCost">
+              <text class="cog-sort-chip-ico">Σ</text>
+              <text>实际成本</text>
+            </view>
+            
+            <view class="cog-sort-chip cog-sort-chip--wasteloss {{sortBy === 'diff' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="diff">
+              <text class="cog-sort-chip-ico">Δ</text>
+              <text>成本偏差</text>
+            </view>
+
+
+            <view class="cog-sort-chip cog-sort-chip--outbound {{sortBy === 'sales' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="sales">
+              <text class="cog-sort-chip-ico">￥</text>
+              <text>销售额</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="food-fgf-list-empty-local" wx:if="{{!salesDishRows.length && dishNameSearch}}">
+        <text>未找到「{{dishNameSearch}}」相关菜品</text>
+      </view>
+    </block>
+
+    <block wx:if="{{salesDishRows.length}}">
+      <view class="flex-column food-fgf-list">
+        <view class="food-fgf-dish-card" wx:for="{{salesDishRows}}" wx:for-item="item" wx:key="dishId">
+          <view class="food-fgf-dish-hd flex-row">
+            <view class="food-fgf-dish-cover-wrap">
+              <!-- <image class="food-fgf-dish-cover"
+                src="{{item.ingredientRows && item.ingredientRows.length ? (imgUrl.resolve(url, item.ingredientRows[0].gbDgGoodsFileImg) || '/images/logo.jpg') : '/images/logo.jpg'}}"
+                mode="aspectFill" /> -->
+              <!-- <view class="food-fgf-cover-badge food-fgf-cover-badge--bad"
+                wx:if="{{num.signKind(item.diffCostPerPortion || '0') === 'pos' || num.signKind(item.diffCostPerPortion || '0') === 'neg'}}">异常</view>
+              <view class="food-fgf-cover-badge food-fgf-cover-badge--ok" wx:else>正常</view> -->
+            </view>
+            <view class="food-fgf-dish-hd-main flex-1 min-w-0">
+              <view class="flex-row-between food-fgf-dish-name-line">
+                <text class="dfl-dish-head__idx">{{index + 1}}.</text>
+
+                <text class="food-fgf-dish-title">{{item.dishName}}</text>   
+              </view>
+              <view class="food-fgf-dish-sub">
+                <text>售价: {{item.salesUnitPrice || '00.00'}}元/份</text>
+                <text class="food-fgf-dot">·</text>
+                <text>本月销量: {{item.salesPortions || '00'}}份</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="food-fgf-cost-strip">
+            <view class="food-fgf-cost-col">
+              <text class="food-fgf-cost-cap {{sortBy === 'actualCost' ? 'food-fgf-cost-cap--sort-active' : ''}}">实际成本</text>
+              <text class="food-fgf-cost-val {{sortBy === 'actualCost' ? 'food-fgf-cost-val--sort-active' : ''}}">{{item.actualCostPerPortion || '00.00'}}</text>
+              <text class="food-fgf-cost-unit {{sortBy === 'actualCost' ? 'food-fgf-cost-unit--sort-active' : ''}}">元/份</text>
+            </view>
+            <view class="food-fgf-cost-div"></view>
+            <view class="food-fgf-cost-col">
+              <text class="food-fgf-cost-cap">理论成本</text>
+              <text class="food-fgf-cost-val">{{item.theoryCostPerPortion || '00.00'}}</text>
+              <text class="food-fgf-cost-unit">元/份</text>
+            </view>
+            <view class="food-fgf-cost-div"></view>
+            <view class="food-fgf-cost-col">
+              <text class="food-fgf-cost-cap {{sortBy === 'diff' ? 'food-fgf-cost-cap--sort-active' : ''}}">成本偏差</text>
+              <view class="food-fgf-cost-diff-line">
+                <text class="food-fgf-cost-val {{sortBy === 'diff' ? 'food-fgf-cost-val--sort-active' : num.diffClass(item.diffCostPerPortion || '0')}}">{{num.formatSigned(item.diffCostPerPortion || '0')}}</text>
+                <text class="food-fgf-diff-arrow {{num.signKind(item.diffCostPerPortion || '0') === 'pos' ? 'is-up' : ''}} {{num.signKind(item.diffCostPerPortion || '0') === 'neg' ? 'is-down' : ''}} {{sortBy === 'diff' ? 'food-fgf-diff-arrow--sort-active' : ''}}">{{num.signKind(item.diffCostPerPortion || '0') === 'pos' ? '↑' : (num.signKind(item.diffCostPerPortion || '0') === 'neg' ? '↓' : '')}}</text>
+              </view>
+              <text class="food-fgf-cost-unit {{sortBy === 'diff' ? 'food-fgf-cost-unit--sort-active' : ''}}">元/份</text>
+            </view>
+            <view class="food-fgf-cost-div"></view>
+            <view class="food-fgf-cost-col">
+              <text class="food-fgf-cost-cap {{sortBy === 'sales' ? 'food-fgf-cost-cap--sort-active' : ''}}">销售额</text>
+              <text class="food-fgf-cost-val {{sortBy === 'sales' ? 'food-fgf-cost-val--sort-active' : ''}}">{{item.salesAmount || '00.00'}}</text>
+              <text class="food-fgf-cost-unit {{sortBy === 'sales' ? 'food-fgf-cost-unit--sort-active' : ''}}">元</text>
+            </view>
+          </view>
+
+          <view class="food-fgf-ing-sec">
+            <view class="food-fgf-ing-sec-cap">主要配料</view>
+            <scroll-view scroll-x class="food-fgf-ing-scroll" show-scrollbar="{{false}}">
+              <view class="food-fgf-ing-table">
+                <view class="food-fgf-ing-tr food-fgf-ing-tr--head">
+                  <text class="food-fgf-ing-td food-fgf-ing-td--name">配料</text>
+                  <text class="food-fgf-ing-td">制作率</text>
+                  <text class="food-fgf-ing-td">理论含量</text>
+                  <text class="food-fgf-ing-td">分摊含量</text>
+                  <text class="food-fgf-ing-td">实际成本</text>
+                  <text class="food-fgf-ing-td">制作总量</text>
+                  <text class="food-fgf-ing-td">损耗总量</text>
+                </view>
+                <view class="food-fgf-ing-tr" wx:for="{{item.ingredientRows}}" wx:for-item="ing" wx:key="disGoodsId">
+                  <view class="food-fgf-ing-td food-fgf-ing-td--name">
+                    <image class="food-fgf-ing-ico"
+                      src="{{(imgUrl.resolve(url, ing.gbDgGoodsFileImg) || '/images/logo.jpg')}}" mode="aspectFill" />
+                    <text class="food-fgf-ing-name-txt">{{ing.gbDgGoodsName}}</text>
+                  </view>
+                  <!-- 制作率  -->
+                  <view class="food-fgf-ing-td food-fgf-ing-td--util">
+                    <text>{{ing.utilizationRate || '00'}}%</text>
+                    <text wx:if="{{ing.utilization}}" class="food-fgf-ing-tag {{utilLv.textClass(ing.utilization.level)}}">{{ing.utilization.labelZh}}</text>
+                  </view>
+                  <!-- 理论含量 -->
+                  <view class="food-fgf-ing-td food-fgf-ing-td--util">
+                    <text class="food-fgf-ing-line">{{ing.recipeUnitPerDish}}</text>
+                    <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}/份</text>
+                  </view>
+                  <!-- 实际含量 -->
+                  <view class="food-fgf-ing-td food-fgf-ing-td--util">
+                    <!-- <text class="food-fgf-ing-line">{{fmt.actualUsagePerPortion(ing.actualProduceUsage, item.salesPortions)}}</text> -->
+                    <text class="food-fgf-ing-line">{{ing.produceAllocatedPerSoldPortion}}</text>
+
+                    <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}/份</text>
+                  </view>
+                  <!-- 实际成本 -->
+                  <view class="food-fgf-ing-td food-fgf-ing-td--util">
+                    <text class="food-fgf-ing-line">{{ing.actualCostPerPortion}}</text>
+                    <text class="food-fgf-ing-line food-fgf-ing-line--sub">元/份</text>
+                  </view>
+                  <!-- 制作出库 -->
+                  <view class="food-fgf-ing-td food-fgf-ing-td--util">
+                    <text class="food-fgf-ing-td">{{ing.actualProduceUsage}}</text>
+                    <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}</text>
+                  </view>
+                  <!-- 损耗成本 -->
+                  <view class="food-fgf-ing-td food-fgf-ing-td--util">
+                    <text class="food-fgf-ing-td">{{ing.actualLossAndWasteUsage}}</text>
+                    <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}</text>
+                  </view>
+                </view>
+              </view>
+            </scroll-view>
+          </view>
+
+          <view class="food-fgf-dish-foot" catchtap="onOpenIngredients" data-dish="{{item}}">
+            <text>查看配料成本分析</text>
+            <text class="food-fgf-foot-arrow">›</text>
+          </view>
+        </view>
+      </view>
+    </block>
+    <view wx:elif="{{!salesDishRowsAll.length}}" class="food-fgf-empty">{{emptyHint || '暂无数据'}}</view>
+    <view wx:elif="{{salesDishRowsAll.length && !salesDishRows.length && !dishNameSearch}}" class="food-fgf-empty">无符合条件的菜品</view>
+
+    <view class="food-fgf-scroll-pad"></view>
+  </scroll-view>
+</view>

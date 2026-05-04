@@ -113,10 +113,10 @@
             <view class="flex-row mb-10">
               <text class="font-bold mr-10">{{goods.gbDgGoodsName}}</text>
               <block wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
-                <text class="text-secondary font-xs">({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})</text>
+                <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})</text>
               </block>
               <block wx:else>
-                <text class="text-secondary font-xs">({{goods.gbDgGoodsStandardname}})</text>
+                <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardname}})</text>
               </block>
             </view>
 

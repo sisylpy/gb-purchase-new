@@ -149,6 +149,7 @@ Page({
         if (res.result.code == 0) {
           var goodsCode = Number(res.result.data.goodsData.code);
           var goodsData = res.result.data;
+          console.log("ressss", res.result.data);
           this.setData({
             goods: goodsData,
             searchItem: goodsData.goodsData.searchItem,
@@ -186,8 +187,6 @@ Page({
 
               supplierListValue = goodsData.purEveryDay.supplierListValue || [];
               purUserListValue = goodsData.purEveryDay.purUserListValue || [];
-              // 获取供货商数据
-              // var supplierListValue = goodsData.purEveryDay.supplierListValue || [];
 
             }
             console.log('[Debug] API dateList:', dateList);
@@ -480,7 +479,7 @@ Page({
 
   /**
    * purEveryDay 里原料/菜品：可能是与 dateList 同序的 number[]，
-   * 也可能是 [{ date, value }]（与 getGoodsReduceWithDayData 一致）
+   * 也可能是 [{ date, value }] 形式的按日序列（与其它接口返回风格一致）
    */
   _coercePurDaySeries(raw) {
     if (!raw || !raw.length) {
@@ -526,22 +525,54 @@ Page({
     if (!axis.length || !values || !values.length) return out;
 
     const toKey = (d) => this._normalizeDateKeyForAlign(d);
+    const parseNum = (v) =>
+      typeof v === 'number' ? v : parseFloat(String(v).replace(/,/g, '')) || 0;
 
     if ((!apiDates || !apiDates.length) && values.length === axis.length) {
-      return values.map((v) => (typeof v === 'number' ? v : parseFloat(String(v).replace(/,/g, '')) || 0));
+      return values.map(parseNum);
     }
 
     const map = {};
     (apiDates || []).forEach((d, i) => {
       if (i < values.length) {
-        const v = values[i];
-        const num = typeof v === 'number' ? v : parseFloat(String(v).replace(/,/g, '')) || 0;
-        map[toKey(d)] = num;
+        map[toKey(d)] = parseNum(values[i]);
       }
     });
+
+    let matches = 0;
     axis.forEach((d, i) => {
       const k = toKey(d);
-      if (map[k] !== undefined) out[i] = map[k];
+      if (map[k] !== undefined) {
+        out[i] = map[k];
+        matches++;
+      }
+    });
+    if (matches > 0) return out;
+
+    // 接口 dateList 常为仅「日」如 "25"，与横轴 yyyy-MM-dd 对不齐 → 上面匹配数为 0
+    if (values.length === axis.length && (!apiDates || apiDates.length === axis.length)) {
+      return values.map(parseNum);
+    }
+
+    (apiDates || []).forEach((d, i) => {
+      if (i >= values.length) return;
+      const num = parseNum(values[i]);
+      const s = String(d == null ? '' : d).trim().split(/[\sT]/)[0];
+      const parts = s.split(/[-/]/);
+      let dom = null;
+      if (parts.length === 1 && /^\d{1,2}$/.test(parts[0])) {
+        dom = parseInt(parts[0], 10);
+      } else if (parts.length === 2) {
+        dom = parseInt(parts[1], 10);
+      }
+      if (dom == null || Number.isNaN(dom)) return;
+      axis.forEach((ad, ai) => {
+        const ak = toKey(ad);
+        const ap = ak.split('-');
+        if (ap.length >= 3 && parseInt(ap[2], 10) === dom) {
+          out[ai] = num;
+        }
+      });
     });
     return out;
   },
@@ -1507,7 +1538,7 @@ Page({
     
     // 提取日期和金额数据
     const dateList = purchaseData.map(item => item.date);
-    const subtotalData = purchaseData.map(item => parseFloat(item.purSubtotal) || 0);
+    const subtotalData = purchaseData.map(item => parseFloat(item.purUnitPrice) || 0);
     
     // 格式化日期显示（只显示日期部分）
     const formattedDates = dateList.map(dateStr => {
@@ -1634,11 +1665,14 @@ Page({
   },
 
   toDatePageSearch() {
+    console.log("d")
     this.setData({
       update: true,
     })
+  
+
     wx.navigateTo({
-      url: '../../sel/searchDate/searchDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
     })
   },
 
@@ -1689,7 +1723,7 @@ Page({
     console.log("goodsPurList");
     wx.setStorageSync('disGoods', this.data.goods);
     wx.navigateTo({
-      url: '../goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + this.data.goods.gbDistributerGoodsId,
+      url: '/subPackage-charts/pages/cost/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + this.data.goods.gbDistributerGoodsId,
     })
 
   },
@@ -1698,7 +1732,7 @@ Page({
   toCost() {
     wx.setStorageSync('disGoods', this.data.goods);
     wx.navigateTo({
-      url: '../goodsFenxiCost/goodsFenxiCost?disGoodsId=' + this.data.goods.gbDistributerGoodsId+ '&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType + '&searchType=total&fenxiType=weightEcharts' +  '&searchDepId=-1' ,
+      url: '/subPackage-charts/pages/cost/goodsFenxiCost/goodsFenxiCost?disGoodsId=' + this.data.goods.gbDistributerGoodsId+ '&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType + '&searchType=total&fenxiType=weightEcharts' +  '&searchDepId=-1' ,
     })
 
   },

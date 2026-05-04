@@ -7,6 +7,10 @@ var request = require('../../lib/request');
 
 // ===== gbdepartmentorders / gbdistributergoods =====
 
+
+var queryDepDisGoodsByQuickSearchGb = function (data) {
+  return request.post('nxgoods/queryDepDisGoodsByQuickSearchGb', data, { useUrlParams: true });
+};
 var createDepartmentOrderForJj = function (data) {
   return request.post('gbdepartmentorders/createDepartmentOrderForJj', data);
 };
@@ -20,7 +24,7 @@ var createDepartmentOrderFromNxGoodsImport = function (data) {
 };
 
 var updateOrderGbJj = function (data) {
-  return request.post('gbdepartmentorders/updateOrderGbJj', data);
+  return request.post('gbdepartmentorders/updateOrderGbJj', data, { useUrlParams: true });
 };
 
 var deleteOrderGb = function (id) {
@@ -63,9 +67,6 @@ var gbDepGetNxGoodsByGreatGrandId = function (data) {
   return request.post('nxgoods/gbDepGetNxGoodsByGreatGrandId', data, { useUrlParams: true });
 };
 
-var getNxGoodsIdsByGreatId = function (id) {
-  return request.get('nxgoods/getNxGoodsIdsByGreatId/' + id);
-};
 
 var saveNxStandard = function (data) {
   return request.post('nxstandard/saveNxStandard', data, { useUrlParams: true });
@@ -106,7 +107,6 @@ module.exports = {
   deleteOrderGb: deleteOrderGb,
   gbGetNxGoodsCataGoods: gbGetNxGoodsCataGoods,
   gbDepGetNxGoodsByGreatGrandId: gbDepGetNxGoodsByGreatGrandId,
-  getNxGoodsIdsByGreatId: getNxGoodsIdsByGreatId,
   gbDisSaveStandard: gbDisSaveStandard,
   saveNxStandard: saveNxStandard,
   gbDisDeleteStandard: gbDisDeleteStandard,
@@ -114,4 +114,5 @@ module.exports = {
   saveDepGoodsStockAdjust: saveDepGoodsStockAdjust,
   reduceAttachmentSaveWithFile: reduceAttachmentSaveWithFile,
   deleteDepGoods: deleteDepGoods,
+  queryDepDisGoodsByQuickSearchGb: queryDepDisGoodsByQuickSearchGb
 };

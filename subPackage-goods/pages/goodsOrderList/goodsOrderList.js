@@ -121,7 +121,7 @@ toDatePage() {
     update: true
   })
   wx.navigateTo({
-    url: '../../sel/date/date?startDate=' + this.data.startDate +
+    url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate +
       '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
   })
 },

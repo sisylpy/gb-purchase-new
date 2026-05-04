@@ -60,15 +60,15 @@
     <!-- all -->
     <swiper-item style="height: 100%;">
       <scroll-view scroll-y style="height:{{ windowHeight - navBarHeight - 120}}rpx;" wx:if="{{total && total.restTotal > 0 && itemIndex == 0}}">
-        <view class="flex-column bg-light p-20" >
+        <view class="flex-column bg-light " >
           <view class="bg-light flex-column" wx:if="{{totalArr && totalArr.length > 0}}">
             <view class="flex-column font-md  bg-white " wx:for="{{totalArr}}" wx:for-item="grand" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
-              <view class="flex-row-default" style="width: {{windowWidth - 80}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
-                <view class="p-20">
+              <view class="flex-row-default" style="width: {{windowWidth - 40}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
+                <!-- <view class="p-20">
                   <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
-                </view>
+                </view> -->
                 <view class="flex-column p-20">
-                  <view class="flex-row-between " style="width: {{windowWidth - 240}}rpx;">
+                  <view class="flex-row-between " style="width: {{windowWidth - 80}}rpx;">
                     <text class="category-name">{{grand.gbDfgFatherGoodsName}}</text>
                     <view class="donut-chart-container">
                       <view class="donut-chart" style="width: 80rpx; height: 80rpx; background: {{grand.stockConicGradient}};">
@@ -105,7 +105,7 @@
       </scroll-view>
       <view class=" " wx:else style="margin-top: 300rpx; height: 200rpx;">
         <view class=" flex-column center-content">
-          <image class="icon-lg" src="../../../../images/file-common.png"></image>
+          <image class="icon" src="../../../../images/file-common.png"></image>
           <text class="p-20">暂无库存</text>
         </view>
       </view>
@@ -158,7 +158,7 @@
         </view>
         <view class="flex-column " wx:else style="height:{{windowHeight - navBarHeight}}rpx; margin-top: 300rpx; ">
           <view class=" flex-column center-content">
-            <image class="icon-lg" src="../../../../images/file-common.png"></image>
+            <image class="icon" src="../../../../images/file-common.png"></image>
             <text class="p-20">暂无库存</text>
           </view>
         </view>
@@ -212,7 +212,7 @@
         </view>
         <view class="flex-column " wx:else style="height:{{windowHeight - navBarHeight}}rpx; margin-top: 300rpx; ">
           <view class=" flex-column center-content">
-            <image class="icon-lg" src="../../../../images/file-common.png"></image>
+            <image class="icon" src="../../../../images/file-common.png"></image>
             <text class="p-20">暂无库存</text>
           </view>
         </view>
@@ -266,7 +266,7 @@
         </view>
         <view class="flex-column " wx:else style="height:{{windowHeight - navBarHeight}}rpx; margin-top: 300rpx; ">
           <view class=" flex-column center-content">
-            <image class="icon-lg" src="../../../../images/file-common.png"></image>
+            <image class="icon" src="../../../../images/file-common.png"></image>
             <text class="p-20">暂无库存</text>
           </view>
         </view>
@@ -320,7 +320,7 @@
         </view>
         <view class="flex-column " wx:else style="height:{{windowHeight - navBarHeight}}rpx; margin-top: 300rpx; ">
           <view class=" flex-column center-content">
-            <image class="icon-lg" src="../../../../images/file-common.png"></image>
+            <image class="icon" src="../../../../images/file-common.png"></image>
             <text class="p-20">暂无库存</text>
           </view>
         </view>
@@ -374,7 +374,7 @@
         </view>
         <view class="flex-column " wx:else style="height:{{windowHeight - navBarHeight}}rpx; margin-top: 300rpx; ">
           <view class=" flex-column center-content">
-            <image class="icon-lg" src="../../../../images/file-common.png"></image>
+            <image class="icon" src="../../../../images/file-common.png"></image>
             <text class="p-20">暂无库存</text>
           </view>
         </view>

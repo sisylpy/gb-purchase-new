@@ -35,7 +35,7 @@ Page({
       depFatherId: options.depFatherId,
       disId: options.disId,
       depId: options.depId,
-      admin: options.admin,
+      admin: 1,
       avatarUrl: "/images/user.png",
       canRegister: false,
     

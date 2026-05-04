@@ -101,19 +101,19 @@
           <view class="loss-content">
             <block wx:if="{{reduce.gbDgsrType == '3'}}">
               <text class="loss-label">损耗数量:</text>
-              <text class="loss-quantity">{{reduce.gbDgsrLossWeight}}{{purGoods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+              <text class="loss-quantity">{{reduce.gbDgsrWeight}}{{purGoods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
               <text class="loss-label">损耗成本:</text>
               <text class="loss-cost">{{reduce.gbDgsrLossSubtotal}}元</text>
             </block>
             <block wx:if="{{reduce.gbDgsrType == '4'}}">
               <text class="loss-label">退货数量:</text>
-              <text class="loss-quantity">{{reduce.gbDgsrReturnWeight}}{{purGoods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+              <text class="loss-quantity">{{reduce.gbDgsrWeight}}{{purGoods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
               <text class="loss-label">退货成本:</text>
               <text class="loss-cost">{{reduce.gbDgsrReturnSubtotal}}元</text>
             </block>
             <block wx:if="{{reduce.gbDgsrType == '2'}}">
               <text class="loss-label">废弃数量:</text>
-              <text class="loss-quantity">{{reduce.gbDgsrWasteWeight}}{{purGoods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+              <text class="loss-quantity">{{reduce.gbDgsrWeight}}{{purGoods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
               <text class="loss-label">废弃成本:</text>
               <text class="loss-cost">{{reduce.gbDgsrWasteSubtotal}}元</text>
             </block>

@@ -1,0 +1,309 @@
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+<wxs module="utilLv" src="/wxs/utilizationLevel.wxs" />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="./dga.wxs" module="dga" />
+<view class="dga-page">
+  <back-navbar
+    style="height: {{navBarHeight}}rpx;"
+    title="{{pageTitle}}"
+    avatar="/images/back.png"
+    bindnavbuttontap="toBack"
+  />
+
+ 
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+  </view>
+
+  <view class="dga-state" wx:if="{{loading}}">
+    <text class="dga-state__txt">加载中…</text>
+  </view>
+  <view class="dga-state dga-state--err" wx:elif="{{errMsg}}">
+    <text class="dga-state__txt">{{errMsg}}</text>
+  </view>
+  <scroll-view wx:else scroll-y class="dga-scroll" enhanced="{{true}}" show-scrollbar="{{false}}">
+    <view class="dga-hero" wx:if="{{dish}}">
+      <view class="dga-hero__title-row">
+        <view class="dga-hero__name-row">
+          <text class="dga-hero__name">{{dish.foodName}}</text>
+        </view>
+      </view>
+      <view class="dga-hero__subline">
+        <text class="dga-hero__sub">单价：¥ {{dish.listPricePerPortion != null && dish.listPricePerPortion !== '' ? dish.listPricePerPortion : '—'}}/份</text>
+        <text class="dga-hero__subsep" wx:if="{{dish.salesPortions}}">　</text>
+        <text class="dga-hero__sub" wx:if="{{dish.salesPortions}}">销量：{{dish.salesPortions}} 份</text>
+      </view>
+     
+
+      <scroll-view class="dga-hero__kpi-scroll" scroll-x="true" show-scrollbar="{{false}}">
+        <view class="dga-hero__kpi dga-hero__kpi--row">
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">综合实际毛利率</text>
+          <view class="dga-hero__kpi-val-wrap">
+            <text class="dga-hero__kpi-val" wx:if="{{dish.grossMarginRateOnListPriceUsingActual123 == null || dish.grossMarginRateOnListPriceUsingActual123 === ''}}">—</text>
+            <text class="dga-hero__kpi-val" wx:else>
+              <text class="dga-hero__kpi-val--em">{{dish.grossMarginRateOnListPriceUsingActual123}}</text>
+              <text class="dga-hero__kpi-pct">%</text>
+            </text>
+          </view>
+        </view>
+        <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">配料毛利率(理论)</text>
+          <view class="dga-hero__kpi-val-wrap">
+            <text class="dga-hero__kpi-val" wx:if="{{dish.grossMarginRateTheoryOnListPrice == null || dish.grossMarginRateTheoryOnListPrice === ''}}">—</text>
+            <text class="dga-hero__kpi-val" wx:else>
+              <text class="dga-hero__kpi-val--em">{{dish.grossMarginRateTheoryOnListPrice}}</text>
+              <text class="dga-hero__kpi-pct">%</text>
+            </text>
+          </view>
+        </view>
+        <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">实际成本/份</text>
+          <text class="dga-hero__kpi-amt">¥ {{dish.actualCostPerPortion || '—'}}</text>
+        </view>
+        <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">理论成本/份</text>
+          <text class="dga-hero__kpi-amt">¥ {{dish.theoryCostPerPortion || '—'}}</text>
+        </view>
+        <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">净菜品毛利/份</text>
+          <view class="dga-hero__kpi-val-wrap" wx:if="{{dish.netGrossProfitPerPortion == null || dish.netGrossProfitPerPortion === ''}}">
+            <text class="dga-hero__kpi-val is-muted">—</text>
+          </view>
+          <view class="dga-hero__kpi-val-wrap" wx:else>
+            <text class="dga-hero__kpi-val--em is-profit">¥ {{dish.netGrossProfitPerPortion}}</text>
+          </view>
+        </view>
+        </view>
+      </scroll-view>
+
+      <view
+        class="dga-hero__margin {{tool.marginStandardHintModDga(dish)}}"
+        wx:if="{{tool.marginStandardShowBlock(dish)}}"
+      >
+        <text
+          class="dga-hero__margin-range"
+          wx:if="{{tool.marginStandardMetaLine(dish)}}"
+        >{{tool.marginStandardMetaLine(dish)}}</text>
+        <view class="dga-hero__margin-inner">
+          <text
+            wx:if="{{dish.grossMarginLevel == 'IN_BAND'}}"
+            class="dga-hero__margin-emoji"
+          >👍</text>
+          <text
+            wx:elif="{{dish.grossMarginLevel == 'BELOW'}}"
+            class="dga-hero__margin-emoji"
+          >😭</text>
+          <text
+            wx:elif="{{dish.grossMarginLevel == 'ABOVE'}}"
+            class="dga-hero__margin-emoji"
+          >😢</text>
+          <text class="dga-hero__margin-txt">{{tool.marginStandardHint(dish)}}</text>
+        </view>
+      </view>
+
+      <view class="dga-hero__hint" wx:if="{{summarySuggestionZh}}">
+        <text class="dga-hero__hint-txt">{{summarySuggestionZh}}</text>
+      </view>
+    </view>
+
+    <view class="dga-sec" wx:if="{{ingredientRows && ingredientRows.length}}">
+      <view class="dga-sec__bar">
+        <text class="dga-sec__tit">配料明细 (共 {{ingredientRows.length}} 种主要配料)</text>
+      </view>
+
+      <scroll-view class="dga-tbl-x" scroll-x="true" show-scrollbar="{{false}}">
+        <view class="dga-tbl" style="min-width: 2080rpx">
+          <view class="dga-tbl__tr dga-tbl__tr--head">
+            <text class="dga-tbl__cell dga-tbl__th dga-td--ing">配料</text>
+            <view class="dga-tbl__cell flex-column">
+              <text class="dga-tbl__th">理论用量</text>
+              <text class="dga-tbl__th tbl__th_sub">(标准配方)</text>
+            </view> 
+            <text class="dga-tbl__cell dga-tbl__th dga-td--stack">实际用量</text>
+            <view
+              class="dga-tbl__cell dga-tbl__th dga-td--dev dga-th--tap"
+              hover-class="dga-th--tap-hover"
+              bindtap="onTapUsageDeviationColumnHelp"
+            >
+              <text class="dga-tbl__th dga-th--underline">用量偏差</text>
+            </view>
+            <text class="dga-tbl__cell dga-tbl__th dga-td--cost">单份成本(实际)</text>
+            <text class="dga-tbl__cell dga-tbl__th dga-td--bar">成本占比</text>
+            <text class="dga-tbl__cell dga-tbl__th dga-td--gp">毛利贡献(单份)</text>
+            <text class="dga-tbl__cell dga-tbl__cell--last dga-tbl__th dga-td--sug">操作建议</text>
+          </view>
+            <view
+              class="dga-tbl__tr"
+              wx:for="{{ingredientRows}}"
+              wx:for-index="ri"
+              wx:key="ri"
+            >
+            <view class="dga-tbl__cell dga-td dga-td--ing">
+              <image
+                class="dga-ico"
+                src="{{(imgUrl.resolve(url, item.gbDgGoodsFileImg) || '/images/logo.jpg')}}"
+                mode="aspectFill"
+              />
+              <view class="dga-ing-name">
+                <text class="dga-ing-name__main">{{item.gbDgGoodsName}}</text>
+              </view>
+            </view>
+            <view class="dga-tbl__cell dga-td dga-td--stack">
+              <text class="dga-td__line">{{item.theoryUsage || '—'}}{{item.gbDgGoodsStandardname || ''}}</text>
+            </view>
+            <view class="dga-tbl__cell dga-td dga-td--stack">
+              <text class="dga-td__line">{{item.actualUsage || '—'}}{{item.gbDgGoodsStandardname || ''}}</text>
+            </view>
+            <view
+              class="dga-tbl__cell dga-td dga-td--dev dga-td--dev-tap"
+              hover-class="dga-td--dev-tap-hover"
+              bindtap="onTapUsageDeviation"
+              data-ri="{{ri}}"
+            >
+              <view class="dga-dev-nums">
+                <text
+                  class="dga-dev-nums__pct {{item.utilization ? utilLv.textClass(item.utilization.level) : utilLv.textClassFromRate(item.utilizationRate)}}"
+                >{{item.usageDeviationPercent > 0 ? '+' : ''}}{{item.usageDeviationPercent || '0.00'}}%</text>
+                <text class="dga-dev-nums__arrow" wx:if="{{dga.isPos(item.usageDeviationPercent)}}">↑</text>
+                <text class="dga-dev-nums__arrow is-down" wx:elif="{{dga.isNeg(item.usageDeviationPercent)}}">↓</text>
+              </view>
+              <text
+                wx:if="{{item.utilization && item.utilization.labelZh}}"
+                class="dga-ing-util-tag {{utilLv.textClass(item.utilization.level)}}"
+              >{{item.utilization.labelZh}}</text>
+              <text
+                wx:elif="{{utilLv.labelZhFromRate(item.utilizationRate)}}"
+                class="dga-ing-util-tag {{utilLv.textClassFromRate(item.utilizationRate)}}"
+              >{{utilLv.labelZhFromRate(item.utilizationRate)}}</text>
+              <text wx:elif="{{item.usageStatus === 'ABNORMAL'}}" class="dga-pill dga-pill--bad">异常</text>
+              <text wx:else class="dga-pill dga-pill--ok">正常</text>
+            </view>
+
+            <text class="dga-tbl__cell dga-td dga-td--cost">¥{{item.actualCostPerPortion || '—'}}</text>
+           
+            <view class="dga-tbl__cell dga-td dga-td--bar">
+              <text class="dga-td__sub">{{item.costShareBarPct != null && item.costShareBarPct !== '' ? item.costShareBarPct : (item.costShareOfDishActualPercent || '—')}}%</text>
+              <view class="dga-bar">
+                <view
+                  class="dga-bar__in {{dga.highShareOrAbnormal(item.costShareBarPct, item.usageStatus) ? 'is-warn' : 'is-ok'}}"
+                  style="width: {{dga.barWidthPct(item.costShareBarPct)}}%;"
+                />
+              </view>
+
+             
+            </view>
+            <text class="dga-tbl__cell dga-td dga-td--gp">¥{{item.grossProfitContributionPerPortion || '—'}}</text>
+            <view class="dga-tbl__cell dga-tbl__cell--last dga-td dga-td--sug">
+              <text
+                class="dga-sug__tag"
+                wx:if="{{item.suggestionLevel === 'FOCUS'}}"
+              >重点关注</text>
+              <text
+                class="dga-sug__tag dga-sug__tag--opt"
+                wx:elif="{{item.suggestionLevel === 'OPTIMIZE'}}"
+              >可优化</text>
+              <!-- <text class="dga-sug__txt">{{item.suggestionZh || '—'}}</text> -->
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+    <view class="dga-empty" wx:else>
+      <text>暂无配料行</text>
+    </view>
+
+    <!-- 饼图与趋势图分开展示：仅有 costTrend 无 costStructure 时也要能出折线 -->
+    <view class="dga-charts" wx:if="{{costStructure && costStructure.segments && costStructure.segments.length}}">
+      <view class="dga-chart-card">
+        <text class="dga-chart-card__tit">成本结构占比</text>
+        <view class="dga-donut">
+          <ec-canvas
+            id="dga_pie"
+            canvas-id="dga_pie"
+            ec="{{ ecLazy }}"
+            class="dga-donut__ec"
+          />
+          <view class="dga-donut__cent">
+            <text class="dga-donut__amt">¥{{costStructure.totalCostPerPortion || '—'}}</text>
+            <text class="dga-donut__sub">总成本/份</text>
+          </view>
+        </view>
+        <view class="dga-legend">
+          <view
+            class="dga-legend__row"
+            wx:for="{{costStructure.segments}}"
+            wx:for-item="seg"
+            wx:for-index="li"
+            wx:key="name"
+          >
+            <view class="dga-legend__left">
+              <view
+                class="dga-legend__dot"
+                style="background-color: {{dga.pieColorAt(li)}}"
+              />
+              <text class="dga-legend__name">{{seg.name}}</text>
+            </view>
+            <text class="dga-legend__val">{{seg.sharePercentDisplay != null && seg.sharePercentDisplay !== '' ? seg.sharePercentDisplay : seg.sharePercent}}% ¥{{seg.costPerPortion}}</text>
+          </view>
+        </view>
+        <text class="dga-foot" wx:if="{{scopeOutboundSubtotals}}">*损耗率(出库) {{scopeOutboundSubtotals.wasteLossRatioInOutbound123}}%</text>
+      </view>
+    </view>
+
+    <view class="dga-charts" wx:if="{{costTrend && costTrend.points && costTrend.points.length}}">
+      <view class="dga-chart-card">
+        <text class="dga-chart-card__tit">成本趋势 ({{costTrend.primaryGoodsName || '主料'}})</text>
+        <ec-canvas
+          id="dga_line"
+          canvas-id="dga_line"
+          ec="{{ ecLazyLine }}"
+          class="dga-line__ec"
+        />
+        <view class="dga-trend-hint" wx:if="{{costTrend.changeSummaryZh}}">
+          <text class="dga-trend-hint__txt">{{costTrend.changeSummaryZh}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="dga-disclaimer" wx:if="{{disclaimerZh}}">
+      <text class="dga-disclaimer__txt">{{disclaimerZh}}</text>
+    </view>
+    <view class="dga-pad"/>
+  </scroll-view>
+
+  <view class="dga-tip-wrap" wx:if="{{showUsageTip}}">
+    <view class="dga-tip-mask" bindtap="onCloseUsageTip" />
+    <view class="dga-tip-panel">
+      <text class="dga-tip__title">{{usageTipTitle}}</text>
+      <scroll-view class="dga-tip__body" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
+        <view class="dga-tip__line" wx:for="{{usageTipLines}}" wx:for-index="ti" wx:key="ti">{{item}}</view>
+      </scroll-view>
+      <view class="dga-tip__btn" hover-class="dga-tip__btn--hover" bindtap="onCloseUsageTip">知道了</view>
+    </view>
+  </view>
+</view>

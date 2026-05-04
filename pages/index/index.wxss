@@ -12,6 +12,7 @@ page {
   background-color: #ffffff;
   border-radius: 10rpx;
 }
+
 .tabs-container {
   display: flex;
   justify-content: space-around;
@@ -193,9 +194,11 @@ page {
 .vline {
   width: 10rpx;
   margin-left: 10rpx;
-  margin-right:10rpx;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+  align-self: stretch;
   /* background: #97aaa7; */
-  background: #cfcfcf;
+  background: #aaaaaa;
 }
 
 .flex-stretch {

@@ -64,6 +64,14 @@ Page({
   },
   
   
+  toFoodGoodsFenxi(){
+
+  wx.navigateTo({
+    url: '/subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi?disId=' + this.data.disId,
+  })
+
+},
+
 toCostGoodsFenxi(){
 
   wx.navigateTo({
@@ -71,7 +79,6 @@ toCostGoodsFenxi(){
   })
 
 },
-
   
   toPurGoodsFenxi(){
     wx.navigateTo({

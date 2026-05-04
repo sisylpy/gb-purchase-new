@@ -5,84 +5,97 @@
 
   <view class="flex-column">
     <view class="flex-column">
-      <view class="top_img_fixed flex-row" style="width: 100%; height: 50rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+      <view class="top_img_fixed"
+        style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
         <view class="flex-row" bindtap="toBack">
-          <view class=" flex-column-center mr-20 margin-left">
-            <image src="../../../../images/back-2.png" class="back_icon"></image>
+          <view class=" flex-column-center">
+            <image src="../../../images/back-2.png" class="back_icon"></image>
           </view>
           <text class="">称重出货</text>
         </view>
       </view>
-      <image src="../../../../images/top.png" style="width: 100%; height: {{50 + statusBarHeight}}rpx;"></image>
+      <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
     </view>
 
     <view style="padding-left:10rpx; padding-right: 10rpx; margin-top: 10rpx; ">
       <view class="" style="height:{{windowHeight - bottomHeight  - statusBarHeight - 40}}rpx; ">
 
         <view class="flex-column" style="height:{{windowHeight - bottomHeight -statusBarHeight - 60}}rpx;  ">
-          <scroll-view class="tui-city-scroll-y" scroll-y="true" scroll-into-view="NAV{{focusIndex}}" scroll-with-animation="true" style="height: {{windowHeight -  bottomHeight - 80 - 60}}rpx; ">
+          <scroll-view class="tui-city-scroll-y" scroll-y="true" scroll-into-view="NAV{{focusIndex}}"
+            scroll-with-animation="true" style="height: {{windowHeight -  bottomHeight - 80 - 60}}rpx; ">
             <block wx:if="{{purArr.length > 0}}">
 
-              <view class="flex-column border-bottom bg-white mt-10" wx:for="{{purArr}}" wx:key="gbDistributerPurchaseGoodsId" wx:for-index="index">
-
-              <view class="flex-row-default p-20 font-lg  {{index + 1 == item.gbDistributerGoodsEntity.length ? 'is-last' : ''}}" style="width: {{widowWidth - 40}}rpx;  ">
-                <text class="mr-10">{{ index + 1}}.</text>
+              <view class="flex-column border-bottom bg-white mt-10" wx:for="{{purArr}}"
+                wx:key="gbDistributerPurchaseGoodsId" wx:for-index="index">
+                <view
+                  class="flex-row-default p-20 font-lg  {{index + 1 == item.gbDistributerGoodsEntity.length ? 'is-last' : ''}}"
+                  style="width: {{widowWidth - 40}}rpx;  ">
+                  <text class="mr-10">{{ index + 1}}.</text>
                   <view class="flex-column">
                     <view class="flex-row-wrap ">
                       <text class="mr-20 ">{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
-                      <text class="font-md gray" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
-                      <block wx:if="{{item.gbDpgStandard !== item.gbDistributerGoodsEntity.gbDgGoodsStandardname && item.gbDpgBuyScale !== '-1'}}">
-                        <text class="mr-20"> ({{item.gbDpgStandard}})</text>
+                      <text class="font-md gray"
+                        wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+                        <text class="mr-20"> ({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+                    </view>
+
+                    <view
+                      class="flex-row  p-20 border-bottom"
+                      wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-item="orders" wx:for-index="orderIndex"
+                      bindtap="inputGoods" data-index="{{index}}" data-orderindex="{{orderIndex}}" data-item="{{item}}"
+                      hover-class="hover" data-orders="{{orders}}">
+
+                      <view class="felx-row" style="width:{{(windowWidth - 140 ) / 10 * 7}}rpx; ">
+                        <block wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentSubAmount > 1}}">
+                          <text
+                            class="mr-10">{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
+                          <text class=" mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                        </block>
+                        <block wx:else>
+                          <text class="mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                        </block>
+                        <text class="mainColor1">{{orders.gbDoQuantity}}{{orders.gbDoStandard}} </text>
+
+                        <block
+                          wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale > 0 && orders.gbDoDsStandardScale !== '-1'}}">
+                          <text
+                            class="">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
+                        </block>
+                      </view>
+
+                      <block
+                        wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale > 0 && orders.gbDoDsStandardScale !== '-1'}}">
+                        <view class=" font-lg flex-row" style="width:{{(windowWidth - 120 ) / 10 * 3}}rpx; ">
+                          <view class="inputWeight mr-10"
+                            style="width:{{(windowWidth - 120 ) / 20 * 3}}rpx; height: 70rpx;line-height: 70rpx;">
+                            <view class="mainColor">{{orders.gbDoScaleWeight !== null && orders.gbDoScaleWeight !==
+                        '0.0' ?
+                        orders.gbDoScaleWeight : ''}}</view>
+                          </view>
+                          <text class="">{{orders.gbDoStandard}}</text>
+                        </view>
+                      </block>
+                      <block wx:else>
+                        <view class=" font-lg flex-row" style="width:{{(windowWidth - 120 ) / 10 * 3}}rpx; ">
+                          <view class="inputWeight mr-10"
+                            style="width:{{(windowWidth - 120 ) / 10 * 3}}rpx; height: 70rpx;line-height: 70rpx;">
+                            <view class="mainColor">{{orders.gbDoWeight !== null && orders.gbDoWeight !== '0.0' ?
+                        orders.gbDoWeight : ''}}</view>
+                          </view>
+                          <text class="">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+                        </view>
                       </block>
                     </view>
 
-<view class="flex-row  p-20 mt-10 border-bottom {{orderIndex  + 1 == item.gbDepartmentOrdersEntities.length && index + 1 == item.gbDistributerGoodsEntity.length ? 'is-last' : ''}} font-md {{orders.gbDoStatus == 0 ? 'bg-light' : 'bg-white'}}" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-item="orders" wx:for-index="orderIndex" bindtap="inputGoods" data-index="{{index}}" data-orderindex="{{orderIndex}}" data-item="{{item}}" hover-class="hover" data-orders="{{orders}}">
-
-                  <view class="felx-row" style="width:{{(windowWidth - 140 ) / 10 * 7}}rpx; ">
-                    <block wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentSubAmount > 1}}">
-                      <text class="mr-10">{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
-                      <text class=" mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
-                    </block>
-                    <block wx:else>
-                      <text class="mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
-                    </block>
-                    <text class="mainColor1">{{orders.gbDoQuantity}}{{orders.gbDoStandard}} </text>
-
-                    <block wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale > 0 && orders.gbDoDsStandardScale !== '-1'}}">
-                      <text class="">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
-                    </block>
                   </view>
-
-                  <block wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale > 0 && orders.gbDoDsStandardScale !== '-1'}}">
-                    <view class=" font-lg flex-row" style="width:{{(windowWidth - 120 ) / 10 * 3}}rpx; ">
-                      <view class="inputWeight mr-10" style="width:{{(windowWidth - 120 ) / 20 * 3}}rpx; height: 50rpx;line-height: 50rpx;">
-                        <view class="mainColor">{{orders.gbDoScaleWeight !== null && orders.gbDoScaleWeight !==
-                        '0.0' ?
-                        orders.gbDoScaleWeight : ''}}</view>
-                      </view>
-                      <text class="gray">{{orders.gbDoStandard}}</text>
-
-                    </view>
-                  </block>
-                  <block wx:else>
-                    <view class=" font-lg flex-row" style="width:{{(windowWidth - 120 ) / 10 * 3}}rpx; ">
-                      <view class="inputWeight mr-10" style="width:{{(windowWidth - 120 ) / 10 * 3}}rpx; height: 50rpx;line-height: 50rpx;">
-                        <view class="mainColor">{{orders.gbDoWeight !== null && orders.gbDoWeight !== '0.0' ?
-                        orders.gbDoWeight : ''}}</view>
-                      </view>
-                      <text class="gray">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
-                    </view>
-                  </block>
                 </view>
 
-                  </view>
               </view>
+              <view style="height: 100rpx;"></view>
+            </block>
 
-            </view>
-            <view style="height: 100rpx;"></view>
-              </block>
-
-            <view class="{{purArr.length == 0 ? 'show empty-container' : 'hide'}}" style="height: {{windowHeight - bottomHeight - 250}}rpx;">
+            <view class="{{purArr.length == 0 ? 'show empty-container' : 'hide'}}"
+              style="height: {{windowHeight - bottomHeight - 250}}rpx;">
               <view class="flex-column-center">
                 <image class="empty_image" src="../../images/xiuxi.png"></image>
                 <text class="font-xl p-20">暂时无订货商品</text>
@@ -90,50 +103,57 @@
               </view>
             </view>
 
-            </scroll-view>
-          </view>
-
-        </view>
-
-        <view class=" p-20 bg-white flex-row-between " wx:if="{{purArr.length > 0}}">
-
-            <view class="btn_container" style="width: {{windowWidth / 3  }}rpx; height: 100rpx; ">
-              <button class=" btn_item_gray" open-type="share" data-type="inOrder" style="width: {{windowWidth / 3  - 20}}rpx; height: 80rpx; line-height: 80rpx;" hover-class="numHover">
-                转发拣货</button>
-            </view>
-
-            <view class="btn_container" style="width: {{windowWidth / 3  }}rpx; height: 100rpx; ">
-              <button class=" btn_item_gray" bind:tap="pasteOrder" style="width: {{windowWidth / 3  - 20}}rpx; height: 80rpx; line-height: 80rpx;" hover-class="numHover">
-                复制订单</button>
-            </view>
-
+          </scroll-view>
         </view>
 
       </view>
+
+      <view class=" p-20 bg-white flex-row-between " wx:if="{{purArr.length > 0}}">
+
+        <view class="btn_container" style="width: {{windowWidth / 3  }}rpx; height: 100rpx; ">
+          <button class=" btn_item_gray" open-type="share" data-type="inOrder"
+            style="width: {{windowWidth / 3  - 20}}rpx; height: 80rpx; line-height: 80rpx; margin-left: 10rpx;" hover-class="numHover">
+            转发拣货</button>
+        </view>
+
+        <view class="btn_container" style="width: {{windowWidth / 3  }}rpx; height: 100rpx; ">
+          <button class=" btn_item_gray" bind:tap="pasteOrder"
+            style="width: {{windowWidth / 3  - 20}}rpx; height: 80rpx; line-height: 80rpx; margin-left: 10rpx;" hover-class="numHover">
+            复制订单</button>
+        </view>
+
+      </view>
+
     </view>
+  </view>
 
 </view>
 
-<view class='inputWeightPart flex flex-column  {{lastInput ? "hidden" : ""}}' style="height:{{windowHeight}}rpx; width:{{windowWidth}}rpx;">
+<view class='inputWeightPart flex flex-column  {{lastInput ? "hidden" : ""}}'
+  style="height:{{windowHeight}}rpx; width:{{windowWidth}}rpx;">
   <view class="flex-column">
     <view class="">
-      <view class="top_img_fixed flex-row" style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+      <view class="top_img_fixed flex-row"
+        style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
         <view class="flex-column">
           <text class="top_bar_title margin-left">出货称重</text>
         </view>
       </view>
-      <image src="../../../../images/top.png" style="width: 100%; height: {{110 + statusBarHeight}}rpx;"></image>
+      <image src="../../../images/top.png" style="width: 100%; height: {{110 + statusBarHeight}}rpx;"></image>
     </view>
 
     <view class="flex-row-reverse " style="padding:40rpx 20rpx; font-size: 80rpx;">
       <text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
       <text>{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
-      <text class="font-md gray" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+      <text class="font-md gray"
+        wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
     </view>
 
     <view class="flex-row-reverse " style="padding:0 30rpx; font-size: 55rpx;">
-      <block wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale > 0 && orders.gbDoDsStandardScale !== '-1'}}">
-        <text class="">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
+      <block
+        wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale > 0 && orders.gbDoDsStandardScale !== '-1'}}">
+        <text
+          class="">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
       </block>
       <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
 
@@ -150,7 +170,8 @@
       <view class="flex-row-reverse p-20 inputline" style="bottom:{{numContainerHeight* 4 + 100}}rpx;">
         <text class="big">{{orders.gbDoStandard}} </text>
         <view class=" weightInput mr-10 flex-row" style="width:{{windowWidth /5}}rpx;">
-          <text class="input_number" wx:if="{{orders.gbDoScaleWeight !== null && orders.gbDoScaleWeight !== '0.0' }}">{{orders.gbDoScaleWeight}}</text>
+          <text class="input_number"
+            wx:if="{{orders.gbDoScaleWeight !== null && orders.gbDoScaleWeight !== '0.0' }}">{{orders.gbDoScaleWeight}}</text>
           <view class='analog_cursor is-active'>
           </view>
         </view>
@@ -162,8 +183,9 @@
     <block wx:else>
       <view class="flex-row-reverse p-20 inputline" style="bottom:{{numContainerHeight* 4 + 100}}rpx;">
         <text class="big">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}} </text>
-        <view class=" weightInput mr-10 flex-row" style="width:{{windowWidth /2}}rpx;">
-          <text class="input_number" wx:if="{{orders.gbDoWeight !== null && orders.gbDoWeight !== '0.0' }}">{{orders.gbDoWeight}}</text>
+        <view class=" weightInput mr-10 flex-row-items-center" style="width:{{windowWidth /2}}rpx;">
+          <text class="input_number"
+            wx:if="{{orders.gbDoWeight !== null && orders.gbDoWeight !== '0.0' }}">{{orders.gbDoWeight}}</text>
           <view class='analog_cursor is-active'>
           </view>
         </view>
@@ -175,54 +197,95 @@
   <view class="flex-column customize_key_board">
     <view class="flex-row">
       <view class="input_number_part">
-        <view class="num_container flex-column-center " style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="7"> 7</view>
+        <view class="num_container flex-column-center "
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="1"> 1</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="8"> 8</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="2"> 2</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="9"> 9</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="3"> 3</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="4"> 4</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="4"> 4</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="5"> 5</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="5"> 5</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
 
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="6"> 6</view>
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="6"> 6</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="1"> 1</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="7"> 7</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
 
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="2"> 2</view>
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="8"> 8</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
 
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="3"> 3</view>
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="9"> 9</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="del"> X</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="del"> X</view>
 
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value="0"> 0</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value="0"> 0</view>
         </view>
-        <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
-          <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue" data-value=".">.</view>
+        <view class="num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerHeight}}rpx; line-height:{{numContainerHeight}}rpx;">
+          <view class="num" hover-class="numHover"
+            style="width:{{numWidth}}rpx; height:{{numHeight}}rpx; line-height:{{numHeight}}rpx;" bindtap="inputValue"
+            data-value=".">.</view>
         </view>
       </view>
       <view class="flex-column">
-        <view class="double_num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth }}rpx;">
-          <view class="double_num " style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="close" hover-class="numHover">关闭</view>
+        <view class="double_num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth * 2 + 20}}rpx; line-height:{{numContainerWidth  * 2}}rpx;">
+          <view class="double_num " style="width:{{numWidth}}rpx; height:{{numWidth * 2 + 20}}rpx; line-height:{{numWidth * 2 + 20}}rpx;"
+            bindtap="inputValue" data-value="close" hover-class="numHover">关闭</view>
         </view>
 
-        <view class="double_num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth * 3 + 40}}rpx; line-height:{{numContainerWidth * 3 + 40}}rpx;">
-          <view class="save_double_btn flex-column-center" style="width:{{numWidth }}rpx; height:{{numWidth * 3 + 70}}rpx; line-height: {{numWidth * 3 + 70}}rpx;" bindtap="inputValue" data-value="finish" hover-class="numHover">
+        <view class="double_num_container flex-column-center"
+          style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth * 2 + 20}}rpx; line-height:{{numContainerWidth * 2}}rpx;">
+          <view class="save_double_btn flex-column-center"
+            style="width:{{numWidth }}rpx; height:{{numWidth * 2 + 20}}rpx; line-height: {{numWidth * 2 + 20}}rpx;"
+            bindtap="inputValue" data-value="finish" hover-class="numHover">
             保存
           </view>
         </view>

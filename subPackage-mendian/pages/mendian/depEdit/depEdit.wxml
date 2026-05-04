@@ -19,7 +19,7 @@
          <view class="flex-row font-lg">
           <text class="mr-20">{{index + 1}}.</text>
           <image src="{{url + user.gbDuWxAvartraUrl}}" mode="aspectFill" class="itemPic mr-30"/>
-             <text class="font-xs mr-30">{{user.gbDuWxNickName}}</text>
+             <text class="font-sl mr-30">{{user.gbDuWxNickName}}</text>
              <text wx:if="{{depInfo.gbDepartmentEntityList.length  > 0}}">{{user.gbDepartmentEntity.gbDepartmentName}}</text>
          </view>
           <view class="button-container-white" bind:tap="delUser" data-id="{{user.gbDepartmentUserId}}" hover-class="hover">
@@ -27,7 +27,7 @@
           </view>
            </view>
 
-            <view  class="flex-column text-secondary font-xs center-content" style="height: 200rpx;">没有数据了!</view>
+            <view  class="flex-column text-secondary font-sl center-content" style="height: 200rpx;">没有数据了!</view>
       </scroll-view>
 
   </view>

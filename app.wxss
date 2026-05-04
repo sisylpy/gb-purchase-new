@@ -32,12 +32,83 @@ page {
   --gb-border-input: #dddddd;
   --gb-border-soft: #f0f0f0;
 
+  /* 食材利用率等级（与「利用率分布」图例一致；文案 / 圆点 / 图表 segment 共用色值）
+   * 后端 level：LOW | NORMAL | HIGH | CRITICAL */
+  --gb-util-low: #38bdf8;
+  --gb-util-normal: #34d399;
+  --gb-util-high: #fb923c;
+  --gb-util-critical: #ef4444;
+
   height: 100%;
   background-color: var(--gb-bg-page);
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-size: 28rpx;
   color: var(--gb-text);
   line-height: 1.6;
+}
+
+/* 制作率等级 — 公共文案色（配合 /wxs/utilizationLevel.wxs 的 textClass） */
+.util-text {
+  font-weight: 600;
+}
+
+.util-text--low {
+  color: var(--gb-util-low);
+}
+
+.util-text--normal {
+  color: var(--gb-util-normal);
+}
+
+.util-text--high {
+  color: var(--gb-util-high);
+}
+
+.util-text--critical {
+  color: var(--gb-util-critical);
+}
+
+.util-text--unknown {
+  color: var(--gb-text-muted);
+  font-weight: 500;
+}
+
+/* 图例圆点、环形 segment、进度条底等（fillClass） */
+.util-fill--low {
+  background-color: var(--gb-util-low);
+}
+
+.util-fill--normal {
+  background-color: var(--gb-util-normal);
+}
+
+.util-fill--high {
+  background-color: var(--gb-util-high);
+}
+
+.util-fill--critical {
+  background-color: var(--gb-util-critical);
+}
+
+.util-fill--unknown {
+  background-color: var(--gb-text-muted);
+}
+
+/* 仅描边场景（如 canvas 辅助线） */
+.util-stroke--low {
+  border-color: var(--gb-util-low);
+}
+
+.util-stroke--normal {
+  border-color: var(--gb-util-normal);
+}
+
+.util-stroke--high {
+  border-color: var(--gb-util-high);
+}
+
+.util-stroke--critical {
+  border-color: var(--gb-util-critical);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -81,9 +152,18 @@ button::after {
    .flex-row / .flex：主轴横向，交叉轴默认 stretch（子项同一行排布，便于再叠 .items-* / .flex-between）
    .flex-row-default：同一行 + 交叉轴从顶部对齐（align-items: flex-start） */
 .flex,
-.flex-row {
+.flex-row1 {
   display: flex;
   flex-direction: row;
+}
+
+
+.flex-row {
+  flex-direction: row;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center; 
 }
 
 .flex-row-default {
@@ -103,6 +183,10 @@ button::after {
 .flex-wrap {
   display: flex;
   flex-wrap: wrap;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
 }
 
 .flex-1 {
@@ -150,6 +234,67 @@ button::after {
 
 .items-stretch {
   align-items: stretch;
+}
+
+
+.button-container-white {
+  position: relative;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* overflow: hidden; */
+}
+
+
+.button-container {
+  position: relative;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* overflow: hidden; */
+}
+
+
+.standard {
+  margin-right: 20rpx;
+ border-radius: 10rpx;
+ padding: 4rpx 14rpx;
+ border: 1px solid lightgray;
+ font-size: 28rpx;
+}
+
+.nnn {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  border-top-left-radius: 40rpx;
+  border-top-right-radius: 40rpx;
+}
+
+.popup {
+  width: 90%;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+  box-shadow: 0 0 20rpx rgba(0, 0, 0, 0.3);
+  position: absolute; /* 使用绝对定位 */
+  top: 30%; /* 使弹出窗口距离顶部30% */
+  left: 50%;
+  transform: translate(-50%, 0); /* 水平居中 */
+}
+
+.center-content {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  width: 100%; /* 确保占满整个行 */
 }
 
 /* —— 双轴居中（空状态、遮罩层等与 .center-content 等价，合并一处）—— */
@@ -273,6 +418,11 @@ button::after {
 
 .radius-10 {
   border-radius: 10rpx;
+}
+
+
+.radius-40 {
+  border-radius: 40rpx;
 }
 
 .radius-sm,
@@ -508,6 +658,9 @@ button::after {
   font-size: 20rpx;
 }
 
+.font-sd {
+  font-size: 26rpx;
+}
 .font-sm {
   font-size: 24rpx;
 }
@@ -653,6 +806,15 @@ button::after {
   border-top: 1rpx solid var(--gb-border);
 }
 
+.border-l {
+  border-left: 1rpx solid var(--gb-border-soft);
+}
+
+/* 浅橙底提示块（成本偏高等），与 text-warning 搭配 */
+.bg-warn-soft {
+  background-color: rgba(250, 157, 59, 0.16);
+}
+
 .shadow-sm {
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
 }
@@ -733,6 +895,10 @@ button::after {
   height: 80rpx;
 }
 
+.empty_image{
+  width: 80rpx;
+  height: 80rpx;
+}
 /* 历史命名：头像/链接小图，慎用过于泛化的类名 */
 .url {
   float: left;
@@ -740,6 +906,7 @@ button::after {
   height: 80rpx;
   border-radius: 50%;
 }
+
 
 .top_img {
   width: 80rpx;
@@ -929,4 +1096,54 @@ button::after {
 
 .hoverBtn {
   background-color: #a0defd;
+}
+
+
+
+
+.top_img{
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  margin-left: 20rpx;
+}
+
+.top_img_fixed{
+  position: absolute;
+  left: 20rpx;  
+  color:#fff;
+  font-size: 40rpx;
+  font-weight: 500;
+}
+
+.top_bar_title_small{
+  font-size: 30rpx;
+  line-height: 40rpx;
+}
+
+.back_icon{
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 40rpx;
+  margin-left: 20rpx;
+
+}
+
+
+
+
+.fresh_goods{
+  /* border: 1px solid #4c535c; */
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  background: #5ab464;
+  color: #fff;
+  transform: skew(-15deg);
+  display: inline-block;
+}
+
+.fresh_goods text {
+  transform: skew(15deg);
+  display: inline-block;
 }

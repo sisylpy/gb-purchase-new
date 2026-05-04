@@ -1,0 +1,362 @@
+<view class="page flex flex-column">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="添加新商品" avatar="/images/back-gray.png" button-text="返回" bindnavbuttontap="toBack"></back-navbar>
+
+  <scroll-view scroll-y class="scroll" style="height: {{catalogScrollViewHeightRpx}}rpx; width: {{windowWidth}}rpx;" enable-back-to-top="{{true}}">
+
+    <view wx:if="{{flowState != 'INPUT' && (lastSubmittedGoodsName || lastSubmittedGoodsSpec || lastSubmittedGoodsFurtherDescription)}}" class="user-submit-persist" style="width: {{windowWidth}}rpx; box-sizing: border-box;">
+      <view class="user-submit-persist__title">您填写的商品</view>
+      <view wx:if="{{lastSubmittedGoodsName}}" class="user-submit-persist__row">名称：{{lastSubmittedGoodsName}}</view>
+      <view wx:if="{{lastSubmittedGoodsSpec}}" class="user-submit-persist__row">规格：{{lastSubmittedGoodsSpec}}</view>
+      <view wx:if="{{lastSubmittedGoodsFurtherDescription}}" class="user-submit-persist__row user-submit-persist__row--muted">说明：{{lastSubmittedGoodsFurtherDescription}}</view>
+    </view>
+
+    <!-- INPUT -->
+    <block wx:if="{{flowState == 'INPUT'}}">
+      <view class="hero" style="width: {{windowWidth}}rpx; box-sizing: border-box;">
+        <view class="hero-title">请填写要添加的商品名称和规格，我们会对照公司商品目录；对不上的可以添加为临时商品。</view>
+      </view>
+      <view class="card">
+        <view class="label">商品名称</view>
+        <input class="input" placeholder="例如：西红柿" value="{{goodsName}}" bindinput="onGoodsNameInput" />
+        <view class="label" style="margin-top: 28rpx;">商品规格</view>
+        <input class="input" placeholder="例如：斤、袋、箱" value="{{goodsSpec}}" bindinput="onGoodsSpecInput" />
+        <view class="hint">规格请尽量与平时下单习惯一致，便于自动匹配。</view>
+        <view class="label" style="margin-top: 28rpx;">说明（选填）</view>
+        <textarea class="input textarea textarea--further" placeholder="冷冻调理、用途、包装、别名等，帮助匹配类目；" value="{{goodsFurtherDescription}}" bindinput="onGoodsFurtherDescriptionInput" maxlength="500" auto-height="{{true}}"></textarea>
+        <view class="btn-primary" bindtap="submitAnalyze">Ai协助添加</view>
+        <view class="btn-secondary row-btns" bindtap="startManualCatalogFromInput">自己选目录</view>
+        <view class="btn-secondary row-btns" bindtap="startDirectTempFromInput">直接添加临时商品</view>
+      </view>
+    </block>
+
+    <!-- MATCH_SINGLE / MANUAL_CATALOG_SKU_SINGLE -->
+    <block wx:if="{{(flowState == 'MATCH_SINGLE' || flowState == 'MANUAL_CATALOG_SKU_SINGLE') && matchSummary}}">
+      <view class="card card--candidates">
+        <view class="section-title">找到以下商品</view>
+        <view class="assistant-msg assistant-msg--compact" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <view class="match-single-row">
+          <image wx:if="{{matchSummary.nxGoodsFile || matchSummary.nxGoodsFileBig}}" class="candidate-thumb" src="{{matchSummary.nxGoodsFile || matchSummary.nxGoodsFileBig}}" mode="aspectFill" />
+          <view wx:else class="candidate-thumb candidate-thumb--empty" />
+          <view class="candidate-body">
+            <view class="candidate-path candidate-path--compact" wx:if="{{matchSummary.path}}">{{matchSummary.path}}</view>
+            <view class="candidate-topline">
+              <text class="dis-catalog-badge dis-catalog-badge--tight {{matchSummary.disImportStatus == 'ALREADY_IN_MY_GOODS' ? 'dis-catalog-badge--in' : 'dis-catalog-badge--dl'}}" wx:if="{{matchSummary.disImportStatus}}">{{matchSummary.disImportStatus == 'ALREADY_IN_MY_GOODS' ? '已在本店' : '待下载'}}</text>
+              <text class="candidate-name-text candidate-name-text--list">{{matchSummary.displayName}}</text>
+            </view>
+            <view class="candidate-spec-line">规格：{{matchSummary.standardName}}</view>
+            <view class="candidate-meta" wx:if="{{matchSummary.nxGoodsStandardWeight || matchSummary.nxGoodsStandardAmount != null}}">
+              <block wx:if="{{matchSummary.nxGoodsStandardWeight}}"><text>{{matchSummary.nxGoodsStandardWeight}}</text></block>
+              <block wx:if="{{matchSummary.nxGoodsStandardWeight && matchSummary.nxGoodsStandardAmount != null}}"><text> · </text></block>
+              <block wx:if="{{matchSummary.nxGoodsStandardAmount != null}}"><text>标准数量 {{matchSummary.nxGoodsStandardAmount}}</text></block>
+            </view>
+          </view>
+        </view>
+        <view class="dis-catalog-row-hint dis-catalog-row-hint--inline" wx:if="{{matchSummary.disImportStatus == 'NOT_DOWNLOADED'}}">↓ 点下方「下载目录商品到本店」</view>
+        <block wx:if="{{nxCatalogConfirmIntents.length > 0}}">
+          <block wx:for="{{nxCatalogConfirmIntents}}" wx:for-item="cint" wx:key="intent">
+            <view class="btn-primary row-btns {{cint.intent == 'ADD_SIBLING_SKU' && (!goodsName || !goodsSpec) ? 'disabled' : ''}}" bindtap="confirmNxCatalogWithIntent" data-intent="{{cint.intent}}">{{cint.label}}</view>
+          </block>
+        </block>
+        <view wx:else class="btn-primary row-btns" bindtap="confirmNxCatalogWithIntent" data-intent="USE_MATCHED">{{matchSummary.disImportStatus == 'NOT_DOWNLOADED' ? '下载目录商品到本店' : '确认添加'}}</view>
+        <view class="btn-secondary" bindtap="backToInput">重新填写</view>
+      </view>
+    </block>
+
+    <block wx:if="{{flowState == 'MATCH_CHOICE' || flowState == 'MANUAL_CATALOG_SKU_CHOICE' || disCatalogPrefetch}}">
+      <view class="card card--candidates">
+        <view class="section-title">请选择一个最符合的商品</view>
+        <view class="section-sub section-sub--tight" wx:if="{{!disCatalogPrefetch}}">以下结果来自公司商品目录，点选一项后确认添加。</view>
+        <view class="section-sub section-sub--muted section-sub--tight" wx:if="{{disCatalogPrefetch && analyzeModeHint}}">{{analyzeModeHint}}</view>
+        <view class="assistant-msg assistant-msg--compact" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <block wx:for="{{candidates}}" wx:key="nxGoodsId">
+          <view class="candidate candidate--compact {{selectedNxGoodsId == item.nxGoodsId ? 'candidate--on' : ''}}" bindtap="selectCandidate" data-id="{{item.nxGoodsId}}">
+            <view class="candidate-inner">
+              <image wx:if="{{item.nxGoodsFile || item.nxGoodsFileBig}}" class="candidate-thumb" src="{{item.nxGoodsFile || item.nxGoodsFileBig}}" mode="aspectFill" />
+              <view wx:else class="candidate-thumb candidate-thumb--empty" />
+              <view class="candidate-body">
+                <view class="candidate-topline">
+                  <text class="dis-catalog-badge dis-catalog-badge--tight {{item.disImportStatus == 'ALREADY_IN_MY_GOODS' ? 'dis-catalog-badge--in' : 'dis-catalog-badge--dl'}}" wx:if="{{item.disImportStatus}}">{{item.disImportStatus == 'ALREADY_IN_MY_GOODS' ? '已在本店' : '待下载'}}</text>
+                  <text class="candidate-name-text candidate-name-text--list">{{item.displayName}}</text>
+                </view>
+                <view class="candidate-spec-line">{{item.standardName}}</view>
+                <view class="candidate-meta" wx:if="{{item.nxGoodsStandardWeight || item.nxGoodsStandardAmount != null}}">
+                  <block wx:if="{{item.nxGoodsStandardWeight}}"><text>{{item.nxGoodsStandardWeight}}</text></block>
+                  <block wx:if="{{item.nxGoodsStandardWeight && item.nxGoodsStandardAmount != null}}"><text> · </text></block>
+                  <block wx:if="{{item.nxGoodsStandardAmount != null}}"><text>数量 {{item.nxGoodsStandardAmount}}</text></block>
+                </view>
+                <view class="candidate-path candidate-path--compact" wx:if="{{item.path}}">{{item.path}}</view>
+              </view>
+            </view>
+            <view class="dis-catalog-row-hint dis-catalog-row-hint--inline" wx:if="{{(disCatalogPrefetch || flowState == 'MATCH_CHOICE' || flowState == 'MANUAL_CATALOG_SKU_CHOICE') && selectedNxGoodsId == item.nxGoodsId && item.disImportStatus == 'NOT_DOWNLOADED'}}">↓ 点下方「下载目录商品到本店」</view>
+            <view class="dis-catalog-row-hint dis-catalog-row-hint--inline dis-catalog-row-hint--in" wx:if="{{disCatalogPrefetch && selectedNxGoodsId == item.nxGoodsId && item.disImportStatus == 'ALREADY_IN_MY_GOODS' && (catalogHitComposition == 'GB_ONLY' || flowState == 'DIS_CATALOG_GB_ONLY')}}">↓ 「使用选中商品去下单」或下方新增 SKU</view>
+            <view class="dis-catalog-row-hint dis-catalog-row-hint--inline dis-catalog-row-hint--in" wx:if="{{disCatalogPrefetch && selectedNxGoodsId == item.nxGoodsId && item.disImportStatus == 'ALREADY_IN_MY_GOODS' && catalogHitComposition != 'GB_ONLY' && flowState != 'DIS_CATALOG_GB_ONLY'}}">↓ 点击下方主按钮带去下单或「新增 SKU」</view>
+          </view>
+        </block>
+        <view wx:if="{{disCatalogPrefetch && (catalogHitComposition == 'GB_ONLY' || flowState == 'DIS_CATALOG_GB_ONLY')}}" class="btn-primary row-btns {{!selectedNxGoodsId ? 'disabled' : ''}}" bindtap="confirmDisCatalogUseInStock">使用选中商品去下单</view>
+        <block wx:if="{{nxCatalogConfirmIntents.length > 0}}">
+          <block wx:for="{{nxCatalogConfirmIntents}}" wx:for-item="cint" wx:key="intent">
+            <view class="btn-primary row-btns {{!selectedNxGoodsId || (cint.intent == 'ADD_SIBLING_SKU' && (!goodsName || !goodsSpec)) ? 'disabled' : ''}}" bindtap="confirmNxCatalogWithIntent" data-intent="{{cint.intent}}">{{cint.label}}</view>
+          </block>
+        </block>
+        <view wx:else class="btn-primary row-btns {{!selectedNxGoodsId ? 'disabled' : ''}}" bindtap="confirmNxCatalogWithIntent" data-intent="USE_MATCHED">{{disCatalogPrimaryFallbackLabel || '确认添加（需先选中一行）'}}</view>
+        <view class="btn-secondary" bindtap="choiceGoTemp">都不对，改为临时商品</view>
+        <view class="btn-secondary" bindtap="noneOfCandidates">{{disCatalogPrefetch ? '继续用 AI 对照目录' : '以上都不是'}}</view>
+        <view class="btn-secondary" bindtap="backToInput">重新填写</view>
+      </view>
+    </block>
+
+    <block wx:if="{{flowState == 'BRANCH_CONFIRM' || flowState == 'MANUAL_CATALOG_BRANCH'}}">
+      <view class="card card--catalog">
+        <view class="section-title">未找到目录里的具体规格商品</view>
+        <view class="assistant-msg" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <view class="section-sub section-sub--muted">确认后系统将新增品名与规格 SKU 到农鑫目录（业务称三级、四级，对应库 nx_goods_level 2 与 3），并加入您的批发商商品。</view>
+        <view class="catalog-list catalog-list--branch">
+          <block wx:for="{{branchOptions}}" wx:key="grandNxGoodsId">
+            <view class="catalog-row catalog-row--branch {{selectedGrandNxGoodsId == item.grandNxGoodsId ? 'catalog-row--on' : ''}}" bindtap="selectBranchOption" data-grand-id="{{item.grandNxGoodsId}}">
+              <view class="catalog-row__accent catalog-row__accent--branch"></view>
+              <view class="catalog-row__main">
+                <text class="catalog-row__tag">一级</text>
+                <text class="catalog-row__subtitle">{{item.greatGrandName}}</text>
+                <text class="catalog-row__tag catalog-row__tag--secondary">二级</text>
+                <text class="catalog-row__title catalog-row__title--compact">{{item.grandName}}</text>
+              </view>
+              <text class="catalog-row__chev">›</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+
+    <!-- NO_MATCH -->
+    <block wx:if="{{flowState == 'NO_MATCH'}}">
+      <view class="card card--catalog">
+        <view class="section-title">未在商品目录中找到完全匹配</view>
+        <view class="section-sub section-sub--warm">可点底部「补充说明」回到首屏修改名称 / 规格 / 说明后再提交；或直接添加临时商品。</view>
+        <block wx:if="{{catalogLevel1Options.length > 0}}">
+          <view class="section-sub catalog-manual-title">从一级目录选择（逐级进入）</view>
+          <view class="catalog-steps catalog-steps--inline">
+            <view class="catalog-steps__track">
+              <view class="catalog-steps__node is-current">1</view>
+              <view class="catalog-steps__bar"></view>
+              <view class="catalog-steps__node">2</view>
+              <view class="catalog-steps__bar"></view>
+              <view class="catalog-steps__node">3</view>
+            </view>
+            <view class="catalog-steps__caption">先选大类，再慢慢缩小范围</view>
+          </view>
+          <view class="catalog-list">
+            <block wx:for="{{catalogLevel1Options}}" wx:key="nxGoodsId">
+              <view class="catalog-row catalog-row--l1" bindtap="selectManualCatalogLevel1" data-nx-goods-id="{{item.nxGoodsId}}">
+                <view class="catalog-row__accent"></view>
+                <view class="catalog-row__main">
+                  <text class="catalog-row__tag">一级</text>
+                  <text class="catalog-row__title">{{item.nxGoodsName}}</text>
+                </view>
+                <text class="catalog-row__chev">›</text>
+              </view>
+            </block>
+          </view>
+        </block>
+      </view>
+    </block>
+
+    <!-- MANUAL_CATALOG_L1 -->
+    <block wx:if="{{flowState == 'MANUAL_CATALOG_L1'}}">
+      <view class="card card--catalog">
+        <view class="catalog-steps">
+          <view class="catalog-steps__track">
+            <view class="catalog-steps__node is-current">1</view>
+            <view class="catalog-steps__bar is-active"></view>
+            <view class="catalog-steps__node">2</view>
+            <view class="catalog-steps__bar"></view>
+            <view class="catalog-steps__node">3</view>
+          </view>
+          <view class="catalog-steps__caption">第 1 步 · 选择大类</view>
+        </view>
+        <view class="section-title">请选择一级分类</view>
+        <view class="section-sub section-sub--warm">按目录逐级点选，就像逛超市货架一样简单。</view>
+        <view class="assistant-msg" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <view class="catalog-list">
+          <block wx:for="{{catalogLevel1Options}}" wx:key="nxGoodsId">
+            <view class="catalog-row catalog-row--l1" bindtap="selectManualCatalogLevel1" data-nx-goods-id="{{item.nxGoodsId}}">
+              <view class="catalog-row__accent"></view>
+              <view class="catalog-row__main">
+                <text class="catalog-row__tag">一级</text>
+                <text class="catalog-row__title">{{item.nxGoodsName}}</text>
+              </view>
+              <text class="catalog-row__chev">›</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+
+    <!-- MANUAL_CATALOG_L2 -->
+    <block wx:if="{{flowState == 'MANUAL_CATALOG_L2'}}">
+      <view class="card card--catalog">
+        <view class="catalog-steps">
+          <view class="catalog-steps__track">
+            <view class="catalog-steps__node is-done">✓</view>
+            <view class="catalog-steps__bar is-active"></view>
+            <view class="catalog-steps__node is-current">2</view>
+            <view class="catalog-steps__bar"></view>
+            <view class="catalog-steps__node">3</view>
+          </view>
+          <view class="catalog-steps__caption">第 2 步 · 选择小类</view>
+        </view>
+        <view class="section-title">请选择二级分类</view>
+        <view class="section-sub section-sub--warm">再选细一点，离目标商品更近啦。</view>
+        <view class="assistant-msg" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <view class="catalog-list">
+          <block wx:for="{{catalogLevel2Options}}" wx:key="nxGoodsId">
+            <view class="catalog-row catalog-row--l2" bindtap="selectManualCatalogLevel2" data-nx-goods-id="{{item.nxGoodsId}}">
+              <view class="catalog-row__accent catalog-row__accent--l2"></view>
+              <view class="catalog-row__main">
+                <text class="catalog-row__tag catalog-row__tag--secondary">二级</text>
+                <text class="catalog-row__title">{{item.nxGoodsName}}</text>
+              </view>
+              <text class="catalog-row__chev">›</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+
+    <!-- MANUAL_CATALOG_L3 -->
+    <block wx:if="{{flowState == 'MANUAL_CATALOG_L3'}}">
+      <view class="card card--catalog">
+        <view class="catalog-steps">
+          <view class="catalog-steps__track">
+            <view class="catalog-steps__node is-done">✓</view>
+            <view class="catalog-steps__bar is-active"></view>
+            <view class="catalog-steps__node is-done">✓</view>
+            <view class="catalog-steps__bar is-active"></view>
+            <view class="catalog-steps__node is-current">3</view>
+          </view>
+          <view class="catalog-steps__caption">第 3 步 · 选择品名</view>
+        </view>
+        <view class="section-title">请选择品名（三级）</view>
+        <view class="section-sub section-sub--warm">选好品名后，我们会为您列出可选规格。</view>
+        <view class="assistant-msg" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <view class="catalog-list">
+          <block wx:for="{{catalogLevel3Options}}" wx:key="nxGoodsId">
+            <view class="catalog-row catalog-row--l3" bindtap="selectManualCatalogLevel3" data-nx-goods-id="{{item.nxGoodsId}}">
+              <view class="catalog-row__accent catalog-row__accent--l3"></view>
+              <view class="catalog-row__main">
+                <text class="catalog-row__tag catalog-row__tag--violet">品名</text>
+                <text class="catalog-row__title">{{item.nxGoodsName}}</text>
+              </view>
+              <text class="catalog-row__chev">›</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+
+    <!-- TEMP_CONFIRM -->
+    <block wx:if="{{flowState == 'TEMP_CONFIRM'}}">
+      <view class="card">
+        <view class="section-title">确认添加临时商品</view>
+        <view class="section-sub">以下商品将加入您的商品清单，不在公司统一目录中，请核对名称与规格。</view>
+        <view class="match-name">{{goodsName}}</view>
+        <view class="match-spec">规格：{{goodsSpec}}</view>
+        <view class="remark-readonly" wx:if="{{goodsFurtherDescription}}">说明：{{goodsFurtherDescription}}</view>
+        <view class="btn-primary row-btns" bindtap="confirmTempGoods">确认添加临时商品</view>
+        <view class="btn-secondary" bindtap="fromTempBack">返回</view>
+      </view>
+    </block>
+
+    <!-- DIRECT_TEMP：规格已在主/订货规格命中，不落库（与后端 TEMP_DUPLICATE 一致） -->
+    <block wx:if="{{flowState == 'TEMP_DUPLICATE'}}">
+      <view class="card card--warm-tip">
+        <view class="section-title">无需重复添加</view>
+        <view class="assistant-msg" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <view class="section-sub section-sub--muted" wx:else>同名商品下已包含该订货规格或与主规格一致。</view>
+        <view class="assistant-msg" wx:if="{{successSummary && (successSummary.goodsName || successSummary.goodsSpec)}}">
+          <text wx:if="{{successSummary.goodsName}}">{{successSummary.goodsName}}</text>
+          <text wx:if="{{successSummary.goodsSpec}}"> · {{successSummary.goodsSpec}}</text>
+          <view wx:if="{{successSummary.gbDistributerGoodsId}}" class="success-extra">批发商商品 id：{{successSummary.gbDistributerGoodsId}}</view>
+          <view wx:if="{{successSummary.gbDepartmentDisGoodsId}}" class="success-extra">部门商品 id：{{successSummary.gbDepartmentDisGoodsId}}</view>
+        </view>
+        <view class="section-sub section-sub--tight" wx:if="{{responseAnalyzeMode == 'DIRECT_TEMP'}}">本次为「直接添加临时商品」前置校验。</view>
+        <view class="btn-primary row-btns" bindtap="finishSuccess">完成（带回已有商品）</view>
+        <view class="btn-secondary" bindtap="backToInput">修改名称规格再试</view>
+      </view>
+    </block>
+
+    <!-- DIRECT_TEMP：同名、规格需在订货规格中维护，不落库 -->
+    <block wx:if="{{flowState == 'TEMP_ADD_ORDER_STANDARD'}}">
+      <view class="card card--warm-tip">
+        <view class="section-title">请维护订货规格</view>
+        <view class="assistant-msg" wx:if="{{assistantMessage}}">{{assistantMessage}}</view>
+        <view class="section-sub section-sub--tight">请返回订货页并打开订货弹窗，在单位一行点「 + 」添加下列规格。</view>
+        <view class="label label--compact">本次填写的规格</view>
+        <view class="match-name">{{requestedOrderStandard}}</view>
+        <view class="label label--compact" wx:if="{{existingOrderStandards.length > 0}}">当前主规格与已有订货规格</view>
+        <view wx:if="{{existingOrderStandards.length == 0}}" class="hint-readonly muted">暂无列表数据，请以详情页为准。</view>
+        <block wx:for="{{existingOrderStandards}}" wx:key="*this">
+          <view class="order-standard-chip">{{item}}</view>
+        </block>
+        <view class="btn-primary row-btns" bindtap="finishOpenDepModalFromAiAddGoods">返回并打开订货弹窗</view>
+        <view class="btn-secondary row-btns" bindtap="finishAiAddBackWithoutCallback">仅返回</view>
+        <view class="btn-secondary" bindtap="backToInput">修改名称规格再试</view>
+      </view>
+    </block>
+
+    <!-- SUCCESS -->
+    <block wx:if="{{flowState == 'SUCCESS'}}">
+      <view class="card">
+        <view class="success-icon-wrap">
+          <text class="success-title">添加成功</text>
+        </view>
+        <view class="success-desc">商品已保存，您可以在商品列表中查看或继续添加。</view>
+        <view class="section-sub" wx:if="{{responseAnalyzeMode == 'DIRECT_TEMP'}}">本次为「直接添加临时商品」，未走目录匹配与二次确认。</view>
+        <view class="assistant-msg" wx:if="{{successSummary && (successSummary.goodsName || successSummary.goodsSpec)}}">
+          <text wx:if="{{successSummary.goodsName}}">{{successSummary.goodsName}}</text>
+          <text wx:if="{{successSummary.goodsSpec}}"> · {{successSummary.goodsSpec}}</text>
+          <view wx:if="{{successSummary.nxGoodsId}}" class="success-extra">目录商品 id：{{successSummary.nxGoodsId}}</view>
+          <view wx:if="{{successSummary.nxGoodsFatherId || successSummary.nxGoodsFatherNodeId}}" class="success-extra">品名父节点 id：{{successSummary.nxGoodsFatherId || successSummary.nxGoodsFatherNodeId}}</view>
+          <view wx:if="{{successSummary.gbDistributerGoodsId}}" class="success-extra">批发商商品 id：{{successSummary.gbDistributerGoodsId}}</view>
+          <view wx:if="{{successSummary.gbDepartmentDisGoodsId}}" class="success-extra">部门商品 id：{{successSummary.gbDepartmentDisGoodsId}}</view>
+          <view wx:if="{{successSummary.addedSiblingNxSku}}" class="success-extra">已在同品类下新增目录 SKU</view>
+          <view wx:if="{{successSummary.refNxGoodsId}}" class="success-extra">参考 SKU id：{{successSummary.refNxGoodsId}}</view>
+        </view>
+        <view class="btn-primary row-btns" bindtap="finishSuccess">完成</view>
+      </view>
+    </block>
+
+    <!-- ERROR -->
+    <block wx:if="{{flowState == 'ERROR'}}">
+      <view class="card">
+        <view class="section-title">操作失败</view>
+        <view class="error-box">{{errorMsg || '操作失败，请稍后重试。'}}</view>
+        <view class="btn-primary row-btns" bindtap="retryError">重试</view>
+        <view class="btn-secondary" bindtap="toBack">返回</view>
+      </view>
+    </block>
+
+    <!-- fixed 页脚底：垫高可滚区域，避免最后一条内容被盖住 -->
+    <view wx:if="{{catalogLayoutSticky}}" style="width: {{windowWidth}}rpx; height: {{catalogScrollPaddingBottomRpx}}rpx; flex-shrink: 0; box-sizing: border-box;"></view>
+    <view wx:if="{{!catalogLayoutSticky}}" style="height: 48rpx;"></view>
+  </scroll-view>
+
+  <!-- 选择目录 / 分支确认 / 未匹配：底部操作区固定 -->
+  <view wx:if="{{catalogLayoutSticky}}" class="catalog-sticky-footer">
+    <block wx:if="{{flowState == 'BRANCH_CONFIRM' || flowState == 'MANUAL_CATALOG_BRANCH'}}">
+      <view class="btn-primary catalog-footer__btn catalog-footer__btn--primary {{!selectedGrandNxGoodsId ? 'disabled' : ''}}" bindtap="confirmBranchAnalyze">确认分类并生成目录商品</view>
+      <view class="btn-secondary catalog-footer__btn" bindtap="startManualCatalogFromNoMatch">自己选目录</view>
+      <view class="btn-secondary catalog-footer__btn" bindtap="goTempFromBranchConfirm">添加为临时商品</view>
+      <view class="btn-secondary catalog-footer__btn catalog-footer__btn--last" bindtap="fromBranchBackEdit">返回修改</view>
+    </block>
+    <block wx:if="{{flowState == 'NO_MATCH'}}">
+      <view class="btn-primary catalog-footer__btn catalog-footer__btn--primary" bindtap="fromNoMatchBackEdit">补充说明</view>
+      <view class="btn-secondary catalog-footer__btn catalog-footer__btn--last" bindtap="goTempFromNoMatch">添加为临时商品</view>
+    </block>
+    <block wx:if="{{flowState == 'MANUAL_CATALOG_L1'}}">
+      <view class="btn-secondary btn-secondary--ghost catalog-footer__btn catalog-footer__btn--last" bindtap="manualCatalogBackOneStep">返回</view>
+    </block>
+    <block wx:if="{{flowState == 'MANUAL_CATALOG_L2' || flowState == 'MANUAL_CATALOG_L3'}}">
+      <view class="btn-secondary btn-secondary--ghost catalog-footer__btn catalog-footer__btn--last" bindtap="manualCatalogBackOneStep">返回上一级</view>
+    </block>
+  </view>
+</view>

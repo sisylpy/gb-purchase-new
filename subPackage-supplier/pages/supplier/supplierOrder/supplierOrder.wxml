@@ -8,7 +8,7 @@
 
     <block wx:if="{{supplierArr.length > 0}}">
       <view class="flex-column bg-white p-20 font-lg border-bottom" bind:tap="saveNxBatch" data-item="{{supplier}}" wx:for="{{supplierArr}}" wx:for-item="supplier" wx:key="nxJrdhSupplierId" hover-class="hover">
-        <view class="flex-row font-xs" style="margin-left: 100rpx;" wx:if="{{supplier.nxDistributerEntity !== null}}">
+        <view class="flex-row font-sl" style="margin-left: 100rpx;" wx:if="{{supplier.nxDistributerEntity !== null}}">
           <image src="../../../../images/user.png" class="icon-sm mr-10"></image>
           <text class="mr-10 text-secondary">{{supplier.nxDistributerEntity.nxDistributerName}}</text>
         </view>
@@ -33,8 +33,8 @@
         <view class="center-content flex-column">
           <image class="empty_image" src="../../../../images/xiuxi-2.png"></image>
           <text class="big">将订单发送给微信好友</text>
-          <text class="font-xs text-secondary pt-20 p-10"> 他们直接接收订货需求</text>
-          <text class="font-xs text-secondary ">可记录现金或记账</text>
+          <text class="font-sl text-secondary pt-20 p-10"> 他们直接接收订货需求</text>
+          <text class="font-sl text-secondary ">可记录现金或记账</text>
         </view>
       </view>
     </view>

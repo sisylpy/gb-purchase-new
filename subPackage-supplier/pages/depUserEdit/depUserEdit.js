@@ -1,9 +1,7 @@
-const globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
 import apiUrl from '../../../config/index.js'
 
 import {
-  updateJrdhUserWithFile,
   updateJrdhUser,
   getJrdhUser
 } from '../../../services/depOrder'
@@ -67,67 +65,57 @@ Page({
   },
 
   save() {
-    if (this.data.imgChanged) {
-      var that = this;
-      var filePathList = this.data.src;
-      var userName = this.data.userName;
-      var userId = this.data.jrdhUserInfo.nxJrdhUserId;
-      load.showLoading("保存修改内容")
-      updateJrdhUserWithFile(filePathList, userName, userId).then(res => {
-        load.hideLoading();
-        console.log(res)
-        if (res.result == '{"code":0}') {
-          getJrdhUser(that.data.jrdhUserInfo.nxJrdhUserId)
-            .then(res => {
-              if (res.result.code == 0) {
-                wx.setStorageSync('jrdhUserInfo', res.result.data);
-                var pages = getCurrentPages();
-                var prevPage1 = pages[pages.length - 2];
-                prevPage1.setData({
-                  jrdhUserInfo: res.result.data,
-                })
-                wx.navigateBack({
-                  delta: 1
-                })
-              }
-            })
-        } else {
-          wx.showToast({
-            title: res.result.msg,
-            icon: 'none'
-          })
-        }
-      })
-    } else {
-      var userName = this.data.userName;
-      var userId = this.data.jrdhUserInfo.nxJrdhUserId;
-      var data = {
-        userName: userName,
-        userId: userId,
-      }
-      load.showLoading("保存修改内容");
-      updateJrdhUser(data).then(res => {
-        if (res.result.code == 0) {
-          console.log(res)
-          load.hideLoading();
-          wx.setStorageSync('jrdhUserInfo', res.result.data);
-          var pages = getCurrentPages();
-          var prevPage1 = pages[pages.length - 2];
-          prevPage1.setData({
-            jrdhUserInfo: res.result.data,
-          })
-          wx.navigateBack({
-            delta: 1
-          })
-        } else {
-          load.hideLoading();
-          wx.showToast({
-            title: '获取信息失败',
-            icon: 'none'
-          })
-        }
-      })
+    var that = this;
+    var userName = this.data.userName;
+    var userId = this.data.jrdhUserInfo.nxJrdhUserId;
+    var tempFilePath = null;
+    if (this.data.imgChanged && this.data.src) {
+      var src = this.data.src;
+      tempFilePath = Array.isArray(src) ? src[0] : src;
     }
+    load.showLoading('保存修改内容');
+    updateJrdhUser(userName, userId, tempFilePath).then(function (res) {
+      load.hideLoading();
+      var raw = res.result;
+      var result = typeof raw === 'string' ? (function () {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          return {};
+        }
+      })() : raw;
+      if (result.code === 0) {
+        if (result.data) {
+          wx.setStorageSync('jrdhUserInfo', result.data);
+          var pages = getCurrentPages();
+          var prev = pages[pages.length - 2];
+          if (prev) {
+            prev.setData({ jrdhUserInfo: result.data });
+          }
+          wx.navigateBack({ delta: 1 });
+        } else {
+          getJrdhUser(that.data.jrdhUserInfo.nxJrdhUserId).then(function (r2) {
+            if (r2.result.code == 0) {
+              wx.setStorageSync('jrdhUserInfo', r2.result.data);
+              var pages = getCurrentPages();
+              var prev = pages[pages.length - 2];
+              if (prev) {
+                prev.setData({ jrdhUserInfo: r2.result.data });
+              }
+              wx.navigateBack({ delta: 1 });
+            }
+          });
+        }
+      } else {
+        wx.showToast({
+          title: result.msg || '保存失败',
+          icon: 'none',
+        });
+      }
+    }).catch(function () {
+      load.hideLoading();
+      wx.showToast({ title: '网络异常，请重试', icon: 'none' });
+    });
   },
 
   toBack() {

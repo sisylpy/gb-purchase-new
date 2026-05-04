@@ -1,9 +1,10 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs module="num" src="/wxs/signedNumber.wxs" />
 
 <view class="flex flex-column">
 
   <back-navbar style="height: {{navBarHeight}}rpx;" title="{{disGoods.gbDgGoodsName}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
-
+ 
   <!--  top -->
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
     <view class="flex-row">
@@ -23,10 +24,11 @@
       </view>
     </view>
 
-    <!-- <view class="flex-row p-20" bindtap="toFilterType">
-      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
-    </view> -->
+    <view class="flex-row p-20" bindtap="onToggleSearchBar">
+      <image src="/images/search-3.png" class="icon mr-20 cog-search-top-ico {{goodsNameSearch ? 'cog-search-top-ico--on' : ''}}"></image>
+    </view>
   </view>
+
 
   <!-- 部门筛选显示区域 -->
   <view class="filter-container" wx:if="{{selectedDepartment}}">
@@ -43,15 +45,13 @@
   <view class="flex-column" wx:if="{{hasGoodsCostContent}}">
 
     <!-- AI智能分析卡片 -->
-    <view class="ai-analysis-card" wx:if="{{aiAnalysis}}">
+    <view class="ai-analysis-card" wx:if="{{aiAnalysis}}" >
 
       <!-- 成本指标区域 -->
       <block wx:if="{{aiAnalysis.type == 'fresh'}}">
         <view class="ai-metrics-section">
           <view class="metrics-title">📊 成本指标</view>
           <view class="metrics-grid">
-
-          
 
             <view class="metric-item">
               <view class="metric-label">支出用量</view>
@@ -113,6 +113,26 @@
 
             </view>
 
+            <!-- 菜品销量反推：理论/实际原料四项（合并进 aiAnalysis） -->
+            <block wx:if="{{showIngredientMetricsStrip}}">
+              <view class="metric-item">
+                <view class="metric-label">理论应耗</view>
+                <view class="metric-value">{{aiAnalysis.theoreticalIngredientTotal}}{{disGoods.gbDgGoodsStandardname}}</view>
+              </view>
+              <view class="metric-item">
+                <view class="metric-label">实际消耗</view>
+                <view class="metric-value">{{aiAnalysis.actualIngredientTotal}}{{disGoods.gbDgGoodsStandardname}}</view>
+              </view>
+              <view class="metric-item">
+                <view class="metric-label">差值(实际−理论)</view>
+                <view class="metric-value">{{aiAnalysis.ingredientGapActualMinusTheoretical}}{{disGoods.gbDgGoodsStandardname}}</view>
+              </view>
+              <view class="metric-item">
+                <view class="metric-label">偏差占理论</view>
+                <view class="metric-value">{{aiAnalysis.ingredientGapPercentOfTheoretical == null ? '无' : aiAnalysis.ingredientGapPercentOfTheoretical + '%'}}</view>
+              </view>
+            </block>
+
           </view>
         </view>
       </block>
@@ -159,6 +179,27 @@
                 {{aiAnalysis.averageSubtotal}}元/天
               </view>
             </view>
+
+            <!-- 菜品销量反推：理论/实际原料四项（合并进 aiAnalysis） -->
+            <block wx:if="{{showIngredientMetricsStrip}}">
+              <view class="metric-item">
+                <view class="metric-label">理论应耗</view>
+                <view class="metric-value">{{aiAnalysis.theoreticalIngredientTotal}}{{disGoods.gbDgGoodsStandardname}}</view>
+              </view>
+              <view class="metric-item">
+                <view class="metric-label">实际消耗</view>
+                <view class="metric-value">{{aiAnalysis.actualIngredientTotal}}{{disGoods.gbDgGoodsStandardname}}</view>
+              </view>
+              <view class="metric-item">
+                <view class="metric-label">差值(实际−理论)</view>
+                <view class="metric-value">{{aiAnalysis.ingredientGapActualMinusTheoretical}}{{disGoods.gbDgGoodsStandardname}}</view>
+              </view>
+              <view class="metric-item">
+                <view class="metric-label">偏差占理论</view>
+                <view class="metric-value">{{aiAnalysis.ingredientGapPercentOfTheoretical == null ? '无' : aiAnalysis.ingredientGapPercentOfTheoretical + '%'}}</view>
+              </view>
+            </block>
+
             <!-- <view class="metric-item">
               <view class="metric-label">库存</view>
               <view class="metric-value">
@@ -211,444 +252,149 @@
 
     </view>
 
-    <!-- 日支出堆叠柱 + 蓝色折线：菜品销量带动的本原料消耗 -->
-    <view class="bg-white p-20 chart-daily-wrap" style="height: 400rpx;">
-      <view wx:if="{{produceList.length > 0 || lossList.length > 0 || wasteList.length > 0 || foodSalesIngredientList.length > 0}}" class="chart-container">
+    <!-- 日支出堆叠柱（生产出库 / 损耗 / 废弃） -->
+    <view class="bg-white p-20 chart-daily-wrap gfc-chart-section" style="height: 460rpx;">
+      <view class="gfc-block-caption">
+        <text class="gfc-block-caption-title">日出库数量</text>
+        <text class="gfc-block-caption-desc">按日汇总出库用量：生产出库、损耗、废弃等在图表中分段展示。</text>
+      </view>
+      <view wx:if="{{produceList.length > 0 || lossList.length > 0 || wasteList.length > 0}}" class="chart-container gfc-chart-body">
         <ec-canvas id="dailyChart" canvas-id="dailyChart" class="chart">
         </ec-canvas>
       </view>
     </view>
 
-    <!-- 门店菜品：接口文档中的菜品/原料字段全部展示 -->
-    <view wx:if="{{foodSalesIngredientList.length || foodSalesStats || foodSalesIngredientTotal != null}}" class="food-sales-root">
-      <view class="food-sales-card">
-        <view class="food-sales-card-head">
-          <text class="food-sales-card-title">门店菜品 · 本原料</text>
-          <text class="food-sales-card-sub">按 Excel 导入的菜品销量反推本原料消耗；图中蓝线为「菜品原料消耗」</text>
-        </view>
 
-        <view class="food-sales-section">
-          <view class="food-sales-section-title">按日·本原料消耗</view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">区间合计</text>
-            <text class="food-sales-v">{{foodSalesIngredientTotal != null ? foodSalesIngredientTotal : '—'}}{{disGoods && disGoods.gbDgGoodsStandardname ? disGoods.gbDgGoodsStandardname : ''}}</text>
-          </view>
-          <scroll-view scroll-y class="food-sales-ingredient-scroll" wx:if="{{foodSalesIngredientList.length}}">
-            <view class="food-sales-table food-sales-table-ing">
-              <view class="food-sales-tr food-sales-th">
-                <text class="food-sales-td w-date">日期</text>
-                <text class="food-sales-td w-val">用量</text>
-              </view>
-              <view class="food-sales-tr" wx:for="{{foodSalesIngredientList}}" wx:for-index="ingIdx" wx:key="ingIdx">
-                <text class="food-sales-td w-date">{{item.date}}</text>
-                <text class="food-sales-td w-val">{{item.value}}</text>
-              </view>
-            </view>
-          </scroll-view>
-          <view wx:else class="food-sales-empty">暂无按日消耗数据</view>
-        </view>
+    <block wx:if="{{oneTotal > 0 || (itemList && itemList.length)}}">
+      <view class="gfc-chart-to-list-gap"></view>
 
-        <view class="food-sales-section" wx:if="{{foodSalesStats}}">
-          <view class="food-sales-section-title">统计范围</view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">原料明细行数</text>
-            <text class="food-sales-v">{{foodSalesStats.depFoodGoodsSalesRowCountInPeriod}}</text>
-          </view>
-          <view class="food-sales-kv" wx:if="{{foodSalesStats.period}}">
-            <text class="food-sales-k">起止日期</text>
-            <text class="food-sales-v">{{foodSalesStats.period.startDate}} ~ {{foodSalesStats.period.stopDate}}</text>
-          </view>
-          <view class="food-sales-kv" wx:if="{{foodSalesStats.filters}}">
-            <text class="food-sales-k">商品编号 / 部门</text>
-            <text class="food-sales-v">{{foodSalesStats.filters.disGoodsId}} / {{foodSalesStats.filters.searchDepId}}</text>
-          </view>
-        </view>
-
-        <view class="food-sales-section" wx:if="{{foodSalesStats && foodSalesStats.dishSales}}">
-          <view class="food-sales-section-title">菜品销售关联</view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">关联销售笔数</text>
-            <text class="food-sales-v">{{foodSalesStats.dishSales.linkedSalesRowCount}}</text>
-          </view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">关联菜品销量合计</text>
-            <text class="food-sales-v">{{foodSalesStats.dishSales.linkedDishQtyTotal}}</text>
-          </view>
-          <view class="food-sales-section-sub">最耗本料的菜品（至多25条）</view>
-          <scroll-view scroll-y class="food-sales-table-scroll" wx:if="{{foodSalesStats.dishSales.topDishesDrivingThisIngredient && foodSalesStats.dishSales.topDishesDrivingThisIngredient.length}}">
-            <view class="food-sales-table">
-              <view class="food-sales-tr food-sales-th">
-                <text class="food-sales-td w-sm">销售单号</text>
-                <text class="food-sales-td w-sm">菜品编号</text>
-                <text class="food-sales-td w-qty">菜品销量</text>
-                <text class="food-sales-td w-amt">本料消耗</text>
-              </view>
-              <view class="food-sales-tr" wx:for="{{foodSalesStats.dishSales.topDishesDrivingThisIngredient}}" wx:for-index="tdIdx" wx:key="tdIdx">
-                <text class="food-sales-td w-sm">{{item.gbDepFoodSalesId}}</text>
-                <text class="food-sales-td w-sm">{{item.gbDfsFoodId}}</text>
-                <text class="food-sales-td w-qty">{{item.dishQty}}</text>
-                <text class="food-sales-td w-amt">{{item.ingredientAmount}}</text>
-              </view>
-            </view>
-          </scroll-view>
-          <view wx:else class="food-sales-empty">暂无排行榜菜品数据</view>
-        </view>
-
-        <view class="food-sales-section" wx:if="{{foodSalesStats}}">
-          <view class="food-sales-section-title">配方中的菜品</view>
-          <scroll-view scroll-y class="food-sales-table-scroll" wx:if="{{foodSalesStats.recipeDishesUsingThisGood && foodSalesStats.recipeDishesUsingThisGood.length}}">
-            <view class="food-sales-table">
-              <view class="food-sales-tr food-sales-th">
-                <text class="food-sales-td w-food">菜名</text>
-                <text class="food-sales-td w-sm">菜品编号</text>
-                <text class="food-sales-td w-num">每份本料量</text>
-                <text class="food-sales-td w-num">配方总用量</text>
-                <text class="food-sales-td w-pct">本料占比(%)</text>
-              </view>
-              <view class="food-sales-tr" wx:for="{{foodSalesStats.recipeDishesUsingThisGood}}" wx:for-index="rcIdx" wx:key="rcIdx">
-                <text class="food-sales-td w-food">{{item.foodName}}</text>
-                <text class="food-sales-td w-sm">{{item.gbDfsFoodId}}</text>
-                <text class="food-sales-td w-num">{{item.recipeAmountThisGoodPerDish}}</text>
-                <text class="food-sales-td w-num">{{item.totalRecipeAmountAllIngredients}}</text>
-                <text class="food-sales-td w-pct">{{item.shareOfRecipePercent}}</text>
-              </view>
-            </view>
-          </scroll-view>
-          <view wx:else class="food-sales-empty">暂无配方数据（需在批发商菜品中维护配方）</view>
-        </view>
-
-        <view class="food-sales-section" wx:if="{{foodSalesStats}}">
-          <view class="food-sales-section-title">按部门·菜品汇总</view>
-          <scroll-view scroll-x="true" class="food-sales-xscroll" wx:if="{{foodSalesStats.periodSalesByDepAndDish && foodSalesStats.periodSalesByDepAndDish.length}}">
-          <scroll-view scroll-y="true" class="food-sales-table-scroll food-sales-table-scroll-tall food-sales-inner-y">
-            <view class="food-sales-table food-sales-table-wide">
-              <view class="food-sales-tr food-sales-th">
-                <text class="food-sales-td w-dep">部门</text>
-                <text class="food-sales-td w-food">菜名</text>
-                <text class="food-sales-td w-sm">部门编号</text>
-                <text class="food-sales-td w-sm">菜品编号</text>
-                <text class="food-sales-td w-qty">销量</text>
-                <text class="food-sales-td w-num">每份本料量</text>
-                <text class="food-sales-td w-amt">理论应耗</text>
-              </view>
-              <view class="food-sales-tr" wx:for="{{foodSalesStats.periodSalesByDepAndDish}}" wx:key="index">
-                <text class="food-sales-td w-dep">{{item.depName}}</text>
-                <text class="food-sales-td w-food">{{item.foodName}}</text>
-                <text class="food-sales-td w-sm">{{item.gbDfsDepId}}</text>
-                <text class="food-sales-td w-sm">{{item.gbDfsFoodId}}</text>
-                <text class="food-sales-td w-qty">{{item.soldQty}}</text>
-                <text class="food-sales-td w-num">{{item.recipeAmountThisGoodPerDish}}</text>
-                <text class="food-sales-td w-amt">{{item.theoreticalIngredientForThisRow}}</text>
-              </view>
-            </view>
-          </scroll-view>
-          </scroll-view>
-          <view wx:else class="food-sales-empty">暂无按部门菜品汇总</view>
-        </view>
-
-        <view class="food-sales-section" wx:if="{{foodSalesStats && foodSalesStats.theoreticalVsActual}}">
-          <view class="food-sales-section-title">理论与实际对比</view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">理论应耗合计</text>
-            <text class="food-sales-v">{{foodSalesStats.theoreticalVsActual.theoreticalIngredientTotal}}</text>
-          </view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">实际消耗合计</text>
-            <text class="food-sales-v">{{foodSalesStats.theoreticalVsActual.actualIngredientTotal}}</text>
-          </view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">差值(实际−理论)</text>
-            <text class="food-sales-v">{{foodSalesStats.theoreticalVsActual.ingredientGapActualMinusTheoretical}}</text>
-          </view>
-          <view class="food-sales-kv">
-            <text class="food-sales-k">偏差占理论(%)</text>
-            <text class="food-sales-v">{{foodSalesStats.theoreticalVsActual.ingredientGapPercentOfTheoretical == null ? '无' : foodSalesStats.theoreticalVsActual.ingredientGapPercentOfTheoretical + '%'}}</text>
-          </view>
-        </view>
+      <view scroll-y style="height:{{windowHeight - 460}}rpx;">
+      <view class="gfc-block-caption gfc-block-caption--in-module bg-white pl-20 pr-20 pt-20 pb-8">
+        <text class="gfc-block-caption-title">每日出库与销售对比</text>
+        <text class="gfc-block-caption-desc">按日期与部门列出当日出库用量、菜品销售份数及相关成本与分摊收入，便于逐日对照。</text>
       </view>
-    </view>
-
-    <view scroll-y wx:if="{{oneTotal > 0}}" style="height:{{windowHeight - 400}}rpx; ">
 
       <view class="flex-column ">
-        <view class="flex-row-default p-20  border-bottom bg-white " wx:for="{{itemList}}" wx:key="index" wx:for-item="everyday" wx:for-index="dayIndex">
+        <view class="flex-row-default p-20 border-bottom bg-white gfc-itemlist-day" wx:for="{{itemList}}" wx:key="index" wx:for-item="everyday" wx:for-index="dayIndex">
 
-         
-          <view class="flex-column" wx:for="{{everyday.arr}}" wx:for-item="day" wx:for-index="itemIndex" wx:key="itemIndex" style="width: {{windowWidth - 40}}rpx;">
+          <view class="flex-column gfc-itemlist-day-inner" wx:for="{{everyday.arr}}" wx:for-item="day" wx:for-index="itemIndex" wx:key="itemIndex" style="width: {{windowWidth - 40}}rpx;">
 
-            <view class="flex-column font-md " wx:for="{{day.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
+            <view class="flex-column font-md">
 
-              <!-- 默认显示 -->
-              <view id="src-{{itemIndex}}-{{dayIndex}}-{{reduceIndex}}" class="stock-row-container " data-index="{{reduceIndex}}" data-item-index="{{itemIndex}}" data-day-index="{{dayIndex}}">
-                <view class="stock-row {{expandedRows[itemIndex + '_' + dayIndex + '_' + reduceIndex] ? 'stock-row-active' : ''}}" bind:tap="showOne" data-index="{{reduceIndex}}" data-item-index="{{itemIndex}}" data-day-index="{{dayIndex}}">
+              <view id="src-{{itemIndex}}-{{dayIndex}}" class="stock-row-container gfc-dep-card-wrap">
+                <view
+                  class="stock-row gfc-dep-summary-row {{expandedRows[itemIndex + '_' + dayIndex] ? 'stock-row-active' : ''}}"
+                >
+                  <view class="gfc-dep-summary-stack">
+                    <!-- 顶部一行：日期 + 部门 -->
+                    <view class="gfc-dep-head-row">
+                      <text class="gfc-dep-head-date" wx:if="{{everyday.date}}">{{tool.transferDateString(everyday.date)}}</text>
+                      <text class="gfc-dep-head-date" wx:elif="{{day.departmentGoodsDailyEntity && day.departmentGoodsDailyEntity.gbDgdDate}}">{{tool.transferDateString(day.departmentGoodsDailyEntity.gbDgdDate)}}</text>
+                      <text class="gfc-dep-head-sep" wx:if="{{everyday.date || (day.departmentGoodsDailyEntity && day.departmentGoodsDailyEntity.gbDgdDate)}}">·</text>
+                      <text class="gfc-dep-head-dept">{{day.gbDepartmentName}}</text>
+                      <text class="gfc-dep-head-attr" wx:if="{{day.gbDepartmentAttrName}}">（{{day.gbDepartmentAttrName}}）</text>
+                    </view>
 
-                  <!-- 左侧信息区域 -->
-                  <view class="stock-info-left">
-                    <view class="stock-department">{{day.gbDepartmentName}}</view>
-                    <view class="stock-date">{{tool.transferDateString(reduceDay.gbDgsrDate)}}</view>
-                  </view>
-
-                  <!-- 中间价格数量区域 -->
-                  <view class="stock-info-center">
-                    <block wx:if="{{reduceDay.gbDgsrType == 1}}">
-                      <view class="stock-amount">{{reduceDay.gbDgsrProduceSubtotal}}元</view>
-                      <view class="stock-quantity">{{reduceDay.gbDgsrProduceWeight}}{{disGoods.gbDgGoodsStandardname}}</view>
-                      <view class="stock-type sales-type">售出</view>
-                    </block>
-                    <block wx:if="{{reduceDay.gbDgsrType == 2}}">
-                      <view class="stock-amount">{{reduceDay.gbDgsrWasteSubtotal}}元</view>
-                      <view class="stock-quantity">{{reduceDay.gbDgsrWasteWeight}}{{disGoods.gbDgGoodsStandardname}}</view>
-                      <view class="stock-type waste-type">废弃</view>
-                    </block>
-                    <block wx:if="{{reduceDay.gbDgsrType == 3}}">
-                      <view class="stock-amount">{{reduceDay.gbDgsrLossSubtotal}}元</view>
-                      <view class="stock-quantity">{{reduceDay.gbDgsrLossWeight}}{{disGoods.gbDgGoodsStandardname}}</view>
-                      <view class="stock-type loss-type">损耗</view>
-                    </block>
-                    <block wx:if="{{reduceDay.gbDgsrType == 4}}">
-                      <view class="stock-amount">{{reduceDay.gbDgsrReturnSubtotal}}元</view>
-                      <view class="stock-quantity">{{reduceDay.gbDgsrReturnWeight}}{{disGoods.gbDgGoodsStandardname}}</view>
-                      <view class="stock-type return-type">退货</view>
-                    </block>
-                  </view>
-
-                  <!-- 右侧箭头区域 -->
-                  <view class="stock-info-right">
-                    <view class="stock-arrow">
-                      <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon {{expandedRows[itemIndex + '_' + dayIndex + '_' + reduceIndex] ? 'expanded' : 'collapsed'}}" />
+                    <!-- 三模块：出库 | 菜品销售 | 本原料收支 -->
+                    <view class="gfc-day-balance-cols gfc-day-balance-cols--triple">
+                      <view class="gfc-day-col gfc-day-col--out">
+                        <text class="gfc-day-col-tag">出库</text>
+                        <text class="gfc-day-col-qty">{{day.dayOutbound123Weight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                        <text class="gfc-day-col-sub">出库成本 ¥{{day.dayOutbound123Subtotal}}</text>
+                        <text class="gfc-day-col-hint">理论用料 {{day.dayTheoryOutboundQty}}{{disGoods.gbDgGoodsStandardname}}</text>
+                      </view>
+                      <view class="gfc-day-col gfc-day-col--sales">
+                        <text class="gfc-day-col-tag">菜品销售</text>
+                        <block wx:if="{{day._gfcDishCount > 0}}">
+                          <text class="gfc-day-col-qty">共 {{day._gfcSalesPortionsTotal}} 份</text>
+                          <text class="gfc-day-col-sub">{{day._gfcDishCount}} 道菜：{{day._gfcSalesPreview}}</text>
+                        </block>
+                        <block wx:else>
+                          <text class="gfc-day-col-qty gfc-day-col-qty--muted">—</text>
+                          <text class="gfc-day-col-sub">暂无关联菜品销量</text>
+                          <text class="gfc-day-col-hint">可看左侧出库</text>
+                        </block>
+                      </view>
+                      <view class="gfc-day-col gfc-day-col--money">
+                        <text class="gfc-day-col-tag">本原料收支</text>
+                        <text class="gfc-day-col-money-rev" wx:if="{{day._gfcDishCount > 0}}">¥{{day._gfcAllocatedRevenueSum}}</text>
+                        <text class="gfc-day-col-money-rev gfc-day-col-money-rev--na" wx:else>—</text>
+                        <text class="gfc-day-col-sub">分摊收入</text>
+                        <text class="gfc-day-col-hint">出库成本 ¥{{day.dayOutbound123Subtotal}}</text>
+                        <text class="gfc-day-col-hint gfc-day-col-hint-profit">毛利 ¥{{day.dayGrossProfitContributionTotal}}</text>
+                      </view>
                     </view>
                   </view>
 
+                  <!-- 菜品明细入口固定在卡片底部 -->
+                  <view
+                    wx:if="{{day.dayDishIngredientSales && day.dayDishIngredientSales.length}}"
+                    class="gfc-dish-toggle-footer"
+                    catchtap="showOne"
+                    data-item-index="{{itemIndex}}"
+                    data-day-index="{{dayIndex}}"
+                  >
+                    <view class="gfc-dish-toggle-foot-text">
+                      <text class="gfc-dish-toggle-foot-title">菜品分摊明细</text>
+                      <text class="gfc-dish-toggle-foot-sub">共 {{day._gfcSalesPortionsTotal}} 份 · {{day._gfcDishCount}} 道菜 · 收支明细</text>
+                    </view>
+                    <view class="gfc-dish-toggle-foot-arrow">
+                      <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon {{expandedRows[itemIndex + '_' + dayIndex] ? 'expanded' : 'collapsed'}}" />
+                    </view>
+                  </view>
+                  <view wx:else class="gfc-dish-toggle-footer gfc-dish-toggle-footer--disabled">
+                    <text class="gfc-dish-toggle-foot-title gfc-dish-toggle-foot-title--muted">暂无菜品分摊明细</text>
+                  </view>
                 </view>
+
+                <view class="stock-info-card gfc-dish-expand" wx:if="{{expandedRows[itemIndex + '_' + dayIndex] && day.dayDishIngredientSales && day.dayDishIngredientSales.length}}">
+                  <view class="gfc-dish-expand-title">各菜品 · 销量与本原料收支</view>
+                  <view class="gfc-dish-card" wx:for="{{day.dayDishIngredientSales}}" wx:for-item="dishRow" wx:for-index="dishIdx" wx:key="dishIdx">
+                    <view class="gfc-dish-card-hd">
+                      <text class="gfc-dish-name">{{dishRow.dishName}}</text>
+                      <text class="gfc-dish-id" wx:if="{{dishRow.dishId}}">#{{dishRow.dishId}}</text>
+                    </view>
+                    <view class="gfc-dish-quick-line">
+                      <text class="gfc-dish-quick-label">当天售出</text>
+                      <text class="gfc-dish-quick-strong">{{dishRow.salesPortions}} 份</text>
+                    </view>
+                    <text class="gfc-dish-quick-sub">整道菜营业额 ¥{{dishRow.salesAmount}}</text>
+                    <view class="gfc-dish-money-trio">
+                      <view class="gfc-dish-mt-item">
+                        <text class="gfc-dish-mt-k">分摊收入</text>
+                        <text class="gfc-dish-mt-v gfc-dish-mt-v--in">¥{{dishRow.listRevenueAllocatedToIngredient}}</text>
+                      </view>
+                      <view class="gfc-dish-mt-item">
+                        <text class="gfc-dish-mt-k">分摊出库成本</text>
+                        <text class="gfc-dish-mt-v gfc-dish-mt-v--out">¥{{dishRow.outbound123CostAllocatedToIngredient}}</text>
+                      </view>
+                      <view class="gfc-dish-mt-item">
+                        <text class="gfc-dish-mt-k">毛利</text>
+                        <text class="gfc-dish-mt-v gfc-dish-mt-v--profit">¥{{dishRow.grossProfitContribution}}</text>
+                      </view>
+                    </view>
+                    <view class="gfc-dish-meta-line">
+                      <text>均价 ¥{{dishRow.salesUnitPrice}}/份</text>
+                      <text class="gfc-dish-meta-dot">·</text>
+                      <text>每份用本原料 {{dishRow.recipeUnitPerDish}}{{disGoods.gbDgGoodsStandardname}}</text>
+                      <text class="gfc-dish-meta-dot">·</text>
+                      <text>理论用量 {{dishRow.theoryIngredientQty}}{{disGoods.gbDgGoodsStandardname}}</text>
+                    </view>
+                  </view>
+                </view>
+
               </view>
-
-              <!-- 显示库存批次信息 -->
-              <view wx:if="{{expandedRows[itemIndex + '_' + dayIndex + '_' + reduceIndex]}}" class="stock-info-card expandable-content expanded" bind:tap="toCost" hover-class="hover">
-
-                <!-- 图标 + 标题 -->
-                <view class="info-header">
-                  <view class="flex-row-between" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <view class="flex-row">
-                      <image src="../../../../images/gouwuche.png" class="info-header-icon"></image>
-                      <text class="info-header-title">入库信息</text>
-                    </view>
-                    <view class="flex-row">
-                      <image src="/images/search.png" mode="aspectFill" class="icon p-10" />
-                    </view>
-                  </view>
-
-                </view>
-
-                <view class="info-item">
-                  <text class="info-label">入库时间</text>
-                  <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsDate}}</text>
-                </view>
-                <view class="info-item">
-                  <text class="info-label">入库数量</text>
-                  <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-                <view class="info-item">
-                  <text class="info-label">入库单价</text>
-                  <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsPrice}}元/{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-                <view class="info-item">
-                  <text class="info-label">入库金额</text>
-                  <text class="info-value info-value-amount">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsSubtotal}}元</text>
-                </view>
-                <view class="info-item">
-                  <text class="info-label">现库存</text>
-                  <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsRestWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-
-
-                <view class="info-item {{reduceDay.gbDgsrType == 1 ? 'active' : ''}}">
-                  <text class="info-label">销售</text>
-                  <view class="flex-row">
-                    <text class="info-value info-value-amount mr-10">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsProduceSubtotal}}元</text>
-                    <text class="font-xs">({{reduceDay.gbDepartmentGoodsStockEntity.gbDgsProduceWeight}}{{disGoods.gbDgGoodsStandardname}})</text>
-                  </view>
-                </view>
-                <view class="info-item  {{reduceDay.gbDgsrType == 3 ? 'active' : ''}}">
-                  <text class="info-label">损耗</text>
-                  <view class="flex-row">
-                    <text class="info-value info-value-amount mr-10">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsLossSubtotal}}元</text>
-                    <text class="font-xs">({{reduceDay.gbDepartmentGoodsStockEntity.gbDgsLossWeight}}{{disGoods.gbDgGoodsStandardname}})</text>
-                  </view>
-                </view>
-                <view class="info-item  {{reduceDay.gbDgsrType == 2 ? 'active' : ''}}">
-                  <text class="info-label">废弃</text>
-                  <view class="flex-row">
-                    <text class="info-value info-value-amount mr-10">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsWasteSubtotal}}元</text>
-                    <text class="font-xs">({{reduceDay.gbDepartmentGoodsStockEntity.gbDgsWasteWeight}}{{disGoods.gbDgGoodsStandardname}})</text>
-                  </view>
-                  
-                </view>
-                <view class="info-item  {{reduceDay.gbDgsrType == 4 ? 'active' : ''}}">
-                  <text class="info-label">退货</text>
-                  <view class="flex-row">
-                    <text class="info-value info-value-amount mr-10">{{reduceDay.gbDepartmentGoodsStockEntity.gbDgsReturnSubtotal}}元</text>
-                    <text class="font-xs">({{reduceDay.gbDepartmentGoodsStockEntity.gbDgsReturnWeight}}{{disGoods.gbDgGoodsStandardname}})</text>
-                  </view>
-                  
-                </view>
-
-                <!-- 采购信息 - 直接显示在库存信息下面 -->
-                <view class="purchase-info-section" bind:tap="toFenxi" data-item="{{item}}" data-id="{{disGoods.gbDistributerGoodsId}}" hover-class="hover" data-purid="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDistributerPurchaseGoodsId}}">
-                  <!-- 分隔线 -->
-                  <view class="section-divider"></view>
-
-                  <!-- 图标 + 标题 -->
-                  <view class="info-header">
-                    <view class="flex-row-between" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                      <view class="flex-row">
-                        <image src="../../../../images/gouwuche.png" class="info-header-icon"></image>
-                        <text class="info-header-title">采购信息</text>
-                      </view>
-                      <view class="flex-row">
-                        <image src="/images/search.png" mode="aspectFill" class="icon p-10" />
-                      </view>
-                    </view>
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">采购时间</text>
-                    <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgStockFinishDate}}</text>
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">单价</text>
-                    <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgBuyPrice}}元/{{disGoods.gbDgGoodsStandardname}}</text>
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">数量</text>
-                    <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgBuyQuantity}}{{disGoods.gbDgGoodsStandardname}}</text>
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">采购金额</text>
-                    <text class="info-value info-value-amount">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgBuySubtotal}}元</text>
-                  </view>
-
-                  <block wx:if="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.purchaseDepartmentUser !== null}}">
-                    <view class="info-item">
-                      <text class="info-label">采购员</text>
-                      <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.purchaseDepartmentUser.gbDuWxNickName}}</text>
-                    </view>
-                  </block>
-
-                  <block wx:elif="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.nxJrdhSupplierEntity !== null}}">
-                    <view class="info-item">
-                      <text class="info-label">供货商</text>
-                      <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
-                    </view>
-                  </block>
-                </view>
-              </view>
-              <!-- 采购批次的所有库存批次（包括业务的库存批次） -->
-              <block>
-                <view wx:if="{{expandedRows[itemIndex + '_' + dayIndex + '_' + reduceIndex] === 'purchase'}}" class="purchase-info-card expandable-content expanded" bind:tap="toFenxi" data-item="{{item}}" data-id="{{disGoods.gbDistributerGoodsId}}" hover-class="hover" data-purid="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDistributerPurchaseGoodsId}}">
-
-                  <!-- 图标 + 标题 -->
-                  <view class="info-header">
-                    <view class="flex-row-between" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                      <view class="flex-row">
-                        <image src="../../../../images/gouwuche.png" class="info-header-icon"></image>
-                        <text class="info-header-title">采购信息</text>
-                      </view>
-                      <view class="flex-row">
-                        <image src="/images/search.png" mode="aspectFill" class="icon p-10" />
-                      </view>
-                    </view>
-
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">采购时间</text>
-                    <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgStockFinishDate}}</text>
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">单价</text>
-                    <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgBuyPrice}}元/{{disGoods.gbDgGoodsStandardname}}</text>
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">数量</text>
-                    <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgBuyQuantity}}{{disGoods.gbDgGoodsStandardname}}</text>
-                  </view>
-
-                  <view class="info-item">
-                    <text class="info-label">采购金额</text>
-                    <text class="info-value info-value-amount">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDpgBuySubtotal}}元</text>
-                  </view>
-
-                  <block wx:if="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.purchaseDepartmentUser !== null}}">
-                    <view class="info-item">
-                      <text class="info-label">采购员</text>
-                      <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.purchaseDepartmentUser.gbDuWxNickName}}</text>
-                    </view>
-                  </block>
-
-                  <block wx:elif="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.nxJrdhSupplierEntity !== null}}">
-                    <view class="info-item">
-                      <text class="info-label">供货商</text>
-                      <text class="info-value">{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
-                    </view>
-                  </block>
-
-                </view>
-
-                <!-- 采购批次的每个库存信息 -->
-                <view class="other-stock-card" wx:for="{{reduceDay.gbDepartmentGoodsStockEntity.purchaseGoodsEntity.gbDepartmentGoodsStockEntities}}" wx:for-item="purStock" wx:if="{{purStock.gbDepartmentEntity.gbDepartmentId !== day.gbDepartmentId}}">
-
-                  <view class="flex-column p-20 font-sm">
-                    <view class="other-stock-item">
-                      <text class="other-stock-label">入库部门</text>
-                      <text class="other-stock-value">{{purStock.gbDepartmentEntity.gbDepartmentName}}</text>
-                    </view>
-                    <view class="other-stock-item">
-                      <text class="other-stock-label">入库数量</text>
-                      <text class="other-stock-value">{{purStock.gbDgsWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                    </view>
-                    <view class="other-stock-item">
-                      <text class="other-stock-label">销售数量</text>
-                      <text class="other-stock-value">{{purStock.gbDgsProduceWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                    </view>
-                    <view class="other-stock-item">
-                      <text class="other-stock-label">损耗数量</text>
-                      <text class="other-stock-value">{{purStock.gbDgsLossWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                    </view>
-                    <view class="other-stock-item">
-                      <text class="other-stock-label">废弃数量</text>
-                      <text class="other-stock-value">{{purStock.gbDgsWasteWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                    </view>
-                    <view class="other-stock-item">
-                      <text class="other-stock-label">退货数量</text>
-                      <text class="other-stock-value">{{purStock.gbDgsReturnWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                    </view>
-                    <view class="other-stock-item">
-                      <text class="other-stock-label">库存数量</text>
-                      <text class="other-stock-value">{{purStock.gbDgsRestWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                    </view>
-                  </view>
-
-
-
-                </view>
-
-              </block>
 
             </view>
           </view>
 
-
         </view>
       </view>
 
-      <view class="font-xs text-secondary flex-column-center" style="height: 100rpx;">没有数据拉！</view>
+      <view class="font-sl text-secondary flex-column-center" style="height: 100rpx;" wx:if="{{!itemList || itemList.length === 0}}">暂无按日部门明细</view>
 
     </view>
+    </block>
 
 
   </view>
@@ -666,6 +412,5 @@
     </view>
     <!-- ./empty -->
   </view>
-
 
 </view>

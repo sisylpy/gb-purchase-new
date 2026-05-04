@@ -164,8 +164,8 @@
   flex-shrink: 0;
   width: 44rpx;
   margin-right: 12rpx;
-  font-size: 24rpx;
-  color: var(--gb-text-muted);
+  font-size: 32rpx;
+  color: var(--gb-text-text);
   line-height: 1.5;
 }
 
@@ -179,7 +179,7 @@
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  font-size: 28rpx;
+  font-size: 32rpx;
   line-height: 1.5;
   color: var(--gb-text);
 }
@@ -192,6 +192,14 @@
 
 .food-raw-search-row__name {
   word-break: break-all;
+}
+
+.food-raw-search-row__spec {
+  flex-shrink: 0;
+  margin-left: 4rpx;
+  font-size: 28rpx;
+  color: var(--gb-text-secondary);
+  font-weight: 400;
 }
 
 .food-raw-search-row__place,

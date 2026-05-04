@@ -48,7 +48,7 @@
   <view class="flex-row-default  font-lg bg-white  border-bottom p-20" wx:for="{{arr}}" wx:for-index="goodsIndex" bindtap="toOrderList" data-id="{{item.gbDistributerGoodsId}}" hover-class="hover">
     <view class="flex-row-default">
       <view class="flex-column " style="width: {{windowWidth - 80}}rpx; ">
-        <view class="flex-row font-xs gray" style="margin-left: 40rpx;">
+        <view class="flex-row font-sl gray" style="margin-left: 40rpx;">
             <image src="../../../../../../images/person.png" class="icon mr-20"></image>
             <text class="mr-10">{{item.gbPurUserEntity.gbDuWxNickName}}</text>
             <text style="margin-right:200rpx">负责采买</text>
@@ -64,7 +64,7 @@
               <text class="mr-10">{{item.nxJrdhsSupplierName}}</text>
              </view>
              <view class="flex-row">
-              <text class="font-xs">{{item.jrdhUserEntity.nxJrdhWxNickName}}</text>
+              <text class="font-sl">{{item.jrdhUserEntity.nxJrdhWxNickName}}</text>
              </view>
 
            </view>

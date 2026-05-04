@@ -78,7 +78,7 @@
         <view class="flex-column" wx:if="{{showType == 3}}">
           <view class="flex-column p-20">
             <view class="flex-row" wx:if="{{item.returnReduceEntity !== null}}">
-              <text>{{item.returnReduceEntity.gbDgsrReturnWeight}}</text>
+              <text>{{item.returnReduceEntity.gbDgsrWeight}}</text>
             </view>
             <view class="flex-row" wx:else>
               <text class="margin-l-right">数量:</text>

@@ -87,17 +87,23 @@
           </view>
           <view class="gem-msg-row gem-msg-ai" id="msg-{{index}}" wx:if="{{item.role === 'assistant'}}">
             <view class="gem-bubble gem-bubble-ai">
-              <view class="gem-typing" wx:if="{{item.isLoading}}">
+              <!-- 有正文时优先展示正文，避免 isLoading 与 setData 不同步时长期只有占位 -->
+              <view class="gem-typing" wx:if="{{item.isLoading && !item.content}}">
                 <view class="gem-dot"></view>
                 <view class="gem-dot"></view>
                 <view class="gem-dot"></view>
               </view>
-              <rich-text
-                wx:elif="{{item.role === 'assistant' && item.richNodes}}"
-                class="gem-rich-md"
-                nodes="{{item.richNodes}}"
-              />
-              <text wx:else class="gem-bubble-text">{{item.content}}</text>
+              <view
+                wx:elif="{{item.richNodes}}"
+                class="gem-ai-stream-row"
+              >
+                <rich-text class="gem-rich-md gem-rich-md--flex" nodes="{{item.richNodes}}" />
+                <view class="gem-stream-cursor" wx:if="{{item.isLoading}}"></view>
+              </view>
+              <view wx:else class="gem-ai-stream-row">
+                <text class="gem-bubble-text">{{item.content}}</text>
+                <view class="gem-stream-cursor" wx:if="{{item.isLoading}}"></view>
+              </view>
             </view>
           </view>
         </block>

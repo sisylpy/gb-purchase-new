@@ -3,7 +3,7 @@
  * 对应后端: AiChatController
  *
  * 接口清单:
- * 1. createConversation(departmentId, userId) - 创建/恢复对话
+ * 1. createConversation(opts) 或 (departmentId, userId, type) - 创建/恢复对话
  * 2. sendMessage(conversationId, msg)          - 发送消息（非流式）
  * 3. getHistory(conversationId)               - 获取对话历史
  * 4. endConversation(conversationId)          - 结束对话（触发记忆提取）
@@ -13,18 +13,33 @@ var requestUtil = require('../lib/request');
 
 /**
  * 创建或恢复对话
- * POST ai/chat/conversation?departmentId=xxx&userId=xxx&type=0|1|2
- * @param {number} departmentId - 门店ID
- * @param {number} userId - 用户ID
- * @param {number} type - 对话类型：0-经营分析 1-促销活动 2-公众号文章
- * @returns {Promise<Object>} 对话对象 { id, departmentId, status, ... }
+ * POST ai/chat/conversation?userId=…&departmentId=…&distributerId=…&scopeMode=…&type=…
  */
-var createConversation = function (departmentId, userId, type) {
-  var url = 'ai/chat/conversation?departmentId=' + departmentId + '&userId=' + userId;
-  if (type !== undefined && type !== null && type !== '') {
-    url += '&type=' + type;
+var createConversation = function (a, b, c) {
+  var opts;
+  if (a !== null && typeof a === 'object' && !Array.isArray(a) && a.userId != null) {
+    opts = a;
+  } else {
+    opts = { departmentId: a, userId: b, type: c };
   }
-  return requestUtil.post(url, {}, { useUrlParams: true });
+
+  var qs =
+    'userId=' +
+    encodeURIComponent(opts.userId) +
+    (opts.departmentId !== undefined && opts.departmentId !== null && opts.departmentId !== ''
+      ? '&departmentId=' + encodeURIComponent(opts.departmentId)
+      : '') +
+    (opts.scopeMode !== undefined && opts.scopeMode !== null && opts.scopeMode !== ''
+      ? '&scopeMode=' + encodeURIComponent(opts.scopeMode)
+      : '') +
+    (opts.distributerId !== undefined && opts.distributerId !== null && opts.distributerId !== ''
+      ? '&distributerId=' + encodeURIComponent(opts.distributerId)
+      : '') +
+    (opts.type !== undefined && opts.type !== null && opts.type !== ''
+      ? '&type=' + encodeURIComponent(opts.type)
+      : '');
+
+  return requestUtil.post('ai/chat/conversation?' + qs, {}, { useUrlParams: true });
 };
 
 /**

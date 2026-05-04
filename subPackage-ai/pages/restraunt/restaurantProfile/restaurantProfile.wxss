@@ -13,7 +13,7 @@
 /* ======================== */
 
 .loading-state {
-  padding: 60rpx;
+  padding: 60rpx
 }
 
 .loading-dots {
@@ -397,7 +397,297 @@
   border-top: 1rpx solid rgba(255, 255, 255, 0.1);
 }
 
-/* 日期头部 */
+/* —— scaleBase 全量卡片（底座） —— */
+.sb-stack-card {
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24rpx 48rpx rgba(0, 0, 0, 0.18);
+}
+
+.sb-card-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 28rpx;
+}
+
+.sb-card-head-title {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.35;
+}
+
+.sb-card-head-meta {
+  font-size: 20rpx;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-top: 4rpx;
+}
+
+.sb-date-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+}
+
+.sb-date-card-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.sb-date-main {
+  font-size: 36rpx;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.sb-date-week {
+  font-size: 26rpx;
+  color: #8892b0;
+}
+
+.sb-date-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.sb-date-badge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.sb-date-month-chip {
+  font-size: 22rpx;
+  color: #94a3b8;
+  padding: 6rpx 16rpx;
+  border-radius: 12rpx;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sb-kpi-item {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 20rpx;
+  padding: 24rpx 22rpx;
+  margin-bottom: 18rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.sb-kpi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20rpx;
+}
+
+.sb-kpi-name {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.35;
+}
+
+.sb-kpi-num {
+  font-size: 34rpx;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-kpi-desc {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.55;
+  color: #8892b0;
+}
+
+.sb-kpi-track-wrap {
+  margin-top: 20rpx;
+}
+
+.sb-kpi-track {
+  height: 16rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+
+.sb-kpi-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  transition: width 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sb-divider {
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 26rpx 0 22rpx;
+}
+
+.sb-safety-block {
+  margin-bottom: 20rpx;
+}
+
+.sb-safety-caption {
+  display: block;
+  font-size: 22rpx;
+  color: #8892b0;
+  margin-bottom: 12rpx;
+}
+
+.safety-tag-full {
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6rpx;
+  padding: 16rpx 22rpx;
+  align-self: stretch;
+}
+
+.safety-tag-line1 {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.safety-tag-line2 {
+  font-size: 24rpx;
+  font-weight: 400;
+  opacity: 0.95;
+  line-height: 1.45;
+}
+
+.sb-risk-compact {
+  padding-top: 8rpx;
+  border-top: none;
+}
+
+.sb-month-progress .sb-progress-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.sb-progress-percent {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-progress-track-xl {
+  height: 18rpx;
+}
+
+.sb-progress-fill-brand {
+  background: linear-gradient(90deg, #667eea, #38ef7d);
+}
+
+.sb-forecast .sb-month-progress {
+  margin-bottom: 28rpx;
+}
+
+.sb-forecast-hero {
+  margin-bottom: 28rpx;
+}
+
+.sb-subtitle-row {
+  margin-bottom: 16rpx;
+  padding-left: 4rpx;
+}
+
+.sb-subtitle-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sb-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24rpx;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+}
+
+.sb-detail-row:last-of-type {
+  border-bottom: none;
+}
+
+.sb-detail-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.sb-detail-key {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sb-detail-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.45;
+  color: #8892b0;
+}
+
+.sb-detail-val {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #cbd5f5;
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-detail-val--money {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.sb-hint-soft {
+  margin-top: 20rpx;
+  padding: 18rpx 22rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16rpx;
+  color: #8892b0;
+  line-height: 1.5;
+}
+
+.sb-strategy-tip {
+  margin-top: 16rpx !important;
+  text-align: left;
+}
+
+.sb-industry-vs {
+  text-align: left;
+}
+
+/* 日期头部 — 旧版类名兼容（若别处引用） */
 .date-header {
   display: flex;
   justify-content: space-between;

@@ -259,9 +259,10 @@ Page({
     then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
-        var standardArr = this.data.goods.gbDistributerStandardEntities;
+        var raw = this.data.goods.gbDistributerStandardEntities;
+        var standardArr = Array.isArray(raw) ? raw.slice() : [];
         standardArr.push(res.result.data);
-        var standards = "goods.gbDistributerStandardEntities"
+        var standards = "goods.gbDistributerStandardEntities";
         this.setData({
           [standards]: standardArr,
           itemstandard: "",

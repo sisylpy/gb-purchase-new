@@ -1,0 +1,131 @@
+/**
+ * 食材制作率等级 → 公共 class 后缀（与 app.wxss 中 .util-text--* / .util-fill--* 对应）
+ * 后端 utilization.level：LOW | NORMAL | HIGH | CRITICAL
+ *
+ * 使用：
+ *   <wxs src="/wxs/utilizationLevel.wxs" module="utilLv" />
+ *   <text class="{{utilLv.textClass(level)}}">{{labelZh}}</text>
+ *   <view class="legend-dot {{utilLv.fillClass(level)}}"></view>
+ */
+
+function norm(level) {
+  if (level == null || level === undefined) {
+    return '';
+  }
+  return ('' + level).toUpperCase();
+}
+
+/** 完整文案 class：util-text util-text--low | ... | unknown */
+function textClass(level) {
+  var s = norm(level);
+  if (s === 'LOW') {
+    return 'util-text util-text--low';
+  }
+  if (s === 'NORMAL') {
+    return 'util-text util-text--normal';
+  }
+  if (s === 'HIGH') {
+    return 'util-text util-text--high';
+  }
+  if (s === 'CRITICAL') {
+    return 'util-text util-text--critical';
+  }
+  return 'util-text util-text--unknown';
+}
+
+/** 色块 / 图例点 class：util-fill--low | ... */
+function fillClass(level) {
+  var s = norm(level);
+  if (s === 'LOW') {
+    return 'util-fill--low';
+  }
+  if (s === 'NORMAL') {
+    return 'util-fill--normal';
+  }
+  if (s === 'HIGH') {
+    return 'util-fill--high';
+  }
+  if (s === 'CRITICAL') {
+    return 'util-fill--critical';
+  }
+  return 'util-fill--unknown';
+}
+
+/** 仅后缀：low | normal | high | critical | unknown（需自行拼前缀） */
+function suffix(level) {
+  var s = norm(level);
+  if (s === 'LOW') {
+    return 'low';
+  }
+  if (s === 'NORMAL') {
+    return 'normal';
+  }
+  if (s === 'HIGH') {
+    return 'high';
+  }
+  if (s === 'CRITICAL') {
+    return 'critical';
+  }
+  return 'unknown';
+}
+
+/** 按制作率百分数字符串推导等级（与后端口径一致：<90 偏低；90～110 正常；110～120 偏高；>120 浪费严重） */
+function parseRate(rateStr) {
+  if (rateStr == null || rateStr === undefined || rateStr === '') {
+    return NaN;
+  }
+  var n = parseFloat(rateStr);
+  return n;
+}
+
+function levelFromRate(rateStr) {
+  var n = parseRate(rateStr);
+  if (isNaN(n)) {
+    return '';
+  }
+  if (n < 90) {
+    return 'LOW';
+  }
+  if (n <= 110) {
+    return 'NORMAL';
+  }
+  if (n <= 120) {
+    return 'HIGH';
+  }
+  return 'CRITICAL';
+}
+
+function labelZhFromRate(rateStr) {
+  var s = levelFromRate(rateStr);
+  if (s === 'LOW') {
+    return '偏低';
+  }
+  if (s === 'NORMAL') {
+    return '正常';
+  }
+  if (s === 'HIGH') {
+    return '偏高';
+  }
+  if (s === 'CRITICAL') {
+    return '浪费严重';
+  }
+  return '';
+}
+
+function textClassFromRate(rateStr) {
+  return textClass(levelFromRate(rateStr));
+}
+
+/** 与 levelFromRate 阈值一致的全文说明（供弹窗、表头等引用） */
+function tipStandardZh() {
+  return '偏低：不到90%。正常：90%到110%（含两头）。偏高：比110%高、最高到120%（含120%）。浪费严重：超过120%。';
+}
+
+module.exports.textClass = textClass;
+module.exports.fillClass = fillClass;
+module.exports.suffix = suffix;
+module.exports.levelFromRate = levelFromRate;
+module.exports.labelZhFromRate = labelZhFromRate;
+module.exports.textClassFromRate = textClassFromRate;
+module.exports.tipStandardZh = tipStandardZh;
+

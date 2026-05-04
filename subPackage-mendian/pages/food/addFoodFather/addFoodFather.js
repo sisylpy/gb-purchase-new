@@ -16,6 +16,10 @@ Page({
     addFinished: false,
     hasSubs: 0,
     resName:"",
+    /** 目标毛利率 %，提交为 gbDfTargetGrossMarginRate */
+    targetGrossMarginRate: '60',
+    /** 毛利率浮动绝对值，提交为 gbDfGrossMarginFloatAbs */
+    grossMarginFloatAbs: '3',
     deps: [],
     fatherFood: null
   },
@@ -34,9 +38,13 @@ Page({
     })
     var fatherFoodValue = wx.getStorageSync('fatherFood');
     if (fatherFoodValue) {
+      var rate = fatherFoodValue.gbDfTargetGrossMarginRate;
+      var floatAbs = fatherFoodValue.gbDfGrossMarginFloatAbs;
       this.setData({
         fatherFood: fatherFoodValue,
         resName: fatherFoodValue.gbDfFoodName || '',
+        targetGrossMarginRate: rate != null && rate !== '' ? String(Number(rate)) : '60',
+        grossMarginFloatAbs: floatAbs != null && floatAbs !== '' ? String(Number(floatAbs)) : '3',
       })
       this._ifCanSave()
     }
@@ -48,6 +56,19 @@ Page({
       resName: e.detail.value,
     })
     this._ifCanSave()
+  },
+
+  onTargetGrossMarginRateInput(e) {
+    this.setData({ targetGrossMarginRate: e.detail.value })
+  },
+
+  onGrossMarginFloatAbsInput(e) {
+    this.setData({ grossMarginFloatAbs: e.detail.value })
+  },
+
+  _parseMarginNumber(str, fallback) {
+    var n = parseFloat(String(str).trim())
+    return isNaN(n) ? fallback : n
   },
 
 
@@ -107,9 +128,13 @@ Page({
 
   saveFoodFather(){
     if(this.data.type == 'add'){
+      var rate = this._parseMarginNumber(this.data.targetGrossMarginRate, 60)
+      var floatAbs = this._parseMarginNumber(this.data.grossMarginFloatAbs, 3)
       var  dep = {
         gbDfDistributerId: this.data.disId,
-        gbDfFoodName: this.data.resName,  
+        gbDfFoodName: this.data.resName,
+        gbDfTargetGrossMarginRate: rate,
+        gbDfGrossMarginFloatAbs: floatAbs,
         }
         load.showLoading("保存供货商类别")
         saveGbFoodFather(dep)
@@ -131,6 +156,8 @@ Page({
     if(this.data.type == 'edit'){
       var dep = this.data.fatherFood;
       dep.gbDfFoodName = this.data.resName;
+      dep.gbDfTargetGrossMarginRate = this._parseMarginNumber(this.data.targetGrossMarginRate, 60)
+      dep.gbDfGrossMarginFloatAbs = this._parseMarginNumber(this.data.grossMarginFloatAbs, 3)
       load.showLoading("修改供货商类别")
       updateGbFood(dep)
       .then(res =>{

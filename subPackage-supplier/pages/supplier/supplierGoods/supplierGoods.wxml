@@ -50,8 +50,8 @@
                     <text class="mainColor mr-10">¥{{goods.goodsStockTotalString}} </text>
                      </view>
 
-                    <text class="font-xs">({{goods.goodsStockWeightTotalString}}</text>
-                    <text class="font-xs"> {{goods.gbDgGoodsStandardname}})</text>
+                    <text class="font-sl">({{goods.goodsStockWeightTotalString}}</text>
+                    <text class="font-sl"> {{goods.gbDgGoodsStandardname}})</text>
                   </view>
 
 

@@ -39,7 +39,7 @@
             <view class="flex-row-wrap mb-20 mt-20">
               <view class="flex-column-center p-10 mr-30 " wx:for="{{sub.gbDepartmentUserEntities}}" wx:for-item="subUser" wx:key="gbDepartmentUserId">
                 <image src="{{url + subUser.gbDuWxAvartraUrl}}" mode="aspectFill" class="itemPic mr-20" />
-                <text class="font-xs">{{subUser.gbDuWxNickName}}</text>
+                <text class="font-sl">{{subUser.gbDuWxNickName}}</text>
 
               </view>
             </view>

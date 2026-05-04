@@ -1,14 +1,14 @@
-var load = require('../../../../lib/load.js');
-
 const globalData = getApp().globalData;
+var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
+
 import apiUrl from '../../../../config/index.js'
 
 
-// import {
-//   disGetDepGoodsGbPageWithSupplier,
-//   disGetDepGoodsCataGbWithSupplier,
-// } from '../../../../lib/apiDepOrder';
+import {
+  disGetDepGoodsCataGbWithSupplier,
+  disGetDepGoodsGbPageWithSupplier,
+} from '../../../services/supplier.js'
 
 
 Page({
@@ -39,6 +39,9 @@ Page({
     showInd: false,
     item: "",
     depGoods: null,
+    supplier: { nxJrdhsSupplierName: '' },
+    leftScrollTop: 0,
+    depGoodsScrollTop: 0,
 
     totalPages: 0,
     totalCount: 0,

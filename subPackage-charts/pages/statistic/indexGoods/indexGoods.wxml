@@ -10,7 +10,7 @@
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
     <view class="flex-row">
       <view class="p-20" bindtap="toDatePage">
-        <image src="../../../images/calender.png" class="icon"></image>
+        <image src="../../../../images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">
         <view class="font-yuan">{{hanzi}}</view>
@@ -26,7 +26,7 @@
     </view>
 
     <!-- <view class="flex-row p-20" bindtap="toFilterType">
-      <image src="{{searchDepId !== -1 ? '../../../images/filter.png' : '../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
     </view> -->
   </view>
 
@@ -62,20 +62,11 @@
         <!-- 卡片头部：图标 + 标题 + 采购总额 -->
         <view class="">
           <view class="flex-row-default">
-            <image src="{{(imgUrl.resolve(url, great.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-20" />
+            <!-- <image src="{{(imgUrl.resolve(url, great.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-20" /> -->
 
             <view class="flex-row-between" style="width: {{windowWidth - 200}}rpx;">
-              <view class="flex-column">
+              <view class="flex-column pb-10">
                 <view class="font-md">{{great.gbDfgFatherGoodsName}}</view>
-                <!-- <view class="flex-column">
-                  <view class="font-xs text-secondary">采购占比总采购{{great.dailyData.purTotal}}元 {{great.dailyData.valuePercent}}%</view>
-                  <view class="font-xs text-secondary">支出占比总支出{{great.dailyData.costAllTotal}}元 {{great.dailyData.costPercent}}%</view>
-
-                  <view class="flex-row-between font-xs text-secondary">
-                    <view class="mr-30">上期库存:{{great.dailyData.lastStock2}}元 </view>
-                    <view>本期库存:{{great.dailyData.perStock}}元 </view>
-                  </view>
-                </view> -->
               </view>
             </view>
           </view>
@@ -92,9 +83,9 @@
               <!-- 图标 + 标题 -->
               <view class="flex-row-between mb-10">
                 <view class="flex-row-default align-center mb-15">
-                  <image src="../../../images/gouwuche.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                  <image src="../../../../images/gouwuche.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
                   <view class="flex-column">
-                    <view class="font-sm font-bold">采购</view>
+                    <view class="font-md font-bold">采购</view>
                   </view>
                 </view>
 
@@ -113,27 +104,27 @@
               <!-- 采购数据 -->
               <view class="flex-column">
                 <view class="flex-row-between mb-8">
-                  <text class="font-xs text-secondary">自采:</text>
-                  <text class="font-xs">{{great.dailyData.zicai}}元</text>
+                  <text class="font-sl text-secondary">自采:</text>
+                  <text class="font-sl">{{great.dailyData.zicai}}元</text>
                 </view>
                 <view class="flex-row-between mb-8">
-                  <text class="font-xs text-secondary">订货:</text>
-                  <text class="font-xs">{{great.dailyData.dinghuo}}元</text>
+                  <text class="font-sl text-secondary">订货:</text>
+                  <text class="font-sl">{{great.dailyData.dinghuo}}元</text>
                 </view>
 
               </view>
 
               <!-- 图标 + 标题 -->
               <view class="flex-row align-center mb-15">
-                <image src="../../../images/kucun.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                <text class="font-sm font-bold">库存</text>
+                <image src="../../../../images/kucun.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                <text class="font-md font-bold">库存</text>
               </view>
 
               <!-- 库存数据 -->
               <view class="flex-column">
                 <view class="flex-row-between mb-8">
-                  <text class="font-xs text-secondary">库存:</text>
-                  <text class="font-xs">{{great.dailyData.perStock}}元</text>
+                  <text class="font-md text-secondary">库存:</text>
+                  <text class="font-sl">{{great.dailyData.perStock}}元</text>
                 </view>
 
               </view>
@@ -150,8 +141,8 @@
                 <!-- 图标 + 标题 -->
 
                 <view class="flex-row align-center mb-15">
-                  <image src="../../../images/qiandaizi.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                  <text class="font-sm font-bold">支出</text>
+                  <image src="../../../../images/qiandaizi.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
+                  <text class="font-md font-bold">支出</text>
                 </view>
 
 
@@ -170,27 +161,27 @@
               <!-- 支出数据 -->
               <view class="flex-column">
                 <view class="flex-row-between mb-8">
-                  <text class="font-xs text-secondary">销售:</text>
-                  <text class="font-xs">{{great.dailyData.produceSubtotal}}元</text>
+                  <text class="font-sl text-secondary">销售:</text>
+                  <text class="font-sl">{{great.dailyData.produceSubtotal}}元</text>
                 </view>
                 <view class="flex-row-between mb-8">
-                  <text class="font-xs text-secondary">损耗:</text>
-                  <text class="font-xs">{{great.dailyData.lossTotal}}元</text>
+                  <text class="font-sl text-secondary">损耗:</text>
+                  <text class="font-sl">{{great.dailyData.lossTotal}}元</text>
                 </view>
                 <view class="flex-row-between mb-8">
-                  <text class="font-xs text-secondary">废弃:</text>
-                  <text class="font-xs">{{great.dailyData.wasteTotal}}元</text>
+                  <text class="font-sl text-secondary">废弃:</text>
+                  <text class="font-sl">{{great.dailyData.wasteTotal}}元</text>
                 </view>
                 <view class="flex-row-between">
-                  <text class="font-sm font-bold">合计:</text>
-                  <text class="font-sm font-bold">{{great.dailyData.costTotal}}元</text>
+                  <text class="font-sl font-bold">合计:</text>
+                  <text class="font-sl font-bold">{{great.dailyData.costTotal}}元</text>
                 </view>
               </view>
             </view>
           </view>
         </view>
       </view>
-      <view class="text-secondary font-xs flex-column center-content" style="height: 200rpx;" >没有数据了！</view>
+      <view class="text-secondary font-sl flex-column center-content" style="height: 200rpx;" >没有数据了！</view>
 
     </view>
 

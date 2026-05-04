@@ -1,12 +1,41 @@
 <wxs module="fmt" src="../../../../wxs/format.wxs" />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="flex flex-column">
 
 
-<navbar title="经营看板" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+<back-navbar title="经营看板" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+  </view>
+
+
 
 <view class="dashboard-page {{dashboard && dashboard.scaleBeam && dashboard.scaleBeam.pointer ? dashboard.scaleBeam.pointer.statusClass : ''}}">
 
 
-  <scroll-view scroll-y="true" class="" style="padding-top: {{navBarHeight}}rpx;" show-scrollbar="true">
+  <scroll-view scroll-y="true" class=""  show-scrollbar="true">
     <view class="create-btn" bindtap="toEditProfile" wx:if="{{errorMsg == '餐厅画像不存在'}}">
       <text>创建画像</text>
     </view>
@@ -23,7 +52,7 @@
     </view>
 
     <view class="empty-state" wx:elif="{{!hasData}}">
-      <view class="flex-column-center" style="padding-top: 120rpx;">
+      <view class="flex-column-center" >
         <text class="empty-icon">📊</text>
         <view class="font-bold p-30"><text>{{errorMsg}}</text></view>
         <view class="text-secondary font-sl mb-40">
@@ -111,75 +140,110 @@
 
           <view class="scale-base" wx:if="{{dashboard.scaleBase}}">
 
-            <view class="date-header" wx:if="{{dashboard.scaleBase.dateHeader}}">
-              <view class="date-left">
-                <text class="date-text">📅 {{dashboard.scaleBase.dateHeader.dateStr}}</text>
-                <text class="date-week">{{dashboard.scaleBase.dateHeader.weekdayStr}}</text>
+            <view class="sb-date-card" wx:if="{{dashboard.scaleBase.dateHeader}}">
+              <view class="sb-date-card-left">
+                <text class="sb-date-main">{{dashboard.scaleBase.dateHeader.dateStr}}</text>
+                <text class="sb-date-week">{{dashboard.scaleBase.dateHeader.weekdayStr}}</text>
               </view>
-              <view class="month-badge">🌙 {{dashboard.scaleBase.dateHeader.badge}}</view>
+              <view class="sb-date-card-right">
+                <text class="sb-date-badge">{{dashboard.scaleBase.dateHeader.badge}}</text>
+                <text class="sb-date-month-chip" wx:if="{{dashboard.scaleBase.dateHeader.currentMonth}}">{{dashboard.scaleBase.dateHeader.currentMonth}}月</text>
+              </view>
             </view>
 
-            <view class="health-card" wx:if="{{dashboard.scaleBase.healthCard}}">
-              <view class="health-card-title">💪 {{dashboard.scaleBase.healthCard.title}}</view>
+            <view class="health-card sb-stack-card" wx:if="{{dashboard.scaleBase.healthCard}}">
+              <view class="sb-card-head-row">
+                <text class="sb-card-head-title">{{dashboard.scaleBase.healthCard.title}}</text>
+                <text class="sb-card-head-meta" wx:if="{{dashboard.scaleBase.healthCard.sectionKey}}">{{dashboard.scaleBase.healthCard.sectionKey}}</text>
+              </view>
 
-              <view class="health-bar-wrap" wx:if="{{dashboard.scaleBase.healthCard.rows[0]}}">
-                <view class="health-bar-header">
-                  <text class="health-bar-label">{{dashboard.scaleBase.healthCard.rows[0].label}}</text>
-                  <text class="health-bar-value" style="color: {{fmt.marginTextColor(dashboard.scaleBase.healthCard.rows[0].value)}}">{{dashboard.scaleBase.healthCard.rows[0].value}}%</text>
+              <block wx:for="{{dashboard.scaleBase.healthCard.rows}}" wx:key="key">
+                <view class="sb-kpi-item">
+                  <view class="sb-kpi-head">
+                    <text class="sb-kpi-name">{{item.key}}</text>
+                    <text class="sb-kpi-num" style="color: {{fmt.healthKpiValueColor(item.key, item.value)}}">{{fmt.healthPercentText(item.value, item.key)}}</text>
+                  </view>
+                  <text class="sb-kpi-desc">{{item.label}}</text>
+                  <view class="sb-kpi-track-wrap" wx:if="{{fmt.healthKpiUsePercentBar(item.key)}}">
+                    <view class="sb-kpi-track">
+                      <view class="sb-kpi-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{fmt.healthBarWidthPercent(item.value)}}%; background-color: {{fmt.healthKpiBarColor(item.key, item.value)}};"></view>
+                    </view>
+                  </view>
                 </view>
-                <view class="health-bar-track">
-                  <view class="health-bar-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{fmt.healthBarWidthPercent(dashboard.scaleBase.healthCard.rows[0].value)}}%; background: {{fmt.marginTextColor(dashboard.scaleBase.healthCard.rows[0].value)}}"></view>
+              </block>
+
+              <view class="sb-divider" wx:if="{{dashboard.scaleBase.healthCard.safety || dashboard.scaleBase.healthCard.riskMultiple}}"></view>
+
+              <view class="sb-safety-block" wx:if="{{dashboard.scaleBase.healthCard.safety}}">
+                <text class="sb-safety-caption">经营状况</text>
+                <view class="safety-tag safety-tag-{{dashboard.scaleBase.healthCard.safety.level}} safety-tag-full">
+                  <text class="safety-tag-line1">{{dashboard.scaleBase.healthCard.safety.text}}</text>
+                  <text class="safety-tag-line2">{{dashboard.scaleBase.healthCard.safety.desc}}</text>
                 </view>
               </view>
 
-              <view class="safety-row" wx:if="{{dashboard.scaleBase.healthCard.safety}}">
-                <text class="health-bar-label">安全等级</text>
-                <view class="safety-tag safety-tag-{{dashboard.scaleBase.healthCard.safety.level}}">
-                  <text>{{dashboard.scaleBase.healthCard.safety.text}} · {{dashboard.scaleBase.healthCard.safety.desc}}</text>
-                </view>
-              </view>
-
-              <view class="risk-row" wx:if="{{dashboard.scaleBase.healthCard.riskMultiple}}">
+              <view class="risk-row sb-risk-compact" wx:if="{{dashboard.scaleBase.healthCard.riskMultiple}}">
                 <view class="risk-left">
-                  <text class="risk-label">🔥 {{dashboard.scaleBase.healthCard.riskMultiple.label}}</text>
+                  <text class="risk-label">{{dashboard.scaleBase.healthCard.riskMultiple.label}}</text>
                   <text class="risk-desc">{{dashboard.scaleBase.healthCard.riskMultiple.hint}}</text>
                 </view>
                 <text class="risk-value risk-value-{{dashboard.scaleBase.healthCard.riskMultiple.isProfit ? 'profit' : 'loss'}}">{{dashboard.scaleBase.healthCard.riskMultiple.value}}{{dashboard.scaleBase.healthCard.riskMultiple.unit}}</text>
               </view>
             </view>
 
-            <view class="forecast-card" wx:if="{{dashboard.scaleBase.monthForecast}}">
-              <view class="forecast-title">🌙 {{dashboard.scaleBase.monthForecast.title}}</view>
-
-              <view class="month-progress-wrap" wx:if="{{dashboard.scaleBase.monthForecast.rows[0]}}">
-                <view class="month-progress-track">
-                  <view class="month-progress-fill {{animReady ? 'anim-shimmer' : ''}}" style="width: {{dashboard.scaleBase.monthForecast.rows[0].value}}%"></view>
-                </view>
-                <text class="month-progress-label" wx:if="{{dashboard.scaleBase.monthForecast.rows[1] && dashboard.scaleBase.monthForecast.rows[2]}}">已过 {{dashboard.scaleBase.monthForecast.rows[1].value}}/{{dashboard.scaleBase.monthForecast.rows[2].value}} 天</text>
+            <!-- <view class="forecast-card sb-stack-card sb-forecast" wx:if="{{dashboard.scaleBase.monthForecast}}">
+              <view class="sb-card-head-row">
+                <text class="sb-card-head-title">{{dashboard.scaleBase.monthForecast.title}}</text>
+                <text class="sb-card-head-meta" wx:if="{{dashboard.scaleBase.monthForecast.sectionKey}}">{{dashboard.scaleBase.monthForecast.sectionKey}}</text>
               </view>
 
-              <view class="forecast-result">
-                <text class="forecast-result-label">预计{{dashboard.scaleBase.dateHeader.currentMonth}}月{{dashboard.scaleBase.monthForecast.isProfit ? '盈利' : '亏损'}}</text>
+              <view class="month-progress-wrap sb-month-progress" wx:if="{{dashboard.scaleBase.monthForecast.rows[0]}}">
+                <view class="sb-progress-label-row">
+                  <text>本月已过</text>
+                  <text class="sb-progress-percent">{{dashboard.scaleBase.monthForecast.rows[0].value}}%</text>
+                </view>
+                <view class="month-progress-track sb-progress-track-xl">
+                  <view class="month-progress-fill sb-progress-fill-brand {{animReady ? 'anim-shimmer' : ''}}" style="width: {{fmt.healthBarWidthPercent(dashboard.scaleBase.monthForecast.rows[0].value)}}%;"></view>
+                </view>
+                <text class="month-progress-label" wx:if="{{dashboard.scaleBase.monthForecast.rows[1] && dashboard.scaleBase.monthForecast.rows[2]}}">第 {{dashboard.scaleBase.monthForecast.rows[1].value}} / {{dashboard.scaleBase.monthForecast.rows[2].value}} 天</text>
+              </view>
+
+              <view class="forecast-result sb-forecast-hero">
+                <text class="forecast-result-label" wx:if="{{dashboard.scaleBase.dateHeader}}">预计 {{dashboard.scaleBase.dateHeader.currentMonth}} 月 {{dashboard.scaleBase.monthForecast.isProfit ? '盈利' : '亏损'}}（按日均推算）</text>
+                <text class="forecast-result-label" wx:else>{{dashboard.scaleBase.monthForecast.isProfit ? '预计本月盈利' : '预计本月亏损'}}（按日均推算）</text>
                 <text class="forecast-result-value forecast-value-{{dashboard.scaleBase.monthForecast.isProfit ? 'profit' : 'loss'}}">
                   {{dashboard.scaleBase.monthForecast.isProfit ? '+' : '-'}}¥{{fmt.formatNumber(dashboard.scaleBase.monthForecast.rows[4] ? dashboard.scaleBase.monthForecast.rows[4].value : dashboard.scaleBase.monthForecast.rows[3].value)}}
                 </text>
+                <view class="forecast-vs sb-industry-vs" wx:if="{{dashboard.scaleBase.monthForecast.isProfit && dashboard.scaleBase.monthForecast.hasIndustryCompare}}">
+                  <text>与行业均值对比（开启对标数据后展示）</text>
+                </view>
+              </view>
 
-                <view class="forecast-vs" wx:if="{{dashboard.scaleBase.monthForecast.isProfit && dashboard.scaleBase.monthForecast.hasIndustryCompare}}">
-                  <text>vs 行业平均（接口开启对标时展示）</text>
+              <view class="sb-subtitle-row">
+                <text class="sb-subtitle-text">月度推算明细</text>
+              </view>
+              <block wx:for="{{dashboard.scaleBase.monthForecast.rows}}" wx:key="key">
+                <view class="sb-detail-row">
+                  <view class="sb-detail-left">
+                    <text class="sb-detail-key">{{item.key}}</text>
+                    <text class="sb-detail-sub">{{item.label}}</text>
+                  </view>
+                  <text class="sb-detail-val {{fmt.scaleBaseForecastCellIsMoney(item.key) ? 'sb-detail-val--money' : ''}}">{{fmt.scaleBaseForecastCellValue(item.key, item.value)}}</text>
                 </view>
-                <view class="forecast-vs text-secondary font-sl" wx:elif="{{dashboard.scaleBase.monthForecast.vsIndustryHint}}">
-                  <text>{{dashboard.scaleBase.monthForecast.vsIndustryHint}}</text>
-                </view>
-                <view class="forecast-vs forecast-vs-danger" wx:elif="{{!dashboard.scaleBase.monthForecast.isProfit}}">
-                  <text>⚠️ 建议调整经营策略</text>
-                </view>
+              </block>
+
+              <view class="sb-hint-soft font-sl" wx:if="{{dashboard.scaleBase.monthForecast.vsIndustryHint}}">
+                <text>{{dashboard.scaleBase.monthForecast.vsIndustryHint}}</text>
+              </view>
+              <view class="forecast-vs forecast-vs-danger sb-strategy-tip" wx:if="{{!dashboard.scaleBase.monthForecast.isProfit}}">
+                <text>建议关注收入结构与成本节奏，及时调整经营策略</text>
               </view>
 
               <view class="risk-alert" wx:if="{{!dashboard.scaleBase.monthForecast.isProfit}}">
                 <text class="risk-alert-icon">⚠️</text>
-                <text class="risk-alert-text">按当前趋势，本月预计亏损 ¥{{fmt.formatNumber(dashboard.scaleBase.monthForecast.rows[4] ? dashboard.scaleBase.monthForecast.rows[4].value : dashboard.scaleBase.monthForecast.rows[3].value)}}，建议提升收入或降低开支</text>
+                <text class="risk-alert-text">按当前趋势，本月预计亏损约 ¥{{fmt.formatNumber(dashboard.scaleBase.monthForecast.rows[4] ? dashboard.scaleBase.monthForecast.rows[4].value : dashboard.scaleBase.monthForecast.rows[3].value)}}，建议提升净收或压低原料与固定开支</text>
               </view>
-            </view>
+            </view> -->
 
           </view>
         </view>
@@ -220,10 +284,12 @@
             <view class="cost-title">💰 {{dashboard.costBreakdown.title}}</view>
             <view class="cost-section" wx:if="{{dashboard.costBreakdown.production}}">
               <view class="cost-section-title">{{dashboard.costBreakdown.production.title}}</view>
-              <block wx:for="{{dashboard.costBreakdown.production.rows}}" wx:key="key">
+              <block wx:for="{{dashboard.costBreakdown.production.rows}}" wx:key="key" wx:for-index="rowIndex">
                 <view class="cost-row {{item.key == '制作成本合计' ? 'cost-row-subtotal' : ''}}">
                   <text class="cost-label">{{item.label}}</text>
-                  <text class="cost-value">¥{{fmt.formatNumber(item.value)}}</text>
+                  <text class="cost-value" wx:if="{{rowIndex < 4}}">¥{{fmt.formatNumber(item.value)}}</text>
+                  <text class="cost-value" wx:else="">{{fmt.formatNumber(item.value)}}%</text>
+
                 </view>
               </block>
             </view>
@@ -250,5 +316,7 @@
     </block>
 
   </scroll-view>
+
+</view>
 
 </view>

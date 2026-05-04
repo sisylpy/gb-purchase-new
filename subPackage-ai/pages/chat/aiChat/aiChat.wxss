@@ -301,13 +301,14 @@
   border: 1rpx solid #e3eaf3;
 }
 
-/* AI：无背景、无圆角卡片感，横向占满可视区域（正文仍留左右边距便于阅读） */
+/* AI：无背景，横向占满；正文留白由 padding 控制 */
 .gem-bubble-ai {
   max-width: 100%;
   width: 100%;
   background: transparent;
   color: #1f1f1f;
   border-radius: 0;
+  border: none;
   box-shadow: none;
   padding: 20rpx 32rpx 28rpx;
 }
@@ -324,6 +325,48 @@
   display: block;
   width: 100%;
   overflow: hidden;
+}
+
+/* 流式输出：与尾部光标同一行（光标贴在段落右下角） */
+.gem-ai-stream-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 100%;
+}
+
+.gem-rich-md--flex {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.gem-ai-stream-row .gem-bubble-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.gem-stream-cursor {
+  flex-shrink: 0;
+  width: 4rpx;
+  height: 34rpx;
+  margin-left: 4rpx;
+  margin-bottom: 6rpx;
+  background: #5f6368;
+  border-radius: 2rpx;
+  animation: gemStreamCursor 1s ease-in-out infinite;
+}
+
+@keyframes gemStreamCursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.12;
+  }
 }
 
 .gem-typing {

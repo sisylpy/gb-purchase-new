@@ -77,9 +77,10 @@ Page({
     this._getInitData();
   },
 
-  // Tab切换事件
+  // Tab切换事件（data-index 为字符串，需转数字否则 switch 无法匹配 case 0/1/2/3）
   onTabChange(e) {
-    const index = e.currentTarget.dataset.index;
+    const index = parseInt(e.currentTarget.dataset.index, 10);
+    if (Number.isNaN(index)) return;
     this.setData({
       currentTab: index
     });
@@ -88,8 +89,9 @@ Page({
 
   // Swiper切换事件
   onSwiperChange(e) {
+    const current = Number(e.detail.current);
     this.setData({
-      currentTab: e.detail.current
+      currentTab: Number.isNaN(current) ? 0 : current
     });
     this._getInitData();
   },
@@ -98,36 +100,53 @@ Page({
     load.showLoading("查询报表中");
     
     const userId = this.data.userInfo.gbDepartmentUserId;
-    const currentTab = this.data.currentTab;
-    
+    let currentTab = Number(this.data.currentTab);
+    if (Number.isNaN(currentTab)) currentTab = 0;
+
     let apiCall;
     let dataKey;
-    
-    switch(currentTab) {
-      case 0: // 成本报表
-      apiCall = chartsApi.getDisUserReportsBusiness(userId);
-      dataKey = 'businessReportArr';
-      break;
-      case 1: // 成本报表
+
+    switch (currentTab) {
+      case 0:
+        apiCall = chartsApi.getDisUserReportsBusiness(userId);
+        dataKey = 'businessReportArr';
+        break;
+      case 1:
         apiCall = chartsApi.getDisUserReportsCost(userId);
         dataKey = 'costReportArr';
         break;
-      case 2: // 采购报表
+      case 2:
         apiCall = chartsApi.getDisUserReportsPurchase(userId);
         dataKey = 'purchaseReportArr';
         break;
-      case 3: // 库存报表
+      case 3:
         apiCall = chartsApi.getDisUserReportsStock(userId);
         dataKey = 'stockReportArr';
         break;
+      default:
+        apiCall = chartsApi.getDisUserReportsBusiness(userId);
+        dataKey = 'businessReportArr';
+        break;
     }
-    
+
+    if (!apiCall || typeof apiCall.then !== 'function') {
+      load.hideLoading();
+      return;
+    }
+
     apiCall.then(res => {
       load.hideLoading();
       console.log(res.result)
       if (res.result.code == 0) {
+        const raw = res.result.data || [];
+        const withKeys = raw.map((item, idx) => {
+          const id = item.report && item.report.gbReportId;
+          return Object.assign({}, item, {
+            _listKey: id != null && id !== '' ? id : `idx-${idx}`
+          });
+        });
         const updateData = {};
-        updateData[dataKey] = res.result.data;
+        updateData[dataKey] = withKeys;
         this.setData(updateData);
       }
     }).catch(err => {

@@ -28,7 +28,7 @@
 				<view class="flex-row-default" style="padding: 20rpx 20rpx;">
 					<text class="explain shrink_fix">单位</text>
 					<view class=" flex-row-wrap shrink_change " >
-						<text class="standardName {{applyStandardName == item.gbDdgOrderStandard ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{item.gbDdgOrderStandard}}" >{{item.gbDdgShowStandardName}}</text>
+						<text class="standardName {{applyStandardName == item.gbDdgShowStandardName ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{item.gbDdgShowStandardName}}" >{{item.gbDdgShowStandardName}}</text>
 						<text  class="standardName {{applyStandardName == standard.gbDsStandardName ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{standard.gbDsStandardName}}" catchlongpress="delStandard" data-id="{{standard.gbDistributerStandardId}}"   wx:for="{{item.gbDistributerStandardEntities}}" wx:key="gbDgDistributerStandardId"
             wx:for-item="standard">{{standard.gbDsStandardName}}</text>
             <text class="standardName" bindtap="showInputStandard"> +</text>

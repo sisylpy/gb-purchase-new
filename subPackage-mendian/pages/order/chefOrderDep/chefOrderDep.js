@@ -10,7 +10,6 @@ const {
   depGetApplyAiByTime: subDepGetApplyAiByTime,
   depGetApplyAiFather: subDepGetApplyAiFather,
   depSearchTodayOrders,
-  disSaveStandard,
   gbDisDeleteStandard: disDeleteStandard,
   depReceiveStock,
 } = depOrder;
@@ -844,32 +843,6 @@ Page({
     }
   },
 
-
-
-  confirmStandard(e) {
-    var data = {
-      gbDsDisGoodsId: this.data.itemDis.gbDistributerGoodsId,
-      gbDsStandardName: e.detail.newStandardName,
-    }
-    disSaveStandard(data).
-    then(res => {
-      if (res.result.code == 0) {
-        console.log(res)
-        var standardArr = this.data.itemDis.gbDistributerStandardEntities;
-        standardArr.push(res.result.data);
-        var standards = "itemDis.gbDistributerStandardEntities"
-        this.setData({
-          [standards]: standardArr,
-          applyStandardName: res.result.data.gbDsStandardName,
-        })
-      } else {
-        wx.showToast({
-          title: res.result.msg,
-          icon: 'none'
-        })
-      }
-    })
-  },
 
 
   confirm: function (e) {

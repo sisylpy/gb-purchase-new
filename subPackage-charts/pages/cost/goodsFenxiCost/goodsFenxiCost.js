@@ -13,41 +13,15 @@ Page({
 
   onShow(){
 
-    // 推荐直接用新API
-    let windowInfo = wx.getWindowInfo();
-    let globalData = getApp().globalData;
-    this.setData({
-      windowWidth: windowInfo.windowWidth * globalData.rpxR,
-      windowHeight: windowInfo.windowHeight * globalData.rpxR,
-      navBarHeight: globalData.navBarHeight * globalData.rpxR,
-    });
-
-
-    if(this.data.update){
-      var myDate = wx.getStorageSync('myDate');
-      if(myDate){
-        // 如果是自定义日期，传递具体的开始和结束日期
-      var dateRange;
-      if (myDate.name === 'custom' ) {
-        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-      } else {
-        dateRange = dateUtils.getDateRange(myDate.name);
-      }
-      
     
-      this.setData({
-        startDate: dateRange.startDate,
-        stopDate: dateRange.stopDate,
-        dateType: myDate.dateType,
-        hanzi: myDate.hanzi || dateRange.name,
-        update: false
-      })
-      }
-       this.setData({
-         update:false
-       })
-        this._initData();
+
+
+    if (this.data.update) {
+      this._syncDatesFromMyDateStorage();
+      this.setData({ update: false });
+      this._initData();
     }
+
    
 
   },
@@ -63,9 +37,6 @@ Page({
     produceList: [],
     lossList: [],
     wasteList: [],
-    foodSalesIngredientList: [],
-    foodSalesIngredientTotal: null,
-    foodSalesStats: null,
     hasGoodsCostContent: false,
     // 展开状态管理
     expandedRows: {},
@@ -83,6 +54,14 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+// 推荐直接用新API
+let windowInfo = wx.getWindowInfo();
+let globalData = getApp().globalData;
+this.setData({
+  windowWidth: windowInfo.windowWidth * globalData.rpxR,
+  windowHeight: windowInfo.windowHeight * globalData.rpxR,
+  navBarHeight: globalData.navBarHeight * globalData.rpxR,
+});
 
     this.setData({
       disGoodsId: options.disGoodsId,
@@ -94,42 +73,8 @@ Page({
        nxDisId: options.nxDisId,
      
     })
-
-    if(options.stopDate !== null){
-      this.setData({
-        startDate: options.startDate,
-        stopDate: options.stopDate,
-        hanzi: options.hanzi,
-      })
-    }else{
-
-      var myDate = wx.getStorageSync('myDate');
-      if(myDate){
-        console.log("reeee", myDate)
-          // 如果是自定义日期，传递具体的开始和结束日期
-       var dateRange;
-       if (myDate.name === 'custom' ) {
-         dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-       } else {
-         dateRange = dateUtils.getDateRange(myDate.name);
-       }
-       this.setData({
-         startDate: dateRange.startDate,
-         stopDate: dateRange.stopDate,
-         dateType: myDate.dateType,
-         hanzi: myDate.hanzi || dateRange.name,
-       })
-  
-      }else{
-        this.setData({
-          dateType: 'month',
-          startDate: dateUtils.getFirstDateInMonth(),
-          stopDate: dateUtils.getArriveDate(0),
-          hanzi:  "本月",
-        })
-      }
-
-    }
+    this._syncDatesFromMyDateStorage();
+   
    
     var disGoods = wx.getStorageSync('disGoods');
     if(disGoods){
@@ -143,7 +88,104 @@ Page({
 
   },
 
-  
+
+  _syncDatesFromMyDateStorage() {
+    var myDate = wx.getStorageSync('myDate');
+    if (myDate) {
+      var dateRange;
+      if (myDate.name === 'custom') {
+        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
+      } else {
+        dateRange = dateUtils.getDateRange(myDate.name);
+      }
+      this.setData({
+        startDate: dateRange.startDate,
+        stopDate: dateRange.stopDate,
+        dateType: myDate.dateType,
+        hanzi: myDate.hanzi || dateRange.name,
+      });
+    } else {
+      this.setData({
+        dateType: 'month',
+        startDate: dateUtils.getFirstDateInMonth(),
+        stopDate: dateUtils.getArriveDate(0),
+        hanzi: '本月',
+      });
+    }
+  },
+
+
+  /** 解析接口里的金额/数量字符串 */
+  _parseAmountForDisplay(v) {
+    if (v == null || v === '') return 0;
+    var n = parseFloat(String(v).replace(/,/g, ''));
+    return isNaN(n) ? 0 : n;
+  },
+
+  _formatMoneyStr(sum) {
+    if (!sum || sum === 0) return '0.00';
+    return (Math.round(sum * 100) / 100).toFixed(2);
+  },
+
+  /** 按日部门行：汇总菜品份数、预览文案、分摊营业额，便于老板看「出库 ↔ 销量」 */
+  _enrichDayDepRow(day) {
+    var sales = day.dayDishIngredientSales;
+    if (!sales || !sales.length) {
+      return Object.assign({}, day, {
+        _gfcSalesPortionsTotal: 0,
+        _gfcDishCount: 0,
+        _gfcSalesPreview: '',
+        _gfcAllocatedRevenueSum: '',
+      });
+    }
+    var portions = 0;
+    var revenueSum = 0;
+    var i;
+    for (i = 0; i < sales.length; i++) {
+      var row = sales[i];
+      portions += this._parseAmountForDisplay(row.salesPortions);
+      revenueSum += this._parseAmountForDisplay(row.listRevenueAllocatedToIngredient);
+    }
+    var preview = '';
+    if (sales.length === 1) {
+      preview =
+        (sales[0].dishName || '菜品') +
+        ' · ' +
+        (sales[0].salesPortions != null ? sales[0].salesPortions : '') +
+        ' 份';
+    } else {
+      var bits = [];
+      for (i = 0; i < sales.length && i < 2; i++) {
+        bits.push(
+          (sales[i].dishName || '菜品') +
+            ' ' +
+            (sales[i].salesPortions != null ? sales[i].salesPortions : '') +
+            '份'
+        );
+      }
+      preview = bits.join('，');
+      if (sales.length > 2) {
+        preview += '…';
+      }
+    }
+    return Object.assign({}, day, {
+      _gfcSalesPortionsTotal: portions,
+      _gfcDishCount: sales.length,
+      _gfcSalesPreview: preview,
+      _gfcAllocatedRevenueSum: this._formatMoneyStr(revenueSum),
+    });
+  },
+
+  _enrichItemListDisplay(list) {
+    if (!list || !list.length) return list || [];
+    var that = this;
+    return list.map(function (dayBlock) {
+      var arr = (dayBlock.arr || []).map(function (row) {
+        return that._enrichDayDepRow(row);
+      });
+      return Object.assign({}, dayBlock, { arr: arr });
+    });
+  },
 
   _initData(){
     var data = {
@@ -159,17 +201,15 @@ Page({
         console.log(res.result.data)
         console.log("fenxiprororoor")
         const d = res.result.data || {};
-        const foodList = d.foodSalesIngredientList || [];
-        const foodStats = d.foodSalesStats || null;
+        const aiRaw = d.aiAnalysis || null;
+      
         const hasGoodsCostContent = !!(
-          d.aiAnalysis ||
+          aiRaw ||
           Number(d.oneTotal) > 0 ||
           (d.itemList && d.itemList.length) ||
           (d.produceList && d.produceList.length) ||
           (d.lossList && d.lossList.length) ||
-          (d.wasteList && d.wasteList.length) ||
-          foodList.length ||
-          foodStats
+          (d.wasteList && d.wasteList.length)
         );
         this.setData({
           oneTotal : d.oneTotal,
@@ -190,15 +230,13 @@ Page({
           produceList: d.produceList || [],
           wasteList: d.wasteList || [],
 
-          itemList: d.itemList,
+          itemList: this._enrichItemListDisplay(d.itemList),
           
-          // AI分析数据
-          aiAnalysis: d.aiAnalysis || null,
+          // AI分析数据（含合并后的理论/实际四项）
+          aiAnalysis: aiRaw,
 
-          foodSalesIngredientList: foodList,
-          foodSalesIngredientTotal: d.foodSalesIngredientTotal != null ? d.foodSalesIngredientTotal : null,
-          foodSalesStats: foodStats,
           hasGoodsCostContent,
+          
         })
 
         // 初始化图表，添加延迟确保DOM已更新
@@ -231,9 +269,7 @@ Page({
           wasteTotal: 0,
           stArr: [],
           depArr: "",
-          foodSalesIngredientList: [],
-          foodSalesIngredientTotal: null,
-          foodSalesStats: null,
+          aiAnalysis: null,
           hasGoodsCostContent: false,
         })
       }
@@ -284,23 +320,15 @@ Page({
   
 
 
-  // toDatePage(){
-  //   this.setData({
-  //     update: true
-  //   })
-  //   wx.navigateTo({
-  //     url: '../../sel/date/date?startDate=' + this.data.startDate
-  //      + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
-  //   })
-  // },
-
 
   toDatePage() {
+    
     this.setData({
       update: true,
     })
+
     wx.navigateTo({
-      url: '../../sel/searchDate/searchDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType + '&hanzi=' + this.data.hanzi, 
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType + '&hanzi=' + this.data.hanzi,
     })
   },
 
@@ -326,10 +354,9 @@ Page({
   // 点击制作行，显示库存批次
   showOne(e) {
     console.log('=== showOne 方法被调用 ===');
-    const index = e.currentTarget.dataset.index;
     const itemIndex = e.currentTarget.dataset.itemIndex;
     const dayIndex = e.currentTarget.dataset.dayIndex;
-    const key = `${itemIndex}_${dayIndex}_${index}`;
+    const key = `${itemIndex}_${dayIndex}`;
     
     console.log('showOne 被调用，key:', key);
     console.log('当前 expandedRows:', this.data.expandedRows);
@@ -420,9 +447,8 @@ Page({
 
   // 获取图表配置
   getChartOption(chartData) {
-    const ingredientData = chartData.ingredientData || [];
     // 计算数据范围，确保小数值也能显示
-    const allValues = [...chartData.produceData, ...chartData.lossData, ...chartData.wasteData, ...ingredientData];
+    const allValues = [...chartData.produceData, ...chartData.lossData, ...chartData.wasteData];
     const maxValue = allValues.length ? Math.max(...allValues) : 0;
     const positive = allValues.filter(v => v > 0);
     const minValue = positive.length ? Math.min(...positive) : 0;
@@ -432,8 +458,7 @@ Page({
       produce + chartData.lossData[index] + chartData.wasteData[index]
     );
     const maxTotalHeight = totalHeight.length ? Math.max(...totalHeight, 0) : 0;
-    const maxIngredient = ingredientData.length ? Math.max(...ingredientData, 0) : 0;
-    const rawMax = Math.max(maxTotalHeight, maxIngredient, maxValue, 0);
+    const rawMax = Math.max(maxTotalHeight, maxValue, 0);
     const yAxisMax = rawMax > 0 ? rawMax * 1.2 : 1;
     
     console.log('=== Y轴范围计算 ===');
@@ -443,9 +468,6 @@ Page({
     console.log('建议Y轴最大值:', yAxisMax);
     
     const legendData = ['销售', '损耗', '废弃'];
-    if (chartData.hasIngredientSeries) {
-      legendData.push('菜品原料消耗');
-    }
 
     const series = [
         {
@@ -482,24 +504,6 @@ Page({
           }
         }
     ];
-    if (chartData.hasIngredientSeries) {
-      series.push({
-        name: '菜品原料消耗',
-        type: 'line',
-        data: ingredientData,
-        silent: true,
-        symbol: 'circle',
-        symbolSize: 5,
-        itemStyle: {
-          color: '#1677ff'
-        },
-        lineStyle: {
-          color: '#1677ff',
-          width: 2
-        },
-        z: 10
-      });
-    }
 
     return {
       // title: {
@@ -651,7 +655,6 @@ Page({
     const produceList = this.data.produceList || [];
     const lossList = this.data.lossList || [];
     const wasteList = this.data.wasteList || [];
-    const ingredientList = this.data.foodSalesIngredientList || [];
     
     console.log('处理图表数据 - 原始数据:', {
       produceList: produceList.slice(0, 3), // 只显示前3条
@@ -682,9 +685,9 @@ Page({
     };
     console.log('14日数据检查:', day14Data);
     
-    // 获取所有日期（含菜品反推按日消耗）
+    // 日期仅来自 produce / loss / waste（与每条自带的 yyyy-MM-dd 对齐）
     const allDates = new Set();
-    [...produceList, ...lossList, ...wasteList, ...ingredientList].forEach(item => {
+    [...produceList, ...lossList, ...wasteList].forEach(item => {
       if (item.date) {
         allDates.add(item.date);
       }
@@ -697,7 +700,6 @@ Page({
     const produceMap = {};
     const lossMap = {};
     const wasteMap = {};
-    const ingredientMap = {};
     
     produceList.forEach(item => {
       if (item.date) {
@@ -716,17 +718,11 @@ Page({
         wasteMap[item.date] = parseFloat(item.value) || 0;
       }
     });
-    ingredientList.forEach(item => {
-      if (item.date) {
-        ingredientMap[item.date] = parseFloat(item.value) || 0;
-      }
-    });
-    
+
     // 生成图表数据
     const produceData = dates.map(date => produceMap[date] || 0);
     const lossData = dates.map(date => lossMap[date] || 0);
     const wasteData = dates.map(date => wasteMap[date] || 0);
-    const ingredientData = dates.map(date => ingredientMap[date] || 0);
     
     const result = {
       dates: dates.map(date => {
@@ -736,16 +732,13 @@ Page({
       }),
       produceData,
       lossData,
-      wasteData,
-      ingredientData,
-      hasIngredientSeries: ingredientList.length > 0
+      wasteData
     };
     
     console.log('最终图表数据:', result);
     console.log('所有销售数据:', produceData);
     console.log('所有损耗数据:', lossData);
     console.log('所有废弃数据:', wasteData);
-    console.log('日期列表:', result.dates);
     
     // 特别检查9月18日的数据（图片显示的数据）
     const sep18Index = dates.findIndex(d => d.includes('09-18') || d.includes('9-18'));

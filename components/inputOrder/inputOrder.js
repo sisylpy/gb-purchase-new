@@ -508,29 +508,31 @@ Component({
       var price = Number(this.data.item.gbDpgBuyPrice);
       var arr = this._getOrders();
       console.log('[inputOrder] _countOrderData - price:', price, 'gbDpgBuyPrice:', this.data.item.gbDpgBuyPrice, 'orders长度:', arr.length);
+      var patch = {};
       for (var i = 0; i < arr.length; i++) {
         if (arr[i].isNotice) {
           var weight = arr[i].gbDoWeight;
           var orderPriceData = this._getOrderKey(i, "gbDoPrice");
           var subData = this._getOrderKey(i, "gbDoSubtotal");
           console.log('[inputOrder] _countOrderData - i:', i, 'weight:', weight, 'price:', price);
-          // 只有 weight 有值时才计算小计
           if (weight != null && weight !== '' && !isNaN(Number(weight))) {
             var sub = this._lineSubtotal(price, String(weight), arr[i]);
             console.log('[inputOrder] _countOrderData - sub:', sub, 'key:', subData);
-            this.setData({
-              [orderPriceData]: price,
-              [subData]: sub,
-            });
+            patch[orderPriceData] = price;
+            patch[subData] = sub;
           } else {
-            // weight 为空，只设置单价
-            this.setData({
-              [orderPriceData]: price,
-            });
+            patch[orderPriceData] = price;
           }
         }
       }
-      this._getBuySubtotal();
+      var that = this;
+      if (Object.keys(patch).length > 0) {
+        this.setData(patch, function () {
+          that._getBuySubtotal();
+        });
+      } else {
+        this._getBuySubtotal();
+      }
     },
 
     _getBuySubtotal: function (e) {
@@ -554,16 +556,8 @@ Component({
       this.setData({
         "item.gbDpgBuySubtotal": total,
         "item.gbDpgBuyQuantity": Number(weightTotal).toFixed(1),
+        canSave: total !== "" && Number(total) > 0,
       });
-      if (total > 0) {
-        this.setData({
-          canSave: true,
-        });
-      } else {
-        this.setData({
-          canSave: false,
-        });
-      }
     },
 
     /** 大包装件数录入：写订单 gbDoScaleWeight；折算基准量 gbDoWeight = 件数×gbDoDsStandardScale */
@@ -605,14 +599,16 @@ Component({
     /** 行小计：gbDoScaleWeight × gbDoScalePrice（大包装件数 × 大包装单价） */
     _getOrderSubtotalScale: function () {
       var arr = this._getOrders();
+      var patch = {};
       for (var i = 0; i < arr.length; i++) {
         var subData = this._getOrderKey(i, "gbDoSubtotal");
         var weight = arr[i].gbDoScaleWeight;
         var price = arr[i].gbDoScalePrice;
         var raw = Number(weight) * Number(price);
         var subtotal = isNaN(raw) ? "" : raw.toFixed(1);
-        var patch = {};
         patch[subData] = subtotal;
+      }
+      if (Object.keys(patch).length > 0) {
         this.setData(patch);
       }
     },
@@ -636,12 +632,14 @@ Component({
       var doPriceVal = doPrice === undefined || doPrice === null ? "" : doPrice;
       var scalePriceVal = scalePrice === undefined || scalePrice === null ? "" : scalePrice;
       var arr = this._getOrders();
+      var patch = {};
       for (var i = 0; i < arr.length; i++) {
         var priceData = this._getOrderKey(i, "gbDoPrice");
         var scalePriceData = this._getOrderKey(i, "gbDoScalePrice");
-        var patch = {};
         patch[priceData] = doPriceVal;
         patch[scalePriceData] = scalePriceVal;
+      }
+      if (Object.keys(patch).length > 0) {
         this.setData(patch);
       }
     },

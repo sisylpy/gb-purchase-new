@@ -8,7 +8,7 @@
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
     <view class="flex-row">
       <view class="p-20" bindtap="toDatePageSearch">
-        <image src="../../../../images/calender.png" class="icon"></image>
+        <image src="../../../images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">
         <view class="font-yuan">{{hanzi}}</view>
@@ -44,14 +44,11 @@
 
     <view class="flex-column p-10">
 
-      <view class="flex-column font-sl radius-10 border mb-30 {{index == selectedStockIndex ? 'bg-selected' : 'bg-white'}}" wx:for="{{stockArr}}" wx:for-index="index" wx:key="gbDepartmentGoodsStockId" id="stock-item-{{index}}">
+      <view class="flex-column font-sl radius-10 border mb-15 {{index == selectedStockIndex ? 'bg-selected' : 'bg-white'}}" wx:for="{{stockArr}}" wx:for-index="index" wx:key="gbDepartmentGoodsStockId" id="stock-item-{{index}}">
 
         <view class="flex-column">
           <view class="flex-row  p-20 border-bottom">
-            <view class="flex-row half-row ">
-              <text class="mr-10">部门:</text>
-              <text class="">{{item.gbDepartmentEntity.gbDepartmentAttrName}}</text>
-            </view>
+           
             <view class="half-row flex-row">
               <text class="mr-10">时间:</text>
               <text class="">{{tool.getAttrDateString(item.gbDgsDate)}}</text>
@@ -62,14 +59,14 @@
           <view class="flex-row  p-20 border-bottom">
 
            
-            <view class="flex-row half-row" wx:if="{{item.nxJrdhSupplierEntity !== null}}">
+            <view class="flex-row half-row" wx:if="{{item.nxJrdhSupplierEntity}}">
               <text class="mr-10">订货商:</text>
               <text class="">{{item.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
             </view>
 
             <view class="flex-row half-row" wx:else>
               <text class="mr-10">自采:</text>
-              <text class="">{{disInfo.purDepartmentList[0].gbDepartmentName}}</text>
+              <text class="">{{disInfo.mendianDepartmentList[0].gbDepartmentName}}</text>
             </view>
             <view class="flex-row half-row ">
               <text class="mr-10">退货:</text>
@@ -150,19 +147,19 @@
           <view class="flex-column font-md p-10" style="width: {{windowWidth - 40}}rpx; ; ">
 
             <view class="flex-row-default p-20 ">
-              <view class="flex-row flex-fixed mr-20">
+              <view class="flex-row flex-shrink-0 mr-20">
                 <text class="line_father icon-md mr-10"></text>
                 <text class="">销售</text>
               </view>
 
-              <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
                 <view class="mr-20 flex-row mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == '1'}}">
                   <view class="flex-row line_father_item  mr-20">
                     <text class="mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                    <text>{{reduce.gbDgsrProduceWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                    <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
                   </view>
-                  <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
-                    <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
+                  <view class="flex-row p-10" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                    <image class="del_btn" src="../../../images/delok.png" mode="aspectFill" />
                   </view>
                 </view>
               </view>
@@ -171,19 +168,19 @@
 
             <view class="flex-row-default p-20 ">
 
-              <view class="flex-row flex-fixed mr-20">
+              <view class="flex-row flex-shrink-0 mr-20">
                 <text class="line_father_loss icon-md mr-10"></text>
                 <text class="">损耗</text>
               </view>
 
 
-              <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
                 <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 3}}">
                   <view class="flex-row line_father_item  mr-20">
                     <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                    <text>{{reduce.gbDgsrLossWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                    <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
                   </view>
-                  <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                  <view class="flex-row p-10" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
                     <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
                   </view>
                 </view>
@@ -193,17 +190,17 @@
 
             <view class="flex-row-default p-20 ">
 
-              <view class="flex-row flex-fixed mr-20">
+              <view class="flex-row flex-shrink-0 mr-20">
                 <text class="line_father_waste icon-md mr-10"></text>
                 <text class="">废弃</text>
               </view>
 
 
-              <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
                 <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 2}}">
                   <view class="flex-row line_father_item  mr-20">
                     <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                    <text>{{reduce.gbDgsrWasteWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                    <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
                   </view>
                   <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
                     <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
@@ -216,16 +213,16 @@
 
             <view class="flex-row-default p-20 ">
 
-              <view class="flex-row flex-fixed mr-20">
+              <view class="flex-row flex-shrink-0 mr-20">
                 <text class="line_father_return icon-md mr-10"></text>
                 <text class="">退货</text>
               </view>
 
-              <view class="flex-row-wrap font-xs" style="width: {{windowWidth - 200}}rpx;">
+              <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
                 <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 4}}">
                   <view class="flex-row line_father_item  mr-20">
                     <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                    <text>{{reduce.gbDgsrReturnWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                    <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
                   </view>
                   <view class="flex-row p-10" wx:if="{{reduce.gbDgsrStatus == '-1' }}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
                     <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
@@ -249,7 +246,7 @@
 
             <view class="flex-row-between  ">
               <view class="flex-row" style="width: {{windowWidth - 180}}rpx;">
-                <text class="mr-10 flex-fixed">新鲜度:</text>
+                <text class="mr-10 flex-shrink-0">新鲜度:</text>
               <image wx:for="{{item.gbDgsStars}}" src="/images/starGreen.png" mode="aspectFill" class="icon-sm mr-10" />
               </view>
 

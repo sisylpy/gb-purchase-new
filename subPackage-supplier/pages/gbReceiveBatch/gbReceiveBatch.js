@@ -58,7 +58,21 @@ Page({
     batch: {
       gbDPGEntities: []
     },
-    from: ""
+    from: "",
+    buySubtotalSum: 0,
+  },
+
+  /** 明细行 gbDpgBuySubtotal 累计（与各商品「小计」展示条件一致：不为 null 且大于 0） */
+  _buySubtotalSumFromBatch(batch) {
+    var sum = 0;
+    var list = batch && batch.gbDPGEntities ? batch.gbDPGEntities : [];
+    for (var i = 0; i < list.length; i++) {
+      var st = list[i].gbDpgBuySubtotal;
+      if (st !== null && st !== undefined && Number(st) > 0) {
+        sum += Number(st);
+      }
+    }
+    return Math.round(sum * 100) / 100;
   },
 
   onLoad: function (options) {
@@ -122,9 +136,9 @@ Page({
             item.gbDpgIsCheck = false;
 
             if (item.gbDpgStatus == 2) {
-              if (item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities && item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities.length > 0) {
-                for (var j = 0; j < item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities.length; j++) {
-                  var order = item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities[j];
+              if (item.gbDepartmentOrdersEntities && item.gbDepartmentOrdersEntities.length > 0) {
+                for (var j = 0; j < item.gbDepartmentOrdersEntities.length; j++) {
+                  var order = item.gbDepartmentOrdersEntities[j];
                   if (order.gbDoBuyStatus == 3) {
                     item.gbDpgIsCheck = true;
                     break;
@@ -136,6 +150,7 @@ Page({
           this.setData({
             waitWeightCount: waitWeightCount,
             batch: this.data.batch,
+            buySubtotalSum: this._buySubtotalSumFromBatch(this.data.batch),
           })
 
         } else {
@@ -188,6 +203,7 @@ Page({
             isTishi: false,
             batch: res.result.data,
             batchStatus: res.result.data.gbDpbStatus,
+            buySubtotalSum: this._buySubtotalSumFromBatch(res.result.data),
           })
         }
       })
@@ -402,7 +418,11 @@ Page({
       })
     }else{
       load.showLoading("保存订单");
-      sellerFinishPurchaseGoodsBatchGb(this.data.batch)
+      var sum = this._buySubtotalSumFromBatch(this.data.batch);
+      var batchPayload = Object.assign({}, this.data.batch, {
+        gbDpbSubtotal: sum,
+      });
+      sellerFinishPurchaseGoodsBatchGb(batchPayload)
         .then(res => {
           load.hideLoading();
           if (res.result.code == 0) {

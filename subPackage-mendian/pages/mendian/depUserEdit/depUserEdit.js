@@ -2,10 +2,7 @@ const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
 import apiUrl from '../../../../config/index.js'
 
-const {
-  updateGbDepUserWithFile,
-  updateGbDepUser,
-} = require('../../../services/apiGbDepartmentUser.js');
+const { updateGbDepUserWithFile } = require('../../../services/apiGbDepartmentUser.js');
 
 Page({
 
@@ -116,95 +113,56 @@ Page({
    * 保存修改内容
    */
   save() {
-
-    //如果修改了图片
-    if (this.data.imgChanged) {
-      var filePathList = this.data.src;
-      var userName = this.data.userName;
-      var userId = this.data.userInfo.gbDepartmentUserId;
-      var depId = this.data.userInfo.gbDuDepartmentId
-      load.showLoading("保存修改内容")
-      updateGbDepUserWithFile(filePathList, userName, userId,depId).then(res => {
-        console.log("updateRetturrnDAta", res.result);
-
-        let result = res.result;
-        if (typeof result === 'string') {
-          try {
-            result = JSON.parse(result);
-          } catch (e) {
-            // 解析失败，处理异常
-            wx.showToast({
-              title: '返回数据格式错误',
-              icon: 'none'
-            });
-            return;
-          }
-        }
-        console.log("ressusososoosolutttttt===", result.data)
-        if (result.code === 0) {
-          load.hideLoading();
-          this.setData({
-            imgChanged: false
-          })
-          // ...
-          wx.setStorageSync('userInfo', result.data);  
-          var pages = getCurrentPages();
-         
-          var prevPage2 = pages[pages.length - 2];
-          prevPage2.setData({
-            userInfo: result.data,
-          })
-         
-          wx.navigateBack({
-            delta: 1
-          })
-        }
-
-
-      })
-    } else {
-      //没有修改图片
-      var userName = this.data.userName;
-      var userId = this.data.userInfo.gbDepartmentUserId;
-      var depId = this.data.userInfo.gbDuDepartmentId;
-      var data = {
-        userName: userName,
-        userId: userId,
-        depId: depId
-      }
-      load.showLoading("保存修改内容");
-      updateGbDepUser(data).then(res => {
-        if (res.result.code == 0) {
-          load.hideLoading();
-        
-          var pages = getCurrentPages();
-          var prevPage = pages[pages.length - 2];
-          prevPage.setData({
-           userInfo: res.result.data.userInfo,
-         
-          })
-        
-         
-          wx.navigateBack({
-            delta: 1
-          })
-          wx.setStorageSync('depInfo', res.result.data.depInfo);
-          wx.setStorageSync('userInfo', res.result.data.userInfo);
-
-        } else {
-          load.hideLoading();
-          wx.showToast({
-            title: '获取信息失败',
-            icon: 'none'
-          })
-        }
-      })
+    var that = this;
+    var userName = this.data.userName;
+    var userId = this.data.userInfo.gbDepartmentUserId;
+    var depId = this.data.userInfo.gbDuDepartmentId;
+    var tempFilePath = null;
+    if (this.data.imgChanged && this.data.src) {
+      var src = this.data.src;
+      tempFilePath = Array.isArray(src) ? src[0] : src;
     }
+    load.showLoading('保存修改内容');
+    updateGbDepUserWithFile(userName, userId, depId, tempFilePath).then(function (res) {
+      load.hideLoading();
+      var raw = res.result;
+      var result = typeof raw === 'string' ? (function () {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          return {};
+        }
+      })() : raw;
+      if (result.code === 0) {
+        var d = result.data;
+        var userInfo = d && d.userInfo ? d.userInfo : d;
+        var depInfo = d && d.depInfo ? d.depInfo : null;
+        if (depInfo) {
+          wx.setStorageSync('depInfo', depInfo);
+        }
+        wx.setStorageSync('userInfo', userInfo);
+        that.setData({ imgChanged: false });
+        var pages = getCurrentPages();
+        var prev = pages[pages.length - 2];
+        if (prev) {
+          prev.setData({ userInfo: userInfo });
+        }
+        wx.navigateBack({ delta: 1 });
+      } else {
+        wx.showToast({
+          title: result.msg || '保存失败',
+          icon: 'none',
+        });
+      }
+    }).catch(function () {
+      load.hideLoading();
+      wx.showToast({ title: '网络异常，请重试', icon: 'none' });
+    });
   },
 
   toBack() {
     wx.navigateBack({
-      detail: 1
+      delta: 1
     })
   }
 

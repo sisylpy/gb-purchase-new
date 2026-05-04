@@ -112,7 +112,7 @@
 
             <!-- 商品信息区域 -->
             <view class="flex-row-default mb-20">
-              <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="url_item mr-20" />
+              <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="empty_image mr-20" />
               <view class="flex-column" style="flex: 1;">
                 <view class="flex-row">
                   <text class="font-sm">第{{goodsIndex + 1}}名/共{{totalCount}}个</text>
@@ -120,10 +120,10 @@
                 <view class="flex-row">
                   <text class="font-bold mr-10">{{item.gbDgGoodsName}}</text>
                   <block wx:if="{{item.gbDgGoodsStandardWeight.length > 0}}">
-                    <text class="text-secondary font-xs">({{item.gbDgGoodsStandardWeight}}/{{item.gbDgGoodsStandardname}})</text>
+                    <text class="text-secondary font-sl">({{item.gbDgGoodsStandardWeight}}/{{item.gbDgGoodsStandardname}})</text>
                   </block>
                   <block wx:else>
-                    <text class="text-secondary font-xs">({{item.gbDgGoodsStandardname}})</text>
+                    <text class="text-secondary font-sl">({{item.gbDgGoodsStandardname}})</text>
                   </block>
                 </view>
               </view>
@@ -135,7 +135,7 @@
             <!-- 部门信息区域 -->
             <view class="flex-column" wx:for="{{item.wasteDepartmentEntities}}" wx:key="{{dep.gbDepartmentId}}" wx:for-item="dep" wx:for-index="depIndex">
 
-              <view class="flex-column font-xs mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
+              <view class="flex-column font-sl mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
 
                 <!-- 整体卡片容器 -->
                 <view class="unified-card-container {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'unified-card-expanded' : 'unified-card-collapsed'}}">
@@ -154,22 +154,22 @@
                       <view class="stock-info-center">
                         <block wx:if="{{reduceDay.gbDgsrType == 1}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrProduceSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrProduceWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type sales-type">售出</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 2}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrWasteSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrWasteWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type waste-type">废弃</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 3}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrLossSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrLossWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type loss-type">损耗</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 4}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrReturnSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrReturnWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type return-type">退货</view>
                         </block>
                       </view>
@@ -360,7 +360,7 @@
 
             <!-- 商品信息区域 -->
             <view class="flex-row-default mb-20">
-              <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="url_item mr-20" />
+              <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="empty_image mr-20" />
               <view class="flex-column" style="flex: 1;">
                 <view class="flex-row">
                   <text class="font-sm">第{{goodsIndex + 1}}名/共{{totalCount}}个</text>
@@ -368,10 +368,10 @@
                 <view class="flex-row">
                   <text class="font-bold mr-10">{{item.gbDgGoodsName}}</text>
                   <block wx:if="{{item.gbDgGoodsStandardWeight.length > 0}}">
-                    <text class="text-secondary font-xs">({{item.gbDgGoodsStandardWeight}}/{{item.gbDgGoodsStandardname}})</text>
+                    <text class="text-secondary font-sl">({{item.gbDgGoodsStandardWeight}}/{{item.gbDgGoodsStandardname}})</text>
                   </block>
                   <block wx:else>
-                    <text class="text-secondary font-xs">({{item.gbDgGoodsStandardname}})</text>
+                    <text class="text-secondary font-sl">({{item.gbDgGoodsStandardname}})</text>
                   </block>
                 </view>
               </view>
@@ -383,7 +383,7 @@
             <!-- 部门信息区域 -->
             <view class="flex-column" wx:for="{{item.wasteDepartmentEntities}}" wx:key="{{dep.gbDepartmentId}}" wx:for-item="dep" wx:for-index="depIndex">
 
-              <view class="flex-column font-xs mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
+              <view class="flex-column font-sl mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
 
                 <!-- 整体卡片容器 -->
                 <view class="unified-card-container {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'unified-card-expanded' : 'unified-card-collapsed'}}">
@@ -402,22 +402,22 @@
                       <view class="stock-info-center">
                         <block wx:if="{{reduceDay.gbDgsrType == 1}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrProduceSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrProduceWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type sales-type">售出</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 2}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrWasteSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrWasteWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type waste-type">废弃</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 3}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrLossSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrLossWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type loss-type">损耗</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 4}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrReturnSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrReturnWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type return-type">退货</view>
                         </block>
                       </view>
@@ -609,7 +609,7 @@
 
             <!-- 商品信息区域 -->
             <view class="flex-row-default mb-20">
-              <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="url_item mr-20" />
+              <image src="{{url + item.gbDgNxFatherImg}}" mode="aspectFill" class="empty_image mr-20" />
               <view class="flex-column" style="flex: 1;">
                 <view class="flex-row">
                   <text class="font-sm">第{{goodsIndex + 1}}名/共{{totalCount}}个</text>
@@ -617,10 +617,10 @@
                 <view class="flex-row">
                   <text class="font-bold mr-10">{{item.gbDgGoodsName}}</text>
                   <block wx:if="{{item.gbDgGoodsStandardWeight.length > 0}}">
-                    <text class="text-secondary font-xs">({{item.gbDgGoodsStandardWeight}}/{{item.gbDgGoodsStandardname}})</text>
+                    <text class="text-secondary font-sl">({{item.gbDgGoodsStandardWeight}}/{{item.gbDgGoodsStandardname}})</text>
                   </block>
                   <block wx:else>
-                    <text class="text-secondary font-xs">({{item.gbDgGoodsStandardname}})</text>
+                    <text class="text-secondary font-sl">({{item.gbDgGoodsStandardname}})</text>
                   </block>
                 </view>
               </view>
@@ -632,7 +632,7 @@
             <!-- 部门信息区域 -->
             <view class="flex-column" wx:for="{{item.wasteDepartmentEntities}}" wx:key="{{dep.gbDepartmentId}}" wx:for-item="dep" wx:for-index="depIndex">
 
-              <view class="flex-column font-xs mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
+              <view class="flex-column font-sl mb-20" wx:for="{{dep.departmentGoodsDailyEntity.wasteReduceList}}" wx:for-item="reduceDay" wx:for-index="reduceIndex" wx:key="reduceIndex">
 
                 <!-- 整体卡片容器 -->
                 <view class="unified-card-container {{expandedRows[goodsIndex + '_' + depIndex + '_' + reduceIndex] ? 'unified-card-expanded' : 'unified-card-collapsed'}}">
@@ -651,22 +651,22 @@
                       <view class="stock-info-center">
                         <block wx:if="{{reduceDay.gbDgsrType == 1}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrProduceSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrProduceWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type sales-type">售出</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 2}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrWasteSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrWasteWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type waste-type">废弃</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 3}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrLossSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrLossWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type loss-type">损耗</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 4}}">
                           <view class="stock-amount">{{reduceDay.gbDgsrReturnSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrReturnWeight}}{{item.gbDgGoodsStandardname}}</view>
+                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type return-type">退货</view>
                         </block>
                       </view>

@@ -1,0 +1,6 @@
+/* pages/supplier/supplier.wxss */
+
+page{
+  background: #f5f5f5;
+
+}

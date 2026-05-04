@@ -34,7 +34,7 @@
 						<view class="flex-row">
 							<view class="input-view" style="width: {{windowWidth / 6}}rpx; margin-right: 10rpx;">
 								<input class='input' type='digit' value="{{item.gbDpgBuyScalePrice}}" bindinput="getPurchasePriceScale"
-									bindblur="_checkPrice" hold-keyboard='true'></input>
+									bindblur="_checkPrice" hold-keyboard='true' focus="{{foucusPrice}}"></input>
 							</view>
 							<view class="flex-column">
 								<text>元/{{item.gbDpgStandard}}({{item.gbDpgBuyScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
@@ -110,6 +110,7 @@
 													<input class="input" type="digit" adjust-position="true"
 														value="{{orders.gbDoScaleWeight == null || orders.gbDoScaleWeight == '0.0' ? '' : orders.gbDoScaleWeight}}"
 														bindinput="getScaleWeight" data-index="{{orderIndex}}"
+														focus="{{orderIndex == 0 && foucusWeight}}"
 														style="width: {{windowWidth / 8}}rpx;" />
 												</view>
 												<text>{{item.gbDpgStandard}}</text>
@@ -122,7 +123,7 @@
 											<view class="input-view" style="margin-right: 10rpx;">
 												<input class="input" type="digit" adjust-position="true"
 													value="{{orders.gbDoWeight == null || orders.gbDoWeight == '0.0' ? '' : orders.gbDoWeight}}"
-													bindinput="getOrderWeight" focus="{{orderIndex == 0 && foucusWeight ? 'true' : ''}}" data-index="{{orderIndex}}" style="width: {{windowWidth / 4}}rpx;" />
+													bindinput="getOrderWeight" focus="{{orderIndex == 0 && foucusWeight}}" data-index="{{orderIndex}}" style="width: {{windowWidth / 4}}rpx;" />
 											</view>
 											<text wx:if="{{orders.gbDoStandard && item.gbDistributerGoodsEntity.gbDgGoodsStandardname && orders.gbDoStandard != item.gbDistributerGoodsEntity.gbDgGoodsStandardname && orders.gbDoDsStandardScale && orders.gbDoDsStandardScale != '-1'}}">{{orders.gbDoStandard}}</text>
 											<text wx:else="">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>

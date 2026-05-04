@@ -7,7 +7,7 @@
       <image src="../../../images/back-2.png" class="back_icon" bindtap="toBack"></image>
       <text class="top_bar_title">账单</text>
     </view>
-    <image src="../../../images/top.png" style="width: 100%; height: {{110 + statusBarHeight}}rpx;"></image>
+    <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
   </view>
 
   <view class="flex-column p-20">

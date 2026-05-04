@@ -1,0 +1,33 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+
+<view class="flex flex-column">
+
+
+<back-navbar style="height: {{navBarHeight}}rpx;" title="搜索门店" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+<view class="flex-column ">
+    <view class="p-20 flex-row-between">
+    <text>选择部门:</text>
+    <text bindtap="toSave">确定</text>
+    </view>
+
+    
+    <view class="border-bottom flex-row-between bg-white p-20 font-lg" wx:for="{{subDepArr}}" wx:for-item="dep" bindtap="selectDepartment"  data-dep="{{dep}}" hover-class="hover" data-index="{{index}}">
+        <view class="flex-row" style="width: {{windowWidth - 100}}rpx;">
+          <text class="mr-10">{{index + 1}}.</text>
+        <text class=' '>{{dep.gbDepartmentName}}</text> 
+        </view>
+        <view class="flex-row" >
+        <image src="{{dep.isSelected ? '../../../../images/correct.png' : ''}}" class="icon"></image>
+      
+      </view>
+     
+    </view>
+ 
+
+</view>
+
+</view>

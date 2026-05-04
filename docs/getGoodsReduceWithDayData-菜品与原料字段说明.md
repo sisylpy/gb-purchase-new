@@ -4,16 +4,16 @@
 
 ---
 
-## 一、菜品带动本原料（按日 + 合计）
+## 一、菜品带动本原料（周期汇总）
 
-数据与 Excel 上传菜品销量后写入的 **`gb_dep_food_goods_sales`** 一致，按当前 **批发商商品 `disGoodsId`**、**日期区间**、**`searchDepId`**（部门 id 或 `-1` 表示不按单部门过滤）汇总。
+数据仍与 Excel 上传菜品销量后写入的 **`gb_dep_food_goods_sales`** 一致。服务端在 **`buildReduceWithDayData`** 内会用 **`foodSalesIngredientPeriod`**（仅内部）汇总周期内本原料「菜品侧」消耗，用于组装 **`foodSalesStats`** / **`aiAnalysis.actualIngredientTotal`** 等，**不再**在接口顶层返回下列字段：
 
-| 字段 | 类型 | 含义 |
-|------|------|------|
-| **`foodSalesIngredientList`** | `Array<{ date: string, value: string }>` | 区间内**每个自然日**，本原料因菜品销售产生的消耗量。`date` 为 `yyyy-MM-dd`；`value` 为**字符串**，保留 1 位小数（与 `produceList`、`lossList` 等列表风格一致）。 |
-| **`foodSalesIngredientTotal`** | `number` | 上表各日 `value` 之和（解析为数值后相加），即区间内**本原料「菜品侧」消耗合计**，保留 1 位小数。 |
+| 字段 | 说明 |
+|------|------|
+| ~~`foodSalesIngredientList`~~ | **已移除**。不再下发「按自然日的菜品消耗」`{ date, value }[]`。 |
+| ~~`foodSalesIngredientTotal`~~ | **已移除**。周期合计不再单独字段返回；与菜品侧实际用量相关的数见 **`aiAnalysis.actualIngredientTotal`** / **`foodSalesStats.theoreticalVsActual.actualIngredientTotal`**（与后端实现保持一致即可）。 |
 
-**用途**：画「菜品原料消耗」折线图，或与生产类 `produceList` 对比。
+按日维度展示请使用 **`produceList` / `lossList` / `wasteList` / `itemList`** 等结构中**每条自带的完整日期** `date`（`yyyy-MM-dd`）；历史上若另有仅「日序 dd」的冗余数组也已去掉，避免与完整日期重复。
 
 ---
 
@@ -21,7 +21,7 @@
 
 路径：**`data.foodSalesStats`**，对象。
 
-与第一节「按日曲线」**不重复**：此处提供**明细行数、与菜品销售关联、配方与理论/实际对比**；按日曲线请只用 **`foodSalesIngredientList`** / **`foodSalesIngredientTotal`**。
+此处提供**明细行数、与菜品销售关联、配方与理论/实际对比**；不再依赖第一节已移除的按日列表字段。
 
 | 字段 | 类型 | 含义 |
 |------|------|------|
@@ -88,7 +88,7 @@
 | 字段 | 含义 |
 |------|------|
 | **`theoreticalIngredientTotal`** | `periodSalesByDepAndDish` 中各行 `theoreticalIngredientForThisRow` 之和（按当前配方 + 销量推算应耗）。 |
-| **`actualIngredientTotal`** | 与 **`foodSalesIngredientTotal`** 一致（`gb_dep_food_goods_sales` 汇总）。 |
+| **`actualIngredientTotal`** | 周期内 `gb_dep_food_goods_sales` 对本原料的消耗汇总（与已移除的顶层 `foodSalesIngredientTotal` 同源语义；具体以后端返回为准）。 |
 | **`ingredientGapActualMinusTheoretical`** | **实际 − 理论**；正数表示比推算多，负数表示比推算少。 |
 | **`ingredientGapPercentOfTheoretical`** | 差距 ÷ 理论 ×100（%）；**理论为 0 时为 `null`**。 |
 
@@ -96,9 +96,10 @@
 
 ## 三、前端使用建议
 
-1. **折线图 / 合计「菜品带动的本原料」**：使用 **`foodSalesIngredientList`** + **`foodSalesIngredientTotal`**。  
+1. **按日用量曲线**：使用 **`produceList` / `lossList` / `wasteList`**（每项含完整 **`date`**）；不再使用已移除的 **`foodSalesIngredientList`**。  
 2. **配方、部门×菜、理论 vs 实际**：使用 **`foodSalesStats`** 中的 `recipeDishesUsingThisGood`、`periodSalesByDepAndDish`、`theoreticalVsActual`。  
-3. **谁最耗这个料**：使用 **`foodSalesStats.dishSales.topDishesDrivingThisIngredient`**。
+3. **谁最耗这个料**：使用 **`foodSalesStats.dishSales.topDishesDrivingThisIngredient`**。  
+4. **AI / 理论对比用的「实际菜品侧消耗」**：使用 **`aiAnalysis.actualIngredientTotal`**（或 stats 内 theoreticalVsActual），而非顶层合计字段。
 
 ---
 

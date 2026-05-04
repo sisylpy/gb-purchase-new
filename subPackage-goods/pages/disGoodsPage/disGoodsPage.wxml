@@ -9,11 +9,11 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
     <view class="flex-column p-20 font-md" style="width:{{windowWidth - 100}}rpx; ">
       <view class="flex-row p-10">
         <view class="half-row">
-          <text class="text-secondary flex-fixed mr-10">商品:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">商品:</text>
           <text class="font-bold">{{goods.gbDgGoodsName}}</text>
         </view>
         <view class="half-row">
-          <text class="text-secondary flex-fixed mr-10">规格:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">规格:</text>
           <text class="">{{goods.gbDgGoodsStandardname}}</text>
         </view>
         
@@ -21,23 +21,23 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
       <view class=" flex-row-default p-10">
         <view class="flex-row half-row">
-          <text class="text-secondary flex-fixed mr-10">口味:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">口味:</text>
           <text class=" shrink_change" wx:if="{{goods.gbDgGoodsDetail !==  null && goods.gbDgGoodsDetail.length > 0}}">{{goods.gbDgGoodsDetail}}</text>
         </view>
         <view class="half-row">
-          <text class="text-secondary flex-fixed mr-10">单位重量:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">单位重量:</text>
           <text class="pt-20 pb-20 shrink_change" wx:if="{{goods.gbDgGoodsStandardWeight !==  null && goods.gbDgGoodsStandardWeight.length > 0}}">{{goods.gbDgGoodsStandardWeight}}</text>
         </view>
       </view>
 
       <view class="flex-row p-10">
         <view class="half-row">
-          <text class="text-secondary flex-fixed mr-10">品牌:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">品牌:</text>
           <text class="pt-20 pb-20 shrink_change" wx:if="{{goods.gbDgGoodsBrand !==  null && goods.gbDgGoodsBrand.length > 0}}">{{goods.gbDgGoodsBrand}}</text>
         </view>
 
         <view class="half-row">
-          <text class="text-secondary flex-fixed mr-10">产地:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">产地:</text>
           <text class="pt-20 pb-20 shrink_change" wx:if="{{goods.gbDgGoodsPlace !==  null && goods.gbDgGoodsPlace.length > 0}}">{{goods.gbDgGoodsPlace}}</text>
         </view>
       </view>
@@ -46,7 +46,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
       
       <view class=" flex-row-default p-10  mb-20">
         <view class="flex-row-default half-row">
-          <text class="mr-10 text-secondary flex-fixed">出货模块:</text>
+          <text class="mr-10 text-secondary flex-shrink-0">采购方式:</text>
           <block wx:if="{{goods.gbDgGoodsType == 1}}">
             <text class="">门店自采</text>
           </block>
@@ -69,24 +69,24 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
         </view>
 
         <view class="half-row flex-row-default" wx:if="{{goods.gbDistributerAppointSupplierEntity == null}}">
-          <text class="text-secondary flex-fixed mr-10">出货部门:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">采购部门:</text>
           <text class="shrink_change">{{goods.gbDepartmentEntity.gbDepartmentName}}</text>
         </view>
         <view class="half-row flex-row-default" wx:else="">
-          <text class="text-secondary flex-fixed mr-10">供货商:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">供货商:</text>
           <text class="shrink_change">{{goods.gbDistributerAppointSupplierEntity.nxJrdhsSupplierName}}</text>
         </view>
       </view>
 
       <view class="flex-row p-10 border-bottom mb-20" wx:if="{{goods.gbDgGoodsType == 5}}">
         <view class="half-row">
-          <text class="text-secondary flex-fixed mr-10">配送商:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">配送商:</text>
           <text class="pt-20 pb-20 shrink_change" wx:if="{{goods.nxDistributerEntity !== null}}">京京送货</text>
           <text class="red" wx:else>无</text>
         </view>
 
         <view class="half-row">
-          <text class="text-secondary flex-fixed mr-10">配送商商品:</text>
+          <text class="text-secondary flex-shrink-0 mr-10">配送商商品:</text>
           <text class="shrink_change pt-20 pb-20 " wx:if="{{goods.nxDistributerGoodsEntity !== null}}">{{goods.nxDistributerGoodsEntity.nxDgGoodsName}}</text>
           <text class="red" wx:else>无</text>
         </view>
@@ -102,7 +102,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
   <view class="flex-column" id="mjltest0">
         <!-- <view class="bg-white p-20  border-bottom flex-column" wx:if="{{goods.gbDgIsSelfControl ==  1}}">
           <view class="flex-row-between pt-20 pb-20">
-            <text class="text-secondary flex-fixed mr-10">是否自制</text>
+            <text class="text-secondary flex-shrink-0 mr-10">是否自制</text>
             <switch checked="{{goods.gbDgIsSelfControl == 1 ? 'checked' : ''}}" bindchange="switchIsSelfControl" />
           </view>
           <block wx:if="{{goods.gbDgIsSelfControl == 1}}">
@@ -122,38 +122,38 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
         </view> -->
         <!-- <view class="bg-white p-20  border-bottom flex-column">
           <view class="flex-row-between pt-20 pb-20">
-            <text class="text-secondary flex-fixed mr-10">是否加盟</text>
+            <text class="text-secondary flex-shrink-0 mr-10">是否加盟</text>
             <switch checked="{{goods.gbDgIsFranchisePrice == 1 ? 'checked' : ''}}" bindchange="switchIsFranchisePrice" />
           </view>
           <block wx:if="{{goods.gbDgIsFranchisePrice == 1}}">
             <view class="flex-row-between p-10">
               <view class="flex-row half-row">
-                <text class="text-secondary flex-fixed mr-10">加盟一级:</text>
+                <text class="text-secondary flex-shrink-0 mr-10">加盟一级:</text>
                 <text>{{goods.gbDgFranchisePriceOne}}元/{{goods.gbDgGoodsStandardname}}</text>
               </view>
               <view class="flex-row half-row">
-                <text class="text-secondary flex-fixed mr-10">时间:</text>
+                <text class="text-secondary flex-shrink-0 mr-10">时间:</text>
                 <text>{{goods.gbDgFranchisePriceOneUpdate}}</text>
               </view>
             </view>
 
             <view class="flex-row-between p-10">
               <view class="flex-row half-row">
-                <text class="text-secondary flex-fixed mr-10">加盟二级:</text>
+                <text class="text-secondary flex-shrink-0 mr-10">加盟二级:</text>
                 <text>{{goods.gbDgFranchisePriceTwo}}元/{{goods.gbDgGoodsStandardname}}</text>
               </view>
               <view class="flex-row half-row">
-                <text class="text-secondary flex-fixed mr-10">时间:</text>
+                <text class="text-secondary flex-shrink-0 mr-10">时间:</text>
                 <text>{{goods.gbDgFranchisePriceTwoUpdate}}</text>
               </view>
             </view>
             <view class="flex-row-between p-10">
               <view class="flex-row half-row">
-                <text class="text-secondary flex-fixed mr-10">加盟三级:</text>
+                <text class="text-secondary flex-shrink-0 mr-10">加盟三级:</text>
                 <text>{{goods.gbDgFranchisePriceThree}}元/{{goods.gbDgGoodsStandardname}}</text>
               </view>
               <view class="flex-row half-row">
-                <text class="text-secondary flex-fixed mr-10">时间:</text>
+                <text class="text-secondary flex-shrink-0 mr-10">时间:</text>
                 <text>{{goods.gbDgFranchisePriceThreeUpdate}}</text>
               </view>
             </view>
@@ -162,7 +162,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
         <!-- <view class="bg-white p-20  border-bottom flex-column" wx:if="{{disInfo.gbDistributerBusinessType !== 21 && disInfo.gbDistributerBusinessType !== 22}}">
           <view class="flex-row-between pt-20 pb-20">
-            <text class="text-secondary flex-fixed mr-10">是否控价</text>
+            <text class="text-secondary flex-shrink-0 mr-10">是否控价</text>
             <switch checked="{{goods.gbDgControlPrice == 1 ? 'checked' : ''}}" bindchange="switchControlPrice" />
           </view>
 
@@ -183,12 +183,12 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
         </view> -->
 
         <view class="bg-white p-20  border-bottom flex-column">
-          <view class="flex-row-between pt-20 pb-20">
-            <text class="text-secondary flex-fixed mr-10">保鲜管理</text>
+          <view class="flex-row-between pt-20 pb-20 font-md">
+            <text class="text-secondary flex-shrink-0 mr-10">保鲜管理</text>
             <switch checked="{{goods.gbDgControlFresh == 1 ? 'checked' : ''}}" bindchange="switchControlFresh" />
           </view>
           <block wx:if="{{goods.gbDgControlFresh == 1}}">
-            <view class="flex-row p-10 small">
+            <view class="flex-row p-10 font-md">
               <text class="graymr-20">时间设置:</text>
               <view style="width:{{windowWidth - 280}}rpx;" class="flex-row">
                 <view class="flex-row half-row">
@@ -199,15 +199,15 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
           </block>
         </view>
         <view class="bg-white p-20  border-bottom flex-column">
-          <text class="text-secondary small">商品下架</text>
+          <text class="text-secondary font-md">商品下架</text>
           <view class="flex-row-between pt-20 pb-20">
-            <text class="text-secondary flex-fixed mr-10">停止订货</text>
+            <text class="text-secondary flex-shrink-0 mr-10">停止订货</text>
             <switch checked="{{goods.gbDgPullOff == 1 ? 'checked' : ''}}" bindchange="switchChange" data-abc="pull" />
           </view>
         </view>
 
         <view class="bg-white p-20  flex-column border-bottom">
-          <text class="text-secondary small">订货单位</text>
+          <text class="text-secondary font-md">订货单位</text>
           <view class="flex-row-wrap pt-20 pb-20">
             <text class="standard">{{goods.gbDgGoodsStandardname}}</text>
             <view class="standard" wx:for="{{goods.gbDistributerStandardEntities}}" wx:for-item="standard" wx:key="gbDistributerStandardId" wx:for-index="standandIndex" bindtap="clickItem" data-itemstandard="{{standard}}" data-index="{{standandIndex}}" data-type="standard"><text class="mr-10">{{standard.gbDsStandardName}}</text>
@@ -219,7 +219,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
         </view>
 
         <view class="bg-white p-20  flex-column border-bottom">
-          <text class="text-secondary small">别名</text>
+          <text class="text-secondary font-md">别名</text>
           <view class="flex-row-wrap pt-20 pb-20">
             <text class="standard" wx:for="{{goods.gbDistributerAliasEntities}}" wx:for-item="alias" wx:for-index="aliasIndex" wx:key="gbDistributerAliasId" bindtap="clickItem" data-itemalias="{{alias}}" data-type="alias" data-index="{{aliasIndex}}">{{alias.gbDaAliasName}}</text>
             <text class="standard" bindtap="addAlias" data-name="{{goods.gbGoodsEntity.gbGoodsName}}">+</text>
@@ -256,9 +256,9 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
       <view class="p-20 flex-row mb-30 mt-30">
         <text class="p-20"> 废弃时间:</text>
-        <view style="position: relative; display: flex; align-items: center;">
+        <view >
           <input 
-            class="inputPrice" 
+            class="" 
             focus="{{showFresh}}" 
             type="digit" 
             value="{{goods.gbDgFreshWasteHour}}" 
@@ -266,13 +266,13 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
             placeholder-style="color: #999; font-size: 28rpx;"
             bindinput="getFresh" 
             data-type="gbDgFreshWasteHour" 
-            style="width: {{windowWidth / 3}}rpx; border: 2rpx solid #e5e5e5; border-radius: 8rpx; padding: 10rpx; background-color: #f8f8f8;" 
+            style="width: {{windowWidth / 3}}rpx; border: 2rpx solid #e5e5e5; border-radius: 8rpx; background-color: #f8f8f8;line-height: 60rpx; height: 60rpx; padding-left: 10rpx;" 
           />
           <view 
             style="position: absolute; right: 10rpx; color: #1989fa; font-size: 24rpx; cursor: pointer;"
             catchtap="showFreshInputHint"
           >
-            ❓
+          
           </view>
         </view>
         <text style="margin-left: 10rpx; color: #666; font-size: 28rpx;">个小时</text>
@@ -283,15 +283,17 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
         <text style="color: #1989fa; font-size: 24rpx;">💡 提示：请输入商品保鲜时间的小时数（仅支持整数，最大999小时）</text>
       </view>
 
-      <view class=" p-20" style="width: {{windowWidth - 140}}rpx; ">
-        <view class="flex-row" style="width: {{(windowWidth - 180) / 3 * 2}}rpx; margin-left: {{(windowWidth - 20)  / 3}}rpx; ">
-          <view class="p-20" catchtap="cancleFresh">
-            <text class="cancel-btn"> 取消</text>
-          </view>
-          <view class="p-20" catchtap="{{goods.gbDgFreshWasteHour > 0 ? '_updateGoodsFresh' : ''}}" style="margin-left: 20rpx;">
-            <text class="confirm-btn {{goods.gbDgFreshWasteHour > 0 ? 'is-active' : ''}}">确定废弃设置</text>
-          </view>
-        </view>
+      <view class="fresh-footer">
+        <view
+          class="fresh-btn fresh-btn--cancel"
+          catchtap="cancleFresh"
+          hover-class="fresh-btn-hover"
+        >取消</view>
+        <view
+          class="fresh-btn fresh-btn--confirm {{goods.gbDgFreshWasteHour > 0 ? 'is-active' : ''}}"
+          catchtap="{{goods.gbDgFreshWasteHour > 0 ? '_updateGoodsFresh' : ''}}"
+          hover-class="{{goods.gbDgFreshWasteHour > 0 ? 'fresh-btn-hover' : 'none'}}"
+        >确定废弃设置</view>
       </view>
     </view>
   </view>

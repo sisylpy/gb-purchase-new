@@ -40,12 +40,6 @@
       <scroll-view scroll-y="true" style="height: {{windowHeight - 100 - navBarHeight}}rpx;">
         <view class="supplier-card-wrapper" wx:for="{{supplierArr}}" wx:for-item="supplier" wx:key="nxJrdhSupplierId">
 
-          <!-- 经销商标签 -->
-          <view class="distributor-tag" wx:if="{{supplier.nxDistributerEntity !== null}}">
-            <image src="../../../../images/user.png" class="tag-icon"></image>
-            <text class="tag-text">{{supplier.nxDistributerEntity.nxDistributerName}}</text>
-          </view>
-
           <!-- 供货商信息卡片 -->
           <view class="supplier-info-card" hover-class="supplier-info-card-hover">
             <view class="supplier-info-header">
@@ -93,7 +87,7 @@
           </view>
 
         </view>
-        <view class="flex-column-center font-xs text-secondary" style="height: 200rpx;"> 没有数据了!</view>
+        <view class="flex-column-center font-sl text-secondary" style="height: 200rpx;"> 没有数据了!</view>
       </scroll-view>
 
     </block>
@@ -103,8 +97,8 @@
         <view class="center-content flex-column">
           <image class="empty_image" src="../../../../images/xiuxi-2.png"></image>
           <text class="big">将订单发送给微信好友</text>
-          <text class="font-xs text-secondary pt-20 p-10"> 他们直接接收订货需求</text>
-          <text class="font-xs text-secondary ">可记录现金或记账</text>
+          <text class="font-sl text-secondary pt-20 p-10"> 他们直接接收订货需求</text>
+          <text class="font-sl text-secondary ">可记录现金或记账</text>
         </view>
       </view>
     </view>

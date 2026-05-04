@@ -186,7 +186,7 @@ Page({
   
         // 跳转到首页或其他页面
         wx.redirectTo({
-          url: '../index/index?depId=' + jsonObject.data.disInfo.purDepartmentList[0].gbDepartmentId,
+          url: '../index/index?depId=' + jsonObject.data.disInfo.mendianDepartmentList[0].gbDepartmentId,
         });
   
       } else {

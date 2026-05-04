@@ -191,7 +191,7 @@ toSupplierDetail(e) {
 
 
 toSupplierGoods(){
- 
+  console.log("aaa")
   this.hideMask();
   wx.setStorageSync('supplierItem', this.data.supplierItem);
   wx.navigateTo({
@@ -258,7 +258,7 @@ toSupplierFenxi(e){
   })
   wx.setStorageSync('supplierItem', this.data.supplierItem);
   wx.navigateTo({
-    url: '/subPackage-charts/pages/management/purUserFenxi/purUserFenxi?supplierId=' + this.data.supplierItem.nxJrdhSupplierId + '&type=1&purUserId=-1&startDate=' + this.data.startDate + '&stopDate='
+    url: '../purUserFenxi/purUserFenxi?supplierId=' + this.data.supplierItem.nxJrdhSupplierId + '&type=1&purUserId=-1&startDate=' + this.data.startDate + '&stopDate='
     + this.data.stopDate + '&dateType=' + this.data.dateType,
   })
 },
