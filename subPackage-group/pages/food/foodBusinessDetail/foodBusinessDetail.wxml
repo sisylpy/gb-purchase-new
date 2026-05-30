@@ -1,0 +1,257 @@
+<!-- ========== 菜品经营详情页 ========== -->
+<view class="fbd-page">
+
+  <back-navbar
+    style="height: {{navBarHeight}}rpx;"
+    title="{{foodName || '菜品详情'}}"
+    avatar="/images/back.png"
+    bindnavbuttontap="toBack"
+  />
+
+  <!-- 加载/错误 -->
+  <view class="fbd-state" wx:if="{{loading}}">
+    <text class="fbd-state__txt">加载中…</text>
+  </view>
+  <view class="fbd-state fbd-state--err" wx:elif="{{errMsg}}">
+    <text class="fbd-state__txt">{{errMsg}}</text>
+  </view>
+
+  <scroll-view wx:else scroll-y class="fbd-scroll" enhanced show-scrollbar="{{false}}">
+
+    <!-- ===== 1. 顶部菜品基础卡：图片、菜名、分类、角色、售价、销量 ===== -->
+    <view class="fbd-card fbd-card--hero">
+      <view class="fbd-hero__row">
+        <!-- 菜品图片 -->
+        <image
+          wx:if="{{foodImage}}"
+          class="fbd-hero__img"
+          src="{{foodImage}}"
+          mode="aspectFill"
+        />
+        <view class="fbd-hero__left">
+          <text class="fbd-hero__name">{{foodName}}</text>
+          <view class="fbd-hero__tags">
+            <text class="fbd-hero__category" wx:if="{{categoryName}}">{{categoryName}}</text>
+            <text
+              class="fbd-hero__role"
+              wx:if="{{roleName}}"
+              style="color: {{roleColor}}; border-color: {{roleColor}}"
+            >{{roleName}}</text>
+          </view>
+          <view class="fbd-hero__meta">
+            <text class="fbd-hero__price">¥{{currentPrice}}/份</text>
+            <text class="fbd-hero__dot">·</text>
+            <text class="fbd-hero__sales">销量 {{soldPortionsDisplay}} 份</text>
+          </view>
+          <!-- roleSummary 角色说明 -->
+          <view class="fbd-hero__summary" wx:if="{{roleSummary}}">
+            <text>{{roleSummary}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 毛利率大卡片 -->
+      <view class="fbd-margin-card">
+        <text class="fbd-margin-card__label">综合毛利率</text>
+        <view class="fbd-margin-card__value-row">
+          <text class="fbd-margin-card__num">{{actualGrossMarginRateDisplay}}</text>
+          <text class="fbd-margin-card__pct">%</text>
+        </view>
+        <view class="fbd-margin-card__target" wx:if="{{targetGrossMarginRate}}">
+          <text class="fbd-margin-card__target-line">目标 {{targetGrossMarginRate}} · 浮动 ±{{targetFloatAbs}} · 标准范围 {{targetLowerBound}}~{{targetUpperBound}}</text>
+        </view>
+        <view class="fbd-margin-card__status {{computedDiagnosisClass}}" wx:if="{{targetStatusLabel}}">
+          <text>{{targetStatusLabel}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 2. 经营概览指标 ===== -->
+    <view class="fbd-card fbd-card--metrics">
+      <view class="fbd-sec__bar">
+        <text class="fbd-sec__title">经营概览</text>
+        <text class="fbd-sec__period" wx:if="{{period.compareLabel}}">{{period.compareLabel}} · 近30天</text>
+      </view>
+
+      <!-- 成本三列 -->
+      <view class="fbd-kpi-grid fbd-kpi-grid--cost">
+        <view class="fbd-kpi-cell">
+          <text class="fbd-kpi-cell__label">实际成本</text>
+          <text class="fbd-kpi-cell__value">¥{{actualCostDisplay}}/份</text>
+        </view>
+        <view class="fbd-kpi-cell">
+          <text class="fbd-kpi-cell__label">理论成本</text>
+          <text class="fbd-kpi-cell__value fbd-kpi-cell__value--muted">¥{{theoreticalCostDisplay}}/份</text>
+        </view>
+        <view class="fbd-kpi-cell">
+          <text class="fbd-kpi-cell__label">成本差异</text>
+          <text class="fbd-kpi-cell__value {{costGapClass}}">¥{{costGapDisplay}}/份</text>
+        </view>
+      </view>
+
+      <!-- 收入利润三列 -->
+      <view class="fbd-kpi-grid">
+        <view class="fbd-kpi-cell">
+          <text class="fbd-kpi-cell__label">销售收入</text>
+          <text class="fbd-kpi-cell__value">¥{{salesAmountDisplay}}</text>
+        </view>
+        <view class="fbd-kpi-cell">
+          <text class="fbd-kpi-cell__label">实际总成本</text>
+          <text class="fbd-kpi-cell__value fbd-kpi-cell__value--muted">¥{{actualTotalCostDisplay}}</text>
+        </view>
+        <view class="fbd-kpi-cell">
+          <text class="fbd-kpi-cell__label">实际利润</text>
+          <text class="fbd-kpi-cell__value fbd-kpi-cell__value--profit">¥{{actualProfitDisplay}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 3. 成本与毛利诊断 ===== -->
+    <view class="fbd-card fbd-card--diagnosis">
+      <view class="fbd-sec__bar">
+        <text class="fbd-sec__title">成本与毛利诊断</text>
+      </view>
+
+      <!-- 诊断摘要（优先列表页数据，fallback 接口数值计算） -->
+      <view class="fbd-diag-box {{computedDiagnosisClass}}">
+        <text class="fbd-diag-box__icon" wx:if="{{computedDiagnosisClass === 'is-warn'}}">⚠️</text>
+        <text class="fbd-diag-box__icon" wx:elif="{{computedDiagnosisClass === 'is-good'}}">✅</text>
+        <text class="fbd-diag-box__icon" wx:else>📊</text>
+        <view class="fbd-diag-box__body">
+          <text class="fbd-diag-box__title">{{computedDiagnosisTitle}}</text>
+          <text class="fbd-diag-box__text">{{computedDiagnosisText}}</text>
+        </view>
+      </view>
+
+      <!-- 实际 vs 理论毛利率对比 -->
+      <view class="fbd-gap-strip">
+        <view class="fbd-gap-strip__item">
+          <text class="fbd-gap-strip__label">实际毛利率</text>
+          <text class="fbd-gap-strip__value">{{actualGrossMarginRateDisplay}}%</text>
+        </view>
+        <view class="fbd-gap-strip__arrow">→</view>
+        <view class="fbd-gap-strip__item">
+          <text class="fbd-gap-strip__label">理论毛利率</text>
+          <text class="fbd-gap-strip__value fbd-gap-strip__value--theory">{{theoreticalGrossMarginRateDisplay}}%</text>
+        </view>
+        <view class="fbd-gap-strip__gap">
+          <text class="fbd-gap-strip__label">偏差</text>
+          <text class="fbd-gap-strip__value {{grossMarginGapClass}}">{{grossMarginGapDisplay}}</text>
+        </view>
+      </view>
+
+      <!-- 单份成本差异 -->
+      <view class="fbd-cost-diff" wx:if="{{costGapDisplay !== '—'}}">
+        <text class="fbd-cost-diff__label">单份成本差异：</text>
+        <text class="fbd-cost-diff__value {{costGapClass}}">实际{{actualCostDisplay}} - 理论{{theoreticalCostDisplay}} = ¥{{costGapDisplay}}</text>
+      </view>
+    </view>
+
+    <!-- ===== 4. 按星期销售表现（周期内星期销量分布） ===== -->
+    <view class="fbd-card fbd-card--weekday">
+      <view class="fbd-sec__bar">
+        <text class="fbd-sec__title">按星期销售表现</text>
+        <text class="fbd-sec__period" wx:if="{{period.compareLabel}}">{{period.compareLabel}} · 近30天</text>
+      </view>
+
+      <!-- 有数据态 -->
+      <block wx:if="{{hasWeekdaySales}}">
+        <!-- 峰值高亮卡片 -->
+        <view class="fbd-peak-card" wx:if="{{weekdaySummary}}">
+          <text class="fbd-peak-card__emoji">🔥</text>
+          <text class="fbd-peak-card__text">{{weekdaySummary}}</text>
+        </view>
+
+        <!-- 柱状图（7列固定） -->
+        <view class="fbd-weekday-chart">
+          <view class="fbd-weekday-bars">
+            <view
+              class="fbd-weekday-bar-wrap"
+              wx:for="{{weekdaySalesData}}"
+              wx:for-item="day"
+              wx:key="label"
+            >
+              <view class="fbd-weekday-bar-col">
+                <text class="fbd-weekday-bar__val {{day.isPeak ? 'is-peak' : ''}}">{{day.salesCount}}</text>
+                <view
+                  class="fbd-weekday-bar__bar {{day.isPeak ? 'is-peak' : ''}}"
+                  style="height: {{day._barHeight || 0}}rpx;"
+                />
+              </view>
+              <text class="fbd-weekday-bar__label {{day.isPeak ? 'is-peak' : ''}}">{{day.label}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 小结区域 -->
+        <view class="fbd-summary-bar" wx:if="{{weekdayPeakName}}">
+          <text class="fbd-summary-bar__label">销量最高</text>
+          <text class="fbd-summary-bar__value">{{weekdayPeakName}} · {{weekdayPeakSales}} 份</text>
+        </view>
+      </block>
+
+      <!-- 空态 -->
+      <view class="fbd-empty-box" wx:else>
+        <text class="fbd-empty-box__icon">📅</text>
+        <text class="fbd-empty-box__text">本周期暂无足够的星期销量数据</text>
+      </view>
+    </view>
+
+    <!-- ===== 5. 配料成本构成（ingredientCostRows） ===== -->
+    <view class="fbd-card fbd-card--ingredients" wx:if="{{hasIngredients}}">
+      <view class="fbd-sec__bar fbd-sec__bar--collapsible" bindtap="onToggleIngredients">
+        <text class="fbd-sec__title">配料成本构成（理论）</text>
+        <view class="fbd-sec__right">
+          <text class="fbd-sec__sub">单位成本：¥{{unitCostDisplay}}/份</text>
+          <text class="fbd-sec__arrow {{ingredientsExpanded ? 'is-open' : ''}}">▾</text>
+        </view>
+      </view>
+
+      <!-- 表头 -->
+      <view class="fbd-ing-list">
+        <view class="fbd-ing-row fbd-ing-row--head">
+          <text class="fbd-ing-cell fbd-ing-cell--name">配料名</text>
+          <text class="fbd-ing-cell fbd-ing-cell--qty">用量</text>
+          <text class="fbd-ing-cell fbd-ing-cell--price">单价</text>
+          <text class="fbd-ing-cell fbd-ing-cell--cost">成本</text>
+          <text class="fbd-ing-cell fbd-ing-cell--share">占比</text>
+        </view>
+
+        <!-- 数据行（映射后的字段: name / quantity / unitPrice / costAmount / shareRate） -->
+        <block wx:for="{{ingredients}}" wx:for-item="ing" wx:for-index="idx" wx:key="name">
+          <view
+            class="fbd-ing-row"
+            wx:if="{{idx < 5 || ingredientsExpanded}}"
+          >
+            <text class="fbd-ing-cell fbd-ing-cell--name">{{ing.name || '—'}}</text>
+            <text class="fbd-ing-cell fbd-ing-cell--qty fbd-ing-cell--muted">{{ing.quantity || '—'}}</text>
+            <text class="fbd-ing-cell fbd-ing-cell--price fbd-ing-cell--muted">¥{{ing.unitPrice || '—'}}</text>
+            <text class="fbd-ing-cell fbd-ing-cell--cost">¥{{ing.costAmount || '—'}}</text>
+            <view class="fbd-ing-cell fbd-ing-cell--share">
+              <text class="fbd-ing-share__num">{{ing.shareRate || '—'}}</text>
+              <view class="fbd-ing-share__bar" wx:if="{{ing.shareRate}}">
+                <view
+                  class="fbd-ing-share__fill"
+                  style="width: {{ing.shareRate}};"
+                />
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+
+      <!-- 展开/收起 -->
+      <view
+        class="fbd-ing-toggle"
+        wx:if="{{ingredients.length > 5}}"
+        bindtap="onToggleIngredients"
+        hover-class="fbd-ing-toggle--hover"
+      >
+        <text>{{ingredientsExpanded ? '收起配料' : '查看全部' + ingredients.length + '种配料'}}</text>
+        <text class="fbd-ing-toggle__arrow {{ingredientsExpanded ? 'is-open' : ''}}">▾</text>
+      </view>
+    </view>
+
+    <view class="fbd-bottom-safe"></view>
+  </scroll-view>
+</view>

@@ -105,6 +105,7 @@ Page({
 
   },
 
+
   _getInitData() {
     var data = {
       depGoodsId: this.data.depGoodsId,

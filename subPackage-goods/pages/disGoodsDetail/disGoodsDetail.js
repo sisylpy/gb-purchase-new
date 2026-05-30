@@ -29,7 +29,6 @@ Page({
     supplierArr: [],
     nxDistributerList: [],
     canSave: true,
-    gbDepId: "",
     nxGoodsId: -1,
     supplierId: -1,
     // items:[
@@ -42,7 +41,7 @@ Page({
 
     // ],
     items: [{
-        name: '2',
+        name: '1',
         value: '自采',
         checked: ""
       },
@@ -52,7 +51,7 @@ Page({
         value: '自动订货',
         checked: ""
       }
-      
+    
      
     ],
     itemsSupplier: [{
@@ -708,7 +707,7 @@ Page({
 
   toSupplier() {
     wx.navigateTo({
-      url: '/subPackage-supplier/pages/supplier/appointSupplierList/appointSupplierList',
+      url: '../appointSupplierList/appointSupplierList?purDepId=' + this.data.defaid,
     })
   },
 

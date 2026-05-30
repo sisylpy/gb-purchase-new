@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "navbar": "/components/navbar/navbar",
+    "navbar-dual": "/components/navbar-dual/navbar-dual",
     "return-type": "/components/return-type/return-type"
   },
   "enablePullDownRefresh": true

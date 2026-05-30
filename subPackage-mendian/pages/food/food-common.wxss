@@ -437,6 +437,10 @@
   margin-right: 12rpx;
 }
 
+.food-cat-section__head-main--hover {
+  opacity: 0.88;
+}
+
 .food-cat-section__name-line {
   flex: 1;
   min-width: 0;
@@ -710,6 +714,69 @@
 .food-raw-chips--in-cell .food-raw-chip {
   font-size: 28rpx;
   padding: 6rpx 14rpx;
+}
+
+/* 菜单页：每条批发商菜品下的部门下发列表（GbDepFoodEntity） */
+.food-dish-cell__dep-block {
+  align-items: flex-start;
+}
+
+.food-dep-food-rows {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.food-dep-food-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 18rpx;
+  background: rgba(0, 122, 255, 0.06);
+  border-radius: 14rpx;
+  border: 1rpx solid rgba(0, 122, 255, 0.12);
+  box-sizing: border-box;
+}
+
+.food-dep-food-row__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx 14rpx;
+}
+
+.food-dep-food-row__dep-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--gb-text);
+  max-width: 100%;
+}
+
+.food-dep-food-row__price {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #07c160;
+}
+
+.food-dep-food-row__unlink {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  padding: 8rpx 18rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #ff3b30;
+  background: rgba(255, 59, 48, 0.08);
+  border-radius: 999rpx;
+}
+
+.food-dep-food-row__unlink--hover {
+  opacity: 0.85;
 }
 
 .food-cell-hover {

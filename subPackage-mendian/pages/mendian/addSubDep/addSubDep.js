@@ -47,8 +47,9 @@ bindKeyInput(e){
   
     saveSubDepartment(this.data.depInfo).then(res => {
       if(res.result.code == 0){
-    
-        wx.navigateBack({delta : 1});
+        console.log("disinfofofofoofofoof", res.result.data);
+        wx.setStorageSync('disInfo', res.result.data);
+        // wx.navigateBack({delta : 1});
       }
     })
   },

@@ -24,12 +24,12 @@
   <view class="flex-column page">
 
 
-    <swiper style="height: {{windowHeight - 100 - statusBarHeight}}rpx" current="{{currentTab}}" wx:key="currentTab" bindchange="bindChange">
+    <swiper style="height: {{contentSwiperHeight}}rpx" current="{{currentTab}}" wx:key="currentTab" bindchange="bindChange">
 
       <!-- 1 -->
       <swiper-item>
 
-        <scroll-view scroll-y="true" style="height: {{windowHeight - 300}}rpx;">
+        <scroll-view scroll-y="true" style="height: {{contentSwiperHeight}}rpx;">
 
           <view class="flex-row ">
             <scroll-view scroll-x="true" style="width: {{windowWidth}}rpx; ">
@@ -37,10 +37,10 @@
 
                 <view class=" flex-column-center p-20 mr-20 orderItem {{selIndex == index ? 'is-active' : ''}}" style="width: {{windowWidth / 3 - 20}}rpx;" wx:for="{{payArr}}" wx:for-index="index" wx:key="index" bind:tap="changeIndex" data-index="{{index}}">
                   <view class="flex-row">
-                    <text>{{item.nxNdpBuyQuantity}}万条</text>
+                    <text>{{item.gbGdpBuyQuantity}}万条</text>
                   </view>
                   <view class="flex-row">
-                    <text class="" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                    <text class="" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
                   </view>
                   <view class="flex-row">
                     <text>{{item.perPrice}}分/条</text>
@@ -178,17 +178,17 @@
       <!-- 2 -->
       <swiper-item>
 
-        <scroll-view scroll-y="true" style="height: {{windowHeight - 300}}rpx;">
+        <scroll-view scroll-y="true" style="height: {{contentSwiperHeight}}rpx;">
 
           <view class="flex-column p-20">
             <view class=" flex-column p-20 twenty_radius bg-white mb-20" wx:for="{{payArr}}" wx:for-index="index" wx:key="index" bind:tap="changeIndex" data-index="{{index}}">
 
               <view class="flex-row-default border-bottom tb-10 font-sm">
-                <image src="{{url + item.nxNdpImgUrl}}" mode="aspectFill" class="p-20" style="width: 140rpx; height: 140rpx; margin: 20rpx;" />
+                <image src="{{url + item.gbGdpImgUrl}}" mode="aspectFill" class="p-20" style="width: 140rpx; height: 140rpx; margin: 20rpx;" />
                 <view class="flex-column">
                   <text class="font-lg">{{item.perPrice}}</text>
                   <view class="flex-row" style="width: {{windowWidth - 340}}rpx; ">
-                    <text class="auto" style="white-space: font-lg; word-break: break-word;">{{item.nxNdpSellDetail}}</text>
+                    <text class="auto" style="white-space: font-lg; word-break: break-word;">{{item.gbGdpSellDetail}}</text>
                   </view>
                 </view>
 
@@ -208,7 +208,7 @@
 
                   <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
                     <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
                   </view>
 
                 </block>
@@ -216,7 +216,7 @@
                 <block wx:if="{{index == 1}}">
                   <view wx:if="{{disInfo.gbDistributerModuleEntity.gbDmStockNumber == -1}}" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
                     <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
                   </view>
                   <block wx:else="">
 
@@ -228,7 +228,7 @@
                 <block wx:if="{{index == 2}}">
                   <view wx:if="{{disInfo.gbDistributerModuleEntity.gbDmCentralKitchenNumber == -1}}" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
                     <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
                   </view>
                   <block wx:else="">
 
@@ -247,7 +247,7 @@
                   </block>
                   <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
                     <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
                   </view>
 
                 </block>
@@ -263,7 +263,7 @@
 
                   <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
                     <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.nxNdpPaySubtotal}}</text>
+                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
                   </view>
 
                 </block>
@@ -288,8 +288,8 @@
 </view>
 
 
-<view class="bottom_view bg-light" style="padding-bottom: 20rpx;">
-  <view class="flex-row p-20">
+<view class="bottom_view bg-light ">
+  <view class="flex-row p-20 pay-page-bottom-inner">
   
     <view wx:if="{{currentTab == 0}}">
 
@@ -298,17 +298,16 @@
         <block wx:if="{{!expired && !haveLiwu}}">
 
           <view class="flex-column">
-            <view class="flex-column-center twenty_radius p-20" style="width: {{(windowWidth - 60) / 2 - 80}}rpx; background-color: #fd5310;line-height: 40rpx; height: 100rpx; font-weight: 500; border-radius: 10rpx; color: #fff;" bind:tap="getLiwu">
+            <view class="flex-column-center twenty_radius p-20" style="width: {{(windowWidth - 40) / 2 }}rpx; background-color: #fd5310;line-height: 40rpx; height: 100rpx; font-weight: 500; border-radius: 10rpx; color: #fff;" bind:tap="getLiwu">
               <text class="countdown">{{countdownText}}</text>
-            <view class="font-lg text-center">领取{{liwu}}点</view>
-          </view>
-            
+              <view class="font-lg text-center">领取{{liwu}}点</view>
+            </view>
           </view>
         </block>
         
         <block wx:else="">
         
-          <button style="width: {{(windowWidth - 40) / 2   + 20}}rpx; background-color: #fd5310; line-height: 100rpx; height: 100rpx; font-weight: 500; border-radius: 10rpx; color: #fff;" class="font-md" open-type="share">邀请好友奖励1000点</button>
+          <button style="width: {{(windowWidth - 40) / 2  }}rpx; background-color: #fd5310; line-height: 100rpx; height: 100rpx; font-weight: 500; border-radius: 10rpx; color: #fff;" class="font-md" open-type="share">邀请好友奖励1000点</button>
         </block>
 
 

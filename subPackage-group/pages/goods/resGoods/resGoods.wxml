@@ -1,0 +1,266 @@
+
+<view class="flex flex-column">
+
+
+  <search-navbar style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack" bindtoSearchGoods="beginSearch"></search-navbar>
+
+  <view class="flex flex-row-between  bg-white" style="height:120rpx; ">
+
+<view class="flex flex-row p-20 mainColor">
+
+  <text class="" wx:if="{{goodsType == '99'}}">全部商品</text>
+  <text class="" wx:elif="{{goodsType == '21'}}">自动订货</text>
+  <text class="" wx:elif="{{goodsType == '2'}}">自采商品</text>
+  <text class="" wx:elif="{{goodsType == '101'}}">保鲜控制</text>
+  <text class="" wx:elif="{{goodsType == '102'}}">停止送货</text>
+
+</view>
+
+
+<view class="p-10">
+  <view class="button-container-white" hover-class="button-hover" bindtap="openOperation" >
+    <image src="../../../../images/filter.png" class="icon"></image>
+  </view>
+</view>
+
+</view>
+
+  <view class="flex-column mt-30">
+    <!-- empty -->
+    <view class="flex-column {{disGoodsArrAi.length == 0  ? 'show' : 'hide'}}" style="height: {{windowHeight - 360}}rpx; ">
+      <view class="center-content" style="margin-top: 300rpx;">
+        <view class="flex-column center-content">
+          <image class="empty_image" src="../../../../images/xiuxi.png"></image>
+          <text class="big">暂无商品</text>
+          <view class="text-secondary font-sl">显示下单成功的商品。</view>
+        </view>
+      </view>
+    </view>
+    <!-- ./empty -->
+
+    <view class="flex-row-default" wx:if="{{disGoodsArrAi.length > 0}}">
+
+      <!-- 左侧菜单 -->
+      <view class="left">
+        <scroll-view id="leftScrollDep" scroll-y="true" style="height: {{windowHeight - 200 - statusBarHeight}}rpx; " scroll-top="{{leftScrollTop}}" scroll-with-animation show-scrollbar="false">
+          <view class="left-item {{selectedSub == index ? 'left-active' : ''}}" wx:for="{{disGoodsCataArr}}" wx:key="gbDistributerFatherGoodsId" id="left-cat-{{grand.gbDistributerFatherGoodsId}}" wx:for-item="grand" bindtap="leftMenuClickDep" data-index="{{index}}" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}">
+            <view class="flex-column-center">
+              <!-- <view class="picView ">
+                <image src="{{grand.gbDfgFatherGoodsImg != null && grand.gbDfgFatherGoodsImg !== '' ? url + grand.gbDfgFatherGoodsImg  : '/images/logo.jpg'}}" mode="aspectFill" class="url" />
+              </view> -->
+              <view class="extremeSmall text_center">
+                <text>{{grand.gbDfgFatherGoodsName}}</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- 右侧内容 -->
+      <view class="flex-column">
+
+        <view wx:if="{{showAllSubCatDep}}">
+
+          <scroll-view scroll-y="true" class="subcat-popup" style="top: {{navBarHeight}}rpx; max-height: {{windowHeight - navBarHeight - 400}}rpx; width: {{windowWidth -80}}rpx; ">
+            <view class="subcat-bar expand">
+              <view class="subcat-tag {{activeSubCatIdDep == item.gbDistributerFatherGoodsId ? 'active' : ''}}" wx:for="{{fatherArr}}" wx:key="gbDistributerFatherGoodsId" bindtap="onSubCatTapDep" data-id="{{item.gbDistributerFatherGoodsId}}">
+                {{item.gbDfgFatherGoodsName}}
+              </view>
+            </view>
+          </scroll-view>
+          <view class="subcat-mask" catchtouchmove="stopScroll" bindtap="toggleSubCatDep"></view>
+        </view>
+
+        <!-- 收起时横向滚动 -->
+        <view class="flex-row" style="width: {{windowWidth - 140}}rpx;" wx:else>
+          <scroll-view class="subcat-bar-scroll" scroll-x="true" scroll-into-view="{{subcatScrollIntoViewDep}}" scroll-with-animation show-scrollbar="false" style="width:{{windowWidth - 240}}rpx; margin-right: 20rpx; ">
+            <block wx:for="{{fatherArr}}" wx:key="gbDistributerFatherGoodsId">
+              <view class="subcat-tag {{activeSubCatIdDep == item.gbDistributerFatherGoodsId ? 'active' : ''}}" id="subcat-dep-{{item.gbDistributerFatherGoodsId}}" bindtap="onSubCatTapDep" data-id="{{item.gbDistributerFatherGoodsId}}">
+                {{item.gbDfgFatherGoodsName}}
+              </view>
+            </block>
+          </scroll-view>
+
+          <view class="subcat-toggle" bindtap="toggleSubCatDep">
+            <image src="../../../../images/arrow-down.svg" class="toggle-icon" />
+          </view>
+        </view>
+
+        <scroll-view scroll-y="true" scroll-with-animation="true" bindscroll="onGoodsScrollDep" bindscrolltolower="onReachBottomDep" scroll-into-view="{{scrollIntoViewDep}}" scroll-top="{{depGoodsScrollTop}}" style="width: {{windowWidth - 150}}rpx; height: {{windowHeight - 200- statusBarHeight}}rpx; " class="goods-list-dep">
+
+          <view class="flex-column  goods-item-dep-wrap" wx:for="{{disGoodsArrAi}}" wx:for-item="goods" wx:key="gbDepartmentDisGoodsId" wx:for-index="depGoodsIndex">
+            <view wx:if="{{goods.isFirstInCategory}}" id="cat-dep-{{goods.gbDgDfgGoodsGrandId}}" class="goods-category-title-dep"></view>
+            <view class="flex-row-default goods-item-dep p-20" id="{{goods.viewId}}" style="align-items: flex-start;">
+              <view class="img-wrapper">
+                <!-- <image
+                  bindtap="showDialogBtnDep"
+                  data-item="{{goods}}"
+                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ?  url+ goods.gbDgNxFatherImg : '/images/logo.jpg'}}"
+                  mode="aspectFill"
+                  class="logoimg"
+                  data-raw-path="{{goods.gbDgNxFatherImg}}"
+                  binderror="onGoodsFatherImgError"
+                /> -->
+                <image
+                  bindtap="showDialogBtnDep"
+                  data-item="{{goods}}"
+                  src="{{ url + goods.gbDgNxFatherImg }}"
+                  mode="aspectFill"
+                  class="logoimg"
+                  data-raw-path="{{goods.gbDgNxFatherImg}}"
+                 
+                />
+              </view>
+
+              <view class="flex-column" style="flex: 1; min-width: 0; margin-left: 16rpx;">
+                <view style="align-items: center;">
+                  <text class="font-bold font-xl">{{goods.gbDgGoodsName}}</text>
+                    <block wx:if="{{goods.gbDgControlFresh == 1}}">
+                                <text class="fresh_goods">保鲜{{goods.gbDgFreshWasteHour}}小时</text>
+                              </block>
+                  </view>
+                  <view class="flex-row font-sm" wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
+                    <view class="flex-row">
+                      <text class="gray">规格:</text>
+                      <block wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
+                        <view class="" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">
+                          {{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}
+                        </view>
+                      </block>
+
+                      <block wx:else>
+                        <text class="">{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+                      </block>
+                    </view>
+                  </view>
+
+                  <view class="flex-row font-sm">
+                    <text class="mr-10">库存:</text>
+                    <text class="mainColor mr-10">¥{{goods.goodsStockTotal}}</text>
+                    <text class="font-sl">({{goods.goodsStockWeightTotal}} {{goods.gbDgGoodsStandardname}})</text>
+                  </view>
+
+              </view>
+
+            </view>
+
+         
+
+            <view class="flex-row border-top">
+
+              <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toGoods" data-id="{{goods.gbDistributerGoodsId}}" data-goods="{{goods}}" data-index="{{depGoodsIndex}}">
+                <image src="/images/shuiguoshucai-2.png" mode="aspectFill" class="icon" />
+              </view>
+
+              <view class="quarter-row center-content flex-column-center p-20" bind:tap="toOrderList" data-id="{{goods.gbDistributerGoodsId}}" data-goods="{{goods}}" hover-class="hover">
+                  <image src="/images/time-2.png" mode="aspectFill" class="icon" />
+                </view>
+
+              <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toFenxi" data-id="{{goods.gbDistributerGoodsId}}">
+                <image src="/images/statistic.png" mode="aspectFill" class="icon" />
+              </view>
+
+              <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toStock" data-id="{{goods.gbDistributerGoodsId}}" data-item="{{goods}}">
+                <image src="{{goods.goodsStockWeightTotal > 0 ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFill" class="icon" />
+              </view>
+
+            </view>
+
+          </view>
+
+          <!-- 添加底部空白区域，确保最后一个商品也能触发联动 -->
+          <view wx:if="{{totalPages == currentPage}}" style="height: {{windowHeight  / 2}}rpx;"></view>
+        </scroll-view>
+
+      </view>
+
+
+    </view>
+
+  </view>
+
+</view>
+
+
+<view class='overlay {{showOperation ? "show" : "hiede"}}' catchtap="hideMask">
+
+  <view class=" bg-white" wx:if="{{deleteShow}}" style="margin-top:{{200 + navBarHeight}}rpx;margin-left: 50rpx; width:{{windowWidth - 100}}rpx;">
+    <view class="flex-cloumn">
+
+      <view class="weight_five  p-20 delBack" style="text-align: center;">
+        <view class="p-20 font-md">删除订货</view>
+      </view>
+      <view class="flex-row p-20 normal">
+        <view class="mr-20 p-20">{{itemDis.gbDgGoodsName}}</view>
+        <view class="p-20">订货: {{applyItem.gbDoQuantity}}{{applyItem.gbDoStandard}}</view>
+      </view>
+    </view>
+
+    <view class="flex-row" style="padding-bottom: 40rpx; margin-top: 20rpx;">
+      <view class="p-20 half-row cancel-btn" style="margin-left: 5%; " bindtap="deleteNo" hover-class="hover">取消</view>
+      <view class="p-20 half-row confirm-btn" bindtap="deleteYes" hover-class="hover" style="margin-left: 10%; ">确定</view>
+    </view>
+
+  </view>
+
+
+</view>
+
+
+<delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />
+
+
+<myIndependent show="{{showInd}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
+
+
+<myIndependentNx show="{{showIndNx}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
+
+
+<myDismodalStand show="{{showStand}}" bindconfirm="confirm" bindcancle="cancle" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemCom}}" applyStandardName="{{applyStandardName}}" applyPrice="{{applyPrice}}" applyStandardId="{{applyStandardId}}" expectPrice="{{expectPrice}}" applyStandardScale="{{applyStandardScale}}" applyStandardQuantity="{{applyStandardQuantity}}" />
+
+
+
+<cover-view class="modal-mask" bindtap="hideModal" wx:if="{{showGoodsModal}}"></cover-view>
+<cover-view class="modal-dialog" wx:if="{{showGoodsModal}}">
+  <cover-view class="modal-title">{{item.gbGoodsName}}</cover-view>
+  <cover-view>{{url + item.gbGoodsFileLarge}}</cover-view>
+  <cover-view class="modal-content">
+    <cover-image style="width: 400rpx; height: 500rpx;" src="{{url + item.gbGoodsFileLarge}}"></cover-image>
+  </cover-view>
+
+</cover-view>
+
+
+
+
+<!-- goodsType -->
+<view class='overlay {{showOperationGoods ? "show" : ""}}' catchtouchmove='ture' catchtap="hideMask">
+  <view class="flex-column nnn bg-white font-lg"  wx:if="{{chooseSize}}" animation='{{animationData}}'>
+
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="99">
+      <image src="../../../../images/icon_goods_active.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '99' ? 'mainColor' : ''}} ">全部商品</text>
+    </view>
+
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="21">
+      <image src="../../../../images/wx.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '21' ? 'mainColor' : ''}} ">自动订货</text>
+    </view>
+
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="2">
+      <image src="../../../../images/gouwuche-4.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '2' ? 'mainColor' : ''}} ">采购商品</text>
+    </view>
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="101">
+      <image src="../../../../images/toxicwaste.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '101' ? 'mainColor' : ''}} ">保鲜控制</text>
+    </view>
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="102">
+      <image src="../../../../images/warn.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '102' ? 'mainColor' : ''}} ">停止订货</text>
+    </view>
+
+    <view style="height: 20rpx;"></view>
+
+  </view>
+</view>

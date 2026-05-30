@@ -1,0 +1,139 @@
+<view class="flex flex-column ">
+  <back-navbar title="{{foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="content ">
+    <view class="food-form-card1 bg-white">
+      <!-- <view class="food-form-row food-form-row--top1">
+        <view class="" >
+          <text class="mr-10 text-secondary" >当前菜品:</text>
+          <text class=" font-lg font-bold" >{{foodItem.dishName}}</text>
+        </view>
+      
+      </view> -->
+
+      <view class="food-raw-section">
+        <view class="food-raw-section__head">
+          <text class="text-secondary">主要原料:</text>
+          <view  class="food-raw-section__add" bindtap="toAddGoods" data-type="raw" hover-class="food-raw-section__add--hover">
+            <text>搜索原料</text>
+          </view>
+        </view>
+
+        <view wx:if="{{!rawArr.length}}" class="food-raw-empty">
+          <text class="food-raw-empty__text">暂无原料，点击「添加」从商品库选择</text>
+        </view>
+       
+        <view wx:for="{{rawArr}}" wx:for-item="raw" wx:for-index="rawIdx" wx:key="rawIdx" class="flex-row-between p-20 border-bottom">
+          <view class="flex-row font-base">
+            <text class="mr-10">{{rawIdx + 1}}.</text>
+            <view class="flex-column ">
+              <text class="">{{raw.gbDfgGoodsName}}</text>
+              <view class="flex-row">
+                 <text class="mr-10 text-secondary">用量:</text>
+                <text class="">{{raw.gbDfgGoodsAmount}}{{raw.gbDfgGoodsStandardname}}</text>
+              </view> 
+            </view>
+          </view>
+          <view class="food-raw-row__actions">
+            <view class="food-raw-icon-btn" bindtap="editGoods" data-item="{{raw}}" hover-class="food-raw-icon-btn--hover">
+              <image src="/images/edit.png" class="icon" mode="aspectFit"></image>
+            </view>
+            <view class="food-raw-icon-btn" bindtap="deleteGoods" data-index="{{rawIdx}}" hover-class="food-raw-icon-btn--hover">
+              <image src="/images/del.png" class="icon" mode="aspectFit"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 选择 / 编辑原料（与 addFood 同一套 food-search-modal） -->
+<view class="food-search-modal" wx:if="{{showFood}}" catchtouchmove="stopMove">
+  <view class="food-search-modal__panel" style="margin-top: {{foodSearchModalPadTopRpx}}rpx; max-height: {{foodSearchModalPanelMaxRpx}}rpx;">
+    <view class="food-search-modal__head">
+      <text class="food-search-modal__title">{{foodItem.gbDfFoodName}}</text>
+      <text class="food-search-modal__hint">搜索商品名称、简拼或全拼</text>
+    </view>
+
+    <view class="food-search-modal__body">
+      <view class="food-search-modal__section flex-row-items-center">
+        <text class="food-form-label food-form-label--narrow">原料</text>
+        <input
+          class="numberInput flex-1"
+          style="min-width: 0;"
+          placeholder="输入关键字搜索"
+          placeholder-style="color: #999; font-size: 30rpx;"
+          adjust-position="{{false}}"
+          bindinput="getSearchString"
+          bindblur="checkGoods"
+          value="{{modalType == 'edit' ? editGoods.gbDfgGoodsName : goodsName}}"
+        />
+      </view>
+
+      <view class="food-search-modal__scroll-wrap searchPart {{isSearching ? 'is-active' : ''}}">
+        <scroll-view
+          scroll-y
+          class="searchList {{isSearching ? 'is-active' : ''}}"
+          catchtouchmove="stopMove"
+          style="height: {{strArr.length ? (strArr.length < 8 ? strArr.length * 108 : foodSearchScrollRpx) : 120}}rpx;"
+        >
+          <view
+            class="food-raw-search-row"
+            wx:for="{{strArr}}"
+            wx:for-item="goods"
+            wx:key="gbDistributerGoodsId"
+            bindtap="applyGoods"
+            data-item="{{goods}}"
+            hover-class="food-raw-search-row--hover"
+          >
+            <text class="mr-10">{{index + 1}}.</text>
+            <view class="food-raw-search-row__content">
+              <view class="food-raw-search-row__line">
+                <text class="brand" wx:if="{{goods.gbDgGoodsBrand && goods.gbDgGoodsBrand.length > 0 && goods.gbDgGoodsBrand !== 'null'}}">{{goods.gbDgGoodsBrand}}</text>
+                <text class="gray" wx:if="{{goods.gbDgPullOff == 1}}">(下架) {{goods.gbDgGoodsName}}</text>
+                <text wx:else class="food-raw-search-row__name">{{goods.gbDgGoodsName}}</text>
+                <block wx:if="{{goods.gbDgGoodsStandardWeight !== 'null' && goods.gbDgGoodsStandardWeight.length > 0}}">
+                  <text class="food-raw-search-row__spec">（{{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}}）</text>
+                </block>
+                <block wx:else>
+                  <text wx:if="{{goods.gbDgGoodsStandardname}}" class="food-raw-search-row__spec">（{{goods.gbDgGoodsStandardname}}）</text>
+                </block>
+                <block wx:if="{{goods.nxAliasEntities && goods.nxAliasEntities.length > 0}}">
+                  <text wx:for="{{goods.nxAliasEntities}}" wx:for-item="alias" wx:for-index="aliasIdx" wx:key="aliasIdx">={{alias.nxDaAliasName}}</text>
+                </block>
+              </view>
+              <view class="food-raw-search-row__line food-raw-search-row__line--sub" wx:if="{{(goods.gbDgGoodsPlace !== null && goods.gbDgGoodsPlace.length > 0) || (goods.gbDgGoodsDetail && goods.gbDgGoodsDetail.length > 0 && goods.gbDgGoodsDetail !== 'null')}}">
+                <text wx:if="{{goods.gbDgGoodsPlace !== null && goods.gbDgGoodsPlace.length > 0}}" class="food-raw-search-row__place">产地 {{goods.gbDgGoodsPlace}}</text>
+                <text wx:if="{{goods.gbDgGoodsDetail && goods.gbDgGoodsDetail.length > 0 && goods.gbDgGoodsDetail !== 'null'}}" class="food-raw-search-row__detail">{{goods.gbDgGoodsDetail}}</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="food-search-modal__section flex-row-items-center" wx:if="{{!isSearching}}">
+        <text class="food-form-label food-form-label--narrow">数量</text>
+        <view class="flex-row-items-center flex-1" style="min-width: 0;">
+          <input
+            class="numberInput"
+            style="width: {{windowWidth - 300}}rpx; min-width: 0;"
+            placeholder-style="color: #999; font-size: 26rpx;"
+            type="digit"
+            value="{{modalType == 'edit' ? editGoods.gbDfgGoodsAmount : amount}}"
+            bindinput="getApplyNumber"
+            hold-keyboard="{{true}}"
+          />
+          <text class="ml-sm text-secondary font-md" style="flex-shrink: 0;">{{modalType == 'edit' && editGoods.distributerGoodsEntity ? editGoods.distributerGoodsEntity.gbDgGoodsStandardname : standardName}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="food-search-modal__footer">
+      <view class="food-search-modal__actions">
+        <view class="cancel-btn" bindtap="cancle" hover-class="hoverBtn">取消</view>
+        <view class="confirm-btn" catchtap="confirm" hover-class="hoverBtn">确定</view>
+      </view>
+    </view>
+  </view>
+</view>

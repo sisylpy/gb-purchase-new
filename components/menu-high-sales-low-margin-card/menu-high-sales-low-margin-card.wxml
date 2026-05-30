@@ -1,0 +1,82 @@
+<!-- 畅销低利菜 - 经营看板卡片 -->
+<view class="hsml-card" wx:if="{{visible}}">
+
+  <!-- ========== 标题区 ========== -->
+  <view class="hsml-header">
+    <text class="hsml-title">{{title}}</text>
+    <text class="hsml-tag" wx:if="{{!empty}}">{{totalRiskDishCount}}道</text>
+  </view>
+
+  <!-- ========== 空态 ========== -->
+  <view class="hsml-empty" wx:if="{{empty}}">
+    <text class="hsml-empty-icon">✅</text>
+    <text class="hsml-empty-text">本期未发现明显畅销低利菜</text>
+  </view>
+
+  <!-- ========== 概览 ========== -->
+  <view class="hsml-summary" wx:elif="{{summary}}">
+    <text class="hsml-summary-text">{{summary}}</text>
+  </view>
+
+  <!-- ========== 菜品列表 ========== -->
+  <view class="hsml-dish-list" wx:if="{{!empty && dishes.length > 0}}">
+    <view
+      class="hsml-dish-card"
+      wx:for="{{dishes}}"
+      wx:key="dishName"
+      wx:for-item="dish"
+    >
+      <!-- 菜品名 -->
+      <view class="hsml-dish-name-row">
+        <text class="hsml-dish-index">{{index + 1}}</text>
+        <text class="hsml-dish-name">{{dish.dishName || '—'}}</text>
+      </view>
+
+      <!-- 销量 & 销售额 -->
+      <view class="hsml-dish-metrics">
+        <view class="hsml-metric">
+          <text class="hsml-metric-label">销量</text>
+          <text class="hsml-metric-value">{{dish.salesCount || '—'}}</text>
+        </view>
+        <view class="hsml-metric">
+          <text class="hsml-metric-label">销售额</text>
+          <text class="hsml-metric-value">¥{{dish.salesAmount || '—'}}</text>
+        </view>
+        <view class="hsml-metric">
+          <text class="hsml-metric-label">毛利率</text>
+          <text class="hsml-metric-value hsml-metric-warn">{{dish.blendedGrossMarginRateOnListPrice || '—'}}%</text>
+        </view>
+      </view>
+
+      <!-- 实际利润 & 成本合计 -->
+      <view class="hsml-dish-metrics">
+        <view class="hsml-metric">
+          <text class="hsml-metric-label">实际利润</text>
+          <text class="hsml-metric-value">¥{{dish.actualProfitAmount || '—'}}</text>
+        </view>
+        <view class="hsml-metric">
+          <text class="hsml-metric-label">成本合计</text>
+          <text class="hsml-metric-value">¥{{dish.actualCostTotalAmount123 || '—'}}</text>
+        </view>
+      </view>
+
+      <!-- 风险原因 -->
+      <view class="hsml-dish-reason" wx:if="{{dish.riskReason}}">
+        <text class="hsml-reason-label">⚠️ 风险原因</text>
+        <text class="hsml-reason-text">{{dish.riskReason}}</text>
+      </view>
+
+      <!-- 建议动作 -->
+      <view class="hsml-dish-action" wx:if="{{dish.recommendedAction}}">
+        <text class="hsml-action-label">💡 建议动作</text>
+        <text class="hsml-action-text">{{dish.recommendedAction}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 底部提示 ========== -->
+  <view class="hsml-footer" wx:if="{{!empty}}">
+    <text class="hsml-footer-text">* 数据仅供参考，具体经营策略请结合实际情况调整</text>
+  </view>
+
+</view>

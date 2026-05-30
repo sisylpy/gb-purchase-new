@@ -7,8 +7,8 @@
 
 var requestUtil = require('../lib/request');
 
-var getPurchaseGoodsGbWithTabCount = function (disId) {
-  return requestUtil.get('gbdistributerpurchasegoods/getPurchaseGoodsGbWithTabCount/' + disId);
+var getStorePurchaseGoodsGbWithTabCount = function (purDepId) {
+  return requestUtil.get('gbdistributerpurchasegoods/getStorePurchaseGoodsGbWithTabCount/' + purDepId);
 };
 
 var saveDisPurGoodsBatchGb = function (data) {
@@ -31,8 +31,8 @@ var receiveGbBatch = function (id) {
   return requestUtil.get('gbdistributerpurchasebatch/receiveGbBatch/' + id);
 };
 
-var jingjingGetBuyingGoodsGb = function (disId) {
-  return requestUtil.get('gbdistributerpurchasebatch/jingjingGetBuyingGoodsGb/' + disId);
+var storeGetBuyingGoodsGb = function (disId) {
+  return requestUtil.get('gbdistributerpurchasebatch/storeGetBuyingGoodsGb/' + disId);
 };
 
 var jingjingGetBuyingGoodsGbWithNx = function (disId) {
@@ -202,6 +202,7 @@ var disGetDepGoodsCataGb = function (data) {
   return requestUtil.post('gbdepartmentdisgoods/disGetDepGoodsCataGb', data, { useUrlParams: true });
 };
 
+
 var disGetDepGoodsCataGbWithSupplier = function (data) {
   return requestUtil.post('gbdepartmentdisgoods/disGetDepGoodsCataGbWithSupplier', data, { useUrlParams: true });
 };
@@ -368,14 +369,22 @@ var finishPayPurchaseBatchGb = function (data) {
   }, { useUrlParams: true });
 };
 
+/**
+ * 集团下门店部门列表（与 mendian 服务同源）
+ * GET gbdepartment/getDisDepartmentGbMendianJing/{disId}
+ */
+var getDisDepartmentGbMendianJing = function (disId) {
+  return requestUtil.get('gbdepartment/getDisDepartmentGbMendianJing/' + disId);
+};
+
 module.exports = {
-  getPurchaseGoodsGbWithTabCount: getPurchaseGoodsGbWithTabCount,
+  getStorePurchaseGoodsGbWithTabCount: getStorePurchaseGoodsGbWithTabCount,
   saveDisPurGoodsBatchGb: saveDisPurGoodsBatchGb,
   purUserSaveMendain: purUserSaveMendain,
   puraserReturnPurGoods: puraserReturnPurGoods,
   receiveGbBatchItem: receiveGbBatchItem,
   receiveGbBatch: receiveGbBatch,
-  jingjingGetBuyingGoodsGb: jingjingGetBuyingGoodsGb,
+  storeGetBuyingGoodsGb: storeGetBuyingGoodsGb,
   jingjingGetBuyingGoodsGbWithNx: jingjingGetBuyingGoodsGbWithNx,
   deleteDisPurBatchGbItem: deleteDisPurBatchGbItem,
   deleteDisPurAndNxDataItem: deleteDisPurAndNxDataItem,
@@ -453,4 +462,6 @@ module.exports = {
   sellerUpdatePurGoods: sellerUpdatePurGoods,
   // settlePageGb 需要的 API
   finishPayPurchaseBatchGb: finishPayPurchaseBatchGb,
+  /** 集团门店列表（首页切换门店） */
+  getDisDepartmentGbMendianJing: getDisDepartmentGbMendianJing,
 };

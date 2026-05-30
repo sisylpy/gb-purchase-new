@@ -1,46 +1,4 @@
-/**
- * subPackage-goods 统一 API
- * 汇总本子包 pages 所用接口，风格对齐 subPackage-ai/services/api.js（request + 注释清单）
- *
- * 部分与部门订单/配送标准重复的方法直接复用 services/depOrder.js，保证路径与主包一致。
- *
- * 接口清单:
- * ====== 商品搜索 searchGoods ======
- * queryDisGoodsByQuickSearchGb(data)     POST gbdistributergoods/queryDisGoodsByQuickSearchGb
- *
- * ====== 商品列表 resGoods ======
- * disGetDepGoodsCataGb(data)             POST gbdepartmentdisgoods/disGetDepGoodsCataGb
- * disGetDepGoodsGbPage(data)             POST gbdepartmentdisgoods/disGetDepGoodsGbPage
- *
- * ====== 商品详情 disGoodsDetail ======
- * gbDisGetGoodsDetail(id)               GET  gbdistributergoods/gbDisGetGoodsDetail/{id}
- * gbDisGetAllNxDistributerAndSupplier(disId) GET gbdistributergoods/gbDisGetAllNxDistributerAndSupplier/{disId}
- * disUpdateDisGoodsGb(goods)             POST gbdistributergoods/disUpdateDisGoodsGb
- *
- * ====== 商品操作页 disGoodsPage ======
- * gbDisSaveStandard(data)                POST gbdistributerstandard/gbDisSaveStandard
- * gbDisUpdateStandard(data)              POST gbdistributerstandard/gbDisUpdateStandard
- * gbDisDeleteStandard(id)                GET  gbdistributerstandard/gbDisDeleteStandard/{id}
- * saveDisAlias(data)                     POST gbdistributeralias/saveDisAlias
- * updateDisAlias(data)                   POST gbdistributeralias/updateDisAlias
- * disDeleteAlias(id)                     GET  gbdistributeralias/disDeleteAlias/{id}
- * updateGbGoods(goods)                   POST gbdistributergoods/updateGbGoods
- * updateGbGoodsPullOff(goods)            POST gbdistributergoods/updateGbGoodsPullOff
- * changeGbGoodsFresh(goods)              POST gbdistributergoods/changeGbGoodsFresh
- * canclePostDgnGoodsGb(data)             POST gbdistributergoods/canclePostDgnGoodsGb
- *
- * ====== 商品分析 goodsFenxi ======
- * getGbPurGoodsFenxi(data)               POST gbdistributerpurchasegoods/getGbPurGoodsFenxi
- *
- * ====== 商品订货流水 goodsOrderList ======
- * getDisGoodsOrderDayJingjinig(data)     POST gbdistributerpurchasegoods/getDisGoodsOrderDayJingjinig
- *
- * ====== 批发商商品库存流水 stockGoodsList ======
- * getDisGoodsBusiness(data)              POST gbdepartmentgoodsstock/getDisGoodsBusiness
- * deleteReduceItem(id)                  GET  gbdepartmentgoodsstockreduce/deleteReduceItem/{id}
- * deleteReduceAttachment(attachId)      GET  gbdepartmentgoodsstockreduceattachment/delAttem/{attachId}
- * changeDepStockToAnotherDep(data)       POST gbdepartmentgoodsstock/changeDepStockToAnotherDep
- */
+
 
 var request = require('../../lib/request');
 var depOrder = require('../../services/depOrder');
@@ -58,6 +16,17 @@ var gbDisDeleteStandard = depOrder.gbDisDeleteStandard;
 // ============================================================
 // 本子包专用
 // ============================================================
+
+
+
+var storeGetDepGoodsGbPage = function (data) {
+  return request.post('gbdepartmentdisgoods/storeGetDepGoodsGbPage', data, { useUrlParams: true });
+};
+
+var storeGetDepGoodsCataGb = function (data) {
+  return request.post('gbdepartmentdisgoods/storeGetDepGoodsCataGb', data, { useUrlParams: true });
+};
+
 
 var queryDisGoodsByQuickSearchGb = function (data) {
   return request.post(
@@ -178,6 +147,8 @@ var changeDepStockToAnotherDep = function (data) {
 module.exports = {
   queryDisGoodsByQuickSearchGb: queryDisGoodsByQuickSearchGb,
   disGetDepGoodsCataGb: disGetDepGoodsCataGb,
+  storeGetDepGoodsCataGb: storeGetDepGoodsCataGb,
+  storeGetDepGoodsGbPage: storeGetDepGoodsGbPage,
   disGetDepGoodsGbPage: disGetDepGoodsGbPage,
   gbDisGetGoodsDetail: gbDisGetGoodsDetail,
   gbDisGetAllNxDistributerAndSupplier: gbDisGetAllNxDistributerAndSupplier,

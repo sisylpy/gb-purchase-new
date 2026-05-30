@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "live-pulse": "/components/livePulse/livePulse"
+  }
+}

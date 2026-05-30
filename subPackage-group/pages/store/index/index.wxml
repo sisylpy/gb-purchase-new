@@ -1,0 +1,73 @@
+<!-- bb -->
+<view class="flex flex-column ">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="门店管理" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <view class="flex-row-between p-20">
+      <text class="p-20 font-md" style="width: {{windowWidth - 200}}rpx;">部门列表</text>
+      <view class="mainBack_new_btn"  bindtap="addSub" data-id="{{dep.gbDepartmentId}}">+        
+      </view>
+    </view>
+
+  <view class="flex-column" wx:for="{{depArr}}" wx:for-item="dep" wx:key="gbDepartmentId">
+   
+  
+        <view class="flex-column font-xl border-bottom mb-30 bg-white" wx:for="{{dep.gbDepartmentEntityList}}" wx:for-item="sub" wx:key="gbDepartmentId">
+          <view class="flex-row-between p-20">
+            <view class="flex-row">
+              <view class="text-secondary mr-20">部门:</view>
+              <view>{{sub.gbDepartmentName}}</view>
+             
+            </view>
+            <view class="button-container-white" bind:tap="editDepartment" data-item="{{sub}}">
+              <image src="/images/edit-2.png" mode="aspectFill" class="icon" />
+            </view>
+          </view>
+
+          <view class="flex-column p-20">
+            <view class="flex-row-between">
+              <text class=" text-secondary" style="width: {{windowWidth - 200}}rpx;">部门下单用户:</text>
+
+              <!-- <button class="big mainBack_new_btn " open-type="share" data-index="{{index}}" data-father-index="{{depIndex}}">
+                +
+              </button> -->
+
+
+            </view>
+
+            <view class="flex-row-wrap mb-20 mt-20">
+              <view class="flex-column-center p-10 mr-30 " wx:for="{{sub.gbDepartmentUserEntities}}" wx:for-item="subUser" wx:key="gbDepartmentUserId">
+                <image src="{{url + subUser.gbDuWxAvartraUrl}}" mode="aspectFill" class="itemPic mr-20" />
+                <text class="font-sl">{{subUser.gbDuWxNickName}}</text>
+
+              </view>
+            </view>
+
+            
+          </view>
+
+
+
+        </view>
+
+  
+
+  </view>
+
+
+
+</view>
+
+<!-- <view class="flex-row" style="position: absolute; bottom: 20rpx; background-color: rgb(228, 228, 228); width: {{windowWidth - 40}}rpx; padding: 20rpx 20rpx;">
+
+
+  <view class="center-content flex-column">
+    <button class=" apply_btn_green" open-type="share" data-type="pur">
+      邀请采购员注册
+    </button>
+  </view>
+
+
+
+</view> -->

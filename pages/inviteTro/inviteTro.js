@@ -47,7 +47,7 @@ Page({
 
     })
 
-    // this._userLogin();
+    this._userLogin();
  
   },
 

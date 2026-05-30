@@ -47,7 +47,7 @@ var gbPurchaserRegitsteWithFile = function (avatarUrl, userName, code, admin, gb
  */
 var gbRegisterWithFileInvite = function (avatarUrl, restaurantName, code, phone, address, disId) {
   return requestUtil.uploadFile(
-    'gbdistributeruser/gbRegisterWithFileInvite',
+    'gbdepartmentuser/gbRegisterWithFileInvite',
     avatarUrl,
     'file',
     {

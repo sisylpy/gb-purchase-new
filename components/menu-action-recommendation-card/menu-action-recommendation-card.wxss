@@ -1,0 +1,307 @@
+/* ============================================================
+   菜单优化方案卡 — AI presentation 主展示
+   ============================================================ */
+
+/* ---------- 卡片容器 ---------- */
+.mar-card {
+  margin: 20rpx 0;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* ---------- 空态 ---------- */
+.mar-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 28rpx;
+}
+.mar-empty-icon { font-size: 56rpx; margin-bottom: 20rpx; }
+.mar-empty-text { font-size: 28rpx; color: #9aa0a6; line-height: 1.5; }
+
+/* ============================================================
+   蓝色头部
+   ============================================================ */
+.mar-hero {
+  background: linear-gradient(135deg, #5B9BD5 0%, #4A90D9 100%);
+  padding: 36rpx 28rpx 30rpx;
+}
+.mar-hero-inner {
+  position: relative;
+}
+.mar-hero-title-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+.mar-hero-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1rpx;
+}
+.mar-hero-star {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-left: 10rpx;
+}
+
+/* 头部核心数据行 */
+.mar-hero-stats {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+.mar-hero-stat {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+.mar-hero-stat-val {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #fff;
+}
+.mar-hero-stat-dot {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 10rpx;
+}
+.mar-hero-label {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ============================================================
+   白色主体
+   ============================================================ */
+.mar-body {
+  padding: 20rpx 24rpx 28rpx;
+}
+
+/* 核心摘要 */
+.mar-ai-summary {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 20rpx 24rpx;
+  margin-bottom: 24rpx;
+  background: #F0F7FF;
+  border-radius: 14rpx;
+  border-left: 6rpx solid #4A90D9;
+}
+.mar-ai-summary-icon {
+  font-size: 28rpx;
+  color: #E47E0A;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+.mar-ai-summary-text {
+  font-size: 28rpx;
+  color: #1a3a5f;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* 通用 section */
+.mar-ai-section {
+  margin-bottom: 24rpx;
+}
+.mar-ai-section-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12rpx;
+}
+.mar-ai-section-body {
+  padding-left: 4rpx;
+}
+
+/* 关键发现 */
+.mar-ai-finding {
+  padding: 12rpx 16rpx;
+  margin-bottom: 8rpx;
+  background: #FFF8F0;
+  border-radius: 10rpx;
+}
+.mar-ai-finding:last-child { margin-bottom: 0; }
+.mar-ai-finding-text {
+  font-size: 26rpx;
+  color: #3a2a1a;
+  line-height: 1.5;
+}
+
+/* 文本/列表内容 */
+.mar-ai-section-text {
+  font-size: 26rpx;
+  color: #3a4a5f;
+  line-height: 1.6;
+  display: block;
+  margin-bottom: 8rpx;
+}
+.mar-ai-section-item {
+  font-size: 26rpx;
+  color: #3a4a5f;
+  line-height: 1.6;
+  display: block;
+  padding: 4rpx 0;
+}
+
+/* ============================================================
+   本次重点关注菜品（紧凑辅助区）
+   ============================================================ */
+.mar-focus-dish-list {
+  display: flex;
+  flex-direction: column;
+}
+.mar-focus-dish {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 14rpx 16rpx;
+  margin-bottom: 10rpx;
+  background: #fafbfc;
+  border-radius: 12rpx;
+  border: 1rpx solid #f0f2f5;
+}
+.mar-focus-dish:last-child { margin-bottom: 0; }
+.mar-focus-dish-img {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 10rpx;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+  background: #f0f2f5;
+}
+.mar-focus-dish-img--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+}
+.mar-focus-dish-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mar-focus-dish-metrics {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+.mar-focus-dish-metric {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-left: 18rpx;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   下一步行动（卡片感行动条）
+   ============================================================ */
+.mar-steps-list {
+  display: flex;
+  flex-direction: column;
+}
+.mar-step-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 16rpx 18rpx;
+  margin-bottom: 12rpx;
+  background: #F0F7FF;
+  border-radius: 12rpx;
+  border-left: 5rpx solid #4A90D9;
+}
+.mar-step-bar:last-child { margin-bottom: 0; }
+.mar-step-bar-num {
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #fff;
+  background: #4A90D9;
+  border-radius: 10rpx;
+  flex-shrink: 0;
+  margin-right: 14rpx;
+  margin-top: 2rpx;
+}
+.mar-step-bar-text {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1a3a5f;
+  line-height: 1.55;
+  flex: 1;
+}
+
+/* ============================================================
+   分析依据
+   ============================================================ */
+.mar-ai-evidence-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  padding: 10rpx 14rpx;
+  margin-bottom: 6rpx;
+  background: #fafbfc;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+.mar-ai-evidence-row:last-child { margin-bottom: 0; }
+.mar-ai-evidence-label {
+  font-weight: 600;
+  color: #1a1a1a;
+  flex-shrink: 0;
+}
+.mar-ai-evidence-colon {
+  color: #9aa0a6;
+  flex-shrink: 0;
+  margin-right: 4rpx;
+}
+.mar-ai-evidence-val {
+  color: #5f6368;
+  flex-shrink: 0;
+}
+.mar-ai-evidence-unit {
+  color: #9aa0a6;
+  margin-left: 4rpx;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   底部能力边界
+   ============================================================ */
+.mar-ai-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f2f5;
+}
+.mar-ai-footer-icon {
+  font-size: 22rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+.mar-ai-footer-text {
+  font-size: 22rpx;
+  color: #9aa0a6;
+  line-height: 1.5;
+  flex: 1;
+}

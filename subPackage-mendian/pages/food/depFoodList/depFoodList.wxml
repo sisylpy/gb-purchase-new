@@ -1,4 +1,214 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view wx:if="{{foodManageMode}}" class="food-menu-page flex flex-column">
+  <back-navbar title="{{manageFatherName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBackManage"></back-navbar>
+
+  <scroll-view scroll-y class="food-menu-scroll">
+    <view class="food-menu-head">
+      <text class="food-menu-head__label">菜品</text>
+      <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" catchtap="addDishFromCategory">
+        <text class="food-menu-action-btn__txt">添加菜品</text>
+      </view>
+    </view>
+
+    <view class="food-cat-section__dishes food-cat-section__dishes--nested" style="margin-left: 0; border-left: none; padding-left: 0;">
+      <view
+        class="food-dish-cell"
+        wx:for="{{manageFoodList}}"
+        wx:for-item="food"
+        wx:key="gbDistributerFoodId"
+      >
+        <view class="food-dish-cell__inner">
+          <view class="food-dish-cell__content">
+            <view class="food-dish-cell__main-row">
+              <view class="food-dish-cell__main-left">
+                <view class="food-dish-cell__title-left">
+                  <text class="food-dish-cell__no-inline">{{index + 1}}.</text>
+                  <view class="food-dish-cell__name-wrap">
+                    <text class="font-lg font-bold food-dish-cell__title-name">{{food.gbDfFoodName}}</text>
+                    <text wx:if="{{food.gbDfStatus == 1}}" class="food-cat-item__badge food-cat-item__badge--off">停用</text>
+                  </view>
+                </view>
+                <view class="flex-row food-dish-cell__method-row font-md">
+                  <text class="text-secondary">售出方法</text>
+                  <text class="ml-10">{{food.gbDfFoodMethod}}</text>
+                </view>
+              </view>
+              <view class="food-dish-cell__price-inline">
+                <text class="food-dish-cell__price-lab">单价</text>
+                <text class="food-dish-cell__price-sym">¥</text>
+                <text class="food-dish-cell__price-num">{{food.gbDfFoodPrice}}</text>
+                <text class="food-dish-cell__price-suffix">元/份</text>
+              </view>
+            </view>
+            <view class="flex-column font-md food-dish-cell__extra">
+              <view class="flex-row pt-10 food-dish-cell__raw">
+                <text class="text-secondary food-dish-cell__raw-label">主要原料</text>
+                <view class="food-raw-chips food-raw-chips--in-cell">
+                  <view class="food-raw-chip" wx:for="{{food.gbdisFoodGoodsEntities}}" wx:for-item="goods" wx:key="gbDistributerFoodGoodsId">
+                    <text>{{goods.gbDfgGoodsName}} {{goods.gbDfgGoodsAmount}}{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+                  </view>
+                </view>
+              </view>
+              <view class="flex-row pt-10 food-dish-cell__raw food-dish-cell__dep-block" wx:if="{{food.depFoodList && food.depFoodList.length}}">
+                <text class="text-secondary food-dish-cell__raw-label">部门菜品</text>
+                <view class="food-dep-food-rows">
+                  <view class="food-dep-food-row" wx:for="{{food.depFoodList}}" wx:for-item="depf" wx:key="_depRowKey">
+                    <view class="food-dep-food-row__main">
+                      <text class="food-dep-food-row__dep-name">{{depf._displayDepName}}</text>
+                      <text class="food-dep-food-row__price">¥{{depf.gbDfFoodPrice}}/份</text>
+                      <text wx:if="{{depf.gbDfStatus == 1}}" class="food-cat-item__badge food-cat-item__badge--off">停用</text>
+                    </view>
+                    <view
+                      class="food-dep-food-row__unlink"
+                      hover-class="food-dep-food-row__unlink--hover"
+                      catchtap="onManageRemoveDepFood"
+                      data-item="{{depf}}"
+                    >
+                      <text>移除</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+            <view class="food-dish-cell__actions">
+              <view
+                wx:if="{{food.gbDfStatus == 1}}"
+                class="food-dish-act food-dish-act--icon food-dish-act--ok"
+                hover-class="food-dish-act--hover"
+                catchtap="onDishRestartFood"
+                data-item="{{food}}"
+                data-father-id="{{manageFoodFatherId}}"
+                data-father-name="{{manageFatherName}}"
+              >
+                <image class="food-dish-act__icon" src="/images/correct.png" mode="aspectFit" />
+                <text class="food-dish-act__txt">恢复</text>
+              </view>
+              <view
+                wx:else=""
+                class="food-dish-act food-dish-act--icon food-dish-act--danger"
+                hover-class="food-dish-act--hover"
+                catchtap="onDishDeleteFood"
+                data-item="{{food}}"
+                data-father-id="{{manageFoodFatherId}}"
+                data-father-name="{{manageFatherName}}"
+              >
+                <image class="food-dish-act__icon" src="/images/ashbin.png" mode="aspectFit" />
+                <text class="food-dish-act__txt">删除</text>
+              </view>
+              <view
+                class="food-dish-act food-dish-act--icon"
+                hover-class="food-dish-act--hover"
+                catchtap="onDishEditFood"
+                data-item="{{food}}"
+                data-father-id="{{manageFoodFatherId}}"
+                data-father-name="{{manageFatherName}}"
+              >
+                <image class="food-dish-act__icon" src="/images/MapEditing.png" mode="aspectFit" />
+                <text class="food-dish-act__txt">编辑</text>
+              </view>
+              <view
+                class="food-dish-act food-dish-act--icon"
+                hover-class="food-dish-act--hover"
+                catchtap="onDishEditRaw"
+                data-item="{{food}}"
+                data-father-id="{{manageFoodFatherId}}"
+                data-father-name="{{manageFatherName}}"
+              >
+                <image class="food-dish-act__icon" src="/images/Cost.png" mode="aspectFit" />
+                <text class="food-dish-act__txt">原料</text>
+              </view>
+              <view
+                
+                class="food-dish-act food-dish-act--icon"
+                hover-class="food-dish-act--hover"
+                catchtap="onDishAddToDepartment"
+                data-item="{{food}}"
+                data-father-id="{{manageFoodFatherId}}"
+                data-father-name="{{manageFatherName}}"
+              >
+                <image class="food-dish-act__icon" src="/images/adduser.png" mode="aspectFit" />
+                <text class="food-dish-act__txt">加部门</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="flex-column-center" wx:if="{{!manageFoodList || manageFoodList.length === 0}}">
+        <text class="p-30">暂无菜品，点击上方「添加菜品」</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>
+
+<view class="mask {{showOperationDep ? 'is-active' : ''}}" wx:if="{{foodManageMode}}" catchtap="hideMaskManage">
+  <view class="food-dep-sheet" catchtap="noop">
+    <view class="food-dep-sheet__header">
+      <text class="food-dep-sheet__title">{{dishItem.gbDfFoodName}}</text>
+      <text class="food-dep-sheet__subtitle">添加到部门 · 设置门店销售价格</text>
+    </view>
+    <view class="food-dep-sheet__body">
+      <view class="food-dep-sheet__field">
+        <text class="food-dep-sheet__label">销售价格</text>
+        <view class="food-dep-sheet__input-wrap">
+          <text class="food-dep-sheet__currency">¥</text>
+          <input
+            class="food-dep-sheet__input"
+            bindinput="getNewPrice"
+            type="digit"
+            placeholder="请输入金额"
+            placeholder-class="food-dep-sheet__placeholder"
+            value="{{price}}"
+          />
+          <text class="food-dep-sheet__unit">元</text>
+        </view>
+      </view>
+      <view class="food-dep-sheet__field">
+        <text class="food-dep-sheet__label">销售部门</text>
+        <view class="food-dep-sheet__dep-chip">
+          <text class="food-dep-sheet__dep-text">{{selectedDepName}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="food-dep-sheet__footer">
+      <view class="food-dep-sheet__actions">
+        <text class="food-dep-sheet__btn food-dep-sheet__btn--ghost" bindtap="hideMaskManage" hover-class="food-dep-sheet__btn--hover">取消</text>
+        <text class="food-dep-sheet__btn food-dep-sheet__btn--primary" catchtap="downLoadGoods" hover-class="food-dep-sheet__btn--hover">保存到部门</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+
+<view class="overlay {{showChoiceDep ? 'show' : ''}}" wx:if="{{foodManageMode}}" catchtap="hideChoiceDepMask">
+  <view class="food-dep-sheet" catchtap="noop">
+    <view class="food-dep-sheet__header">
+      <text class="food-dep-sheet__title">选择销售部门</text>
+      <text class="food-dep-sheet__subtitle">将「{{dishItem.gbDfFoodName}}」添加到以下部门</text>
+    </view>
+    <scroll-view scroll-y class="food-dep-sheet__scroll" style="max-height: {{windowHeight * 0.5}}rpx;">
+      <view
+        class="food-dep-sheet__item"
+        wx:for="{{departmentChoiceList}}"
+        wx:key="gbDepartmentId"
+        wx:for-item="dep"
+        bindtap="selectDepartmentForFood"
+        data-item="{{dep}}"
+        hover-class="food-dep-sheet__item--hover"
+      >
+        <text class="food-dep-sheet__item-main">{{dep.gbDepartmentName}}</text>
+        <text class="food-dep-sheet__item-arrow">›</text>
+      </view>
+    </scroll-view>
+    <view class="food-dep-sheet__footer food-dep-sheet__footer--borderless">
+      <view class="food-dep-sheet__actions food-dep-sheet__actions--single">
+        <text class="food-dep-sheet__btn food-dep-sheet__btn--ghost" bindtap="hideChoiceDepMask" hover-class="food-dep-sheet__btn--hover">取消</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<block wx:if="{{!foodManageMode}}">
 <view class="food-page food-page--boss">
   <back-navbar title="菜品经营" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack">
   </back-navbar>
@@ -23,9 +233,29 @@
       </view>
     </view>
 
-    <view class="flex-row p-20" bindtap="onToggleSearchBar">
+    <view class="flex-row">
+      <view class="flex-row p-20" bindtap="onToggleSearchBar">
       <image src="/images/search-3.png" class="icon mr-20 dfl-search-top-ico {{foodNameSearch ? 'dfl-search-top-ico--on' : ''}}"></image>
     </view>
+    
+    <picker
+      wx:if="{{subDepPickerRange.length > 1}}"
+      mode="selector"
+      range="{{subDepPickerRange}}"
+      range-key="gbDepartmentName"
+      value="{{activeSubDepIndex}}"
+      bindchange="onSubDepChange"
+    >
+      <view class="flex-row p-20">
+        <image src="/images/search-3.png" class="icon mr-20 dfl-search-top-ico"></image>
+        <text class="small">{{activeSubDepName ? activeSubDepName : '子部门'}}</text>
+      </view>
+    </picker>
+    
+    </view>
+
+   
+
   </view>
 
   <view class="dfl-search-panel bg-white border-bottom" wx:if="{{searchBarOpen}}">
@@ -299,9 +529,10 @@
 
   <view class="dfl-empty" wx:if="{{foodRowsSourceCount === 0}}">当前日期范围暂无菜品数据</view>
 </view>
+</block>
 
 <!-- 菜品销量模板：日期范围 -->
-<view class="food-tpl-modal" wx:if="{{showFoodSalesTemplateModal}}">
+<view class="food-tpl-modal" wx:if="{{!foodManageMode && showFoodSalesTemplateModal}}">
   <view class="food-tpl-mask" bindtap="onCloseFoodSalesTemplateModal"></view>
   <view class="food-tpl-panel">
     <view class="food-tpl-title">选择日期范围</view>

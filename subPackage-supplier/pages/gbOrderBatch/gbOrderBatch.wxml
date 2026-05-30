@@ -10,18 +10,18 @@
       <view class="flex-column">
 
         <view class="flex-column">
-          <view class="top_img_fixed flex-row" style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+          <view class="top_img_fixed flex-row" style="width: 100%; height: {{70 + statusBarHeight}}rpx; line-height: {{70 + statusBarHeight}}rpx; padding-top: {{statusBarHeight + 20}}rpx; ">
             <view class="plr-20 flex-row" bindtap="toIndex">
               <image src="../../../images/back-2.png" mode="aspectFill" class="icon" />
             </view>
             <text class="">{{retName}}.订货单</text>
 
           </view>
-          <image src="../../../images/top.png" style="width: 100%; height:  {{70 + statusBarHeight}}rpx;"></image>
+          <image src="../../../images/top.png" style="width: 100%; height:  {{90 + statusBarHeight}}rpx;"></image>
         </view>
 
         <view style="padding-left: 20rpx; padding-right: 20rpx; margin-top: 10rpx; ">
-          <view class="body " style="height:{{windowHeight - bottomHeight - statusBarHeight}}rpx; ">
+          <view class="body " style="height:{{windowHeight - bottomHeight }}rpx; ">
             <!-- ../ -->
             <view class="flex-row" style="margin-top: 20rpx; padding-bottom: 20rpx;">
               <view class=" flex-column-center third-row">
@@ -47,9 +47,9 @@
               </view>
             </view>
 
-            <view class="flex-column form_body" style="height:{{windowHeight - formHeight -statusBarHeight }}rpx;">
+            <view class="flex-column form_body" style="height:{{windowHeight - formHeight }}rpx;">
               <scroll-view class="tui-city-scroll-y" scroll-y="true" style="height: {{windowHeight -  formHeight - statusBarHeight -80 }}rpx; ">
-                <view class="flex-column with-s-padding" wx:for="{{batch.gbDPGEntities}}" wx:key="gbDistributerPurchaseGoodsId">
+                <view class="flex-column p-10" wx:for="{{batch.gbDPGEntities}}" wx:key="gbDistributerPurchaseGoodsId">
                   <view class="flex-row-default  border-bottom {{orderIndex + 1 == item.gbDepartmentOrdersEntities.length ? 'is-last' : ''}}">
                     <text class="mr-10 ">{{ index + 1}}.</text>
                     <view class="flex-column">
@@ -60,11 +60,11 @@
                       <view class="flex-row  pt-20 pb-20 border-bottom {{orderIndex == item.gbDepartmentOrdersEntities.length - 1 ? 'is-last' : ''}} font-md" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-item="orders" style="width:{{(windowWidth - 40 )  }}rpx; ">
                         <view class="felx-row">
                           <block wx:if="{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentSubAmount > 1}}">
-                            <text class="mr-10">{{orders.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
-                            <text class=" mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                            <text class="mr-10">{{orders.gbDepartmentEntity.gbDoParentDepartmentName}}.</text>
+                            <text class=" mr-10">{{orders.gbDoOrderDepartmentName}}</text>
                           </block>
                           <block wx:else>
-                            <text class="mr-10">{{orders.gbDepartmentEntity.gbDepartmentName}}</text>
+                            <text class="mr-10">{{orders.gbDoParentDepartmentName}}</text>
                           </block>
                           <text class="mainColor">{{orders.gbDoQuantity}}{{orders.gbDoStandard}} </text>
                           <block wx:if="{{orders.gbDoDsStandardScale !== null && orders.gbDoDsStandardScale > 0 && orders.gbDoDsStandardScale !== '-1'}}">

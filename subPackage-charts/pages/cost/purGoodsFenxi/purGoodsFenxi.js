@@ -10,9 +10,14 @@ import apiDistributer from '../../../../services/apiDistributer.js'
 Page({
 
   onShow(){
-    if(this.data.update){
+    
+
+    if (this.data.update) {
+      this._syncDatesFromMyDateStorage();
+      this.setData({ update: false });
       this._getSupplierStatistics();
     }
+ 
   },
 
   data: {
@@ -41,37 +46,49 @@ Page({
       url: apiUrl.server,
       supplierIds: -1,
       purUserIds: -1,
-      disId: options.disId || wx.getStorageSync('userInfo').gbDuDistributerId,
     })
-    var myDate = wx.getStorageSync('myDate');
-      if(myDate){
-        console.log("reeee", myDate)
-          // 如果是自定义日期，传递具体的开始和结束日期
-       var dateRange;
-       if (myDate.name === 'custom' ) {
-         dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-       } else {
-         dateRange = dateUtils.getDateRange(myDate.name);
-       }
-       this.setData({
-         startDate: dateRange.startDate,
-         stopDate: dateRange.stopDate,
-         dateType: myDate.dateType,
-         hanzi: myDate.hanzi || dateRange.name,
-       })
-  
-      }else{
-        this.setData({
-          dateType: 'month',
-          startDate: dateUtils.getFirstDateInMonth(),
-          stopDate: dateUtils.getArriveDate(0),
-          hanzi:  "本月",
-        })
-      }
 
+
+    var disInfo = wx.getStorageSync('disInfo');
+ 
+    if (disInfo) {
+      this.setData({
+        disInfo: disInfo,
+        disId: disInfo.gbDistributerId,
+      })
+    }
+    this._syncDatesFromMyDateStorage();
+
+    
     this._getSupplierStatistics();
   },
 
+
+
+  _syncDatesFromMyDateStorage() {
+    var myDate = wx.getStorageSync('myDate');
+    if (myDate) {
+      var dateRange;
+      if (myDate.name === 'custom') {
+        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
+      } else {
+        dateRange = dateUtils.getDateRange(myDate.name);
+      }
+      this.setData({
+        startDate: dateRange.startDate,
+        stopDate: dateRange.stopDate,
+        dateType: myDate.dateType,
+        hanzi: myDate.hanzi || dateRange.name,
+      });
+    } else {
+      this.setData({
+        dateType: 'month',
+        startDate: dateUtils.getFirstDateInMonth(),
+        stopDate: dateUtils.getArriveDate(0),
+        hanzi: "本月",
+      });
+    }
+  },
 
 
   // 获取供货商统计信息

@@ -19,7 +19,7 @@
     </view> -->
 
 
-<navbar title="经营看板" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+<navbar title="{{pageTitle || '经营看板'}}" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
      
   </view>
 
@@ -53,22 +53,26 @@
               data-id="{{topic.id}}"
             >
               <text class="gem-pill-emoji">{{topic.emoji}}</text>
-              <text class="gem-pill-title">{{topic.title}}</text>
+              <view class="gem-pill-body">
+                <text class="gem-pill-title">{{topic.title}}</text>
+                <text class="gem-pill-desc" wx:if="{{topic.description}}">{{topic.description}}</text>
+              </view>
               <text class="gem-pill-chevron">{{expandedTopicId === topic.id ? '⌃' : '⌄'}}</text>
             </view>
             <view class="gem-sublist" wx:if="{{expandedTopicId === topic.id}}">
-              <view wx:if="{{topic.questions.length}}" class="gem-sublist-inner">
+              <view wx:if="{{topic.questions.length}}" class="gem-sublist-chips">
                 <view
-                  class="gem-q-row"
+                  class="gem-chip {{!q.clickable ? 'gem-chip--disabled' : 'gem-chip--active'}}"
                   wx:for="{{topic.questions}}"
                   wx:for-item="q"
                   wx:key="id"
-                  hover-class="gem-q-row-hover"
+                  hover-class="{{q.clickable ? 'gem-chip-hover' : ''}}"
                   catchtap="onQuestionTap"
-                  data-prompt="{{q.prompt}}"
+                  data-text="{{q.text}}"
+                  data-clickable="{{q.clickable}}"
                 >
-                  <text class="gem-q-label">{{q.label}}</text>
-                  <text class="gem-q-arrow">›</text>
+                  <text class="gem-chip-text">{{q.text}}</text>
+                  <text class="gem-chip-tag" wx:if="{{!q.clickable}}">即将支持</text>
                 </view>
               </view>
               <view wx:else class="gem-sublist-empty">暂无具体问题</view>
@@ -104,6 +108,34 @@
                 <text class="gem-bubble-text">{{item.content}}</text>
                 <view class="gem-stream-cursor" wx:if="{{item.isLoading}}"></view>
               </view>
+
+              <!-- 业务卡片渲染（统一 cards 驱动，每张卡 cardData 由前端 _resolveDisplayCard 预构建） -->
+              <block wx:if="{{!item.isLoading && item.cards && item.cards.length > 0}}">
+                <!-- 菜单结构四象限卡片 -->
+                <menu-portfolio-quadrant-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'MENU_PORTFOLIO_QUADRANT_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 菜品成本分析卡片 -->
+                <dish-cost-analysis-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'DISH_COST_ANALYSIS_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 菜品销售卡片（单菜品） -->
+                <dish-sales-single-dish-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'DISH_SALES_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+              </block>
             </view>
           </view>
         </block>
@@ -112,6 +144,11 @@
 
     <view class="gem-scroll-spacer"></view>
   </scroll-view>
+
+  <!-- 流式进度提示 -->
+  <view class="gem-stream-hint" wx:if="{{isSending && streamingStage}}">
+    <text class="gem-stream-hint-text">{{streamingStage}}</text>
+  </view>
 
   <!-- 底部输入区：侧栏 + 输入框 + 发送 -->
   <view class="gem-composer-wrap" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
@@ -129,12 +166,21 @@
           cursor-spacing="16"
           adjust-position="{{true}}"
           disabled="{{isSending}}"
+          focus="{{composerFocused}}"
           bindinput="onInputChange"
+          bindfocus="onComposerFocus"
+          bindblur="onComposerBlur"
           bindconfirm="onSendTap"
           confirm-type="send"
         />
         <view
-          class="gem-send-pill {{isSending || !inputValue ? 'gem-send-pill-off' : ''}}"
+          wx:if="{{isSending}}"
+          class="gem-stop-btn"
+          catchtap="onStopGeneratingTap"
+        >停止</view>
+        <view
+          wx:else
+          class="gem-send-pill {{!inputValue ? 'gem-send-pill-off' : ''}}"
           catchtap="onSendTap"
         >发送</view>
       </view>
@@ -151,9 +197,14 @@
     class="gem-drawer-sheet {{drawerOpen ? 'gem-drawer-sheet--open' : ''}}"
     style="padding-top: {{drawerPaddingTop}}px;"
   >
+  
       <view class="gem-drawer-head">
         <text class="gem-drawer-head-title">主题与历史</text>
         <view class="gem-drawer-close" catchtap="onDrawerCloseTap">✕</view>
+      </view>
+      <view class="gem-new-conv-btn" catchtap="onNewConversationTap">
+        <text class="gem-new-conv-plus">+</text>
+        <text class="gem-new-conv-label">新建对话</text>
       </view>
       <scroll-view
         scroll-y="{{true}}"
@@ -170,22 +221,26 @@
               data-id="{{topic.id}}"
             >
               <text class="gem-pill-emoji">{{topic.emoji}}</text>
-              <text class="gem-pill-title">{{topic.title}}</text>
+              <view class="gem-pill-body">
+                <text class="gem-pill-title">{{topic.title}}</text>
+                <text class="gem-pill-desc" wx:if="{{topic.description}}">{{topic.description}}</text>
+              </view>
               <text class="gem-pill-chevron">{{drawerExpandedTopicId === topic.id ? '⌃' : '⌄'}}</text>
             </view>
             <view class="gem-sublist" wx:if="{{drawerExpandedTopicId === topic.id}}">
-              <view wx:if="{{topic.questions.length}}" class="gem-sublist-inner">
+              <view wx:if="{{topic.questions.length}}" class="gem-sublist-chips">
                 <view
-                  class="gem-q-row"
+                  class="gem-chip {{!q.clickable ? 'gem-chip--disabled' : 'gem-chip--active'}}"
                   wx:for="{{topic.questions}}"
                   wx:for-item="q"
                   wx:key="id"
-                  hover-class="gem-q-row-hover"
+                  hover-class="{{q.clickable ? 'gem-chip-hover' : ''}}"
                   catchtap="onDrawerQuestionTap"
-                  data-prompt="{{q.prompt}}"
+                  data-text="{{q.text}}"
+                  data-clickable="{{q.clickable}}"
                 >
-                  <text class="gem-q-label">{{q.label}}</text>
-                  <text class="gem-q-arrow">›</text>
+                  <text class="gem-chip-text">{{q.text}}</text>
+                  <text class="gem-chip-tag" wx:if="{{!q.clickable}}">即将支持</text>
                 </view>
               </view>
               <view wx:else class="gem-sublist-empty">暂无具体问题</view>

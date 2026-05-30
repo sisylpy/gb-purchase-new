@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "addStandard": "/components/addStandard/addStandard",
+    "addAlias": "/components/addAlias/addAlias" ,
+    "back-navbar": "/components/back-navbar/back-navbar"
+  }
+}

@@ -6,7 +6,7 @@
  *   二、页面初始数据
  *   三、生命周期（onLoad, onShow）
  *   四、数据加载（_getInitData, _initBatchData)
- *   五、登录认证（_userLogin, _checkIfShowPage）
+ *   五、登录认证（_userLogin,)
  *   六、商品选择（selectItem, selectOrders, deleteOrderGoods, _getPurSelArr）
  *   七、订货批次（cancelGbBatchItem, receiveGbBatchItem, changeAutoGoods, onShareAppMessage 等）
  *   八、门店设置（showPopup, hidePopup, bindKeyInput, radioChange 等）
@@ -25,11 +25,14 @@ var load = require('../../lib/load');
 var requestUtil = require('../../lib/request');
 var depOrderApi = require('../../services/depOrder');
 var pagesApi = require('../services/pages');
+var purchaseContext = require('../../lib/purchaseContext');
+
 
 // --- 本页面用到的所有 API 接口 ---
-// depOrderApi.getPurchaseGoodsGbWithTabCount(disId)    获取采购商品列表（含Tab统计数量）
-// depOrderApi.jingjingGetBuyingGoodsGb(disId)           获取订货批次列表（普通）
-// depOrderApi.saveDisPurGoodsBatchGb(data)              保存订货批次（分享转发时触发）
+// depOrderApi.getStorePurchaseGoodsGbWithTabCount(disId)    获取采购商品列表（含Tab统计数量）
+// depOrderApi.getDisDepartmentGbMendianJing(disId)      集团下门店列表（首页切换门店）
+// depOrderApi.storeGetBuyingGoodsGb(depId)              获取订货批次列表
+// depOrderApi.saveDisPurGoodsBatchGb(data)            保存订货批次（分享转发时触发）
 // depOrderApi.purUserSaveMendain(data)                  保存门店设置
 // depOrderApi.deleteDisPurBatchGbItem(id)               删除订货批次中的商品
 // depOrderApi.receiveGbBatchItem(id)                    确认收货（单品）
@@ -55,15 +58,7 @@ Page({
     purArr: [],
     selectedArr: [],
     showGoods: false,
-    userInfo: null,
-    showPage: false,         // 控制弹出层和蒙版显示
-    popupAnimation: {},      // 弹出层动画
-    disInfo: {
-      gbDistributerName: '', // 门店名称
-    },
-    hasSubs: 2,             // 部门类型
-    selNumber: 1,           // 部门数量
-    isShixianAuto: false,
+    userInfo: null,  
     tabs: [{
         name: "未采购",
         amount: ""
@@ -73,7 +68,15 @@ Page({
         amount: ""
       }
     ],
-    goodsSupplierId: null
+    goodsSupplierId: null,
+    /** 集团用户已进入所选门店采购（用于展示「返回经营看板」） */
+    isGroupPurchaseMode: false,
+    /** 底部弹层：切换门店 */
+    showGroupStoreSheet: false,
+    groupStoreList: [],
+    groupStoreListLoading: false,
+    /** 当前门店部门实体（模板用 mendianInfo.name 与单店/子部门展示） */
+    mendianInfo: null,
   },
 
   // ============================================
@@ -83,43 +86,37 @@ Page({
   onLoad: function (options) {
     var week = dateUtils.getWhatDay(0);
     var date = dateUtils.getOnlyHao(0);
-    var todayaaa = dateUtils.getArriveDate(0);
 
     this.setData({
       week: week,
       date: date,
-      todayaaa: todayaaa,
       url: requestUtil.getServerUrl(),
-      todayDate: dateUtils.getArriveDate(0),
     });
+
 
     var userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
+      var depInfo = wx.getStorageSync('mendianInfo');
+      this.setData({
+        depId: depInfo.gbDepartmentId,
+        mendianInfo: depInfo,
+      });
       if (userInfo.gbDuAdmin == 1) {
         wx.redirectTo({
           url: '../../subPackage-ai/pages/ai/chefOrderDep/chefOrderDep',
         });
-      } else {
-        this.setData({
-          userInfo: userInfo,
-          userId: userInfo.gbDepartmentUserId,
+      } 
+      if ( userInfo.gbDuAdmin == 0) {
+        wx.reLaunch({
+          url: '/subPackage-group/pages/homePage/homePage',
         });
-
-        var disInfo = wx.getStorageSync('disInfo');
-        if (disInfo) {
-          this.setData({
-            disInfo: disInfo,
-            disId: disInfo.gbDistributerId,
-            depId: disInfo.mendianDepartmentList[0].gbDepartmentId,
-          });
-        }
-
+      
+        return;
       }
     } else {
       this._userLogin();
     }
 
-    this._getDepInf0
     this.calculateSlider(0);
   },
 
@@ -134,39 +131,36 @@ Page({
 
     wx.removeStorageSync('selArr');
 
-    if (this.data.tab1Index == 0) {
-      this._getInitData();
-    } else {
-      this._initBatchData();
-    
+    if (this.data.depId && this.data.mendianInfo) {
+      if (this.data.tab1Index == 0) {
+        this._getInitData();
+      } else {
+        this._initBatchData();
+      }
     }
   },
 
-  // ============================================
-  // 四、数据加载
-  // ============================================
-
   /** 获取采购商品列表（Tab1 - 未采购） */
   _getInitData: function () {
-    if (!this.data.disId) return;
     load.showLoading("获取订单");
 
-    depOrderApi.getPurchaseGoodsGbWithTabCount(this.data.disId)
+    depOrderApi.getStorePurchaseGoodsGbWithTabCount(this.data.depId)
       .then(function (res) {
         load.hideLoading();
         if (res.result.code == 0) {
           console.log("ddadddaaaaddddaaaxxx",res.result.data);
           var newOrderCount = "tabs[0].amount";
           var wxOrderCountData = "tabs[1].amount";
+         
           this.setData({
             purArr: res.result.data.arr,
             selectedArr: [],
-            disInfo: res.result.data.disInfo,
             [newOrderCount]: res.result.data.orderAmount,
             [wxOrderCountData]: res.result.data.wxAmount,
-          });
-          wx.setStorageSync('disInfo', res.result.data.disInfo);
-          this.calculateSlider(0);
+            disInfo: res.result.data.disInfo,
+          })
+         
+         
         } else {
           load.hideLoading()
           this.setData({ purArr: [] });
@@ -179,7 +173,7 @@ Page({
   /** 获取订货批次列表（Tab2 - 普通） */
   _initBatchData: function () {
     load.showLoading("获取订货");
-    depOrderApi.jingjingGetBuyingGoodsGb(this.data.disId)
+    depOrderApi.storeGetBuyingGoodsGb(this.data.depId)
       .then(function (res) {
         load.hideLoading();
         if (res.result.code == 0) {
@@ -187,13 +181,13 @@ Page({
           this.setData({ orderRefreshing: false });
           var newOrderCount = "tabs[0].amount";
           var wxOrderCountData = "tabs[1].amount";
-          this.setData({
+          var batchPatch = {
             batchArr: res.result.data.arr,
             [newOrderCount]: res.result.data.orderAmount,
             [wxOrderCountData]: res.result.data.wxAmount,
-            disInfo: res.result.data.disInfo,
-          });
-          wx.setStorageSync('disInfo', res.result.data.disInfo);
+          };
+         
+          this.setData(batchPatch);
         } else {
           this.setData({ purArr: [], batchSize: 0, finishSize: 0, selectedArr: [] });
           wx.showToast({ title: res.result.msg, icon: 'none' });
@@ -206,7 +200,7 @@ Page({
   onPurchaseRefresh: function () {
     this.setData({ purchaseRefreshing: true });
     load.showLoading("获取订单");
-    depOrderApi.getPurchaseGoodsGbWithTabCount(this.data.disId)
+    depOrderApi.getStorePurchaseGoodsGbWithTabCount(this.data.depId)
       .then(function (res) {
         load.hideLoading();
         if (res.result.code == 0) {
@@ -214,14 +208,16 @@ Page({
           this.setData({ purchaseRefreshing: false });
           var newOrderCount = "tabs[0].amount";
           var wxOrderCountData = "tabs[1].amount";
-          this.setData({
+          var di3 = res.result.data.disInfo;
+          var refreshPatch = {
             purArr: res.result.data.arr,
             selectedArr: [],
             [newOrderCount]: res.result.data.orderAmount,
             [wxOrderCountData]: res.result.data.wxAmount,
-            disInfo: res.result.data.disInfo,
-          });
-          wx.setStorageSync('disInfo', res.result.data.disInfo);
+            disInfo: di3,
+          };
+         
+          wx.setStorageSync('disInfo', di3);
         } else {
           this.setData({ purArr: [] });
           wx.showToast({ title: res.result.msg, icon: 'none' });
@@ -240,32 +236,6 @@ Page({
   // 五、登录认证
   // ============================================
 
-  /** 检查是否需要设置门店信息 */
-  _checkIfShowPage: function () {
-    if (this.data.disInfo.mendianDepartmentList.length == 0) {
-      this.setData({
-        showPage: true,
-        mendianInfo: {
-          gbDepartmentDisId: this.data.disId,
-          gbDepartmentType: 1,
-          gbDepartmentSubAmount: 0,
-          gbDepartmentIsGroupDep: 1,
-          gbDepartmentFatherId: 0,
-          gbDepartmentName: this.data.disInfo.gbDistributerName,
-          gbDepartmentPrintName: this.data.disInfo.gbDistributerName,
-          gbDepartmentAttrName: this.data.disInfo.gbDistributerName,
-          gbDepartmentLevel: 0,
-          gbDepartmentEntityList: [{
-            gbDepartmentName: this.data.disInfo.gbDistributerName
-          }],
-        },
-        gbDepartmentEntities: [{
-          gbDepartmentName: this.data.disInfo.gbDistributerName
-        }],
-      });
-      this.showPopup();
-    }
-  },
 
   /** 微信登录 */
   _userLogin: function () {
@@ -273,27 +243,29 @@ Page({
       success: function (resLogin) {
         pagesApi.gbLoginIndex(resLogin.code)
           .then(function (res) {
+            console.log("login====", res.result);
             if (res.result.code !== -1) {
               if (res.result.data !== "noBuyer") {
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
                 wx.setStorageSync('userInfo', res.result.data.depUserInfo);
+
+                wx.setStorageSync('mendianInfo', res.result.data.depInfo);
                 var admin = res.result.data.depUserInfo.gbDuAdmin;
-                if (admin == 11 ) {
-                  var avatarUrl = '';
-                  if (res.result.data.depUserInfo.gbDuWxAvartraUrl) {
-                    avatarUrl = requestUtil.getServerUrl() + res.result.data.depUserInfo.gbDuWxAvartraUrl;
-                  } else {
-                    avatarUrl = '/images/user.png';
-                  }
-                  this.setData({
-                    avatarUrl: avatarUrl,
-                    disInfo: res.result.data.disInfo,
-                    userInfo: res.result.data.depUserInfo,
-                    disId: res.result.data.disInfo.gbDistributerId,
-                    depId: res.result.data.disInfo.mendianDepartmentList[0].gbDepartmentId,
+                if ( admin == 0) {
+                  wx.reLaunch({
+                    url: '/subPackage-group/pages/homePage/homePage',
                   });
-               
-                  wx.setStorageSync('mendianInfo', res.result.data.disInfo.mendianDepartmentList[0]);
+                
+                  return;
+                }
+                if (admin == 1  || admin == 11 ) {
+                  this.setData({
+                    disInfo: res.result.data.disInfro,
+                    userInfo: res.result.data.depUserInfo,
+                    depId: res.result.data.depInfo.gbDepartmentId,
+                    mendianInfo: res.result.data.depInfo,
+                  });
+
                   this._getInitData();
                 } else {
                   wx.setStorageSync('orderDepInfo', res.result.data.depInfo);
@@ -704,18 +676,7 @@ Page({
     this.setData({ popupAnimation: animation.export() });
   },
 
-  hidePopup: function () {
-    var animation = wx.createAnimation({
-      duration: 300,
-      timingFunction: 'ease-in-out',
-    });
-    animation.translateY('100%').step();
-    this.setData({ popupAnimation: animation.export() });
-    var that = this;
-    setTimeout(function () {
-      that.setData({ showPage: false });
-    }, 300);
-  },
+
 
   bindKeyInput: function (e) {
     this.setData({ 'disInfo.gbDistributerName': e.detail.value });
@@ -771,9 +732,15 @@ Page({
     var that = this;
     depOrderApi.purUserSaveMendain(mendian).then(function (res) {
       if (res.result.code == 0) {
-        that.setData({ disInfo: res.result.data });
+        var firstMendian = mendianRowWithDisplayName(
+          res.result.data.mendianDepartmentList[0] || null
+        );
+        that.setData({
+          disInfo: res.result.data,
+          mendianInfo: firstMendian,
+        });
         wx.setStorageSync('disInfo', res.result.data);
-        wx.setStorageSync('mendianInfo', res.result.data.mendianDepartmentList[0]);
+        // wx.setStorageSync('mendianInfo', firstMendian);
         that._getInitData();
         that.hidePopup();
       }
@@ -803,7 +770,6 @@ Page({
   },
 
   toAiOrders: function () {
-    wx.setStorageSync('mendianInfo', this.data.disInfo.mendianDepartmentList[0]);
     wx.navigateTo({ url: '../../subPackage-mendian/pages/order/chefOrder/chefOrder' });
   },
 
@@ -811,19 +777,117 @@ Page({
     wx.navigateTo({ url: '/subPackage-mendian/pages/management/homePage/homePage?disId=' + this.data.disId });
   },
 
+  /** 集团用户：打开门店列表弹层 */
+  onOpenGroupStoreSheet: function () {
+    console.log('[index.groupStore] onOpenGroupStoreSheet 进入', {
+      disId: this.data.disId,
+      depId: this.data.depId,
+      isGroupPurchaseMode: this.data.isGroupPurchaseMode,
+    });
+    if (!this.data.disId) {
+      wx.showToast({ title: '缺少分销商信息', icon: 'none' });
+      return;
+    }
+    var that = this;
+    this.setData({
+      showGroupStoreSheet: true,
+      groupStoreListLoading: true,
+      groupStoreList: [],
+    });
+    console.log('[index.groupStore] 请求 getDisDepartmentGbMendianJing disId=', this.data.disId);
+    depOrderApi
+      .getDisDepartmentGbMendianJing(this.data.disId)
+      .then(function (res) {
+        var list = [];
+        if (res.result && res.result.code == 0) {
+          list = res.result.data || [];
+        } else if (res.result && res.result.msg) {
+          wx.showToast({ title: res.result.msg, icon: 'none' });
+        }
+        console.log('[index.groupStore] 门店列表返回', {
+          code: res.result && res.result.code,
+          msg: res.result && res.result.msg,
+          count: Array.isArray(list) ? list.length : 0,
+        });
+        that.setData({
+          groupStoreList: list,
+          groupStoreListLoading: false,
+        });
+      })
+      .catch(function (err) {
+        console.warn('[index.groupStore] getDisDepartmentGbMendianJing 失败', err);
+        that.setData({ groupStoreList: [], groupStoreListLoading: false });
+        wx.showToast({ title: '门店列表加载失败', icon: 'none' });
+      });
+  },
+
+  onCloseGroupStoreSheet: function () {
+    this.setData({ showGroupStoreSheet: false });
+  },
+
+  noopForSheet: function () {},
+
+  /** 在弹层中选择门店并刷新当前 Tab 数据 */
+  onSelectGroupStoreItem: function (e) {
+    var deptId = e.currentTarget.dataset.deptid;
+    var list = this.data.groupStoreList || [];
+    var item = null;
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].gbDepartmentId) === String(deptId)) {
+        item = list[i];
+        break;
+      }
+    }
+    if (!item) {
+      console.warn('[index.groupStore] onSelectGroupStoreItem 未匹配行 deptId=', deptId);
+      return;
+    }
+    console.log('[index.groupStore] 选中门店', {
+      gbDepartmentId: item.gbDepartmentId,
+      gbDepartmentName: item.gbDepartmentName || item.gbDepartmentPrintName,
+    });
+    purchaseContext.setGroupSelectedStoreDepartment(item);
+    var itemNorm = mendianRowWithDisplayName(item);
+    var that = this;
+    this.setData(
+      {
+        depId: item.gbDepartmentId,
+        mendianInfo: itemNorm,
+        showGroupStoreSheet: false,
+        isGroupPurchaseMode: true,
+      },
+      function () {
+        console.log('[index.groupStore] setData 完成，刷新数据 tab1Index=', that.data.tab1Index);
+        if (that.data.tab1Index == 0) {
+          that._getInitData();
+        } else {
+          that._initBatchData();
+        }
+      }
+    );
+  },
+
+  /** 集团代门店采购时返回经营看板，并清除所选门店缓存 */
+  toGroupAiChatBoard: function () {
+    this.setData({ showGroupStoreSheet: false });
+    purchaseContext.clearGroupStorePurchaseContext();
+    wx.reLaunch({
+      url: '/subPackage-ai/pages/chat/groupAiChat/groupAiChat',
+    });
+  },
+
   toPay: function () {
     wx.navigateTo({ url: '../../subPackage/pages/account/payPage/payPage?type=0' });
   },
 
-  // toEditUser: function () {
-  //   wx.navigateTo({ url: '../../subPackage-mendian/pages/account/userEdit/userEdit' });
-  // },
+ 
   toEditUser: function () {
-    wx.navigateTo({ url: '../../subPackage-ai/pages/restraunt/restaurantProfile/restaurantProfile' });
+    wx.navigateTo({ url: '../myDashboard/myDashboard' });
   },
 
   toResGoods: function () {
-    wx.navigateTo({ url: '../../subPackage-goods/pages/resGoods/resGoods' });
+    console.log(("ddhdhhhdhe"))
+    wx.navigateTo({ url: '../../subPackage-goods/pages/depGoodsIndex/depGoodsIndex' });
   },
 
   // ============================================

@@ -362,7 +362,7 @@
   color: var(--gb-text-muted);
 }
 
-/* ---------- 列表排序（与 depGetAllFood sortBy/sortOrder 一致） ---------- */
+/* ---------- 列表排序（与 depGeFoodBusiness sortBy/sortOrder 一致） ---------- */
 .dfl-sort-wrap {
   display: flex;
   flex-direction: row;

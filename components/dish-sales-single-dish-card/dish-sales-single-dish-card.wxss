@@ -1,0 +1,128 @@
+/* dish-sales-single-dish-card — AI 对话卡片 */
+
+.dssc-card {
+  background: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8eaed;
+  padding: 24rpx 20rpx;
+  margin-top: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 菜品名称 */
+.dssc-dish-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+  margin-bottom: 8rpx;
+}
+
+/* 标签行 */
+.dssc-tags {
+  display: flex;
+  flex-direction: row;
+  gap: 10rpx;
+  margin-bottom: 14rpx;
+}
+
+.dssc-tag {
+  font-size: 20rpx;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 6rpx;
+  padding: 2rpx 10rpx;
+}
+
+/* 核心指标行：销量 / 销售额 / 单价 */
+.dssc-stats {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: #f9fafb;
+  border-radius: 12rpx;
+  border: 1rpx solid #ececec;
+  padding: 14rpx 6rpx;
+  margin-bottom: 12rpx;
+}
+
+.dssc-stat-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dssc-stat-div {
+  width: 1rpx;
+  background: #e5e7eb;
+  align-self: stretch;
+  margin: 4rpx 0;
+}
+
+.dssc-stat-label {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 6rpx;
+  font-weight: 500;
+}
+
+.dssc-stat-value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dssc-stat-unit {
+  font-size: 20rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}
+
+/* 毛利率 / 排名行 */
+.dssc-extra-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: #f9fafb;
+  border-radius: 12rpx;
+  border: 1rpx solid #ececec;
+  padding: 14rpx 6rpx;
+}
+
+.dssc-extra-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dssc-extra-div {
+  width: 1rpx;
+  background: #e5e7eb;
+  align-self: stretch;
+  margin: 4rpx 0;
+}
+
+.dssc-extra-cap {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 6rpx;
+  font-weight: 500;
+}
+
+.dssc-extra-val {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dssc-extra-unit {
+  font-size: 20rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}

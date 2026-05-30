@@ -644,6 +644,7 @@ Page({
       gbDoDisGoodsId: gbDisGoodsId, //
       gbDoDepartmentId: this.data.depId,
       gbDoDistributerId: this.data.disId,
+      gbDoToDepartmentId: this.data.depInfo.gbDepartmentFatherId,
       gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentFatherId,
       gbDoQuantity: e.detail.applyNumber,
       gbDoStandard: e.detail.applyStandardName,

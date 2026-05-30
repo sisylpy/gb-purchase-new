@@ -1,0 +1,110 @@
+<view class="food-menu-page flex flex-column">
+  <back-navbar title="菜单" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+
+  <scroll-view scroll-y class="food-menu-scroll">
+    <!-- 顶部操作按钮 -->
+    <view class="food-menu-head food-menu-head--new">
+      <view class="flex-row">
+        <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" bindtap="addFoodCategory">
+          <text class="food-menu-action-btn__txt">+ 新建分类</text>
+        </view>
+        <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" bindtap="toMenuAi">
+          <text class="food-menu-action-btn__txt">菜单顾问</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 菜单概览卡片 -->
+    <view class="overview-card">
+      <text class="overview-card__title">菜单概览</text>
+      <view class="overview-card__grid">
+        <view class="overview-cell">
+          <text class="overview-cell__label">分类数</text>
+          <text class="overview-cell__value">{{summary.categoryCount}}</text>
+        </view>
+        <view class="overview-cell">
+          <text class="overview-cell__label">菜品总数</text>
+          <text class="overview-cell__value">{{summary.dishCount}}</text>
+        </view>
+        <view class="overview-cell">
+          <text class="overview-cell__label">综合毛利率</text>
+          <text class="overview-cell__value">{{summary.grossMarginRate}}</text>
+        </view>
+        <view class="overview-cell">
+          <text class="overview-cell__label">较前30天</text>
+          <text class="overview-cell__change {{summary.changeClass}}">{{summary.grossMarginRateChange}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 分类卡片列表 -->
+    <view class="cat-card-list">
+      <view
+        class="cat-card"
+        wx:for="{{categories}}"
+        wx:for-item="cat"
+        wx:key="categoryId"
+        hover-class="cat-card--hover"
+        bindtap="openCategoryFoodList"
+        data-father-id="{{cat.categoryId}}"
+        data-father-name="{{cat.categoryName}}"
+      >
+        <!-- 上半部分：信息 + 环形图 -->
+        <view class="cat-card__top">
+          <view class="cat-card__left">
+            <view class="cat-card__icon-box" style="background: {{cat.iconBg}};">
+              <text class="cat-card__icon-emoji" style="color: {{cat.iconColor}};">{{cat.iconEmoji}}</text>
+            </view>
+            <view class="cat-card__info">
+              <text class="cat-card__name">{{cat.categoryName}}</text>
+              <text class="cat-card__count">{{cat.dishCount}} 道菜品</text>
+            </view>
+          </view>
+
+          <view class="cat-card__right">
+            <!-- 环形图 -->
+            <view class="cat-card__pie-wrap">
+              <view class="cat-card__pie" style="background: {{cat.pieStyle || '#f0f0f0'}};">
+                <view class="cat-card__pie-hole">
+                  <text class="cat-card__pie-num">{{cat.dishCount}}</text>
+                  <text class="cat-card__pie-unit">道</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 图例 -->
+            <view class="cat-card__legend">
+              <view class="legend-item" wx:for="{{cat.legendList}}" wx:for-item="leg" wx:key="name">
+                <view class="legend-dot" style="background: {{leg.color}};"></view>
+                <text class="legend-name">{{leg.name}} {{leg.count}} ({{leg.ratio}}%)</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 三列指标 -->
+        <view class="cat-card__metrics">
+          <view class="metric-cell">
+            <text class="metric-cell__label">目标毛利率</text>
+            <text class="metric-cell__value">{{cat.targetGrossMarginRate}}</text>
+          </view>
+          <view class="metric-cell">
+            <text class="metric-cell__label">实际平均毛利</text>
+            <text class="metric-cell__value">{{cat.actualAverageGrossMarginRate}}</text>
+          </view>
+          <view class="metric-cell">
+            <text class="metric-cell__label">波动范围</text>
+            <text class="metric-cell__value metric-cell__value--highlight">{{cat.grossMarginRange}}</text>
+          </view>
+        </view>
+
+        <!-- 底部提示 -->
+        <view class="cat-card__tip">
+          <text class="cat-card__tip-icon">💡</text>
+          <text class="cat-card__tip-text">{{cat.summaryText}}</text>
+          <text class="cat-card__tip-arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

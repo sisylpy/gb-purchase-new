@@ -148,6 +148,18 @@ button::after {
 /* 3. 布局（flex）— 保留老项目类名；单属性类需与 .flex-row / .flex-column 等组合使用 */
 /* -------------------------------------------------------------------------- */
 
+/* —— 导航栏适配 —— */
+/* navbar 组件会自动设置 --nav-height，页面使用此类自动避开导航栏 */
+.page-content {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: var(--nav-height, 64px);
+  box-sizing: border-box;
+}
+
 /* —— 横向一行 ——
    .flex-row / .flex：主轴横向，交叉轴默认 stretch（子项同一行排布，便于再叠 .items-* / .flex-between）
    .flex-row-default：同一行 + 交叉轴从顶部对齐（align-items: flex-start） */

@@ -2,15 +2,15 @@
 
 <!-- 导航栏 -->
 <navbar 
-  style="height: {{navBarHeight}}rpx;" 
   title="饭店注册信息" 
   avatar="/images/back-gray.png" 
   button-text="设置" 
+  style="height: {{navBarHeight}}rpx;" 
   bindnavbuttontap="toBack"
 ></navbar>
 
 <!-- 表单容器 -->
-<view class="form-container font-lg" style="margin-top: 40rpx;">
+<view class="form-container font-lg" style="margin-top: 20rpx;">
 
   <!-- 餐厅名称 -->
   <view class="form-item">

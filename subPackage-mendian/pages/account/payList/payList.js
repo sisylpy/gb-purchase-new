@@ -4,15 +4,13 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../utils/dateUtil')
 
 import apiUrl from '../../../../config/index.js'
-// import {
-//   disGetPayList,
-//   gbLogin
-// } from '../../../../lib/apiDistributer'
 
-// import {
-//   disPayUser
-// } from '../../../../lib/apiDepOrder'
+import {
+  disGetPayList,
+  disPayUser,
+} from '../../../services/apiDistributerPay.js'
 
+var gbLogin = require('../../../services/apiDistributerGbUser.js').gbLogin;
 
 let itemWidth = 0;
 let windowWidth = 0;
@@ -32,7 +30,9 @@ Page({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
     });
 
-
+    if (this.data.disId) {
+      this._initData();
+    }
   },
 
 
@@ -222,15 +222,6 @@ Page({
     wx.navigateBack({
       delta: 1
     })
-  },
-
-
-  toPayDetail(){
-     
- console.log("toPayDetail")
-  wx.navigateTo({
-    url: '../payDetail/payDetail',
-  })
   },
 
 

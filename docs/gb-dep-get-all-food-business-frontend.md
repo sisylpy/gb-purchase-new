@@ -1,4 +1,4 @@
-# 部门菜品接口 `POST /gbdepfood/depGetAllFood` — 经营分析字段说明（给前端）
+# 部门菜品接口 `POST /gbdepfood/depGeFoodBusiness` — 经营分析字段说明（给前端）
 
 当请求同时传入 **`startDate`、`stopDate`、`disId`、`depFatherId`**（均为有效值）时，接口在原有菜品列表基础上增加**经营分析**数据；用于门店菜品统计、周销量、标价收入、成本与毛利率、区间损耗率等页面。此时 **`data` 数组按区间内总销量降序**；**销量为 0 的菜品仍返回主档信息，但不查询配方行/配料**（`gbDistributerFoodEntity.gbdisFoodGoodsEntities` 为空数组）。
 

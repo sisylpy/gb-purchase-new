@@ -1,0 +1,2052 @@
+
+
+
+@import '../food-common.wxss';
+
+/* ==================== 分类菜品经营列表（dcl = dish category list） ==================== */
+.dcl-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.dcl-scroll {
+  height: 100%;
+}
+
+/* 分类摘要条 */
+.dcl-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 20rpx 24rpx 0;
+  padding: 24rpx 20rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.dcl-summary-cell {
+  width: 33.33%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10rpx 4rpx;
+  box-sizing: border-box;
+}
+
+.dcl-summary-cell--wide {
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 12rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+  gap: 8rpx;
+}
+
+.dcl-summary-cell__label {
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-summary-cell__value {
+  margin-top: 6rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+}
+
+.dcl-summary-cell__value--green {
+  color: #07c160;
+}
+
+.dcl-summary-cell__value--blue {
+  color: #4A90D9;
+}
+
+.dcl-summary-cell__value--warn {
+  color: #f59e0b;
+}
+
+.dcl-summary-cell__period {
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* 角色分布小标签 */
+.dcl-role-mini {
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-left: 10rpx;
+}
+
+.dcl-role-mini--star { color: #4A90D9; }
+.dcl-role-mini--traffic { color: #34C759; }
+.dcl-role-mini--potential { color: #5AC8FA; }
+.dcl-role-mini--watch { color: #BDC1C6; }
+
+.dcl-summary-cell__change {
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dcl-summary-cell__change.is-up {
+  color: #07c160;
+}
+
+.dcl-summary-cell__change.is-down {
+  color: #fa5151;
+}
+
+/* 搜索栏 */
+.dcl-search-bar {
+  display: flex;
+  align-items: center;
+  margin: 20rpx 24rpx 0;
+  padding: 14rpx 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+}
+
+.dcl-search-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.dcl-search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  min-height: 48rpx;
+  line-height: 48rpx;
+}
+
+.dcl-search-clear {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  text-align: center;
+  line-height: 40rpx;
+  font-size: 36rpx;
+  color: #c0c0c0;
+}
+
+/* 角色筛选 */
+.dcl-role-scroll {
+  margin: 16rpx 0 0;
+  padding: 0 24rpx;
+  white-space: nowrap;
+}
+
+.dcl-role-chips {
+  display: inline-flex;
+  gap: 14rpx;
+}
+
+.dcl-role-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #fff;
+  border: 1rpx solid #e8e8e8;
+  white-space: nowrap;
+}
+
+.dcl-role-chip--hover {
+  opacity: 0.8;
+}
+
+.dcl-role-chip--on {
+  font-weight: 600;
+  color: #fff;
+  background: #4A90D9;
+  border-color: #4A90D9;
+}
+
+.dcl-role-chip--star.dcl-role-chip--on {
+  background: #4A90D9;
+  border-color: #4A90D9;
+}
+
+.dcl-role-chip--traffic.dcl-role-chip--on {
+  background: #34C759;
+  border-color: #34C759;
+}
+
+.dcl-role-chip--potential.dcl-role-chip--on {
+  background: #5AC8FA;
+  border-color: #5AC8FA;
+}
+
+.dcl-role-chip--watch.dcl-role-chip--on {
+  background: #BDC1C6;
+  border-color: #BDC1C6;
+}
+
+/* 排序 */
+.dcl-sort-wrap {
+  display: flex;
+  align-items: center;
+  margin: 16rpx 24rpx 0;
+  gap: 16rpx;
+}
+
+.dcl-sort-label {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.dcl-sort-scroll {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.dcl-sort-chips {
+  display: inline-flex;
+  gap: 12rpx;
+}
+
+.dcl-sort-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #fff;
+  border: 1rpx solid #e8e8e8;
+}
+
+.dcl-sort-chip--on {
+  color: #4A90D9;
+  background: #eef4ff;
+  border-color: #bdd6ff;
+  font-weight: 600;
+}
+
+.dcl-sort-chip--hover {
+  opacity: 0.8;
+}
+
+/* 空状态 */
+.dcl-empty {
+  display: flex;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  font-size: 26rpx;
+  color: #bbb;
+}
+
+/* 列表 */
+.dcl-list {
+  padding: 20rpx 24rpx 0;
+}
+
+/* 菜品经营卡片 */
+.dcl-card {
+  margin-bottom: 20rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 顶部：图片 + 头部信息 */
+.dcl-card__top {
+  display: flex;
+  gap: 20rpx;
+}
+
+.dcl-card__img-wrap {
+  flex-shrink: 0;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.dcl-card__img {
+  width: 100%;
+  height: 100%;
+}
+
+.dcl-card__img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+}
+
+.dcl-card__img-ph-icon {
+  font-size: 48rpx;
+}
+
+.dcl-card__head-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dcl-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.dcl-card__name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+/* 角色标签 */
+.dcl-role-tag {
+  flex-shrink: 0;
+  padding: 4rpx 14rpx;
+  border-radius: 6rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
+.dcl-role-tag--star {
+  color: #4A90D9;
+  background: rgba(74, 144, 217, 0.1);
+}
+
+.dcl-role-tag--traffic {
+  color: #34C759;
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.dcl-role-tag--potential {
+  color: #5AC8FA;
+  background: rgba(90, 200, 250, 0.1);
+}
+
+.dcl-role-tag--watch {
+  color: #8e8e93;
+  background: rgba(142, 142, 147, 0.1);
+}
+
+/* 标签 */
+.dcl-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 10rpx;
+}
+
+/* 角色原因 */
+.dcl-card__role-reason {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 售价 + 销量 + 变化 */
+.dcl-card__price-sales {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-card__price {
+  color: #e67e22;
+  font-weight: 600;
+}
+
+.dcl-card__divider {
+  margin: 0 6rpx;
+}
+
+.dcl-card__sales-num {
+  font-weight: 600;
+  color: #333;
+}
+
+.dcl-card__change-tag {
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.dcl-card__change-tag.is-up {
+  color: #07c160;
+}
+
+.dcl-card__change-tag.is-down {
+  color: #fa5151;
+}
+
+/* 核心指标区 */
+.dcl-card__metrics {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: #f9fafb;
+  border-radius: 14rpx;
+}
+
+/* 实际毛利率 + 理论毛利率 并排 */
+.dcl-metrics-dual {
+  display: flex;
+}
+
+.dcl-metrics-dual__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dcl-metrics-dual__col--right {
+  align-items: flex-end;
+}
+
+.dcl-metrics-dual__divider {
+  width: 1rpx;
+  margin: 0 20rpx;
+  align-self: stretch;
+  background: #e8eaef;
+  flex-shrink: 0;
+}
+
+.dcl-metrics-dual__label {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-metrics-dual__val-row {
+  display: flex;
+  align-items: baseline;
+  margin-top: 6rpx;
+}
+
+.dcl-metrics-dual__val-row--r {
+  justify-content: flex-end;
+}
+
+.dcl-metrics-dual__num {
+  font-size: 48rpx;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.dcl-metrics-dual__num--actual {
+  color: #07c160;
+}
+
+.dcl-metrics-dual__num--theory {
+  color: #4A90D9;
+}
+
+.dcl-metrics-dual__pct {
+  margin-left: 4rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #07c160;
+}
+
+.dcl-metrics-dual__pct--theory {
+  color: #4A90D9;
+}
+
+/* 成本三列 */
+.dcl-cost-grid {
+  display: flex;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #eef0f4;
+}
+
+.dcl-cost-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.dcl-cost-cell__label {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-cost-cell__value {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.3;
+}
+
+.dcl-cost-cell__value.is-warn {
+  color: #f59e0b;
+}
+
+.dcl-cost-cell__value.is-good {
+  color: #10b981;
+}
+
+/* 实际利润 */
+.dcl-profit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #eef0f4;
+}
+
+.dcl-profit-row__label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.dcl-profit-row__value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* 经营提示条 */
+.dcl-card__hint {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.dcl-card__hint--good {
+  background: rgba(7, 193, 96, 0.06);
+  color: #10b981;
+}
+
+.dcl-card__hint--warn {
+  background: rgba(245, 158, 11, 0.06);
+  color: #d97706;
+}
+
+.dcl-card__hint--info {
+  background: rgba(74, 144, 217, 0.06);
+  color: #3b82f6;
+}
+
+.dcl-card__hint--neutral {
+  background: rgba(107, 114, 128, 0.06);
+  color: #6b7280;
+}
+
+.dcl-card__hint-icon {
+  flex-shrink: 0;
+  margin-right: 10rpx;
+  font-size: 28rpx;
+  align-self: flex-start;
+  margin-top: 2rpx;
+}
+
+.dcl-card__hint-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.dcl-card__hint-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.dcl-card__hint-text {
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.dcl-card__hint-action {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* 底部操作 */
+.dcl-card__actions {
+  display: flex;
+  margin-top: 20rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #f0f0f0;
+  gap: 14rpx;
+}
+
+.dcl-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  padding: 14rpx 10rpx;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #f5f6f8;
+}
+
+.dcl-action-btn--hover {
+  opacity: 0.8;
+}
+
+.dcl-action-btn--primary {
+  color: #fff;
+  background: #4A90D9;
+}
+
+.dcl-action-btn__icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+/* 底部安全区 */
+.dcl-bottom-safe {
+  height: 40rpx;
+}
+
+/* ==================== 原有老板经营视图样式（不变） ==================== */
+
+.dfl-search-top-ico {
+  opacity: 0.72;
+}
+
+.dfl-search-top-ico--on {
+  opacity: 1;
+}
+
+.dfl-search-panel {
+  padding: 12rpx 24rpx 16rpx;
+}
+
+.dfl-search-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 999rpx;
+  padding: 12rpx 20rpx;
+  min-height: 72rpx;
+  box-sizing: border-box;
+}
+
+.dfl-search-inner-ico {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+  opacity: 0.45;
+}
+
+.dfl-search-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  color: #111827;
+  height: 44rpx;
+  line-height: 44rpx;
+}
+
+.dfl-search-clear {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 40rpx;
+  text-align: center;
+  font-size: 40rpx;
+  color: #9ca3af;
+  margin-left: 8rpx;
+}
+
+.dfl-list-empty {
+  padding: 48rpx 32rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--gb-text-muted);
+  line-height: 1.5;
+}
+
+.food-page {
+  min-height: 100vh;
+  background: var(--gb-bg-page);
+}
+
+.food-page--boss {
+  background: linear-gradient(180deg, #f0f4f8 0%, var(--gb-bg-page) 320rpx);
+}
+
+/* .dfl-hero {
+  padding: 12rpx 24rpx 20rpx;
+  background: var(--gb-bg-white);
+  border-bottom: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-hero__row {
+  align-items: flex-start;
+}
+
+.dfl-hero__date {
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.dfl-hero__cal {
+  padding: 12rpx 16rpx 12rpx 0;
+}
+
+.dfl-hero__cal .icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.dfl-hero__hanzi {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--gb-text);
+}
+
+.dfl-hero__range {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: var(--gb-text-secondary);
+}
+
+.dfl-hero__dash {
+  padding: 0 8rpx;
+}
+
+.dfl-hero__tools {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 48%;
+} */
+
+.dfl-tool-chip {
+  padding: 10rpx 18rpx;
+  margin-left: 10rpx;
+  margin-bottom: 8rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  border-radius: 999rpx;
+  box-sizing: border-box;
+}
+
+.dfl-tool-chip--blue {
+  color: #007aff;
+  background: #f0f7ff;
+  border: 1rpx solid rgba(0, 122, 255, 0.35);
+}
+
+.dfl-tool-chip--green {
+  color: #1a7f4b;
+  background: #ecf9f1;
+  border: 1rpx solid rgba(26, 127, 75, 0.35);
+}
+
+.dfl-hero__footnote {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: var(--gb-text-muted);
+  line-height: 1.5;
+}
+
+.dfl-hero__upload-hint {
+  margin-top: 10rpx;
+  padding-right: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.55;
+  color: var(--gb-text-muted);
+}
+
+.dfl-hero__upload-hint--em {
+  font-weight: 600;
+  color: var(--gb-text-secondary);
+}
+
+/* ---------- 区间 KPI ---------- */
+.dfl-banner {
+  margin: 20rpx 24rpx 0;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #1c2a3a 0%, #2d3e52 100%);
+  box-shadow: 0 8rpx 28rpx rgba(28, 42, 58, 0.25);
+}
+
+.dfl-banner__head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.dfl-banner__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.dfl-banner__badge {
+  padding: 4rpx 14rpx;
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999rpx;
+}
+
+.dfl-banner__hero {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin-bottom: 20rpx;
+  padding: 20rpx 16rpx;
+  border-radius: 16rpx;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+}
+
+.dfl-banner__hero-main {
+  flex: 1.35;
+  min-width: 0;
+  padding-right: 16rpx;
+  border-right: 1rpx solid rgba(255, 255, 255, 0.12);
+}
+
+.dfl-banner__hero-side {
+  flex: 1;
+  min-width: 0;
+  padding-left: 16rpx;
+}
+
+.dfl-banner__hero-lab {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 0.04em;
+}
+
+.dfl-banner__hero-side-lab {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.dfl-banner__hero-val {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 56rpx;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #7dd3c0;
+  letter-spacing: -0.02em;
+}
+
+.dfl-banner__hero-side-val {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 40rpx;
+  font-weight: 700;
+  line-height: 1.15;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.dfl-banner__hero-sub {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 18rpx;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.dfl-banner__meta {
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.1);
+  font-size: 20rpx;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.dfl-banner__grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 0 -8rpx;
+}
+
+.dfl-kpi {
+  width: 50%;
+  box-sizing: border-box;
+  padding: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.dfl-kpi__val {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.98);
+  letter-spacing: 0.02em;
+}
+
+.dfl-kpi__val--accent {
+  color: #7dd3c0;
+  font-size: 34rpx;
+}
+
+.dfl-kpi__lab {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* 菜品卡内小 KPI（dfl-kpi 默认白字是写给深色 dfl-banner 的） */
+.dfl-boss-card .dfl-banner__grid--dish {
+  margin: 12rpx -4rpx 0;
+  padding: 12rpx 8rpx 4rpx;
+  border-radius: 14rpx;
+  background: #f3f4f6;
+  border: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-boss-card .dfl-banner__grid--dish .dfl-kpi__val {
+  color: var(--gb-text);
+}
+
+.dfl-boss-card .dfl-banner__grid--dish .dfl-kpi__val--accent {
+  color: #187e6e;
+}
+
+.dfl-boss-card .dfl-banner__grid--dish .dfl-kpi__lab {
+  color: var(--gb-text-muted);
+}
+
+.dfl-banner__hint {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ---------- 列表区块 ---------- */
+.dfl-section {
+  padding: 20rpx 24rpx 40rpx;
+}
+
+.dfl-section__bar {
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.dfl-section__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--gb-text);
+}
+
+.dfl-section__tag {
+  margin-left: 12rpx;
+  padding: 4rpx 12rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+  color: #a94442;
+  background: #fdeaea;
+  border-radius: 8rpx;
+}
+
+.dfl-section__tip {
+  font-size: 22rpx;
+  color: var(--gb-text-muted);
+}
+
+/* ---------- 列表排序（与 depGeFoodBusiness sortBy/sortOrder 一致） ---------- */
+.dfl-sort-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 4rpx 0 8rpx;
+  background: var(--gb-bg-page);
+  border-radius: 12rpx;
+}
+
+.dfl-sort-left {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 12rpx;
+}
+
+.dfl-sort-arrows {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 10rpx;
+  gap: 2rpx;
+}
+
+.dfl-sort-arrow {
+  font-size: 30rpx;
+  color: #c5cdd6;
+  line-height: 1;
+  font-weight: 700;
+  padding: 0 2rpx;
+}
+
+.dfl-sort-arrow.is-on {
+  color: #187e6e;
+}
+
+.dfl-sort-label {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: var(--gb-text-secondary);
+  font-weight: 500;
+}
+
+.dfl-sort-scroll {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.dfl-sort-chips {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 2rpx 0;
+  gap: 12rpx;
+}
+
+.dfl-sort-chip {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: var(--gb-text-secondary);
+  background: var(--gb-bg-white);
+  border: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-sort-chip-ico {
+  margin-right: 6rpx;
+  font-size: 24rpx;
+}
+
+.dfl-sort-chip.is-on {
+  font-weight: 600;
+}
+
+.dfl-sort-chip--sales.is-on {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.dfl-sort-chip--margin.is-on {
+  color: #166534;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.dfl-sort-chip--profit.is-on {
+  color: #c2410c;
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.dfl-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dfl-boss-card {
+  margin-bottom: 20rpx;
+  padding: 22rpx 22rpx 18rpx;
+  background: var(--gb-bg-white);
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 18rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid rgba(0, 0, 0, 0.04);
+}
+
+.dfl-boss-card__head {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8rpx;
+}
+
+/* ---------- 菜品卡顶栏（稿图：菜名/单价 + 圆图占位 + 销量） ---------- */
+.dfl-dish-head {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.dfl-dish-head__main {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.dfl-dish-head__idx {
+  flex-shrink: 0;
+  width: 40rpx;
+  margin-right: 8rpx;
+  font-size: 32rpx;
+  color: var(--gb-text-muted);
+  line-height: 44rpx;
+  text-align: center;
+}
+
+.dfl-dish-head__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.dfl-dish-head__name {
+  display: block;
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #333333;
+  line-height: 1.35;
+}
+
+.dfl-dish-head__price {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.4;
+}
+
+.dfl-dish-head__aside {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20rpx;
+}
+
+.dfl-dish-head__photo-wrap {
+  flex-shrink: 0;
+}
+
+.dfl-dish-head__photo {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: block;
+}
+
+.dfl-dish-head__photo--placeholder {
+  border: 1rpx dashed #e5e7eb;
+  box-sizing: border-box;
+}
+
+.dfl-dish-head__sales {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 100rpx;
+}
+
+.dfl-dish-head__sales-lab {
+  font-size: 24rpx;
+  color: #999999;
+  line-height: 1.3;
+}
+
+.dfl-dish-head__sales-val {
+  margin-top: 6rpx;
+  font-size: 40rpx;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #07c160;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- 综合毛利率主卡（浅绿描边、居中） ---------- */
+.dfl-blend-hero {
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx 24rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 2rpx solid rgba(7, 193, 96, 0.45);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.dfl-blend-hero__title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.dfl-blend-hero__value-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+  margin-top: 12rpx;
+}
+
+.dfl-blend-hero__num {
+  font-size: 64rpx;
+  font-weight: 800;
+  line-height: 1.05;
+  color: #07c160;
+  letter-spacing: -0.03em;
+}
+
+.dfl-blend-hero__pct {
+  margin-left: 4rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #07c160;
+}
+
+.dfl-blend-hero__hint {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  margin-top: 16rpx;
+  padding: 14rpx 16rpx 0;
+  border-top: 1rpx solid #eef6f1;
+  box-sizing: border-box;
+}
+
+.dfl-blend-hero__hint-range {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: var(--gb-text-secondary, #666);
+  line-height: 1.45;
+  text-align: center;
+  margin-bottom: 10rpx;
+  padding: 0 8rpx;
+}
+
+.dfl-blend-hero__hint-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.dfl-blend-hero__hint-emoji {
+  margin-right: 10rpx;
+  font-size: 40rpx;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dfl-blend-hero__hint-txt {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #07c160;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.dfl-blend-hero__hint--ok .dfl-blend-hero__hint-txt {
+  color: #07c160;
+}
+
+.dfl-blend-hero__hint--warn .dfl-blend-hero__hint-txt {
+  color: #c97a00;
+}
+
+.dfl-blend-hero__hint--good .dfl-blend-hero__hint-txt {
+  color: #0d7a4d;
+}
+
+.dfl-blend-hero__hint--muted .dfl-blend-hero__hint-txt {
+  color: var(--gb-text-muted, #999);
+  font-weight: 400;
+}
+
+/* ---------- 双列指标白卡片 ---------- */
+.dfl-stat-dual {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin-top: 20rpx;
+  padding: 24rpx 20rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 1rpx solid #eef0f4;
+  box-sizing: border-box;
+}
+
+.dfl-stat-dual--tight {
+  margin-top: 16rpx;
+}
+
+.dfl-stat-dual__col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dfl-stat-dual__divider {
+  width: 1rpx;
+  margin: 0 8rpx;
+  align-self: stretch;
+  background: #eef0f4;
+  flex-shrink: 0;
+}
+
+.dfl-stat-dual__icon-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.dfl-stat-ico {
+  flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dfl-stat-ico__img {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.dfl-stat-ico__fallback {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #07c160;
+  line-height: 1;
+}
+
+.dfl-stat-ico--cost {
+  background: #e8f8f0;
+}
+
+.dfl-stat-ico--theory {
+  background: #e8f8f0;
+}
+
+.dfl-stat-ico--revenue {
+  background: #e8f8f0;
+}
+
+.dfl-stat-ico--wallet {
+  background: #fff4e8;
+}
+
+.dfl-stat-ico--wallet .dfl-stat-ico__fallback {
+  color: #e67e22;
+}
+
+.dfl-stat-dual__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.dfl-stat-dual__lab {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #333333;
+  line-height: 1.35;
+}
+
+.dfl-stat-dual__val {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.dfl-stat-dual__val-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: nowrap;
+}
+
+.dfl-stat-dual__pct-suffix {
+  margin-left: 2rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.dfl-stat-dual__val--dark {
+  color: #333333;
+}
+
+.dfl-stat-dual__val--green {
+  color: #07c160;
+}
+
+.dfl-stat-dual__sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.4;
+  color: #999999;
+}
+
+/* ---------- 配料成本分析 CTA ---------- */
+.dfl-ingredient-cta {
+  margin-top: 24rpx;
+  padding: 22rpx 24rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  border: 2rpx solid rgba(7, 193, 96, 0.55);
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.dfl-ingredient-cta__ico {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.dfl-ingredient-cta__ico-slot {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+  border-radius: 6rpx;
+  border: 2rpx solid rgba(7, 193, 96, 0.35);
+  box-sizing: border-box;
+}
+
+.dfl-ingredient-cta__txt {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #07c160;
+}
+
+.dfl-ingredient-cta__chev {
+  flex-shrink: 0;
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #07c160;
+  line-height: 1;
+  margin-left: 8rpx;
+}
+
+.dfl-data-disclaimer {
+  display: block;
+  margin-top: 16rpx;
+  margin-bottom: 4rpx;
+  font-size: 20rpx;
+  line-height: 1.45;
+  color: #bbbbbb;
+}
+
+.dfl-boss-card__method--below-chart {
+  margin-top: 16rpx;
+  padding-top: 0;
+  border-top: none;
+}
+
+.dfl-boss-card__top {
+  align-items: flex-start;
+}
+
+.dfl-boss-card__left {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.dfl-boss-card__idx {
+  flex-shrink: 0;
+  width: 40rpx;
+  margin-right: 10rpx;
+  font-size: 22rpx;
+  color: var(--gb-text-muted);
+  line-height: 44rpx;
+  text-align: center;
+}
+
+.dfl-boss-card__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.dfl-boss-card__name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--gb-text);
+  line-height: 1.4;
+}
+
+.dfl-boss-card__sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.4;
+}
+
+.dfl-boss-card__price {
+  color: var(--gb-primary);
+  font-weight: 600;
+}
+
+.dfl-boss-card__price--emph,
+.dfl-boss-card__qty--emph {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.dfl-boss-card__dot {
+  margin: 0 8rpx;
+  color: var(--gb-text-muted);
+}
+
+.dfl-boss-card__qty {
+  color: var(--gb-text-secondary);
+}
+
+.dfl-boss-card__margin-wrap {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  text-align: right;
+}
+
+.dfl-boss-card__margin-lab {
+  display: block;
+  font-size: 24rpx;
+  line-height: 1.3;
+  color: var(--gb-text-secondary);
+}
+
+.dfl-boss-card__revenue-val {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 36rpx;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #1a4d6e;
+}
+
+/* 两列毛利率卡（与稿：白底细边框、大号绿色百分比、底栏提示） */
+.dfl-gm-card {
+  margin-top: 18rpx;
+  padding: 26rpx 22rpx 20rpx;
+  border: 1rpx solid #e8eaef;
+  border-radius: 16rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.dfl-gm-card__body {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.dfl-gm-col {
+  flex: 1;
+  min-width: 0;
+  padding-right: 8rpx;
+  box-sizing: border-box;
+}
+
+.dfl-gm-col--r {
+  padding: 0 0 0 20rpx;
+  border-left: 1rpx solid #e8eaef;
+  text-align: right;
+}
+
+.dfl-gm-card__lab {
+  display: block;
+  font-size: 24rpx;
+  line-height: 1.4;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.dfl-gm-card__lab--r {
+  text-align: right;
+}
+
+.dfl-gm-card__val-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  margin-top: 10rpx;
+  min-height: 64rpx;
+}
+
+.dfl-gm-card__val-row--r {
+  justify-content: flex-end;
+}
+
+.dfl-gm-card__num {
+  font-size: 50rpx;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #16a34a;
+}
+
+.dfl-gm-card__pct {
+  margin-left: 4rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #16a34a;
+  vertical-align: baseline;
+}
+
+.dfl-gm-card__sub {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 24rpx;
+  line-height: 1.45;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.dfl-gm-card__sub--r {
+  text-align: right;
+}
+
+.dfl-gm-card__foot {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #eef0f4;
+}
+
+.dfl-gm-card__icon {
+  flex-shrink: 0;
+  font-size: 32rpx;
+  line-height: 1;
+  margin-right: 8rpx;
+  filter: grayscale(0) saturate(1.2);
+}
+
+.dfl-gm-card__hint {
+  flex: 1;
+  min-width: 0;
+  font-size: 25rpx;
+  line-height: 1.45;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.dfl-metrics-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-metric-cell--end {
+  text-align: right;
+}
+
+.dfl-metrics-pair {
+  margin-bottom: 14rpx;
+}
+
+.dfl-metrics-pair:last-child {
+  margin-bottom: 0;
+}
+
+.dfl-metric-cell {
+  flex: 1;
+  min-width: 0;
+  padding-right: 12rpx;
+  box-sizing: border-box;
+}
+
+.dfl-metric-cell:last-child {
+  padding-right: 0;
+  padding-left: 12rpx;
+  border-left: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-metric__pct {
+  font-weight: 700;
+}
+
+.dfl-metric__pct--high {
+  color: #187e6e;
+}
+
+.dfl-metric__pct--mid {
+  color: #b07a1e;
+}
+
+.dfl-metric__pct--low {
+  color: #c44f4f;
+}
+
+.dfl-metric__pct--none {
+  color: var(--gb-text-muted);
+  font-weight: 600;
+}
+
+.dfl-metric__pct--theory-high {
+  color: #2a6f9e;
+}
+
+.dfl-metric__pct--theory-mid {
+  color: #8a6d3a;
+}
+
+.dfl-metric__pct--theory-low {
+  color: #b94a48;
+}
+
+.dfl-metric__pct--theory-none {
+  color: var(--gb-text-muted);
+  font-weight: 600;
+}
+
+.dfl-metric__lab {
+  display: block;
+  font-size: 24rpx;
+  line-height: 1.3;
+  color: var(--gb-text-secondary);
+}
+
+.dfl-metric__val {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--gb-text);
+}
+
+.dfl-boss-card__no-insight {
+  margin-top: 14rpx;
+  padding: 12rpx 0 0;
+  border-top: 1rpx dashed var(--gb-border-soft);
+  font-size: 22rpx;
+  color: var(--gb-text-muted);
+}
+
+.dfl-boss-card__foot {
+  align-items: flex-end;
+  margin-top: 14rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-boss-card__method {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: var(--gb-text-secondary);
+}
+
+.dfl-boss-card__method--muted {
+  color: var(--gb-text-muted);
+}
+
+.dfl-boss-card__link {
+  flex-shrink: 0;
+  padding: 8rpx 20rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  color: var(--gb-primary);
+  border: 1rpx solid rgba(24, 126, 110, 0.35);
+  border-radius: 999rpx;
+}
+
+/* ---------- 周内销量 ec-canvas ---------- */
+.dfl-week-chart {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-boss-card .dfl-week-chart {
+  margin-top: 20rpx;
+  padding: 20rpx 16rpx 12rpx;
+  border-top: none;
+  border: 1rpx solid #eef0f4;
+  border-radius: 16rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.dfl-week-chart__head {
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.dfl-week-chart__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.dfl-week-chart__muted {
+  font-size: 22rpx;
+  color: var(--gb-text-muted);
+}
+
+.dfl-week-chart__canvas-wrap {
+  width: 100%;
+  height: 220rpx;
+}
+
+.dfl-week-ec {
+  display: block;
+  width: 100%;
+  height: 220rpx;
+}
+
+.food-toolbar {
+  padding: 18rpx 24rpx 6rpx;
+  background: var(--gb-bg-white);
+  border-bottom: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-group {
+  margin-bottom: 22rpx;
+}
+
+.dfl-group__header {
+  align-items: center;
+  margin-bottom: 14rpx;
+  padding: 0 4rpx;
+}
+
+.dfl-group__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--gb-text);
+}
+
+.dfl-group__count {
+  font-size: 22rpx;
+  color: var(--gb-text-muted);
+}
+
+.dfl-list-card {
+  overflow: hidden;
+  background: var(--gb-bg-white);
+  border-radius: 18rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.dfl-item {
+  align-items: flex-start;
+  padding: 20rpx;
+  border-bottom: 1rpx solid var(--gb-border-soft);
+}
+
+.dfl-item:last-child {
+  border-bottom: none;
+}
+
+.dfl-item__main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.dfl-item__index {
+  flex-shrink: 0;
+  width: 36rpx;
+  margin-right: 12rpx;
+  font-size: 22rpx;
+  color: var(--gb-text-muted);
+  line-height: 40rpx;
+  text-align: center;
+}
+
+.dfl-item__image-wrap {
+  flex-shrink: 0;
+}
+
+.dfl-item__img {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 14rpx;
+}
+
+.dfl-item__body {
+  flex: 1;
+  min-width: 0;
+  margin-left: 16rpx;
+}
+
+.dfl-item__name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--gb-text);
+  line-height: 1.45;
+}
+
+.dfl-item__meta {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.dfl-item__price {
+  margin-right: 16rpx;
+  color: var(--gb-primary);
+  font-weight: 600;
+}
+
+.dfl-item__sales {
+  color: var(--gb-text-secondary);
+}
+
+.dfl-item__method {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.55;
+  color: var(--gb-text-secondary);
+}
+
+.dfl-item__method--empty {
+  color: var(--gb-text-muted);
+}
+
+.dfl-item__action {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 146rpx;
+  margin-left: 12rpx;
+}
+
+.dfl-action-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 62rpx;
+  border-radius: 14rpx;
+}
+
+.dfl-action-btn--on {
+  background: var(--gb-bg-light);
+  border: 1rpx solid rgba(24, 126, 110, 0.2);
+}
+
+.dfl-action-btn--off {
+  background: #eef4ff;
+  border: 1rpx solid #d6e3ff;
+}
+
+.dfl-action-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 8rpx;
+}
+
+.dfl-action-text {
+  font-size: 22rpx;
+  line-height: 1;
+  color: var(--gb-text-secondary);
+}
+
+.dfl-action-btn--off .dfl-action-text {
+  color: #3567d7;
+}
+
+.dfl-dep-name {
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  line-height: 1.4;
+  color: var(--gb-text-muted);
+  text-align: right;
+}
+
+.dfl-empty {
+  margin-top: 80rpx;
+  padding: 0 40rpx;
+  font-size: 26rpx;
+  color: var(--gb-text-muted);
+  text-align: center;
+}
+
+/* 绿色按钮 */
+.dfl-action-btn--green {
+  background: #e8f8f0;
+  border: 1rpx solid rgba(24, 126, 110, 0.25);
+  margin-top: 8rpx;
+  padding: 10rpx 10rpx;
+  font-size: 30rpx;
+}
+
+.dfl-action-btn--green .dfl-action-text {
+  color: #187e6e;
+}

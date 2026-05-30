@@ -1,0 +1,125 @@
+.dual-host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #e0e0e0;
+  z-index: 999;
+}
+
+.dual-row {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.dual-title-layer {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* 相对整条导航栏视觉居中（不对称左右占位时不再把标题拽偏） */
+.dual-title-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.dual-title-text {
+  display: block;
+  width: 100%;
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333333;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 左侧整栏：图标 + 双按钮（横排） */
+.dual-left-bar {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding-left: 12rpx;
+  max-width: 72%;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.dual-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.dual-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  margin-left: 4rpx;
+  border: 1px solid #e9e9e9;
+}
+
+.dual-back {
+  width: 44rpx;
+  height: 44rpx;
+  margin-left: 8rpx;
+}
+
+.dual-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  margin-left: 8rpx;
+  /* 勿 shrink，否则窄屏下「门店」「设置」被挤成 0 宽，点击无响应 */
+  flex-shrink: 0;
+}
+
+.dual-link-hit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 12rpx 12rpx;
+  min-height: 56rpx;
+  box-sizing: border-box;
+}
+
+.dual-link-hit--major {
+  margin-left: 4rpx;
+}
+
+.dual-link {
+  font-size: 28rpx;
+  color: #187e6e;
+}
+
+.dual-link--major {
+  margin-left: 0;
+}
+
+.dual-link--minor {
+  font-size: 26rpx;
+}

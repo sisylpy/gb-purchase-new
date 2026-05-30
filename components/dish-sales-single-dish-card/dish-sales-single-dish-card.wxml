@@ -1,0 +1,51 @@
+<wxs module="safe">
+  module.exports = {
+    or: function (a, b) { return a ? a : b; },
+    fmt: function (v, fallback) { return (v !== null && v !== undefined && v !== '') ? v : (fallback || '--'); },
+    ranking: function (d) { return d.ranking != null ? d.ranking : (d.rank != null ? d.rank : null); }
+  };
+</wxs>
+
+<view class="dssc-card" wx:if="{{cardData}}">
+  <!-- 菜品名称 + 时间/范围标签 -->
+  <view class="dssc-dish-name">{{cardData.dishName || '菜品'}}</view>
+  <view class="dssc-tags" wx:if="{{cardData.timeLabel || cardData.scopeLabel}}">
+    <text class="dssc-tag" wx:if="{{cardData.timeLabel}}">{{cardData.timeLabel}}</text>
+    <text class="dssc-tag" wx:if="{{cardData.scopeLabel}}">{{cardData.scopeLabel}}</text>
+  </view>
+
+  <!-- 核心指标：销量 / 销售额 / 单价 -->
+  <view class="dssc-stats">
+    <view class="dssc-stat-item">
+      <text class="dssc-stat-label">销量</text>
+      <text class="dssc-stat-value">{{safe.or(cardData.soldPortionsTotal, cardData.salesPortions) || '--'}}</text>
+      <text class="dssc-stat-unit">份</text>
+    </view>
+    <view class="dssc-stat-div"></view>
+    <view class="dssc-stat-item">
+      <text class="dssc-stat-label">销售额</text>
+      <text class="dssc-stat-value">{{safe.or(cardData.salesAmount, cardData.listPriceRevenue) || '--'}}</text>
+      <text class="dssc-stat-unit">元</text>
+    </view>
+    <view class="dssc-stat-div"></view>
+    <view class="dssc-stat-item">
+      <text class="dssc-stat-label">单价</text>
+      <text class="dssc-stat-value">{{cardData.salesUnitPrice || '--'}}</text>
+      <text class="dssc-stat-unit">元/份</text>
+    </view>
+  </view>
+
+  <!-- 毛利率 / 排名 -->
+  <view class="dssc-extra-strip" wx:if="{{cardData.grossMarginRate != null || safe.ranking(cardData) != null}}">
+    <view class="dssc-extra-col" wx:if="{{cardData.grossMarginRate != null}}">
+      <text class="dssc-extra-cap">毛利率</text>
+      <text class="dssc-extra-val">{{cardData.grossMarginRate}}</text>
+      <text class="dssc-extra-unit">%</text>
+    </view>
+    <view class="dssc-extra-div" wx:if="{{cardData.grossMarginRate != null && safe.ranking(cardData) != null}}"></view>
+    <view class="dssc-extra-col" wx:if="{{safe.ranking(cardData) != null}}">
+      <text class="dssc-extra-cap">排名</text>
+      <text class="dssc-extra-val">{{safe.ranking(cardData)}}</text>
+    </view>
+  </view>
+</view>

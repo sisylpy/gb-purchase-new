@@ -27,7 +27,9 @@ Page({
 
   onShow(){
 
-    if(this.data.update){
+    if (this.data.update) {
+      this._syncDatesFromMyDateStorage();
+      this.setData({ update: false });
       this._initData();
     }
    
@@ -43,44 +45,44 @@ Page({
       url: apiUrl.server,
     })
 
+   
+
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if(mendianInfo){
+      this.setData({
+        mendianInfo: mendianInfo,
+        depId: mendianInfo.gbDepartmentId,
+    })
+  }
+   this._syncDatesFromMyDateStorage();
+    this._initData();
+
+  },
+
+  _syncDatesFromMyDateStorage() {
     var myDate = wx.getStorageSync('myDate');
-    if(myDate){
-      // 如果是自定义日期，传递具体的开始和结束日期
+    if (myDate) {
       var dateRange;
       if (myDate.name === 'custom') {
         dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
       } else {
         dateRange = dateUtils.getDateRange(myDate.name);
       }
-    
       this.setData({
         startDate: dateRange.startDate,
         stopDate: dateRange.stopDate,
         dateType: myDate.dateType,
         hanzi: myDate.hanzi || dateRange.name,
-      })
-    }else{
+      });
+    } else {
       this.setData({
         dateType: 'month',
         startDate: dateUtils.getFirstDateInMonth(),
         stopDate: dateUtils.getArriveDate(0),
-        hanzi:  "本月",
-      })
+        hanzi: "本月",
+      });
     }
-
-    var disInfo = wx.getStorageSync('disInfo');
-    if(disInfo){
-      this.setData({
-        disInfo: disInfo,
-        depId: disInfo.mendianDepartmentList[0].gbDepartmentId,
-    })
-    console.log("depiiddidid", disInfo.mendianDepartmentList[0].gbDepartmentId)
-  }
-
-    this._initData();
-
   },
-
 
 _initData(){
   var data  = {

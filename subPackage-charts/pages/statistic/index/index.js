@@ -38,25 +38,10 @@ Page({
 
   onShow() {
  
-    if(this.data.update){
-      var myDate = wx.getStorageSync('myDate');
-      if (myDate) {
-        // 如果是自定义日期，传递具体的开始和结束日期
-        var dateRange;
-        if (myDate.name === 'custom' ) {
-          dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-        } else {
-          dateRange = dateUtils.getDateRange(myDate.name);
-        }
-        this.setData({
-          startDate: dateRange.startDate,
-          stopDate: dateRange.stopDate,
-          dateType: myDate.dateType,
-          hanzi: myDate.hanzi || dateRange.name,
-          update: false
-        })
-      } 
-  
+   
+    if (this.data.update) {
+      this._syncDatesFromMyDateStorage();
+      this.setData({ update: false });
       this._loadFilterDataFromCache();
     }
  
@@ -76,30 +61,7 @@ Page({
     
     })
 
-    var myDate = wx.getStorageSync('myDate');
-    if(myDate){
-      // 如果是自定义日期，传递具体的开始和结束日期
-      var dateRange;
-      if (myDate.name === 'custom' ) {
-        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-      } else {
-        dateRange = dateUtils.getDateRange(myDate.name);
-      }
-      
-      this.setData({
-        startDate: dateRange.startDate,
-        stopDate: dateRange.stopDate,
-        dateType: myDate.dateType,
-        hanzi: myDate.hanzi || dateRange.name,
-      })
-    }else{
-      this.setData({
-        dateType: 'month',
-        startDate: dateUtils.getFirstDateInMonth(),
-        stopDate: dateUtils.getArriveDate(0),
-        hanzi:  "本月",
-      })
-    }
+    this._syncDatesFromMyDateStorage();
 
 
     var value = wx.getStorageSync('userInfo');
@@ -122,6 +84,31 @@ Page({
   },
 
 
+
+  _syncDatesFromMyDateStorage() {
+    var myDate = wx.getStorageSync('myDate');
+    if (myDate) {
+      var dateRange;
+      if (myDate.name === 'custom') {
+        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
+      } else {
+        dateRange = dateUtils.getDateRange(myDate.name);
+      }
+      this.setData({
+        startDate: dateRange.startDate,
+        stopDate: dateRange.stopDate,
+        dateType: myDate.dateType,
+        hanzi: myDate.hanzi || dateRange.name,
+      });
+    } else {
+      this.setData({
+        dateType: 'month',
+        startDate: dateUtils.getFirstDateInMonth(),
+        stopDate: dateUtils.getArriveDate(0),
+        hanzi: "本月",
+      });
+    }
+  },
 
 
   // 1 swiper 

@@ -29,24 +29,9 @@ Page({
    */
   onLoad: function (options) {
     this.setData({
-        type: options.type,
+      purDepId: options.purDepId,
     })
     
-    var userInfoValue = wx.getStorageSync('userInfo');
-    if (userInfoValue) {
-      this.setData({
-        userInfo: userInfoValue
-      })
-    }
-    var disInfo = wx.getStorageSync('disInfo');
-    if (disInfo) {
-      this.setData({
-        disInfo: disInfo,
-        disId: disInfo.gbDistributerId,
-        purDepId: disInfo.mendianDepartmentList[0].gbDepartmentId,
-      })
-    }
-    this._initData();
   },
 
   _initData(){

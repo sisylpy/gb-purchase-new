@@ -1,7 +1,15 @@
 {
   "pages": [
-   
+
+
     "pages/index/index",
+
+    "pages/storeAiChat/storeAiChat",
+    "pages/myDashboard/myDashboard",
+   
+ 
+
+   
     "pages/splash/splash",
     "pages/common/selectDate/selectDate",
     "pages/register/register",
@@ -60,7 +68,7 @@
       "root": "subPackage-ai/",
       "name": "ai",
       "pages": [
-        "pages/chat/aiChat/aiChat",
+        "pages/chat/groupAiChat/groupAiChat",
         "pages/restraunt/restaurantProfile/restaurantProfile",
         "pages/restraunt/restaurantEdit/restaurantEdit"
       ]
@@ -69,7 +77,7 @@
       "root": "subPackage-goods/",
       "name": "goods",
       "pages": [
-        "pages/resGoods/resGoods",
+        "pages/depGoodsIndex/depGoodsIndex",
         "pages/searchGoods/searchGoods",
         "pages/disGoodsDetail/disGoodsDetail",
         "pages/disGoodsPage/disGoodsPage",
@@ -104,6 +112,7 @@
       "root": "subPackage-charts/",
       "name": "charts",
       "pages": [
+        "pages/aiChat/aiChat",
         "pages/statistic/index/index",
         "pages/statistic/indexGoods/indexGoods",
         "pages/statistic/costGoodsByDate/costGoodsByDate",
@@ -129,6 +138,24 @@
         "pages/report/subDepStock/subDepStock",
         "pages/report/subDepCost/subDepCost"
       ]
+    },
+    {
+      "root": "subPackage-group/",
+      "name": "group",
+      "pages": [
+        "pages/homePage/homePage",
+        "pages/disEdit/disEdit",
+       
+        
+        "pages/food/index/index",
+        "pages/food/depFoodList/depFoodList",
+        "pages/food/dishIngredientDashboard/dishIngredientDashboard",
+        "pages/food/foodBusinessDetail/foodBusinessDetail",
+        "pages/food/addFood/addFood",
+        "pages/food/addFoodFather/addFoodFather",
+        "pages/food/addRaw/addRaw"
+
+      ]
     }
   ],
   "window": {
@@ -145,5 +172,8 @@
       "version": "2.3.10",
       "provider": "wx3e17776051baf153"
     }
+  },
+  "usingComponents": {
+    "navbar-dual": "/components/navbar-dual/navbar-dual"
   }
 }

@@ -66,6 +66,22 @@ Page({
       url: apiUrl.server,
     })
 
+    this._syncDatesFromMyDateStorage();
+
+    
+
+    var value = wx.getStorageSync('mendianInfo');
+    if(value){
+      this.setData({
+        mendianInfo: value,
+        depFatherId: value.gbDepartmentId,
+      })
+    }
+
+    this._initData();
+  },
+
+  _syncDatesFromMyDateStorage() {
     var myDate = wx.getStorageSync('myDate');
     if (myDate) {
       var dateRange;
@@ -79,35 +95,23 @@ Page({
         stopDate: dateRange.stopDate,
         dateType: myDate.dateType,
         hanzi: myDate.hanzi || dateRange.name,
-      })
+      });
     } else {
       this.setData({
         dateType: 'month',
         startDate: dateUtils.getFirstDateInMonth(),
         stopDate: dateUtils.getArriveDate(0),
         hanzi: "本月",
-      })
+      });
     }
-
-    var disInfo = wx.getStorageSync('disInfo');
-    if (disInfo) {
-      this.setData({
-        disInfo: disInfo,
-        departmentId: disInfo.mendianDepartmentList[0].gbDepartmentId,  // 部门ID
-      })
-    }
-
-    this._initData();
   },
-
   /**
    * 初始化数据
    */
   _initData() {
     load.showLoading("获取数据中")
-
     var params = {
-      departmentId: this.data.departmentId,
+      departmentId: this.data.depFatherId,
       startDate: this.data.startDate,
       endDate: this.data.stopDate,
     }
@@ -116,9 +120,8 @@ Page({
       load.hideLoading();
       console.log('原始响应:', res);
       console.log('接口返回数据:', JSON.stringify(res.result, null, 2));
-      // 接口返回格式：{ code: 0, chartData: [], dailyList: [] }
       var data = res.result;
-      
+      console.log("dailyList",data.dailyList)
       if (data.code == 0) {
         // 计算统计数据
         var stats = {
@@ -440,10 +443,5 @@ Page({
   },
 
 
-  /**
-   * 页面卸载时清除缓存
-   */
-  onUnload() {
-    wx.removeStorageSync('myDate');
-  }
+ 
 })

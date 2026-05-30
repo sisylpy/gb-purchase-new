@@ -2,10 +2,11 @@
 
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
+var purchaseContext = require('../../../../lib/purchaseContext');
 import apiUrl from '../../../../config/index.js'
 import {
   getDepUsersByFatherIdGb,
-  getDisDepartmentGbMendianJing,
+  getSubDepartmentsGb,
   updateGroupNameGb,
   deleteDepartment,
 } from '../../../services/mendian.js'
@@ -37,28 +38,27 @@ Page({
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: apiUrl.server,
-      
     })
-    var userValue = wx.getStorageSync('userInfo');
-    if(userValue){
+    var depInfo = wx.getStorageSync('mendianInfo');
+    if(depInfo){
       this.setData({
-        userInfo: userValue
+        depInfo: depInfo,
+        depId: depInfo.gbDepartmentId,
       })
     }
 
-    var value = wx.getStorageSync('disInfo');
-    if (value) {
-      this.setData({
-        disId: value.gbDistributerId,
-        disInfo: value,
-        purDepInfo: value.mendianDepartmentList[0]
-      })
-    }
-  
+    
   },
 
   _initDataUser(){
-    getDepUsersByFatherIdGb(this.data.userInfo.gbDuDepartmentId).then(res =>{
+    var ui = this.data.userInfo;
+    if (!ui) {
+      return;
+    }
+    var pur = this.data.purDepInfo;
+    var depIdForApi =
+      pur && pur.gbDepartmentId ? pur.gbDepartmentId : ui.gbDuDepartmentId;
+    getDepUsersByFatherIdGb(depIdForApi).then(res =>{
       if(res.result.code == 0){
         this.setData({
           userArr: res.result.data,
@@ -71,7 +71,7 @@ Page({
   _initData() {
     
     load.showLoading("获取门店")
-    getDisDepartmentGbMendianJing(this.data.disId).then(res => {
+    getSubDepartmentsGb(this.data.depId).then(res => {
       if (res.result.code == 0) {
         load.hideLoading();
         this.setData({
@@ -101,12 +101,10 @@ Page({
 
 
   addSub(e){ 
+   
     wx.navigateTo({
-      url: '../addSubDep/addSubDep?depFatherId=1' ,
+      url: '../addSubDep/addSubDep?depFatherId=' + this.data.depId,
     })
-    // wx.navigateTo({
-    //   url: '../addSubDep/addSubDep?depFatherId=' + this.data.depArr[0].gbDepartmentId,
-    // })
   },
 
 
@@ -119,26 +117,7 @@ Page({
     })
   },
 
-
-  addDepartment(e) {
-    this.setData({
-      toAdd: true
-    })
-    wx.navigateTo({
-      url: '../addDepartment/addDepartment?disId=' + this.data.disId
-                + '&type=' + e.currentTarget.dataset.type,
-    })
-  },
-
-  inviteDep(e){
-    this.setData({
-      depInfo: e.currentTarget.dataset.item,
-      depId: e.currentTarget.dataset.item.gbDepartmentId,
-    })
-    console.log('disId=' + this.data.disId + '&depId='  +this.data.depId);
-  },
-
-
+  
   /**
    * 邀请采购员
    * @param {*} options 

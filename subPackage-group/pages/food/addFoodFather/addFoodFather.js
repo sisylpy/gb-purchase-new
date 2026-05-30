@@ -1,0 +1,186 @@
+const app = getApp()
+const globalData = app.globalData;
+var load = require('../../../../lib/load.js');
+
+import {
+  saveGbFoodFather,
+  updateGbFood
+} from '../../../services/apiDistributerGbFood'
+Page({
+  /**
+   * 页面的初始数据
+   */
+  data: {
+    showNumber: false,
+    depNumbers: "",
+    addFinished: false,
+    hasSubs: 0,
+    resName:"",
+    /** 目标毛利率 %，提交为 gbDfTargetGrossMarginRate */
+    targetGrossMarginRate: '60',
+    /** 毛利率浮动绝对值，提交为 gbDfGrossMarginFloatAbs */
+    grossMarginFloatAbs: '3',
+    deps: [],
+    fatherFood: null
+  },
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad: function (options) {
+    this.setData({
+      windowWidth: globalData.windowWidth * globalData.rpxR,
+      windowHeight: globalData.windowHeight * globalData.rpxR,
+      statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      disId: options.disId,
+      type: options.type
+    })
+    var fatherFoodValue = wx.getStorageSync('fatherFood');
+    if (fatherFoodValue) {
+      var rate = fatherFoodValue.gbDfTargetGrossMarginRate;
+      var floatAbs = fatherFoodValue.gbDfGrossMarginFloatAbs;
+      this.setData({
+        fatherFood: fatherFoodValue,
+        resName: fatherFoodValue.gbDfFoodName || '',
+        targetGrossMarginRate: rate != null && rate !== '' ? String(Number(rate)) : '60',
+        grossMarginFloatAbs: floatAbs != null && floatAbs !== '' ? String(Number(floatAbs)) : '3',
+      })
+      this._ifCanSave()
+    }
+  },
+
+
+  getRestrauntName(e) {
+    this.setData({
+      resName: e.detail.value,
+    })
+    this._ifCanSave()
+  },
+
+  onTargetGrossMarginRateInput(e) {
+    this.setData({ targetGrossMarginRate: e.detail.value })
+  },
+
+  onGrossMarginFloatAbsInput(e) {
+    this.setData({ grossMarginFloatAbs: e.detail.value })
+  },
+
+  _parseMarginNumber(str, fallback) {
+    var n = parseFloat(String(str).trim())
+    return isNaN(n) ? fallback : n
+  },
+
+
+
+  /**
+   * 检查可下一步状态
+   */
+   _ifCanSave(){
+     //resName
+     if(this.data.resName.length > 0){
+       // hasSubs == 1 
+       if(this.data.hasSubs == 1){
+         if(this.data.deps.length > 0){
+           //
+           var num  = this.data.deps.length;
+           for (var i = 0; i < num; i++) {
+             var name =  this.data.deps[i].gbDepartmentName;
+             if(name == null || name.length == 0){
+               this.setData({
+                addFinished: false
+               })
+               return;
+             }else{
+              this.setData({
+                addFinished: true
+               })
+             } 
+           }
+         }else{
+          this.setData({
+            addFinished: false
+          })
+         }
+       
+       } else{
+        this.setData({
+          addFinished: true
+        })
+       }
+     }else{
+       this.setData({
+         addFinished: false
+       })
+     }
+    
+   },
+
+ 
+  toBack(){
+    wx.removeStorageSync('fatherFood');
+    wx.navigateBack({
+      delta: 1,
+    })
+  },
+
+  
+
+  saveFoodFather(){
+    if(this.data.type == 'add'){
+      var rate = this._parseMarginNumber(this.data.targetGrossMarginRate, 60)
+      var floatAbs = this._parseMarginNumber(this.data.grossMarginFloatAbs, 3)
+      var  dep = {
+        gbDfDistributerId: this.data.disId,
+        gbDfFoodName: this.data.resName,
+        gbDfTargetGrossMarginRate: rate,
+        gbDfGrossMarginFloatAbs: floatAbs,
+        }
+        load.showLoading("保存供货商类别")
+        saveGbFoodFather(dep)
+        .then(res =>{
+          load.hideLoading()
+          if(res.result.code == 0){
+            wx.removeStorageSync('fatherFood');
+            wx.navigateBack({
+              delta: 1,
+            })
+          }else{
+            wx.showToast({
+              title: res.result.msg,
+              icon: 'none'
+            })
+          }
+        })
+    }
+    if(this.data.type == 'edit'){
+      var dep = this.data.fatherFood;
+      dep.gbDfFoodName = this.data.resName;
+      dep.gbDfTargetGrossMarginRate = this._parseMarginNumber(this.data.targetGrossMarginRate, 60)
+      dep.gbDfGrossMarginFloatAbs = this._parseMarginNumber(this.data.grossMarginFloatAbs, 3)
+      load.showLoading("修改供货商类别")
+      updateGbFood(dep)
+      .then(res =>{
+        load.hideLoading()
+        if(res.result.code == 0){
+          wx.removeStorageSync('fatherFood');
+          wx.navigateBack({
+            delta: 1,
+          })
+        }
+      })
+    }
+  },
+
+
+  
+
+
+
+
+
+
+
+
+  
+})

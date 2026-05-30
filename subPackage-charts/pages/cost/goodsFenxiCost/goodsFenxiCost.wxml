@@ -114,7 +114,7 @@
             </view>
 
             <!-- 菜品销量反推：理论/实际原料四项（合并进 aiAnalysis） -->
-            <block wx:if="{{showIngredientMetricsStrip}}">
+            <block >
               <view class="metric-item">
                 <view class="metric-label">理论应耗</view>
                 <view class="metric-value">{{aiAnalysis.theoreticalIngredientTotal}}{{disGoods.gbDgGoodsStandardname}}</view>

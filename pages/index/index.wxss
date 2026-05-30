@@ -869,3 +869,182 @@ button::after { border: none; }
   color: #999999;
   font-weight: normal;
 }
+
+/* 集团用户：门店切换底部弹层（主色 #187e6e，与导航按钮一致） */
+.group-store-overlay {
+  z-index: 10040 !important;
+}
+
+.group-store-sheet-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10050;
+  transform: translateY(110%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events: none;
+}
+
+.group-store-sheet-wrap.is-open {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.group-store-sheet-card {
+  background: #fafcfb;
+  border-radius: 28rpx 28rpx 0 0;
+  box-shadow:
+    0 -4rpx 24rpx rgba(24, 126, 110, 0.08),
+    0 -16rpx 48rpx rgba(0, 0, 0, 0.06);
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden;
+}
+
+.group-store-sheet-handle {
+  width: 72rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: rgba(24, 126, 110, 0.18);
+  margin: 14rpx auto 6rpx;
+}
+
+.group-store-sheet-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 28rpx 20rpx;
+  margin: 0 16rpx;
+  margin-bottom: 8rpx;
+  background: linear-gradient(135deg, rgba(24, 126, 110, 0.12) 0%, rgba(24, 126, 110, 0.06) 100%);
+  border-radius: 16rpx;
+  border: 1rpx solid rgba(24, 126, 110, 0.2);
+}
+
+.group-store-sheet-strip-hover {
+  background: linear-gradient(135deg, rgba(24, 126, 110, 0.18) 0%, rgba(24, 126, 110, 0.1) 100%);
+}
+
+.group-store-sheet-strip-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #187e6e;
+  font-weight: 500;
+  line-height: 1.45;
+  padding-right: 12rpx;
+}
+
+.group-store-sheet-strip-arrow {
+  font-size: 40rpx;
+  color: rgba(24, 126, 110, 0.55);
+  line-height: 1;
+  font-weight: 300;
+}
+
+.group-store-sheet-heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 18rpx 28rpx 12rpx;
+}
+
+.group-store-sheet-heading-mark {
+  width: 6rpx;
+  height: 28rpx;
+  border-radius: 3rpx;
+  background: #187e6e;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+.group-store-sheet-heading-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #24302e;
+  letter-spacing: 0.5rpx;
+}
+
+.group-store-sheet-loading {
+  padding: 48rpx 28rpx 56rpx;
+  font-size: 28rpx;
+  color: #187e6e;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.group-store-sheet-scroll {
+  max-height: 42vh;
+  padding: 0 20rpx 8rpx;
+  box-sizing: border-box;
+}
+
+.group-store-sheet-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 22rpx;
+  margin-bottom: 12rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 1rpx solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2rpx 12rpx rgba(24, 126, 110, 0.04);
+}
+
+.group-store-sheet-row-hover {
+  background: rgba(24, 126, 110, 0.06);
+}
+
+.group-store-sheet-row.is-current {
+  border-color: rgba(24, 126, 110, 0.45);
+  background: linear-gradient(180deg, rgba(24, 126, 110, 0.1) 0%, rgba(24, 126, 110, 0.04) 100%);
+  box-shadow: 0 4rpx 16rpx rgba(24, 126, 110, 0.12);
+}
+
+.group-store-sheet-name {
+  flex: 1;
+  font-size: 30rpx;
+  color: #2a2a2a;
+  line-height: 1.4;
+  padding-right: 16rpx;
+}
+
+.group-store-sheet-row.is-current .group-store-sheet-name {
+  color: #145a50;
+  font-weight: 500;
+}
+
+.group-store-sheet-check {
+  font-size: 22rpx;
+  color: #ffffff;
+  background: #187e6e;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.group-store-sheet-footer {
+  padding: 12rpx 28rpx 20rpx;
+  border-top: 1rpx solid rgba(24, 126, 110, 0.1);
+  background: #fafcfb;
+}
+
+.group-store-sheet-close {
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #187e6e;
+  padding: 22rpx 24rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid rgba(24, 126, 110, 0.35);
+  background: #ffffff;
+}
+
+.group-store-sheet-close-hover {
+  background: rgba(24, 126, 110, 0.08);
+}

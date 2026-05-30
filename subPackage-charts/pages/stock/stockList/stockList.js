@@ -6,7 +6,7 @@ var globalData = getApp().globalData;
 Page({
   data: {
     nowTime: "",
-    searchDepId: -1,
+    searchSubDepIds: -1,
     currentOpen: false,
     expandedRows: {},
     currentExpandedItem: null
@@ -19,6 +19,13 @@ Page({
     var disInfo = wx.getStorageSync('disInfo');
     if (disInfo) {
       that.setData({ disInfo: disInfo });
+    }
+    var value = wx.getStorageSync('mendianInfo');
+    if(value){
+      this.setData({
+        mendianInfo: value,
+        depFatherId: value.gbDepartmentId,
+      })
     }
 
     that.setData({
@@ -48,7 +55,8 @@ Page({
     var that = this;
     var data = {
       disId: that.data.disId,
-      searchDepId: that.data.searchDepId,
+      depFatherId: that.data.depFatherId,
+      searchSubDepIds: that.data.searchSubDepIds,
       greatId: that.data.greatId,
       whichDay: that.data.whichDay,
       type: that.data.type

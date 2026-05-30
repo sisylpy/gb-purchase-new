@@ -27,6 +27,20 @@
       </view>
     </view>
 
+    <picker
+      wx:if="{{subDepPickerRange.length > 1}}"
+      mode="selector"
+      range="{{subDepPickerRange}}"
+      range-key="gbDepartmentName"
+      value="{{activeSubDepIndex}}"
+      bindchange="onSubDepChange"
+    >
+      <view class="flex-row p-20">
+        <image src="/images/search-3.png" class="icon mr-20 cog-search-top-ico"></image>
+        <text class="small">{{activeSubDepName ? activeSubDepName : '子部门'}}</text>
+      </view>
+    </picker>
+
     <view class="flex-row p-20" bindtap="onToggleSearchBar">
       <image src="/images/search-3.png" class="icon mr-20 cog-search-top-ico {{goodsNameSearch ? 'cog-search-top-ico--on' : ''}}"></image>
     </view>

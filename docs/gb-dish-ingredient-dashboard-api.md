@@ -186,7 +186,7 @@ curl -s -X POST 'http://<host>/gbDishCostAnalysis/dishIngredientDashboard' \
 |------|------|
 | `POST /gbDishCostAnalysis/ingredientAnalysis` | 全量按菜列表；本接口为**单菜**聚合看板，配料行底层同源 |
 | `POST /gbDishCostAnalysis/report` | `scopeOutboundSubtotals` 结构复用 |
-| `POST /gbdepfood/depGetAllFood` | 列表中带 `ingredientAnalysisRows` 时仍为嵌入列表；**独立页推荐直接调本接口** |
+| `POST /gbdepfood/depGeFoodBusiness` | 列表中带 `ingredientAnalysisRows` 时仍为嵌入列表；**独立页推荐直接调本接口** |
 
 ---
 

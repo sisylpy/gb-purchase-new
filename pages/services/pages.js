@@ -10,7 +10,7 @@ var requestUtil = require('../../lib/request');
  * @param {string} code - wx.login 拿到的 code
  */
 var gbLoginIndex = function (code) {
-  return requestUtil.get('gbdistributeruser/gbLoginIndex/' + code);
+  return requestUtil.get('gbdepartmentuser/gbLoginIndex/' + code);
 };
 
 /**

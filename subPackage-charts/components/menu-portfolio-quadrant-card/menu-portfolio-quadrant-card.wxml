@@ -1,0 +1,79 @@
+<!-- 菜品分类分布 - 经营看板卡片 -->
+<view class="mpq-card" wx:if="{{visible}}">
+
+  <!-- ========== 标题区 ========== -->
+  <view class="mpq-header">
+    <text class="mpq-title">{{title}}</text>
+    <text class="mpq-subtitle">{{subtitle}}</text>
+  </view>
+
+  <!-- ========== 图表 + 图例 ========== -->
+  <view class="mpq-top-section">
+    <view class="mpq-chart-wrap">
+      <ec-canvas id="mpq-donut" canvas-id="mpq-donut-canvas" ec="{{ ec }}"></ec-canvas>
+    </view>
+    <view class="mpq-legend-list">
+      <view class="mpq-legend-item" wx:for="{{categories}}" wx:key="categoryCode" wx:for-item="cat">
+        <view class="mpq-legend-icon-wrap">
+          <view class="mpq-legend-icon" style="background:{{_colorMap[cat.categoryCode]}}">
+            <text class="mpq-legend-icon-text">{{cat.categoryName[0]}}</text>
+          </view>
+        </view>
+        <view class="mpq-legend-body">
+          <view class="mpq-legend-title-row">
+            <text class="mpq-legend-name">{{cat.categoryName}}</text>
+            <text class="mpq-legend-count">{{cat.count}}道 ({{cat.ratio}}%)</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 经营结论 ========== -->
+  <view class="mpq-insight" wx:if="{{insightText}}">
+    <text class="mpq-insight-text">{{insightText}}</text>
+  </view>
+
+  <!-- ========== 分类纵向列表 ========== -->
+  <view class="mpq-cat-list">
+    <view class="mpq-cat-section" wx:for="{{categories}}" wx:key="categoryCode" wx:for-item="cat">
+      <!-- 分类标题行（可点击展开） -->
+      <view class="mpq-cat-header" data-code="{{cat.categoryCode}}" catchtap="onCategoryToggle">
+        <view class="mpq-cat-color-bar" style="background:{{_colorMap[cat.categoryCode]}}"></view>
+        <view class="mpq-cat-header-body">
+          <view class="mpq-cat-title-row">
+            <text class="mpq-cat-name">{{cat.categoryName}}</text>
+            <text class="mpq-cat-count">{{cat.count}}道菜</text>
+          </view>
+          <text class="mpq-cat-desc" wx:if="{{cat.recommendedAction}}">{{cat.recommendedAction}}</text>
+        </view>
+        <text class="mpq-cat-arrow">{{expandedCategory === cat.categoryCode ? '▴' : '▸'}}</text>
+      </view>
+
+      <!-- 展开详情 -->
+      <view class="mpq-cat-detail" wx:if="{{expandedCategory === cat.categoryCode}}">
+        <view class="mpq-dish-table" wx:if="{{cat.dishes && cat.dishes.length}}">
+          <view class="mpq-dish-row mpq-dish-header">
+            <text class="mpq-dish-col mpq-dish-col-name">菜品名称</text>
+            <text class="mpq-dish-col mpq-dish-col-num">销量</text>
+            <text class="mpq-dish-col mpq-dish-col-num">毛利率</text>
+          </view>
+          <view class="mpq-dish-row" wx:for="{{cat.dishes}}" wx:key="dishName" wx:for-item="dish">
+            <text class="mpq-dish-col mpq-dish-col-name">{{dish.dishName || '—'}}</text>
+            <text class="mpq-dish-col mpq-dish-col-num">{{dish.salesCount || dish.soldPortionsTotal || '—'}}</text>
+            <text class="mpq-dish-col mpq-dish-col-num">{{dish.blendedGrossMarginRateOnListPrice || '—'}}%</text>
+          </view>
+        </view>
+        <view class="mpq-cat-empty" wx:if="{{!cat.dishes || !cat.dishes.length}}">
+          <text>暂无菜品明细</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 底部提示 ========== -->
+  <view class="mpq-footer">
+    <text class="mpq-footer-text">* 本轮菜单内相对分层，非绝对行业标准</text>
+  </view>
+
+</view>

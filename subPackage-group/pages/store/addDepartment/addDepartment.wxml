@@ -1,0 +1,94 @@
+
+<view class=' flex flex-column' >
+	
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="管理" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+ <view class="flex-column bg-white">
+	<view class=' p-30 '>
+		<view class="text-secondary" style="font-size: 38rpx; font-weight: 500;margin-bottom: 10rpx;">店铺名称:</view>
+		<view class=" flex-column">
+			<input class="numInput"
+				style="width:{{windowWidth/2}}rpx; font-size: 40rpx;  height: 80rpx; line-height: 80rpx;padding-left: 10rpx; margin-bottom:10rpx;"
+				bindblur="getRestrauntName" value="{{resName}}"></input>
+		</view>
+	</view>
+
+  <!-- <view class="p-30">
+		<text class="text-secondary" style="font-size: 34rpx; font-weight: 500;">门店商品:</text>
+	</view>
+	<view class="flex-row">
+		<radio-group class="pr-10 pl-10 font-md" bindchange="radioChangeCankao">
+			<label class="radio ">
+				<view class="flex-row p-20">
+					<radio value="0" checked="true" />
+					<text class='wxNumber'>不参考现有门店</text>
+				</view>
+			</label>
+
+			<label class="radio">
+				<view class="flex-row p-20">
+					<radio value="1" />
+					<text class='wxNumber'>参考现有门店</text>
+				</view>
+			</label>
+		</radio-group>
+	</view> -->
+ 
+
+	<!-- <view class='type' wx:if="{{cankaoDep == 1}}">
+
+		<view class="selcet_content font-lg p-20">
+			<text style="margin-right:10rpx; margin-top:20rpx;">与</text>
+			<view class="flex-row" style="margin-right:20rpx;" catchtap="showDepNumbersPart">
+				<view class="flex-column">
+					<input class="numInput"
+						style="width:{{windowWidth/3}}rpx; font-size: 40rpx;  height: 90rpx; line-height: 90rpx; padding-left: 20rpx; "
+						disabled="true" value="{{cankaoDep.gbDepartmentName}}"></input>
+					<view class="result {{showNumber ? 'is-active' : ''}}" style="width: {{windowWidth/3 + 20}}rpx;">
+        
+						<view style="width:{{windowWidth/3}}rpx; " class="flex-column result-row" wx:for="{{mendianArr}}" wx:for-item="item"
+							wx:for-index="index" catchtap="selDepartment" data-index="{{index}}" hover-class="hover" wx:key="index">
+							{{item.gbDepartmentName}}
+						</view>
+					</view>
+				</view>
+				<view class="nabla trigle">
+				</view>
+			</view>
+		</view>
+	</view> -->
+
+	<view class='depments p-20' >
+    <view class="flex-row p-20" >
+        <text class="form-label">部门数量:</text>
+        <input class="" style="width: 300rpx; border-bottom: 1px solid gray;" type="number" value="{{selNumber}}" placeholder="请输入数量" bindinput="handleDepartmentNumber" />
+      </view>
+
+      <!-- 部门名称列表 wx:if="{{selNumber > 0}}" -->
+      <view class="department-list">
+        <view wx:for="{{gbDepartmentEntities}}" wx:for-item="item" wx:for-index="index" wx:key="index" class="flex-row p-20">
+          <text class="form-label">部门{{index + 1}}:</text>
+          <input class="form-input" placeholder="请输入部门名称" value="{{item.gbDepartmentName}}" bindinput="getDepartmentName" data-index="{{index}}" />
+        </view>
+      </view>
+		<!-- <view class="dep_content {{deps.length > 0 ? 'is-active' : ''}} flex-column">
+			<input wx:for="{{depNumbers}}" wx:for-index="inputIndex" wx:key="index" class="numInput"
+				style="width:{{windowWidth/2}}rpx; font-size: 40rpx;  height: 80rpx; line-height: 80rpx;padding-left: 10rpx; margin-bottom:10rpx;"
+				bindinput="getDepartmentName" data-index="{{inputIndex}}" value="{{deps.gbDepartmentName}}"
+				adjust-position="true" confirm-type='{{inputIndex == depNumbers -1 ? "done" : "next"}}' hold-keyboard="true"
+				bindconfirm='clickConfirm' focus='{{focusIndex == inputIndex ? "true" : ""}}'></input>
+		</view> -->
+	</view>
+</view>
+
+
+	<!-- <view class='bg-warning  p-20 center-content' catchtap='{{resName.length > 0 ? "saveDepartment" : ""}}'>保存</view> -->
+
+  <view class="popup-footer ">
+      <button class="save-btn {{addFinished  ? 'bg-success' : 'bg-light'}}" style="width: {{windowWidth - 80}}rpx;" catchtap='{{addFinished ? "saveDepartment" : ""}}'>保存</button>
+
+    
+    </view>
+	
+</view>

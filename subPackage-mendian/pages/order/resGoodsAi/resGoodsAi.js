@@ -102,7 +102,7 @@ Page({
     // 从搜索页 / AI 添加商品等返回后，与其它订单页一致：根据标记全量刷新部门商品（再合并 newOrderInfo）
     var needImmediateRefresh = wx.getStorageSync('needRefreshOrderData');
     if (needImmediateRefresh) {
-      wx.removeStorageSync('needRefreshOrderData');
+      // wx.removeStorageSync('needRefreshOrderData');
       var that = this;
       if (this.data.depInfo && this.data.depInfo.gbDepartmentId) {
         this.setData({ currentPage: 1 }, function () {
@@ -1338,6 +1338,7 @@ Page({
       gbDoDisGoodsId: gbDisGoodsId, //
       gbDoDepartmentId: this.data.depId,
       gbDoDistributerId: this.data.disId,
+      gbDoToDepartmentId: this.data.depInfo.gbDepartmentFatherId,
       gbDoDepartmentFatherId: this.data.depInfo.gbDepartmentFatherId,
       gbDoQuantity: e.detail.applyNumber,
       gbDoStandard: e.detail.applyStandardName,
@@ -1551,6 +1552,7 @@ Page({
 
     };
     console.log(dg);
+    console.log("todepidd", dg.gbDoToDepartmentId);
     load.showLoading("保存订单");
     orderApi.createDepartmentOrderForJj(dg).then(res => {
       load.hideLoading();

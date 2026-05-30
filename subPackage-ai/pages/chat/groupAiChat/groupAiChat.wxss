@@ -1,0 +1,760 @@
+/* ============================================================
+   AI 对话页 — Gemini 浅色风格（算账版）
+   字体栈贴近 Google Sans / 系统无衬线
+   ============================================================ */
+
+.gem-page {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 顶栏 ---------- */
+.gem-nav {
+  flex-shrink: 0;
+  background: #ffffff;
+  z-index: 50;
+}
+
+.gem-nav-inner {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.gem-nav-side {
+  width: 48px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gem-nav-left {
+  justify-content: flex-start;
+  padding-left: 4px;
+}
+
+.gem-nav-right {
+  justify-content: flex-end;
+  padding-right: 4px;
+}
+
+.gem-icon-menu {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding-left: 8px;
+  gap: 5px;
+}
+
+.gem-menu-line {
+  width: 18px;
+  height: 2px;
+  background: #3c4043;
+  border-radius: 1px;
+}
+
+.gem-nav-brand {
+  font-size: 20px;
+  font-weight: 500;
+  color: #1f1f1f;
+  letter-spacing: -0.02em;
+}
+
+.gem-avatar-ring {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1a73e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.12);
+}
+
+.gem-avatar-char {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1;
+}
+
+/* ---------- 主滚动 ---------- */
+.gem-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.gem-loading {
+  display: flex;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.gem-loading-text {
+  font-size: 30rpx;
+  color: #5f6368;
+  font-weight: 400;
+}
+
+/* ---------- 首页（空会话） ---------- */
+.gem-home {
+  padding: 24rpx 40rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.gem-greet {
+  font-size: 42rpx;
+  font-weight: 500;
+  color: #1f1f1f;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.gem-greet-sub {
+  margin-top: 8rpx;
+  font-size: 42rpx;
+  font-weight: 500;
+  color: #1f1f1f;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  margin-bottom: 20rpx;
+}
+
+.gem-subtitle {
+  font-size: 30rpx;
+  font-weight: 400;
+  color: #5f6368;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  margin-bottom: 32rpx;
+}
+
+.gem-pill-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20rpx;
+}
+
+.gem-topic-block {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.gem-pill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 9999rpx;
+  padding: 26rpx 28rpx 26rpx 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(60, 64, 67, 0.08), 0 1rpx 2rpx rgba(60, 64, 67, 0.06);
+  box-sizing: border-box;
+}
+
+.gem-pill-open {
+  border-radius: 28rpx 28rpx 0 0;
+  box-shadow: 0 2rpx 8rpx rgba(60, 64, 67, 0.06);
+}
+
+.gem-pill-hover {
+  background: #f8f9fa;
+}
+
+.gem-pill-chevron {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: #80868b;
+  margin-left: 12rpx;
+  line-height: 1;
+}
+
+.gem-pill-emoji {
+  font-size: 38rpx;
+  line-height: 1;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.gem-pill-title {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #1f1f1f;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+/* 主题下的具体问题列表 */
+.gem-sublist {
+  margin-top: -4rpx;
+}
+
+.gem-sublist-inner {
+  background: #ffffff;
+  border-radius: 0 0 28rpx 28rpx;
+  padding: 8rpx 0 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(60, 64, 67, 0.08);
+  box-sizing: border-box;
+}
+
+.gem-sublist-empty {
+  background: #ffffff;
+  border-radius: 0 0 28rpx 28rpx;
+  padding: 28rpx 32rpx;
+  font-size: 30rpx;
+  color: #80868b;
+  box-shadow: 0 4rpx 12rpx rgba(60, 64, 67, 0.08);
+}
+
+.gem-q-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 24rpx 32rpx 24rpx 36rpx;
+  border-top: 1rpx solid #f1f3f4;
+  box-sizing: border-box;
+}
+
+.gem-q-row-hover {
+  background: #f8f9fa;
+}
+
+.gem-q-row:first-child {
+  border-top: none;
+}
+
+.gem-q-label {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #1f1f1f;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.gem-q-arrow {
+  flex-shrink: 0;
+  font-size: 38rpx;
+  color: #dadce0;
+  font-weight: 300;
+  margin-left: 16rpx;
+  line-height: 1;
+}
+
+/* ---------- 对话消息 ---------- */
+.gem-chat-inner {
+  padding: 24rpx 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.gem-msg-row {
+  display: flex;
+  margin-bottom: 28rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gem-msg-user {
+  justify-content: flex-end;
+  padding-left: 72rpx;
+  padding-right: 24rpx;
+}
+
+.gem-msg-ai {
+  justify-content: flex-start;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.gem-bubble {
+  max-width: 85%;
+  padding: 22rpx 28rpx;
+  border-radius: 22rpx;
+  font-size: 32rpx;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+.gem-bubble-user {
+  background: #f0f4f9;
+  color: #1f1f1f;
+  border-bottom-right-radius: 6rpx;
+  border: 1rpx solid #e3eaf3;
+}
+
+/* AI：无背景，横向占满；正文留白由 padding 控制 */
+.gem-bubble-ai {
+  max-width: 100%;
+  width: 100%;
+  background: transparent;
+  color: #1f1f1f;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  padding: 20rpx 32rpx 28rpx;
+}
+
+.gem-bubble-text {
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #1f1f1f;
+  white-space: pre-wrap;
+}
+
+/* rich-text 内联样式为主；外层控制宽度与对齐 */
+.gem-rich-md {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* 流式输出：与尾部光标同一行（光标贴在段落右下角） */
+.gem-ai-stream-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 100%;
+}
+
+.gem-rich-md--flex {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.gem-ai-stream-row .gem-bubble-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.gem-stream-cursor {
+  flex-shrink: 0;
+  width: 4rpx;
+  height: 34rpx;
+  margin-left: 4rpx;
+  margin-bottom: 6rpx;
+  background: #5f6368;
+  border-radius: 2rpx;
+  animation: gemStreamCursor 1s ease-in-out infinite;
+}
+
+@keyframes gemStreamCursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.12;
+  }
+}
+
+.gem-typing {
+  display: flex;
+  gap: 8rpx;
+  padding: 6rpx 0;
+}
+
+.gem-dot {
+  width: 10rpx;
+  height: 10rpx;
+  background: #9aa0a6;
+  border-radius: 50%;
+  animation: gemDot 1.4s infinite ease-in-out;
+}
+
+.gem-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.gem-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes gemDot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.92);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.gem-scroll-spacer {
+  height: 24rpx;
+}
+
+/* ---------- 底部输入面板 ---------- */
+.gem-composer-wrap {
+  flex-shrink: 0;
+  background: #ffffff;
+  padding-top: 8rpx;
+}
+
+.gem-composer-card {
+  background: #ffffff;
+  border-radius: 28rpx 28rpx 0 0;
+  padding: 16rpx 20rpx 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+  box-shadow: none;
+  box-sizing: border-box;
+}
+
+.gem-composer-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.gem-side-btn {
+  width: 72rpx;
+  height: 72rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  background: #f0f4f9;
+  border: 1rpx solid #e3eaf3;
+  box-sizing: border-box;
+}
+
+.gem-side-btn-hover {
+  background: #e8eef5;
+}
+
+.gem-side-btn-icon {
+  font-size: 34rpx;
+  color: #3c4043;
+  line-height: 1;
+}
+
+.gem-input {
+  width: 100%;
+  min-height: 44px;
+  font-size: 36rpx;
+  font-weight: 400;
+  color: #1f1f1f;
+  line-height: 44px;
+  letter-spacing: -0.01em;
+  padding: 4rpx 8rpx;
+  box-sizing: border-box;
+}
+
+.gem-input--row {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+}
+
+.gem-input-ph {
+  color: #80868b;
+  font-weight: 400;
+}
+
+.gem-send-pill {
+  flex-shrink: 0;
+  padding: 0 28rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #fff;
+  background: #1a73e8;
+  border-radius: 999rpx;
+  box-sizing: border-box;
+}
+
+.gem-send-pill-off {
+  background: #dadce0;
+  color: #fff;
+  pointer-events: none;
+}
+
+/* ---------- 左侧抽屉 ---------- */
+.gem-drawer-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 800;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.gem-drawer-mask--show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gem-drawer-sheet {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 72%;
+  max-width: 600rpx;
+  background: #ffffff;
+  z-index: 801;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transform: translateX(-100%);
+  transition: transform 0.28s ease;
+  pointer-events: none;
+}
+
+.gem-drawer-sheet--open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.gem-drawer-topbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12rpx 20rpx 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  gap: 16rpx;
+  box-sizing: border-box;
+}
+
+.gem-drawer-avatar-btn {
+  flex-shrink: 0;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gem-drawer-avatar-img {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 50%;
+}
+
+.gem-drawer-avatar-fallback {
+  width: 68rpx;
+  height: 68rpx;
+  box-sizing: border-box;
+}
+
+.gem-drawer-avatar-fallback .gem-avatar-char {
+  font-size: 28rpx;
+}
+
+.gem-drawer-tool-btn {
+  flex-shrink: 0;
+  padding: 0 24rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1f1f1f;
+  background: #f0f4f9;
+  border-radius: 999rpx;
+  border: 1rpx solid #e3eaf3;
+  box-sizing: border-box;
+}
+
+.gem-drawer-tool-btn--active {
+  background: #e8f0fe;
+  border-color: #1a73e8;
+  color: #174ea6;
+}
+
+.gem-drawer-tool-btn--muted {
+  opacity: 0.45;
+  background: #f5f5f5;
+  border-color: #e8e8e8;
+}
+
+.gem-drawer-topbar-fill {
+  flex: 1;
+  min-width: 0;
+}
+
+.gem-drawer-store-panel {
+  flex-shrink: 0;
+  padding: 12rpx 20rpx 16rpx;
+  background: #f8f9fa;
+  border-bottom: 1rpx solid #e8eaed;
+  max-height: 40vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.gem-drawer-store-panel-title {
+  margin-bottom: 10rpx;
+}
+
+.gem-drawer-head {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 28rpx 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.gem-drawer-head-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.gem-drawer-close {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #5f6368;
+}
+
+.gem-drawer-scroll {
+  width: 100%;
+  padding: 0 24rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.gem-drawer-section-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #5f6368;
+  padding: 24rpx 4rpx 12rpx;
+}
+
+.gem-drawer-section-title--history {
+  margin-top: 8rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 28rpx;
+}
+
+.gem-drawer-pills {
+  padding-bottom: 8rpx;
+}
+
+.gem-pill--drawer {
+  box-shadow: 0 1rpx 6rpx rgba(60, 64, 67, 0.06);
+}
+
+.gem-drawer-loading,
+.gem-drawer-empty {
+  font-size: 28rpx;
+  color: #80868b;
+  padding: 24rpx 8rpx;
+}
+
+.gem-drawer-history-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 22rpx 20rpx;
+  margin-bottom: 12rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  border: 1rpx solid #f0f0f0;
+  box-sizing: border-box;
+}
+
+.gem-drawer-history-row--active {
+  border-color: #1a73e8;
+  background: #e8f0fe;
+}
+
+.gem-drawer-history-title {
+  font-size: 30rpx;
+  color: #1f1f1f;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.gem-drawer-history-time {
+  font-size: 24rpx;
+  color: #80868b;
+  margin-top: 8rpx;
+}
+
+.gem-drawer-scroll-bottom {
+  height: env(safe-area-inset-bottom);
+  min-height: 16rpx;
+}
+
+/* ---------- 集团：进入门店采购 ---------- */
+.gem-store-board {
+  padding: 16rpx 24rpx 8rpx;
+  background: #f8f9fa;
+  border-bottom: 1rpx solid #e8eaed;
+}
+
+.gem-store-board-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #5f6368;
+  margin-bottom: 12rpx;
+}
+
+.gem-store-board-empty {
+  font-size: 28rpx;
+  color: #80868b;
+  padding: 12rpx 0 20rpx;
+}
+
+.gem-store-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 20rpx;
+  margin-bottom: 12rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8eaed;
+  box-sizing: border-box;
+}
+
+.gem-store-name {
+  font-size: 32rpx;
+  color: #1f1f1f;
+}
+
+.gem-store-arrow {
+  font-size: 36rpx;
+  color: #5f6368;
+}

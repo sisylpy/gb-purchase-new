@@ -1,46 +1,117 @@
-.custom-navbar {
+/* 固定顶栏 */
+.navbar-host {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  box-sizing: border-box;
   background-color: #ffffff;
   border-bottom: 1rpx solid #e0e0e0;
   z-index: 999;
 }
 
-.nav-container {
+.navbar-inner {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.navbar-zone--left {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
   display: flex;
   align-items: center;
+  padding-left: 16rpx;
+  max-width: 42%;
+  box-sizing: border-box;
 }
 
 .user-avatar {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  margin-left: 20rpx;
+  margin-left: 8rpx;
   border: 1px solid rgb(233, 233, 233);
 }
 
 .back-icon {
   width: 48rpx;
   height: 48rpx;
-  margin-left: 20rpx;
+  margin-left: 12rpx;
 }
 
-.nav-left, .nav-right {
+.navbar-menu-leading {
+  margin-left: 8rpx;
+  width: 72rpx;
+  height: 72rpx;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  background: #f0f4f9;
+  border: 1rpx solid #e3eaf3;
+  box-sizing: border-box;
 }
 
-.nav-title {
-  flex: 1;
+.navbar-menu-leading-hover {
+  background: #e8eef5;
+}
+
+.navbar-menu-leading-icon {
+  font-size: 34rpx;
+  color: #3c4043;
+  line-height: 1;
+}
+
+.navbar-zone--title {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.navbar-title-wrap {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 0;
+}
+
+.navbar-title-text {
+  width: 100%;
   text-align: center;
   font-size: 36rpx;
   font-weight: bold;
+  color: #333333;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.35;
 }
 
-.nav-button-text {
+.navbar-zone--actions {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.nav-txt {
   font-size: 28rpx;
   color: #187e6e;
-  padding: 0 20rpx;
+  padding: 0 12rpx;
+  line-height: 1.2;
+  flex-shrink: 0;
 }

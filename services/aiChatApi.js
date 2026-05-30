@@ -931,6 +931,28 @@ var getDisDepartmentGbMendianJing = function (disId) {
 };
 
 // ============================================================
+// 门店库存按时间段分类统计
+// ============================================================
+
+/**
+ * 门店库存按时间段分类统计
+ * POST /gbdepartmentgoodsstock/getMendianStockTypePeriod
+ * @param {{ disId: number, whichDay: number, depFatherId: number, searchSubDepIds?: string }} payload
+ */
+var getMendianStockTypePeriod = function (payload) {
+  return request.post('gbdepartmentgoodsstock/getMendianStockTypePeriod', payload, { useUrlParams: true });
+};
+
+/**
+ * 根据大类ID查询商品库存按时间段分类统计
+ * POST /gbdepartmentgoodsstock/disGetDayStockByGreatId
+ * @param {{ disId?: number, depFatherId: number, searchSubDepIds?: string, greatId: string, whichDay: number, type?: number }} payload
+ */
+var disGetDayStockByGreatId = function (payload) {
+  return request.post('gbdepartmentgoodsstock/disGetDayStockByGreatId', payload, { useUrlParams: true });
+};
+
+// ============================================================
 // 导出
 // ============================================================
 
@@ -965,4 +987,7 @@ module.exports = {
   disGetPurchaseCata: disGetPurchaseCata,
   getGbPurGoodsStatisticsSeachDate: getGbPurGoodsStatisticsSeachDate,
   getGbPurGoodsListSearchDate: getGbPurGoodsListSearchDate,
+  // 门店库存按时间段分类统计
+  getMendianStockTypePeriod: getMendianStockTypePeriod,
+  disGetDayStockByGreatId: disGetDayStockByGreatId,
 };

@@ -65,18 +65,19 @@ Page({
       url: config.server,
       nowTime: dateUtils.getNowTime(),
     })
-    var value = wx.getStorageSync('disInfo');
-    if (value) {
-      this.setData({
-        disInfo: value,
-        disId: value.gbDistributerId,
+    // var value = wx.getStorageSync('disInfo');
+    // if (value) {
+    //   this.setData({
+    //     disInfo: value,
+    //     disId: value.gbDistributerId,
         
-      })
-    }
-    var userValue = wx.getStorageSync('userInfo');
-    if (userValue) {
+    //   })
+    // }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
       this.setData({
-        userInfo: userValue
+        mendianInfo: mendianInfo,
+        depFatherId: mendianInfo.gbDepartmentId
       })
     }
 
@@ -90,10 +91,10 @@ Page({
   _getInitDataDep() {
     load.showLoading("获取分类");
     var data = {
-      disId: this.data.disId,
+      depFatherId: this.data.depFatherId,
       goodsType: this.data.goodsType
     }
-    goodsApi.disGetDepGoodsCataGb(data).then(function(res) {
+    goodsApi.storeGetDepGoodsCataGb(data).then(function(res) {
       load.hideLoading();
       if (res.result.code === 0 && res.result.data.cataArr.length > 0) {
         var firstSubCat = res.result.data.cataArr[0].fatherGoodsEntities[0];
@@ -128,10 +129,10 @@ _getInitDataPageDep(isRefresh, callback) {
   });
   load.showLoading("加载商品…");
 
-  goodsApi.disGetDepGoodsGbPage({
+  goodsApi.storeGetDepGoodsGbPage({
     limit: this.data.limit,
     page: this.data.currentPage,
-    disId: this.data.disId,
+    depFatherId: this.data.depFatherId,
     goodsType: this.data.goodsType
   }).then(function(res) {
     load.hideLoading();
@@ -296,8 +297,8 @@ _getInitDataPageDep(isRefresh, callback) {
       isLoading: true
     });
     load.showLoading("加载商品");
-    goodsApi.disGetDepGoodsGbPage({
-      disId: this.data.disId,
+    goodsApi.storeGetDepGoodsGbPage({
+      depFatherId: this.data.depFatherId,
       limit: this.data.limit,
       page: page,
       goodsType: this.data.goodsType

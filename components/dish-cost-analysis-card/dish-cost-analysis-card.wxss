@@ -1,0 +1,232 @@
+/* dish-cost-analysis-card — AI 对话卡片 */
+
+.dcac-card {
+  background: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8eaed;
+  padding: 24rpx 20rpx;
+  margin-top: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 菜品名称 */
+.dcac-dish-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+  margin-bottom: 16rpx;
+}
+
+/* 关键指标行：销量 / 销售额 / 单价 */
+.dcac-stats {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: #f9fafb;
+  border-radius: 12rpx;
+  border: 1rpx solid #ececec;
+  padding: 14rpx 6rpx;
+  margin-bottom: 12rpx;
+}
+
+.dcac-stat-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dcac-stat-div {
+  width: 1rpx;
+  background: #e5e7eb;
+  align-self: stretch;
+  margin: 4rpx 0;
+}
+
+.dcac-stat-label {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 6rpx;
+  font-weight: 500;
+}
+
+.dcac-stat-value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dcac-stat-unit {
+  font-size: 20rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}
+
+/* 成本指标行：理论 / 实际 / 偏差 */
+.dcac-cost-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: #f9fafb;
+  border-radius: 12rpx;
+  border: 1rpx solid #ececec;
+  padding: 14rpx 6rpx;
+  margin-bottom: 12rpx;
+}
+
+.dcac-cost-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dcac-cost-div {
+  width: 1rpx;
+  background: #e5e7eb;
+  align-self: stretch;
+  margin: 4rpx 0;
+}
+
+.dcac-cost-cap {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 6rpx;
+  font-weight: 500;
+}
+
+.dcac-cost-val {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dcac-cost-unit {
+  font-size: 20rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}
+
+/* signedNumber.wxs 输出 */
+.cog-diff--pos {
+  color: #fa5151;
+}
+
+.cog-diff--neg {
+  color: #07c160;
+}
+
+.cog-diff--zero {
+  color: #6b7280;
+}
+
+.cog-diff--na {
+  color: #9ca3af;
+}
+
+/* 配料明细 */
+.dcac-ing-sec {
+  margin-top: 4rpx;
+}
+
+.dcac-ing-sec-cap {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 10rpx;
+}
+
+.dcac-ing-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dcac-ing-row {
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.dcac-ing-row:last-child {
+  border-bottom: none;
+}
+
+.dcac-ing-name-wrap {
+  margin-bottom: 6rpx;
+}
+
+.dcac-ing-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.dcac-ing-fields {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4rpx 20rpx;
+}
+
+.dcac-ing-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.dcac-ing-field-label {
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+.dcac-ing-field-val {
+  font-size: 24rpx;
+  color: #374151;
+  font-weight: 500;
+}
+
+.dcac-ing-tag {
+  font-size: 20rpx;
+  padding: 1rpx 8rpx;
+  border-radius: 6rpx;
+  margin-left: 4rpx;
+  background: #f9fafb;
+  border: 1rpx solid #e5e7eb;
+}
+
+/* utilizationLevel.wxs 输出 */
+.util-text--low {
+  color: #f59e0b;
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.util-text--normal {
+  color: #059669;
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+}
+
+.util-text--high {
+  color: #ea580c;
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.util-text--critical {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.util-text--unknown {
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}

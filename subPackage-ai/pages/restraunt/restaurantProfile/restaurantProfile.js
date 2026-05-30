@@ -135,7 +135,7 @@ Page({
     ai.getRevenueStats(this.data.departmentId, buildStatsQuery(this))
       .then(function (res) {
         var r = res.result || {};
-
+        console.log("rers", res.result)
         var ok = r.code == 0 && (r.stats != null || r.dashboard != null);
         if (!ok) {
           that.setData({

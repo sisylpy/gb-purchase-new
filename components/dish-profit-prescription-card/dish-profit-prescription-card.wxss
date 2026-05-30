@@ -1,0 +1,438 @@
+/* ============================================================
+   单菜利润处方卡 - 菜品价格与配方诊断卡
+   ============================================================ */
+
+/* ---------- 卡片容器 ---------- */
+.dpp-card {
+  margin: 20rpx 0;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* ---------- 标题区 ---------- */
+.dpp-header {
+  display: flex;
+  flex-direction: column;
+  padding: 32rpx 28rpx 16rpx;
+}
+
+.dpp-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: 1rpx;
+}
+
+.dpp-subtitle {
+  margin-top: 8rpx;
+  font-size: 28rpx;
+  color: #5f6368;
+  font-weight: 500;
+}
+
+/* ---------- 非 SUCCESS 状态 ---------- */
+.dpp-failed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 28rpx;
+}
+
+.dpp-failed-icon {
+  font-size: 48rpx;
+  margin-bottom: 16rpx;
+}
+
+.dpp-failed-text {
+  font-size: 28rpx;
+  color: #9aa0a6;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ---------- Section ---------- */
+.dpp-section {
+  padding: 8rpx 28rpx 20rpx;
+}
+
+.dpp-section-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16rpx;
+}
+
+/* ---------- 综合诊断 ---------- */
+.dpp-diagnosis {
+  padding: 8rpx 28rpx 16rpx;
+}
+
+.dpp-diagnosis-box {
+  padding: 20rpx 24rpx;
+  background: #FFF8EA;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #F5A623;
+}
+
+.dpp-diagnosis-text {
+  font-size: 26rpx;
+  color: #5a4a2f;
+  line-height: 1.6;
+}
+
+/* ---------- 价格建议区 ---------- */
+.dpp-price-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.dpp-price-item {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dpp-price-item:nth-child(odd) {
+  padding-right: 20rpx;
+}
+
+.dpp-price-item:nth-child(even) {
+  padding-left: 20rpx;
+}
+
+.dpp-price-suggested {
+  background: #F0F7FF;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  margin-top: 8rpx;
+  width: 100%;
+  border-bottom: none;
+}
+
+.dpp-price-label {
+  font-size: 24rpx;
+  color: #9aa0a6;
+  margin-bottom: 6rpx;
+}
+
+.dpp-price-value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.dpp-price-highlight {
+  color: #4A90D9;
+}
+
+/* ---------- 公式 ---------- */
+.dpp-formula {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 12rpx;
+  padding: 10rpx 16rpx;
+  background: #f8f9fb;
+  border-radius: 8rpx;
+}
+
+.dpp-formula-label {
+  font-size: 22rpx;
+  color: #9aa0a6;
+  margin-right: 8rpx;
+}
+
+.dpp-formula-text {
+  font-size: 22rpx;
+  color: #5f6368;
+  font-family: monospace;
+}
+
+/* ---------- 成本差异区 ---------- */
+.dpp-cost-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.dpp-cost-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 8rpx;
+  background: #fafbfc;
+  border-radius: 12rpx;
+  margin: 0 6rpx;
+}
+
+.dpp-cost-card:first-child {
+  margin-left: 0;
+}
+
+.dpp-cost-card:last-child {
+  margin-right: 0;
+}
+
+.dpp-cost-card-label {
+  font-size: 22rpx;
+  color: #9aa0a6;
+  margin-bottom: 8rpx;
+}
+
+.dpp-cost-card-value {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.dpp-cost-card-sub {
+  font-size: 22rpx;
+  color: #9aa0a6;
+  margin-top: 4rpx;
+}
+
+.dpp-cost-actual {
+  color: #D0021B;
+}
+
+.dpp-cost-warn {
+  color: #D0021B;
+}
+
+/* ---------- 配料复核区 ---------- */
+.dpp-ingredient-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 16rpx 12rpx;
+  background: #f5f6f8;
+  border-radius: 8rpx 8rpx 0 0;
+}
+
+.dpp-ingredient-th {
+  flex: 1;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #5f6368;
+  text-align: center;
+}
+
+.dpp-ingredient-th--name {
+  flex: 1.4;
+  text-align: left;
+}
+
+.dpp-ingredient-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 16rpx 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dpp-ingredient-row:last-child {
+  border-bottom: none;
+}
+
+.dpp-ingredient-td {
+  flex: 1;
+  font-size: 22rpx;
+  color: #1a1a1a;
+  text-align: center;
+  word-break: break-all;
+}
+
+.dpp-ingredient-td--name {
+  flex: 1.4;
+  text-align: left;
+  font-weight: 500;
+}
+
+.dpp-ingredient-td--source {
+  font-size: 20rpx;
+  color: #5f6368;
+}
+
+.dpp-ingredient-td--flags {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.dpp-flag {
+  display: inline-block;
+  padding: 2rpx 8rpx;
+  font-size: 18rpx;
+  color: #F5A623;
+  background: #FFF8EA;
+  border-radius: 4rpx;
+  white-space: nowrap;
+}
+
+/* ---------- 行动建议区 ---------- */
+.dpp-action-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dpp-action-card {
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  background: #fafbfc;
+  border-radius: 12rpx;
+  border: 1rpx solid #eef0f3;
+}
+
+.dpp-action-card:last-child {
+  margin-bottom: 0;
+}
+
+.dpp-action-top {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dpp-action-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.dpp-action-index {
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fff;
+  background: #4A90D9;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.dpp-action-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- 优先级 --- */
+.dpp-priority {
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+.dpp-priority-high {
+  background: #FFF0F0;
+}
+
+.dpp-priority-high .dpp-priority-text {
+  color: #D0021B;
+}
+
+.dpp-priority-medium {
+  background: #FFF8EA;
+}
+
+.dpp-priority-medium .dpp-priority-text {
+  color: #F5A623;
+}
+
+.dpp-priority-low {
+  background: #F0F7FF;
+}
+
+.dpp-priority-low .dpp-priority-text {
+  color: #4A90D9;
+}
+
+.dpp-priority-text {
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+/* --- 原因 --- */
+.dpp-action-reason {
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  background: #f8f9fb;
+  border-radius: 8rpx;
+}
+
+.dpp-action-reason-label {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #5f6368;
+}
+
+.dpp-action-reason-text {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  color: #3a4a5f;
+  line-height: 1.5;
+}
+
+/* --- 数据参考 --- */
+.dpp-action-ref {
+  margin-top: 8rpx;
+  padding: 6rpx 12rpx;
+  background: #f0f0f0;
+  border-radius: 6rpx;
+}
+
+.dpp-action-ref-text {
+  font-size: 20rpx;
+  color: #9aa0a6;
+}
+
+/* ---------- 能力边界提示 ---------- */
+.dpp-capability {
+  margin: 4rpx 28rpx 24rpx;
+  padding: 20rpx 24rpx;
+  background: #fafbfc;
+  border-radius: 12rpx;
+  border: 1rpx solid #eef0f3;
+}
+
+.dpp-capability-label {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #5f6368;
+  margin-bottom: 10rpx;
+}
+
+.dpp-capability-item {
+  margin-bottom: 6rpx;
+}
+
+.dpp-capability-item:last-child {
+  margin-bottom: 0;
+}
+
+.dpp-capability-text {
+  font-size: 24rpx;
+  color: #9aa0a6;
+  line-height: 1.5;
+}

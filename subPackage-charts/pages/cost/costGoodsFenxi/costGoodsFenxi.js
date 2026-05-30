@@ -35,15 +35,12 @@ Page({
     goodsNameSearchDraft: '',
     emptyHint: '',
     update: false,
-    searchDepId: '-1',
-    /**
-     * outboundIngredientAnalysis sortBy（与后端一致）：
-     * outbound | outboundAmount | 出库金额
-     * util | utilization | 制作率
-     * wasteloss | wasteAndLoss | 损耗
-     */
+    mendianInfo: null,
+    activeSubDepIndex: 0,
+    activeSubDepId: '',
+    activeSubDepName: '',
+    subDepPickerRange: [],
     ingredientSortBy: 'outbound',
-    /** sortOrder：asc 升序（当前默认）、desc 降序；与 sortBy 联用 */
     ingredientSortOrder: 'asc',
     expandedDisGoodsId: null,
     /** 仅用于展开/收起后恢复滚动，不用来跟手滚动同步，避免与子高度变化时被重置冲突 */
@@ -87,12 +84,64 @@ Page({
 
     var mendianInfo = wx.getStorageSync('mendianInfo');
     if (mendianInfo && mendianInfo.gbDepartmentId) {
-      this.setData({
-        depFatherId: mendianInfo.gbDepartmentId,
-      });
+      var patch = this._patchSubDepFromMendian(mendianInfo);
+      this.setData(
+        Object.assign(
+          {
+            mendianInfo: mendianInfo,
+            depFatherId: mendianInfo.gbDepartmentId,
+          },
+          patch
+        )
+      );
     }
 
     this._fetchReport();
+  },
+
+  /** 与 depFoodList / foodGoodsFenxi 同源 */
+  _patchSubDepFromMendian: function (mendianInfo) {
+    var subs = mendianInfo && mendianInfo.gbDepartmentEntityList;
+    if (!subs || subs.length < 2) {
+      return {
+        subDepPickerRange: [],
+        activeSubDepIndex: 0,
+        activeSubDepId: '',
+        activeSubDepName: '',
+      };
+    }
+    var range = [{ _all: true, gbDepartmentName: '全部（不按子部门）', gbDepartmentId: '' }].concat(subs);
+    return {
+      subDepPickerRange: range,
+      activeSubDepIndex: 0,
+      activeSubDepId: '',
+      activeSubDepName: '',
+    };
+  },
+
+  onSubDepChange: function (e) {
+    var idx = parseInt(e.detail.value, 10);
+    if (isNaN(idx) || idx < 0) {
+      return;
+    }
+    var range = this.data.subDepPickerRange;
+    if (!range || !range[idx]) {
+      return;
+    }
+    var row = range[idx];
+    var patch = { activeSubDepIndex: idx };
+    if (row._all) {
+      patch.activeSubDepId = '';
+      patch.activeSubDepName = '';
+    } else {
+      var id = row.gbDepartmentId;
+      patch.activeSubDepId = id != null && id !== '' ? id : '';
+      patch.activeSubDepName = row.gbDepartmentName != null ? String(row.gbDepartmentName) : '';
+    }
+    var that = this;
+    this.setData(patch, function () {
+      that._fetchReport();
+    });
   },
 
   _syncDatesFromMyDateStorage() {
@@ -296,20 +345,23 @@ Page({
     var lastPage = this.data.ingredientListPage || 0;
     var reqPage = isAppend ? lastPage + 1 : 1;
 
-    chartsApi
-      .outboundIngredientAnalysis({
-        startDate: this.data.startDate,
-        stopDate: this.data.stopDate,
-        endDate: this.data.stopDate,
-        disId: this.data.disId,
-        searchDepId: this.data.searchDepId,
-        depFatherId: this.data.depFatherId,
-        sortBy: this.data.ingredientSortBy || 'outbound',
-        sortOrder: this.data.ingredientSortOrder || 'asc',
-        goodsNameSearch: this.data.goodsNameSearch || '',
-        page: reqPage,
-        pageSize: pageSize,
-      })
+    var req = {
+      startDate: this.data.startDate,
+      stopDate: this.data.stopDate,
+      endDate: this.data.stopDate,
+      disId: this.data.disId,
+      depFatherId: this.data.depFatherId,
+      sortBy: this.data.ingredientSortBy || 'outbound',
+      sortOrder: this.data.ingredientSortOrder || 'asc',
+      goodsNameSearch: this.data.goodsNameSearch || '',
+      page: reqPage,
+      pageSize: pageSize,
+    };
+    var sid = this.data.activeSubDepId;
+    if (sid != null && sid !== '') {
+      req.subDepId = sid;
+    }
+    chartsApi.outboundIngredientAnalysis(req)
       .then(function (res) {
         if (!isAppend) {
           load.hideLoading();

@@ -57,6 +57,12 @@ Page({
     searchInputFocus: false,
     dishNameSearch: '',
     dishNameSearchDraft: '',
+    mendianInfo: null,
+    /** 与 depFoodList 一致：选具体子部门后请求带 subDepId；首项「全部」不带 */
+    activeSubDepIndex: 0,
+    activeSubDepId: '',
+    activeSubDepName: '',
+    subDepPickerRange: [],
   },
 
   onUnload: function () {
@@ -88,14 +94,65 @@ Page({
 
     var mendianInfo = wx.getStorageSync('mendianInfo');
     if (mendianInfo && mendianInfo.gbDepartmentId) {
-      this.setData({
-        depFatherId: mendianInfo.gbDepartmentId,
-      });
+      var patch = this._patchSubDepFromMendian(mendianInfo);
+      this.setData(
+        Object.assign(
+          {
+            mendianInfo: mendianInfo,
+            depFatherId: mendianInfo.gbDepartmentId,
+          },
+          patch
+        )
+      );
     }
     this._syncDatesFromMyDateStorage();
     this._fetchReport();
   },
 
+  /** 与 depFoodList 同源：首项不按子部门，其后为 gbDepartmentEntityList */
+  _patchSubDepFromMendian: function (mendianInfo) {
+    var subs = mendianInfo && mendianInfo.gbDepartmentEntityList;
+    if (!subs || subs.length < 2) {
+      return {
+        subDepPickerRange: [],
+        activeSubDepIndex: 0,
+        activeSubDepId: '',
+        activeSubDepName: '',
+      };
+    }
+    var range = [{ _all: true, gbDepartmentName: '全部（不按子部门）', gbDepartmentId: '' }].concat(subs);
+    return {
+      subDepPickerRange: range,
+      activeSubDepIndex: 0,
+      activeSubDepId: '',
+      activeSubDepName: '',
+    };
+  },
+
+  onSubDepChange: function (e) {
+    var idx = parseInt(e.detail.value, 10);
+    if (isNaN(idx) || idx < 0) {
+      return;
+    }
+    var range = this.data.subDepPickerRange;
+    if (!range || !range[idx]) {
+      return;
+    }
+    var row = range[idx];
+    var patch = { activeSubDepIndex: idx };
+    if (row._all) {
+      patch.activeSubDepId = '';
+      patch.activeSubDepName = '';
+    } else {
+      var id = row.gbDepartmentId;
+      patch.activeSubDepId = id != null && id !== '' ? id : '';
+      patch.activeSubDepName = row.gbDepartmentName != null ? String(row.gbDepartmentName) : '';
+    }
+    var that = this;
+    this.setData(patch, function () {
+      that._fetchReport();
+    });
+  },
 
   _syncDatesFromMyDateStorage() {
     var myDate = wx.getStorageSync('myDate');
@@ -126,17 +183,22 @@ Page({
   _fetchReport: function () {
     var that = this;
     load.showLoading('加载中');
+    var req = {
+      startDate: this.data.startDate,
+      stopDate: this.data.stopDate,
+      endDate: this.data.stopDate,
+      disId: this.data.disId,
+      searchDepId: this.data.searchDepId,
+      depFatherId: this.data.depFatherId,
+      sortBy: this.data.sortBy || 'sales',
+      sortOrder: this.data.sortOrder || 'desc',
+    };
+    var sid = this.data.activeSubDepId;
+    if (sid != null && sid !== '') {
+      req.subDepId = sid;
+    }
     chartsApi
-      .getGbIngredientAnalysis({
-        startDate: this.data.startDate,
-        stopDate: this.data.stopDate,
-        endDate: this.data.stopDate,
-        disId: this.data.disId,
-        searchDepId: this.data.searchDepId,
-        depFatherId: this.data.depFatherId,
-        sortBy: this.data.sortBy || 'sales',
-        sortOrder: this.data.sortOrder || 'desc',
-      })
+      .getGbIngredientAnalysis(req)
       .then(function (res) {
         load.hideLoading();
         console.log("ers", res.result.data);

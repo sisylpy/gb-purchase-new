@@ -7,8 +7,11 @@
 
   <!-- 顶部标签栏 -->
   <view class=" flex-row-between bg-white border-bottom" wx:if="{{total && total.restTotal > 0}}">
-    <view class="flex-row ">
-      <scroll-view scroll-x="true" show-scrollbar="false" enhanced="true" class="nav" scroll-with-animation="{{true}}" scroll-left="{{leftWidth}}" style="width: {{windowWidth - 40 }}rpx; padding: 0 16rpx;">
+    <block wx:if="{{}}">
+      
+    </block>
+    <view class="flex-row " >
+      <scroll-view scroll-x="true" show-scrollbar="false" enhanced="true" class="nav" scroll-with-animation="{{true}}" scroll-left="{{leftWidth}}" style="width: {{windowWidth - 140 }}rpx; padding: 0 16rpx;">
         <view class="swiper1_top_item flex-column {{itemIndex == 0 ? 'on' : ''}} " data-index='0'  bindtap="onTab1Click" style="width: {{windowWidth / 4}}rpx; min-width: 140rpx; padding: 16rpx 12rpx; margin: 0 4rpx; box-sizing: border-box;">
           <view class="flex-row">
             <view class="time-icon all-stock">总</view>
@@ -52,6 +55,11 @@
           <view class="font-md">{{exceedThree ? exceedThree.exceedThreeTotal : 0}}元</view>
         </view>
       </scroll-view>
+
+       <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view>
+
     </view>
   </view>
 

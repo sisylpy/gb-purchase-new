@@ -145,7 +145,7 @@ Page({
           if(res.result.data.arr.length > 0){
  // 延迟初始化图表，确保DOM渲染完成
 setTimeout(() => {
- this.initPurSubtotalChart();
+ this.initPurPricelChart();
 }, 100);
           }
          
@@ -178,7 +178,7 @@ setTimeout(() => {
   },
 
   // 初始化采购金额图表
-  initPurSubtotalChart() {
+  initPurPricelChart() {
     if (!this.data.itemList || this.data.itemList.length === 0) {
       return;
     }
@@ -227,11 +227,11 @@ setTimeout(() => {
     const valueList = [];
     
     itemList.forEach(item => {
-      if (item.date && item.purSubtotal !== undefined && item.purSubtotal !== null) {
+      if (item.date && item.purUnitPrice !== undefined && item.purUnitPrice !== null) {
         // 提取日期部分，如从 "2025-01-15" 提取 "15"
         const day = item.date.split('-')[2];
         dateList.push(day);
-        valueList.push(parseFloat(item.purSubtotal) || 0);
+        valueList.push(parseFloat(item.purUnitPrice) || 0);
       }
     });
 
@@ -274,21 +274,29 @@ setTimeout(() => {
         }
       },
       series: [{
-        type: 'bar',
+        type: 'line',
         name: '采购金额',
         data: valueList,
-        barMaxWidth: 40, // 设置最大宽度为40px
+        showSymbol: true,
+        symbol: 'circle',
+        symbolSize: function (value, params) {
+          const v = typeof params.data === 'number' ? params.data : parseFloat(params.data);
+          return v > 0 ? 10 : 0;
+        },
+        lineStyle: {
+          width: 2,
+          color: '#4A90E2'
+        },
         itemStyle: {
-          color: '#4A90E2',
-          shadowBlur: 0,
-          shadowColor: 'transparent'
+          color: '#4A90E2'
         },
         label: {
           show: true,
           position: 'top',
           formatter: function(params) {
-            if (params.value > 0) {
-              return '¥' + params.value.toFixed(0);
+            const v = params.value;
+            if (typeof v === 'number' && v > 0) {
+              return '¥' + v.toFixed(0);
             }
             return '';
           },

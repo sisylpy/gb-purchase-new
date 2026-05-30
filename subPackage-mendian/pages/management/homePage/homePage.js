@@ -24,32 +24,20 @@ Page({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight  * globalData.rpxR,
-      sysDeviceId: globalData.sysDeviceId,
       url: apiUrl.server,
-      disId: options.disId,
     })
 
-    var disInfo = wx.getStorageSync('disInfo');
-    if(disInfo){
+    var value = wx.getStorageSync('mendianInfo');
+    if(value){
       this.setData({
-        disInfo: disInfo,
-
+        mendianInfo: value,
+        disId: value.gbDepartmentDisId
+        
       })
     }
-    
-    
-     // 清除缓存
-     wx.removeStorageSync('selectedSupplier');
-     wx.removeStorageSync('selectedPurUser');
-     
    
   },
 
-
-
-
-  
-  
   toMendian(){
     wx.navigateTo({
       url: '/subPackage-mendian/pages/account/userEdit/userEdit',
@@ -68,6 +56,14 @@ Page({
 
   wx.navigateTo({
     url: '/subPackage-charts/pages/cost/foodGoodsFenxi/foodGoodsFenxi?disId=' + this.data.disId,
+  })
+
+},
+
+toMendainFood(){
+
+  wx.navigateTo({
+    url: '../../food/depFoodList/depFoodList?disId=' + this.data.disId,
   })
 
 },
@@ -101,47 +97,7 @@ toCostGoodsFenxi(){
   },
 
 
-  editHome(){
-    wx.navigateTo({
-      url: '../homeEdit/homeEdit',
-    })
 
-  },
-
-  toHistory(){
-    wx.navigateTo({
-      url: '/subPackage-mendian/pages/order/orderHistory/index/index?disId=' + this.data.disId,
-    })
-  },
-
-
-  toAccount(){
-    wx.navigateTo({
-      url: '../../account/payPage/payPage?type=0',
-    })
-  } , 
-
-
-toPayList(){
-  wx.navigateTo({
-    url: '../../account/payList/payList',
-  })
-},
-
-
-
-toPayPage(){
-  wx.navigateTo({
-    url: '../../account/payPage/payPage?type=0',
-  })
-},
-
-
-toStock(){
-  wx.navigateTo({
-    url: '/subPackage-mendian/pages/stock/index/index',
-  })
-},
 
 
 toPurchaseDate(){
@@ -159,17 +115,6 @@ toPurchaseGoods(){
 },
 
 
-toFood(){
-  wx.navigateTo({
-    url: '../../food/index/index?disId=' + this.data.disId,
-  })
-},
-
-toMendainFood(){
-  wx.navigateTo({
-    url: '../../food/depFoodList/depFoodList?disId=' + this.data.disId,
-  })
-},
 
   toReportStock(){
     wx.navigateTo({
@@ -183,34 +128,21 @@ toMendainFood(){
     })
 
   },
+
+
 toPriceFenxi(){
   wx.navigateTo({
     url: '/subPackage-mendian/pages/data/priceFenxi/priceFenxi',
   })
 },
 
-  toShixanBill(){
-    wx.navigateTo({
-      url: '/subPackage-mendian/pages/yishang/myNxDistributerBill/myNxDistributerBill?nxDisId=' + this.data.disInfo.nxDistributerEntity.nxDistributerId + '&gbDisId=' + this.data.disId,
-    })
-
-
-  },
-
-
-
-  toBack(){
-    wx.navigateBack({
-      delta: 1,
-    })
-  },
-
 
   /* AI对话 */
   toAiChat(){
     wx.navigateTo({
-      url: '/subPackage-ai/pages/chat/aiChat/aiChat',
+      url: '/pages/storeAiChat/storeAiChat',
     })
+   
   },
 
   /* 经营分析 - 餐厅画像 */
@@ -221,6 +153,12 @@ toPriceFenxi(){
   },
 
 
+
+  toBack(){
+    wx.navigateBack({
+      delta: 1,
+    })
+  },
 
 
 

@@ -1,0 +1,80 @@
+<wxs src="/wxs/signedNumber.wxs" module="num" />
+<wxs src="/wxs/utilizationLevel.wxs" module="utilLv" />
+
+<view class="dcac-card" wx:if="{{cardData}}">
+  <!-- 菜品名称 -->
+  <view class="dcac-dish-name">{{cardData.dishName || '菜品'}}</view>
+
+  <!-- 关键指标 -->
+  <view class="dcac-stats">
+    <view class="dcac-stat-item">
+      <text class="dcac-stat-label">销量</text>
+      <text class="dcac-stat-value">{{cardData.salesPortions || '0'}}</text>
+      <text class="dcac-stat-unit">份</text>
+    </view>
+    <view class="dcac-stat-div"></view>
+    <view class="dcac-stat-item">
+      <text class="dcac-stat-label">销售额</text>
+      <text class="dcac-stat-value">{{cardData.salesAmount || '0.00'}}</text>
+      <text class="dcac-stat-unit">元</text>
+    </view>
+    <view class="dcac-stat-div"></view>
+    <view class="dcac-stat-item">
+      <text class="dcac-stat-label">单价</text>
+      <text class="dcac-stat-value">{{cardData.salesUnitPrice || '0.00'}}</text>
+      <text class="dcac-stat-unit">元/份</text>
+    </view>
+  </view>
+
+  <!-- 成本指标 -->
+  <view class="dcac-cost-strip">
+    <view class="dcac-cost-col">
+      <text class="dcac-cost-cap">理论成本</text>
+      <text class="dcac-cost-val">{{cardData.theoryCostPerPortion || '0.00'}}</text>
+      <text class="dcac-cost-unit">元/份</text>
+    </view>
+    <view class="dcac-cost-div"></view>
+    <view class="dcac-cost-col">
+      <text class="dcac-cost-cap">实际成本</text>
+      <text class="dcac-cost-val">{{cardData.actualCostPerPortion || '0.00'}}</text>
+      <text class="dcac-cost-unit">元/份</text>
+    </view>
+    <view class="dcac-cost-div"></view>
+    <view class="dcac-cost-col">
+      <text class="dcac-cost-cap">成本偏差</text>
+      <text class="dcac-cost-val {{num.diffClass(cardData.diffCostPerPortion || '0')}}">{{num.formatSigned(cardData.diffCostPerPortion || '0')}}</text>
+      <text class="dcac-cost-unit">元/份</text>
+    </view>
+  </view>
+
+  <!-- 配料明细 -->
+  <view class="dcac-ing-sec" wx:if="{{cardData.ingredientRows && cardData.ingredientRows.length}}">
+    <view class="dcac-ing-sec-cap">配料明细</view>
+    <view class="dcac-ing-list">
+      <view class="dcac-ing-row" wx:for="{{cardData.ingredientRows}}" wx:key="disGoodsId" wx:for-item="ing">
+        <view class="dcac-ing-name-wrap">
+          <text class="dcac-ing-name">{{ing.gbDgGoodsName || '—'}}</text>
+        </view>
+        <view class="dcac-ing-fields">
+          <view class="dcac-ing-field">
+            <text class="dcac-ing-field-label">单价</text>
+            <text class="dcac-ing-field-val">{{ing.unitPrice || '0.00'}}</text>
+          </view>
+          <view class="dcac-ing-field">
+            <text class="dcac-ing-field-label">理论用量</text>
+            <text class="dcac-ing-field-val">{{ing.theoryUsage || '0'}}</text>
+          </view>
+          <view class="dcac-ing-field">
+            <text class="dcac-ing-field-label">实际用量</text>
+            <text class="dcac-ing-field-val">{{ing.actualUsage || '0'}}</text>
+          </view>
+          <view class="dcac-ing-field">
+            <text class="dcac-ing-field-label">制作率</text>
+            <text class="dcac-ing-field-val">{{ing.utilizationRate || '0'}}%</text>
+            <text wx:if="{{ing.utilization}}" class="dcac-ing-tag {{utilLv.textClass(ing.utilization.level)}}">{{ing.utilization.labelZh}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

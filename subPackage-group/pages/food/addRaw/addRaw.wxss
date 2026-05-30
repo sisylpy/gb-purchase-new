@@ -1,0 +1,210 @@
+@import '../food-common.wxss';
+
+/* -------------------------------------------------------------------------- */
+/* 原料列表主区域 */
+/* -------------------------------------------------------------------------- */
+
+.food-raw-section {
+  padding: 8rpx 0 16rpx;
+}
+
+.food-raw-section__head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 28rpx 12rpx;
+}
+
+.food-raw-section__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--gb-text);
+}
+
+.food-raw-section__add {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10rpx 20rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: var(--gb-primary);
+  background: var(--gb-bg-light);
+  border: 1rpx solid rgba(24, 126, 110, 0.25);
+  border-radius: 999rpx;
+}
+
+.food-raw-section__add--hover {
+  opacity: 0.88;
+}
+
+.food-raw-section__add-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+
+.food-raw-empty {
+  padding: 48rpx 36rpx 56rpx;
+  margin: 0 28rpx 20rpx;
+  text-align: center;
+  background: var(--gb-bg-page);
+  border-radius: 16rpx;
+  border: 1rpx dashed var(--gb-border);
+}
+
+.food-raw-empty__text {
+  font-size: 26rpx;
+  line-height: 1.55;
+  color: var(--gb-text-muted);
+}
+
+.food-raw-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 28rpx;
+  border-bottom: 1rpx solid var(--gb-border-soft);
+}
+
+.food-raw-row:last-child {
+  border-bottom: none;
+}
+
+.food-raw-row__body {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+
+.food-raw-row__no {
+  flex-shrink: 0;
+  min-width: 40rpx;
+  margin-right: 12rpx;
+  font-size: 26rpx;
+  color: var(--gb-text-muted);
+  line-height: 1.5;
+}
+
+.food-raw-row__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.food-raw-row__name {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 500;
+  color: var(--gb-text);
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.food-raw-row__meta {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  color: var(--gb-text-secondary);
+}
+
+.food-raw-row__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.food-raw-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  margin-left: 8rpx;
+  border-radius: 14rpx;
+  background: var(--gb-bg-page);
+}
+
+.food-raw-icon-btn .icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.food-raw-icon-btn--hover {
+  opacity: 0.85;
+  background: var(--gb-bg-gray);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 搜索弹窗内结果行（多行信息） */
+/* -------------------------------------------------------------------------- */
+
+.food-raw-search-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 20rpx 20rpx;
+  border-bottom: 1rpx solid var(--gb-border-soft);
+}
+
+.food-raw-search-row:last-child {
+  border-bottom: none;
+}
+
+.food-raw-search-row--hover {
+  background: var(--gb-bg-page);
+}
+
+.food-raw-search-row__idx {
+  flex-shrink: 0;
+  width: 44rpx;
+  margin-right: 12rpx;
+  font-size: 32rpx;
+  color: var(--gb-text-text);
+  line-height: 1.5;
+}
+
+.food-raw-search-row__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.food-raw-search-row__line {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 32rpx;
+  line-height: 1.5;
+  color: var(--gb-text);
+}
+
+.food-raw-search-row__line--sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--gb-text-secondary);
+}
+
+.food-raw-search-row__name {
+  word-break: break-all;
+}
+
+.food-raw-search-row__spec {
+  flex-shrink: 0;
+  margin-left: 4rpx;
+  font-size: 28rpx;
+  color: var(--gb-text-secondary);
+  font-weight: 400;
+}
+
+.food-raw-search-row__place,
+.food-raw-search-row__detail {
+  margin-right: 16rpx;
+  margin-top: 4rpx;
+  color: var(--gb-text-muted);
+}

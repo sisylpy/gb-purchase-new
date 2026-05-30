@@ -1,0 +1,704 @@
+page {
+  background: #f0f2f5;
+  height: 100%;
+}
+
+.fbd-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+}
+
+.fbd-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 0 24rpx 48rpx;
+}
+
+.fbd-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx;
+}
+
+.fbd-state--err .fbd-state__txt {
+  color: #c44f4f;
+}
+
+.fbd-state__txt {
+  font-size: 32rpx;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ===== 通用卡片 ===== */
+.fbd-card {
+  margin-top: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8eaef;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(15, 23, 42, 0.04);
+}
+
+/* ===== Section 标题栏 ===== */
+.fbd-sec__bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 24rpx 16rpx;
+}
+
+.fbd-sec__bar--collapsible {
+  cursor: pointer;
+}
+
+.fbd-sec__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.fbd-sec__period {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.fbd-sec__right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.fbd-sec__sub {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.fbd-sec__arrow {
+  font-size: 28rpx;
+  color: #94a3b8;
+  transition: transform 0.2s;
+}
+
+.fbd-sec__arrow.is-open {
+  transform: rotate(180deg);
+}
+
+/* ===== 1. 菜品信息卡 hero ===== */
+.fbd-card--hero {
+  padding: 28rpx 24rpx 0;
+}
+
+.fbd-hero__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.fbd-hero__img {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+  background: #f1f5f9;
+}
+
+.fbd-hero__left {
+  flex: 1;
+  min-width: 0;
+}
+
+.fbd-hero__summary {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.fbd-hero__name {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.3;
+  margin-bottom: 10rpx;
+}
+
+.fbd-hero__tags {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 12rpx;
+}
+
+.fbd-hero__role {
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.fbd-hero__category {
+  font-size: 24rpx;
+  font-weight: 500;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1rpx solid #e2e8f0;
+  margin-right: 10rpx;
+}
+
+.fbd-hero__meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 26rpx;
+  color: #64748b;
+}
+
+.fbd-hero__price {
+  color: #ea580c;
+  font-weight: 700;
+  font-size: 28rpx;
+}
+
+.fbd-hero__dot {
+  margin: 0 8rpx;
+  color: #cbd5e1;
+}
+
+.fbd-hero__sales {
+  font-weight: 500;
+}
+
+/* 毛利率大卡片 */
+.fbd-margin-card {
+  margin-top: 24rpx;
+  margin-left: -24rpx;
+  margin-right: -24rpx;
+  padding: 28rpx 24rpx 24rpx;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-top: 1rpx solid #dcfce7;
+}
+
+.fbd-margin-card__label {
+  display: block;
+  font-size: 26rpx;
+  color: #15803d;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.fbd-margin-card__value-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  margin-bottom: 12rpx;
+}
+
+.fbd-margin-card__num {
+  font-size: 64rpx;
+  font-weight: 900;
+  color: #15803d;
+  line-height: 1;
+  letter-spacing: -1rpx;
+}
+
+.fbd-margin-card__pct {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #15803d;
+  margin-left: 4rpx;
+}
+
+.fbd-margin-card__target {
+  margin-bottom: 10rpx;
+}
+
+.fbd-margin-card__target-line {
+  font-size: 22rpx;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.fbd-margin-card__status {
+  display: inline-flex;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.fbd-margin-card__status.is-warn {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.fbd-margin-card__status.is-good {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.fbd-margin-card__status.is-info {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* ===== 2. 经营概览 ===== */
+.fbd-card--metrics {
+  padding: 0 0 24rpx;
+}
+
+.fbd-kpi-grid {
+  display: flex;
+  flex-direction: row;
+  padding: 0 24rpx;
+}
+
+.fbd-kpi-grid--cost {
+  border-bottom: 1rpx solid #f1f5f9;
+  padding-bottom: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.fbd-kpi-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 4rpx;
+}
+
+.fbd-kpi-cell__label {
+  font-size: 24rpx;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+}
+
+.fbd-kpi-cell__value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.fbd-kpi-cell__value--muted {
+  color: #64748b;
+}
+
+.fbd-kpi-cell__value--profit {
+  color: #16a34a;
+}
+
+.fbd-kpi-cell__value.is-warn {
+  color: #dc2626;
+}
+
+.fbd-kpi-cell__value.is-good {
+  color: #16a34a;
+}
+
+/* ===== 3. 成本与毛利诊断 ===== */
+.fbd-card--diagnosis {
+  padding-bottom: 24rpx;
+}
+
+.fbd-diag-box {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin: 0 24rpx 20rpx;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+
+.fbd-diag-box.is-warn {
+  background: #fef2f2;
+  border: 1rpx solid #fecaca;
+}
+
+.fbd-diag-box.is-good {
+  background: #f0fdf4;
+  border: 1rpx solid #bbf7d0;
+}
+
+.fbd-diag-box.is-info {
+  background: #eff6ff;
+  border: 1rpx solid #bfdbfe;
+}
+
+.fbd-diag-box__icon {
+  font-size: 36rpx;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+.fbd-diag-box__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.fbd-diag-box__title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6rpx;
+}
+
+.fbd-diag-box__text {
+  display: block;
+  font-size: 26rpx;
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* 毛利率对比条 */
+.fbd-gap-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 24rpx;
+  padding: 16rpx 0;
+  border-top: 1rpx solid #f1f5f9;
+  gap: 12rpx;
+}
+
+.fbd-gap-strip__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.fbd-gap-strip__arrow {
+  font-size: 24rpx;
+  color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+.fbd-gap-strip__gap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.fbd-gap-strip__label {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-bottom: 4rpx;
+}
+
+.fbd-gap-strip__value {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.fbd-gap-strip__value--theory {
+  color: #4A90D9;
+}
+
+.fbd-gap-strip__value.is-down {
+  color: #dc2626;
+}
+
+.fbd-gap-strip__value.is-up {
+  color: #16a34a;
+}
+
+/* 单份成本差异 */
+.fbd-cost-diff {
+  margin: 0 24rpx;
+  padding: 14rpx 0 0;
+  font-size: 24rpx;
+  color: #64748b;
+  border-top: 1rpx solid #f1f5f9;
+}
+
+.fbd-cost-diff__label {
+  color: #94a3b8;
+}
+
+.fbd-cost-diff__value.is-warn {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.fbd-cost-diff__value.is-good {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* ===== 4. 按星期销售表现 ===== */
+.fbd-card--weekday {
+  padding-bottom: 24rpx;
+}
+
+/* 峰值高亮卡片 */
+.fbd-peak-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 24rpx 16rpx;
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 12rpx;
+  border: 1rpx solid #fde68a;
+}
+
+.fbd-peak-card__emoji {
+  font-size: 32rpx;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+}
+
+.fbd-peak-card__text {
+  font-size: 26rpx;
+  color: #92400e;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* 柱状图 */
+.fbd-weekday-chart {
+  padding: 0 16rpx;
+}
+
+.fbd-weekday-bars {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 230rpx;
+  padding: 0 4rpx;
+}
+
+.fbd-weekday-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fbd-weekday-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.fbd-weekday-bar__val {
+  font-size: 20rpx;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+
+.fbd-weekday-bar__val.is-peak {
+  color: #ea580c;
+  font-weight: 700;
+  font-size: 22rpx;
+}
+
+.fbd-weekday-bar__bar {
+  width: 48rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  min-height: 10rpx;
+  background: linear-gradient(180deg, #a5b4fc 0%, #818cf8 100%);
+}
+
+.fbd-weekday-bar__bar.is-peak {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.fbd-weekday-bar__label {
+  margin-top: 10rpx;
+  font-size: 20rpx;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.fbd-weekday-bar__label.is-peak {
+  color: #ea580c;
+  font-weight: 600;
+}
+
+/* 小结 bar */
+.fbd-summary-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 20rpx 24rpx 0;
+  padding: 14rpx 20rpx;
+  background: #f8fafc;
+  border-radius: 8rpx;
+  gap: 10rpx;
+}
+
+.fbd-summary-bar__label {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.fbd-summary-bar__value {
+  font-size: 26rpx;
+  color: #ea580c;
+  font-weight: 600;
+}
+
+/* 空态 */
+.fbd-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48rpx 24rpx;
+}
+
+.fbd-empty-box__icon {
+  font-size: 48rpx;
+  margin-bottom: 8rpx;
+}
+
+.fbd-empty-box__text {
+  font-size: 26rpx;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ===== 5. 配料成本构成 ===== */
+.fbd-card--ingredients {
+  padding-bottom: 8rpx;
+}
+
+.fbd-ing-list {
+  overflow: hidden;
+}
+
+.fbd-ing-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 18rpx 24rpx;
+  border-bottom: 1rpx solid #f1f5f9;
+}
+
+.fbd-ing-row:last-child {
+  border-bottom: none;
+}
+
+.fbd-ing-row--head {
+  background: #f8fafc;
+  padding: 14rpx 24rpx;
+  border-bottom: 1rpx solid #e2e8f0;
+}
+
+.fbd-ing-cell {
+  font-size: 26rpx;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.fbd-ing-row--head .fbd-ing-cell {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.fbd-ing-cell--name {
+  flex: 2;
+  min-width: 0;
+}
+
+.fbd-ing-cell--qty {
+  flex: 1.5;
+  text-align: center;
+}
+
+.fbd-ing-cell--price {
+  flex: 1.5;
+  text-align: center;
+}
+
+.fbd-ing-cell--cost {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+}
+
+.fbd-ing-cell--share {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.fbd-ing-cell--muted {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.fbd-ing-share__num {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.fbd-ing-share__bar {
+  width: 100%;
+  height: 10rpx;
+  border-radius: 5rpx;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+.fbd-ing-share__fill {
+  height: 100%;
+  border-radius: 5rpx;
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+}
+
+/* 展开/收起 */
+.fbd-ing-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  color: #2563eb;
+  font-size: 26rpx;
+  font-weight: 500;
+  gap: 6rpx;
+  border-top: 1rpx solid #f1f5f9;
+}
+
+.fbd-ing-toggle--hover {
+  opacity: 0.7;
+}
+
+.fbd-ing-toggle__arrow {
+  transition: transform 0.2s;
+  font-size: 22rpx;
+}
+
+.fbd-ing-toggle__arrow.is-open {
+  transform: rotate(180deg);
+}
+
+/* ===== 底部安全区 ===== */
+.fbd-bottom-safe {
+  height: 48rpx;
+}

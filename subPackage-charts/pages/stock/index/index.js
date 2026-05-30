@@ -17,6 +17,8 @@ Page({
   data: {
     searchDepIds: -1,
     searchDepId: -1,
+    tab1IndexDep: 0,
+    itemIndexDep: 0,
     tab1Index: 0,
     itemIndex: 0,
     dateString: '',
@@ -36,6 +38,14 @@ Page({
         disId: disInfo.gbDistributerId,
         type: disInfo.gbDistributerStockCycle,
       });
+
+      var value = wx.getStorageSync('mendianInfo');
+      if(value){
+        this.setData({
+          mendianInfo: value,
+          depFatherId: value.gbDepartmentId,
+        })
+      }
       that._getInitData();
     }
   },
@@ -49,12 +59,14 @@ Page({
       whichDay = Number(that.data.itemIndex) - 1;
     }
     wx.showLoading({ title: '获取数据中', mask: true });
+    var idxDep = that.data.itemIndexDep;
+    if (idxDep == null) idxDep = 0;
+    var searchSubIds = Number(idxDep) === 0 ? that.data.searchDepIds : that.data.searchDepId;
     var data = {
       disId: that.data.disId,
-      searchDepIds: that.data.searchDepIds,
-      searchDepId: that.data.searchDepId,
+      depFatherId: that.data.depFatherId,
+      searchSubDepIds: searchSubIds,
       whichDay: whichDay,
-      type: that.data.type,
     };
     api.getMendianStockTypePeriod(data)
       .then(function (res) {

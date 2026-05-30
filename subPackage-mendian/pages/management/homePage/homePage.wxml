@@ -12,14 +12,14 @@
       <view class="quarter-row pt-20 pb-20" bindtap="toMendian" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/house-things-.png" class="icon" />
-          <text>门店</text>
+          <text>门店管理</text>
         </view>
       </view>
 
       <view class="quarter-row pt-20 pb-20" bindtap="toStaff" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/user-group-2.png" class="icon" />
-          <text>采购组</text>
+          <text>管理用户</text>
         </view>
       </view>
 
@@ -110,7 +110,7 @@
       <view class="quarter-row pt-20 pb-20" bindtap="toAiChat" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/chat_record.png" class="icon" />
-          <text>AI对话</text>
+          <text>AI助理</text>
         </view>
       </view>
 

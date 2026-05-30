@@ -76,7 +76,7 @@
     <view class="module-title">菜品销量</view>
     <text class="food-list-hint" wx:if="{{foodsLoading}}">加载中…</text>
     <text class="food-list-hint" wx:elif="{{!salesFoodRows.length}}">暂无菜品，请先在菜单中维护</text>
-    <scroll-view wx:else scroll-y class="food-sales-scroll" enhanced="{{true}}" show-scrollbar="{{true}}">
+    <view wx:else  class="food-sales-scroll1 flex-column" >
       <block wx:for="{{salesFoodRows}}" wx:key="rowKey" wx:for-index="idx">
         <view class="food-cat-stripe" wx:if="{{idx === 0 || item.catName !== salesFoodRows[idx - 1].catName}}">
           <text class="food-cat-stripe__text">{{item.catName}}</text>
@@ -106,7 +106,7 @@
           </view>
         </view>
       </block>
-    </scroll-view>
+    </view>
     <view class="dinein-estimate" wx:if="{{salesFoodRows.length}}">
       <text class="dinein-estimate__text">按标价汇总（本页）：¥{{dineInFromDishes}}</text>
     </view>

@@ -140,8 +140,12 @@
   border: 1px solid rgb(112, 112, 112);
 }
 
-.form_body_dep{
+
+.form_body_business{
   background-color: #e4e4d1;
+}
+.form_body_purchase{
+  background-color: #eef8ed;
 }
 
 .form_body_goods{
@@ -149,7 +153,7 @@
 }
 
 .form_body_out{
-  background-color: #ebfeff;
+  background-color: #e4e9f0;
 }
 
 .form_body_title{

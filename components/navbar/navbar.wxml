@@ -1,14 +1,35 @@
-<!-- components/navbar/navbar.wxml -->
-<view class="custom-navbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
-  <view class="nav-container" style="height: {{navBarContentHeight}}px;">
-    <view class="nav-left" bindtap="onNavButtonTap" style="width: {{leftWidth}}px; height: {{navBarContentHeight}}px;">
-      <live-pulse wx:if="{{livePulse && !showBack}}" />
-      <image src="{{avatar}}" mode="aspectFill" class="user-avatar" wx:elif="{{avatar && !showBack}}"/>
-      <image src="{{avatar}}" mode="aspectFit" class="back-icon" wx:if="{{showBack}}"/>
+<!-- 自定义导航：左图标 / 中间标题 / 右侧单按钮（如「设置」） -->
+<view
+  class="navbar-host custom-navbar"
+  style="height: {{navBarFullHeightPx}}px; padding-top: {{statusBarHeight}}px; --nav-height: {{navBarFullHeightPx}}px;"
+>
+  <view class="navbar-inner" style="height: {{navBarFullHeightPx - statusBarHeight}}px;">
+    <view class="navbar-zone navbar-zone--left" bindtap="onNavButtonTap">
+      <view wx:if="{{leadingMenu}}" class="navbar-menu-leading" hover-class="navbar-menu-leading-hover">
+        <text class="navbar-menu-leading-icon">☰</text>
+      </view>
+      <block wx:else>
+        <live-pulse wx:if="{{livePulse && !showBack}}" />
+        <image
+          wx:elif="{{avatar && !showBack}}"
+          class="user-avatar"
+          src="{{avatar}}"
+          mode="aspectFill"
+        />
+        <image
+          wx:if="{{showBack}}"
+          class="back-icon"
+          src="{{avatar}}"
+          mode="aspectFit"
+        />
+      </block>
     </view>
-    <view class="nav-title">{{title}}</view>
-    <view class="nav-right" style="width: {{rightWidth}}px;">
-      <text class="nav-button-text" wx:if="{{buttonText}}" bindtap="onNavButtonTap">{{buttonText}}</text>
+
+    <view class="navbar-zone navbar-zone--title">
+      <view class="navbar-title-wrap">
+        <text class="navbar-title-text">{{title}}</text>
+      </view>
     </view>
+
   </view>
 </view>

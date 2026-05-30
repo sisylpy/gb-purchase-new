@@ -1,0 +1,201 @@
+<!-- 单菜利润处方卡 - 菜品价格与配方诊断卡 -->
+<wxs module="f">
+  var UNIT_MAP = {
+    OUTBOUND_TYPE1_AVG: '本期出库均价',
+    PURCHASE_LATEST: '最新采购价',
+    MANUAL: '手动录入价',
+    DEFAULT: '参考价',
+  };
+  function priceSource(source) {
+    if (!source) return '—';
+    if (UNIT_MAP[source]) return UNIT_MAP[source];
+    return source;
+  }
+  function reviewFlag(flag) {
+    if (flag === 'USAGE_ABNORMAL') return '用量异常';
+    if (flag === 'FOCUS_INGREDIENT') return '核心配料';
+    return flag || '—';
+  }
+  // 数字优先级 → 中文标签
+  function priorityLabel(p) {
+    if (p === 1) return '高';
+    if (p === 2) return '中';
+    if (p === 3) return '低';
+    if (p === 'HIGH') return '高';
+    if (p === 'MEDIUM') return '中';
+    if (p === 'LOW') return '低';
+    return p || '—';
+  }
+  function priorityCls(p) {
+    if (p === 1 || p === 'HIGH') return 'dpp-priority-high';
+    if (p === 2 || p === 'MEDIUM') return 'dpp-priority-medium';
+    if (p === 3 || p === 'LOW') return 'dpp-priority-low';
+    return 'dpp-priority-medium';
+  }
+  module.exports = {
+    priceSource: priceSource,
+    reviewFlag: reviewFlag,
+    priorityLabel: priorityLabel,
+    priorityCls: priorityCls,
+  };
+</wxs>
+
+<view class="dpp-card" wx:if="{{visible}}">
+
+  <!-- ========== 标题区 ========== -->
+  <view class="dpp-header">
+    <text class="dpp-title">{{title}}</text>
+    <text class="dpp-subtitle">{{dishName}}</text>
+  </view>
+
+  <!-- ========== 非 SUCCESS 状态 ========== -->
+  <view class="dpp-failed" wx:if="{{isFailed}}">
+    <text class="dpp-failed-icon">⚠️</text>
+    <text class="dpp-failed-text">{{diagnosisSummary || '当前暂无诊断数据，请检查数据状态或稍后再试'}}</text>
+  </view>
+
+  <!-- ========== 正常态 ========== -->
+  <block wx:if="{{isSuccess}}">
+
+    <!-- 综合诊断 -->
+    <view class="dpp-diagnosis" wx:if="{{diagnosisSummary}}">
+      <text class="dpp-section-label">📊 综合诊断</text>
+      <view class="dpp-diagnosis-box">
+        <text class="dpp-diagnosis-text">{{diagnosisSummary}}</text>
+      </view>
+    </view>
+
+    <!-- 价格建议区 -->
+    <view class="dpp-section">
+      <text class="dpp-section-label">💰 价格建议</text>
+      <view class="dpp-price-grid">
+        <view class="dpp-price-item">
+          <text class="dpp-price-label">当前售价</text>
+          <text class="dpp-price-value">{{currentPrice !== null ? currentPrice + ' 元' : '—'}}</text>
+        </view>
+        <view class="dpp-price-item">
+          <text class="dpp-price-label">实际成本</text>
+          <text class="dpp-price-value">{{actualCostPerPortion123 !== null ? actualCostPerPortion123 + ' 元' : '—'}}</text>
+        </view>
+        <view class="dpp-price-item">
+          <text class="dpp-price-label">目标毛利率</text>
+          <text class="dpp-price-value">{{targetGrossMarginRate !== null ? targetGrossMarginRate + '%' : '—'}}</text>
+        </view>
+        <view class="dpp-price-item dpp-price-suggested">
+          <text class="dpp-price-label">建议售价</text>
+          <text class="dpp-price-value dpp-price-highlight">{{suggestedPrice !== null ? suggestedPrice + ' 元' : '—'}}</text>
+        </view>
+      </view>
+      <view class="dpp-formula" wx:if="{{formulaId}}">
+        <text class="dpp-formula-label">参考公式：</text>
+        <text class="dpp-formula-text">{{formulaId}}</text>
+      </view>
+    </view>
+
+    <!-- 成本差异区 -->
+    <view class="dpp-section" wx:if="{{theoreticalCostPerPortion !== null || actualCostPerPortion123 !== null || costGapPerPortion !== null}}">
+      <text class="dpp-section-label">📉 成本差异</text>
+      <view class="dpp-cost-grid">
+        <view class="dpp-cost-card">
+          <text class="dpp-cost-card-label">理论成本</text>
+          <text class="dpp-cost-card-value">{{theoreticalCostPerPortion !== null ? theoreticalCostPerPortion + ' 元' : '—'}}</text>
+        </view>
+        <view class="dpp-cost-card">
+          <text class="dpp-cost-card-label">实际成本</text>
+          <text class="dpp-cost-card-value dpp-cost-actual">{{actualCostPerPortion123 !== null ? actualCostPerPortion123 + ' 元' : '—'}}</text>
+        </view>
+        <view class="dpp-cost-card">
+          <text class="dpp-cost-card-label">成本差异</text>
+          <text class="dpp-cost-card-value {{costGapPerPortion && costGapPerPortion > 0 ? 'dpp-cost-warn' : ''}}">
+            {{costGapPerPortion !== null ? (costGapPerPortion >= 0 ? '+' : '') + costGapPerPortion + ' 元' : '—'}}
+          </text>
+          <text class="dpp-cost-card-sub" wx:if="{{costGapRate !== null}}">{{costGapRate}}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配料复核区 -->
+    <view class="dpp-section" wx:if="{{ingredientRows.length > 0}}">
+      <text class="dpp-section-label">🧾 配料复核</text>
+
+      <!-- 表头 -->
+      <view class="dpp-ingredient-header">
+        <text class="dpp-ingredient-th dpp-ingredient-th--name">配料名</text>
+        <text class="dpp-ingredient-th">理论用量</text>
+        <text class="dpp-ingredient-th">实际用量</text>
+        <text class="dpp-ingredient-th">单价</text>
+        <text class="dpp-ingredient-th">来源</text>
+        <text class="dpp-ingredient-th">成本</text>
+        <text class="dpp-ingredient-th">备注</text>
+      </view>
+
+      <!-- 行 -->
+      <view
+        class="dpp-ingredient-row"
+        wx:for="{{ingredientRows}}"
+        wx:key="index"
+        wx:for-item="row"
+      >
+        <text class="dpp-ingredient-td dpp-ingredient-td--name">{{row.gbDgGoodsName || row.ingredientName || '—'}}</text>
+        <text class="dpp-ingredient-td">{{row.theoryUsage !== undefined ? row.theoryUsage : (row.theoreticalQuantity !== undefined ? row.theoreticalQuantity : '—')}}</text>
+        <text class="dpp-ingredient-td">{{row.actualProduceUsage !== undefined ? row.actualProduceUsage : (row.actualQuantity !== undefined ? row.actualQuantity : '—')}}</text>
+        <text class="dpp-ingredient-td">{{row.unitPrice !== undefined ? row.unitPrice : '—'}}</text>
+        <text class="dpp-ingredient-td dpp-ingredient-td--source">{{f.priceSource(row.unitPriceSource)}}</text>
+        <text class="dpp-ingredient-td">{{row.produceCostPerPortion !== undefined ? row.produceCostPerPortion : (row.cost !== undefined ? row.cost : '—')}}</text>
+        <text class="dpp-ingredient-td dpp-ingredient-td--flags">
+          <text
+            class="dpp-flag"
+            wx:for="{{row.reviewFlags}}"
+            wx:for-item="flag"
+            wx:key="*this"
+          >{{f.reviewFlag(flag)}}</text>
+        </text>
+      </view>
+    </view>
+
+    <!-- 行动建议区 -->
+    <view class="dpp-section" wx:if="{{recommendedActions.length > 0}}">
+      <text class="dpp-section-label">🎯 行动建议</text>
+      <view class="dpp-action-list">
+        <view
+          class="dpp-action-card"
+          wx:for="{{recommendedActions}}"
+          wx:key="actionName"
+          wx:for-item="action"
+        >
+          <view class="dpp-action-top">
+            <view class="dpp-action-left">
+              <text class="dpp-action-index">{{index + 1}}</text>
+              <text class="dpp-action-name">{{action.actionName || '—'}}</text>
+            </view>
+            <view class="dpp-priority {{f.priorityCls(action.priority)}}" wx:if="{{action.priority}}">
+              <text class="dpp-priority-text">{{f.priorityLabel(action.priority)}}</text>
+            </view>
+          </view>
+          <view class="dpp-action-reason" wx:if="{{action.reasonZh || action.reason}}">
+            <text class="dpp-action-reason-label">📋 原因</text>
+            <text class="dpp-action-reason-text">{{action.reasonZh || action.reason}}</text>
+          </view>
+          <view class="dpp-action-ref" wx:if="{{action.evidenceRefId}}">
+            <text class="dpp-action-ref-text">数据参考：{{action.evidenceRefId}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 能力边界提示 -->
+    <view class="dpp-capability" wx:if="{{capabilityHints.length > 0}}">
+      <text class="dpp-capability-label">📌 提示</text>
+      <view
+        class="dpp-capability-item"
+        wx:for="{{capabilityHints}}"
+        wx:key="*this"
+        wx:for-item="hint"
+      >
+        <text class="dpp-capability-text">{{hint}}</text>
+      </view>
+    </view>
+
+  </block>
+
+</view>

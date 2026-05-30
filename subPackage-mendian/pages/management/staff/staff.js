@@ -63,11 +63,12 @@ Page({
       })
     }
 
-    var userInfo = wx.getStorageSync('userInfo');
-    if (userInfo) {
+    var value = wx.getStorageSync('mendianInfo');
+    if(value){
       this.setData({
-        userInfo: userInfo,
-      });
+        mendianInfo: value,
+        depFatherId: value.gbDepartmentId,
+      })
     }
     this._initData();
   },
@@ -78,7 +79,7 @@ Page({
     var data = {
       startDate: this.data.startDate,
       stopDate: this.data.stopDate,
-      depId: this.data.userInfo.gbDuDepartmentId
+      depId: this.data.depFatherId
     };
     apiDistributer.getDepUsersByFatherIdGb(data).then(function (res) {
       if (res.result.code == 0) {
@@ -100,7 +101,7 @@ Page({
   onShareAppMessage: function (options) {
     return {
       title: "注册京采账本小程序",
-      path: '/pages/inviteAdmin/inviteAdmin?disId=' + this.data.userInfo.gbDuDistributerId + '&depFatherId=' + this.data.userInfo.gbDuDepartmentFatherId + '&depId=' + this.data.userInfo.gbDuDepartmentFatherId + '&depName=' + this.data.userInfo.gbDuWxNickName + '&admin=2',
+      path: '/pages/inviteAdmin/inviteAdmin?disId=' + this.data.userInfo.gbDuDistributerId + '&depFatherId=' + this.data.depFatherId + '&depId=' + this.data.depFatherId + '&depName=' + this.data.userInfo.gbDuWxNickName + '&admin=2',
       imageUrl: this.data.url + 'userImage/say.png',
     };
   },

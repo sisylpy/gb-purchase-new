@@ -6,24 +6,28 @@ import apiUrl from '../../config/index.js'
 var load = require('../../lib/load.js');
 
 // ===== allFood 页面 =====
-export const depGetAllFood = (data) => {
+/** form 用字符串 body，避免个别基础库把 object.data 序列化丢字段（如 subDepId） */
+export const depGeFoodBusiness = (data) => {
   return new Promise((resolve, reject) => {
-    var req = {
-      disId: data.disId,
-      depFatherId: data.depFatherId,
-      startDate: data.startDate,
-      stopDate: data.stopDate,
-    };
+    var parts = [
+      'disId=' + encodeURIComponent(String(data.disId)),
+      'depFatherId=' + encodeURIComponent(String(data.depFatherId)),
+      'startDate=' + encodeURIComponent(String(data.startDate)),
+      'stopDate=' + encodeURIComponent(String(data.stopDate)),
+    ];
     if (data.sortBy != null && data.sortBy !== '') {
-      req.sortBy = data.sortBy;
+      parts.push('sortBy=' + encodeURIComponent(String(data.sortBy)));
     }
     if (data.sortOrder != null && data.sortOrder !== '') {
-      req.sortOrder = data.sortOrder;
+      parts.push('sortOrder=' + encodeURIComponent(String(data.sortOrder)));
+    }
+    if (data.subDepId != null && data.subDepId !== '' && data.subDepId !== undefined && !isNaN(Number(data.subDepId))) {
+      parts.push('subDepId=' + encodeURIComponent(String(Number(data.subDepId))));
     }
     wx.request({
-      url: apiUrl.apiUrl + 'gbdepfood/depGetAllFood',
+      url: apiUrl.apiUrl + 'gbdepfood/depGeFoodBusiness',
       method: 'POST',
-      data: req,
+      data: parts.join('&'),
       header: {
         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
       },
@@ -76,7 +80,7 @@ export const cancleDownloadFood = (data) => {
 export const dishIngredientDashboard = (data) => {
   var body = {
     startDate: data.startDate,
-    endDate: data.endDate,
+    stopDate: data.stopDate,
     disId: data.disId,
     depFatherId: data.depFatherId,
     foodId: data.foodId,

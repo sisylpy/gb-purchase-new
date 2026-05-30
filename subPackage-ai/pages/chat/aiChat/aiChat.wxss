@@ -191,8 +191,14 @@
   flex-shrink: 0;
 }
 
-.gem-pill-title {
+.gem-pill-body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gem-pill-title {
   font-size: 32rpx;
   font-weight: 400;
   color: #1f1f1f;
@@ -200,17 +206,29 @@
   letter-spacing: -0.01em;
 }
 
+.gem-pill-desc {
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  font-weight: 400;
+  color: #80868b;
+  line-height: 1.4;
+}
+
 /* 主题下的具体问题列表 */
 .gem-sublist {
   margin-top: -4rpx;
 }
 
-.gem-sublist-inner {
+/* 圆角 chip 容器 */
+.gem-sublist-chips {
   background: #ffffff;
   border-radius: 0 0 28rpx 28rpx;
-  padding: 8rpx 0 12rpx;
+  padding: 16rpx 20rpx 20rpx;
   box-shadow: 0 4rpx 12rpx rgba(60, 64, 67, 0.08);
   box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
 }
 
 .gem-sublist-empty {
@@ -222,39 +240,54 @@
   box-shadow: 0 4rpx 12rpx rgba(60, 64, 67, 0.08);
 }
 
-.gem-q-row {
-  display: flex;
-  flex-direction: row;
+/* 圆角 chip 基础样式 */
+.gem-chip {
+  display: inline-flex;
   align-items: center;
-  padding: 24rpx 32rpx 24rpx 36rpx;
-  border-top: 1rpx solid #f1f3f4;
+  justify-content: center;
+  padding: 16rpx 28rpx;
+  border-radius: 9999rpx;
   box-sizing: border-box;
+  max-width: 100%;
 }
 
-.gem-q-row-hover {
+/* 可点击的活跃 chip */
+.gem-chip--active {
+  background: #f0f4f9;
+  border: 1rpx solid #d2e3fc;
+}
+
+.gem-chip-hover {
+  background: #dce8f8;
+}
+
+/* 灰态 chip：COMING_SOON 或 enabled=false */
+.gem-chip--disabled {
   background: #f8f9fa;
+  border: 1rpx solid #f0f0f0;
+  pointer-events: none;
 }
 
-.gem-q-row:first-child {
-  border-top: none;
-}
-
-.gem-q-label {
-  flex: 1;
-  font-size: 32rpx;
+.gem-chip-text {
+  font-size: 28rpx;
   font-weight: 400;
   color: #1f1f1f;
-  line-height: 1.45;
-  letter-spacing: -0.01em;
+  line-height: 1.5;
+  word-break: break-all;
 }
 
-.gem-q-arrow {
-  flex-shrink: 0;
-  font-size: 38rpx;
-  color: #dadce0;
-  font-weight: 300;
-  margin-left: 16rpx;
+.gem-chip--disabled .gem-chip-text {
+  color: #c4c7cc;
+}
+
+/* 灰态 chip 的「即将支持」标签 */
+.gem-chip-tag {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: #c4c7cc;
+  margin-left: 8rpx;
   line-height: 1;
+  white-space: nowrap;
 }
 
 /* ---------- 对话消息 ---------- */
@@ -494,6 +527,63 @@
   background: #dadce0;
   color: #fff;
   pointer-events: none;
+}
+
+/* 停止生成按钮 */
+.gem-stop-btn {
+  flex-shrink: 0;
+  padding: 0 28rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1a73e8;
+  background: #e8f0fe;
+  border: 1rpx solid #d2e3fc;
+  border-radius: 999rpx;
+  box-sizing: border-box;
+}
+
+/* 流式进度提示 */
+.gem-stream-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 24rpx;
+  background: #f8f9fa;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.gem-stream-hint-text {
+  font-size: 24rpx;
+  color: #5f6368;
+  font-weight: 400;
+}
+
+/* ---------- 左侧抽屉 ---------- */
+.gem-new-conv-btn {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 28rpx;
+  margin: 8rpx 20rpx 12rpx;
+  background: #e8f0fe;
+  border-radius: 20rpx;
+  box-sizing: border-box;
+}
+
+.gem-new-conv-plus {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #1a73e8;
+  margin-right: 12rpx;
+  line-height: 1;
+}
+
+.gem-new-conv-label {
+  font-size: 28rpx;
+  font-weight: 400;
+  color: #1a73e8;
+  line-height: 1.4;
 }
 
 /* ---------- 左侧抽屉 ---------- */

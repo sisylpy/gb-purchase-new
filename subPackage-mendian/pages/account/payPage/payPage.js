@@ -2,38 +2,52 @@ const globalData = getApp().globalData;
 var app = getApp()
 var load = require('../../../../lib/load.js');
 import apiUrl from '../../../../config/index.js'
-
-// import {
-//   gbDisBuyUser,
-//   gbDisGetBuyType,
-//   buyMachines,
-//   addPoints
-// } from '../../../../lib/apiDistributer'
-
+import {
+  gbDisBuyUser,
+  gbDisGetBuyType,
+  buyMachines,
+  addPoints,
+} from '../../../services/apiDistributerPay.js'
 
 let itemWidth = 0;
 let windowWidth = 0;
 
 Page({
 
- 
-  onShow: function () {
-
-    // 推荐直接用新API
-    let windowInfo = wx.getWindowInfo();
-    let globalData = getApp().globalData;
+  /**
+   * 视口与中间滑动区高度（扣除顶部导航 + Tab + 底部固定购买栏）
+   */
+  _syncLayoutMetrics() {
+    var windowInfo = wx.getWindowInfo();
+    var gd = getApp().globalData;
+    var rpxR = gd.rpxR;
+    var windowHeightRpx = windowInfo.windowHeight * rpxR;
+    var navBarHeightRpx = gd.navBarHeight * rpxR;
+    var tabsBarRpx = 80;
+    var bottomFixedBarRpx = 176;
+    var safeBottomRpx = (windowInfo.safeAreaInsets && windowInfo.safeAreaInsets.bottom)
+      ? Math.ceil(windowInfo.safeAreaInsets.bottom * rpxR)
+      : 0;
+    var bottomReserveRpx = bottomFixedBarRpx + safeBottomRpx;
+    var contentSwiperHeight = windowHeightRpx - navBarHeightRpx - tabsBarRpx - bottomReserveRpx;
+    if (contentSwiperHeight < 200) {
+      contentSwiperHeight = 200;
+    }
     this.setData({
-      windowWidth: windowInfo.windowWidth * globalData.rpxR,
-      windowHeight: windowInfo.windowHeight * globalData.rpxR,
-      navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
+      windowWidth: windowInfo.windowWidth * rpxR,
+      windowHeight: windowHeightRpx,
+      navBarHeight: navBarHeightRpx,
+      statusBarHeight: gd.statusBarHeight * rpxR,
+      contentSwiperHeight: contentSwiperHeight,
+      bottomReserveRpx: bottomReserveRpx,
     });
+  },
 
-    // 在 windowWidth 设置完成后调用 clueOffset
+  onShow: function () {
+    this._syncLayoutMetrics();
     if (this.data.type !== undefined) {
       this.clueOffset(this.data.type);
     }
-
   },
   /**
    * 页面的初始数据
@@ -64,6 +78,8 @@ Page({
     haveLiwu: false,
     countdownText: '',
 
+    contentSwiperHeight: 400,
+    bottomReserveRpx: 176,
 
   },
 
@@ -105,7 +121,8 @@ Page({
       img: 'userImage/index_share1.png',
     })
 
-    // this._initData();
+    this._syncLayoutMetrics();
+    this._initData();
     // clueOffset 现在在 onShow 中调用，确保 windowWidth 已设置
 
 
@@ -318,8 +335,8 @@ Page({
     var index = e.currentTarget.dataset.index;
     this.setData({
       selIndex: index,
-      orderSubtotal: this.data.payArr[index].nxNdpPaySubtotal,
-      quantity: this.data.payArr[index].nxNdpBuyQuantity,
+      orderSubtotal: this.data.payArr[index].gbGdpPaySubtotal,
+      quantity: this.data.payArr[index].gbGdpBuyQuantity,
     })
   },
 
@@ -346,8 +363,8 @@ Page({
         that._showLiwu();
         if (this.data.currentTab < 2) {
           this.setData({
-            orderSubtotal: res.result.data.list[0].nxNdpPaySubtotal,
-            quantity: res.result.data.list[0].nxNdpBuyQuantity,
+            orderSubtotal: res.result.data.list[0].gbGdpPaySubtotal,
+            quantity: res.result.data.list[0].gbGdpBuyQuantity,
           })
         } else {
           this.setData({
@@ -380,13 +397,13 @@ Page({
       var price = sel[i].perPrice;
 
       var one = {
-        gbGdpPaySubtotal: sel[i].nxNdpPaySubtotal,
+        gbGdpPaySubtotal: sel[i].gbGdpPaySubtotal,
         payUserOpenId: this.data.userInfo.gbDuWxOpenId,
         gbGdpBuyQuantity: 1,
         gbGdpGbDisId: this.data.disInfo.gbDistributerId,
-        gbGdpType: sel[i].nxNdpType,
-        gbGdpImgUrl: sel[i].nxNdpImgUrl,
-        gbGdpSellDetail: sel[i].nxNdpSellDetail,
+        gbGdpType: sel[i].gbGdpType,
+        gbGdpImgUrl: sel[i].gbGdpImgUrl,
+        gbGdpSellDetail: sel[i].gbGdpSellDetail,
       }
       arr.push(one);
     }
@@ -609,7 +626,7 @@ Page({
     var total = 0;
     if (selArr.length > 0) {
       for (var i = 0; i < selArr.length; i++) {
-        total += Number(selArr[i].nxNdpPaySubtotal);
+        total += Number(selArr[i].gbGdpPaySubtotal);
       }
     }
     console.log("tootoa", total);

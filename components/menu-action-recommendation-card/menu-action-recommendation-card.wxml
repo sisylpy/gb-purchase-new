@@ -1,0 +1,142 @@
+<!-- 菜单优化方案卡 — AI presentation 主展示 -->
+<view class="mar-card" wx:if="{{visible}}">
+
+  <!-- ========== 空态 ========== -->
+  <view class="mar-empty" wx:if="{{empty}}">
+    <text class="mar-empty-icon">✅</text>
+    <text class="mar-empty-text">本期暂无需要优先调整的菜品</text>
+  </view>
+
+  <block wx:if="{{!empty && hasAiContent}}">
+
+    <!-- 蓝色头部 -->
+    <view class="mar-hero">
+      <view class="mar-hero-inner">
+        <view class="mar-hero-title-wrap">
+          <text class="mar-hero-title">{{title}}</text>
+          <text class="mar-hero-star">✦</text>
+        </view>
+        <!-- 核心数据行 -->
+        <view class="mar-hero-stats" wx:if="{{heroGrossMargin || heroDishCount}}">
+          <text class="mar-hero-stat" wx:if="{{heroGrossMargin}}">综合毛利率 <text class="mar-hero-stat-val">{{heroGrossMargin}}</text></text>
+          <text class="mar-hero-stat-dot" wx:if="{{heroGrossMargin && heroDishCount}}">·</text>
+          <text class="mar-hero-stat" wx:if="{{heroDishCount}}">共分析 <text class="mar-hero-stat-val">{{heroDishCount}}</text></text>
+        </view>
+        <text class="mar-hero-label">AI生成 · 菜单专家建议</text>
+      </view>
+    </view>
+
+    <!-- 白色主体 -->
+    <view class="mar-body">
+
+      <!-- 核心摘要 -->
+      <view class="mar-ai-summary" wx:if="{{aiMainSummary}}">
+        <view class="mar-ai-summary-icon">★</view>
+        <text class="mar-ai-summary-text">{{aiMainSummary}}</text>
+      </view>
+
+      <!-- 关键发现 -->
+      <view class="mar-ai-section" wx:if="{{aiKeyFindings.length > 0}}">
+        <view class="mar-ai-section-title">🔍 关键发现</view>
+        <view
+          class="mar-ai-finding"
+          wx:for="{{aiKeyFindings}}"
+          wx:key="*this"
+          wx:for-item="item"
+        >
+          <text class="mar-ai-finding-text">{{item}}</text>
+        </view>
+      </view>
+
+      <!-- 本次重点关注菜品（扁平化，紧凑辅助区） -->
+      <view class="mar-ai-section" wx:if="{{flatFocusDishes.length > 0}}">
+        <view class="mar-ai-section-title">📌 本次重点关注菜品</view>
+        <view class="mar-focus-dish-list">
+          <view
+            class="mar-focus-dish"
+            wx:for="{{flatFocusDishes}}"
+            wx:key="dishName"
+            wx:for-item="dish"
+          >
+            <image
+              class="mar-focus-dish-img"
+              src="{{dish.dishImageUrl}}"
+              mode="aspectFill"
+              wx:if="{{dish.dishImageUrl}}"
+            />
+            <view class="mar-focus-dish-img mar-focus-dish-img--ph" wx:else>
+              <text>🍽</text>
+            </view>
+            <text class="mar-focus-dish-name">{{dish.dishName || '—'}}</text>
+            <view class="mar-focus-dish-metrics">
+              <text class="mar-focus-dish-metric" wx:if="{{dish.blendedGrossMarginRateOnListPrice}}">毛利率 {{dish.blendedGrossMarginRateOnListPrice}}%</text>
+              <text class="mar-focus-dish-metric" wx:if="{{dish.actualProfitAmount}}">利润 {{dish.actualProfitAmount}}元</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 关注区块文本内容（多个 section，只渲染 content/items，不含菜品子列表） -->
+      <view
+        class="mar-ai-section"
+        wx:for="{{aiFocusSections}}"
+        wx:key="index"
+        wx:for-item="section"
+      >
+        <view class="mar-ai-section-title" wx:if="{{section.title}}">{{section.title}}</view>
+        <view class="mar-ai-section-body">
+          <!-- 文本内容 -->
+          <text class="mar-ai-section-text" wx:if="{{section.content}}">{{section.content}}</text>
+          <!-- 列表内容 -->
+          <text
+            class="mar-ai-section-item"
+            wx:for="{{section.items}}"
+            wx:for-item="it"
+            wx:key="*this"
+            wx:if="{{section.items && section.items.length > 0}}"
+          >{{it}}</text>
+        </view>
+      </view>
+
+      <!-- 下一步行动（卡片感行动条） -->
+      <view class="mar-ai-section" wx:if="{{aiNextSteps.length > 0}}">
+        <view class="mar-ai-section-title">📋 下一步行动</view>
+        <view class="mar-steps-list">
+          <view
+            class="mar-step-bar"
+            wx:for="{{aiNextSteps}}"
+            wx:key="*this"
+            wx:for-item="step"
+          >
+            <view class="mar-step-bar-num">{{index + 1}}</view>
+            <text class="mar-step-bar-text">{{step}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 分析依据 -->
+      <view class="mar-ai-section" wx:if="{{aiSupportingEvidence.length > 0}}">
+        <view class="mar-ai-section-title">📊 分析依据</view>
+        <view
+          class="mar-ai-evidence-row"
+          wx:for="{{aiSupportingEvidence}}"
+          wx:key="displayLabel"
+          wx:for-item="row"
+        >
+          <text class="mar-ai-evidence-label">{{row.displayLabel || row.label || ''}}</text>
+          <text class="mar-ai-evidence-colon" wx:if="{{row.displayLabel || row.label}}">：</text>
+          <text class="mar-ai-evidence-val">{{row.value || '—'}}</text>
+          <text class="mar-ai-evidence-unit" wx:if="{{row.unit}}">{{row.unit}}</text>
+        </view>
+      </view>
+
+      <!-- 能力边界 -->
+      <view class="mar-ai-footer" wx:if="{{aiCapabilityBoundaryZh}}">
+        <text class="mar-ai-footer-icon">💡</text>
+        <text class="mar-ai-footer-text">{{aiCapabilityBoundaryZh}}</text>
+      </view>
+
+    </view>
+  </block>
+
+</view>

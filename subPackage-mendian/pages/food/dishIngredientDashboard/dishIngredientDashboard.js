@@ -170,7 +170,6 @@ Page({
     errMsg: '',
 
     startDate: '',
-    endDate: '',
     stopDate: '',
     hanzi: '',
     disId: '',
@@ -238,21 +237,19 @@ Page({
 
   onLoad: function (options) {
     var o = options || {};
-    var endD = o.stopDate || o.endDate || '';
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: apiUrl.server,
       foodId: o.foodId || '',
       dateType: o.dateType,
       startDate: o.startDate || '',
-      endDate: endD,
-      stopDate: endD,
+      stopDate: o.stopDate,
       hanzi: o.hanzi ? decodeURIComponent(String(o.hanzi)) : '',
       disId: o.disId != null && o.disId !== undefined ? String(o.disId) : '',
       depFatherId: o.depFatherId != null && o.depFatherId !== undefined ? String(o.depFatherId) : '',
       pageTitle: o.foodName ? decodeURIComponent(String(o.foodName)) : '配料看板',
     });
-    if (!this.data.foodId || !this.data.startDate || !this.data.endDate) {
+    if (!this.data.foodId || !this.data.startDate || !this.data.stopDate) {
       this.setData({ loading: false, errMsg: '参数不完整' });
       return;
     }
@@ -345,7 +342,7 @@ Page({
     load.showLoading('加载中');
     fetchDishIngredientDashboard({
       startDate: this.data.startDate,
-      endDate: this.data.endDate,
+      stopDate: this.data.stopDate,
       disId: this.data.disId,
       depFatherId: this.data.depFatherId,
       foodId: this.data.foodId,
