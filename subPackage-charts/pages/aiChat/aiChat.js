@@ -227,14 +227,16 @@ Page({
     /** 创建 Run 的基础参数（userId / departmentId / distributerId / scopeMode） */
     runPayloadBase: null,
     composerFocused: false,
-    /** SSE 阶段文案 */
-    streamingStage: '',
+    /** SSE 阶段文案列表（新 stage 会把旧 stage 向上滚动） */
+    streamingStages: [],
     /** 当前 Run ID */
     currentRunId: null,
     /** 页面标题（如 "菜单经营顾问"），空则使用默认 "经营看板" */
     pageTitle: '',
     /** 智能体 ID，用于加载推荐问题；由 URL 参数 advisorId 传入 */
     advisorId: null,
+    /** 是否展示调试 JSON */
+    showDebugJson: true,
   },
 
   onLoad: function (options) {
@@ -425,7 +427,7 @@ Page({
     var clickable = e.currentTarget.dataset.clickable !== false;
     if (!text || !clickable) return;
     this.setData({ drawerOpen: false, drawerExpandedTopicId: '' });
-    this._fillInput(text);
+    this._sendMessage(text);
   },
 
   onHistoryConversationTap: function (e) {
@@ -499,7 +501,7 @@ Page({
       this._sseCtl.abort();
       this._sseCtl = null;
     }
-    this.setData({ streamingStage: '', currentRunId: null });
+    this.setData({ streamingStages: [], currentRunId: null });
   },
 
   /**
@@ -556,7 +558,7 @@ Page({
         inputValue: '',
         isSending: true,
         messages: messages,
-        streamingStage: '',
+        streamingStages: ['正在连接...'],
       },
       function () {
         that._scrollToBottom();
@@ -581,15 +583,15 @@ Page({
 
             that.setData({ currentRunId: runId });
 
-            // 连接 SSE
-            that._connectSse(runId, aiMsg.id);
+            // 连接 SSE（传入 createAiRun 原始结果用于调试）
+            that._connectSse(runId, aiMsg.id, result);
           })
           .catch(function (err) {
             console.error('[AI对话] createAiRun 失败', err);
             var errMsg = (err && err.message) ? err.message : '请求失败，请重试';
             that._replaceAiMessage(aiMsg.id, errMsg);
             that._sending = false;
-            that.setData({ isSending: false, streamingStage: '' });
+            that.setData({ isSending: false, streamingStages: [] });
           });
       }
     );
@@ -598,7 +600,7 @@ Page({
   /**
    * 连接 SSE 事件流
    */
-  _connectSse: function (runId, aiMsgId) {
+  _connectSse: function (runId, aiMsgId, runResult) {
     var that = this;
     var assistantBuffer = '';
     var flushTimer = null;
@@ -608,6 +610,10 @@ Page({
     /** SSE 过程中累积的 answerPreview / contextSummary */
     var pendingAnswerPreview = null;
     var pendingContextSummary = null;
+    /** 调试用：createAiRun 返回结果 */
+    var debugRunResult = runResult || null;
+    /** 调试用：收集所有原始 SSE 事件 */
+    var debugEvents = [];
 
     function clearFlushTimer() {
       if (flushTimer) {
@@ -635,7 +641,11 @@ Page({
         else if (step.event === 'agent_finished') stage = '分析完成...';
         else if (step.event === 'tool_finished') stage = '数据查询完成...';
         if (stage) {
-          that.setData({ streamingStage: stage });
+          var prev = that.data.streamingStages || [];
+          // 避免重复 push 相同文案
+          if (prev.length === 0 || prev[prev.length - 1] !== stage) {
+            that.setData({ streamingStages: prev.concat([stage]) });
+          }
         }
 
         // 捕获 answerPreview / contextSummary（后续事件覆盖前值）
@@ -655,7 +665,11 @@ Page({
       },
       onDelta: function (delta) {
         assistantBuffer += delta || '';
-        that.setData({ streamingStage: '正在生成回答...' });
+        var stage = '正在生成回答...';
+        var prev = that.data.streamingStages || [];
+        if (prev.length === 0 || prev[prev.length - 1] !== stage) {
+          that.setData({ streamingStages: prev.concat([stage]) });
+        }
         if (assistantBuffer.length > 0) {
           scheduleFlush();
         }
@@ -677,8 +691,9 @@ Page({
               that._patchCardPayload(aiMsgId, cards, answerPreview, contextSummary);
             }
           }
+          that._saveDebugData(aiMsgId, debugRunResult, debugEvents);
           that._sending = false;
-          that.setData({ isSending: false, streamingStage: '', currentRunId: null });
+          that.setData({ isSending: false, streamingStages: [], currentRunId: null });
         }
 
         if (pendingCards && pendingCards.length > 0) {
@@ -709,8 +724,17 @@ Page({
         clearFlushTimer();
         var finalContent = assistantBuffer || errMsg || '生成失败，请稍后再试';
         that._replaceAiMessage(aiMsgId, finalContent);
+        // 保存调试数据（即使出错也记录）
+        that._saveDebugData(aiMsgId, debugRunResult, debugEvents);
         that._sending = false;
-        that.setData({ isSending: false, streamingStage: '', currentRunId: null });
+        that.setData({ isSending: false, streamingStages: [], currentRunId: null });
+      },
+      /** 调试用：收口每个原始 SSE 事件 */
+      onRawEvent: function (flat, ev) {
+        debugEvents.push({
+          event: ev,
+          data: flat,
+        });
       },
     };
 
@@ -728,7 +752,7 @@ Page({
         if (err && err.type === 'no_chunk') {
           that._replaceAiMessage(aiMsgId, '当前微信版本不支持流式传输，请更新微信');
           that._sending = false;
-          that.setData({ isSending: false, streamingStage: '', currentRunId: null });
+          that.setData({ isSending: false, streamingStages: [], currentRunId: null });
         }
       });
   },
@@ -753,7 +777,7 @@ Page({
       }
     }
     that._sending = false;
-    that.setData({ isSending: false, streamingStage: '', currentRunId: null });
+    that.setData({ isSending: false, streamingStages: [], currentRunId: null });
   },
 
   _patchAssistantPlain: function (msgId, content, stillLoading, plainStream) {
@@ -911,20 +935,28 @@ Page({
     var payload = card.payload || null;
 
     if (card.cardType === 'MENU_PORTFOLIO_QUADRANT_CARD') {
-      // payload.categories 必须是数组且长度为 4（四象限）
-      if (!payload || !Array.isArray(payload.categories) || payload.categories.length !== 4) {
-        console.log('[AI对话] _resolveDisplayCard ⚠️ 四象限卡 categories 不合法, categories:', payload && payload.categories ? payload.categories.length : 'N/A');
-        return null;
+      var cats = (payload && Array.isArray(payload.categories)) ? payload.categories : [];
+      // 空状态：返回带 emptyReason 的 cardData，让组件显示提示文案
+      if (cats.length === 0) {
+        return {
+          cardType: card.cardType,
+          cardData: {
+            title: card.title || '菜单结构四象限',
+            subtitle: '',
+            totalDishCount: 0,
+            categories: [],
+            emptyReason: card.subtitle || (payload && payload.noDataReason) || '该时间范围内暂无菜品数据，暂不能做菜单结构分析',
+          },
+        };
       }
-      // 饼图数据字段：categoryName / count / ratio
-      // 组件需要 { title, subtitle, totalDishCount, categories }
+      // 正常数据
       return {
         cardType: card.cardType,
         cardData: {
           title: card.title || payload.title || '菜单结构四象限',
           subtitle: card.subtitle || payload.subtitle || '本轮菜单内相对分层（销量与实际利润中位数阈值，非绝对行业标准）',
           totalDishCount: payload.totalDishCount || 0,
-          categories: payload.categories,
+          categories: cats,
         },
       };
     }
@@ -1044,6 +1076,188 @@ Page({
       };
     }
 
+    // 原料采购明细卡
+    if (card.cardType === 'PURCHASE_GOODS_DETAIL_CARD') {
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({
+          title: card.title || '',
+          timeLabel: (payload && payload.timeLabel) || '',
+          reportLabel: card.subtitle || (payload && payload.reportLabel) || '',
+          scopeLabel: (payload && payload.scopeLabel) || '',
+          emptyReason: (payload && payload.emptyReason) || '',
+          totalPurchaseAmount: (payload && payload.totalPurchaseAmount != null) ? payload.totalPurchaseAmount : null,
+          purchaseOrderCount: (payload && payload.purchaseOrderCount != null) ? payload.purchaseOrderCount : 0,
+          status: (payload && payload.status) || 'OK',
+          items: (payload && Array.isArray(payload.items)) ? payload.items : [],
+          warnings: (payload && Array.isArray(payload.warnings)) ? payload.warnings : [],
+        }, payload),
+      };
+    }
+
+    // 营业额卡
+    if (card.cardType === 'REVENUE_REPORT_CARD') {
+      return {
+        cardType: card.cardType,
+        cardData: payload,
+      };
+    }
+
+    // 采购核验卡 — 后端字段统一命名为 unitPriceChangedItems，映射到原有 priceAnomalyItems
+    if (card.cardType === 'PURCHASE_CHECK_CARD') {
+      var rawItems = (payload && Array.isArray(payload.unitPriceChangedItems)) ? payload.unitPriceChangedItems : [];
+      var priceItems = rawItems.map(function(item) {
+        return {
+          goodsName: item.goodsName || item.name || '',
+          standardName: item.standardName || '',
+          currentUnitPrice: item.currentUnitPrice || '',
+          previousUnitPrice: item.previousUnitPrice || '',
+          changePercent: item.priceChangePercent || '',
+          reason: item.reason || '',
+        };
+      });
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          priceAnomalyItems: priceItems,
+          unitPriceChangedItems: rawItems,
+        }),
+      };
+    }
+
+    // 库存核销卡 — 后端字段 ingredientDiffItems 映射到原有 topDiffItems
+    if (card.cardType === 'STOCK_RECONCILE_CARD') {
+      var rawDiffItems = (payload && Array.isArray(payload.ingredientDiffItems)) ? payload.ingredientDiffItems : [];
+      var diffItems = rawDiffItems.map(function(item) {
+        return {
+          foodName: item.ingredientName || item.foodName || '',
+          theoryCost: item.theoryUsage || item.theoryCost || '',
+          actualCost: item.actualUsage || item.actualCost || '',
+          diffUsage: item.diffUsage || '',
+          diffCostAmount: item.diffCostAmount || '',
+        };
+      });
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          topDiffItems: diffItems,
+          topDiffItemCount: payload.ingredientDiffItemCount || rawDiffItems.length,
+          ingredientDiffItems: rawDiffItems,
+        }),
+      };
+    }
+
+    // 订货提醒卡
+    if (card.cardType === 'REORDER_REMINDER_CARD') {
+      return {
+        cardType: card.cardType,
+        cardData: payload,
+      };
+    }
+
+    // 菜品销量排行卡
+    if (card.cardType === 'DISH_SALES_RANKING_CARD') {
+      var timeText = (payload && payload.timeDisplayText) || (payload && payload.timeLabel) || '';
+      var baseTitle = card.title || '菜品排行';
+      var combinedTitle = timeText ? timeText + '·' + baseTitle : baseTitle;
+      var metricLabel = (payload && payload.metricLabel) || '';
+      var subtitle = card.subtitle || (metricLabel ? '按' + metricLabel + '排序' : '');
+      return {
+        cardType: card.cardType,
+        cardData: {
+          title: combinedTitle,
+          subtitle: subtitle,
+          payload: payload || {},
+        },
+      };
+    }
+
+    // 菜品成本/利润排行卡
+    if (card.cardType === 'DISH_PROFIT_COST_RANKING_CARD') {
+      var timeText2 = (payload && payload.timeDisplayText) || (payload && payload.timeLabel) || '';
+      var baseTitle2 = card.title || '菜品成本排行';
+      var combinedTitle2 = timeText2 ? timeText2 + '·' + baseTitle2 : baseTitle2;
+      var metricLabel2 = (payload && payload.metricLabel) || '';
+      var subtitle2 = card.subtitle || (metricLabel2 ? '按' + metricLabel2 + '排序' : '');
+      return {
+        cardType: card.cardType,
+        cardData: {
+          title: combinedTitle2,
+          subtitle: subtitle2,
+          payload: payload || {},
+        },
+      };
+    }
+
+    // 菜品利润排行卡（与 DISH_PROFIT_COST_RANKING_CARD 结构一致，chartType=TABLE）
+    if (card.cardType === 'DISH_PROFIT_RANKING_CARD') {
+      var timeText3 = (payload && payload.timeDisplayText) || (payload && payload.timeLabel) || '';
+      var baseTitle3 = card.title || '菜品利润排行';
+      var combinedTitle3 = timeText3 ? timeText3 + '·' + baseTitle3 : baseTitle3;
+      var metricLabel3 = (payload && payload.metricLabel) || '';
+      var subtitle3 = card.subtitle || (metricLabel3 ? '按' + metricLabel3 + '排序' : '');
+      return {
+        cardType: card.cardType,
+        cardData: {
+          title: combinedTitle3,
+          subtitle: subtitle3,
+          payload: payload || {},
+        },
+      };
+    }
+
+    // 菜品配料可支撑天数卡
+    if (card.cardType === 'DISH_INGREDIENT_COVER_DAYS_CARD') {
+      var title4 = card.title || (payload ? (payload.dishName || '') + '·配料可支撑天数' : '配料可支撑天数');
+      var subtitle4 = card.subtitle || (payload ? (payload.stockSnapshotLabel || '') : '');
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          title: title4,
+          subtitle: subtitle4,
+        }),
+      };
+    }
+
+    // 库存风险关注列表卡
+    if (card.cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD') {
+      var title5 = card.title || '库存风险关注列表';
+      var subtitle5 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          title: title5,
+          subtitle: subtitle5,
+        }),
+      };
+    }
+
+    // 库房库存排行卡（账面库存金额偏低/偏高商品）
+    if (card.cardType === 'WAREHOUSE_STOCK_RANKING_CARD') {
+      var title6 = card.title || '账面库存排行';
+      var subtitle6 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          title: title6,
+          subtitle: subtitle6,
+        }),
+      };
+    }
+
+    // 原料可支撑菜品覆盖卡（GOODS → DISH 反向链路）
+    if (card.cardType === 'GOODS_SUPPORTED_DISH_COVER_CARD') {
+      var title7 = card.title || (payload ? (payload.goodsName || '') + '·可支撑菜品' : '原料可支撑菜品');
+      var subtitle7 = card.subtitle || (payload ? (payload.stockSnapshotLabel || '') : '');
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          title: title7,
+          subtitle: subtitle7,
+        }),
+      };
+    }
+
     // 未知 cardType：直接透传 payload
     return {
       cardType: card.cardType,
@@ -1086,21 +1300,14 @@ Page({
   },
 
   /**
-   * 点击子问题：填入输入框并聚焦，不自动发送
+   * 点击子问题：直接发送，不再经过输入框
    * clickable=false / COMING_SOON 的问题灰态不可点击
    */
   onQuestionTap: function (e) {
     var text = e.currentTarget.dataset.text;
     var clickable = e.currentTarget.dataset.clickable !== false;
     if (!text || !clickable) return;
-    this._fillInput(text);
-  },
-
-  /**
-   * 将问题文本填入底部输入框并聚焦
-   */
-  _fillInput: function (text) {
-    this.setData({ inputValue: text, composerFocused: true });
+    this._sendMessage(text);
   },
 
   onMenuTap: function () {
@@ -1121,5 +1328,81 @@ Page({
 
   toBack: function () {
     wx.navigateBack();
+  },
+
+  // ========== 调试 JSON ==========
+
+  /** 切换调试 JSON 显示 */
+  toggleDebugJson: function () {
+    this.setData({ showDebugJson: !this.data.showDebugJson });
+  },
+
+  /** 将调试数据存入 AI 消息 */
+  _saveDebugData: function (aiMsgId, runResult, events) {
+    var list = this.data.messages;
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === aiMsgId && list[i].role === 'assistant') {
+        idx = i;
+        break;
+      }
+    }
+    if (idx < 0) return;
+
+    var payload = {
+      runResult: runResult,
+      sseEvents: events || [],
+    };
+    var jsonText = '';
+    try {
+      jsonText = JSON.stringify(payload, null, 2);
+    } catch (e) {
+      jsonText = String(payload);
+    }
+
+    var patch = {};
+    patch['messages[' + idx + '].debugRunResult'] = runResult;
+    patch['messages[' + idx + '].debugSseEvents'] = events || [];
+    patch['messages[' + idx + '].debugJsonText'] = jsonText;
+    this.setData(patch);
+  },
+
+  /** 复制调试 JSON 到剪贴板 */
+  onCopyDebugJson: function (e) {
+    var msgId = e.currentTarget.dataset.msgid;
+    var msg = null;
+    var list = this.data.messages;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === msgId) {
+        msg = list[i];
+        break;
+      }
+    }
+    if (!msg) {
+      wx.showToast({ title: '未找到消息', icon: 'none' });
+      return;
+    }
+    var payload = {
+      runId: msg.runId || '',
+      role: msg.role,
+      debugRunResult: msg.debugRunResult,
+      debugSseEvents: msg.debugSseEvents,
+      content: typeof msg.content === 'string' ? msg.content.slice(0, 200) : msg.content,
+    };
+    var text;
+    try {
+      text = JSON.stringify(payload, null, 2);
+    } catch (e2) {
+      text = String(payload);
+    }
+    wx.setClipboardData({
+      data: text,
+      success: function () {
+        wx.showToast({ title: '已复制 Debug JSON', icon: 'success', duration: 1500 });
+      },
+      fail: function () {
+        wx.showToast({ title: '复制失败', icon: 'none' });
+      },
+    });
   },
 });

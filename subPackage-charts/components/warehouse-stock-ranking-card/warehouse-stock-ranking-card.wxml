@@ -1,0 +1,74 @@
+<!-- 库房库存排行卡片（表格样式） -->
+<view class="wsr-card" wx:if="{{visible}}">
+
+  <!-- ========== 标题区 ========== -->
+  <view class="wsr-header">
+    <text class="wsr-title">{{title}}</text>
+    <text class="wsr-subtitle">{{subtitle}}</text>
+  </view>
+
+  <!-- ========== 摘要叙述 ========== -->
+  <view class="wsr-summary" wx:if="{{narrative}}">
+    <text class="wsr-summary-text">{{narrative}}</text>
+  </view>
+
+  <!-- ========== 空数据 ========== -->
+  <view class="wsr-empty" wx:if="{{emptyReason && rows.length === 0}}">
+    <text class="wsr-empty-text">{{emptyReason}}</text>
+  </view>
+
+  <!-- ========== 表格 ========== -->
+  <view class="wsr-table" wx:if="{{rows.length > 0}}">
+
+    <!-- 表头 -->
+    <view class="wsr-thead">
+      <text class="wsr-th wsr-th--rank">排名</text>
+      <text class="wsr-th wsr-th--goods">商品名称</text>
+      <text class="wsr-th wsr-th--amount wsr-th--red">账面库存金额（元）</text>
+      <text class="wsr-th wsr-th--weight">剩余重量（斤）</text>
+    </view>
+
+    <!-- 数据行 -->
+    <view
+      class="wsr-tr {{item.rank === 1 ? 'wsr-tr--first' : ''}}"
+      wx:for="{{displayRows}}"
+      wx:key="rank"
+    >
+      <!-- 排名 -->
+      <view class="wsr-td wsr-td--rank">
+        <view class="wsr-medal {{item.rank === 1 ? 'wsr-medal--gold' : item.rank === 2 ? 'wsr-medal--silver' : item.rank === 3 ? 'wsr-medal--bronze' : 'wsr-medal--normal'}}">
+          <text class="wsr-medal-num">{{item.rank}}</text>
+        </view>
+      </view>
+
+      <!-- 商品名称 -->
+      <view class="wsr-td wsr-td--goods">
+        <text class="wsr-goods-name">{{item.goodsName}}</text>
+      </view>
+
+      <!-- 账面库存金额 -->
+      <view class="wsr-td wsr-td--amount">
+        <text class="wsr-amount-val wsr-amount-val--red">{{item.restAmountStr}}</text>
+      </view>
+
+      <!-- 剩余重量 -->
+      <view class="wsr-td wsr-td--weight">
+        <text class="wsr-weight-val">{{item.restWeightStr}}</text>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ========== 底部栏 ========== -->
+  <view class="wsr-footer" wx:if="{{rows.length > 0}}">
+    <view class="wsr-footer-left">
+      <text class="wsr-footer-icon">📊</text>
+      <text class="wsr-footer-text">共 {{totalCount}} 项商品参与排行</text>
+    </view>
+    <view class="wsr-footer-right" wx:if="{{hasMore}}" catchtap="onToggleExpand">
+      <text class="wsr-expand-text">{{showAll ? '收起' : '查看完整排行'}}</text>
+      <text class="wsr-expand-arrow">{{showAll ? '∧' : '∨'}}</text>
+    </view>
+  </view>
+
+</view>

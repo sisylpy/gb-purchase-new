@@ -1,0 +1,234 @@
+/* ========== 卡片容器 ========== */
+.dsr-card {
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx 20rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  border: 1rpx solid #eaeaea;
+  box-sizing: border-box;
+}
+
+/* ========== 标题行 ========== */
+.dsr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.dsr-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.dsr-title-icon {
+  width: 44rpx;
+  height: 44rpx;
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12rpx;
+}
+
+.dsr-icon-crown {
+  font-size: 24rpx;
+  color: #f5a623;
+}
+
+.dsr-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.dsr-info-icon {
+  font-size: 24rpx;
+  color: #b0b0b0;
+  margin-left: 8rpx;
+}
+
+.dsr-date-range {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #888;
+  line-height: 1.3;
+  margin-left: 16rpx;
+}
+
+/* 副标题 */
+.dsr-subtitle {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+  padding-left: 56rpx;
+  line-height: 1.4;
+}
+
+/* ========== 空数据 ========== */
+.dsr-empty {
+  padding: 48rpx 0;
+  text-align: center;
+}
+.dsr-empty-text { font-size: 26rpx; color: #bbb; }
+
+/* ========== 表格 ========== */
+.dsr-table { margin-top: 4rpx; }
+
+/* 表头 */
+.dsr-thead {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dsr-th {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.dsr-th--rank { width: 100rpx; flex-shrink: 0; text-align: center; }
+.dsr-th--dish { flex: 1; min-width: 0; padding-left: 16rpx; }
+.dsr-th--sales { width: 180rpx; flex-shrink: 0; text-align: right; }
+.dsr-th--amount { width: 180rpx; flex-shrink: 0; text-align: right; padding-right: 4rpx; }
+
+/* 数据行 */
+.dsr-tr {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+.dsr-tr:last-child { border-bottom: none; }
+
+/* 第1名高亮 */
+.dsr-tr--first { background: linear-gradient(90deg, #fffbeb, transparent); margin: 0 -12rpx; padding-left: 12rpx; padding-right: 12rpx; border-radius: 8rpx; }
+
+/* 单元格 */
+.dsr-td { display: flex; align-items: center; }
+
+.dsr-td--rank { width: 100rpx; flex-shrink: 0; justify-content: center; }
+.dsr-td--dish { flex: 1; min-width: 0; padding-left: 16rpx; }
+.dsr-td--sales { width: 180rpx; flex-shrink: 0; justify-content: flex-end; }
+.dsr-td--amount { width: 180rpx; flex-shrink: 0; justify-content: flex-end; padding-right: 4rpx; }
+
+/* ---------- 奖牌徽标 ---------- */
+.dsr-medal {
+  width: 48rpx;
+  height: 52rpx;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.dsr-medal::after {
+  content: '';
+  position: absolute;
+  bottom: -4rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28rpx;
+  height: 10rpx;
+  border-radius: 0 0 14rpx 14rpx;
+}
+
+/* 金牌 */
+.dsr-medal--gold {
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+}
+.dsr-medal--gold .dsr-medal-num { color: #fff; font-weight: 800; font-size: 26rpx; }
+.dsr-medal--gold::after { background: linear-gradient(135deg, #ff8a65, #e64a19); }
+
+/* 银牌 */
+.dsr-medal--silver {
+  background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+}
+.dsr-medal--silver .dsr-medal-num { color: #666; font-weight: 700; font-size: 26rpx; }
+.dsr-medal--silver::after { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+
+/* 铜牌 */
+.dsr-medal--bronze {
+  background: linear-gradient(135deg, #d4a574, #b8865c);
+}
+.dsr-medal--bronze .dsr-medal-num { color: #fff; font-weight: 700; font-size: 26rpx; }
+.dsr-medal--bronze::after { background: linear-gradient(135deg, #bc8a5c, #9a7044); }
+
+/* 普通名次 */
+.dsr-medal--normal {
+  background: #f5f5f5;
+  border-radius: 50%;
+  width: 40rpx;
+  height: 40rpx;
+}
+.dsr-medal--normal .dsr-medal-num { color: #999; font-weight: 600; font-size: 22rpx; }
+.dsr-medal--normal::after { display: none; }
+
+/* ---------- 菜品名称 ---------- */
+.dsr-dish-name {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- 销量 ---------- */
+.dsr-sales-num {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.dsr-sales-num--top { color: #e8632d; }
+.dsr-sales-unit {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-left: 4rpx;
+  line-height: 1.4;
+}
+
+/* ---------- 销售额 ---------- */
+.dsr-amount-val {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ========== 底部栏 ========== */
+.dsr-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.dsr-footer-left {
+  display: flex;
+  align-items: center;
+}
+
+.dsr-footer-icon { font-size: 24rpx; margin-right: 6rpx; }
+.dsr-footer-text { font-size: 23rpx; color: #999; }
+
+.dsr-footer-right {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  background: #fafafa;
+  border-radius: 8rpx;
+}
+
+.dsr-expand-text { font-size: 23rpx; color: #555; }
+.dsr-expand-arrow { font-size: 20rpx; color: #999; margin-left: 6rpx; }

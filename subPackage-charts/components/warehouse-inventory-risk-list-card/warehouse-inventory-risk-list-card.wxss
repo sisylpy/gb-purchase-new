@@ -1,0 +1,139 @@
+.wir-card {
+  margin: 20rpx 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx 24rpx;
+}
+
+/* 头部 */
+.wir-header {
+  margin-bottom: 16rpx;
+}
+
+.wir-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: block;
+}
+
+.wir-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
+  display: block;
+}
+
+/* 摘要 */
+.wir-summary {
+  background: #f5f7fa;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.wir-summary-text {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* 风险项列表 */
+.wir-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.wir-item {
+  background: #fafafa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.wir-item:last-child {
+  margin-bottom: 0;
+}
+
+.wir-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.wir-item-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+}
+
+.wir-item-level {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
+.wir-risk-high {
+  background: #fde8e8;
+  color: #e02020;
+}
+
+.wir-risk-medium {
+  background: #fef0e6;
+  color: #e8632d;
+}
+
+.wir-risk-low {
+  background: #e8f8e8;
+  color: #389e0d;
+}
+
+/* 三项指标 */
+.wir-item-stats {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 12rpx;
+}
+
+.wir-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border-radius: 8rpx;
+  padding: 12rpx 8rpx;
+}
+
+.wir-stat-label {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.wir-stat-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 原因 */
+.wir-item-reason {
+  display: flex;
+  font-size: 24rpx;
+  line-height: 1.5;
+  padding-top: 8rpx;
+  border-top: 1rpx solid #eee;
+}
+
+.wir-reason-label {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.wir-reason-text {
+  color: #666;
+}

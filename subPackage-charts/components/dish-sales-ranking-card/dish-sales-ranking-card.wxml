@@ -1,0 +1,79 @@
+<!-- 菜品销量 / 销售额排行卡片（表格样式） -->
+<view class="dsr-card" wx:if="{{visible}}">
+
+  <!-- ========== 标题行 ========== -->
+  <view class="dsr-header">
+    <view class="dsr-header-left">
+      <view class="dsr-title-icon">
+        <text class="dsr-icon-crown">♛</text>
+      </view>
+      <!-- <text class="dsr-title">{{title}}</text> -->
+      <!-- <text class="dsr-info-icon">ⓘ</text> -->
+    </view>
+    <!-- <text class="dsr-date-range" wx:if="{{dateRange}}">📅 {{dateRange}}</text> -->
+  </view>
+
+  <!-- 副标题 -->
+  <!-- <text class="dsr-subtitle" wx:if="{{subtitle}}">{{subtitle}}</text> -->
+
+  <!-- ========== 空数据 ========== -->
+  <view class="dsr-empty" wx:if="{{emptyReason && rows.length === 0}}">
+    <text class="dsr-empty-text">{{emptyReason}}</text>
+  </view>
+
+  <!-- ========== 表格 ========== -->
+  <view class="dsr-table" wx:if="{{rows.length > 0}}">
+
+    <!-- 表头 -->
+    <view class="dsr-thead">
+      <text class="dsr-th dsr-th--rank">排名</text>
+      <text class="dsr-th dsr-th--dish">菜品</text>
+      <text class="dsr-th dsr-th--sales">销量（份）</text>
+      <text class="dsr-th dsr-th--amount">销售额（元）</text>
+    </view>
+
+    <!-- 数据行 -->
+    <view
+      class="dsr-tr {{item.rank === 1 ? 'dsr-tr--first' : ''}}"
+      wx:for="{{displayRows}}"
+      wx:key="rank"
+    >
+      <!-- 排名：奖牌徽标 -->
+      <view class="dsr-td dsr-td--rank">
+        <view class="dsr-medal {{item.rank === 1 ? 'dsr-medal--gold' : item.rank === 2 ? 'dsr-medal--silver' : item.rank === 3 ? 'dsr-medal--bronze' : 'dsr-medal--normal'}}">
+          <text class="dsr-medal-num">{{item.rank}}</text>
+        </view>
+      </view>
+
+      <!-- 菜名 -->
+      <view class="dsr-td dsr-td--dish">
+        <text class="dsr-dish-name">{{item.dishName}}</text>
+      </view>
+
+      <!-- 销量 -->
+      <view class="dsr-td dsr-td--sales">
+        <text class="dsr-sales-num {{item.rank === 1 ? 'dsr-sales-num--top' : ''}}">{{item.soldPortionsTotal}}</text>
+        <text class="dsr-sales-unit">份</text>
+      </view>
+
+      <!-- 销售额 -->
+      <view class="dsr-td dsr-td--amount">
+        <text class="dsr-amount-val">{{item.salesAmountStr}}</text>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ========== 底部栏 ========== -->
+  <view class="dsr-footer" wx:if="{{rows.length > 0}}">
+    <view class="dsr-footer-left">
+      <text class="dsr-footer-icon">📊</text>
+      <text class="dsr-footer-text">共 {{totalCount}} 道菜品参与排行</text>
+    </view>
+    <view class="dsr-footer-right" wx:if="{{hasMore}}" catchtap="onToggleExpand">
+      <text class="dsr-expand-text">{{showAll ? '收起' : '查看完整排行'}}</text>
+      <text class="dsr-expand-arrow">{{showAll ? '∧' : '∨'}}</text>
+    </view>
+  </view>
+
+</view>

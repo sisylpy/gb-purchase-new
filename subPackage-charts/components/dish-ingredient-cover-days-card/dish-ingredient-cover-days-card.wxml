@@ -1,0 +1,73 @@
+<!-- 菜品配料可支撑天数卡片 -->
+<view class="dicd-card" wx:if="{{visible && ingredientRows.length > 0}}">
+
+  <!-- ========== 头部：菜品名 + 整体可支撑天数 ========== -->
+  <view class="dicd-header">
+    <view class="dicd-header-left">
+      <text class="dicd-dish-name">{{dishName}}</text>
+      <text class="dicd-subtitle" wx:if="{{subtitle}}">{{subtitle}}</text>
+    </view>
+    <view class="dicd-header-right {{dishDanger ? 'dicd-header-right--danger' : ''}}">
+      <text class="dicd-cover-days-label">可支撑</text>
+      <text class="dicd-cover-days-num {{dishDanger ? 'dicd-cover-days-num--danger' : ''}}">{{dishCoverDays}}</text>
+      <text class="dicd-cover-days-unit">天</text>
+    </view>
+  </view>
+
+  <!-- ========== 摘要统计 ========== -->
+  <view class="dicd-summary" wx:if="{{summary}}">
+    <text class="dicd-summary-text">近{{summary.salesBaselineDays || 7}}天总销量 <text class="dicd-summary-bold">{{salesPortions}}</text> 份</text>
+    <text class="dicd-summary-div">|</text>
+    <text class="dicd-summary-text">日均销量 <text class="dicd-summary-bold">{{dailySalesPortions}}</text> 份</text>
+  </view>
+
+  <!-- ========== 瓶颈提示 ========== -->
+  <view class="dicd-bottleneck" wx:if="{{bottleneckName}}">
+    <view class="dicd-bn-dot"></view>
+    <text class="dicd-bn-text">瓶颈配料：<text class="dicd-bn-name">{{bottleneckName}}</text></text>
+    <text class="dicd-bn-days">{{bottleneckDays}} 天</text>
+  </view>
+
+  <!-- ========== 配料表格 ========== -->
+  <view class="dicd-table">
+    <!-- 表头 -->
+    <view class="dicd-thead">
+      <text class="dicd-th dicd-th--ing">配料名称</text>
+      <text class="dicd-th dicd-th--recipe">单份用量</text>
+      <text class="dicd-th dicd-th--stock">当前库存</text>
+      <text class="dicd-th dicd-th--daily">日预计用量</text>
+      <text class="dicd-th dicd-th--days">可支撑天数</text>
+    </view>
+
+    <!-- 数据行 -->
+    <view
+      class="dicd-tr {{item.isBottleneck ? 'dicd-tr--bottleneck' : ''}}"
+      wx:for="{{ingredientRows}}"
+      wx:key="ingredientName"
+    >
+      <view class="dicd-td dicd-td--ing">
+        <text class="dicd-ing-name">{{item.ingredientName}}</text>
+        <text class="dicd-ing-bn-tag" wx:if="{{item.isBottleneck}}">瓶颈</text>
+      </view>
+      <view class="dicd-td dicd-td--recipe">
+        <text class="dicd-td-val">{{item.recipeUnitPerDish}}</text>
+      </view>
+      <view class="dicd-td dicd-td--stock">
+        <text class="dicd-td-val">{{item.currentStockQty}}</text>
+      </view>
+      <view class="dicd-td dicd-td--daily">
+        <text class="dicd-td-val">{{item.dailyExpectedUsageQty}}</text>
+      </view>
+      <view class="dicd-td dicd-td--days">
+        <text class="dicd-days-val {{item.isDanger ? 'dicd-days-val--danger' : (item.isWarning ? 'dicd-days-val--warning' : '')}}">{{item.coverDaysStr}}</text>
+        <text class="dicd-days-unit">天</text>
+      </view>
+    </view>
+  </view>
+
+</view>
+
+<!-- 空数据 / 无配料 -->
+<view class="dicd-card dicd-card--empty" wx:if="{{visible && ingredientRows.length === 0}}">
+  <text class="dicd-empty-text">暂无配料可支撑天数数据</text>
+</view>

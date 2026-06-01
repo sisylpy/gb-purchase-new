@@ -1,0 +1,212 @@
+/* ========== 卡片容器 ========== */
+.wsr-card {
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx 20rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  border: 1rpx solid #eaeaea;
+  box-sizing: border-box;
+}
+
+/* ========== 标题区 ========== */
+.wsr-header {
+  margin-bottom: 4rpx;
+}
+
+.wsr-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: block;
+  line-height: 1.3;
+}
+
+.wsr-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-top: 4rpx;
+  line-height: 1.4;
+}
+
+/* ========== 摘要 ========== */
+.wsr-summary {
+  background: #f5f7fa;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  margin-top: 16rpx;
+}
+
+.wsr-summary-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* ========== 空数据 ========== */
+.wsr-empty {
+  padding: 48rpx 0;
+  text-align: center;
+}
+.wsr-empty-text { font-size: 26rpx; color: #bbb; }
+
+/* ========== 表格 ========== */
+.wsr-table { margin-top: 20rpx; }
+
+/* 表头 */
+.wsr-thead {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.wsr-th {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.wsr-th--rank { width: 100rpx; flex-shrink: 0; text-align: center; }
+.wsr-th--goods { flex: 1; min-width: 0; padding-left: 16rpx; }
+.wsr-th--amount { width: 190rpx; flex-shrink: 0; text-align: right; }
+.wsr-th--weight { width: 140rpx; flex-shrink: 0; text-align: right; padding-right: 4rpx; }
+
+/* 表头红字 */
+.wsr-th--red { color: #e02020; }
+
+/* 数据行 */
+.wsr-tr {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+.wsr-tr:last-child { border-bottom: none; }
+
+/* 第1名高亮 */
+.wsr-tr--first {
+  background: linear-gradient(90deg, #fffbeb, transparent);
+  margin: 0 -12rpx;
+  padding-left: 12rpx;
+  padding-right: 12rpx;
+  border-radius: 8rpx;
+}
+
+/* 单元格 */
+.wsr-td { display: flex; align-items: center; }
+
+.wsr-td--rank { width: 100rpx; flex-shrink: 0; justify-content: center; }
+.wsr-td--goods { flex: 1; min-width: 0; padding-left: 16rpx; }
+.wsr-td--amount { width: 190rpx; flex-shrink: 0; justify-content: flex-end; }
+.wsr-td--weight { width: 140rpx; flex-shrink: 0; justify-content: flex-end; padding-right: 4rpx; }
+
+/* ---------- 奖牌徽标（复用 dpcr 样式） ---------- */
+.wsr-medal {
+  width: 48rpx;
+  height: 52rpx;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wsr-medal::after {
+  content: '';
+  position: absolute;
+  bottom: -4rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28rpx;
+  height: 10rpx;
+  border-radius: 0 0 14rpx 14rpx;
+}
+
+/* 金牌 */
+.wsr-medal--gold {
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+}
+.wsr-medal--gold .wsr-medal-num { color: #fff; font-weight: 800; font-size: 26rpx; }
+.wsr-medal--gold::after { background: linear-gradient(135deg, #ff8a65, #e64a19); }
+
+/* 银牌 */
+.wsr-medal--silver {
+  background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+}
+.wsr-medal--silver .wsr-medal-num { color: #666; font-weight: 700; font-size: 26rpx; }
+.wsr-medal--silver::after { background: linear-gradient(135deg, #90a4ae, #607d8b); }
+
+/* 铜牌 */
+.wsr-medal--bronze {
+  background: linear-gradient(135deg, #d4a574, #b8865c);
+}
+.wsr-medal--bronze .wsr-medal-num { color: #fff; font-weight: 700; font-size: 26rpx; }
+.wsr-medal--bronze::after { background: linear-gradient(135deg, #bc8a5c, #9a7044); }
+
+/* 普通名次 */
+.wsr-medal--normal {
+  background: #f5f5f5;
+  border-radius: 50%;
+  width: 40rpx;
+  height: 40rpx;
+}
+.wsr-medal--normal .wsr-medal-num { color: #999; font-weight: 600; font-size: 22rpx; }
+.wsr-medal--normal::after { display: none; }
+
+/* ---------- 商品名称 ---------- */
+.wsr-goods-name {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- 账面库存金额 ---------- */
+.wsr-amount-val {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.wsr-amount-val--red { color: #e02020; }
+
+/* ---------- 剩余重量 ---------- */
+.wsr-weight-val {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ========== 底部栏 ========== */
+.wsr-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.wsr-footer-left {
+  display: flex;
+  align-items: center;
+}
+
+.wsr-footer-icon { font-size: 24rpx; margin-right: 6rpx; }
+.wsr-footer-text { font-size: 23rpx; color: #999; }
+
+.wsr-footer-right {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  background: #fafafa;
+  border-radius: 8rpx;
+}
+
+.wsr-expand-text { font-size: 23rpx; color: #555; }
+.wsr-expand-arrow { font-size: 20rpx; color: #999; margin-left: 6rpx; }

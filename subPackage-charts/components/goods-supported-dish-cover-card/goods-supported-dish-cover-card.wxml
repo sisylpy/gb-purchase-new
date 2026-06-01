@@ -1,0 +1,73 @@
+<view class="gsdc-card" wx:if="{{visible}}">
+  <!-- 头部：原料名称 + 整体可支撑天数 -->
+  <view class="gsdc-header">
+    <view class="gsdc-header-main">
+      <text class="gsdc-title">{{title}}</text>
+      <view class="gsdc-cover-badge">
+        <text class="gsdc-cover-label">可支撑</text>
+        <text class="gsdc-cover-num {{dishDanger ? 'gsdc-cover-num--danger' : ''}}">{{dishCoverDays}}</text>
+        <text class="gsdc-cover-unit">天</text>
+      </view>
+    </view>
+    <text class="gsdc-subtitle">{{subtitle}}</text>
+    <text class="gsdc-stock">当前库存 {{currentStockQty}} {{weightUnit}}</text>
+  </view>
+
+  <!-- 瓶颈菜品 -->
+  <view class="gsdc-bottleneck" wx:if="{{bottleneckName}}">
+    <view class="gsdc-bottleneck-dot"></view>
+    <text class="gsdc-bottleneck-text">瓶颈菜品：{{bottleneckName}}（{{bottleneckDays}} 天）</text>
+  </view>
+
+  <!-- 销量基线说明 -->
+  <view class="gsdc-baseline" wx:if="{{salesBaselineLabel}}">
+    <text class="gsdc-baseline-label">销量基线：</text>
+    <text class="gsdc-baseline-text">{{salesBaselineLabel}}</text>
+  </view>
+
+  <!-- 菜品表格 -->
+  <view class="gsdc-table" wx:if="{{dishRows.length > 0}}">
+    <!-- 表头 -->
+    <view class="gsdc-thead">
+      <text class="gsdc-th gsdc-th--dish">菜品</text>
+      <text class="gsdc-th gsdc-th--recipe">单份用量</text>
+      <text class="gsdc-th gsdc-th--daily">日均销量</text>
+      <text class="gsdc-th gsdc-th--cover">可支撑天数</text>
+      <text class="gsdc-th gsdc-th--portions">还可卖(份)</text>
+    </view>
+
+    <!-- 数据行 -->
+    <view
+      class="gsdc-tr {{item.isBottleneck ? 'gsdc-tr--bottleneck' : ''}}"
+      wx:for="{{dishRows}}"
+      wx:key="dishId"
+    >
+      <view class="gsdc-td gsdc-td--dish">
+        <text class="gsdc-dish-name">{{item.dishName}}</text>
+        <text class="gsdc-bottleneck-tag" wx:if="{{item.isBottleneck}}">瓶颈</text>
+      </view>
+      <view class="gsdc-td gsdc-td--recipe">
+        <text class="gsdc-recipe-val">{{item.recipeUnitPerDish}}</text>
+      </view>
+      <view class="gsdc-td gsdc-td--daily">
+        <text class="gsdc-daily-val">{{item.dailySalesPortions}}</text>
+      </view>
+      <view class="gsdc-td gsdc-td--cover">
+        <text class="gsdc-cover-val {{item.isDanger ? 'gsdc-cover-val--danger' : item.isWarning ? 'gsdc-cover-val--warning' : ''}}">{{item.coverDaysStr}}</text>
+      </view>
+      <view class="gsdc-td gsdc-td--portions">
+        <text class="gsdc-portions-val">{{item.supportedPortions}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空数据 -->
+  <view class="gsdc-empty" wx:if="{{dishRows.length === 0}}">
+    <text class="gsdc-empty-text">暂无使用此原料的菜品数据</text>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="gsdc-footer" wx:if="{{summary && summary.methodNote}}">
+    <text class="gsdc-method-note">{{summary.methodNote}}</text>
+  </view>
+</view>

@@ -1,0 +1,241 @@
+.gsdc-card {
+  margin: 20rpx 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx 24rpx;
+  border: 1rpx solid #eaeaea;
+}
+
+/* 头部 */
+.gsdc-header {
+  margin-bottom: 16rpx;
+}
+
+.gsdc-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+
+.gsdc-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  flex: 1;
+}
+
+.gsdc-cover-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+
+.gsdc-cover-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.gsdc-cover-num {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.gsdc-cover-num--danger {
+  color: #e02020;
+}
+
+.gsdc-cover-unit {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.gsdc-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  line-height: 1.4;
+}
+
+.gsdc-stock {
+  font-size: 26rpx;
+  color: #e8632d;
+  font-weight: 500;
+  display: block;
+  margin-top: 4rpx;
+}
+
+/* 瓶颈菜品 */
+.gsdc-bottleneck {
+  display: flex;
+  align-items: center;
+  background: #fef0e6;
+  border-radius: 10rpx;
+  padding: 14rpx 18rpx;
+  margin-bottom: 16rpx;
+}
+
+.gsdc-bottleneck-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #e8632d;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.gsdc-bottleneck-text {
+  font-size: 26rpx;
+  color: #e8632d;
+  font-weight: 500;
+}
+
+/* 销量基线 */
+.gsdc-baseline {
+  display: flex;
+  background: #f5f7fa;
+  border-radius: 10rpx;
+  padding: 12rpx 18rpx;
+  margin-bottom: 16rpx;
+}
+
+.gsdc-baseline-label {
+  font-size: 24rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.gsdc-baseline-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 表格 */
+.gsdc-table {
+  margin-top: 8rpx;
+}
+
+.gsdc-thead {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.gsdc-th {
+  font-size: 23rpx;
+  color: #999;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.gsdc-th--dish { flex: 1; min-width: 0; padding-left: 8rpx; }
+.gsdc-th--recipe { width: 110rpx; flex-shrink: 0; text-align: center; }
+.gsdc-th--daily { width: 110rpx; flex-shrink: 0; text-align: center; }
+.gsdc-th--cover { width: 130rpx; flex-shrink: 0; text-align: center; }
+.gsdc-th--portions { width: 130rpx; flex-shrink: 0; text-align: center; padding-right: 4rpx; }
+
+/* 数据行 */
+.gsdc-tr {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+
+.gsdc-tr:last-child {
+  border-bottom: none;
+}
+
+.gsdc-tr--bottleneck {
+  background: #fff5f5;
+  margin: 0 -12rpx;
+  padding-left: 12rpx;
+  padding-right: 12rpx;
+  border-radius: 8rpx;
+}
+
+.gsdc-td {
+  display: flex;
+  align-items: center;
+}
+
+.gsdc-td--dish {
+  flex: 1;
+  min-width: 0;
+  padding-left: 8rpx;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.gsdc-dish-name {
+  font-size: 27rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.gsdc-bottleneck-tag {
+  font-size: 20rpx;
+  color: #e02020;
+  background: #fde8e8;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+  margin-top: 4rpx;
+}
+
+.gsdc-td--recipe { width: 110rpx; flex-shrink: 0; justify-content: center; }
+.gsdc-td--daily { width: 110rpx; flex-shrink: 0; justify-content: center; }
+.gsdc-td--cover { width: 130rpx; flex-shrink: 0; justify-content: center; }
+.gsdc-td--portions { width: 130rpx; flex-shrink: 0; justify-content: center; padding-right: 4rpx; }
+
+.gsdc-recipe-val,
+.gsdc-daily-val,
+.gsdc-portions-val {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.gsdc-cover-val {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.gsdc-cover-val--danger {
+  color: #e02020;
+}
+
+.gsdc-cover-val--warning {
+  color: #e8632d;
+}
+
+/* 空数据 */
+.gsdc-empty {
+  padding: 48rpx 0;
+  text-align: center;
+}
+
+.gsdc-empty-text {
+  font-size: 26rpx;
+  color: #bbb;
+}
+
+/* 底部说明 */
+.gsdc-footer {
+  margin-top: 16rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.gsdc-method-note {
+  font-size: 22rpx;
+  color: #aaa;
+  line-height: 1.6;
+}

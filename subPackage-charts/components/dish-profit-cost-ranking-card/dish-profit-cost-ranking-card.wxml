@@ -1,0 +1,70 @@
+<!-- 菜品成本/利润排行卡片（表格样式） -->
+<view class="dpcr-card" wx:if="{{visible}}">
+
+  <!-- ========== 空数据 ========== -->
+  <view class="dpcr-empty" wx:if="{{emptyReason && rows.length === 0}}">
+    <text class="dpcr-empty-text">{{emptyReason}}</text>
+  </view>
+
+  <!-- ========== 表格 ========== -->
+  <view class="dpcr-table" wx:if="{{rows.length > 0}}">
+
+    <!-- 表头 -->
+    <view class="dpcr-thead">
+      <text class="dpcr-th dpcr-th--rank">排名</text>
+      <text class="dpcr-th dpcr-th--dish">菜品</text>
+      <text class="dpcr-th dpcr-th--sales">销量（份）</text>
+      <text class="dpcr-th dpcr-th--cost {{costHighlight ? 'dpcr-th--cost-red' : ''}}">实际成本（元）</text>
+      <text class="dpcr-th dpcr-th--margin {{profitHighlight ? 'dpcr-th--margin-red' : ''}}">{{marginLabel}}</text>
+    </view>
+
+    <!-- 数据行 -->
+    <view
+      class="dpcr-tr {{item.rank === 1 ? 'dpcr-tr--first' : ''}}"
+      wx:for="{{displayRows}}"
+      wx:key="rank"
+    >
+      <!-- 排名 -->
+      <view class="dpcr-td dpcr-td--rank">
+        <view class="dpcr-medal {{item.rank === 1 ? 'dpcr-medal--gold' : item.rank === 2 ? 'dpcr-medal--silver' : item.rank === 3 ? 'dpcr-medal--bronze' : 'dpcr-medal--normal'}}">
+          <text class="dpcr-medal-num">{{item.rank}}</text>
+        </view>
+      </view>
+
+      <!-- 菜名 -->
+      <view class="dpcr-td dpcr-td--dish">
+        <text class="dpcr-dish-name">{{item.dishName}}</text>
+      </view>
+
+      <!-- 销量 -->
+      <view class="dpcr-td dpcr-td--sales">
+        <text class="dpcr-sales-num {{item.rank === 1 ? 'dpcr-sales-num--top' : ''}}">{{item.salesQuantity}}</text>
+        <text class="dpcr-sales-unit">份</text>
+      </view>
+
+      <!-- 实际成本 -->
+      <view class="dpcr-td dpcr-td--cost">
+        <text class="dpcr-cost-val {{costHighlight ? 'dpcr-cost-val--red' : ''}}">{{item.actualCostStr}}</text>
+      </view>
+
+      <!-- 毛利率 / 利润额 -->
+      <view class="dpcr-td dpcr-td--margin">
+        <text class="dpcr-margin-val {{profitHighlight ? 'dpcr-margin-val--red' : (item.rank === 1 ? 'dpcr-margin-val--top' : '')}}">{{profitHighlight ? item.profitAmountStr : item.marginRateStr}}</text>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ========== 底部栏 ========== -->
+  <view class="dpcr-footer" wx:if="{{rows.length > 0}}">
+    <view class="dpcr-footer-left">
+      <text class="dpcr-footer-icon">📊</text>
+      <text class="dpcr-footer-text">共 {{totalCount}} 道菜品参与排行</text>
+    </view>
+    <view class="dpcr-footer-right" wx:if="{{hasMore}}" catchtap="onToggleExpand">
+      <text class="dpcr-expand-text">{{showAll ? '收起' : '查看完整排行'}}</text>
+      <text class="dpcr-expand-arrow">{{showAll ? '∧' : '∨'}}</text>
+    </view>
+  </view>
+
+</view>

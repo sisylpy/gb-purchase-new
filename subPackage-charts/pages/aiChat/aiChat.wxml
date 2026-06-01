@@ -4,11 +4,14 @@
   <view class="gem-nav" style="padding-top: {{statusBarHeight + 20}}px;">
    
 
-<navbar title="{{pageTitle || '经营看板'}}" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+<navbar title="{{pageTitle || 'Ai助手'}}" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
      
   </view>
 
-  <view class="p-20">{{topicPageTitle}}</view>
+  <!-- Debug 切换按钮 -->
+  <view class="gem-debug-toggle" catchtap="toggleDebugJson">
+    <text class="gem-debug-toggle-text">🐞 {{showDebugJson ? 'ON' : 'OFF'}}</text>
+  </view>
 
   <!-- 主区域 -->
   <scroll-view
@@ -40,7 +43,7 @@
               <text class="gem-pill-emoji">{{topic.emoji}}</text>
               <view class="gem-pill-body">
                 <text class="gem-pill-title">{{topic.title}}</text>
-                <text class="gem-pill-desc" wx:if="{{topic.description}}">{{topic.description}}</text>
+                <!-- <text class="gem-pill-desc" wx:if="{{topic.description}}">{{topic.description}}</text> -->
               </view>
               <text class="gem-pill-chevron">{{expandedTopicId === topic.id ? '⌃' : '⌄'}}</text>
             </view>
@@ -74,21 +77,26 @@
           <view class="gem-msg-row gem-msg-user" id="msg-{{index}}" wx:if="{{item.role === 'user'}}">
             <view class="gem-bubble gem-bubble-user">{{item.content}}</view>
           </view>
-          <view class="gem-msg-row gem-msg-ai" id="msg-{{index}}" wx:if="{{item.role === 'assistant'}}">
+          <view class="gem-msg-row gem-msg-ai flex-column" id="msg-{{index}}" wx:if="{{item.role === 'assistant'}}">
             <view class="gem-bubble gem-bubble-ai">
-              <view class="gem-typing" wx:if="{{item.isLoading && !item.content}}">
-                <view class="gem-dot"></view>
-                <view class="gem-dot"></view>
-                <view class="gem-dot"></view>
-              </view>
-              <view
-                wx:elif="{{item.richNodes && (!item.cards || item.cards.length === 0)}}"
-                class="gem-ai-stream-row"
+              <!-- SSE 阶段滚动列表（替代原来的三个小点） -->
+              <scroll-view
+                wx:if="{{item.isLoading && streamingStages.length > 0}}"
+                scroll-y="{{true}}"
+                class="gem-stage-scroll"
+                scroll-into-view="stage-{{streamingStages.length - 1}}"
+                scroll-with-animation="{{true}}"
               >
+                <block wx:for="{{streamingStages}}" wx:key="index">
+                  <text id="stage-{{index}}" class="gem-stage-item">{{item}}</text>
+                </block>
+              </scroll-view>
+              <!-- AI 正文：无卡片 / 无 answerPreview 时才显示（避免与下方卡片摘要重复） -->
+              <view wx:if="{{item.richNodes && !item.answerPreview && (!item.cards || item.cards.length === 0)}}" class="gem-ai-stream-row">
                 <rich-text class="gem-rich-md gem-rich-md--flex" nodes="{{item.richNodes}}" />
                 <view class="gem-stream-cursor" wx:if="{{item.isLoading}}"></view>
               </view>
-              <view wx:elif="{{!item.cards || item.cards.length === 0}}" class="gem-ai-stream-row">
+              <view wx:elif="{{item.content && !item.answerPreview && (!item.cards || item.cards.length === 0)}}" class="gem-ai-stream-row">
                 <text class="gem-bubble-text">{{item.content}}</text>
                 <view class="gem-stream-cursor" wx:if="{{item.isLoading}}"></view>
               </view>
@@ -151,7 +159,118 @@
                   wx:if="{{dc.cardType === 'DISH_PROFIT_PRESCRIPTION_CARD' && dc.cardData}}"
                   cardData="{{dc.cardData}}"
                 />
+                <!-- 营业额卡 -->
+                <revenue-report-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'REVENUE_REPORT_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 采购卡 -->
+                <purchase-check-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'PURCHASE_CHECK_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 库存 / 销货核对卡 -->
+                <stock-reconcile-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'STOCK_RECONCILE_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 订货卡 -->
+                <reorder-reminder-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'REORDER_REMINDER_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 原料采购明细卡 -->
+                <purchase-goods-detail-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'PURCHASE_GOODS_DETAIL_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 菜品销量排行卡片 -->
+                <dish-sales-ranking-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'DISH_SALES_RANKING_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 菜品成本/利润排行卡片 -->
+                <dish-profit-cost-ranking-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'DISH_PROFIT_COST_RANKING_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 菜品利润排行卡片（与成本/利润排行卡共用组件） -->
+                <dish-profit-cost-ranking-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'DISH_PROFIT_RANKING_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 菜品配料可支撑天数卡片 -->
+                <dish-ingredient-cover-days-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'DISH_INGREDIENT_COVER_DAYS_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 库存风险关注列表卡片 -->
+                <warehouse-inventory-risk-list-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 库房库存排行卡片 -->
+                <warehouse-stock-ranking-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'WAREHOUSE_STOCK_RANKING_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 原料可支撑菜品覆盖卡片 -->
+                <goods-supported-dish-cover-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'GOODS_SUPPORTED_DISH_COVER_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
               </block>
+            </view>
+            <!-- 调试 JSON 面板 -->
+            <view
+              class="gem-debug-panel " 
+              wx:if="{{showDebugJson && !item.isLoading && item.debugJsonText}}"
+            >
+              <view class="gem-debug-head">
+                <text class="gem-debug-title">原始 Debug JSON</text>
+                <view class="gem-debug-copy" catchtap="onCopyDebugJson" data-msgid="{{item.id}}">
+                  <text>复制</text>
+                </view>
+              </view>
+              <scroll-view scroll-y class="gem-debug-body">
+                <text class="gem-debug-json">{{item.debugJsonText}}</text>
+              </scroll-view>
             </view>
           </view>
         </block>
@@ -160,11 +279,6 @@
 
     <view class="gem-scroll-spacer"></view>
   </scroll-view>
-
-  <!-- 流式进度提示 -->
-  <view class="gem-stream-hint" wx:if="{{isSending && streamingStage}}">
-    <text class="gem-stream-hint-text">{{streamingStage}}</text>
-  </view>
 
   <!-- 底部输入区：侧栏 + 输入框 + 发送 -->
   <view class="gem-composer-wrap" style="padding-bottom: calc(12px + env(safe-area-inset-bottom));">
@@ -176,7 +290,7 @@
         <input
           class="gem-input gem-input--row"
           type="text"
-          placeholder="问问钱多多"
+          placeholder="问问Ai助手"
           placeholder-class="gem-input-ph"
           value="{{inputValue}}"
           cursor-spacing="16"
@@ -239,7 +353,7 @@
               <text class="gem-pill-emoji">{{topic.emoji}}</text>
               <view class="gem-pill-body">
                 <text class="gem-pill-title">{{topic.title}}</text>
-                <text class="gem-pill-desc" wx:if="{{topic.description}}">{{topic.description}}</text>
+                <!-- <text class="gem-pill-desc" wx:if="{{topic.description}}">{{topic.description}}</text> -->
               </view>
               <text class="gem-pill-chevron">{{drawerExpandedTopicId === topic.id ? '⌃' : '⌄'}}</text>
             </view>
