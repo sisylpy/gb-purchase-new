@@ -95,8 +95,6 @@
                           </block>
                         </view>
 
-
-
                         <view class="button-container" bind:tap="toBusiness" data-id="{{goods.gbDepartmentDisGoodsId}}" data-index="{{depGoodsIndex}}" data-goods="{{goods}}" hover-class="hover">
                           <image src="{{goods.gbDepartmentGoodsStockEntities.length > 0 ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFill" class="icon" />
 
@@ -265,7 +263,7 @@
                 <!-- cat-* 锚点放在首行商品上：空标题区高度为 0 时 scroll-into-view 对齐后首屏仍是上一分类，onGoodsScrollDis 会把标签改回去 -->
                 <view class="flex-row-default product-item p-10 {{sons.isFirstInCategory ? 'dis-cat-anchor' : ''}}" id="{{sons.isFirstInCategory ? 'cat-' + sons.nxGoodsGrandId : 'goods-row-' + sons.nxGoodsId}}">
                   <view class="flex-row-default">
-                    <!-- <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons._disGoodsImageRel ? imgUrl.resolve(url, sons._disGoodsImageRel) : '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" /> -->
+                    <!-- <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons._disGoodsImageRel ? url + sons._disGoodsImageRel : '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" /> -->
                     <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons.nxGoodsFile ? url+  sons.nxGoodsFile: '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" />
                     <view class="flex-row-default">
                       <view class="flex-column" style="width: {{windowWidth - 480}}rpx;  ">

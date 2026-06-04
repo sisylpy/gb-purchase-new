@@ -1,0 +1,328 @@
+/* ========== 卡片容器 ========== */
+.wis-card {
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx 20rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  border: 1rpx solid #eaeaea;
+  box-sizing: border-box;
+}
+
+/* ========== 标题区 ========== */
+.wis-header {
+  margin-bottom: 8rpx;
+}
+
+.wis-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: block;
+  line-height: 1.3;
+}
+
+.wis-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-top: 4rpx;
+  line-height: 1.4;
+}
+
+/* ========== 元信息 ========== */
+.wis-meta {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: 12rpx;
+  flex-wrap: wrap;
+}
+
+.wis-meta-item {
+  font-size: 22rpx;
+  color: #888;
+}
+
+/* ========== 摘要 ========== */
+.wis-summary {
+  background: #fef7f0;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  margin-top: 16rpx;
+  border-left: 6rpx solid #f5a623;
+}
+
+.wis-summary-text {
+  font-size: 24rpx;
+  color: #8b6914;
+  line-height: 1.6;
+}
+
+/* ========== 空数据 ========== */
+.wis-empty {
+  padding: 48rpx 0;
+  text-align: center;
+}
+.wis-empty-text {
+  font-size: 26rpx;
+  color: #bbb;
+}
+
+/* ========== Section ========== */
+.wis-section {
+  margin-top: 16rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  border: 1rpx solid #f0f0f0;
+}
+
+.wis-section--danger {
+  border-color: #fde8e8;
+}
+
+.wis-section--warn {
+  border-color: #fef0d8;
+}
+
+.wis-section--ok {
+  border-color: #e8f5e9;
+}
+
+/* Section 头部 */
+.wis-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 20rpx;
+  background: #fafafa;
+}
+
+.wis-section--danger .wis-section-head {
+  background: #fef5f5;
+}
+
+.wis-section--warn .wis-section-head {
+  background: #fefaf0;
+}
+
+.wis-section--ok .wis-section-head {
+  background: #f5faf5;
+}
+
+.wis-section-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.wis-section-icon {
+  font-size: 24rpx;
+}
+
+.wis-section-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.wis-section-count {
+  font-size: 22rpx;
+  color: #999;
+  margin-left: 4rpx;
+}
+
+.wis-section-arrow {
+  font-size: 20rpx;
+  color: #bbb;
+  padding: 4rpx 8rpx;
+}
+
+/* Section 内容区 */
+.wis-section-body {
+  padding: 8rpx 0;
+}
+
+/* ========== 普通行 ========== */
+.wis-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+
+.wis-row:last-child {
+  border-bottom: none;
+}
+
+.wis-row-name {
+  font-size: 26rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+  flex-shrink: 0;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wis-row-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.wis-row-stock {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.wis-row-daily {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.wis-row-support {
+  font-size: 22rpx;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+.wis-row-idle {
+  font-size: 22rpx;
+  color: #e8632d;
+  background: #fff3e0;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+/* 批次行 */
+.wis-row--batch {
+  flex-wrap: wrap;
+  gap: 6rpx;
+}
+
+.wis-row--batch .wis-row-name {
+  max-width: 160rpx;
+}
+
+.wis-row-batch {
+  font-size: 22rpx;
+  color: #aaa;
+}
+
+.wis-row-date {
+  font-size: 24rpx;
+  color: #555;
+}
+
+.wis-date--expired {
+  color: #e02020;
+  font-weight: 600;
+}
+
+/* ========== 子 Section（临期/过期子分组） ========== */
+.wis-subsection {
+  padding: 0;
+}
+
+.wis-subsection-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 20rpx 8rpx;
+}
+
+.wis-subsection-tag {
+  font-size: 22rpx;
+  font-weight: 600;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+}
+
+.wis-subsection-tag--expired {
+  background: #fde8e8;
+  color: #e02020;
+}
+
+.wis-subsection-tag--near {
+  background: #fef7f0;
+  color: #b8860b;
+}
+
+.wis-subsection-count {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 风险标签 */
+.wis-risk-tag {
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 16rpx;
+  font-weight: 500;
+}
+
+.wis-tier--expired {
+  background: #fde8e8;
+  color: #e02020;
+}
+
+.wis-tier--due-today {
+  background: #fff3e0;
+  color: #e8632d;
+}
+
+.wis-tier--near {
+  background: #fef7f0;
+  color: #b8860b;
+}
+
+/* ========== 底部统计 ========== */
+.wis-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32rpx;
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.wis-footer-item {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.wis-footer-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+}
+
+.wis-footer-dot--green {
+  background: #4caf50;
+}
+
+.wis-footer-dot--orange {
+  background: #f5a623;
+}
+
+.wis-footer-dot--red {
+  background: #e02020;
+}
+
+.wis-footer-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.wis-footer-val {
+  font-size: 22rpx;
+  color: #333;
+  font-weight: 600;
+}

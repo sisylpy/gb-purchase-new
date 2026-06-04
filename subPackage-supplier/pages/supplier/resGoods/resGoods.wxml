@@ -28,7 +28,7 @@
           <view class="left-item {{selectedSub == index ? 'left-active' : ''}}" wx:for="{{disGoodsCataArr}}" wx:key="gbDistributerFatherGoodsId" id="left-cat-{{grand.gbDistributerFatherGoodsId}}" wx:for-item="grand" bindtap="leftMenuClickDep" data-index="{{index}}" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}">
             <view class="flex-column-center">
               <view class="picView ">
-                <!-- <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="itemPic" /> -->
+                <!-- <image src="{{(url + grand.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="itemPic" /> -->
               </view>
               <view class="extremeSmall text_center">
                 <text>{{grand.gbDfgFatherGoodsName}}</text>
@@ -74,7 +74,7 @@
             <view wx:if="{{goods.isFirstInCategory}}" id="cat-dep-{{goods.gbDgDfgGoodsGrandId}}" class="goods-category-title-dep"></view>
             <view class="flex-row-default  goods-item-dep p-20" id="{{goods.viewId}}">
               <view class="img-wrapper">
-                <image bindtap="showDialogBtnDep" data-item="{{goods}}" src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ? (imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg') : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
+                <image bindtap="showDialogBtnDep" data-item="{{goods}}" src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ? (url + goods.gbDgNxFatherImg || '/images/logo.jpg') : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
               </view>
 
               <view class="flex-row">

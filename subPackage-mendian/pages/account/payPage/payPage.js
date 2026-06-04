@@ -63,7 +63,7 @@ Page({
         amount: "",
         amountOk: "",
       }, {
-        name: "定制",
+        name: "扩展",
         amount: "",
         amountOk: "",
       }
@@ -554,6 +554,11 @@ Page({
 
   },
 
+  toAddBusiness(){
+    wx.navigateTo({
+      url: '/subPackage-mendian/pages/mendian/addDepartment/addDepartment?disId=' + this.data.disId,
+    })
+  },
 
   // // 跳转客服
   toCustomerServicePages: function () {

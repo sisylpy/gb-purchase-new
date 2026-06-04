@@ -72,7 +72,7 @@
       <!-- 商品信息头部 -->
       <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
         <view class="flex-row-default mb-20">
-          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
+          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
           <view class="flex-column">
             <text class="font-sm">第{{index + 1}}名/共{{arr.length}}个</text>
             <view class="flex-row mb-10">

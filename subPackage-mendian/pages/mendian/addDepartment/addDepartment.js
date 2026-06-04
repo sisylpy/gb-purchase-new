@@ -1,11 +1,14 @@
 const app = getApp()
 const globalData = app.globalData;
 
+import {
+  saveGbDepartment,
+} from '../../../services/mendian';
+import {
+  updateDepUserAdminGb,
+} from '../../../services/apiGbDepartmentUser';
 
-// import {
-//   saveGbDepartment,
-// } from '../../../../lib/apiDistributerGb'
-// import load from '../../../../lib/load';
+
 Page({
   /**
    * 页面的初始数据
@@ -13,7 +16,7 @@ Page({
   data: {
     showNumber: false,
     selNumber: 1,
-    addFinished: false,
+    addFinished: true,
     hasSubs: 0,
     cankaoDep: 0,
     resName:"",
@@ -26,9 +29,7 @@ Page({
 
        }
     ],
-    cankaoDep:{
-      gbDepartmentId: -1,
-    }
+   
   },
 
   /**
@@ -44,11 +45,19 @@ Page({
       depLevel: 1,
     })
    
-    var disInfo = wx.getStorageSync('disInfo');
-    if(disInfo){
+   
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if(mendianInfo){
       this.setData({
-        disInfo: disInfo,
-        mendianArr: disInfo.mendianDepartmentList,
+        cankaoDepId: mendianInfo.gbDepartmentId,
+      })
+     
+    }
+
+    var userInfo = wx.getStorageSync('userInfo');
+    if(userInfo){
+      this.setData({
+        userInfo: userInfo,
       })
      
     }
@@ -69,28 +78,28 @@ Page({
     }
   },
   
-  // radioChangeCankao(e){
-  //   this.setData({
-  //     cankaoDep: e.detail.value, 
-  //   })  
+  radioChangeCankao(e){
+    this.setData({
+      cankaoDepId: e.detail.value, 
+    })  
 
-  // },
+  },
 
   
-  //  radioChange: function (e) {
-  //   this.setData({
-  //     hasSubs: e.detail.value, 
-  //   })  
-  //   if(this.data.hasSubs == 0){
-  //     this.setData({
-  //       showNumber:false,
-  //       depNumbers: "",
-  //       deps: [],
-  //     })
-  //   }
-  //   this._ifCanSave();
+   radioChange: function (e) {
+    this.setData({
+      hasSubs: e.detail.value, 
+    })  
+    if(this.data.hasSubs == 0){
+      this.setData({
+        showNumber:false,
+        depNumbers: "",
+        deps: [],
+      })
+    }
+    this._ifCanSave();
 
-  // },
+  },
 
 
   // 处理部门数量输入
@@ -244,6 +253,7 @@ Page({
   },
 
   saveDepartment(){
+    var that = this;
     var  dep = {
       gbDepartmentDisId: this.data.disId,
       gbDepartmentFatherId: 0,
@@ -252,16 +262,18 @@ Page({
       gbDepartmentSubAmount: this.data.gbDepartmentEntities.length,
       gbDepartmentIsGroupDep: 1,
       gbDepartmentType: 1,
-      cankaoDepId: this.data.cankaoDep.gbDepartmentId,
+      cankaoDepId: this.data.cankaoDepId,
       fatherGoodsIds: "",
       gbDepartmentEntityList: this.data.gbDepartmentEntities
       }
-      load.showLoading("保存新店铺")
+      wx.showLoading({ title: "保存新店铺" });
       saveGbDepartment(dep)
       .then(res =>{
-        load.hideLoading();
+        wx.hideLoading();
         if(res.result.code == 0){
           console.log(res.result.data);
+
+          that._updateDepUserInfo()
           wx.setStorageSync('disInfo', res.result.data);
           var pages = getCurrentPages();
           var prevPagePre = pages[pages.length - 3];
@@ -283,7 +295,22 @@ Page({
         }
       })
 
-  }
+  },
+
+
+
+_updateDepUserInfo(index){
+  var item = this.data.userInfo;
+   console.log(item);
+  updateDepUserAdminGb(item).then(res =>{
+    if(res.result.code == 0){
+
+      wx.setStorageSync('userInfo', res.result.data);
+
+    }
+  })
+
+},
 
   
 

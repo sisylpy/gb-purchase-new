@@ -68,7 +68,6 @@
       "root": "subPackage-ai/",
       "name": "ai",
       "pages": [
-        "pages/chat/groupAiChat/groupAiChat",
         "pages/restraunt/restaurantProfile/restaurantProfile",
         "pages/restraunt/restaurantEdit/restaurantEdit"
       ]
@@ -83,7 +82,8 @@
         "pages/disGoodsPage/disGoodsPage",
         "pages/goodsOrderList/goodsOrderList",
         "pages/stockGoodsList/stockGoodsList",
-        "pages/goodsFenxi/goodsFenxi"
+        "pages/goodsFenxi/goodsFenxi",
+        "pages/appointSupplierList/appointSupplierList"
       ]
     },
     {
@@ -132,6 +132,7 @@
         "pages/sales/dailyTurnover/dailyTurnover",
         "pages/sales/addTurnover/addTurnover",
         "pages/sales/addFoodSales/addFoodSales",
+        "pages/sales/editFoodSales/editFoodSales",
         "pages/report/reportPage/reportPage",
         "pages/report/dateReport/dateReport",
         "pages/report/selSupplier/selSupplier",

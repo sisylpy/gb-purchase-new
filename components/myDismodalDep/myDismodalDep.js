@@ -126,6 +126,7 @@ Component({
         remarkContent: "",
         goodsStandard: "",
         editApply: false,
+        stockIsZero: false,
       })
     },
 
@@ -140,7 +141,8 @@ Component({
         editApply: false,
         depStandardArr: [],
         applySubtotal: "0.0元",
-        newStandardName: ""
+        newStandardName: "",
+        stockIsZero: false,
       })
       this.triggerEvent('cancle')
     },
@@ -188,8 +190,8 @@ Component({
             stockIsZero: false,
             editApply: false,
             applySubtotal: "0.0元",
-            newStandardName: ""
-
+            newStandardName: "",
+          
           })
         } else {
           wx.showToast({
@@ -271,25 +273,6 @@ Component({
         })
       }
 
-      // var three = this.data.item.nxDgBuyingPriceThreeUpdate;
-      // var two = this.data.item.nxDgBuyingPriceTwoUpdate;
-      // console.log(three);
-      // console.log(two);
-
-      // if(Number(this.data.applyNumber) > Number(three) || Number(this.data.applyNumber) == Number(three)){
-      //   this.setData({
-      //     level: 3
-      //   })
-      // }else  if(Number(this.data.applyNumber) > Number(two) || Number(this.data.applyNumber) == Number(two) ){
-      //   this.setData({
-      //     level: 2
-      //   })
-      // }else  {
-      //   this.setData({
-      //     level: 1
-      //   })
-      // }
-
     },
 
 
@@ -345,7 +328,8 @@ Component({
         goodsStandard: "",
         editApply: false,
         applySubtotal: "0.0元",
-        newStandardName: ""
+        newStandardName: "",
+        stockIsZero: false,
 
       })
     },

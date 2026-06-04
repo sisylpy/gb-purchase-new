@@ -168,95 +168,6 @@ function flattenSalesFoodRowsFromDepFoodEntities(list) {
   return rows;
 }
 
-function qtyToQtyStr(sum) {
-  var n = parseFloat(String(sum));
-  if (isNaN(n) || n <= 0) return '';
-  if (Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
-  var s = n.toFixed(4).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
-  return s;
-}
-
-function scalarToInputStr(val) {
-  if (val == null || val === '') return '';
-  return String(val);
-}
-
-/**
- * dailyRevenue 字段可能在 camelCase 或与列表一致的 gbAiDailyRevenue* 前缀
- */
-function pickDr(obj, keys) {
-  if (!obj || typeof obj !== 'object') return undefined;
-  for (var i = 0; i < keys.length; i++) {
-    var v = obj[keys[i]];
-    if (v != null && v !== '') return v;
-  }
-  return undefined;
-}
-
-function formatDrMoney(v) {
-  if (v == null || v === '') return '';
-  var n = parseFloat(String(v).trim());
-  if (isNaN(n)) return String(v);
-  return n.toFixed(2);
-}
-
-function buildDailyRevenueView(dr) {
-  var o = dr && typeof dr === 'object' ? dr : {};
-  var hasRecord =
-    o.hasRecord === true ||
-    o.hasRecord === 1 ||
-    o.hasRecord === '1';
-  var rid = pickDr(o, ['gbAiDailyRevenueId']);
-  if (rid != null && rid !== '') {
-    hasRecord = true;
-  }
-
-  function money(keys) {
-    return formatDrMoney(pickDr(o, keys));
-  }
-
-  function intStr(keys) {
-    var v = pickDr(o, keys);
-    if (v == null || v === '') return '';
-    var n = parseInt(v, 10);
-    return isNaN(n) ? String(v) : String(n);
-  }
-
-  var gross = money(['grossRevenue', 'gbAiDailyRevenueGrossRevenue']);
-  var net = money(['netRevenue', 'gbAiDailyRevenueNetRevenue']);
-  var dineStored = money([
-    'dineInRevenueStored',
-    'gbAiDailyRevenueDineInRevenue',
-  ]);
-  var dineFromDishes = money(['dineInRevenueFromDishes']);
-  var takeout = money(['takeoutRevenue', 'gbAiDailyRevenueTakeoutRevenue']);
-  var platform = money(['platformFee', 'gbAiDailyRevenuePlatformFee']);
-
-  if (!hasRecord && (gross || net || dineStored || dineFromDishes || takeout)) {
-    hasRecord = true;
-  }
-
-  var notesVal = pickDr(o, ['notes', 'gbAiDailyRevenueNotes']);
-  var weekVal = pickDr(o, ['weekday', 'gbAiDailyRevenueWeekday']);
-  var holVal = pickDr(o, ['holiday', 'gbAiDailyRevenueHoliday']);
-
-  return {
-    hasRecord: hasRecord,
-    grossRevenue: gross,
-    netRevenue: net,
-    dineInRevenueStored: dineStored,
-    dineInRevenueFromDishes: dineFromDishes,
-    dineInOrders: intStr(['dineInOrders', 'gbAiDailyRevenueDineInOrders']),
-    dineInCustomers: intStr(['dineInCustomers', 'gbAiDailyRevenueDineInCustomers']),
-    takeoutRevenue: takeout,
-    takeoutOrders: intStr(['takeoutOrders', 'gbAiDailyRevenueTakeoutOrders']),
-    platformFee: platform,
-    notes: notesVal != null && notesVal !== '' ? String(notesVal) : '',
-    weekday: weekVal != null && weekVal !== '' ? String(weekVal) : '',
-    holiday: holVal != null && holVal !== '' ? String(holVal) : '',
-  };
-}
-
 /** 单个门店行（mendianDepartmentList 的一项或缓存 mendianInfo）→ 销售部门 picker 选项 */
 function foodDepChoicesFromMendianDepartmentRow(m) {
   var choices = [];
@@ -373,12 +284,6 @@ Page({
   },
 
   onLoad: function (options) {
-    var isEdit =
-      options.edit === '1' ||
-      options.edit === 'true' ||
-      options.mode === 'edit';
-    var pageTitle = isEdit ? '修改菜品销量' : '添加菜品销量';
-
     var today = dateUtils.getArriveDate(0);
     var firstDay = today.substring(0, 8) + '01';
     var anchorParam =
@@ -410,8 +315,8 @@ Page({
       singleDate: initialSingle,
       combinedTemplateStartDate: templateStart,
       combinedTemplateEndDate: templateEnd,
-      isEditMode: isEdit,
-      pageTitle: pageTitle,
+      isEditMode: false,
+      pageTitle: '添加菜品销量',
     });
 
     var userInfo = wx.getStorageSync('userInfo');
@@ -545,18 +450,11 @@ Page({
           var rows = flattenSalesFoodRowsFromDepFoodEntities(res.result.data);
           self.setData({ salesFoodRows: rows, foodCatalogReady: true });
           self._recalcDineInFromDishes();
-          if (self.data.isEditMode) {
-            self._fetchDailySalesAndFillForm();
-          }
         } else {
           wx.showToast({ title: res.result.msg || '加载失败', icon: 'none' });
         }
       })
-      .catch(function () {
-        load.hideLoading();
-        self.setData({ foodsLoading: false });
-        wx.showToast({ title: '网络异常', icon: 'none' });
-      });
+      
   },
 
   onSalesDepChange: function (e) {
@@ -572,165 +470,7 @@ Page({
     );
   },
 
-  _pickSalesDepIndexFromLines: function (linesIn, choiceList) {
-    choiceList = choiceList || [];
-    linesIn = linesIn || [];
-    var depCount = {};
-    for (var i = 0; i < linesIn.length; i++) {
-      var ln = linesIn[i];
-      var q = parseFloat(String(ln.quantity != null ? ln.quantity : '').trim());
-      if (isNaN(q) || q <= 0) continue;
-      var did = ln.depId;
-      if (did == null || did === '') continue;
-      var k = String(did);
-      depCount[k] = (depCount[k] || 0) + 1;
-    }
-    var bestK = '';
-    var bestN = -1;
-    for (var k2 in depCount) {
-      if (depCount[k2] > bestN) {
-        bestN = depCount[k2];
-        bestK = k2;
-      }
-    }
-    if (!bestK || bestN < 0) return -1;
-    var targetId = Number(bestK);
-    for (var j = 0; j < choiceList.length; j++) {
-      if (Number(choiceList[j].gbDepartmentId) === targetId) {
-        return j;
-      }
-    }
-    return -1;
-  },
-
-  /**
-   * 将 getDailyFoodSalesAndRevenue 返回的 submitShape 回填到当前列表与指标区
-   */
-  _applySubmitShapeToForm: function (submitShape) {
-    var shape = submitShape || {};
-    var rowsSource = this.data.salesFoodRows || [];
-    var rows = [];
-    for (var a = 0; a < rowsSource.length; a++) {
-      rows.push(Object.assign({}, rowsSource[a]));
-    }
-    var qtyMap = {};
-    var linesIn = shape.lines || [];
-    for (var i = 0; i < linesIn.length; i++) {
-      var ln = linesIn[i];
-      var q = parseFloat(String(ln.quantity != null ? ln.quantity : '').trim());
-      if (isNaN(q) || q <= 0) continue;
-      var sk = String(ln.foodId);
-      qtyMap[sk] = (qtyMap[sk] || 0) + q;
-    }
-    for (var j = 0; j < rows.length; j++) {
-      var r = rows[j];
-      var mq = qtyMap[String(r.foodId)];
-      r.qtyStr = mq != null ? qtyToQtyStr(mq) : '';
-    }
-
-    var patch = {
-      salesFoodRows: rows,
-      dineInOrderCount: scalarToInputStr(shape.dineInOrders),
-      dineInCustomerCount: scalarToInputStr(shape.dineInCustomers),
-      takeoutRevenue: scalarToInputStr(shape.takeoutRevenue),
-      takeoutOrderCount: scalarToInputStr(shape.takeoutOrders),
-      platformFee: scalarToInputStr(shape.platformFee),
-      notes: scalarToInputStr(shape.notes),
-    };
-    var depIdx = this._pickSalesDepIndexFromLines(linesIn, this.data.departmentChoiceList || []);
-    if (depIdx >= 0 && this.data.hasDepartmentChoices) {
-      patch.salesDepIndex = depIdx;
-    }
-    if (
-      !this.data.isEditMode &&
-      shape.recordDate != null &&
-      shape.recordDate !== '' &&
-      /^\d{4}-\d{2}-\d{2}$/.test(String(shape.recordDate).substring(0, 10))
-    ) {
-      patch.singleDate = String(shape.recordDate).substring(0, 10);
-    }
-    this.setData(patch);
-  },
-
-  /**
-   * 拉取指定日已有数据并回填（需目录已就绪）
-   * @param {string} [recordDateHint] yyyy-MM-dd，默认当前 data.singleDate
-   */
-  _fetchDailySalesAndFillForm: function (recordDateHint) {
-    var self = this;
-    if (!self.data.foodCatalogReady || !self.data.disId) {
-      return;
-    }
-    if (self._dailySalesFetchBusy) {
-      return;
-    }
-    var recordDate =
-      recordDateHint != null && recordDateHint !== ''
-        ? String(recordDateHint).trim().substring(0, 10)
-        : self.data.singleDate;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(recordDate || '')) {
-      return;
-    }
-    var depFatherId = self._fatherDepForCurrentSelection();
-    var distributerId = self._resolveDistributerId();
-    var subDepIdVal = self._getSalesDepId();
-    if (!depFatherId || !distributerId) {
-      return;
-    }
-    if (
-      subDepIdVal === '' ||
-      subDepIdVal == null ||
-      isNaN(Number(subDepIdVal))
-    ) {
-      return;
-    }
-    self._dailySalesFetchBusy = true;
-    api
-      .getDailyFoodSalesAndRevenue({
-        depFatherId: Number(depFatherId),
-        subDepId: Number(subDepIdVal),
-        distributerId: Number(distributerId),
-        recordDate: recordDate,
-      })
-      .then(function (res) {
-        self._dailySalesFetchBusy = false;
-        var code = res.result.code;
-        if (code !== 0 && code !== '0') {
-          wx.showToast({
-            title: res.result.msg || '加载当日数据失败',
-            icon: 'none',
-          });
-          return;
-        }
-        var d = res.result.data || {};
-        var submitShape = d.submitShape;
-
-        var lc = null;
-        if (d.lineCount != null && d.lineCount !== '') {
-          lc = Number(d.lineCount);
-          if (isNaN(lc)) lc = null;
-        }
-
-        self.setData({
-          dailyRevenueView: buildDailyRevenueView(d.dailyRevenue),
-          fetchLineCount: lc,
-        });
-
-        if (submitShape) {
-          self._applySubmitShapeToForm(submitShape);
-        } else {
-          self._applySubmitShapeToForm({});
-        }
-        self._recalcDineInFromDishes();
-      })
-      .catch(function () {
-        self._dailySalesFetchBusy = false;
-        wx.showToast({ title: '加载当日数据失败', icon: 'none' });
-      });
-  },
-
   onDateChange: function (e) {
-    if (this.data.isEditMode) return;
     var d = e.detail.value;
     this.setData({ singleDate: d });
   },
@@ -809,7 +549,6 @@ Page({
   },
 
   onDownloadCombinedTemplate: function () {
-    if (this.data.isEditMode) return;
     if (!this._ensureTemplateDepartmentId()) return;
     var today = dateUtils.getArriveDate(0);
     var patch = { showCombinedTemplateModal: true, todayDate: today };
@@ -850,7 +589,6 @@ Page({
   },
 
   onConfirmDownloadCombined: function () {
-    if (this.data.isEditMode) return;
     var startDate = this.data.combinedTemplateStartDate;
     var endDate = this.data.combinedTemplateEndDate;
     if (!startDate || !endDate) {
@@ -904,7 +642,6 @@ Page({
   },
 
   onUploadCombinedExcel: function () {
-    if (this.data.isEditMode) return;
     var departmentId = this._ensureTemplateDepartmentId();
     if (!departmentId) return;
     var distributerId = this._resolveDistributerId();
@@ -958,9 +695,6 @@ Page({
         var msg = res.result && res.result.msg;
         if (code === 0 || code === '0') {
           wx.showToast({ title: '导入成功', icon: 'success' });
-          if (that.data.isEditMode && that.data.foodCatalogReady) {
-            that._fetchDailySalesAndFillForm();
-          }
         } else {
           wx.showToast({ title: msg || '上传失败', icon: 'none' });
         }
@@ -1041,9 +775,7 @@ Page({
 
     load.showLoading('保存中...');
     var self = this;
-    var savePromise = self.data.isEditMode
-      ? api.updateDailyFoodSalesAndRevenue(body)
-      : api.submitDailyFoodSalesAndRevenue(body);
+    var savePromise = api.submitDailyFoodSalesAndRevenue(body);
     savePromise.then(function (res) {
         load.hideLoading();
         if (res.result.code == 0) {

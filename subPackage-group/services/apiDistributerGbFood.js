@@ -99,6 +99,24 @@ export const updateFoodWithFile = (filePathList, id, foodName, price, method, ta
   })
 }
 
+/** 更新菜品毛利率（仅提交 gbDistributerFoodId / gbDfTargetGrossMarginRate / gbDfGrossMarginFloatAbs） */
+export const updateGrossMargin = (data) => {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: apiUrl.apiUrl + 'gbdistributerfood/updateGrossMargin',
+      method: 'POST',
+      data,
+      success: (res) => {
+        resolve({ result: res.data })
+      },
+      fail: (e) => {
+        reject(e);
+        load.hideLoading();
+      }
+    })
+  })
+}
+
 export const updateFood = (data) => {
   return new Promise((resolve, reject) => {
     wx.request({

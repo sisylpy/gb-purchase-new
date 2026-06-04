@@ -43,7 +43,7 @@
 
     <view class="flex-column p-10">
 
-      <view class="flex-column font-sl radius-10 border bg-white mb-30" wx:for="{{stockArr}}">
+      <view class="flex-column font-lg radius-10 border bg-white mb-30" wx:for="{{stockArr}}">
 
         <view class="flex-column" style="background-color: #ececec;">
           <view class="flex-row p-20 border-bottom">
@@ -59,20 +59,20 @@
 
             <view class="flex-row half-row" wx:else>
               <text class="mr-10">自采:</text>
-              <text class="">{{disInfo.mendianDepartmentList[0].gbDepartmentName}}</text>
+              <text class="">{{mendianName}}</text>
             </view>
           </view>
 
           <view class="flex-row  p-20 border-bottom">
-
-            <view class="flex-row half-row ">
-              <text class="mr-10">进货:</text>
-              <text>{{item.gbDgsWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-            </view>
             <view class="flex-row half-row ">
               <text class="mr-10">单价:</text>
               <text>{{item.gbDgsPrice}}元/{{disGoods.gbDgGoodsStandardname}}</text>
             </view>
+            <view class="flex-row half-row ">
+              <text class="mr-10">进货:</text>
+              <text>{{item.gbDgsWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+            </view>
+           
 
           </view>
           <view class="flex-row  p-20 border-bottom">

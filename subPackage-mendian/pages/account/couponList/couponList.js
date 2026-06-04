@@ -105,20 +105,22 @@ Page({
   // xiadan
   toShixian(e) {
     console.log("Eeeeee", e);
-    if (this.data.disInfo.mendianDepartmentList.length > 1 || this.data.disInfo.mendianDepartmentList[0].gbDepartmentSubAmount > 1 ) {
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo && mendianInfo.gbDepartmentSubAmount > 1) {
       this.setData({
         showChoice: true,
       })
-    } else {
+    } else if (mendianInfo) {
 
 
-      wx.setStorageSync('depInfo', this.data.disInfo.mendianDepartmentList[0].gbDepartmentEntityList[0]);
-      console.log('depId=' + this.data.depId + '&disId=' + this.data.disId + '&depName=' + this.data.disInfo.mendianDepartmentList[0].gbDepartmentEntityList[0].gbDepartmentName)
+      wx.setStorageSync('depInfo', mendianInfo.gbDepartmentEntityList[0]);
+      var depName = mendianInfo.gbDepartmentEntityList[0].gbDepartmentName;
+      console.log('depId=' + this.data.depId + '&disId=' + this.data.disId + '&depName=' + depName)
       // wx.navigateTo({
-      //   url: '/subPackage-yishang/pages/yishang/nxDistributerGoods/nxDistributerGoods?depId=' + this.data.depId + '&disId=' + this.data.disId + '&depName=' + this.data.disInfo.mendianDepartmentList[0].gbDepartmentEntityList[0].gbDepartmentName,
+      //   url: '/subPackage-yishang/pages/yishang/nxDistributerGoods/nxDistributerGoods?depId=' + this.data.depId + '&disId=' + this.data.disId + '&depName=' + depName,
       // })
       wx.navigateTo({
-        url: '/subPackage-yishang/pages/yishang/nxDistributerGoods/nxDistributerGoods?depId=' + this.data.depId + '&disId=' + this.data.disId + '&depName=' + this.data.disInfo.mendianDepartmentList[0].gbDepartmentEntityList[0].gbDepartmentName + '&nxDisId=' + e.currentTarget.dataset.item.nxGducNxDistributerId,
+        url: '/subPackage-yishang/pages/yishang/nxDistributerGoods/nxDistributerGoods?depId=' + this.data.depId + '&disId=' + this.data.disId + '&depName=' + depName + '&nxDisId=' + e.currentTarget.dataset.item.nxGducNxDistributerId,
       })
     }
 

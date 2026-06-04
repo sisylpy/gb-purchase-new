@@ -1,0 +1,274 @@
+/* revenue-report-card — 营业额卡 */
+
+/* ===== 公共基础样式（4 卡共用）===== */
+
+.biz-card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  border: 1rpx solid #eef0f2;
+  padding: 28rpx 24rpx;
+  margin-top: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+/* ===== 营业额卡主体：左右分栏 ===== */
+
+.biz-body {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 24rpx;
+}
+
+/* 左侧区域：标题 + 总营业额 */
+.biz-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding-right: 20rpx;
+  border-right: 1rpx solid #e5e7eb;
+}
+
+.biz-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.biz-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.biz-icon {
+  font-size: 28rpx;
+  line-height: 1;
+  filter: brightness(10);
+}
+
+.biz-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.biz-total {
+  margin-top: 16rpx;
+}
+
+.biz-total-label {
+  display: block;
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 6rpx;
+}
+
+.biz-total-value {
+  font-size: 52rpx;
+  font-weight: 800;
+  color: #059669;
+  line-height: 1.2;
+}
+
+/* 右侧区域：2×2 指标网格 */
+.biz-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12rpx 20rpx;
+}
+
+.biz-grid-item {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  background: #f8fafb;
+  border-radius: 14rpx;
+  padding: 18rpx 16rpx;
+}
+
+.biz-grid-icon-wrap {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
+  background: #ffffff;
+  border: 1rpx solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.biz-grid-icon {
+  font-size: 26rpx;
+}
+
+.biz-grid-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  min-width: 0;
+}
+
+.biz-grid-label {
+  font-size: 22rpx;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.biz-grid-value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+}
+
+.biz-grid-value-sm {
+  font-size: 24rpx;
+}
+
+/* ===== 菜品销量分析（dishSalesReason） ===== */
+
+.biz-dish-section {
+  margin-top: 24rpx;
+}
+
+/* 总结卡片 */
+.biz-summary-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  border-left: 6rpx solid #f59e0b;
+}
+
+.biz-summary-badge {
+  font-size: 32rpx;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.biz-summary-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #78350f;
+  line-height: 1.7;
+}
+
+/* 区段标题 */
+.biz-section-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #92400e;
+  margin-top: 24rpx;
+  margin-bottom: 14rpx;
+}
+
+/* 菜品行卡片 */
+.biz-dish-row {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 12rpx;
+  border: 1rpx solid #f0eff4;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+}
+
+.biz-dish-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.biz-dish-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f2937;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.biz-dish-diff-pill {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #ef4444;
+  background: #fef2f2;
+  border-radius: 10rpx;
+  padding: 6rpx 18rpx;
+  flex-shrink: 0;
+}
+
+.biz-dish-diff--up {
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.biz-dish-reason {
+  display: block;
+  font-size: 23rpx;
+  color: #b45309;
+  margin-top: 10rpx;
+  line-height: 1.6;
+  padding-left: 8rpx;
+  border-left: 3rpx solid #fcd34d;
+}
+
+/* 数据指标网格 */
+.biz-dish-metrics {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  margin-top: 18rpx;
+  background: #fafafa;
+  border-radius: 12rpx;
+  padding: 18rpx 20rpx;
+}
+
+.biz-metric-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  min-width: 0;
+}
+
+.biz-metric-item--sales .biz-metric-value {
+  color: #059669;
+  font-weight: 800;
+}
+
+.biz-metric-divider {
+  width: 1rpx;
+  height: 48rpx;
+  background: #e5e7eb;
+  flex-shrink: 0;
+}
+
+.biz-metric-label {
+  font-size: 20rpx;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.biz-metric-value {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #374151;
+}

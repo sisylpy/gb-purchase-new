@@ -1,0 +1,278 @@
+/* reorder-reminder-card — 订货卡 */
+
+/* ===== 公共基础样式 ===== */
+
+.biz-card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  border: 1rpx solid #eef0f2;
+  padding: 28rpx 24rpx;
+  margin-top: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.biz-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.biz-header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.biz-icon-wrap {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: #e8f5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.biz-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.biz-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.biz-scope-bar {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.biz-scope-tag {
+  font-size: 22rpx;
+  color: #1a73e8;
+  background: #e8f0fe;
+  padding: 2rpx 12rpx;
+  border-radius: 999rpx;
+  font-weight: 500;
+}
+
+.biz-scope-name {
+  font-size: 22rpx;
+  color: #6b7280;
+}
+
+.biz-kpi-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.biz-kpi-col {
+  flex: 1;
+  min-width: 140rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #f8fafb;
+  border-radius: 14rpx;
+  padding: 18rpx 16rpx;
+}
+
+.biz-kpi-label {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 6rpx;
+  white-space: nowrap;
+}
+
+.biz-kpi-value {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #059669;
+  line-height: 1.2;
+}
+
+.biz-kpi-normal {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.biz-kpi-warn {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #ea580c;
+}
+
+.biz-agent-bar {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-radius: 14rpx;
+  padding: 16rpx 18rpx;
+  border: 1rpx solid #d1fae5;
+  margin-top: 8rpx;
+}
+
+.biz-agent-icon {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  flex-shrink: 0;
+}
+
+.biz-agent-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #166534;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.biz-agent-text {
+  font-size: 24rpx;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+/* ===== 订货卡独有 ===== */
+
+.biz-icon-purple { background: #f3e8ff; }
+
+/* 空状态 */
+.biz-empty-block {
+  background: #f9fafb;
+  border-radius: 14rpx;
+  padding: 28rpx 24rpx;
+  text-align: center;
+  margin-bottom: 4rpx;
+}
+
+.biz-empty-title {
+  font-size: 28rpx;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* 副标题 */
+.biz-reorder-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 16rpx;
+  font-size: 26rpx;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.biz-reorder-dep {
+  font-size: 22rpx;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 订货列表 */
+.biz-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+  border-radius: 14rpx;
+  overflow: hidden;
+  border: 1rpx solid #e5e7eb;
+  margin-bottom: 14rpx;
+}
+
+.biz-order-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 16rpx;
+  background: #ffffff;
+  gap: 10rpx;
+}
+
+.biz-order-row:nth-child(even) {
+  background: #fafafa;
+}
+
+.biz-order-icon-wrap {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #f3f4f6;
+}
+
+.icon-warn { background: #fff7ed; }
+.icon-ok { background: #f0fdf4; }
+
+.biz-order-icon {
+  font-size: 26rpx;
+  line-height: 1;
+}
+
+.biz-order-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #374151;
+  min-width: 100rpx;
+  flex-shrink: 0;
+}
+
+.biz-order-suggest {
+  font-size: 24rpx;
+  color: #6b7280;
+  flex: 1;
+}
+
+.biz-order-status {
+  font-size: 22rpx;
+  font-weight: 700;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-ok {
+  color: #059669;
+  background: #d1fae5;
+}
+
+.status-warn {
+  color: #ea580c;
+  background: #ffedd5;
+}
+
+/* 统计条 */
+.biz-count-bar {
+  margin-bottom: 8rpx;
+}
+
+.biz-count-text {
+  font-size: 24rpx;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+/* Agent 变体 */
+.biz-agent-purple { background: #e9d5ff; }

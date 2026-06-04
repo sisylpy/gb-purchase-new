@@ -12,6 +12,8 @@ import {
   menuCategoryDishBusinessList,
 } from '../../../services/apiDistributerFood'
 
+import { deleteFood, updateGbFood } from '../../../services/apiDistributerGbFood'
+
 var foodSalesTemplateWx = require('../../../../lib/foodSalesTemplateWx.js');
 
 // ===== 角色四象限颜色 =====
@@ -293,6 +295,9 @@ Page({
     /** 新参数命名 */
     categoryId: '',
     categoryName: '',
+    /** 修改类别名称弹窗 */
+    showRenamePopup: false,
+    renameInputValue: '',
     distributerId: null,
     /** 查询参数 */
     scopeMode: 'GROUP',
@@ -586,13 +591,26 @@ Page({
   },
 
   // ========== 分类菜品经营：底部操作 ==========
+
+  addDishFromCategory() {
+    var id = this.data.manageFoodFatherId;
+    this.setData({ toAdd: true });
+    wx.navigateTo({
+      url:
+        '../addFood/addFood?fatherId=' +
+        id +
+        '&fatherName=' +this.data.categoryName  +
+        '&type=add',
+    });
+  },
+
   onDishEdit(e) {
     var dish = e.currentTarget.dataset.dish;
+    console.log("dis",dish);
     if (!dish) return;
-    var foodId = _resolveDistributerFoodId(dish);
-    var fatherName = this.data.manageFatherName || this.data.categoryName || '';
+    // var foodId = _resolveDistributerFoodId(dish);
     wx.navigateTo({
-      url: '../addFood/addFood?fatherName=' + encodeURIComponent(fatherName) + '&type=edit&foodId=' + encodeURIComponent(foodId),
+      url: '../addFood/addFood?fatherName=' + this.data.categoryName + '&type=edit&foodId=' + dish.dishId,
     });
   },
 
@@ -644,6 +662,107 @@ Page({
 
   toBackManage() {
     wx.navigateBack({ delta: 1 });
+  },
+
+  deleteFather() {
+    var that = this;
+    var categoryId = this.data.categoryId;
+    if (!categoryId) {
+      wx.showToast({ title: '分类数据异常', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '提示',
+      content: '确定要删除该分类吗？删除后不可恢复。',
+      confirmColor: '#ff3b30',
+      success(res) {
+        if (res.confirm) {
+          load.showLoading('删除中');
+          deleteFood({ id: categoryId }).then(function (resp) {
+            load.hideLoading();
+            if (resp.result.code == 0) {
+              // 通知上一页刷新
+              var pages = getCurrentPages();
+              var prevPage = pages[pages.length - 2];
+              if (prevPage) {
+                prevPage.setData({ update: true });
+              }
+              wx.navigateBack({ delta: 1 });
+            } else {
+              wx.showToast({ title: resp.result.msg || '删除失败', icon: 'none' });
+            }
+          }).catch(function () {
+            load.hideLoading();
+            wx.showToast({ title: '网络异常', icon: 'none' });
+          });
+        }
+      }
+    });
+  },
+
+  /** 修改类别名称 - 显示弹窗 */
+  renameFather() {
+    this.setData({
+      showRenamePopup: true,
+      renameInputValue: this.data.categoryName || this.data.manageFatherName || '',
+    });
+  },
+
+  /** 改名弹窗 - 输入变更 */
+  onRenameInput(e) {
+    this.setData({ renameInputValue: e.detail.value });
+  },
+
+  /** 改名弹窗 - 确认 */
+  confirmRename() {
+    var that = this;
+    var newName = (this.data.renameInputValue || '').trim();
+    if (!newName) {
+      wx.showToast({ title: '名称不能为空', icon: 'none' });
+      return;
+    }
+    if (newName === this.data.categoryName || newName === this.data.manageFatherName) {
+      this.setData({ showRenamePopup: false });
+      return;
+    }
+    var categoryId = this.data.categoryId;
+    var distributerId = this.data.distributerId;
+    if (!categoryId) {
+      wx.showToast({ title: '分类数据异常', icon: 'none' });
+      return;
+    }
+    load.showLoading('修改中');
+    updateGbFood({
+      id: categoryId,
+      gbDfFoodName: newName,
+      gbDfDistributerId: distributerId,
+    }).then(function (res) {
+      load.hideLoading();
+      if (res.result.code == 0) {
+        that.setData({
+          showRenamePopup: false,
+          categoryName: newName,
+          manageFatherName: newName,
+        });
+        wx.showToast({ title: '修改成功', icon: 'success' });
+        // 通知上一页刷新
+        var pages = getCurrentPages();
+        var prevPage = pages[pages.length - 2];
+        if (prevPage) {
+          prevPage.setData({ update: true });
+        }
+      } else {
+        wx.showToast({ title: res.result.msg || '修改失败', icon: 'none' });
+      }
+    }).catch(function () {
+      load.hideLoading();
+      wx.showToast({ title: '网络异常', icon: 'none' });
+    });
+  },
+
+  /** 改名弹窗 - 取消 */
+  cancelRename() {
+    this.setData({ showRenamePopup: false });
   },
 
   _findMendianById(disInfo, fatherId) {

@@ -16,10 +16,7 @@ Page({
     addFinished: false,
     hasSubs: 0,
     resName:"",
-    /** 目标毛利率 %，提交为 gbDfTargetGrossMarginRate */
-    targetGrossMarginRate: '60',
-    /** 毛利率浮动绝对值，提交为 gbDfGrossMarginFloatAbs */
-    grossMarginFloatAbs: '3',
+   
     deps: [],
     fatherFood: null
   },
@@ -128,13 +125,10 @@ Page({
 
   saveFoodFather(){
     if(this.data.type == 'add'){
-      var rate = this._parseMarginNumber(this.data.targetGrossMarginRate, 60)
-      var floatAbs = this._parseMarginNumber(this.data.grossMarginFloatAbs, 3)
+    
       var  dep = {
         gbDfDistributerId: this.data.disId,
         gbDfFoodName: this.data.resName,
-        gbDfTargetGrossMarginRate: rate,
-        gbDfGrossMarginFloatAbs: floatAbs,
         }
         load.showLoading("保存供货商类别")
         saveGbFoodFather(dep)

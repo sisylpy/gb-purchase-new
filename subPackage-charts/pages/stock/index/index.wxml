@@ -73,7 +73,7 @@
             <view class="flex-column font-md  bg-white " wx:for="{{totalArr}}" wx:for-item="grand" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
               <view class="flex-row-default" style="width: {{windowWidth - 40}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
                 <!-- <view class="p-20">
-                  <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
+                  <image src="{{(url + grand.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
                 </view> -->
                 <view class="flex-column p-20">
                   <view class="flex-row-between " style="width: {{windowWidth - 80}}rpx;">
@@ -127,7 +127,7 @@
             <view class="flex-column font-md  bg-white " wx:for="{{totalArr}}" wx:for-item="grand" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
               <view class="flex-row-default" style="width: {{windowWidth - 80}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
                 <view class="p-20">
-                  <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
+                  <image src="{{(url + grand.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
                 </view>
                 <view class="flex-column p-20">
                   <view class="flex-row-between " style="width: {{windowWidth - 240}}rpx;">
@@ -181,7 +181,7 @@
             <view class="flex-column font-md  bg-white " wx:for="{{totalArr}}" wx:for-item="grand" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
               <view class="flex-row-default" style="width: {{windowWidth - 80}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
                 <view class="p-20">
-                  <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
+                  <image src="{{(url + grand.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
                 </view>
                 <view class="flex-column p-20">
                   <view class="flex-row-between " style="width: {{windowWidth - 240}}rpx;">
@@ -235,7 +235,7 @@
             <view class="flex-column font-md  bg-white " wx:for="{{totalArr}}" wx:for-item="grand" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
               <view class="flex-row-default" style="width: {{windowWidth - 80}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
                 <view class="p-20">
-                  <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
+                  <image src="{{(url + grand.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
                 </view>
                 <view class="flex-column p-20">
                   <view class="flex-row-between " style="width: {{windowWidth - 240}}rpx;">
@@ -289,7 +289,7 @@
             <view class="flex-column font-md  bg-white " wx:for="{{totalArr}}" wx:for-item="grand" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
               <view class="flex-row-default" style="width: {{windowWidth - 80}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
                 <view class="p-20">
-                  <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
+                  <image src="{{(url + grand.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
                 </view>
                 <view class="flex-column p-20">
                   <view class="flex-row-between " style="width: {{windowWidth - 240}}rpx;">
@@ -343,7 +343,7 @@
             <view class="flex-column font-md  bg-white " wx:for="{{totalArr}}" wx:for-item="grand" wx:for-index="greatIndex" wx:key="gbDistributerGoodsFatherId">
               <view class="flex-row-default" style="width: {{windowWidth - 80}}rpx;" bindtap="toStockPage" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}"  data-color="{{grand.gbDfgFatherGoodsColor}}" data-total="{{grand.fatherStockTotalString}}" data-index="{{greatIndex}}" hover-class="hover">
                 <view class="p-20">
-                  <image src="{{(imgUrl.resolve(url, grand.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
+                  <image src="{{(url + grand.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="category-image" />
                 </view>
                 <view class="flex-column p-20">
                   <view class="flex-row-between " style="width: {{windowWidth - 240}}rpx;">

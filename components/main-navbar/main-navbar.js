@@ -35,8 +35,8 @@ Component({
       // console.log("jssssss" , app.globalData)
        var windowWidth = app.globalData.windowWidth;
        var menuButtonInfo = app.globalData.menuButtonInfo;
-       const navBarContentHeight = menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2;
        var statusBarHeight = app.globalData.statusBarHeight;
+       const navBarContentHeight = menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2;
        const navBarHeight = statusBarHeight + navBarContentHeight;
 
        

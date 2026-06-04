@@ -42,6 +42,24 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
         </view>
       </view>
 
+      <view class="flex-row p-10">
+        <view class="half-row">
+          <text class="text-secondary flex-shrink-0 mr-10">外箱名称:</text>
+          <text class="pt-20 pb-20 shrink_change" wx:if="{{goods.gbDgCartonUnit !==  null && goods.gbDgCartonUnit.length > 0}}">{{goods.gbDgCartonUnit}}</text>
+        </view>
+        <view class="half-row">
+          <text class="text-secondary flex-shrink-0 mr-10">外箱装数量:</text>
+          <text class="pt-20 pb-20 shrink_change" wx:if="{{goods.gbDgItemsPerCarton !==  null && goods.gbDgItemsPerCarton.length > 0}}">{{goods.gbDgItemsPerCarton}}</text>
+        </view>
+      </view>
+
+      <view class="flex-row p-10">
+        <view class="half-row">
+          <text class="text-secondary flex-shrink-0 mr-10">大包装数量:</text>
+          <text class="pt-20 pb-20 shrink_change">{{goods.gbDgQuantityDays}}</text>
+        </view>
+      </view>
+
 
       
       <view class=" flex-row-default p-10  mb-20">

@@ -142,7 +142,7 @@
           <view class="food-fgf-dish-hd flex-row">
             <view class="food-fgf-dish-cover-wrap">
               <!-- <image class="food-fgf-dish-cover"
-                src="{{item.ingredientRows && item.ingredientRows.length ? (imgUrl.resolve(url, item.ingredientRows[0].gbDgGoodsFileImg) || '/images/logo.jpg') : '/images/logo.jpg'}}"
+                src="{{item.ingredientRows && item.ingredientRows.length ? (url + item.ingredientRows[0].gbDgGoodsFileImg || '/images/logo.jpg') : '/images/logo.jpg'}}"
                 mode="aspectFill" /> -->
               <!-- <view class="food-fgf-cover-badge food-fgf-cover-badge--bad"
                 wx:if="{{num.signKind(item.diffCostPerPortion || '0') === 'pos' || num.signKind(item.diffCostPerPortion || '0') === 'neg'}}">异常</view>
@@ -207,7 +207,7 @@
                 <view class="food-fgf-ing-tr" wx:for="{{item.ingredientRows}}" wx:for-item="ing" wx:key="disGoodsId">
                   <view class="food-fgf-ing-td food-fgf-ing-td--name">
                     <image class="food-fgf-ing-ico"
-                      src="{{(imgUrl.resolve(url, ing.gbDgGoodsFileImg) || '/images/logo.jpg')}}" mode="aspectFill" />
+                      src="{{(url + ing.gbDgGoodsFileImg || '/images/logo.jpg')}}" mode="aspectFill" />
                     <text class="food-fgf-ing-name-txt">{{ing.gbDgGoodsName}}</text>
                   </view>
                   <!-- 制作率  -->

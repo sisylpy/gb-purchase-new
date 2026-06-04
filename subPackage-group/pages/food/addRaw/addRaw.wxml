@@ -1,93 +1,229 @@
-<view class="flex flex-column ">
+<view class="flex flex-column page-bg">
+
   <back-navbar title="{{foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
-  <view class="content ">
-    <view class="food-form-card1 bg-white">
-      <!-- <view class="food-form-row food-form-row--top1">
-        <view class="" >
-          <text class="mr-10 text-secondary" >当前菜品:</text>
-          <text class=" font-lg font-bold" >{{foodItem.dishName}}</text>
-        </view>
-      
-      </view> -->
+  <scroll-view scroll-y class="content-scroll">
+    <!-- 顶部状态栏 -->
+    <view class="status-bar">
+      <view class="status-left">
+        <view class="status-dot"></view>
+        <text class="status-text">实时测算中</text>
+      </view>
+      <view class="status-right" bindtap="toChangePrice" hover-class="status-right--hover">
+        <text>更换售价</text>
+      </view>
+    </view>
 
-      <view class="food-raw-section">
-        <view class="food-raw-section__head">
-          <text class="text-secondary">主要原料:</text>
-          <view  class="food-raw-section__add" bindtap="toAddGoods" data-type="raw" hover-class="food-raw-section__add--hover">
-            <text>搜索原料</text>
+    <!-- 售价/成本/毛利率卡片 -->
+    <view class="kpi-card">
+      <view class="kpi-row">
+        <view class="kpi-cell">
+          <text class="kpi-label">当前售价</text>
+          <view class="kpi-value-wrap">
+            <text class="kpi-symbol">¥</text>
+            <text class="kpi-value">{{foodItem.salePrice || '0.00'}}</text>
+            <image src="/images/edit.png" class="kpi-edit-icon" mode="aspectFit" bindtap="toChangePrice"></image>
           </view>
         </view>
-
-        <view wx:if="{{!rawArr.length}}" class="food-raw-empty">
-          <text class="food-raw-empty__text">暂无原料，点击「添加」从商品库选择</text>
+        <view class="kpi-divider"></view>
+        <view class="kpi-cell">
+          <text class="kpi-label">理论成本（每份）</text>
+          <view class="kpi-value-wrap">
+            <text class="kpi-symbol kpi-symbol--cost">¥</text>
+            <text class="kpi-value kpi-value--cost">{{totalCost || '0.00'}}</text>
+          </view>
         </view>
-       
-        <view wx:for="{{rawArr}}" wx:for-item="raw" wx:for-index="rawIdx" wx:key="rawIdx" class="flex-row-between p-20 border-bottom">
-          <view class="flex-row font-base">
-            <text class="mr-10">{{rawIdx + 1}}.</text>
-            <view class="flex-column ">
-              <text class="">{{raw.gbDfgGoodsName}}</text>
-              <view class="flex-row">
-                 <text class="mr-10 text-secondary">用量:</text>
-                <text class="">{{raw.gbDfgGoodsAmount}}{{raw.gbDfgGoodsStandardname}}</text>
-              </view> 
+        <view class="kpi-divider"></view>
+        <view class="kpi-cell">
+          <text class="kpi-label">理论毛利率</text>
+          <view class="kpi-value-wrap">
+            <text class="kpi-value kpi-value--rate">{{grossMarginRate || '0.0'}}%</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 收益卡片 -->
+    <view class="profit-card">
+      <view class="profit-left">
+        <view class="profit-title">
+          <text>每份大约能赚</text>
+          <view class="profit-info-icon" bindtap="showProfitHint">
+            <text class="profit-info-i">i</text>
+          </view>
+        </view>
+        <view class="profit-amount">
+          <text class="profit-symbol">¥</text>
+          <text class="profit-num">{{profit || '0.00'}}</text>
+        </view>
+        <view class="profit-tag {{profitLevelClass}}">
+          <text class="profit-tag-icon">👍</text>
+          <text class="profit-tag-text">{{profitHint || '做得好！毛利表现优秀'}}</text>
+        </view>
+      </view>
+      <view class="profit-right">
+        <!-- <canvas type="2d" id="donutChart" class="donut-canvas"></canvas> -->
+        <view class="donut-legend">
+          <view class="legend-item" wx:for="{{rawArr}}" wx:for-item="raw" wx:for-index="idx" wx:key="gbDistributerFoodGoodsId" wx:if="{{idx < 4}}">
+            <view class="legend-dot" style="background-color: {{pieColors[idx % pieColors.length]}};"></view>
+            <text class="legend-name">{{raw.gbDfgGoodsName}}</text>
+            <text class="legend-ratio">{{raw._ratio}}%</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提示条 -->
+    <view class="hint-bar">
+      <view class="hint-left">
+        <image src="/images/icon.png" class="hint-icon" mode="aspectFit"></image>
+        <text class="hint-text">调整配料用量，成本和毛利将实时更新</text>
+      </view>
+      <view class="hint-right" bindtap="refreshData">
+        <text class="hint-update">上次更新：刚刚</text>
+        <view class="hint-refresh">
+          <view class="hint-refresh-arrow">↻</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配料清单 -->
+    <view class="raw-section">
+      <view class="raw-section-header">
+        <text class="raw-section-title">配料清单（{{rawArr.length}}）</text>
+        <view class="raw-section-add" bindtap="toAddGoods" data-type="raw" hover-class="raw-section-add--hover">
+          <text class="raw-section-add-plus">+</text>
+          <text>添加配料</text>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view wx:if="{{!rawArr.length}}" class="food-raw-empty">
+        <text class="food-raw-empty__text">暂无原料，点击「添加配料」从商品库选择</text>
+      </view>
+
+      <!-- 配料列表 -->
+      <view wx:else class="raw-list">
+        <!-- 表头 -->
+        <view class="raw-list-header">
+          <view class="raw-list-header-top">
+            <view class="raw-header-cell raw-header-cell--info">
+              <text class="raw-header-text">配料信息</text>
+            </view>
+            <view class="raw-header-cell raw-header-cell--action"></view>
+          </view>
+          <view class="raw-list-header-bottom">
+            <view class="raw-header-cell raw-header-cell--amount">
+              <text class="raw-header-text">用量（每份）</text>
+            </view>
+            <view class="raw-header-cell raw-header-cell--cost">
+              <text class="raw-header-text">成本（每份）</text>
+            </view>
+            <view class="raw-header-cell raw-header-cell--ratio">
+              <text class="raw-header-text">占比</text>
             </view>
           </view>
-          <view class="food-raw-row__actions">
-            <view class="food-raw-icon-btn" bindtap="editGoods" data-item="{{raw}}" hover-class="food-raw-icon-btn--hover">
-              <image src="/images/edit.png" class="icon" mode="aspectFit"></image>
+        </view>
+
+        <!-- 数据行 -->
+        <view wx:for="{{rawArr}}" wx:for-item="raw" wx:for-index="rawIdx" wx:key="gbDistributerFoodGoodsId" class="raw-item">
+          <!-- 第一行：图片 + 名称/单价 + 操作 -->
+          <view class="raw-item-top">
+            <view class="raw-item-main">
+              <image
+                class="raw-item-img"
+                src="{{url + raw.gbDistributerGoodsEntity.gbDgNxFatherImg}}"
+                mode="aspectFill"
+              />
+              <view class="raw-item-info">
+                <text class="raw-item-name">{{raw.gbDfgGoodsName}}</text>
+                <text class="raw-item-price">¥{{raw._packPriceLabel}}</text>
+              </view>
             </view>
-            <view class="food-raw-icon-btn" bindtap="deleteGoods" data-index="{{rawIdx}}" hover-class="food-raw-icon-btn--hover">
-              <image src="/images/del.png" class="icon" mode="aspectFit"></image>
+            <view class="raw-item-action">
+              <!-- <view class="action-btn" bindtap="editGoods" data-item="{{raw}}" hover-class="action-btn--hover">
+                <image src="/images/edit.png" class="action-icon" mode="aspectFit"></image>
+              </view> -->
+              <view class="action-btn action-btn--delete" bindtap="deleteGoods" data-index="{{rawIdx}}" hover-class="action-btn--hover">
+                <image src="/images/del.png" class="action-icon" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+
+          <!-- 第二行：用量 + 成本 + 占比 -->
+          <view class="raw-item-bottom">
+            <view class="raw-item-amount">
+              <view class="stepper">
+                <view class="stepper-btn stepper-btn--minus" bindtap="onMinusAmount" data-index="{{rawIdx}}" hover-class="stepper-btn--hover">-</view>
+                <text class="stepper-value">{{raw._displayAmount}}</text>
+                <text class="stepper-unit">{{raw._displayUnit}}</text>
+                <view class="stepper-btn stepper-btn--plus" bindtap="onPlusAmount" data-index="{{rawIdx}}" hover-class="stepper-btn--hover">+</view>
+              </view>
+            </view>
+            <view class="raw-item-cost">
+              <text class="raw-cost-text">¥{{raw._cost}}</text>
+            </view>
+            <view class="raw-item-ratio">
+              <text class="raw-ratio-text">{{raw._ratio}}%</text>
             </view>
           </view>
         </view>
       </view>
     </view>
-  </view>
+    <view class="page-bottom-pad"></view>
+  </scroll-view>
 </view>
 
-<!-- 选择 / 编辑原料（与 addFood 同一套 food-search-modal） -->
+<!-- 添加 / 编辑原料（支持最小单位用量与包装换算） -->
 <view class="food-search-modal" wx:if="{{showFood}}" catchtouchmove="stopMove">
-  <view class="food-search-modal__panel" style="margin-top: {{foodSearchModalPadTopRpx}}rpx; max-height: {{foodSearchModalPanelMaxRpx}}rpx;">
+  <view
+    class="food-search-modal__panel raw-add-modal__panel"
+    style="margin-top: {{foodSearchModalPadTopRpx}}rpx; max-height: {{foodSearchModalPanelMaxRpx}}rpx;"
+    catchtap="stopTap"
+  >
     <view class="food-search-modal__head">
-      <text class="food-search-modal__title">{{foodItem.gbDfFoodName}}</text>
-      <text class="food-search-modal__hint">搜索商品名称、简拼或全拼</text>
+      <text class="food-search-modal__title">{{modalType == 'edit' ? '编辑原料' : '添加原料'}}</text>
     </view>
 
-    <view class="food-search-modal__body">
-      <view class="food-search-modal__section flex-row-items-center">
-        <text class="food-form-label food-form-label--narrow">原料</text>
+    <scroll-view scroll-y class="raw-add-modal__scroll" catchtouchmove="stopMove">
+      <!-- 搜索 -->
+      <view class="raw-add-modal__search">
+        <image class="raw-add-modal__search-icon" src="/images/search-3.png" mode="aspectFit" />
         <input
-          class="numberInput flex-1"
-          style="min-width: 0;"
-          placeholder="输入关键字搜索"
-          placeholder-style="color: #999; font-size: 30rpx;"
+          class="raw-add-modal__search-input"
+          placeholder="搜索商品名称、简拼或全拼"
+          placeholder-style="color: #999; font-size: 28rpx;"
           adjust-position="{{false}}"
-          bindinput="getSearchString"
-          bindblur="checkGoods"
-          value="{{modalType == 'edit' ? editGoods.gbDfgGoodsName : goodsName}}"
+          hold-keyboard="{{true}}"
+          confirm-type="{{searchKeyword ? 'search' : 'done'}}"
+          confirm-hold="{{true}}"
+          bindinput="onSearchKeywordInput"
+          bindconfirm="onSearchConfirm"
+          value="{{searchKeyword}}"
         />
+        <view
+          wx:if="{{searchKeyword}}"
+          class="raw-add-modal__search-clear"
+          bindtap="clearSearchKeyword"
+          hover-class="raw-add-modal__search-clear--hover"
+        >×</view>
       </view>
 
-      <view class="food-search-modal__scroll-wrap searchPart {{isSearching ? 'is-active' : ''}}">
+      <!-- 搜索结果 -->
+      <view class="food-search-modal__scroll-wrap searchPart {{isSearching ? 'is-active' : ''}}" wx:if="{{isSearching}}">
         <scroll-view
           scroll-y
-          class="searchList {{isSearching ? 'is-active' : ''}}"
+          class="searchList is-active"
           catchtouchmove="stopMove"
-          style="height: {{strArr.length ? (strArr.length < 8 ? strArr.length * 108 : foodSearchScrollRpx) : 120}}rpx;"
+          style="height: {{strArr.length ? (strArr.length < 6 ? strArr.length * 108 : foodSearchScrollRpx) : 120}}rpx;"
         >
           <view
             class="food-raw-search-row"
             wx:for="{{strArr}}"
             wx:for-item="goods"
             wx:key="gbDistributerGoodsId"
-            bindtap="applyGoods"
-            data-item="{{goods}}"
-            hover-class="food-raw-search-row--hover"
           >
-            <text class="mr-10">{{index + 1}}.</text>
+            <text class="food-raw-search-row__idx">{{index + 1}}.</text>
             <view class="food-raw-search-row__content">
               <view class="food-raw-search-row__line">
                 <text class="brand" wx:if="{{goods.gbDgGoodsBrand && goods.gbDgGoodsBrand.length > 0 && goods.gbDgGoodsBrand !== 'null'}}">{{goods.gbDgGoodsBrand}}</text>
@@ -99,40 +235,149 @@
                 <block wx:else>
                   <text wx:if="{{goods.gbDgGoodsStandardname}}" class="food-raw-search-row__spec">（{{goods.gbDgGoodsStandardname}}）</text>
                 </block>
-                <block wx:if="{{goods.nxAliasEntities && goods.nxAliasEntities.length > 0}}">
-                  <text wx:for="{{goods.nxAliasEntities}}" wx:for-item="alias" wx:for-index="aliasIdx" wx:key="aliasIdx">={{alias.nxDaAliasName}}</text>
-                </block>
               </view>
-              <view class="food-raw-search-row__line food-raw-search-row__line--sub" wx:if="{{(goods.gbDgGoodsPlace !== null && goods.gbDgGoodsPlace.length > 0) || (goods.gbDgGoodsDetail && goods.gbDgGoodsDetail.length > 0 && goods.gbDgGoodsDetail !== 'null')}}">
-                <text wx:if="{{goods.gbDgGoodsPlace !== null && goods.gbDgGoodsPlace.length > 0}}" class="food-raw-search-row__place">产地 {{goods.gbDgGoodsPlace}}</text>
-                <text wx:if="{{goods.gbDgGoodsDetail && goods.gbDgGoodsDetail.length > 0 && goods.gbDgGoodsDetail !== 'null'}}" class="food-raw-search-row__detail">{{goods.gbDgGoodsDetail}}</text>
+              <view class="flex-row">
+                <text class="text-secondary">均价:</text>
+                <text wx:if="{{goods.gbDgGoodsAveragePrice > 0}}">¥{{goods.gbDgGoodsAveragePrice}}/{{goods.gbDgGoodsStandardname}}</text>
+                <text wx:else class="text-secondary">最近无采购</text>
               </view>
             </view>
+            <view
+              class="food-raw-search-row__select-btn"
+              catchtap="applyGoods"
+              data-item="{{goods}}"
+              hover-class="food-raw-search-row__select-btn--hover"
+            >选择</view>
           </view>
         </scroll-view>
       </view>
 
-      <view class="food-search-modal__section flex-row-items-center" wx:if="{{!isSearching}}">
-        <text class="food-form-label food-form-label--narrow">数量</text>
-        <view class="flex-row-items-center flex-1" style="min-width: 0;">
-          <input
-            class="numberInput"
-            style="width: {{windowWidth - 300}}rpx; min-width: 0;"
-            placeholder-style="color: #999; font-size: 26rpx;"
-            type="digit"
-            value="{{modalType == 'edit' ? editGoods.gbDfgGoodsAmount : amount}}"
-            bindinput="getApplyNumber"
-            hold-keyboard="{{true}}"
+      <!-- 已选商品 + 用量配置 -->
+      <block wx:if="{{modalGoods && !isSearching}}">
+        <view class="raw-add-modal__picked">
+          <view class="raw-add-modal__picked-check">✓</view>
+          <image
+            class="raw-add-modal__picked-img"
+            src="{{modalGoodsImg}}"
+            mode="aspectFill"
           />
-          <text class="ml-sm text-secondary font-md" style="flex-shrink: 0;">{{modalType == 'edit' && editGoods.distributerGoodsEntity ? editGoods.distributerGoodsEntity.gbDgGoodsStandardname : standardName}}</text>
+          <view class="raw-add-modal__picked-info">
+            <text class="raw-add-modal__picked-name">{{modalGoods.gbDgGoodsName}}</text>
+            <text class="raw-add-modal__picked-spec">{{modalPackLabel}}</text>
+            <text class="raw-add-modal__picked-price">{{modalPackPriceLabel}}</text>
+          </view>
         </view>
-      </view>
-    </view>
+
+        <view class="raw-add-modal__form">
+          <view class="raw-add-modal__row">
+            <text class="raw-add-modal__label">采购包装</text>
+            <text class="raw-add-modal__value">{{modalPackLabel}}</text>
+            <text class="raw-add-modal__arrow">›</text>
+          </view>
+          <view class="raw-add-modal__row">
+            <text class="raw-add-modal__label">采购单价</text>
+            <text class="raw-add-modal__value raw-add-modal__value--price">{{modalPackPriceLabel}}</text>
+            <text class="raw-add-modal__arrow">›</text>
+          </view>
+          <view class="raw-add-modal__row raw-add-modal__row--dosage">
+            <text class="raw-add-modal__label">每份用量</text>
+            <view class="raw-add-modal__dosage">
+              <view class="raw-add-modal__stepper">
+                <view class="raw-add-modal__step-btn" bindtap="onModalPortionMinus" hover-class="raw-add-modal__step-btn--hover">-</view>
+                <input
+                  class="raw-add-modal__step-input"
+                  type="digit"
+                  value="{{modalPortionAmount}}"
+                  bindinput="onModalPortionInput"
+                  hold-keyboard="{{true}}"
+                />
+                <view class="raw-add-modal__step-btn" bindtap="onModalPortionPlus" hover-class="raw-add-modal__step-btn--hover">+</view>
+              </view>
+              <picker mode="selector" range="{{minUnitOptions}}" value="{{modalMinUnitIndex}}" bindchange="onMinUnitChange">
+                <view class="raw-add-modal__unit-pick">
+                  <text>{{modalMinUnit}}</text>
+                  <text class="raw-add-modal__unit-arrow">▾</text>
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view class="raw-add-modal__row raw-add-modal__row--picker">
+            <text class="raw-add-modal__label">最小单位</text>
+            <picker mode="selector" range="{{minUnitOptions}}" value="{{modalMinUnitIndex}}" bindchange="onMinUnitChange">
+              <view class="raw-add-modal__unit-pick raw-add-modal__unit-pick--wide">
+                <text>{{modalMinUnit}}</text>
+                <text class="raw-add-modal__unit-arrow">▾</text>
+              </view>
+            </picker>
+          </view>
+          <text class="raw-add-modal__hint">支持使用：g / ml / 张 / 个等；按斤买、按个用时请填「1斤=几个」</text>
+          <view class="raw-add-modal__row raw-add-modal__row--conversion" wx:if="{{modalPackUnit && modalMinUnit !== modalPackUnit}}">
+            <text class="raw-add-modal__label">换算关系<text class="raw-add-modal__required" wx:if="{{modalConversionRequired}}">*</text></text>
+            <view class="raw-add-modal__conversion-col">
+              <view class="raw-add-modal__conversion-edit {{modalConversionRequired && !modalPackQtyInMin ? 'raw-add-modal__conversion-edit--warn' : ''}}">
+                <text class="raw-add-modal__conversion-prefix">1{{modalPackUnit}} =</text>
+                <input
+                  class="raw-add-modal__conversion-input"
+                  type="digit"
+                  placeholder="{{modalConversionPlaceholder}}"
+                  value="{{modalPackQtyInMin}}"
+                  bindinput="onConversionCountInput"
+                  hold-keyboard="{{true}}"
+                />
+                <text class="raw-add-modal__conversion-suffix">{{modalMinUnit}}</text>
+              </view>
+              <text class="raw-add-modal__conversion-sub" wx:if="{{modalPackEquivText}}">保存为 {{modalPackEquivText}}</text>
+              <text class="raw-add-modal__conversion-warn" wx:elif="{{modalConversionRequired && !modalPackQtyInMin}}">商品未配置默认规格，请填写换算后才能保存并计算成本</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="raw-add-modal__summary">
+          <view class="raw-add-modal__summary-top">
+            <view class="raw-add-modal__summary-cell">
+              <text class="raw-add-modal__summary-icon">🧮</text>
+              <view class="raw-add-modal__summary-text">
+                <text class="raw-add-modal__summary-label">每份成本 ≈</text>
+                <text class="raw-add-modal__summary-num">¥ {{modalCostPerPortion}}</text>
+              </view>
+            </view>
+            <view class="raw-add-modal__summary-divider"></view>
+            <view class="raw-add-modal__summary-cell">
+              <text class="raw-add-modal__summary-icon">📦</text>
+              <view class="raw-add-modal__summary-text">
+                <text class="raw-add-modal__summary-label">1{{modalPackUnit}}约可做</text>
+                <text class="raw-add-modal__summary-num">{{modalPortionsPerPack}} 份</text>
+              </view>
+            </view>
+          </view>
+          <view class="raw-add-modal__summary-demo">{{modalDemoText}}</view>
+          <view class="raw-add-modal__summary-tip">
+            <text class="raw-add-modal__summary-tip-i">i</text>
+            <text>支持大包装按最小单位自动折算成本</text>
+          </view>
+        </view>
+
+        <view class="raw-add-modal__quick" wx:if="{{modalQuickTags.length}}">
+          <text class="raw-add-modal__quick-label">常用用量</text>
+          <view class="raw-add-modal__quick-tags">
+            <view
+              wx:for="{{modalQuickTags}}"
+              wx:for-item="tag"
+              wx:key="value"
+              class="raw-add-modal__quick-tag {{tag.active ? 'is-active' : ''}}"
+              data-value="{{tag.value}}"
+              bindtap="onQuickDosage"
+              hover-class="raw-add-modal__quick-tag--hover"
+            >{{tag.label}}</view>
+          </view>
+        </view>
+      </block>
+    </scroll-view>
 
     <view class="food-search-modal__footer">
       <view class="food-search-modal__actions">
         <view class="cancel-btn" bindtap="cancle" hover-class="hoverBtn">取消</view>
-        <view class="confirm-btn" catchtap="confirm" hover-class="hoverBtn">确定</view>
+        <view class="confirm-btn" catchtap="confirm" hover-class="hoverBtn">{{modalType == 'edit' ? '确认保存' : '确认添加'}}</view>
       </view>
     </view>
   </view>

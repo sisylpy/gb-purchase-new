@@ -1,0 +1,105 @@
+<view class="biz-card biz-revenue" wx:if="{{cardData}}">
+  <!-- 主体布局：左侧标题+总金额 | 右侧 2×2 指标网格 -->
+  <view class="biz-body">
+    <!-- 左侧：标题 + 总营业额 -->
+    <view class="biz-left">
+      <view class="biz-header">
+        <view class="biz-icon-wrap">
+          <text class="biz-icon">📊</text>
+        </view>
+        <text class="biz-title">营业额</text>
+      </view>
+      <view class="biz-total">
+        <text class="biz-total-label">总营业额</text>
+        <text class="biz-total-value">{{cardData.totalRevenue || '0'}}</text>
+      </view>
+    </view>
+
+    <!-- 右侧：2×2 指标网格 -->
+    <view class="biz-grid">
+      <view class="biz-grid-item">
+        <view class="biz-grid-icon-wrap">
+          <text class="biz-grid-icon">🍽️</text>
+        </view>
+        <view class="biz-grid-info">
+          <text class="biz-grid-label">堂食</text>
+          <text class="biz-grid-value">{{cardData.dineInRevenue || '0'}}</text>
+        </view>
+      </view>
+      <view class="biz-grid-item">
+        <view class="biz-grid-icon-wrap">
+          <text class="biz-grid-icon">🛵</text>
+        </view>
+        <view class="biz-grid-info">
+          <text class="biz-grid-label">外卖</text>
+          <text class="biz-grid-value">{{cardData.takeoutRevenue || '0'}}</text>
+        </view>
+      </view>
+      <view class="biz-grid-item">
+        <view class="biz-grid-icon-wrap">
+          <text class="biz-grid-icon">💰</text>
+        </view>
+        <view class="biz-grid-info">
+          <text class="biz-grid-label">平台抽成</text>
+          <text class="biz-grid-value">{{cardData.platformFee || '0'}}</text>
+        </view>
+      </view>
+      <view class="biz-grid-item">
+        <view class="biz-grid-icon-wrap">
+          <text class="biz-grid-icon">📋</text>
+        </view>
+        <view class="biz-grid-info">
+          <text class="biz-grid-label">订单数 / 客单价</text>
+          <text class="biz-grid-value biz-grid-value-sm">{{cardData.orderCount || '0'}} 单 / ¥{{cardData.averageOrderValue || '0'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 菜品销量分析（dishSalesReason） -->
+  <view class="biz-dish-section" wx:if="{{cardData.dishSalesReason}}">
+    <!-- 总体判断 -->
+    <view class="biz-summary-card" wx:if="{{cardData.dishSalesReason.summary}}">
+      <view class="biz-summary-badge">📈</view>
+      <text class="biz-summary-text">{{cardData.dishSalesReason.summary}}</text>
+    </view>
+
+    <!-- 菜品波动列表 -->
+    <block wx:if="{{cardData.dishSalesReason.items && cardData.dishSalesReason.items.length > 0}}">
+      <text class="biz-section-title">菜品销售分析</text>
+      <block wx:for="{{cardData.dishSalesReason.items}}" wx:key="dishName">
+        <view class="biz-dish-row">
+          <!-- 上半部：菜名 + 原因 + 核心差异指标 -->
+          <view class="biz-dish-top">
+            <text class="biz-dish-name">{{item.dishName}}</text>
+            <text class="biz-dish-diff-pill {{item.qtyDiff > 0 ? 'biz-dish-diff--up' : ''}}">较平时 {{item.qtyDiff > 0 ? '+' : ''}}{{item.qtyDiff || 0}}份</text>
+          </view>
+          <text class="biz-dish-reason" wx:if="{{item.reason}}">💡 {{item.reason}}</text>
+
+          <!-- 下半部：数据网格 -->
+          <view class="biz-dish-metrics">
+            <view class="biz-metric-item">
+              <text class="biz-metric-label">本期销量</text>
+              <text class="biz-metric-value">{{item.periodQty || '0'}}</text>
+            </view>
+            <view class="biz-metric-divider"></view>
+            <view class="biz-metric-item">
+              <text class="biz-metric-label">平时日均</text>
+              <text class="biz-metric-value">{{item.baselineDailyAvgQty || '0'}}</text>
+            </view>
+            <view class="biz-metric-divider"></view>
+            <view class="biz-metric-item">
+              <text class="biz-metric-label">多卖</text>
+              <text class="biz-metric-value">¥{{item.amountDiff || '0'}}</text>
+            </view>
+            <view class="biz-metric-divider"></view>
+            <view class="biz-metric-item biz-metric-item--sales">
+              <text class="biz-metric-label">销售额</text>
+              <text class="biz-metric-value">¥{{item.periodSalesAmount || '0'}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </block>
+  </view>
+</view>

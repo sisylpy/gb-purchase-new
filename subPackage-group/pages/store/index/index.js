@@ -50,10 +50,11 @@ Page({
     var value = wx.getStorageSync('disInfo');
     if (value) {
       var ctx = purchaseContext.resolveIndexPurchaseContext();
+      var mendianInfo = wx.getStorageSync('mendianInfo');
       var purDep =
         ctx.ok && ctx.purDepInfo
           ? ctx.purDepInfo
-          : value.mendianDepartmentList && value.mendianDepartmentList[0];
+          : mendianInfo;
       this.setData({
         disId: value.gbDistributerId,
         disInfo: value,

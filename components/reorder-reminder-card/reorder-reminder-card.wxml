@@ -1,0 +1,55 @@
+<view class="biz-card biz-reorder" wx:if="{{cardData}}">
+  <!-- 卡片标题 -->
+  <view class="biz-header">
+    <view class="biz-icon-wrap biz-icon-purple">
+      <text class="biz-icon">📝</text>
+    </view>
+    <view class="biz-header-right">
+      <text class="biz-title">订货</text>
+      <view class="biz-scope-bar" wx:if="{{cardData.reportLabel}}">
+        <text class="biz-scope-tag">{{cardData.reportLabel}}</text>
+        <text class="biz-scope-name" wx:if="{{cardData.scopeLabel}}">· {{cardData.scopeLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态：EMPTY / SKIPPED / NO_DATA / 无notOrderedItems -->
+  <view class="biz-empty-block" wx:if="{{cardData.status === 'EMPTY' || cardData.status === 'SKIPPED' || cardData.status === 'NO_DATA' || !cardData.notOrderedItems || cardData.notOrderedItems.length === 0}}">
+    <text class="biz-empty-title">{{cardData.emptyReason || '当前无需订货'}}</text>
+  </view>
+
+  <!-- 正常内容 -->
+  <block wx:else>
+    <!-- 副标题 -->
+    <view class="biz-reorder-subtitle">
+      <text class="biz-reorder-dep" wx:if="{{cardData.orderingDepId != null}}">🏪 门店 {{cardData.orderingDepId}}</text>
+      <text>根据订货习惯，以下商品今日建议订货</text>
+    </view>
+
+    <!-- 未订商品列表 -->
+    <view class="biz-order-list">
+      <view class="biz-order-row" wx:for="{{cardData.notOrderedItems}}" wx:key="index" wx:for-item="item">
+        <view class="biz-order-icon-wrap {{_itemIconClass(item)}}">
+          <text class="biz-order-icon">{{item.emoji || _itemEmoji(item.goodsName || item.name)}}</text>
+        </view>
+        <text class="biz-order-name">{{item.goodsName || item.name || '—'}}</text>
+        <text class="biz-order-suggest">建议订 {{item.suggestQty || item.quantity || '?'}} {{item.unit || '斤'}}</text>
+        <text class="biz-order-status {{item.status === 'ORDERED' ? 'status-ok' : 'status-warn'}}">{{item.status === 'ORDERED' ? '已订' : '未订'}}</text>
+      </view>
+    </view>
+
+    <!-- 统计 -->
+    <view class="biz-count-bar" wx:if="{{cardData.shouldOrderItems && cardData.shouldOrderItems.length}}">
+      <text class="biz-count-text">共 {{cardData.shouldOrderItems.length}} 种商品需要订货，{{_orderedCount()}} 种已正常订货</text>
+    </view>
+  </block>
+
+  <!-- Agent 摘要 -->
+  <view class="biz-agent-bar" wx:if="{{cardData.checkSummary || cardData.agentSummary}}">
+    <view class="biz-agent-icon biz-agent-purple">
+      <text>🤖</text>
+    </view>
+    <text class="biz-agent-title">Agent</text>
+    <text class="biz-agent-text">{{cardData.checkSummary || cardData.agentSummary || ''}}</text>
+  </view>
+</view>

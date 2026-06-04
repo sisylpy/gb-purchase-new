@@ -66,7 +66,7 @@
 
             <view class="flex-row half-row" wx:else>
               <text class="mr-10">自采:</text>
-              <text class="">{{disInfo.mendianDepartmentList[0].gbDepartmentName}}</text>
+              <text class="">{{mendianName}}</text>
             </view>
             <view class="flex-row half-row ">
               <text class="mr-10">退货:</text>

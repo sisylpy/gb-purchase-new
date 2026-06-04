@@ -1,10 +1,24 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
 
 <!-- ========== 分类菜品经营列表（从分类卡片进入） ========== -->
-<view wx:if="{{foodManageMode}}" class="dcl-page">
+<view wx:if="{{foodManageMode}}" class="dcl-page1 flex-column flex">
+ 
   <back-navbar title="{{manageFatherName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBackManage"></back-navbar>
 
-  <scroll-view scroll-y class="dcl-scroll">
+  <view class="food-menu-head">
+      <view class="food-menu-head__left">
+        <text class="food-menu-link" catchtap="renameFather">修改名称</text>
+        <block wx:if="{{!dishes.length}}">
+          <text class="food-menu-divider">|</text>
+          <text class="food-menu-link" style="color: #ff3b30;" catchtap="deleteFather">删除父类</text>
+        </block>
+      </view>
+      <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" catchtap="addDishFromCategory">
+        <text class="food-menu-action-btn__txt">添加菜品</text>
+      </view>
+    </view>
+    
+  <scroll-view scroll-y class="dcl-scroll mt-10" >
 
     <!-- 分类摘要条（突出毛利、成本差异、角色分布） -->
     <view class="dcl-summary-bar">
@@ -650,6 +664,24 @@
     <view class="food-tpl-actions">
       <view class="food-tpl-btn food-tpl-btn--ghost" bindtap="onCloseFoodSalesTemplateModal">取消</view>
       <view class="food-tpl-btn food-tpl-btn--primary" bindtap="onConfirmDownloadFoodSales">确认下载</view>
+    </view>
+  </view>
+
+  <!-- 修改类别名称弹窗 -->
+  <view class="rename-overlay" wx:if="{{showRenamePopup}}" catchtap="cancelRename">
+    <view class="rename-dialog" catchtap="">
+      <view class="rename-dialog__title">修改类别名称</view>
+      <input class="rename-dialog__input" 
+             value="{{renameInputValue}}" 
+             placeholder="请输入新名称"
+             maxlength="20"
+             focus="{{showRenamePopup}}"
+             bindinput="onRenameInput"
+             bindconfirm="confirmRename"/>
+      <view class="rename-dialog__btns">
+        <text class="rename-dialog__btn rename-dialog__btn--cancel" catchtap="cancelRename">取消</text>
+        <text class="rename-dialog__btn rename-dialog__btn--confirm" catchtap="confirmRename">确定</text>
+      </view>
     </view>
   </view>
 </view>

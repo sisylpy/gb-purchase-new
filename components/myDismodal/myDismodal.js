@@ -146,7 +146,8 @@ Component({
         remarkContent: "",
         goodsStandard: "",
         editApply: false,
-        stockIsZero: false
+        stockIsZero: false,
+        hasStock: false
       })
     },
 
@@ -162,6 +163,7 @@ Component({
         applySubtotal: "0.0元",
         newStandardName: "",
         stockIsZero: false,
+        hasStock: false
       })
       this.triggerEvent('cancle')
     },
@@ -218,7 +220,7 @@ Component({
             editApply: false,
             applySubtotal: "0.0元",
             newStandardName: "",
-            stockIsZero: false
+            hasStock: false
 
           })
         } else {

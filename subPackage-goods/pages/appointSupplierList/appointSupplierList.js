@@ -1,13 +1,10 @@
 const globalData = getApp().globalData;
-// var load = require('../../../../lib/load.js');
+var load = require('../../../lib/load.js');
 
-// import {
-//   gbPurchaserGetSupplier,
-//   disUpdateDisGoodsGb
-// } from '../../../../lib/apiDistributer'
 
 import {
-  depGetSupplier,
+  depGetAllSupplier,
+  disUpdateDisGoodsGb,
 } from '../../../services/supplier.js'
 
 
@@ -31,11 +28,11 @@ Page({
     this.setData({
       purDepId: options.purDepId,
     })
-    
+    this._initData();
   },
 
   _initData(){
-    depGetSupplier(this.data.purDepId).then(res => {
+    depGetAllSupplier(this.data.purDepId).then(res => {
       load.showLoading("获取供货商")
       if (res.result.code == 0) {
         load.hideLoading();
@@ -47,6 +44,7 @@ Page({
         wx.showToast({
           title: res.result.msg,
           icon: 'none'
+       
         })
       }
     })

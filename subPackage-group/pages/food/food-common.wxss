@@ -1574,3 +1574,23 @@
   flex: 1;
   min-height: 0;
 }
+
+/* -------------------------------------------------------------------------- */
+/* 删除菜品按钮（addFood 编辑模式） */
+/* -------------------------------------------------------------------------- */
+
+.food-delete-btn {
+  margin-top: 32rpx;
+  padding: 24rpx 0;
+  text-align: center;
+  background: var(--gb-bg-white);
+  border: 1rpx solid #ff3b30;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #ff3b30;
+}
+
+.food-delete-btn:active {
+  opacity: 0.75;
+}

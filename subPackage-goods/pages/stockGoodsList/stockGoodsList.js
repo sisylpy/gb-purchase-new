@@ -133,6 +133,12 @@ Page({
         disInfo: disInfo
       })
     }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
+      this.setData({
+        mendianName: mendianInfo.gbDepartmentName
+      })
+    }
 
     // 统一从缓存获取筛选数据
      this._getInitData();
@@ -266,7 +272,8 @@ Page({
      }
      
      item.gbDistributerGoodsEntity = this.data.disGoods;
-     var depList = this.data.disInfo.mendianDepartmentList[0].gbDepartmentEntityList;
+     var mendianInfo = wx.getStorageSync('mendianInfo');
+     var depList = mendianInfo ? mendianInfo.gbDepartmentEntityList : [];
      console.log("部门列表长度:", depList.length);
      
      // 设置初始showType

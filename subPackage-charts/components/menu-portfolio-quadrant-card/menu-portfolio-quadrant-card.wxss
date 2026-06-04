@@ -32,6 +32,21 @@
   line-height: 1.4;
 }
 
+/* ---------- 空数据提示 ---------- */
+.mpq-empty {
+  padding: 48rpx 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mpq-empty-text {
+  font-size: 26rpx;
+  color: #9aa0a6;
+  text-align: center;
+  line-height: 1.6;
+}
+
 /* ---------- 图表 + 图例 ---------- */
 .mpq-top-section {
   display: flex;

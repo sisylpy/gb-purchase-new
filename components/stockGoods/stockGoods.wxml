@@ -1,3 +1,4 @@
+<wxs src="../../utils/fn.wxs" module="tool" />
 
 
 <view class='ccc' wx:if='{{show}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
@@ -17,7 +18,7 @@
       </view>
     </view>
 
-    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
+    <view class="flex-row p-10" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
       <view class="flex-row half-row">
         <text class="margin-l-right">入库:</text>
         <text class="">{{tool.getAttrFullTime(item.gbDgsFullTime)}} </text>

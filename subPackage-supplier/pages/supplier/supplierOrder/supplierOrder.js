@@ -36,11 +36,10 @@ Page({
       url: apiUrl.server,
     })
 
-    var disInfo = wx.getStorageSync('disInfo');
-    if(disInfo){
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if(mendianInfo){
       this.setData({
-        disInfo: disInfo,
-        depId: disInfo.mendianDepartmentList[0].gbDepartmentId,
+        depId: mendianInfo.gbDepartmentId,
     })
   }
   var userInfo = wx.getStorageSync('userInfo');

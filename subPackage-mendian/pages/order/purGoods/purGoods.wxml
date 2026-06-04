@@ -20,7 +20,7 @@
 
       <view class="order-list">
         <view class="order-item" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:key="gbDepartmentOrdersId" wx:for-item="orders" wx:if="{{orders.isNotice}}">
-          <block wx:if="{{disInfo.mendianDepartmentList.length == 1 && disInfo.mendianDepartmentList[0].gbDepartmentSubAmount == 1}}">
+          <block wx:if="{{subDepAmount == 1}}">
             <view class="order-quantity">
               <text class="mr-10" style="color: #999; font-size: 34rpx;">订货:</text>
               <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>

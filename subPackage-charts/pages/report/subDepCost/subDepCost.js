@@ -39,15 +39,18 @@ Page({
    
     var disInfo = wx.getStorageSync('disInfo');
     if(disInfo){
-      // 为每个部门添加默认选中状态
-      const subDepArr = disInfo.mendianDepartmentList[0].gbDepartmentEntityList.map(dep => ({
-        ...dep,
-        isSelected: true
-      }));
-      
       this.setData({
         disInfo: disInfo,
         disId: disInfo.gbDistributerId,
+      })
+    }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
+      var subDepArr = mendianInfo.gbDepartmentEntityList.map(dep => ({
+        ...dep,
+        isSelected: true
+      }));
+      this.setData({
         subDepArr: subDepArr,
       })
     }

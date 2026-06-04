@@ -50,18 +50,17 @@ Page({
 
     var disInfo = wx.getStorageSync('disInfo');
     if (disInfo) {
-      var depPatch = {
+      this.setData({
         disInfo: disInfo,
         disId: disInfo.gbDistributerId,
-      };
-      var depIdVal =
-        disInfo.mendianDepartmentList && disInfo.mendianDepartmentList.length > 0
-          ? disInfo.mendianDepartmentList[0].gbDepartmentId
-          : disInfo.gbDepartmentId;
-      if (depIdVal !== undefined && depIdVal !== null && depIdVal !== '') {
-        depPatch.depId = depIdVal;
-      }
-      this.setData(depPatch);
+      });
+    }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo && mendianInfo.gbDepartmentId) {
+      this.setData({
+        depId: mendianInfo.gbDepartmentId,
+        subDepAmount: mendianInfo.gbDepartmentSubAmount,
+      });
     }
 
     var userInfo = wx.getStorageSync('userInfo');
@@ -115,25 +114,12 @@ Page({
   },
 
   /**
-   * 弹层打开后短时保留 foucusWeight/foucusPrice 用于首帧自动聚焦，随后关掉，
-   * 避免 quantity 的 focus 一直为 true 与单价输入抢焦点。
+   * 弹层打开后短时保留 foucusWeight/foucusPrice 用于首帧自动聚焦，随后关掉。
+   * 注意：不能在此处将 foucusWeight/foucusPrice 置为 false，
+   * 否则正在输入的 input 会丢失焦点导致键盘关闭。
+   * 微信小程序的 focus 属性在首次渲染 focus=true 后，input 获得焦点，
+   * 之后 focus 变为 false 不会使 input 失焦（仅在未获得焦点时生效）。
    */
-  _scheduleResetInputOrderFocus: function () {
-    var that = this;
-    if (this._inputOrderFocusTimer) {
-      clearTimeout(this._inputOrderFocusTimer);
-    }
-    this._inputOrderFocusTimer = setTimeout(function () {
-      that._inputOrderFocusTimer = null;
-      if (!that.data.show) {
-        return;
-      }
-      that.setData({
-        foucusWeight: false,
-        foucusPrice: false,
-      });
-    }, 400);
-  },
 
   showInputOrder: function (e) {
     var item = e.currentTarget.dataset.item;
@@ -261,7 +247,6 @@ Page({
             canSave: true,
             windowHeight: that.data.windowHeight,
           });
-          that._scheduleResetInputOrderFocus();
         } else {
           displayItem.gbDpgBuyScale = 0;
           displayItem.gbDpgBuyScalePrice = "";
@@ -331,7 +316,6 @@ Page({
           } else {
             that.setData({ canSave: false });
           }
-          that._scheduleResetInputOrderFocus();
         }
       } else {
         if (needScalePack && scalePackMeta) {
@@ -356,7 +340,6 @@ Page({
           canSave: false,
           windowHeight: that.data.windowHeight,
         });
-        that._scheduleResetInputOrderFocus();
       }
     }).catch(function (err) {
       logPurInput('purUserGetPurGoodsInfo 请求异常', err);
@@ -453,10 +436,6 @@ Page({
 
   cancle: function () {
     console.log('[purGoods inputOrder cancle] 取消录入');
-    if (this._inputOrderFocusTimer) {
-      clearTimeout(this._inputOrderFocusTimer);
-      this._inputOrderFocusTimer = null;
-    }
     this.setData({
       show: false,
       item: null,

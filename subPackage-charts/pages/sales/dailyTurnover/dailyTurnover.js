@@ -435,7 +435,7 @@ Page({
     }
     wx.navigateTo({
       url:
-        '../addFoodSales/addFoodSales?edit=1&type=single&departmentId=' +
+        '../editFoodSales/editFoodSales?edit=1&type=single&departmentId=' +
         (this.data.departmentId || '') +
         '&anchorDate=' +
         encodeURIComponent(day),

@@ -69,6 +69,15 @@ var getSubDepartmentsGb = function (depFatherId) {
   return requestUtil.get('gbdepartment/getSubDepartmentsGb/' + depFatherId);
 };
 
+/**
+ * 保存新部门（门店）
+ * POST gbdepartment/saveGbDepartment
+ * @param {Object} data 部门实体
+ */
+var saveGbDepartment = function (data) {
+  return requestUtil.post('gbdepartment/saveGbDepartment', data);
+};
+
 module.exports = {
   getDepUsersByFatherIdGb: getDepUsersByFatherIdGb,
   getDisDepartmentGbMendianJing: getDisDepartmentGbMendianJing,
@@ -76,4 +85,5 @@ module.exports = {
   deleteDepartment: deleteDepartment,
   saveSubDepartment: saveSubDepartment,
   getSubDepartmentsGb: getSubDepartmentsGb,
+  saveGbDepartment: saveGbDepartment,
 };

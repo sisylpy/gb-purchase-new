@@ -83,7 +83,7 @@
         </view>
 
         <!-- 三列指标 -->
-        <view class="cat-card__metrics">
+        <!-- <view class="cat-card__metrics">
           <view class="metric-cell">
             <text class="metric-cell__label">目标毛利率</text>
             <text class="metric-cell__value">{{cat.targetGrossMarginRate}}</text>
@@ -96,14 +96,14 @@
             <text class="metric-cell__label">波动范围</text>
             <text class="metric-cell__value metric-cell__value--highlight">{{cat.grossMarginRange}}</text>
           </view>
-        </view>
+        </view> -->
 
         <!-- 底部提示 -->
-        <view class="cat-card__tip">
+        <!-- <view class="cat-card__tip">
           <text class="cat-card__tip-icon">💡</text>
           <text class="cat-card__tip-text">{{cat.summaryText}}</text>
           <text class="cat-card__tip-arrow">›</text>
-        </view>
+        </view> -->
       </view>
     </view>
   </scroll-view>

@@ -10,6 +10,7 @@ import {
   updateFood,
   queryDisGoodsByQuickSearchGb,
   getFoodByFoodId,
+  deleteFood,
 } from '../../../services/apiDistributerGbFood'
 
 Page({
@@ -170,24 +171,6 @@ Page({
 
   },
 
-  onTargetGrossMarginRateInput(e) {
-    if (this.data.type == 'edit') {
-      var key = 'foodItem.gbDfTargetGrossMarginRate';
-      this.setData({ [key]: e.detail.value });
-    } else {
-      this.setData({ targetGrossMarginRate: e.detail.value });
-    }
-  },
-
-  onGrossMarginFloatAbsInput(e) {
-    if (this.data.type == 'edit') {
-      var key = 'foodItem.gbDfGrossMarginFloatAbs';
-      this.setData({ [key]: e.detail.value });
-    } else {
-      this.setData({ grossMarginFloatAbs: e.detail.value });
-    }
-  },
-
     _checkCanSave(){
       if(this.data.type == 'edit'){
         var name = this.data.foodItem.gbDfFoodName;
@@ -306,9 +289,7 @@ Page({
 
   addFood() {
     if(this.data.type == 'edit'){
-      var itemUrl = this.data.foodItem.gbDfFoodImg;
-      var dataUrl = this.data.dataUrl;
-      if(dataUrl !==  itemUrl){
+      if(this.data.imgChanged && this.data.foodItem.gbDfFoodImg){
         var id = this.data.foodItem.gbDistributerFoodId;
         var filePathList = this.data.foodItem.gbDfFoodImg;
         var foodName = this.data.foodItem.gbDfFoodName;
@@ -321,7 +302,7 @@ Page({
               method = ""
         }
         load.showLoading("修改商品")
-        updateFoodWithFile(filePathList, id,foodName, price ,method, foodItem.gbDfTargetGrossMarginRate, foodItem.gbDfGrossMarginFloatAbs ).then(res => {
+        updateFoodWithFile(filePathList, id,foodName, price ,method, this.data.foodItem.gbDfTargetGrossMarginRate, this.data.foodItem.gbDfGrossMarginFloatAbs ).then(res => {
           load.hideLoading();
           if(res.result == '{"code":0}'){
             let pages = getCurrentPages();
@@ -399,6 +380,42 @@ Page({
     wx.navigateBack({
       delta: 1,
     })
+  },
+
+  deleteFood(){
+    var that = this;
+    var foodItem = this.data.foodItem;
+    if (!foodItem || !foodItem.gbDistributerFoodId) {
+      wx.showToast({ title: '菜品数据异常', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '提示',
+      content: '确定要删除该菜品吗？删除后不可恢复。',
+      confirmColor: '#ff3b30',
+      success(res) {
+        if (res.confirm) {
+          load.showLoading('删除中');
+          deleteFood({ id: foodItem.gbDistributerFoodId }).then(function (resp) {
+            load.hideLoading();
+            if (resp.result.code == 0) {
+              // 通知上一页刷新
+              let pages = getCurrentPages();
+              let prevPage = pages[pages.length - 2];
+              if (prevPage) {
+                prevPage.setData({ update: true });
+              }
+              wx.navigateBack({ delta: 1 });
+            } else {
+              wx.showToast({ title: resp.result.msg || '删除失败', icon: 'none' });
+            }
+          }).catch(function () {
+            load.hideLoading();
+            wx.showToast({ title: '网络异常', icon: 'none' });
+          });
+        }
+      }
+    });
   }
 
 

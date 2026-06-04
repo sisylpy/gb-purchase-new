@@ -11,7 +11,7 @@
   <!--  top -->
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
     <view class="flex-row">
-      <view class="p-20" bindtap="toDatePageSearch">
+      <view class="p-20" bindtap="toDatePage">
         <image src="../../../../images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">

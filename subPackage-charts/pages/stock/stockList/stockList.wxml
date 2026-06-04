@@ -20,7 +20,7 @@
       </view>
       <view class="stock-amount-section flex-column">
         <text class="stock-amount">{{oneDay ? oneDay.total : 0}}元</text>
-        <block wx:if="{{oneDay.goodsEveryWasteTotal > 0}}">
+        <block wx:if="{{oneDay.wasteGoodsCount > 0}}">
           <view class="font-yuan text-danger">过期金额:{{oneDay.wasteSubtotal}}元</view>
         </block>
       </view>
@@ -31,7 +31,7 @@
 
         <view class="flex-row-between" catch:tap="showList" data-index="{{stockIndex}}">
           <view class="flex-row-default">
-            <image src="{{(imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image" />
+            <image src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image" />
             <view class="goods-details">
               <text class="flex-row font-sl">第{{stockIndex + 1}}/{{oneDay.arr.length}}个</text>
               <text class="goods-name">{{goods.gbDgGoodsName}}</text>
@@ -60,14 +60,12 @@
                 <view class="purchase-date">
                   <text>{{tool.getHowManyDays(stock.gbDgsDate)}}天库存</text>
                 </view>
-                <text class="font-sm">{{stock.departmentName}}</text>
-                <block wx:if="{{stock.wasteGoodsCount > 0}}">
-                  <view class="flex-row-between font-yuan">
-                    <view class="flex-row text-danger">
+                <text class="font-sm">{{stock.gbDepartmentName}}</text>
+                <block wx:if="{{stock.gbDgsWasteFullTime !== null}}">
+                    <view class="flex-row text-danger font-xs">
                       <text class="">过期</text>
                       <text class="{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime) < 0 ? 'text-danger' : ''}}">{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime)}}小时</text>
                     </view>
-                  </view>
                 </block>
               </view>
             </view>
@@ -76,10 +74,10 @@
               <view class="column-label purchase-price">单价</view>
               <view class="flex-column">
                 <view class="amount-text">{{stock.gbDgsPrice}}元/{{stock.goodsStandardName}}</view>
-                <block wx:if="{{goods.gbDgGbSupplierId == -1}}">
-                  <text class="weight-text purchase-price">{{stock.purUserName}}</text>
+                <block wx:if="{{stock.gbDgsNxSupplierId == -1}}">
+                  <text class="weight-text">{{stock.purUserName}}</text>
                 </block>
-                <block wx:elif="{{goods.gbDgGbSupplierId !== -1}}">
+                <block wx:elif="{{stock.gbDgsNxSupplierId !== -1}}">
                   <text class="weight-text">{{stock.nxSupplierName}}</text>
                 </block>
               </view>

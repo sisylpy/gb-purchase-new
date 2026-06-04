@@ -1,0 +1,165 @@
+<view class="flex-column page-add-food-sales page-add-food-sales--edit">
+<back-navbar title="{{pageTitle}}" style="height: {{navBarHeight}}rpx;" button-text="返回"  avatar="/images/back-gray.png"  bindnavbuttontap="toBack"></back-navbar>
+
+<view class="flex flex-column p-20 page-body">
+
+  <view class="module-card mb-20">
+    <view class="field-row date-row">
+      <text class="field-label">日期</text>
+      <view class="date-input-wrapper date-readonly-edit" style="width: {{windowWidth - 240}}rpx;">
+        <text class="date-readonly-edit__main">{{singleDate || '—'}}</text>
+        <text class="date-readonly-edit__hint">不可修改</text>
+      </view>
+    </view>
+    <view class="field-row" wx:if="{{hasDepartmentChoices}}">
+      <text class="field-label">销售部门</text>
+      <picker mode="selector" range="{{departmentChoiceList}}" range-key="gbDepartmentName" value="{{salesDepIndex}}" bindchange="onSalesDepChange">
+        <view class="date-input-wrapper" style="width: {{windowWidth - 240}}rpx;">
+          <text>{{departmentChoiceList[salesDepIndex] ? departmentChoiceList[salesDepIndex].gbDepartmentName : ''}}</text>
+        </view>
+      </picker>
+    </view>
+    <view class="field-row dep-readonly-row" wx:if="{{!hasDepartmentChoices && departmentChoiceList.length}}">
+      <text class="field-label">销售部门</text>
+      <text class="dep-readonly">{{departmentChoiceList[0].gbDepartmentName}}</text>
+    </view>
+  </view>
+
+  <view class="module-card mb-20 module-card--food-sales">
+    <view class="module-title">菜品销量</view>
+    <text class="food-list-hint" wx:if="{{foodsLoading}}">加载中…</text>
+    <text class="food-list-hint" wx:elif="{{!salesFoodRows.length}}">暂无菜品，请先在菜单中维护</text>
+    <view wx:else  class="food-sales-scroll1 flex-column" >
+      <block wx:for="{{salesFoodRows}}" wx:key="rowKey" wx:for-index="idx">
+        <view class="food-cat-stripe" wx:if="{{idx === 0 || item.catName !== salesFoodRows[idx - 1].catName}}">
+          <text class="food-cat-stripe__text">{{item.catName}}</text>
+        </view>
+        <view class="food-dish-block {{item.offShelf ? 'food-dish-block--off' : ''}}">
+          <view class="food-dish-block__title-row">
+            <text class="food-dish-block__name">{{item.foodName}}</text>
+            <text wx:if="{{item.offShelf}}" class="food-dish-block__badge">停用</text>
+          </view>
+          <view class="food-dish-block__meta-row">
+            <view class="food-dish-block__price-col">
+              <text class="food-dish-block__label">单价</text>
+              <text class="food-dish-block__price">¥{{item.unitPriceDisplay}}</text>
+            </view>
+            <view class="food-dish-block__qty-col">
+              <text class="food-dish-block__label food-dish-block__label--qty">份数</text>
+              <input
+                class="food-dish-block__qty-input"
+                type="digit"
+                placeholder="填份数"
+                placeholder-class="food-dish-block__qty-placeholder"
+                value="{{item.qtyStr}}"
+                data-index="{{idx}}"
+                bindinput="onFoodQtyInput"
+              />
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    <view class="dinein-estimate" wx:if="{{salesFoodRows.length}}">
+      <text class="dinein-estimate__text">按标价汇总（本页）：¥{{dineInFromDishes}}</text>
+    </view>
+    <view class="dinein-estimate dinein-estimate--muted" wx:if="{{dailyRevenueView && dailyRevenueView.dineInRevenueFromDishes}}">
+      <text class="dinein-estimate__text">入库按菜汇总：¥{{dailyRevenueView.dineInRevenueFromDishes}}（与日营收 dineInRevenueFromDishes 对齐）</text>
+    </view>
+  </view>
+
+  <view class="module-card mb-20 daily-revenue-readonly" wx:if="{{dailyRevenueView}}">
+    <view class="module-title">日营收明细（库 gb_ai_daily_revenue）</view>
+    <text class="dr-fetch-meta" wx:if="{{fetchLineCount != null}}">有效销量行：{{fetchLineCount}}</text>
+    <view class="dr-no-record" wx:if="{{!dailyRevenueView.hasRecord}}">
+      <text>当日暂无日营收入库记录；保存后与菜品销量一并写入。</text>
+    </view>
+    <view class="dr-body" wx:else>
+      <view class="dr-row" wx:if="{{dailyRevenueView.grossRevenue}}">
+        <text class="dr-k">总营业额</text>
+        <text class="dr-v">¥{{dailyRevenueView.grossRevenue}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.netRevenue}}">
+        <text class="dr-k">净营业额</text>
+        <text class="dr-v">¥{{dailyRevenueView.netRevenue}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.dineInRevenueStored}}">
+        <text class="dr-k">堂食（库）</text>
+        <text class="dr-v">¥{{dailyRevenueView.dineInRevenueStored}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.dineInRevenueFromDishes}}">
+        <text class="dr-k">堂食（按菜汇总）</text>
+        <text class="dr-v">¥{{dailyRevenueView.dineInRevenueFromDishes}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.dineInOrders}}">
+        <text class="dr-k">堂食订单数</text>
+        <text class="dr-v">{{dailyRevenueView.dineInOrders}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.dineInCustomers}}">
+        <text class="dr-k">堂食人数</text>
+        <text class="dr-v">{{dailyRevenueView.dineInCustomers}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.takeoutRevenue}}">
+        <text class="dr-k">外卖营业额</text>
+        <text class="dr-v">¥{{dailyRevenueView.takeoutRevenue}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.takeoutOrders}}">
+        <text class="dr-k">外卖订单数</text>
+        <text class="dr-v">{{dailyRevenueView.takeoutOrders}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.platformFee}}">
+        <text class="dr-k">平台抽成</text>
+        <text class="dr-v">¥{{dailyRevenueView.platformFee}}</text>
+      </view>
+      <view class="dr-row dr-row--notes" wx:if="{{dailyRevenueView.notes}}">
+        <text class="dr-k">备注</text>
+        <text class="dr-notes">{{dailyRevenueView.notes}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.weekday}}">
+        <text class="dr-k">星期</text>
+        <text class="dr-v">{{dailyRevenueView.weekday}}</text>
+      </view>
+      <view class="dr-row" wx:if="{{dailyRevenueView.holiday}}">
+        <text class="dr-k">节假日</text>
+        <text class="dr-v">{{dailyRevenueView.holiday}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="module-card mb-20 module-card--form-fields">
+    <view class="module-title">堂食（指标）</view>
+    <view class="field-row">
+      <text class="field-label">订单数</text>
+      <input class="field-input" type="number" placeholder="0" bindinput="onDineInOrderInput" value="{{dineInOrderCount}}" />
+    </view>
+    <view class="field-row">
+      <text class="field-label">顾客数</text>
+      <input class="field-input" type="number" placeholder="0" bindinput="onDineInCustomerInput" value="{{dineInCustomerCount}}" />
+    </view>
+  </view>
+
+  <view class="module-card mb-20 module-card--form-fields">
+    <view class="module-title">外卖与其它</view>
+    <view class="field-row">
+      <text class="field-label">外卖营业额</text>
+      <input class="field-input" type="digit" placeholder="0" bindinput="onTakeoutInput" value="{{takeoutRevenue}}" />
+    </view>
+    <view class="field-row">
+      <text class="field-label">外卖订单数</text>
+      <input class="field-input" type="number" placeholder="0" bindinput="onTakeoutOrderInput" value="{{takeoutOrderCount}}" />
+    </view>
+    <view class="field-row">
+      <text class="field-label">平台抽成</text>
+      <input class="field-input" type="digit" placeholder="0" bindinput="onPlatformFeeInput" value="{{platformFee}}" />
+    </view>
+    <view class="field-row">
+      <text class="field-label">备注</text>
+      <input class="field-input" placeholder="选填" bindinput="onNotesInput" value="{{notes}}" />
+    </view>
+  </view>
+
+  <view class="save-btn-wrapper">
+    <button class="save-btn save-btn--edit" bindtap="onSave">保存修改</button>
+  </view>
+</view>
+</view>

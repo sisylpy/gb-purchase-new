@@ -27,7 +27,7 @@ function parseGbDisGoodsEntity(body) {
  * @param {number|string|undefined} depFatherId 父级部门 id，可选
  * @returns {Promise<{ result: any, item: object|null }>}
  */
-function saveLinshiGoodsGb(filePathList, goodsName, standard, detail, disId, toDepId, depId, depFatherId) {
+function saveLinshiGoodsGb(filePathList, goodsName, standard, detail, disId, toDepId, depId, depFatherId, standardWeight, brand, place, cartonUnit, itemsPerCarton) {
   var firstPath = Array.isArray(filePathList) && filePathList.length
     ? filePathList[0]
     : filePathList;
@@ -49,6 +49,11 @@ function saveLinshiGoodsGb(filePathList, goodsName, standard, detail, disId, toD
       toDepId: toDepId,
       depId: depId,
       depFatherId: depFatherIdStr,
+      standardWeight: standardWeight != null ? String(standardWeight) : '',
+      brand: brand != null ? String(brand) : '',
+      place: place != null ? String(place) : '',
+      cartonUnit: cartonUnit != null ? String(cartonUnit) : '',
+      itemsPerCarton: itemsPerCarton != null ? String(itemsPerCarton) : '',
     };
 
     if (hasFile) {
@@ -64,6 +69,11 @@ function saveLinshiGoodsGb(filePathList, goodsName, standard, detail, disId, toD
           toDepId: String(form.toDepId),
           depId: String(form.depId),
           depFatherId: depFatherIdStr,
+          standardWeight: form.standardWeight,
+          brand: form.brand,
+          place: form.place,
+          cartonUnit: form.cartonUnit,
+          itemsPerCarton: form.itemsPerCarton,
         },
         header: {
           'Content-Type': 'multipart/form-data',

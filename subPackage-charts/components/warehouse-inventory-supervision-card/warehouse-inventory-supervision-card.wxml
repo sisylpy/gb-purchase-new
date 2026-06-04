@@ -1,0 +1,102 @@
+<view class="wis-card" wx:if="{{visible}}">
+
+  <!-- 头部 -->
+  <view class="wis-header">
+    <text class="wis-title">{{title}}</text>
+    <text class="wis-subtitle" wx:if="{{subtitle}}">{{subtitle}}</text>
+  </view>
+
+  <!-- 范围 & 时间标签 -->
+  <view class="wis-meta" wx:if="{{scopeLabel || stockSnapshotLabel}}">
+    <text class="wis-meta-item" wx:if="{{scopeLabel}}">📍 {{scopeLabel}}</text>
+    <text class="wis-meta-item" wx:if="{{stockSnapshotLabel}}">🕐 {{stockSnapshotLabel}}</text>
+  </view>
+
+  <!-- 摘要 -->
+  <view class="wis-summary" wx:if="{{narrative}}">
+    <text class="wis-summary-text">{{narrative}}</text>
+  </view>
+
+  <!-- 空数据 -->
+  <view class="wis-empty" wx:if="{{sections.length === 0}}">
+    <text class="wis-empty-text">暂无库存数据</text>
+  </view>
+
+  <!-- Sections -->
+  <block wx:for="{{sections}}" wx:for-item="section" wx:key="sectionId">
+    <view class="wis-section {{section.sectionId === 'OVERSTOCK_SLOW_MOVING' ? 'wis-section--warn' : section.sectionId === 'EXPIRY_RISK' ? 'wis-section--danger' : 'wis-section--ok'}}">
+
+      <!-- Section 头部 -->
+      <view class="wis-section-head" catchtap="onToggleSection" data-section-id="{{section.sectionId}}">
+        <view class="wis-section-head-left">
+          <text class="wis-section-icon">
+            <text wx:if="{{section.sectionId === 'OVERSTOCK_SLOW_MOVING'}}">📦</text>
+            <text wx:elif="{{section.sectionId === 'EXPIRY_RISK'}}">⚠️</text>
+            <text wx:else>✅</text>
+          </text>
+          <text class="wis-section-title">{{section.title}}</text>
+          <text class="wis-section-count">{{section.rowCount}} 项</text>
+        </view>
+        <text class="wis-section-arrow">{{expandedSections[section.sectionId] ? '∧' : '∨'}}</text>
+      </view>
+
+      <!-- Section 内容（默认展开 OVERSTOCK_SLOW_MOVING 和 EXPIRY_RISK，收起 HEALTHY_NO_ALERT） -->
+      <view class="wis-section-body" wx:if="{{expandedSections[section.sectionId] !== false && (section.sectionId !== 'HEALTHY_NO_ALERT' || expandedSections[section.sectionId] === true)}}">
+
+        <!-- OVERSTOCK_SLOW_MOVING / HEALTHY_NO_ALERT 普通行 -->
+        <block wx:if="{{section.sectionId !== 'EXPIRY_RISK'}}">
+          <view class="wis-row" wx:for="{{section.rows}}" wx:for-item="row" wx:key="goodsId">
+            <text class="wis-row-name">{{row.goodsName}}</text>
+            <view class="wis-row-right">
+              <text class="wis-row-stock">{{row.restWeight}}{{row.weightUnit}}</text>
+              <text class="wis-row-daily" wx:if="{{row.dailyOutboundWeight > 0}}">日均{{row.dailyOutboundWeight}}{{row.weightUnit}}</text>
+              <text class="wis-row-support" wx:if="{{row.supportDays}}">可支撑{{row.supportDays}}天</text>
+              <text class="wis-row-idle" wx:if="{{row.periodOutboundWeight == 0 && row.dailyOutboundWeight == 0}}">近期无动销</text>
+            </view>
+          </view>
+        </block>
+
+        <!-- EXPIRY_RISK：含有 subSections -->
+        <block wx:else>
+          <block wx:for="{{section.subSections}}" wx:for-item="sub" wx:key="subSectionId">
+            <view class="wis-subsection">
+              <view class="wis-subsection-head">
+                <text class="wis-subsection-tag {{sub.subSectionId === 'expired' ? 'wis-subsection-tag--expired' : 'wis-subsection-tag--near'}}">{{sub.title}}</text>
+                <text class="wis-subsection-count">{{sub.rowCount}} 项</text>
+              </view>
+              <view class="wis-row wis-row--batch" wx:for="{{sub.rows}}" wx:for-item="row" wx:key="batchId">
+                <text class="wis-row-name">{{row.goodsName}}</text>
+                <view class="wis-row-right">
+                  <text class="wis-row-batch">批次#{{row.batchId}}</text>
+                  <text class="wis-row-stock">{{row.restWeight}}{{row.weightUnit}}</text>
+                  <text class="wis-row-date {{row.riskTier === 'expired' ? 'wis-date--expired' : ''}}">{{row.expiryDate}}</text>
+                  <text class="wis-risk-tag {{row.riskTierCls}}">{{row.riskTierLabel}}</text>
+                </view>
+              </view>
+            </view>
+          </block>
+        </block>
+      </view>
+    </view>
+  </block>
+
+  <!-- 底部统计摘要 -->
+  <view class="wis-footer" wx:if="{{sectionCounts.OVERSTOCK_SLOW_MOVING || sectionCounts.EXPIRY_RISK || sectionCounts.HEALTHY_NO_ALERT}}">
+    <view class="wis-footer-item" wx:if="{{sectionCounts.HEALTHY_NO_ALERT}}">
+      <text class="wis-footer-dot wis-footer-dot--green"></text>
+      <text class="wis-footer-label">正常</text>
+      <text class="wis-footer-val">{{sectionCounts.HEALTHY_NO_ALERT}}</text>
+    </view>
+    <view class="wis-footer-item" wx:if="{{sectionCounts.OVERSTOCK_SLOW_MOVING}}">
+      <text class="wis-footer-dot wis-footer-dot--orange"></text>
+      <text class="wis-footer-label">积压/慢动销</text>
+      <text class="wis-footer-val">{{sectionCounts.OVERSTOCK_SLOW_MOVING}}</text>
+    </view>
+    <view class="wis-footer-item" wx:if="{{sectionCounts.EXPIRY_RISK}}">
+      <text class="wis-footer-dot wis-footer-dot--red"></text>
+      <text class="wis-footer-label">临期/过期</text>
+      <text class="wis-footer-val">{{sectionCounts.EXPIRY_RISK}}</text>
+    </view>
+  </view>
+
+</view>

@@ -502,6 +502,7 @@ Page({
     }
 
     if (e.currentTarget.dataset.depgoods !== null && e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
+
       console.log(e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length);
       this.setData({
         hasStock: true
@@ -585,6 +586,42 @@ Page({
     });
   },
 
+  /**
+   * 修改配送申请
+   * @param {} e 
+   */
+  _updateDisOrderDep(e) {
+    var that = this;
+    var dg = {
+      id: that.data.applyItem.gbDepartmentOrdersId,
+      weight: e.detail.applyNumber,
+      standard: e.detail.applyStandardName,
+      remark: e.detail.applyRemark,
+      gbDoDsStandardScale: this._gbDoDsStandardScaleForOuterPack(e.detail.applyStandardName),
+    };
+    load.showLoading("修改订单");
+    orderApi.updateOrderGbJj(dg).then(res => {
+      load.hideLoading();
+      if (res.result.code == 0) {
+        load.hideLoading();
+        wx.setStorageSync('needRefreshOrderData', true);
+
+        var data = "depGoodsArrAi[" + this.data.index + "].gbDepartmentOrdersEntity";
+        this.setData({
+          [data]: res.result.data,
+        })
+
+
+        this.cancle();
+      } else {
+        load.hideLoading();
+        wx.showToast({
+          title: res.result.msg,
+          icon: "none"
+        })
+      }
+    })
+  },
 
   /**
    * 选中外包装单位（nxGoodsCartonUnit）时，gbDoDsStandardScale 使用 nxGoodsItemsPerCarton（每件外包装含基准规格数量）；否则 -1。
@@ -727,7 +764,7 @@ Page({
       standard: e.detail.applyStandardName,
       remark: e.detail.applyRemark,
     };
-
+    console.log("kakanananna", dg);
     orderApi.updateOrderGbJj(dg).then(function (res) {
       load.showLoading("修改订单");
       if (res.result.code == 0) {
@@ -852,6 +889,15 @@ Page({
     orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(function (res) {
       if (res.result.code == 0) {
         that.getSearchStringPlaceHolder();
+        that.setData({
+          // searchString: "",
+          applyNumber: "",
+          applyStandardName: "",
+          applyItem: "",
+          editApply: false,
+          isSearching: true,
+        });
+
         // if (that.data.tab1IndexSearch == 0) {
         //   var data = "depGoodsArrAi[" + that.data.index + "].gbDepartmentOrdersEntity";
         //   that.setData({ [data]: null });
@@ -871,19 +917,46 @@ Page({
 
   /** 保存新的配送标准规格 */
   confirmStandard: function (e) {
+    var goodsId;
+    // myDismodalDep (我的商品) 组件触发时，使用 depGoods 的数据
+    if (this.data.showDep) {
+      goodsId = this.data.depGoods ? this.data.depGoods.gbDdgDisGoodsId : undefined;
+    } else {
+      // myDismodal (商品目录) 组件触发时，使用 itemDis 的数据
+      goodsId = this.data.itemDis ? this.data.itemDis.gbDistributerGoodsId : undefined;
+    }
+
+    if (!goodsId) {
+      wx.showToast({ title: '商品信息缺失，无法保存标准', icon: 'none' });
+      return;
+    }
+
     var data = {
-      gbDsDisGoodsId: this.data.itemDis.gbDistributerGoodsId,
+      gbDsDisGoodsId: goodsId,
       gbDsStandardName: e.detail.newStandardName,
     };
     orderApi.gbDisSaveStandard(data).then(function (res) {
       if (res.result.code == 0) {
-        var standardArr = this.data.itemDis.gbDistributerStandardEntities;
-        standardArr.push(res.result.data);
-        var standards = "itemDis.gbDistributerStandardEntities";
-        this.setData({
-          [standards]: standardArr,
-          applyStandardName: res.result.data.gbDsStandardName,
-        });
+        if (this.data.showDep) {
+          // 更新 depGoods 和 depGoodsArrAi[index] 的标准列表
+          var standardArr = (this.data.depGoods.gbDistributerStandardEntities || []).slice();
+          standardArr.push(res.result.data);
+          var depIndexKey = "depGoodsArrAi[" + this.data.index + "].gbDistributerStandardEntities";
+          this.setData({
+            'depGoods.gbDistributerStandardEntities': standardArr,
+            [depIndexKey]: standardArr,
+            applyStandardName: res.result.data.gbDsStandardName,
+          });
+        } else {
+          // 更新 itemDis 的标准列表
+          var standardArr = this.data.itemDis.gbDistributerStandardEntities;
+          standardArr.push(res.result.data);
+          var standards = "itemDis.gbDistributerStandardEntities";
+          this.setData({
+            [standards]: standardArr,
+            applyStandardName: res.result.data.gbDsStandardName,
+          });
+        }
       } else {
         wx.showToast({ title: res.result.msg, icon: 'none' });
       }
@@ -1289,10 +1362,13 @@ Page({
 
   /** 跳转到 AI 添加商品页（预填搜索关键词为商品名称） */
   toAddGoods: function () {
-    var name = this.data.placeHolder || '';
     wx.navigateTo({
-      url: '../aiAddGoods/aiAddGoods?goodsName=' + encodeURIComponent(name),
+      url: '../disAddGoods/disAddGoods?goodsName=' + this.data.placeHolder,
     });
+    
+    // wx.navigateTo({
+    //   url: '../aiAddGoods/aiAddGoods?goodsName=' + encodeURIComponent(name),
+    // });
   },
 
   /** 跳转到商品业务详情页面 */

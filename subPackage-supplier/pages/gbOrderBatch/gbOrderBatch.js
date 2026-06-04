@@ -75,6 +75,20 @@ Page({
     jrdhUserInfo: null,
   },
 
+
+  /** 明细行 gbDpgBuySubtotal 累计（与各商品「小计」展示条件一致：不为 null 且大于 0） */
+  _buySubtotalSumFromBatch(batch) {
+    var sum = 0;
+    var list = batch && batch.gbDPGEntities ? batch.gbDPGEntities : [];
+    for (var i = 0; i < list.length; i++) {
+      var st = list[i].gbDpgBuySubtotal;
+      if (st !== null && st !== undefined && Number(st) > 0) {
+        sum += Number(st);
+      }
+    }
+    return Math.round(sum * 100) / 100;
+  },
+
   onLoad: function (options) {
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
@@ -140,8 +154,8 @@ Page({
           for (var i = 0; i < this.data.batch.gbDPGEntities.length; i++) {
             var item = this.data.batch.gbDPGEntities[i];
 
-            // 初始化为false
-            item.gbDpgIsCheck = false;
+            // 初始化为0
+            item.gbDpgIsCheck = 0;
 
             if (item.gbDpgStatus == 2) {
 
@@ -149,8 +163,8 @@ Page({
                 for (var j = 0; j < item.gbDepartmentOrdersEntities.length; j++) {
                   var order = item.gbDepartmentOrdersEntities[j];
                   if (order.gbDoBuyStatus == 3) {
-                    console.log(`  订单${j}状态为3，设置gbDpgIsCheck=true`);
-                    item.gbDpgIsCheck = true;
+                    console.log(`  订单${j}状态为3，设置gbDpgIsCheck=1`);
+                    item.gbDpgIsCheck = 1;
                     break; // 找到一个状态为3的订单就够了
                   }
                 }
@@ -748,6 +762,11 @@ Page({
       })
     } else {
       load.showLoading("保存订单");
+      var sum = this._buySubtotalSumFromBatch(this.data.batch);
+      var batchPayload = Object.assign({}, this.data.batch, {
+        gbDpbSubtotal: sum,
+      });
+      console.log("batch", batchPayload);
       sellerFinishPurchaseGoodsBatchGb(this.data.batch)
         .then(res => {
           load.hideLoading();

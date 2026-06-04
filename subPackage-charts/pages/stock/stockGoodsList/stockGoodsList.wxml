@@ -7,7 +7,7 @@
   <!-- 商品信息卡片 -->
   <view class="goods-card bg-white p-20 mb-20" wx:if="{{disGoods}}">
     <view class="flex-row">
-      <image src="{{(imgUrl.resolve(url, disGoods.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods-img" />
+      <image src="{{(url + disGoods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-img" />
       <view class="flex-column flex-1 ml-20">
         <text class="font-bold font-lg">{{disGoods.gbDgGoodsName}}</text>
         <text class="font-sm text-secondary mt-10" wx:if="{{disGoods.gbDistributerGoodsEntity}}">

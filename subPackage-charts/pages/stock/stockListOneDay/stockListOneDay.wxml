@@ -32,7 +32,7 @@
             <view class="production-container" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
               <view class="flex-column p-20 border-bottom {{expandedRows[stockIndex + '_' + stockIndex + '_0'] ? 'production-row-expanded' : 'production-row-collapsed'}}" style="width: {{windowWidth - 260}}rpx;" bind:tap="showOne" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
                 <view class="flex-row-default">
-                  <image src="{{(imgUrl.resolve(url, stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="empty_image mr-20" />
+                  <image src="{{(url + stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="empty_image mr-20" />
                   <view class="flex-column">
                     <view class="flex-row font-lg">{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsName}}</view>
                     <view class="flex-row-between p-10 bg-light radius-10" style="width: {{windowWidth - 400}}rpx;">

@@ -1,5 +1,5 @@
 <wxs src="./orderEntities.wxs" module="ord" />
-<view class='mask {{isClosing ? "closing" : ""}}' wx:if='{{show}}' catchtouchmove='ture' style="height:{{maskHeight}}rpx;top:-{{scrollViewTop}}rpx;">
+<view class='mask {{isClosing ? "closing" : ""}}' wx:if='{{show}}' catchtouchmove='true' style="height:{{maskHeight}}rpx;top:-{{scrollViewTop}}rpx;">
 	<view class='modal-content' style="margin-top:{{scrollViewTop + 200}}rpx;">
 		<view class="modal-header">
 			<view class='goods-title'>
@@ -86,7 +86,7 @@
 							wx:for-item="orders" wx:for-index="orderIndex">
 							<block wx:if="{{orders.isNotice}}">
 								<view class="row-between with-tbl-padding">
-									<block wx:if="{{disInfo.mendianDepartmentList.length == 1 || disInfo.mendianDepartmentList[0].gbDepartmentSubAmount == 0}}">
+									<block wx:if="{{subDepAmount == 0}}">
 										<view>订货:</view>
 									</block>
 									<block wx:else="">

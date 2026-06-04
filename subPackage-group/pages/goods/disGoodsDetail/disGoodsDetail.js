@@ -89,7 +89,12 @@ Page({
       this.setData({
         disId: value.gbDistributerId,
         disInfo: value,
-        purDepId: value.mendianDepartmentList[0].gbDepartmentId
+      })
+    }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
+      this.setData({
+        purDepId: mendianInfo.gbDepartmentId,
       })
     }
     var value = wx.getStorageSync('disGoods');

@@ -67,6 +67,8 @@ Page({
         wx.hideLoading();
         if (res.result.code == 0) {
           var oneDayData = res.result.data.oneDay;
+          console.log("onday999", oneDayData);
+          
           if (oneDayData && oneDayData.arr) {
             oneDayData.arr = oneDayData.arr.map(function (goods) {
               return Object.assign({}, goods, { showStockList: false });
@@ -78,10 +80,7 @@ Page({
           });
         }
       })
-      .catch(function (err) {
-        wx.hideLoading();
-        wx.showToast({ title: '网络异常', icon: 'none' });
-      });
+     
   },
 
   showList(e) {

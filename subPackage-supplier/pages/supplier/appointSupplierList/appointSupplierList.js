@@ -42,7 +42,12 @@ Page({
       this.setData({
         disInfo: disInfo,
         disId: disInfo.gbDistributerId,
-        purDepId: disInfo.mendianDepartmentList[0].gbDepartmentId,
+      })
+    }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
+      this.setData({
+        depId: mendianInfo.gbDepartmentId,
       })
     }
     this._initData();
@@ -75,7 +80,7 @@ Page({
      var aaa = supplierItem.nxJrdhSupplierId;
      goodsItem.gbDgGbSupplierId = aaa;
      goodsItem.gbDgGoodsType = 21;
-     goodsItem.gbDgGbDepartmentId = this.data.purDepId,
+     goodsItem.gbDgGbDepartmentId = this.data.depId,
     disUpdateDisGoodsGb(goodsItem).then(res =>{
      
       if(res.result.code == 0){

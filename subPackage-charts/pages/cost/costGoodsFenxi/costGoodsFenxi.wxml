@@ -174,7 +174,7 @@
       <view class="cog-ing-card" wx:for="{{ingredientsAnalysis}}" wx:for-item="goods" wx:key="disGoodsId">
         <view class="cog-ing-main flex-row">
           <image class="cog-ing-thumb"
-            src="{{(imgUrl.resolve(url, goods.gbDgGoodsFileImg) || '/images/logo.jpg')}}" mode="aspectFill" />
+            src="{{(url + goods.gbDgGoodsFileImg || '/images/logo.jpg')}}" mode="aspectFill" />
           <view class="cog-ing-body flex-1 min-w-0">
             <view class="cog-ing-title-row flex-row-between">
               <text class="cog-ing-name">{{goods.gbDgGoodsName}}</text>

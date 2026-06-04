@@ -101,6 +101,12 @@ Page({
         disInfo: disInfo
       })
     }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
+      this.setData({
+        mendianName: mendianInfo.gbDepartmentName
+      })
+    }
 
 
   },

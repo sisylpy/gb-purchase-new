@@ -41,11 +41,11 @@ Page({
         disInfo.purDepartmentList.length > 0
       ) {
         depId = disInfo.purDepartmentList[0].gbDepartmentId;
-      } else if (
-        disInfo.mendianDepartmentList &&
-        disInfo.mendianDepartmentList.length > 0
-      ) {
-        depId = disInfo.mendianDepartmentList[0].gbDepartmentId;
+      } else {
+        var mendianInfo = wx.getStorageSync('mendianInfo');
+        if (mendianInfo) {
+          depId = mendianInfo.gbDepartmentId;
+        }
       }
     }
 

@@ -4,11 +4,16 @@
   <!-- ========== 标题区 ========== -->
   <view class="mpq-header">
     <text class="mpq-title">{{title}}</text>
-    <text class="mpq-subtitle">{{subtitle}}</text>
+    <text class="mpq-subtitle" wx:if="{{!emptyReason}}">{{subtitle}}</text>
+  </view>
+
+  <!-- ========== 空数据提示 ========== -->
+  <view class="mpq-empty" wx:if="{{emptyReason}}">
+    <text class="mpq-empty-text">{{emptyReason}}</text>
   </view>
 
   <!-- ========== 图表 + 图例 ========== -->
-  <view class="mpq-top-section">
+  <view class="mpq-top-section" wx:if="{{!emptyReason}}">
     <view class="mpq-chart-wrap">
       <ec-canvas id="mpq-donut" canvas-id="mpq-donut-canvas" ec="{{ ec }}"></ec-canvas>
     </view>
@@ -72,7 +77,7 @@
   </view>
 
   <!-- ========== 底部提示 ========== -->
-  <view class="mpq-footer">
+  <view class="mpq-footer" wx:if="{{!emptyReason}}">
     <text class="mpq-footer-text">* 本轮菜单内相对分层，非绝对行业标准</text>
   </view>
 

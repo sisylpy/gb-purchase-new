@@ -114,7 +114,7 @@
             <!-- 商品信息区域 -->
             <view class="flex-row-between" bind:tap="showList" data-index="{{goodsIndex}}">
               <view class="flex-row-default mb-20">
-                <image src="{{(imgUrl.resolve(url, item.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="url mr-20" />
+                <image src="{{(url + item.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="url mr-20" />
                 <view class="flex-column" style="flex: 1;">
                   <view class="flex-row">
                     <text class="font-sm">第{{goodsIndex + 1}}名/共{{totalCount}}个</text>

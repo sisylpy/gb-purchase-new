@@ -62,7 +62,7 @@
         <!-- 卡片头部：图标 + 标题 + 采购总额 -->
         <view class="">
           <view class="flex-row-default">
-            <!-- <image src="{{(imgUrl.resolve(url, great.gbDfgFatherGoodsImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-20" /> -->
+            <!-- <image src="{{(url + great.gbDfgFatherGoodsImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-20" /> -->
 
             <view class="flex-row-between" style="width: {{windowWidth - 200}}rpx;">
               <view class="flex-column pb-10">

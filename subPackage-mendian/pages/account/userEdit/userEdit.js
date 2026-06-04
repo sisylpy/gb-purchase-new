@@ -178,7 +178,7 @@ Page({
   },
   toFood(){
     wx.navigateTo({
-      url: '/subPackage-mendian/pages/food/index/index',
+      url: '/subPackage-group/pages/food/index/index',
     })
 
   },

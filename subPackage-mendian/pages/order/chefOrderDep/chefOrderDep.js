@@ -94,7 +94,12 @@ Page({
     if(disInfo){
       this.setData({
         disInfo: disInfo,
-        depList: disInfo.mendianDepartmentList[0].gbDepartmentEntityList
+      })
+    }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if(mendianInfo){
+      this.setData({
+        depList: mendianInfo.gbDepartmentEntityList
       })
     }
 

@@ -1,7 +1,7 @@
 <view class="flex flex-column height-100">
 
 
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="管理" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="连锁管理" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
 
   <view class="flex-column pt-10  font-sl">

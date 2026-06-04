@@ -255,6 +255,30 @@
                   wx:if="{{dc.cardType === 'GOODS_SUPPORTED_DISH_COVER_CARD' && dc.cardData}}"
                   cardData="{{dc.cardData}}"
                 />
+                <!-- 库存临期/过期风险卡片 -->
+                <warehouse-near-expiry-risk-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'WAREHOUSE_NEAR_EXPIRY_RISK_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 库存监督/诊断卡片 -->
+                <warehouse-inventory-supervision-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'WAREHOUSE_INVENTORY_SUPERVISION_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
+                <!-- 采购经营分析卡片 -->
+                <purchase-goods-business-analysis-card
+                  wx:for="{{item.cards}}"
+                  wx:for-item="dc"
+                  wx:key="cardType"
+                  wx:if="{{dc.cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD' && dc.cardData}}"
+                  cardData="{{dc.cardData}}"
+                />
               </block>
             </view>
             <!-- 调试 JSON 面板 -->
@@ -296,10 +320,7 @@
           cursor-spacing="16"
           adjust-position="{{true}}"
           disabled="{{isSending}}"
-          focus="{{composerFocused}}"
           bindinput="onInputChange"
-          bindfocus="onComposerFocus"
-          bindblur="onComposerBlur"
           bindconfirm="onSendTap"
           confirm-type="send"
         />

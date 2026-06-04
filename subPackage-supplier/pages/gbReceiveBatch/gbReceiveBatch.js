@@ -133,14 +133,14 @@ Page({
 
           for (var i = 0; i < this.data.batch.gbDPGEntities.length; i++) {
             var item = this.data.batch.gbDPGEntities[i];
-            item.gbDpgIsCheck = false;
+            item.gbDpgIsCheck = 0;
 
             if (item.gbDpgStatus == 2) {
               if (item.gbDepartmentOrdersEntities && item.gbDepartmentOrdersEntities.length > 0) {
                 for (var j = 0; j < item.gbDepartmentOrdersEntities.length; j++) {
                   var order = item.gbDepartmentOrdersEntities[j];
                   if (order.gbDoBuyStatus == 3) {
-                    item.gbDpgIsCheck = true;
+                    item.gbDpgIsCheck = 1;
                     break;
                   }
                 }
@@ -422,6 +422,7 @@ Page({
       var batchPayload = Object.assign({}, this.data.batch, {
         gbDpbSubtotal: sum,
       });
+      console.log("batch", batchPayload);
       sellerFinishPurchaseGoodsBatchGb(batchPayload)
         .then(res => {
           load.hideLoading();

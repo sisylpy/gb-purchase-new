@@ -18,7 +18,7 @@
         </view>
       </view>
 
-      <view class="food-form-row food-form-row--multiline">
+      <!-- <view class="food-form-row food-form-row--multiline">
         <view class="flex-column" style="width: 100%; min-width: 0;">
           <text class="food-form-section-title">目标毛利率（%）</text>
           <input
@@ -48,7 +48,7 @@
           />
           <text class="food-form-hint">允许的毛利率波动范围（与目标毛利率同单位语境）。</text>
         </view>
-      </view>
+      </view> -->
     </view>
   </view>
 

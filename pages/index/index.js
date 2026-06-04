@@ -98,6 +98,7 @@ Page({
     if (userInfo) {
       var depInfo = wx.getStorageSync('mendianInfo');
       this.setData({
+        userInfo: userInfo,
         depId: depInfo.gbDepartmentId,
         mendianInfo: depInfo,
       });
@@ -740,7 +741,7 @@ Page({
           mendianInfo: firstMendian,
         });
         wx.setStorageSync('disInfo', res.result.data);
-        // wx.setStorageSync('mendianInfo', firstMendian);
+        wx.setStorageSync('mendianInfo', firstMendian);
         that._getInitData();
         that.hidePopup();
       }
@@ -882,7 +883,10 @@ Page({
 
  
   toEditUser: function () {
-    wx.navigateTo({ url: '../myDashboard/myDashboard' });
+    // wx.navigateTo({ url: '../myDashboard/myDashboard' });
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/aiChat/aiChat?advisorId=1',
+    })
   },
 
   toResGoods: function () {

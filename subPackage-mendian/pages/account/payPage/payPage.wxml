@@ -181,7 +181,7 @@
         <scroll-view scroll-y="true" style="height: {{contentSwiperHeight}}rpx;">
 
           <view class="flex-column p-20">
-            <view class=" flex-column p-20 twenty_radius bg-white mb-20" wx:for="{{payArr}}" wx:for-index="index" wx:key="index" bind:tap="changeIndex" data-index="{{index}}">
+            <view class=" flex-row p-20 twenty_radius bg-white mb-20" wx:for="{{payArr}}" wx:for-index="index" wx:key="index" bind:tap="changeIndex" data-index="{{index}}">
 
               <view class="flex-row-default border-bottom tb-10 font-sm">
                 <image src="{{url + item.gbGdpImgUrl}}" mode="aspectFill" class="p-20" style="width: 140rpx; height: 140rpx; margin: 20rpx;" />
@@ -196,88 +196,16 @@
 
               <view class="flex-row-reverse tb-10 font-sm">
 
-
-                <block wx:if="{{index == 0}}">
-
-                  <block wx:if="{{disInfo.gbDistributerBusinessType == 1}}">
-                    <view class="flex-row p-20 text-success">
-                      管理端已开通
-                    </view>
-
-                  </block>
-
-                  <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
+                <view class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
                     <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
+                    <!-- <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text> -->
                   </view>
 
-                </block>
-
-                <block wx:if="{{index == 1}}">
-                  <view wx:if="{{disInfo.gbDistributerModuleEntity.gbDmStockNumber == -1}}" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
-                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
-                  </view>
-                  <block wx:else="">
-
-                    <view class="flex-row p-20 text-success">
-                      库房端已开通
-                    </view>
-                  </block>
-                </block>
-                <block wx:if="{{index == 2}}">
-                  <view wx:if="{{disInfo.gbDistributerModuleEntity.gbDmCentralKitchenNumber == -1}}" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
-                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
-                  </view>
-                  <block wx:else="">
-
-                    <view class="flex-row p-20 text-success">
-                      销售中心已开通
-                    </view>
-                  </block>
-                </block>
-
-                <block wx:if="{{index == 3}}">
-                  <block wx:if="{{disInfo.gbDistributerBusinessType == 2}}">
-
-                    <view class="flex-row p-20 text-success">
-                      销售中心已开通
-                    </view>
-                  </block>
-                  <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
-                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
-                  </view>
-
-                </block>
-
-                <block wx:if="{{index == 4}}">
-
-                  <block wx:if="{{disInfo.gbDistributerBusinessType == 3}}">
-
-                    <view class="flex-row p-20 text-success">
-                      私域会员已开通
-                    </view>
-                  </block>
-
-                  <view wx:else="" class="flex-row plr-20" bind:tap="addMachine" data-index="{{index}}">
-                    <image src="{{item.isSelected ? '/images/selected-2.png' : '/images/radiobuttonunselect-2.png'}}" mode="aspectFill" class="icon mr-20" />
-                    <text class="mr-20" style="font-size: 50rpx; color: red; font-weight: 500;">¥{{item.gbGdpPaySubtotal}}</text>
-                  </view>
-
-                </block>
 
               </view>
 
             </view>
-
-
           </view>
-
-
-
-
 
         </scroll-view>
 
@@ -320,8 +248,8 @@
 
     </view>
     <view wx:elif="{{currentTab == 1}}">
-      <view class="center-content twenty_radius p-20" style="width: {{windowWidth  - 100}}rpx; background-color: #0660d6; color: #fff;border-radius: 10rpx; line-height: 60rpx; height: 60rpx;" bind:tap="toCustomerServicePages">
-        <view class="font-lg">咨询人工</view>
+      <view class="center-content twenty_radius p-20" style="width: {{windowWidth  - 40}}rpx; background-color: #0660d6; color: #fff;border-radius: 10rpx; line-height: 80rpx; height: 80rpx;" bind:tap="toAddBusiness">
+        <view class="font-lg">申请注册</view>
       </view>
     </view>
 

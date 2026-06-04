@@ -612,6 +612,19 @@ var getRevenueStats = function (departmentId, query) {
   return request.get('ai/daily-revenue/stats/' + departmentId, data);
 };
 
+/**
+ * 获取日营业额完整数据（含统计、曲线图、每日详情）
+ * GET ai/daily-revenue/list/{departmentId}?startDate=&endDate=
+ * @param {{ departmentId: number, startDate: string, endDate: string }} params
+ */
+var getDailyTurnover = function (params) {
+  params = params || {};
+  var query = {};
+  if (params.startDate) query.startDate = params.startDate;
+  if (params.endDate) query.endDate = params.endDate;
+  return request.get('ai/daily-revenue/list/' + params.departmentId, query);
+};
+
 // ============================================================
 // AI 对话（旧版 chat controller）
 // 从 services/aiChat.js 合并，供子包 aiChat/groupAiChat 页面使用
@@ -895,6 +908,14 @@ var disGetPurchaseDate = function (payload) {
 };
 
 /**
+ * 获取分销商采购批次明细（按采购员/供货商维度）
+ * POST gbdistributerpurchasebatch/disGetPurchaseDetailType
+ */
+var disGetPurchaseDetailType = function (payload) {
+  return request.post('gbdistributerpurchasebatch/disGetPurchaseDetailType', payload, { useUrlParams: true });
+};
+
+/**
  * 获取分销商采购分类统计数据
  * POST gbdistributerpurchasegoods/disGetPurchaseCata
  */
@@ -953,6 +974,64 @@ var disGetDayStockByGreatId = function (payload) {
 };
 
 // ============================================================
+// 商品成本统计（subPackage-charts 使用）
+// ============================================================
+
+/**
+ * 商品成本汇总（生产 / 损耗 / 损失）
+ * POST /gbdepartmentgoodsstockreduce/getGbGoodsCostStatistics
+ */
+var getGbGoodsCostStatistics = function (payload) {
+  return request.post('gbdepartmentgoodsstockreduce/getGbGoodsCostStatistics', payload, { useUrlParams: true });
+};
+
+/**
+ * 商品成本按日期搜索（分页）
+ * POST /gbdepartmentgoodsstockreduce/getGoodsCostBySearchDate
+ */
+var getGoodsCostBySearchDate = function (payload) {
+  return request.post('gbdepartmentgoodsstockreduce/getGoodsCostBySearchDate', payload, { useUrlParams: true });
+};
+
+// ============================================================
+// 报表（subPackage-charts 使用）
+// ============================================================
+
+/**
+ * 获取用户报表 - 营业统计
+ * GET /gbreport/getDisUserReportsBusiness/{userId}
+ */
+var getDisUserReportsBusiness = function (userId) {
+  return request.get('gbreport/getDisUserReportsBusiness/' + userId);
+};
+
+/**
+ * 获取用户报表 - 成本统计
+ * GET /gbreport/getDisUserReportsCost/{userId}
+ */
+var getDisUserReportsCost = function (userId) {
+  return request.get('gbreport/getDisUserReportsCost/' + userId);
+};
+
+/**
+ * 获取用户报表 - 采购统计
+ * GET /gbreport/getDisUserReportsPurchase/{userId}
+ */
+var getDisUserReportsPurchase = function (userId) {
+  return request.get('gbreport/getDisUserReportsPurchase/' + userId);
+};
+
+/**
+ * 获取用户报表 - 库存统计
+ * GET /gbreport/getDisUserReportsStock/{userId}
+ */
+var getDisUserReportsStock = function (userId) {
+  return request.get('gbreport/getDisUserReportsStock/' + userId);
+};
+
+
+
+// ============================================================
 // 导出
 // ============================================================
 
@@ -975,6 +1054,7 @@ module.exports = {
   updateAiProfile: updateAiProfile,
   // 营业额统计
   getRevenueStats: getRevenueStats,
+  getDailyTurnover: getDailyTurnover,
   // 智能体详情（统一顾问详情，含推荐问题 questionTopics）
   getAdvisorDetail: getAdvisorDetail,
   // 集团门店部门列表
@@ -985,9 +1065,18 @@ module.exports = {
   // 采购日期统计
   disGetPurchaseDate: disGetPurchaseDate,
   disGetPurchaseCata: disGetPurchaseCata,
+  disGetPurchaseDetailType: disGetPurchaseDetailType,
   getGbPurGoodsStatisticsSeachDate: getGbPurGoodsStatisticsSeachDate,
   getGbPurGoodsListSearchDate: getGbPurGoodsListSearchDate,
   // 门店库存按时间段分类统计
   getMendianStockTypePeriod: getMendianStockTypePeriod,
   disGetDayStockByGreatId: disGetDayStockByGreatId,
+  // 商品成本统计
+  getGbGoodsCostStatistics: getGbGoodsCostStatistics,
+  getGoodsCostBySearchDate: getGoodsCostBySearchDate,
+  // 报表
+  getDisUserReportsBusiness: getDisUserReportsBusiness,
+  getDisUserReportsCost: getDisUserReportsCost,
+  getDisUserReportsPurchase: getDisUserReportsPurchase,
+  getDisUserReportsStock: getDisUserReportsStock,
 };

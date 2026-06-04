@@ -1,13 +1,13 @@
-<view class="flex-column page-add-food-sales {{isEditMode ? 'page-add-food-sales--edit' : ''}}">
+<view class="flex-column page-add-food-sales">
 <back-navbar title="{{pageTitle}}" style="height: {{navBarHeight}}rpx;" button-text="返回"  avatar="/images/back-gray.png"  bindnavbuttontap="toBack"></back-navbar>
 
 <view class="flex flex-column p-20 page-body">
-  <view class="flex-row p-20 pt-0 food-sales-tool-row" wx:if="{{!isEditMode}}">
+  <view class="flex-row p-20 pt-0 food-sales-tool-row">
     <view class="download-btn" bindtap="onDownloadCombinedTemplate">下载模板</view>
     <view class="upload-btn" bindtap="onUploadCombinedExcel">上传模板</view>
   </view>
 
-  <view class="combined-tpl-modal" wx:if="{{showCombinedTemplateModal && !isEditMode}}">
+  <view class="combined-tpl-modal" wx:if="{{showCombinedTemplateModal}}">
     <view class="combined-tpl-mask" bindtap="onCloseCombinedTemplateModal"></view>
     <view class="combined-tpl-panel">
       <view class="combined-tpl-title">合并模板 · 日期范围</view>
@@ -40,19 +40,10 @@
     </view>
   </view>
 
-  <view class="edit-mode-banner" wx:if="{{isEditMode}}">
-    <text class="edit-mode-banner__tag">修改模式</text>
-    <text class="edit-mode-banner__desc">与「新建」样式不同：日期固定为本条记录，改完后点下方保存覆盖（无模板导入）</text>
-  </view>
-
   <view class="module-card mb-20">
     <view class="field-row date-row">
       <text class="field-label">日期</text>
-      <view wx:if="{{isEditMode}}" class="date-input-wrapper date-readonly-edit" style="width: {{windowWidth - 240}}rpx;">
-        <text class="date-readonly-edit__main">{{singleDate || '—'}}</text>
-        <text class="date-readonly-edit__hint">不可修改</text>
-      </view>
-      <picker wx:else mode="date" value="{{singleDate}}" end="{{todayDate}}" bindchange="onDateChange">
+      <picker mode="date" value="{{singleDate}}" end="{{todayDate}}" bindchange="onDateChange">
         <view class="date-input-wrapper" style="width: {{windowWidth - 240}}rpx;">
           <text>{{singleDate || '请选择日期'}}</text>
         </view>
@@ -110,67 +101,6 @@
     <view class="dinein-estimate" wx:if="{{salesFoodRows.length}}">
       <text class="dinein-estimate__text">按标价汇总（本页）：¥{{dineInFromDishes}}</text>
     </view>
-    <view class="dinein-estimate dinein-estimate--muted" wx:if="{{isEditMode && dailyRevenueView && dailyRevenueView.dineInRevenueFromDishes}}">
-      <text class="dinein-estimate__text">入库按菜汇总：¥{{dailyRevenueView.dineInRevenueFromDishes}}（与日营收 dineInRevenueFromDishes 对齐）</text>
-    </view>
-  </view>
-
-  <view class="module-card mb-20 daily-revenue-readonly" wx:if="{{isEditMode && dailyRevenueView}}">
-    <view class="module-title">日营收明细（库 gb_ai_daily_revenue）</view>
-    <text class="dr-fetch-meta" wx:if="{{fetchLineCount != null}}">有效销量行：{{fetchLineCount}}</text>
-    <view class="dr-no-record" wx:if="{{!dailyRevenueView.hasRecord}}">
-      <text>当日暂无日营收入库记录；保存后与菜品销量一并写入。</text>
-    </view>
-    <view class="dr-body" wx:else>
-      <view class="dr-row" wx:if="{{dailyRevenueView.grossRevenue}}">
-        <text class="dr-k">总营业额</text>
-        <text class="dr-v">¥{{dailyRevenueView.grossRevenue}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.netRevenue}}">
-        <text class="dr-k">净营业额</text>
-        <text class="dr-v">¥{{dailyRevenueView.netRevenue}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInRevenueStored}}">
-        <text class="dr-k">堂食（库）</text>
-        <text class="dr-v">¥{{dailyRevenueView.dineInRevenueStored}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInRevenueFromDishes}}">
-        <text class="dr-k">堂食（按菜汇总）</text>
-        <text class="dr-v">¥{{dailyRevenueView.dineInRevenueFromDishes}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInOrders}}">
-        <text class="dr-k">堂食订单数</text>
-        <text class="dr-v">{{dailyRevenueView.dineInOrders}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInCustomers}}">
-        <text class="dr-k">堂食人数</text>
-        <text class="dr-v">{{dailyRevenueView.dineInCustomers}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.takeoutRevenue}}">
-        <text class="dr-k">外卖营业额</text>
-        <text class="dr-v">¥{{dailyRevenueView.takeoutRevenue}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.takeoutOrders}}">
-        <text class="dr-k">外卖订单数</text>
-        <text class="dr-v">{{dailyRevenueView.takeoutOrders}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.platformFee}}">
-        <text class="dr-k">平台抽成</text>
-        <text class="dr-v">¥{{dailyRevenueView.platformFee}}</text>
-      </view>
-      <view class="dr-row dr-row--notes" wx:if="{{dailyRevenueView.notes}}">
-        <text class="dr-k">备注</text>
-        <text class="dr-notes">{{dailyRevenueView.notes}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.weekday}}">
-        <text class="dr-k">星期</text>
-        <text class="dr-v">{{dailyRevenueView.weekday}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.holiday}}">
-        <text class="dr-k">节假日</text>
-        <text class="dr-v">{{dailyRevenueView.holiday}}</text>
-      </view>
-    </view>
   </view>
 
   <view class="module-card mb-20 module-card--form-fields">
@@ -206,7 +136,7 @@
   </view>
 
   <view class="save-btn-wrapper">
-    <button class="save-btn {{isEditMode ? 'save-btn--edit' : ''}}" bindtap="onSave">{{isEditMode ? '保存修改' : '保存'}}</button>
+    <button class="save-btn" bindtap="onSave">保存</button>
   </view>
 </view>
 </view>

@@ -79,7 +79,12 @@ Page({
     if (disInfo) {
       this.setData({
         disInfo: disInfo,
-        departmentId: disInfo.mendianDepartmentList[0].gbDepartmentId,  // 部门ID
+      })
+    }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
+      this.setData({
+        departmentId: mendianInfo.gbDepartmentId,
       })
     }
   },
@@ -591,17 +596,16 @@ Page({
       });
   },
 
-  _resolveDepartmentIdForFood(disInfo) {
-    if (!disInfo) return '';
-    if (disInfo.mendianDepartmentList && disInfo.mendianDepartmentList.length) {
-      return disInfo.mendianDepartmentList[0].gbDepartmentId;
+  _resolveDepartmentIdForFood() {
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo && mendianInfo.gbDepartmentId) {
+      return mendianInfo.gbDepartmentId;
     }
     return '';
   },
 
   _ensureDepartmentForFoodExcel() {
-    const disInfo = wx.getStorageSync('disInfo');
-    const departmentId = disInfo ? this._resolveDepartmentIdForFood(disInfo) : this.data.departmentId;
+    const departmentId = this._resolveDepartmentIdForFood() || this.data.departmentId;
     if (!departmentId) {
       wx.showToast({ title: '请先登录门店并选择部门', icon: 'none' });
       return '';

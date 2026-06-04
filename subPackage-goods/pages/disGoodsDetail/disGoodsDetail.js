@@ -88,7 +88,12 @@ Page({
       this.setData({
         disId: value.gbDistributerId,
         disInfo: value,
-        purDepId: value.mendianDepartmentList[0].gbDepartmentId
+      })
+    }
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    if (mendianInfo) {
+      this.setData({
+        purDepId: mendianInfo.gbDepartmentId,
       })
     }
     var value = wx.getStorageSync('disGoods');
@@ -110,7 +115,7 @@ Page({
       }
     }
 
-    this._getSupplier();
+    // this._getSupplier();
 
   },
 
@@ -599,6 +604,42 @@ Page({
         })
       }
     }
+    if (e.currentTarget.dataset.type == 7) {
+      var cartonUnit = "goods.gbDgCartonUnit";
+      if (e.detail.value.length > 0) {
+        this.setData({
+          [cartonUnit]: e.detail.value
+        })
+      } else {
+        this.setData({
+          [cartonUnit]: null
+        })
+      }
+    }
+    if (e.currentTarget.dataset.type == 8) {
+      var itemsPerCarton = "goods.gbDgItemsPerCarton";
+      if (e.detail.value.length > 0) {
+        this.setData({
+          [itemsPerCarton]: e.detail.value
+        })
+      } else {
+        this.setData({
+          [itemsPerCarton]: null
+        })
+      }
+    }
+    if (e.currentTarget.dataset.type == 9) {
+      var quantityDays = "goods.gbDgQuantityDays";
+      if (e.detail.value.length > 0) {
+        this.setData({
+          [quantityDays]: e.detail.value
+        })
+      } else {
+        this.setData({
+          [quantityDays]: null
+        })
+      }
+    }
     this._ifCanSave();
 
   },
@@ -707,7 +748,7 @@ Page({
 
   toSupplier() {
     wx.navigateTo({
-      url: '../appointSupplierList/appointSupplierList?purDepId=' + this.data.defaid,
+      url: '../appointSupplierList/appointSupplierList?purDepId=' + this.data.gbDepId,
     })
   },
 

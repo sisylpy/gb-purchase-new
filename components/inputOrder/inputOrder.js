@@ -62,6 +62,7 @@ Component({
     isClosing: false,
     /** 单价后缀：外包装订货时为 gbDoStandard（如箱），否则为商品基准规格名 */
     priceUnitSuffix: "",
+    subDepAmount: 0,
   },
 
   observers: {
@@ -73,6 +74,12 @@ Component({
   lifetimes: {
     attached: function () {
       this._refreshPriceUnitSuffix(this.properties.item);
+      var mendianInfo = wx.getStorageSync('mendianInfo');
+      if (mendianInfo) {
+        this.setData({
+          subDepAmount: mendianInfo.gbDepartmentSubAmount
+        });
+      }
     },
   },
 
@@ -381,62 +388,63 @@ Component({
     },
 
     getOrderWeight: function (e) {
-      console.log('[inputOrder] getOrderWeight - 原始e.detail.value:', e.detail.value);
       var index = e.currentTarget.dataset.index;
       var price = Number(this.data.item.gbDpgBuyPrice);
-      console.log('[inputOrder] getOrderWeight - price:', price, 'gbDpgBuyPrice:', this.data.item.gbDpgBuyPrice);
       var orderWeightData = this._getOrderKey(index, "gbDoWeight");
       var orderPriceData = this._getOrderKey(index, "gbDoPrice");
       var subData = this._getOrderKey(index, "gbDoSubtotal");
-      var orderWeighValue = e.detail.value;
+      var rawValue = e.detail.value;
       var orderRow = this._getOrders()[index];
-      if (orderWeighValue.length > 0) {
-        var sub = (isNaN(price) || price === 0) ? "" : this._lineSubtotal(price, orderWeighValue, orderRow);
-        console.log('[inputOrder] getOrderWeight - weightKey:', orderWeightData, 'weightValue:', orderWeighValue, 'subKey:', subData, 'sub:', sub, 'outerPack:', orderRow && this._isOrderOuterPack(orderRow, this.data.item.gbDistributerGoodsEntity));
-        this.setData({
-          [orderWeightData]: orderWeighValue,
-          [orderPriceData]: price,
-          [subData]: sub
-        });
-        console.log('[inputOrder] getOrderWeight - setData后，arr[' + index + '].gbDoWeight:', this._getOrders()[index].gbDoWeight, 'gbDoSubtotal:', this._getOrders()[index].gbDoSubtotal);
 
-        var y = String(orderWeighValue).indexOf(".");
-        var count = 0;
-        if (y !== -1) {
-          count = String(orderWeighValue).length - y;
+      if (rawValue.length > 0) {
+        // 校验并截断
+        var finalValue = rawValue;
+        var y = String(rawValue).indexOf(".");
+        if (y !== -1 && String(rawValue).length - y > 3) {
+          wx.showToast({ title: '小数点只能保留一位' });
+          finalValue = rawValue.substring(0, rawValue.length - 1);
         }
-        if (count > 3) {
-          wx.showToast({
-            title: '小数点只能保留一位',
-          });
-          var newWeight = Number(orderWeighValue.substring(0, orderWeighValue.length - 1));
-          var newSub = (isNaN(price) || price === 0) ? "" : this._lineSubtotal(price, String(newWeight), orderRow);
-          this.setData({
-            [orderWeightData]: newWeight,
-            [orderPriceData]: price,
-            [subData]: newSub
-          });
+        if (Number(finalValue) > 99999) {
+          wx.showToast({ title: '最大不能超过九万九千九百九十九', icon: "none" });
+          finalValue = rawValue.substring(0, rawValue.length - 1);
         }
-        if (e.detail.value > 99999) {
-          wx.showToast({
-            title: '最大不能超过九万九千九百九十九',
-            icon: "none"
-          });
-          var newWeight2 = Number(orderWeighValue.substring(0, orderWeighValue.length - 1));
-          var newSub2 = (isNaN(price) || price === 0) ? "" : this._lineSubtotal(price, String(newWeight2), orderRow);
-          this.setData({
-            [orderWeightData]: newWeight2,
-            [orderPriceData]: price,
-            [subData]: newSub2
-          });
+
+        var sub = (isNaN(price) || price === 0) ? "" : this._lineSubtotal(price, finalValue, orderRow);
+
+        // 一次性 setData：行数据 + 汇总（避免多次重渲染导致键盘关闭）
+        var patch = {};
+        patch[orderWeightData] = finalValue;
+        patch[orderPriceData] = price;
+        patch[subData] = sub;
+
+        // 直接计算 buySubtotal 汇总
+        var arr = this._getOrders();
+        var total = "";
+        var weightTotal = "";
+        for (var i = 0; i < arr.length; i++) {
+          if (arr[i].isNotice) {
+            var rowSub = i === index ? sub : arr[i].gbDoSubtotal;
+            var rowWeight = i === index ? finalValue : arr[i].gbDoWeight;
+            if (rowSub !== null && rowSub !== "") {
+              weightTotal = Number(weightTotal) + Number(rowWeight);
+              total = Number(total) + Number(rowSub);
+              total = total.toFixed(1);
+            }
+          }
         }
+        patch["item.gbDpgBuySubtotal"] = total;
+        patch["item.gbDpgBuyQuantity"] = Number(weightTotal).toFixed(1);
+        patch["canSave"] = total !== "" && Number(total) > 0;
+
+        this.setData(patch);
       } else {
-        this.setData({
-          [orderWeightData]: "",
-          [subData]: ""
-        });
+        // 清空
+        var clearPatch = {};
+        clearPatch[orderWeightData] = "";
+        clearPatch[subData] = "";
+        this.setData(clearPatch);
+        this._getBuySubtotal();
       }
-      this._getBuySubtotal();
     },
 
     _checkPrice: function () {
@@ -570,13 +578,55 @@ Component({
 
       var itemData = this._getOrderKey(orderIndex, "gbDoScaleWeight");
       var itemOrderData = this._getOrderKey(orderIndex, "gbDoWeight");
-      var patch = { orderIndex: orderIndex };
-      patch[itemData] = value;
-      patch[itemOrderData] = isNaN(orderWeight) ? "" : orderWeight;
-      this.setData(patch);
+      var subDataKey = this._getOrderKey(orderIndex, "gbDoSubtotal");
 
-      this._getTotalWeightScale();
-      this._getOrderSubtotalScale();
+      var scaleWeight = value;
+      var baseWeight = isNaN(orderWeight) ? "" : String(orderWeight);
+
+      // 计算该行小计
+      var price = orders[orderIndex] ? orders[orderIndex].gbDoScalePrice : 0;
+      var raw = Number(scaleWeight) * Number(price);
+      var subtotal = isNaN(raw) ? "" : raw.toFixed(1);
+
+      // 一次性汇总：总件数 + 总基准量 + 大包装总金额 + 各订单小计
+      var arr = this._getOrders();
+      var scaleQtyTotal = 0;
+      var baseQtyTotal = 0;
+      var buyTotal = 0;
+      var patch = {};
+
+      for (var i = 0; i < arr.length; i++) {
+        var sw = i === orderIndex ? scaleWeight : arr[i].gbDoScaleWeight;
+        var bw = i === orderIndex ? baseWeight : arr[i].gbDoWeight;
+        scaleQtyTotal = Number(scaleQtyTotal) + Number(sw);
+        baseQtyTotal = Number(baseQtyTotal) + Number(bw);
+
+        if (i === orderIndex) {
+          patch[subDataKey] = subtotal;
+        } else {
+          // 保留其他行的小计不变
+        }
+      }
+
+      buyTotal = (Number(scaleQtyTotal) * Number(this.data.item.gbDpgBuyScalePrice)).toFixed(1);
+
+      patch[itemData] = scaleWeight;
+      patch[itemOrderData] = baseWeight;
+      patch["item.gbDpgBuyScaleQuantity"] = scaleQtyTotal;
+      patch["item.gbDpgBuyQuantity"] = baseQtyTotal;
+      patch["item.gbDpgBuySubtotal"] = buyTotal;
+
+      // 同步 gbDoPrice/gbDoScalePrice 到所有订单行
+      var doPrice = this.data.item.gbDpgBuyPrice;
+      var scalePrice = this.data.item.gbDpgBuyScalePrice;
+      for (var j = 0; j < arr.length; j++) {
+        patch[this._getOrderKey(j, "gbDoPrice")] = doPrice === undefined || doPrice === null ? "" : doPrice;
+        patch[this._getOrderKey(j, "gbDoScalePrice")] = scalePrice === undefined || scalePrice === null ? "" : scalePrice;
+      }
+
+      patch["canSave"] = Number(buyTotal) > 0;
+
+      this.setData(patch);
     },
 
     _getTotalWeightScale: function () {

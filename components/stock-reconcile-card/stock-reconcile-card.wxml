@@ -1,0 +1,68 @@
+<view class="biz-card biz-stock" wx:if="{{cardData}}">
+  <!-- 卡片标题 -->
+  <view class="biz-header">
+    <view class="biz-icon-wrap biz-icon-teal">
+      <text class="biz-icon">📦</text>
+    </view>
+    <view class="biz-header-right">
+      <text class="biz-title">库存 / 销货核对</text>
+      <view class="biz-scope-bar" wx:if="{{cardData.reportLabel}}">
+        <text class="biz-scope-tag">{{cardData.reportLabel}}</text>
+        <text class="biz-scope-name" wx:if="{{cardData.scopeLabel}}">· {{cardData.scopeLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 出库成本 & 毛利率 -->
+  <view class="biz-stock-summary" wx:if="{{cardData.actualOutboundAmount || cardData.theoryOutboundAmount}}">
+    <view class="biz-kpi-row">
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">实际出库成本</text>
+        <text class="biz-kpi-value">¥{{cardData.actualOutboundAmount || '—'}}</text>
+      </view>
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">理论出库成本</text>
+        <text class="biz-kpi-normal">¥{{cardData.theoryOutboundAmount || '—'}}</text>
+      </view>
+    </view>
+    <view class="biz-kpi-row" wx:if="{{cardData.actualGrossMarginRate || cardData.theoryGrossMarginRate}}">
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">实际毛利率</text>
+        <text class="biz-kpi-value">{{cardData.actualGrossMarginRate || '—'}}%</text>
+      </view>
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">理论毛利率</text>
+        <text class="biz-kpi-normal">{{cardData.theoryGrossMarginRate || '—'}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 配料差异表格 -->
+  <view class="biz-table-section" wx:if="{{cardData.topDiffItems && cardData.topDiffItems.length > 0}}">
+    <text class="biz-table-subtitle">配料消耗差异 Top{{cardData.topDiffItemCount || ''}}</text>
+    <!-- 表头 -->
+    <view class="biz-table-header">
+      <text class="biz-th biz-th-name">配料</text>
+      <text class="biz-th biz-th-price">用量差异</text>
+      <text class="biz-th biz-th-change">成本差异</text>
+    </view>
+    <!-- 表体 -->
+    <view class="biz-table-body">
+      <view class="biz-tr" wx:for="{{cardData.topDiffItems}}" wx:key="index" wx:for-item="m">
+        <text class="biz-td biz-td-name">{{m.foodName || '—'}}</text>
+        <text class="biz-td biz-td-price">理论{{m.theoryCost || '0'}} → 实际{{m.actualCost || '0'}}（{{m.diffUsage || '0'}}）</text>
+        <text class="biz-td biz-td-change">¥{{m.diffCostAmount || '0'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 有出库统计但无差异项 -->
+  <view class="biz-ok-section" wx:elif="{{cardData.actualOutboundAmount || cardData.theoryOutboundAmount}}">
+    <text class="biz-ok-text">{{cardData.emptyReason || '✅ 本期配料消耗与实际出库核销一致，无显著差异。'}}</text>
+  </view>
+
+  <!-- 完全无数据 -->
+  <view class="biz-empty-section" wx:else>
+    <text class="biz-empty-text">{{cardData.emptyReason || '暂无库存核销数据'}}</text>
+  </view>
+</view>

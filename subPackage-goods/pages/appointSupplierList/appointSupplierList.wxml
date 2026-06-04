@@ -15,7 +15,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
   
   </view>
 
-  <view class="flex-row-between bg-white p-20 font-lg border-bottom }}" wx:for="{{supplierArr}}" style="width: {{windowWidth - 40}}rpx;" bindtap="choiceSupplier" data-item="{{item}}" >
+  <view class="flex-row-between bg-white p-20 font-lg border-bottom }}" wx:for="{{supplierArr}}" style="width: {{windowWidth}}rpx;" bindtap="choiceSupplier" data-item="{{item}}" >
     <view class="">
       <text class="mr-10">{{index + 1}}.</text>
       <text>{{item.nxJrdhsSupplierName}}</text>

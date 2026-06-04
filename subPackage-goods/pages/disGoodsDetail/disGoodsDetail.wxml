@@ -54,6 +54,24 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
     </view>
   </view>
 
+  <view class="flex-row">
+    <view class=" flex-row half-row">
+      <text class=" flex-shrink-0 mr-10 text-secondary">外箱名称:</text>
+      <input class="inputAddGoods pt-20 pb-20" placeholder="如：箱、盒等" value="{{goods.gbDgCartonUnit}}" bindinput="getComGoodsContent" data-type="7"></input>
+    </view>
+    <view class=" flex-row half-row">
+      <text class=" flex-shrink-0 mr-10 text-secondary">外箱装数量:</text>
+      <input class="inputAddGoods pt-20 pb-20" placeholder="每箱装数量" value="{{goods.gbDgItemsPerCarton}}" bindinput="getComGoodsContent" data-type="8"></input>
+    </view>
+  </view>
+
+  <view class="flex-row">
+    <view class=" flex-row half-row">
+      <text class=" flex-shrink-0 mr-10 text-secondary">库存天数:</text>
+      <input class="inputAddGoods pt-20 pb-20" placeholder="大包装数量" value="{{goods.gbDgItemsPerCarton}}" bindinput="getComGoodsContent" data-type="9"></input>
+    </view>
+  </view>
+
 
   <!--  -->
 

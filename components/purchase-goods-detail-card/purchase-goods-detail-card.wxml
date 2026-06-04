@@ -1,0 +1,73 @@
+<view class="biz-card biz-goods-detail" wx:if="{{cardData}}">
+
+  <!-- 卡片标题 -->
+  <view class="biz-header">
+    <view class="biz-icon-wrap biz-icon-blue">
+      <text class="biz-icon">📦</text>
+    </view>
+    <view class="biz-header-right">
+      <text class="biz-title">{{_title}}</text>
+      <view class="biz-scope-bar" wx:if="{{_timeLabel || _scopeLabel}}">
+        <!-- <text class="biz-scope-tag" wx:if="{{_timeLabel}}">{{_timeLabel}}</text> -->
+        <text class="biz-scope-name" wx:if="{{_scopeLabel}}">{{_scopeLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="biz-empty" wx:if="{{_isEmpty}}">
+    <text class="biz-empty-text">{{_emptyReason}}</text>
+  </view>
+
+  <!-- 有数据 -->
+  <block wx:else>
+    <!-- 顶部核心数字 -->
+    <view class="biz-kpi-row">
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">采购总金额</text>
+        <text class="biz-kpi-value">¥{{_totalAmount || '—'}}</text>
+      </view>
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">采购笔数</text>
+        <text class="biz-kpi-value biz-kpi-normal">{{_orderCount}} 笔</text>
+      </view>
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">原料种类</text>
+        <text class="biz-kpi-value biz-kpi-normal">{{_itemCount}} 种</text>
+      </view>
+    </view>
+
+    <!-- 明细列表（使用预处理后的 _items） -->
+    <view class="biz-items-section">
+      <view class="biz-item-row" wx:for="{{_items}}" wx:key="index" wx:for-item="item">
+        <!-- 商品名 + 来源标签 -->
+        <view class="biz-item-head">
+          <text class="biz-item-name">{{item.goodsName || '—'}}</text>
+          <text class="biz-item-source" wx:if="{{item.sourceLabel}}">{{item.sourceLabel}}</text>
+        </view>
+
+        <!-- 明细行：数量 × 单价 | 金额 -->
+        <view class="biz-item-body">
+          <view class="biz-item-meta">
+            <text class="biz-item-qty">{{item._qtyStr}}</text>
+            <text class="biz-item-price">× ¥{{item._priceStr || '—'}}</text>
+          </view>
+          <text class="biz-item-amount">¥{{item._amountStr || '—'}}</text>
+        </view>
+
+        <!-- 供货商 -->
+        <view class="biz-item-foot" wx:if="{{item.supplierName}}">
+          <text class="biz-item-supplier">🏭 {{item.supplierName}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 警告提示 -->
+  <view class="biz-warn-list" wx:if="{{_warnings && _warnings.length > 0}}">
+    <view class="biz-warn-item" wx:for="{{_warnings}}" wx:key="index" wx:for-item="w">
+      <text class="biz-warn-text">⚠️ {{w}}</text>
+    </view>
+  </view>
+
+</view>

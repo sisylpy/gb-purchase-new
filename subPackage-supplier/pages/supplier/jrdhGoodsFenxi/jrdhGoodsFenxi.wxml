@@ -128,7 +128,7 @@
          data-id="{{goods.gbDistributerGoodsId}}" data-goods="{{goods}}" hover-class="hover">
 
           <view class="flex-row-default">
-            <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(imgUrl.resolve(url, goods.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="empty_image mr-20" />
+            <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="empty_image mr-20" />
             <view class="flex-column" style="width: {{windowWidth - 220}}rpx; ">
               <view class="flex-row-wrap font-md" style="width: {{windowWidth - 220}}rpx;">
                 <text class="font-md ">{{goods.gbDgGoodsName}}</text>

@@ -135,7 +135,8 @@ Page({
     var that = this;
     var item = e.currentTarget.dataset.item;
     item.gbDistributerGoodsEntity = that.data.disGoods;
-    var depList = that.data.disInfo.mendianDepartmentList[0].gbDepartmentEntityList;
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    var depList = mendianInfo ? mendianInfo.gbDepartmentEntityList : [];
 
     if (depList.length > 1) {
       that.setData({ showType: 6 });

@@ -30,6 +30,16 @@ var updateGbDepUserWithFile = function (userName, userId, depId, tempFilePath) {
   );
 };
 
+/**
+ * 更新部门用户管理员角色
+ * POST gbdepartmentuser/updateDepUserAdminGb
+ * @param {Object} data 用户实体（含 gbDepartmentUserId）
+ */
+var updateDepUserAdminGb = function (data) {
+  return requestUtil.post('gbdepartmentuser/updateDepUserAdminGb', data);
+};
+
 module.exports = {
   updateGbDepUserWithFile: updateGbDepUserWithFile,
+  updateDepUserAdminGb: updateDepUserAdminGb,
 };

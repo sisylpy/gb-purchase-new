@@ -103,7 +103,12 @@
   padding-top: 20rpx;
   padding-bottom: 20rpx;
 }
-
+.p-10{
+  padding-left: 10rpx;
+  padding-right: 10rpx;
+  padding-top: 10rpx;
+  padding-bottom: 10rpx;
+}
 .with-tb-padding{
   padding-top: 20rpx;
   padding-bottom: 20rpx;

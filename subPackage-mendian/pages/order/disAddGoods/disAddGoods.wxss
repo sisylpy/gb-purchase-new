@@ -10,6 +10,18 @@ page{
   border-bottom: 1px solid lightgray;
   width: 100%;
   padding-left: 10rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 30rpx;
+}
+
+.inputAddGoods-textarea{
+  width: 100%;
+  min-height: 120rpx;
+  padding: 10rpx;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+  font-size: 28rpx;
 }
 
 .addBtn{

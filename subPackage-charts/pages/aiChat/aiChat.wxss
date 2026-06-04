@@ -439,39 +439,18 @@
   }
 }
 
-.gem-typing {
-  display: flex;
-  gap: 8rpx;
+/* SSE 阶段提示（替代原来的三个小点，仅显示一行最新文案） */
+.gem-stage-scroll {
+  height: 40rpx;
+  overflow: hidden;
   padding: 6rpx 0;
 }
 
-.gem-dot {
-  width: 10rpx;
-  height: 10rpx;
-  background: #9aa0a6;
-  border-radius: 50%;
-  animation: gemDot 1.4s infinite ease-in-out;
-}
-
-.gem-dot:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.gem-dot:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-@keyframes gemDot {
-  0%,
-  80%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.92);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.gem-stage-item {
+  display: block;
+  font-size: 26rpx;
+  color: #5f6368;
+  line-height: 40rpx;
 }
 
 .gem-scroll-spacer {
@@ -579,22 +558,6 @@
   border: 1rpx solid #d2e3fc;
   border-radius: 999rpx;
   box-sizing: border-box;
-}
-
-/* 流式进度提示 */
-.gem-stream-hint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12rpx 24rpx;
-  background: #f8f9fa;
-  border-top: 1rpx solid #f0f0f0;
-}
-
-.gem-stream-hint-text {
-  font-size: 24rpx;
-  color: #5f6368;
-  font-weight: 400;
 }
 
 /* ---------- 左侧抽屉 ---------- */
@@ -758,4 +721,73 @@
 .gem-drawer-scroll-bottom {
   height: env(safe-area-inset-bottom);
   min-height: 16rpx;
+}
+
+/* ========== 调试 JSON 面板 ========== */
+
+/* 顶栏下方 Debug 切换按钮 */
+.gem-debug-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 0 6rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.gem-debug-toggle-text {
+  font-size: 22rpx;
+  color: #5f6368;
+  font-weight: 500;
+}
+
+/* 每条消息下的调试面板 */
+.gem-debug-panel {
+  margin: 8rpx 28rpx 0;
+  border: 1rpx solid #e8eaed;
+  border-radius: 12rpx;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.gem-debug-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  background: #f5f5f5;
+}
+
+.gem-debug-title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #5f6368;
+}
+
+.gem-debug-copy {
+  padding: 6rpx 18rpx;
+  background: #1a73e8;
+  border-radius: 8rpx;
+}
+
+.gem-debug-copy text {
+  font-size: 22rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.gem-debug-body {
+  max-height: 500rpx;
+  padding: 16rpx 20rpx;
+}
+
+.gem-debug-json {
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 20rpx;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.6;
 }

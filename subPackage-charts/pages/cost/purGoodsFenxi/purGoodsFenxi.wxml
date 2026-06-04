@@ -73,7 +73,7 @@
       </view>
       <view class="flex-row-between-default p-20 border-bottom" wx:for="{{topGoodsPrice}}" wx:key="index" wx:if="{{index < (showAllSubtotalGoods ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toGoodsPage" data-goods="{{item}}" hover-class="hover">
         <view class="flex-row">
-        <image src="{{(imgUrl.resolve(url, item.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-10"/>
+        <image src="{{(url + item.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-10"/>
         <text>{{item.gbDgGoodsName}}</text>
        </view>
         <view class="flex-column">
@@ -110,7 +110,7 @@
       <view class="font-sm mb-20 p-20">采购次数排名</view>
       <view class="flex-row-between p-20 border-bottom" wx:for="{{topTimesGoods}}" wx:key="index" wx:if="{{index < (showAllGoods ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toGoodsPage" data-goods="{{item}}"  hover-class="hover">
         <view class="flex-row">
-        <image src="{{(imgUrl.resolve(url, item.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-10"/>
+        <image src="{{(url + item.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-10"/>
         <text>{{item.gbDgGoodsName}}</text>
        </view>
         <text>{{item.gbDgQuantityDays}}次</text>
@@ -134,7 +134,7 @@
       </view>
       <view class="flex-row-between p-20 border-bottom" wx:for="{{topSubtotalGoods}}" wx:key="index" wx:if="{{index < (showAllSubtotalGoods ? 10 : 4)}}" data-id="{{item.gbDistributerGoodsId}}" bind:tap="toGoodsPage" data-goods="{{item}}"  hover-class="hover">
        <view class="flex-row">
-        <image src="{{(imgUrl.resolve(url, item.gbDgNxFatherImg) || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-10"/>
+        <image src="{{(url + item.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods_item_lg mr-10"/>
         <text>{{item.gbDgGoodsName}}</text>
        </view>
         

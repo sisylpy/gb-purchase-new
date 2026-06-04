@@ -42,7 +42,12 @@ Page({
        this.setData({
         disInfo: disInfo,
         disId: disInfo.gbDistributerId,
-        toDepId: disInfo.mendianDepartmentList[0].gbDepartmentId,
+       })
+     }
+     var mendianInfo = wx.getStorageSync('mendianInfo');
+     if(mendianInfo){
+       this.setData({
+        toDepId: mendianInfo.gbDepartmentId,
        })
      }
      var depInfo = wx.getStorageSync('orderDepInfo');
@@ -65,6 +70,11 @@ Page({
         gbDgDistributerId: this.data.disId,
         gbDgGoodsName: options.goodsName,
         gbDgGoodsStandardname: "",
+        gbDgGoodsStandardWeight: "",
+        gbDgCartonUnit: "",
+        gbDgQuantityDays: "",
+        gbDgGoodsBrand: "",
+        gbDgGoodsPlace: "",
         gbDgGoodsInventoryType: 1,
         gbDgNxGoodsFatherColor: "#20afb8",
         gbDgGoodsFile: 'goodsImage/logo.png',
@@ -78,46 +88,105 @@ Page({
   },
 
 
+  /**
+   * 将中文计量单位转换为统一标准缩写
+   */
+  _normalizeUnit: function (value) {
+    if (!value || typeof value !== 'string') return value;
+    var unitMap = {
+      '毫升': 'ml',
+      '升': 'L',
+      '公斤': 'kg',
+      '千克': 'kg',
+      '克': 'g',
+      '斤': 'jin',
+      '两': 'liang',
+      '吨': 't',
+      '毫克': 'mg',
+    };
+    var result = value;
+    // 先去掉数字和中文单位之间的空格："400 毫升" → "400毫升"
+    for (var cn in unitMap) {
+      if (unitMap.hasOwnProperty(cn)) {
+        result = result.replace(new RegExp('(\\d+)\\s*' + cn, 'g'), '$1' + unitMap[cn]);
+      }
+    }
+    // 去掉数字和英文单位缩写之间的空格："400 ml" → "400ml"
+    result = result.replace(/(\d+)\s+(ml|L|kg|g|jin|liang|t|mg)/g, '$1$2');
+    return result;
+  },
+
+  /**
+   * 去空格处理：移除首尾空格，并将中间连续空格替换为单个空格
+   */
+  _trimSpaces: function (value) {
+    if (!value || typeof value !== 'string') return value;
+    return value.trim().replace(/\s+/g, ' ');
+  },
+
   getDisGoodsContent(e) {
     var nameData = "goods.gbDgGoodsName";
     var standardData = "goods.gbDgGoodsStandardname";
     var standardWeightData = "goods.gbDgGoodsStandardWeight";
+    var cartonUnitData = "goods.gbDgCartonUnit";
+    var itemsPerCartonData = "goods.gbDgItemsPerCarton";
     var brandData = "goods.gbDgGoodsBrand";
     var placeData = "goods.gbDgGoodsPlace";
     var detailData = "goods.gbDgGoodsDetail";
     
+    var rawValue = e.detail.value;
 
     if (e.currentTarget.dataset.type == 0) {
+      var val = this._trimSpaces(rawValue);
       this.setData({
-        name: e.detail.value,
-        [nameData]: e.detail.value
+        name: val,
+        [nameData]: val
       })
     }
     if (e.currentTarget.dataset.type == 1) {
+      var val = this._trimSpaces(rawValue);
+      var normalizedStandard = this._normalizeUnit(val);
       this.setData({
-        standard: e.detail.value,
-        [standardData]: e.detail.value
+        standard: normalizedStandard,
+        [standardData]: normalizedStandard
       })
     }
     if (e.currentTarget.dataset.type == 2) {
+      var val = this._trimSpaces(rawValue);
+      var normalizedWeight = this._normalizeUnit(val);
       this.setData({
-        [standardWeightData]: e.detail.value
+        [standardWeightData]: normalizedWeight
       })
     }
     if (e.currentTarget.dataset.type == 3) {
+      var val = this._trimSpaces(rawValue);
       this.setData({
-        [brandData]: e.detail.value
+        [brandData]: val
       })
-    } 
-    if (e.currentTarget.dataset.type == 4) {
+    }
+    if (e.currentTarget.dataset.type == 6) {
+      var val = this._trimSpaces(rawValue);
       this.setData({
-        [placeData]: e.detail.value
+        [cartonUnitData]: val
+      })
+    }
+    if (e.currentTarget.dataset.type == 7) {
+      var val = this._trimSpaces(rawValue);
+      this.setData({
+        [itemsPerCartonData]: val
+      })
+    }
+    if (e.currentTarget.dataset.type == 4) {
+      var val = this._trimSpaces(rawValue);
+      this.setData({
+        [placeData]: val
       })
     }
 
     if (e.currentTarget.dataset.type == 5) {
+      var val = this._trimSpaces(rawValue);
       this.setData({
-        [detailData]: e.detail.value
+        [detailData]: val
       })
     }
 
@@ -194,8 +263,14 @@ Page({
     var filePathList = this.data.src;
     var goodsName = this.data.goods.gbDgGoodsName;
     var disId = this.data.disId;
-    var standard = this.data.goods.gbDgGoodsStandardname;
+    // 规格、重量中的空格用 "GS" 替换，统一表示
+    var standard = (this.data.goods.gbDgGoodsStandardname || '').replace(/\s+/g, 'GS');
     var detail = this.data.goods.gbDgGoodsDetail;
+    var standardWeight = (this.data.goods.gbDgGoodsStandardWeight || '').replace(/\s+/g, 'GS');
+    var cartonUnit = this.data.goods.gbDgCartonUnit;
+    var itemsPerCarton = this.data.goods.gbDgItemsPerCarton;
+    var brand = this.data.goods.gbDgGoodsBrand;
+    var place = this.data.goods.gbDgGoodsPlace;
     var toDepId = this.data.toDepId;
     var depId = this.data.depId;
     var depFatherId = this.data.depFatherId;
@@ -210,7 +285,7 @@ Page({
       depFatherId: depFatherId,
     });
     gbDistributerGoodsApi
-      .saveLinshiGoodsGb(filePathList, goodsName, standard, detail, disId, toDepId, depId, depFatherId)
+      .saveLinshiGoodsGb(filePathList, goodsName, standard, detail, disId, toDepId, depId, depFatherId, standardWeight, brand, place, cartonUnit, itemsPerCarton)
       .then(function (res) {
         load.hideLoading();
         var item = res.item;

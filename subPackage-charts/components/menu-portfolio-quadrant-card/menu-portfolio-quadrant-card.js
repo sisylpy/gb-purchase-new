@@ -38,6 +38,7 @@ Component({
     categories: [],
     expandedCategory: '',
     insightText: '',
+    emptyReason: '',
     _colorMap: CATEGORY_COLORS,
     ec: {
       lazyLoad: true,
@@ -46,8 +47,21 @@ Component({
 
   methods: {
     _onCardDataChange: function (newVal) {
-      if (!newVal || !Array.isArray(newVal.categories) || !newVal.categories.length) {
+      if (!newVal) {
         this.setData({ visible: false });
+        return;
+      }
+
+      // 空状态：显示提示文案
+      if (!Array.isArray(newVal.categories) || !newVal.categories.length) {
+        this.setData({
+          visible: true,
+          title: newVal.title || '菜单结构四象限',
+          subtitle: '',
+          categories: [],
+          emptyReason: newVal.emptyReason || '暂无数据',
+          insightText: '',
+        });
         return;
       }
 

@@ -1195,6 +1195,18 @@ Page({
         depGoods: e.currentTarget.dataset.depgoods,
       })
 
+      if (e.currentTarget.dataset.depgoods !== null && e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
+
+        console.log(e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length);
+        this.setData({
+          hasStock: true
+        })
+      } else {
+        this.setData({
+          hasStock: false
+        })
+      }
+
 
     }
   },
@@ -2668,6 +2680,7 @@ Page({
       itemDis: null,
       item: null,
       nxGoods: null,
+      hasStock: false,
 
     })
   },

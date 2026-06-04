@@ -17,6 +17,9 @@
     "dish-ingredient-cover-days-card": "/subPackage-charts/components/dish-ingredient-cover-days-card/dish-ingredient-cover-days-card",
     "warehouse-inventory-risk-list-card": "/subPackage-charts/components/warehouse-inventory-risk-list-card/warehouse-inventory-risk-list-card",
     "warehouse-stock-ranking-card": "/subPackage-charts/components/warehouse-stock-ranking-card/warehouse-stock-ranking-card",
-    "goods-supported-dish-cover-card": "/subPackage-charts/components/goods-supported-dish-cover-card/goods-supported-dish-cover-card"
+    "goods-supported-dish-cover-card": "/subPackage-charts/components/goods-supported-dish-cover-card/goods-supported-dish-cover-card",
+    "warehouse-near-expiry-risk-card": "/subPackage-charts/components/warehouse-near-expiry-risk-card/warehouse-near-expiry-risk-card",
+    "warehouse-inventory-supervision-card": "/subPackage-charts/components/warehouse-inventory-supervision-card/warehouse-inventory-supervision-card",
+    "purchase-goods-business-analysis-card": "/components/purchase-goods-business-analysis-card/purchase-goods-business-analysis-card"
   }
 }

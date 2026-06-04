@@ -1,0 +1,63 @@
+<view class="biz-card biz-purchase" wx:if="{{cardData}}">
+  <!-- 卡片标题 -->
+  <view class="biz-header">
+    <view class="biz-icon-wrap biz-icon-green">
+      <text class="biz-icon">🛒</text>
+    </view>
+    <view class="biz-header-right">
+      <text class="biz-title">采购</text>
+      <view class="biz-scope-bar" wx:if="{{cardData.reportLabel}}">
+        <text class="biz-scope-tag">{{cardData.reportLabel}}</text>
+        <text class="biz-scope-name" wx:if="{{cardData.scopeLabel}}">· {{cardData.scopeLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 采购总金额 -->
+  <view class="biz-kpi-row" wx:if="{{cardData.totalPurchaseAmount}}">
+    <view class="biz-kpi-col">
+      <text class="biz-kpi-label">采购总金额</text>
+      <text class="biz-kpi-value">¥{{cardData.totalPurchaseAmount}}</text>
+    </view>
+    <view class="biz-kpi-col">
+      <text class="biz-kpi-label">自主采购</text>
+      <text class="biz-kpi-normal">¥{{cardData.selfPurchaseAmount || '0'}}</text>
+    </view>
+    <view class="biz-kpi-col">
+      <text class="biz-kpi-label">供应商采购</text>
+      <text class="biz-kpi-normal">¥{{cardData.supplierPurchaseAmount || '0'}}</text>
+    </view>
+  </view>
+
+  <!-- 单价变动表格 -->
+  <view class="biz-table-section" wx:if="{{cardData.priceAnomalyItems && cardData.priceAnomalyItems.length > 0}}">
+    <!-- <text class="biz-table-subtitle">采购单价变动（对比{{cardData.priceCompareLabel || cardData.compareLabel || '上期'}}）</text> -->
+    <text class="biz-table-desc" wx:if="{{cardData.priceCompareDescription}}">{{cardData.priceCompareDescription}}</text>
+    <!-- 表头 -->
+    <view class="biz-table-header">
+      <text class="biz-th biz-th-name">商品</text>
+      <text class="biz-th biz-th-price">本期单价</text>
+      <text class="biz-th biz-th-price">上期单价</text>
+      <text class="biz-th biz-th-change">变动</text>
+    </view>
+    <!-- 表体 -->
+    <view class="biz-table-body">
+      <view class="biz-tr" wx:for="{{cardData.priceAnomalyItems}}" wx:key="index" wx:for-item="item">
+        <text class="biz-td biz-td-name">{{item.goodsName || item.name || '—'}}{{item.standardName ? '（' + item.standardName + '）' : ''}}</text>
+        <text class="biz-td biz-td-price">¥{{item.currentUnitPrice || '—'}}</text>
+        <text class="biz-td biz-td-price">¥{{item.previousUnitPrice || '—'}}</text>
+        <text class="biz-td biz-td-change {{_changeClass(item.changePercent)}}">{{_formatChange(item.changePercent)}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 无单价变动提示：有采购金额但无单价变动时，展示 emptyReason 或默认文案 -->
+  <view class="biz-ok-section" wx:elif="{{cardData.totalPurchaseAmount}}">
+    <text class="biz-ok-text">{{cardData.emptyReason || '✅ 本期采购价格稳定，无显著变动。'}}</text>
+  </view>
+
+  <!-- 完全无数据 -->
+  <view class="biz-empty-section" wx:else>
+    <text class="biz-empty-text">{{cardData.emptyReason || '暂无采购数据'}}</text>
+  </view>
+</view>

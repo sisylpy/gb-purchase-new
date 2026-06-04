@@ -226,7 +226,6 @@ Page({
     conversationHistoryLoading: false,
     /** 创建 Run 的基础参数（userId / departmentId / distributerId / scopeMode） */
     runPayloadBase: null,
-    composerFocused: false,
     /** SSE 阶段文案列表（新 stage 会把旧 stage 向上滚动） */
     streamingStages: [],
     /** 当前 Run ID */
@@ -1258,6 +1257,43 @@ Page({
       };
     }
 
+    // 库存临期/过期风险卡
+    if (card.cardType === 'WAREHOUSE_NEAR_EXPIRY_RISK_CARD') {
+      var title8 = card.title || '库存临期/过期风险';
+      var subtitle8 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          title: title8,
+          subtitle: subtitle8,
+        }),
+      };
+    }
+
+    // 库存监督/诊断卡
+    if (card.cardType === 'WAREHOUSE_INVENTORY_SUPERVISION_CARD') {
+      var title9 = card.title || '库存监督/诊断';
+      var subtitle9 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          title: title9,
+          subtitle: subtitle9,
+        }),
+      };
+    }
+
+    // 采购经营分析卡
+    if (card.cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD') {
+      return {
+        cardType: card.cardType,
+        cardData: Object.assign({}, payload, {
+          title: card.title || '',
+          subtitle: card.subtitle || '',
+        }),
+      };
+    }
+
     // 未知 cardType：直接透传 payload
     return {
       cardType: card.cardType,
@@ -1277,14 +1313,6 @@ Page({
 
   onInputChange: function (e) {
     this.setData({ inputValue: e.detail.value });
-  },
-
-  onComposerFocus: function () {
-    this.setData({ composerFocused: true });
-  },
-
-  onComposerBlur: function () {
-    this.setData({ composerFocused: false });
   },
 
   onSendTap: function () {

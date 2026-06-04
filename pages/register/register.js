@@ -200,10 +200,11 @@ Page({
       if (jsonObject.code === 0) {
         wx.setStorageSync('disInfo', jsonObject.data.disInfo);
         wx.setStorageSync('userInfo', jsonObject.data.depUserInfo);
-
         wx.setStorageSync('mendianInfo', jsonObject.data.disInfo.mendianDepartmentList[0]);
+
+        var mendianInfo = wx.getStorageSync('mendianInfo');
         wx.redirectTo({
-          url: '../index/index?depId=' + jsonObject.data.disInfo.mendianDepartmentList[0].gbDepartmentId,
+          url: '../index/index?depId=' + (mendianInfo ? mendianInfo.gbDepartmentId : ''),
         });
       } else {
         wx.showToast({
