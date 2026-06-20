@@ -47,8 +47,8 @@ Page({
     emptyHint: '',
     update: false,
     searchDepId: '-1',
-    /** 菜品排序：sales | diff（每份成本偏差绝对值）| actualCost（整菜实际成本总额） */
-    sortBy: 'sales',
+    /** 菜品排序：diffCostPerPortion（成本偏差金额）| diffRate（成本偏差率）| ingredientCount（配料数量） */
+    sortBy: 'diffCostPerPortion',
     /** desc 默认与后端一致 */
     sortOrder: 'desc',
     /** 仅看成本偏差≠0 的菜品（前端筛选） */
@@ -94,64 +94,14 @@ Page({
 
     var mendianInfo = wx.getStorageSync('mendianInfo');
     if (mendianInfo && mendianInfo.gbDepartmentId) {
-      var patch = this._patchSubDepFromMendian(mendianInfo);
-      this.setData(
-        Object.assign(
-          {
-            mendianInfo: mendianInfo,
-            depFatherId: mendianInfo.gbDepartmentId,
-          },
-          patch
-        )
+      this.setData({
+        mendianInfo: mendianInfo,
+        depFatherId: mendianInfo.gbDepartmentId,
+      },
       );
     }
     this._syncDatesFromMyDateStorage();
     this._fetchReport();
-  },
-
-  /** 与 depFoodList 同源：首项不按子部门，其后为 gbDepartmentEntityList */
-  _patchSubDepFromMendian: function (mendianInfo) {
-    var subs = mendianInfo && mendianInfo.gbDepartmentEntityList;
-    if (!subs || subs.length < 2) {
-      return {
-        subDepPickerRange: [],
-        activeSubDepIndex: 0,
-        activeSubDepId: '',
-        activeSubDepName: '',
-      };
-    }
-    var range = [{ _all: true, gbDepartmentName: '全部（不按子部门）', gbDepartmentId: '' }].concat(subs);
-    return {
-      subDepPickerRange: range,
-      activeSubDepIndex: 0,
-      activeSubDepId: '',
-      activeSubDepName: '',
-    };
-  },
-
-  onSubDepChange: function (e) {
-    var idx = parseInt(e.detail.value, 10);
-    if (isNaN(idx) || idx < 0) {
-      return;
-    }
-    var range = this.data.subDepPickerRange;
-    if (!range || !range[idx]) {
-      return;
-    }
-    var row = range[idx];
-    var patch = { activeSubDepIndex: idx };
-    if (row._all) {
-      patch.activeSubDepId = '';
-      patch.activeSubDepName = '';
-    } else {
-      var id = row.gbDepartmentId;
-      patch.activeSubDepId = id != null && id !== '' ? id : '';
-      patch.activeSubDepName = row.gbDepartmentName != null ? String(row.gbDepartmentName) : '';
-    }
-    var that = this;
-    this.setData(patch, function () {
-      that._fetchReport();
-    });
   },
 
   _syncDatesFromMyDateStorage() {
@@ -190,7 +140,7 @@ Page({
       disId: this.data.disId,
       searchDepId: this.data.searchDepId,
       depFatherId: this.data.depFatherId,
-      sortBy: this.data.sortBy || 'sales',
+      sortBy: this.data.sortBy || 'diffCostPerPortion',
       sortOrder: this.data.sortOrder || 'desc',
     };
     var sid = this.data.activeSubDepId;
@@ -299,6 +249,17 @@ Page({
     });
   },
 
+  /** 切换菜品详情展开/收起 */
+  onToggleDishDetail: function (e) {
+    var idx = e.currentTarget.dataset.index;
+    if (idx === undefined || idx === null) return;
+    var key = 'salesDishRows[' + idx + ']._expanded';
+    var current = this.data.salesDishRows[idx] && this.data.salesDishRows[idx]._expanded;
+    this.setData({
+      [key]: !current
+    });
+  },
+
   onToggleAbnormal: function () {
     var next = !this.data.abnormalFirst;
     this.setData({ abnormalFirst: next });
@@ -392,7 +353,7 @@ Page({
       q.push('hanzi=' + encodeURIComponent(String(d.hanzi)));
     }
     wx.navigateTo({
-      url: '/subPackage-mendian/pages/food/dishIngredientDashboard/dishIngredientDashboard?' + q.join('&'),
+      url: '/subPackage-mendian/pages/management/dishIngredientDashboard/dishIngredientDashboard?' + q.join('&'),
     });
   },
 });

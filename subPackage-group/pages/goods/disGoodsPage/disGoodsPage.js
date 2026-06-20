@@ -3,9 +3,44 @@ var load = require('../../../../lib/load.js');
 let windowWidth = 0;
 let itemWidth = 0;
 const globalData = getApp().globalData;
-var dateUtils = require('../../../../utils/dateUtil');
+var dateUtils = require('../../../../lib/dateUtil.js');
 
-var goodsApi = require('../../services/api.js');
+var goodsApi = require('../../../services/api.js');
+
+var BASIC_GOODS_FIELDS = [
+  'gbDistributerGoodsId',
+  'gbDgGoodsName',
+  'gbDgGoodsDetail',
+  'gbDgGoodsStandardname',
+  'gbDgGoodsStandardWeight',
+  'gbDgGoodsIsWeight',
+  'gbDgControlPrice',
+  'gbDgControlFresh',
+  'gbDgFreshWarnHour',
+  'gbDgFreshWasteHour',
+  'gbDgPullOff',
+  'gbDgGoodsBrand',
+  'gbDgGoodsPlace',
+  'gbDgGoodsPrice',
+  'gbDgGoodsLowestPrice',
+  'gbDgGoodsHighestPrice',
+  'gbDgQuantityDays',
+  'gbDgCartonUnit',
+  'gbDgItemsPerCarton',
+];
+
+function pickBasicGoodsPayload(goods) {
+  var payload = {};
+  if (!goods) {
+    return payload;
+  }
+  BASIC_GOODS_FIELDS.forEach(function (key) {
+    if (goods[key] !== undefined && goods[key] !== null) {
+      payload[key] = goods[key];
+    }
+  });
+  return payload;
+}
 
 Page({
   
@@ -55,7 +90,6 @@ Page({
     goodsApi.gbDisGetGoodsDetail(this.data.disGoodsId).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
-        console.log(res.result.data);
         this.setData({
           goods: res.result.data.goodsInfo,
           standard: res.result.data.goodsInfo.gbDgGoodsStandardname,
@@ -123,7 +157,6 @@ Page({
    * @param {*} e 
    */
   clickItem(e) {
-    console.log(e);
     this.setData({
       depGoodsName: this.data.goods.gbDgGoodsName,
     })
@@ -339,7 +372,6 @@ Page({
     load.showLoading("更新别名")
     goodsApi.updateDisAlias(data).then(res => {
       if (res.result.code == 0) {
-        console.log(res)
         load.hideLoading();
         var alias = "goods.gbDistributerAliasEntities[" + this.data.indexAlias + "]";
         this.setData({
@@ -456,7 +488,6 @@ Page({
     goodsApi.canclePostDgnGoodsGb(data).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
-        console.log(res);
         var pages = getCurrentPages();
         var prevPage = pages[pages.length - 2]; //上一个页面
         
@@ -487,7 +518,6 @@ Page({
   },
 
   switchChangeAuto(e) {
-    console.log(e)
     var pullOff = "goods.gbDgGoodsIsWeight"
     if (e.detail.value) {
       this.setData({
@@ -523,25 +553,15 @@ Page({
   },
 
 
-  _updateGoodsPullOff(){
-
-    goodsApi.updateGbGoodsPullOff(this.data.goods).then(res =>{
-      if(res.result.code == 0){
+  _updateGoodsPullOff() {
+    var prevPullOff = this.data.goods.gbDgPullOff;
+    this._updateGoods({
+      onFail: function () {
         this.setData({
-          goods: res.result.data
-        })
-      }else{
-        var data = "goods.gbDgPullOff";
-        this.setData({
-          [data]: 0,
-        })
-        wx.showToast({
-          title: res.result.msg,
-          icon: 'none'
-        })
-      }
-    })
-
+          'goods.gbDgPullOff': prevPullOff === '1' || prevPullOff === 1 ? '0' : '1',
+        });
+      }.bind(this),
+    });
   },
 
   
@@ -636,7 +656,6 @@ Page({
 
 
   switchIsFranchisePrice(e) {
-    console.log(e)
     var pullOff = "goods.gbDgIsFranchisePrice"
 
     if(e.detail.value == 1){
@@ -699,7 +718,6 @@ Page({
   },
   
   cancleContrl(e){
-    console.log("cancleContrl")
     if (this.data.goods.gbDgIsSelfControl == 0) {
       var goodsData = "goods.gbDgIsSelfControl";
       this.setData({
@@ -709,52 +727,30 @@ Page({
     this.hideMask();
   },
   _updateGoodsFresh(e) {
-    var warnHour = this.data.goods.gbDgFreshWasteHour;
+    var warnHour = this.data.goods.gbDgFreshWarnHour;
     var wasteHour = this.data.goods.gbDgFreshWasteHour;
-    var goodsData = "goods.gbDgControlFresh";    
-    if (warnHour !== null && wasteHour !== null && warnHour.length > 0 && wasteHour.length > 0) {
-      this.setData({
-        [goodsData]: 1
-      })
-      this._updateGoodsFreshData();
-
-    } else {
+    if (!warnHour || !wasteHour || warnHour.length === 0 || wasteHour.length === 0) {
       wx.showToast({
-        title: '时间输入不正确',
+        title: '请填写报警和废弃时间',
         icon: 'none'
-      })
+      });
+      return;
     }
+    if (parseInt(warnHour, 10) >= parseInt(wasteHour, 10)) {
+      wx.showToast({
+        title: '报警应早于废弃时间',
+        icon: 'none'
+      });
+      return;
+    }
+    this.setData({
+      'goods.gbDgControlFresh': 1
+    });
+    this._updateGoodsFreshData();
   },
   
-  _updateGoodsFreshData(){
-    load.showLoading("修改商品")
-    var goods = this.data.goods;
-    // goods.gbDgFreshWarnHour = 1;
-    goodsApi.changeGbGoodsFresh(goods)
-      .then(res => {
-        load.hideLoading();
-        if (res.result.code == 0) {
-          wx.showToast({
-            title: '修改成功',
-          })
-          this.setData({
-            showChoice: false,
-            showFresh: false,
-            showPrice: false,
-            showFranchisePrice: false,
-            showOperation: false,
-            showIsSelfControl: false,
-            goods: res.result.data
-          })
-          this._getGoodsDetail();
-          }else{
-            wx.showToast({
-              title: res.result.msg,
-              icon: 'none'
-            })
-          }
-      })
-
+  _updateGoodsFreshData() {
+    this._updateGoods();
   },
 
   // 设置采购价格
@@ -790,7 +786,6 @@ Page({
  
 
   getPrice(e) {
-    console.log(e);
     var priceData = "goods." + e.currentTarget.dataset.type;
     if (e.detail.value.length > 0) {
       this.setData({
@@ -804,7 +799,6 @@ Page({
   },
 
   editDisGoodsSelfPrice(){
-    console.log("editselfproi")
     this.setData({
       showOperation: true,
       showOperationBtn: false,
@@ -814,7 +808,6 @@ Page({
   },
 
   getIsFranchisePrice(e){
-    console.log(e);
     var priceData = "goods." + e.currentTarget.dataset.type;
     var priceTimeData = "goods." + e.currentTarget.dataset.typetime;
     if (e.detail.value.length > 0) {
@@ -830,7 +823,6 @@ Page({
   },
   
   getSelfPrice(e){
-    console.log(e);
     var priceData = "goods.gbDgSelfPrice" ;
     if (e.detail.value.length > 0) {
       this.setData({
@@ -843,104 +835,15 @@ Page({
     }
   },
 
-  // 输入框帮助提示
-  showFreshInputHint() {
-    wx.showModal({
-      title: '💡 输入说明',
-      content: '请输入商品保鲜时间的小时数\n\n• 仅支持整数（如：24）\n• 不支持小数（如：24.5）\n• 建议范围：1-168小时\n• 单位：小时',
-      showCancel: false,
-      confirmText: '知道了',
-      confirmColor: '#1989fa'
-    });
-  },
-
   getFresh(e) {
-    console.log('保鲜时间输入事件:', e);
-    
-    var inputValue = e.detail.value;
-    var freshData = "goods." + e.currentTarget.dataset.type;
-    
-    // 输入验证和格式化
-    if (inputValue.length === 0) {
-      // 空值处理
-      this.setData({
-        [freshData]: ""
-      });
-      return;
+    var inputValue = e.detail.value.replace(/[^0-9]/g, '');
+    if (parseInt(inputValue, 10) > 999) {
+      inputValue = '999';
     }
-    
-    // 只允许输入数字
-    var numericValue = inputValue.replace(/[^0-9]/g, '');
-    
-    // 如果输入了非数字字符，显示提示
-    if (numericValue !== inputValue) {
-      wx.showModal({
-        title: '⚠️ 输入格式错误',
-        content: '保鲜时间只能输入数字（小时）\n\n请输入有效的小时数，例如：24',
-        showCancel: false,
-        confirmText: '重新输入',
-        confirmColor: '#ff4444'
-      });
-      // 使用清理后的数字值
-      inputValue = numericValue;
-    }
-    
-    // 检查是否输入了小数
-    if (inputValue.indexOf('.') !== -1) {
-      wx.showModal({
-        title: '⚠️ 不支持小数',
-        content: '保鲜时间请设置为整数小时\n\n例如：输入 24 而不是 24.5',
-        showCancel: false,
-        confirmText: '重新输入',
-        confirmColor: '#ff4444'
-      });
-      // 移除小数点及之后的内容
-      inputValue = inputValue.substring(0, inputValue.indexOf('.'));
-    }
-    
-    // 设置合理的上限（比如999小时）
-    var maxHours = 999;
-    var numValue = parseInt(inputValue);
-    if (numValue > maxHours) {
-      wx.showModal({
-        title: '⚠️ 输入超出范围',
-        content: `保鲜时间不能超过${maxHours}小时\n\n请输入合理的数值，建议范围：1-168小时（1-7天）`,
-        showCancel: false,
-        confirmText: '重新输入',
-        confirmColor: '#ff4444'
-      });
-      inputValue = maxHours.toString();
-    }
-    
-    // 更新数据
+    var freshData = 'goods.' + e.currentTarget.dataset.type;
     this.setData({
       [freshData]: inputValue
     });
-    
-    // 输入成功提示
-    if (inputValue.length > 0 && numValue > 0) {
-      var timeText = '';
-      if (numValue < 24) {
-        timeText = `${numValue}小时`;
-      } else if (numValue < 168) {
-        var days = Math.floor(numValue / 24);
-        var hours = numValue % 24;
-        timeText = days > 0 ? `${days}天${hours > 0 ? hours + '小时' : ''}` : `${numValue}小时`;
-      } else {
-        timeText = `${numValue}小时`;
-      }
-      
-      // 只在输入有效值且不是通过错误处理自动修正的情况下显示成功提示
-      if (inputValue === e.detail.value) {
-        wx.showToast({
-          title: `已设置：${timeText}`,
-          icon: 'success',
-          duration: 1500
-        });
-      }
-    }
-    
-    console.log('保鲜时间已更新为:', inputValue, '小时');
   },
 
   _updateGoodsControlPrice(e) {
@@ -999,16 +902,17 @@ Page({
   },
 
 
-  _updateGoods(e) {
-    load.showLoading("修改商品")
-    var goods = this.data.goods;
-    goodsApi.updateGbGoods(goods)
+  _updateGoods(options) {
+    options = options || {};
+    load.showLoading('修改商品');
+    var payload = pickBasicGoodsPayload(this.data.goods);
+    goodsApi.disUpdateDisGoodsBasicGb(payload)
       .then(res => {
         load.hideLoading();
         if (res.result.code == 0) {
           wx.showToast({
             title: '修改成功',
-          })
+          });
           this.setData({
             showChoice: false,
             showFresh: false,
@@ -1017,16 +921,29 @@ Page({
             showOperation: false,
             showOperationBtn: false,
             showIsSelfControl: false,
-            goods: res.result.data
-          })
+            goods: res.result.data,
+          });
           this._getGoodsDetail();
-          }else{
-            wx.showToast({
-              title: res.result.msg,
-              icon: 'none'
-            })
+        } else {
+          if (options.onFail) {
+            options.onFail(res);
           }
+          wx.showToast({
+            title: res.result.msg,
+            icon: 'none',
+          });
+        }
       })
+      .catch(function () {
+        load.hideLoading();
+        if (options.onFail) {
+          options.onFail();
+        }
+        wx.showToast({
+          title: '修改失败',
+          icon: 'none',
+        });
+      });
   },
 
   
@@ -1075,7 +992,6 @@ Page({
     this.setData({
       showOperationBtn: false,
     })
-    console.log("aaab")
     wx.navigateTo({
       url: '/subPackage-yishang/pages/yishang/map/map?nxGoodsId=' + this.data.goods.gbDgNxGoodsId + '&nxGoodsName=' +  this.data.goods.gbDgGoodsName,
     })

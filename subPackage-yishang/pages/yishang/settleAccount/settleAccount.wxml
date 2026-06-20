@@ -1,0 +1,81 @@
+<import src='../../../../template/billPay/billPay.wxml' />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="top_bar flex-row "  style="padding-top: {{navBarHeight}}rpx;">
+	<image src="../../../../images/back.png" class="back_icon" bindtap="toBack"></image>
+	<view class="flex-column">
+		<text class="top_bar_title">结算</text>
+	</view>
+</view>
+
+<view class="emptyView {{accountBillArr.length == 0  ? 'is-active' : ''}}"
+	style="height: {{windowHeight - 760}}rpx; text-align:center;">
+	<view class="empty_View center-content">
+		<image class="empty_image" src="../../../images/file-empty.png"></image>
+		<text class="big">暂无结账单</text>
+	</view>
+</view>
+
+<view class="flex-column">
+	<view class="flex-row-between border-bottom p-20" wx:for="{{accountBillArr}}" wx:for-item="item"
+		wx:for-index="index" style="width:{{windowWidth - 40}}rpx; ">
+		<view class="flex-row ">
+			<view class="body-view mr-20">
+				<switch type="checkbox" checked="{{item.isSelect}}" bindchange="selectBill" data-index="{{index}}" />
+			</view>
+
+			<view class="flex-column">
+				<view class="flex-row">
+					<text class="mr-20">{{tool.transferDateString(item.gbDbDate)}}</text>
+          <text>{{item.gbDepartmentEntity.gbDepartmentAttrName}}</text>
+      	</view>
+			
+        <view class="flex-row font-xs gray">
+						<text>单号:</text>
+						<text>{{item.gbDbTradeNo}}</text>
+					</view>
+			</view>
+		</view>
+
+		<view class=" with-mr-20">
+			<text class="big">{{item.gbDbTotal}}</text>
+			<text class="small">元</text>
+		</view>
+
+	</view>
+</view>
+
+
+
+<view class="mask {{isTishi ? 'is-active' : ''}}">
+
+	<view class="body  bg-white" style="width: {{windowWidth - 100}}rpx;">
+		<view class="mb-20  center-content">
+
+			<view class="tishiView"
+				style="width:{{windowWidth/5}}rpx; height:{{windowWidth/5}}rpx; margin-top:-{{windowWidth/10 + 10}}rpx; z-index: 9999;border-radius: 50%;">
+				<image src="../../../images/aixin.png" class="tishi_icon"
+					style="width:{{windowWidth/5 -80}}rpx; height:{{windowWidth/5 - 80}}rpx;  border-radius: 50%; margin-top:40rpx; margin-left: 40rpx;">
+				</image>
+			</view>
+
+			<view class="center-content sentence">
+				<text class="small">客户已完成付款，结账确认以后</text>
+				<text class="font-lg">订单状态不可修改！</text>
+			</view>
+			<view class="p-20 flex-row-between " bindtap="closeMask" style="width:{{windowWidth - 200}}rpx; ">
+				<view class="half-row center-content">
+					<text class="border_btn" bindtap="cancleSettle">取消</text>
+				</view>
+				<view class="half-row center-content">
+					<text class="border_btn" bindtap="settleAccount">确定</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</view>
+
+
+
+
+<template is="billPay" data='{{selAmount:selAmount, total: total}}'></template>

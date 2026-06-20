@@ -153,7 +153,7 @@ var createAiRun = function (payload) {
     if (raw && raw.code !== undefined && raw.data !== undefined) {
       raw = raw.data;
     }
-    // 解析 runId / conversationId
+    // 解析 runId / conversationId / messageId
     var runIdRaw = raw.runId || raw.run_id;
     var runId = typeof runIdRaw === 'number' ? runIdRaw : Number(runIdRaw);
     if (!runId || isNaN(runId)) {
@@ -165,8 +165,14 @@ var createAiRun = function (payload) {
       var n = typeof cidRaw === 'number' ? cidRaw : Number(cidRaw);
       if (!isNaN(n)) conversationId = n;
     }
+    var msgIdRaw = raw.messageId || raw.message_id || raw.assistantMessageId || raw.assistant_message_id;
+    var messageId;
+    if (msgIdRaw !== undefined && msgIdRaw !== null) {
+      var m = typeof msgIdRaw === 'number' ? msgIdRaw : Number(msgIdRaw);
+      if (!isNaN(m)) messageId = m;
+    }
     var status = typeof raw.status === 'string' ? raw.status : undefined;
-    return { runId: runId, conversationId: conversationId, status: status };
+    return { runId: runId, conversationId: conversationId, status: status, messageId: messageId };
   });
 };
 
@@ -613,15 +619,17 @@ var getRevenueStats = function (departmentId, query) {
 };
 
 /**
- * 获取日营业额完整数据（含统计、曲线图、每日详情）
- * GET ai/daily-revenue/list/{departmentId}?startDate=&endDate=
- * @param {{ departmentId: number, startDate: string, endDate: string }} params
+ * 获取日营业额完整数据（含 summary、dailyRows）
+ * GET ai/daily-revenue/list/{departmentId}?startDate=&endDate=&subDepId=&distributerId=
+ * @param {{ departmentId: number, startDate: string, endDate: string, subDepId?: string|number, distributerId?: string|number }} params
  */
 var getDailyTurnover = function (params) {
   params = params || {};
   var query = {};
   if (params.startDate) query.startDate = params.startDate;
   if (params.endDate) query.endDate = params.endDate;
+  if (params.subDepId !== null && params.subDepId !== undefined && params.subDepId !== '') query.subDepId = params.subDepId;
+  if (params.distributerId !== null && params.distributerId !== undefined && params.distributerId !== '') query.distributerId = params.distributerId;
   return request.get('ai/daily-revenue/list/' + params.departmentId, query);
 };
 
@@ -940,6 +948,104 @@ var getGbPurGoodsListSearchDate = function (payload) {
 };
 
 // ============================================================
+// 工作记录 — 从业务卡片记入
+// ============================================================
+
+/**
+ * 从业务卡片记入工作记录
+ * POST /api/ai/work-records/from-business-card
+ *
+ * source 五元组（conversationId/messageId/runId/cardType/itemKey）用于幂等；
+ * biz_fact_snapshot / sourceCard 仍由服务端从 message cards_json 解析，不接受前端 payload。
+ *
+ * @param {{ userId: number, departmentId: number, distributerId?: number,
+ *           sourceConversationId: number, sourceMessageId: number, sourceRunId?: number,
+ *           sourceCardType: string, sourceItemKey: string,
+ *           editedTitle?: string, title?: string,
+ *           editedContent?: string, content?: string,
+ *           categoryCode?: string }} payload
+ *   editedTitle/title → gb_wr_title（editedTitle 优先）；editedContent/content → gb_wr_raw_content；
+ *   categoryCode 可选，须为 ACTIVE 分类编码。幂等重复提交返回同 recordId，不更新 title/content。
+ */
+var createWorkRecordFromBusinessCard = function (payload) {
+  return request.post('ai/work-records/from-business-card', payload, { showErrorToast: false });
+};
+
+// ============================================================
+// 图钉 — 消息图钉 与 卡片级图钉（Answer Pin / Card Pin）
+// ============================================================
+
+/**
+ * 添加消息级图钉（整条 AI 回复）
+ * POST /api/ai/messages/{messageId}/pin?userId=
+ * body 为空 {} → 后端视为 MESSAGE 级 pin
+ * @param {number|string} messageId - 服务端消息 ID
+ * @param {number} userId
+ * @returns {Promise<{ code: number, data: { pinned: boolean, pinId: number|null, duplicated?: boolean } }>}
+ */
+var pinMessage = function (messageId, userId) {
+  return request.request('ai/messages/' + messageId + '/pin?userId=' + userId, {}, { method: 'POST' });
+};
+
+/**
+ * 取消消息级图钉
+ * DELETE /api/ai/messages/{messageId}/pin?userId=
+ * @param {number|string} messageId - 服务端消息 ID
+ * @param {number} userId
+ * @returns {Promise<{ code: number, data: { pinned: boolean, pinId: number|null } }>}
+ */
+var unpinMessage = function (messageId, userId) {
+  return request.request('ai/messages/' + messageId + '/pin?userId=' + userId, {}, { method: 'DELETE' });
+};
+
+/**
+ * 添加卡片级图钉（只 pin 单张业务卡）
+ * POST /api/ai/messages/{messageId}/pin?userId=
+ * body 必传：{ pinScope, cardInstanceId, cardType, cardTitle, cardKey?, cardIndex? }
+ * @param {number|string} messageId - 服务端消息 ID
+ * @param {number} userId
+ * @param {{ pinScope: string, cardInstanceId: string, cardType: string, cardTitle: string,
+ *           cardKey?: string, cardIndex?: number }} body
+ * @returns {Promise<{ code: number, data: { pinned: boolean, pinId: number|null, duplicated?: boolean } }>}
+ */
+var pinCard = function (messageId, userId, body) {
+  return request.request('ai/messages/' + messageId + '/pin?userId=' + userId, body || {}, { method: 'POST' });
+};
+
+/**
+ * 获取用户的所有图钉列表（跨会话）— 新接口 /mine
+ * GET /api/ai/work-pins/mine
+ * 自动限制当前 userId，支持 conversationId / sourceType 可选筛选
+ * @param {Object} params - { page?: number, pageSize?: number, conversationId?, sourceType? }
+ * @returns {Promise<{ result: { total, page, pageSize, items: Array } }>}
+ */
+var listMyPins = function (params) {
+  return request.get('ai/work-pins/mine', params || {}, { showErrorToast: false });
+};
+
+/**
+ * 删除图钉
+ * DELETE /api/ai/work-pins/{pinId}?userId=
+ * @param {number|string} pinId
+ * @param {number|string} userId
+ * @returns {Promise}
+ */
+var deletePin = function (pinId, userId) {
+  return request.request('ai/work-pins/' + pinId + '?userId=' + userId, {}, { method: 'DELETE' });
+};
+
+/**
+ * 获取图钉详情（独立快照）
+ * GET /api/ai/work-pins/{pinId}?userId={userId}
+ * @param {number|string} pinId
+ * @param {number} userId
+ * @returns {Promise<{ result: { code, data: { pinId, title, sourceTextSnapshot, sourceAnswerPreview, cards, cardsSnapshotJson, primaryCardType, cardCount, conversationId, messageId, runId, createdAt } } }>}
+ */
+var getPinDetail = function (pinId, userId) {
+  return request.get('ai/work-pins/' + pinId, { userId: userId }, { showErrorToast: false });
+};
+
+// ============================================================
 // 集团门店部门
 // ============================================================
 
@@ -1032,6 +1138,122 @@ var getDisUserReportsStock = function (userId) {
 
 
 // ============================================================
+// 工作笔记（Work Note）— 店长可记录自己看法的笔记
+// ============================================================
+
+/**
+ * 创建笔记
+ * POST /ai/work-notes
+ * @param {{ userId: number, title: string, content: string, conversationId?: number, messageId?: number, runId?: number }} payload
+ * @returns {Promise}
+ */
+var createWorkNote = function (payload) {
+  return request.post('ai/work-notes', payload, { showErrorToast: false });
+};
+
+/**
+ * 获取当前用户全部工作笔记（跨会话，分页；不含完整快照）
+ * GET /ai/work-notes/mine
+ * @param {Object} params - { userId: number, page?: number, pageSize?: number, conversationId?, noteType? }
+ * @returns {Promise<{ result: { total, page, pageSize, items: Array } }>}
+ */
+var listMyWorkNotes = function (params) {
+  return request.get('ai/work-notes/mine', params || {}, { showErrorToast: false });
+};
+
+/**
+ * 删除工作笔记（软删除）
+ * DELETE /ai/work-notes/{noteId}?userId=
+ * @param {number|string} noteId
+ * @param {number|string} userId
+ * @returns {Promise}
+ */
+var deleteWorkNote = function (noteId, userId) {
+  return request.request('ai/work-notes/' + noteId + '?userId=' + userId, {}, { method: 'DELETE' });
+};
+
+/**
+ * 获取工作笔记详情（含完整 content / sourceTextSnapshot）
+ * GET /ai/work-notes/{noteId}?userId=
+ * @param {number|string} noteId
+ * @param {number|string} userId
+ * @returns {Promise}
+ */
+var getWorkNoteDetail = function (noteId, userId) {
+  return request.get('ai/work-notes/' + noteId, { userId: userId }, { showErrorToast: false });
+};
+
+/**
+ * 更新工作笔记
+ * PUT /ai/work-notes/{noteId}
+ * @param {number|string} noteId
+ * @param {number|string} userId
+ * @param {{ title: string, content: string }} payload
+ * @returns {Promise}
+ */
+var updateWorkNote = function (noteId, userId, payload) {
+  return request.request('ai/work-notes/' + noteId + '?userId=' + userId, payload, { method: 'PUT' });
+};
+
+/**
+ * 推送工作笔记到店内公告
+ * POST /store-announcements/from-note/{noteId}
+ * @param {number|string} noteId
+ * @param {{ userId: number, departmentId?: number, distributerId?: number, title?: string }} payload
+ * @returns {Promise}
+ */
+var pushWorkNoteToAnnouncement = function (noteId, payload) {
+  return request.post('store-announcements/from-note/' + noteId, payload, { showErrorToast: false });
+};
+
+/**
+ * 推送工作记录到店内公告
+ * POST /store-announcements/from-work-record/{recordId}
+ * @param {number|string} recordId
+ * @param {{ userId: number, departmentId?: number, distributerId?: number, title?: string }} payload
+ * @returns {Promise}
+ */
+var pushWorkRecordToAnnouncement = function (recordId, payload) {
+  return request.post('store-announcements/from-work-record/' + recordId, payload, { showErrorToast: false });
+};
+
+// ============================================================
+// 店内公告栏
+// ============================================================
+
+/**
+ * 查询店内公告列表
+ * GET /store-announcements?userId=&departmentId=&distributerId=&page=1&pageSize=50
+ * @param {{ userId: number, departmentId?: number, distributerId?: number, page?: number, pageSize?: number }} params
+ * @returns {Promise}
+ */
+var listStoreAnnouncements = function (params) {
+  return request.get('store-announcements', params, { showErrorToast: false }).then(function (res) {
+    var raw = res && res.result;
+    if (raw && raw.code !== undefined && raw.data !== undefined) {
+      return { result: raw.data, header: res.header };
+    }
+    return res;
+  });
+};
+
+/**
+ * 获取每日公告牌
+ * GET /store-announcements/daily-board
+ * @param {{ userId: number, departmentId: number, distributerId: number, boardType: string, asOfDate?: string, page?: number, pageSize?: number }} params
+ * @returns {Promise}
+ */
+var getDailyBoard = function (params) {
+  return request.get('store-announcements/daily-board', params, { showErrorToast: false }).then(function (res) {
+    var raw = res && res.result;
+    if (raw && raw.code !== undefined && raw.data !== undefined) {
+      return { result: raw.data, header: res.header };
+    }
+    return res;
+  });
+};
+
+// ============================================================
 // 导出
 // ============================================================
 
@@ -1079,4 +1301,25 @@ module.exports = {
   getDisUserReportsCost: getDisUserReportsCost,
   getDisUserReportsPurchase: getDisUserReportsPurchase,
   getDisUserReportsStock: getDisUserReportsStock,
+  // 工作记录 — 从业务卡片记入
+  createWorkRecordFromBusinessCard: createWorkRecordFromBusinessCard,
+  // 图钉 — 消息图钉 & 卡片级图钉
+  pinMessage: pinMessage,
+  unpinMessage: unpinMessage,
+  pinCard: pinCard,
+  // 图钉 — 列表 & 删除 & 详情
+  listMyPins: listMyPins,
+  deletePin: deletePin,
+  getPinDetail: getPinDetail,
+  // 工作笔记
+  createWorkNote: createWorkNote,
+  listMyWorkNotes: listMyWorkNotes,
+  getWorkNoteDetail: getWorkNoteDetail,
+  updateWorkNote: updateWorkNote,
+  deleteWorkNote: deleteWorkNote,
+  pushWorkNoteToAnnouncement: pushWorkNoteToAnnouncement,
+  pushWorkRecordToAnnouncement: pushWorkRecordToAnnouncement,
+  // 店内公告栏
+  listStoreAnnouncements: listStoreAnnouncements,
+  getDailyBoard: getDailyBoard,
 };

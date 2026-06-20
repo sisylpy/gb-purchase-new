@@ -188,13 +188,18 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
             <switch checked="{{goods.gbDgControlFresh == 1 ? 'checked' : ''}}" bindchange="switchControlFresh" />
           </view>
           <block wx:if="{{goods.gbDgControlFresh == 1}}">
-            <view class="flex-row p-10 font-md">
-              <text class="graymr-20">时间设置:</text>
-              <view style="width:{{windowWidth - 280}}rpx;" class="flex-row">
-                <view class="flex-row half-row">
-                  <text class="">{{goods.gbDgFreshWasteHour}}小时废弃</text>
-                </view>
+            <view class="fresh-setting-row">
+              <view class="fresh-setting-row__info">
+                <text class="text-secondary">报警</text>
+                <text class="fresh-setting-row__value">{{goods.gbDgFreshWarnHour || '-'}}小时</text>
+                <text class="text-secondary fresh-setting-row__sep">废弃</text>
+                <text class="fresh-setting-row__value">{{goods.gbDgFreshWasteHour || '-'}}小时</text>
               </view>
+              <view
+                class="fresh-setting-row__btn"
+                catchtap="editDisGoodsFresh"
+                hover-class="fresh-setting-row__btn--hover"
+              >修改</view>
             </view>
           </block>
         </view>
@@ -245,56 +250,51 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
   <!--  showFresh -->
 
-  <view class="bg-white popup" wx:elif="{{showFresh}}" >
+  <view class="bg-white popup fresh-popup" wx:elif="{{showFresh}}">
 
-    <view class="flex-column">
-      <view class="flex-column center-content mainBack">
-        <view class="p-20   five-weight  flex-row font-lg">
-          {{goods.gbDgGoodsName}}({{goods.gbDgGoodsStandardname}})
-        </view>
-      </view>
+    <view class="fresh-popup__title">{{goods.gbDgGoodsName}} · {{goods.gbDgGoodsStandardname}}</view>
 
-      <view class="p-20 flex-row mb-30 mt-30">
-        <text class="p-20"> 废弃时间:</text>
-        <view >
-          <input 
-            class="" 
-            focus="{{showFresh}}" 
-            type="digit" 
-            value="{{goods.gbDgFreshWasteHour}}" 
-            placeholder="请输入小时数"
-            placeholder-style="color: #999; font-size: 28rpx;"
-            bindinput="getFresh" 
-            data-type="gbDgFreshWasteHour" 
-            style="width: {{windowWidth / 3}}rpx; border: 2rpx solid #e5e5e5; border-radius: 8rpx; background-color: #f8f8f8;line-height: 60rpx; height: 60rpx; padding-left: 10rpx;" 
-          />
-          <view 
-            style="position: absolute; right: 10rpx; color: #1989fa; font-size: 24rpx; cursor: pointer;"
-            catchtap="showFreshInputHint"
-          >
-          
-          </view>
-        </view>
-        <text style="margin-left: 10rpx; color: #666; font-size: 28rpx;">个小时</text>
+    <view class="fresh-form">
+      <view class="fresh-form__row">
+        <text class="fresh-form__label">报警</text>
+        <input
+          class="fresh-form__input"
+          focus="{{showFresh}}"
+          type="digit"
+          value="{{goods.gbDgFreshWarnHour}}"
+          placeholder="小时"
+          bindinput="getFresh"
+          data-type="gbDgFreshWarnHour"
+        />
+        <text class="fresh-form__unit">小时</text>
       </view>
-      
-      <!-- 输入提示信息 -->
-      <view style="margin: -20rpx 20rpx 20rpx 20rpx; padding: 10rpx; background-color: #f0f8ff; border-radius: 8rpx; border-left: 4rpx solid #1989fa;">
-        <text style="color: #1989fa; font-size: 24rpx;">💡 提示：请输入商品保鲜时间的小时数（仅支持整数，最大999小时）</text>
+      <view class="fresh-form__row">
+        <text class="fresh-form__label">废弃</text>
+        <input
+          class="fresh-form__input"
+          type="digit"
+          value="{{goods.gbDgFreshWasteHour}}"
+          placeholder="小时"
+          bindinput="getFresh"
+          data-type="gbDgFreshWasteHour"
+        />
+        <text class="fresh-form__unit">小时</text>
       </view>
+    </view>
 
-      <view class="fresh-footer">
-        <view
-          class="fresh-btn fresh-btn--cancel"
-          catchtap="cancleFresh"
-          hover-class="fresh-btn-hover"
-        >取消</view>
-        <view
-          class="fresh-btn fresh-btn--confirm {{goods.gbDgFreshWasteHour > 0 ? 'is-active' : ''}}"
-          catchtap="{{goods.gbDgFreshWasteHour > 0 ? '_updateGoodsFresh' : ''}}"
-          hover-class="{{goods.gbDgFreshWasteHour > 0 ? 'fresh-btn-hover' : 'none'}}"
-        >确定废弃设置</view>
-      </view>
+    <text class="fresh-form__hint">整数，最大999；报警应早于废弃</text>
+
+    <view class="fresh-footer">
+      <view
+        class="fresh-btn fresh-btn--cancel"
+        catchtap="cancleFresh"
+        hover-class="fresh-btn-hover"
+      >取消</view>
+      <view
+        class="fresh-btn fresh-btn--confirm {{goods.gbDgFreshWarnHour > 0 && goods.gbDgFreshWasteHour > 0 ? 'is-active' : ''}}"
+        catchtap="{{goods.gbDgFreshWarnHour > 0 && goods.gbDgFreshWasteHour > 0 ? '_updateGoodsFresh' : ''}}"
+        hover-class="{{goods.gbDgFreshWarnHour > 0 && goods.gbDgFreshWasteHour > 0 ? 'fresh-btn-hover' : 'none'}}"
+      >确定</view>
     </view>
   </view>
   <!-- ../showFresh -->

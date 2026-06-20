@@ -10,36 +10,22 @@
     <text class="wir-summary-text">{{narrative}}</text>
   </view>
 
-  <!-- 风险项列表 -->
-  <view class="wir-list">
+  <!-- 紧凑列表 -->
+  <view class="wir-list" wx:if="{{riskItems.length > 0}}">
     <view
-      class="wir-item"
+      class="wir-row"
       wx:for="{{riskItems}}"
-      wx:key="goodsName"
+      wx:key="*this"
     >
-      <view class="wir-item-head">
-        <text class="wir-item-name">{{item.goodsName}}</text>
-        <text class="wir-item-level {{item.riskLevelClass}}">{{item.riskLevelLabel}}</text>
-      </view>
-
-      <view class="wir-item-stats">
-        <view class="wir-stat">
-          <text class="wir-stat-label">剩余库存</text>
-          <text class="wir-stat-value">{{item.restWeight}} {{item.weightUnit}}</text>
-        </view>
-        <view class="wir-stat">
-          <text class="wir-stat-label">区间出库</text>
-          <text class="wir-stat-value">{{item.periodOutboundWeight}} {{item.weightUnit}}</text>
-        </view>
-        <view class="wir-stat">
-          <text class="wir-stat-label">日均出库</text>
-          <text class="wir-stat-value">{{item.dailyOutboundWeight}} {{item.weightUnit}}</text>
-        </view>
-      </view>
-
-      <view class="wir-item-reason" wx:if="{{item.riskReason}}">
-        <text class="wir-reason-label">原因：</text>
-        <text class="wir-reason-text">{{item.riskReason}}</text>
+      <text class="wir-row-name">{{item.goodsName}}</text>
+      <view class="wir-row-right">
+        <text class="wir-row-stock">{{item.restWeight}}{{item.weightUnit}}</text>
+        <text class="wir-row-daily" wx:if="{{item.dailyOutboundWeight > 0}}">日均{{item.dailyOutboundWeight}}{{item.weightUnit}}</text>
+        <text class="wir-row-idle" wx:if="{{item.periodOutboundWeight == 0 && item.dailyOutboundWeight == 0}}">近期无动销</text>
+        <text class="wir-row-support" wx:if="{{item.hasSupportDays}}">可支撑{{item.supportDays}}天</text>
+        <text class="wir-risk-tag {{item.riskLevelClass}}" wx:if="{{item.hasRiskLevel}}">{{item.riskLevelLabel}}</text>
+        <!-- 行级「记入工作记录」按钮（非只读模式显示） -->
+        <text class="wir-record-btn" wx:if="{{!readonly}}" catchtap="onRecordItem" data-index="{{index}}">📝</text>
       </view>
     </view>
   </view>

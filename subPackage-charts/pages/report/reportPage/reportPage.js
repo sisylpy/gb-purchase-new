@@ -1,7 +1,7 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 var config = require('../../../../config/index.js');
-var dateUtils = require('../../../../utils/dateUtil');
+var dateUtils = require('../../../../lib/dateUtil');
 var chartsApi = require('../../../services/api.js');
 
 Page({
@@ -136,7 +136,6 @@ Page({
 
     apiCall.then(res => {
       load.hideLoading();
-      console.log(res.result)
       if (res.result.code == 0) {
         const raw = res.result.data || [];
         const withKeys = raw.map((item, idx) => {
@@ -240,14 +239,11 @@ Page({
       header: {},
       success(res) {
         if (res.statusCode === 200) {
-          console.log('下载成功，临时文件路径：', res.tempFilePath);
-          console.log('文件大小：', res.tempFileSize);
     
           wx.openDocument({
             filePath: res.tempFilePath,
             fileType: 'pdf',
             success: function () {
-              console.log('打开 PDF 成功');
             },
             fail: function (err) {
               console.error('打开 PDF 失败：', err);
@@ -280,7 +276,6 @@ Page({
         header: {},
         success(res) {
           if (res.statusCode === 200) {
-            console.log(res);
             var tempFilePath = res.tempFilePath;
             var path = wx.env.USER_DATA_PATH + "/" + that.data.depName + that.data.startDate +"-" + that.data.stopDate+ that.data.type +  ".xls"
             wx.saveFile({
@@ -293,13 +288,11 @@ Page({
                   showMenu: true,
                   fileType: 'xls',
                   success: function (oRes) {
-                    console.log("open")
                     that.hideMask();
                   }
                 })
               },
               fail(sF) {
-                console.log(sF);
                 wx.showToast({
                   title: '保存失败',
                 })
@@ -338,9 +331,9 @@ Page({
       wx.downloadFile({
         url: config.apiUrl + 'gbreport/downloadReportExcelGb?id=' + this.data.repId
         +'&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate,
+        timeout: 120000,  // 下载超时时间 2 分钟
         // 不传filePath，让系统自动分配临时路径
         success(res) {
-          console.log('下载成功:', res);
           if (res.statusCode === 200) {
             const tempFilePath = res.tempFilePath;
             
@@ -351,14 +344,12 @@ Page({
               tempFilePath: tempFilePath,
               filePath: filePath,
               success(saveRes) {
-                console.log('保存成功:', saveRes);
                 // 使用保存后的稳定路径打开文档
                 wx.openDocument({
                   filePath: saveRes.savedFilePath,
                   showMenu: true,
                   fileType: 'xls',
                   success: function (oRes) {
-                    console.log("打开文档成功");
                     that.hideMask();
                   },
                   fail: function(err) {
@@ -378,7 +369,6 @@ Page({
                   showMenu: true,
                   fileType: 'xls',
                   success: function (oRes) {
-                    console.log("使用临时路径打开成功");
                     that.hideMask();
                   },
                   fail: function(err) {

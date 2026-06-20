@@ -6,237 +6,13 @@ var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
 var foodSalesTemplateWx = require('../../../../lib/foodSalesTemplateWx.js');
 var foodSalesExcelApi = require('../../../../lib/foodSalesExcelApi.js');
+var foodSalesDepUtil = require('../../../utils/foodSalesDepUtil');
 
-/**
- * GET gbdepfood/depGetDepFoodList
- * depFatherId 必填；subDepid 可选（有子部门时传子部门 id，仅父级铺位不传则查父下全部子部门）。
- */
-function depGetDepFoodList(depFatherId, subDepid) {
-  var qs = 'depFatherId=' + encodeURIComponent(String(depFatherId));
-  if (subDepid != null && subDepid !== '') {
-    qs += '&subDepid=' + encodeURIComponent(String(subDepid));
-  }
-  return new Promise(function (resolve, reject) {
-    wx.request({
-      url: apiUrl.apiUrl + 'gbdepfood/depGetDepFoodList?' + qs,
-      method: 'GET',
-      success: function (res) {
-        resolve({ result: res.data });
-      },
-      fail: function (e) {
-        load.hideLoading();
-        reject(e);
-      },
-    });
-  });
-}
-
-/** 当前部门选项 → 新接口参数（与同页 departmentChoiceList 项结构一致） */
-function depFatherAndSubDepForChoice(ch) {
-  if (!ch || ch.gbDfDepFatherId == null || ch.gbDfDepFatherId === '') {
-    return null;
-  }
-  var father = Number(ch.gbDfDepFatherId);
-  var selfId =
-    ch.gbDepartmentId != null && ch.gbDepartmentId !== ''
-      ? Number(ch.gbDepartmentId)
-      : NaN;
-  if (isNaN(father)) {
-    return null;
-  }
-  var subDepid =
-    !isNaN(selfId) && selfId !== father ? selfId : undefined;
-  return { depFatherId: father, subDepid: subDepid };
-}
-
-/**
- * 与 chefOrder/mendian/index 缓存一致：父部门 mendianInfo.gbDepartmentId，
- * 有子部门时子部门默认 gbDepartmentEntityList[0]。无子部门时不传 subDepid。
- */
-function depFatherAndSubDepFromMendianInfo(mi) {
-  if (!mi || mi.gbDepartmentId == null || mi.gbDepartmentId === '') {
-    return null;
-  }
-  var father = Number(mi.gbDepartmentId);
-  if (isNaN(father)) {
-    return null;
-  }
-  var subs = mi.gbDepartmentEntityList || [];
-  var hasSubs =
-    (mi.gbDepartmentSubAmount != null &&
-      Number(mi.gbDepartmentSubAmount) > 0 &&
-      subs.length > 0) ||
-    subs.length > 0;
-  var subFirst = subs[0];
-  var subDepid =
-    hasSubs &&
-    subFirst &&
-    subFirst.gbDepartmentId != null &&
-    subFirst.gbDepartmentId !== ''
-      ? Number(subFirst.gbDepartmentId)
-      : undefined;
-  return { depFatherId: father, subDepid: subDepid };
-}
-
-/** salesDepIndex 与 mendianInfo 默认子部门（或仅存父的一条）对齐 */
-function indexOfMendianDefaultSalesDep(choices, mi) {
-  if (!choices || !choices.length || !mi) {
-    return 0;
-  }
-  var subs = mi.gbDepartmentEntityList || [];
-  var hasSubs =
-    (mi.gbDepartmentSubAmount != null &&
-      Number(mi.gbDepartmentSubAmount) > 0 &&
-      subs.length > 0) ||
-    subs.length > 0;
-  var fatherId = mi.gbDepartmentId;
-  var i;
-  if (!hasSubs) {
-    for (i = 0; i < choices.length; i++) {
-      if (
-        Number(choices[i].gbDepartmentId) === Number(fatherId) &&
-        Number(choices[i].gbDfDepFatherId) === Number(fatherId)
-      ) {
-        return i;
-      }
-    }
-    return 0;
-  }
-  var subId =
-    subs.length > 0 &&
-    subs[0] &&
-    subs[0].gbDepartmentId != null &&
-    subs[0].gbDepartmentId !== ''
-      ? subs[0].gbDepartmentId
-      : null;
-  if (subId == null) {
-    return 0;
-  }
-  for (i = 0; i < choices.length; i++) {
-    if (
-      Number(choices[i].gbDfDepFatherId) === Number(fatherId) &&
-      Number(choices[i].gbDepartmentId) === Number(subId)
-    ) {
-      return i;
-    }
-  }
-  return 0;
-}
-
-/** 将 GbDepFoodEntity[] 转为销售页表格行（原 disGetFood 分类结构不再使用） */
-function flattenSalesFoodRowsFromDepFoodEntities(list) {
-  var rows = [];
-  var raw = Array.isArray(list) ? list : [];
-  for (var i = 0; i < raw.length; i++) {
-    var item = raw[i];
-    var nested = item.gbDistributerFoodEntity || {};
-    var fid =
-      item.gbDfFoodId != null && item.gbDfFoodId !== ''
-        ? item.gbDfFoodId
-        : nested.gbDistributerFoodId != null
-          ? nested.gbDistributerFoodId
-          : item.gbDistributerFoodId;
-    if (fid == null || fid === '') {
-      continue;
-    }
-    var fname =
-      item.gbDfFoodName != null && item.gbDfFoodName !== ''
-        ? String(item.gbDfFoodName)
-        : nested.gbDfFoodName != null
-          ? String(nested.gbDfFoodName)
-          : '';
-    var price =
-      item.gbDfFoodPrice != null && item.gbDfFoodPrice !== ''
-        ? item.gbDfFoodPrice
-        : nested.gbDfFoodPrice;
-    var status =
-      item.gbDfStatus != null ? item.gbDfStatus : nested.gbDfStatus;
-    var rowId =
-      item.gbDepFoodId != null && item.gbDepFoodId !== ''
-        ? String(item.gbDepFoodId)
-        : 'r' + i;
-    rows.push({
-      rowKey: rowId + '_' + String(fid),
-      catName: '',
-      foodName: fname,
-      unitPriceDisplay: price != null && price !== '' ? String(price) : '—',
-      foodId: fid,
-      qtyStr: '',
-      offShelf: status == 1,
-    });
-  }
-  return rows;
-}
-
-/** 单个门店行（mendianDepartmentList 的一项或缓存 mendianInfo）→ 销售部门 picker 选项 */
-function foodDepChoicesFromMendianDepartmentRow(m) {
-  var choices = [];
-  if (!m || m.gbDepartmentId == null || m.gbDepartmentId === '') {
-    return choices;
-  }
-  var subs = m.gbDepartmentEntityList || [];
-  var hasSubs =
-    (m.gbDepartmentSubAmount != null &&
-      Number(m.gbDepartmentSubAmount) > 0 &&
-      subs.length > 0) ||
-    subs.length > 0;
-  if (!hasSubs) {
-    choices.push({
-      gbDepartmentId: m.gbDepartmentId,
-      gbDepartmentName: m.gbDepartmentName || '',
-      gbDfDepFatherId: m.gbDepartmentId,
-    });
-  } else {
-    for (var j = 0; j < subs.length; j++) {
-      var s = subs[j];
-      choices.push({
-        gbDepartmentId: s.gbDepartmentId,
-        gbDepartmentName:
-          (m.gbDepartmentName || '') +
-          ' · ' +
-          ((s && s.gbDepartmentName) || ''),
-        gbDfDepFatherId: m.gbDepartmentId,
-      });
-    }
-  }
-  return choices;
-}
-
-/** 全部门店（旧逻辑，仅无 mendianInfo 时兜底） */
-function buildFoodDepChoices(disInfo) {
-  var choices = [];
-  var list = (disInfo && disInfo.mendianDepartmentList) || [];
-  for (var i = 0; i < list.length; i++) {
-    var part = foodDepChoicesFromMendianDepartmentRow(list[i]);
-    for (var k = 0; k < part.length; k++) {
-      choices.push(part[k]);
-    }
-  }
-  return choices;
-}
-
-/**
- * 当前门店：仅 mendianInfo.gbDepartmentId 对应那一家的子部门，避免多店混在一个 picker 里。
- * 优先 disInfo 里同 id 行（数据更全）；对不上则用缓存 mendianInfo 自身建树。
- */
-function buildDepartmentChoiceListForCurrentMendian(disInfo, mendianStored) {
-  if (
-    mendianStored == null ||
-    mendianStored.gbDepartmentId == null ||
-    mendianStored.gbDepartmentId === ''
-  ) {
-    return buildFoodDepChoices(disInfo);
-  }
-  var list = (disInfo && disInfo.mendianDepartmentList) || [];
-  var target = Number(mendianStored.gbDepartmentId);
-  var i;
-  for (i = 0; i < list.length; i++) {
-    if (Number(list[i].gbDepartmentId) === target) {
-      return foodDepChoicesFromMendianDepartmentRow(list[i]);
-    }
-  }
-  return foodDepChoicesFromMendianDepartmentRow(mendianStored);
-}
+var depFatherAndSubDepForChoice = foodSalesDepUtil.depFatherAndSubDepForChoice;
+var depFatherAndSubDepFromMendianInfo = foodSalesDepUtil.depFatherAndSubDepFromMendianInfo;
+var indexOfMendianDefaultSalesDep = foodSalesDepUtil.indexOfMendianDefaultSalesDep;
+var buildGroupedRows = foodSalesDepUtil.buildGroupedRows;
+var buildDepartmentChoiceListForCurrentMendian = foodSalesDepUtil.buildDepartmentChoiceListForCurrentMendian;
 
 Page({
   data: {
@@ -252,7 +28,8 @@ Page({
     departmentChoiceList: [],
     salesDepIndex: 0,
     hasDepartmentChoices: false,
-    salesFoodRows: [],
+    foodGroups: [],
+    expandedGroupId: '',
     foodsLoading: false,
 
     singleDate: '',
@@ -442,13 +219,15 @@ Page({
     }
     self.setData({ foodsLoading: true });
     load.showLoading('加载菜品');
-    depGetDepFoodList(depParam.depFatherId, depParam.subDepid)
+    api.depGetDepFoodList(depParam.depFatherId, depParam.subDepid)
       .then(function (res) {
         load.hideLoading();
+        console.log("depGetDepFoodList", res.result.data);
+
         self.setData({ foodsLoading: false });
         if (res.result.code == 0) {
-          var rows = flattenSalesFoodRowsFromDepFoodEntities(res.result.data);
-          self.setData({ salesFoodRows: rows, foodCatalogReady: true });
+          var groups = buildGroupedRows(res.result.data);
+          self.setData({ foodGroups: groups, foodCatalogReady: true });
           self._recalcDineInFromDishes();
         } else {
           wx.showToast({ title: res.result.msg || '加载失败', icon: 'none' });
@@ -500,25 +279,48 @@ Page({
   },
 
   onFoodQtyInput: function (e) {
+    var gid = e.currentTarget.dataset.gid;
     var idx = e.currentTarget.dataset.index;
     var val = e.detail.value;
-    var key = 'salesFoodRows[' + idx + '].qtyStr';
-    var patch = {};
-    patch[key] = val;
-    this.setData(patch);
+    var groups = this.data.foodGroups;
+    for (var i = 0; i < groups.length; i++) {
+      if (groups[i].groupId === gid) {
+        groups[i].children[idx].qtyStr = val;
+        break;
+      }
+    }
+    this.setData({ foodGroups: groups });
     this._recalcDineInFromDishes();
   },
 
+  /** 点击父级分类：手风琴展开/收起 */
+  onParentGroupTap: function (e) {
+    var gid = e.currentTarget.dataset.gid;
+    var currentExpanded = this.data.expandedGroupId;
+    var nextExpanded = (currentExpanded === gid) ? '' : gid;
+    var groups = this.data.foodGroups;
+    for (var i = 0; i < groups.length; i++) {
+      groups[i].expanded = (groups[i].groupId === nextExpanded);
+    }
+    this.setData({
+      foodGroups: groups,
+      expandedGroupId: nextExpanded,
+    });
+  },
+
   _recalcDineInFromDishes: function () {
-    var rows = this.data.salesFoodRows || [];
+    var groups = this.data.foodGroups || [];
     var sum = 0;
-    for (var i = 0; i < rows.length; i++) {
-      var r = rows[i];
-      var q = parseFloat(String(r.qtyStr || '').trim());
-      if (isNaN(q) || q <= 0) continue;
-      var p = parseFloat(String(r.unitPriceDisplay === '—' ? '0' : r.unitPriceDisplay).trim());
-      if (isNaN(p)) p = 0;
-      sum += q * p;
+    for (var i = 0; i < groups.length; i++) {
+      var children = groups[i].children || [];
+      for (var j = 0; j < children.length; j++) {
+        var r = children[j];
+        var q = parseFloat(String(r.qtyStr || '').trim());
+        if (isNaN(q) || q <= 0) continue;
+        var p = parseFloat(String(r.unitPriceDisplay === '—' ? '0' : r.unitPriceDisplay).trim());
+        if (isNaN(p)) p = 0;
+        sum += q * p;
+      }
     }
     this.setData({ dineInFromDishes: sum.toFixed(2) });
   },
@@ -727,16 +529,19 @@ Page({
     }
 
     var lines = [];
-    var rows = this.data.salesFoodRows || [];
-    for (var i = 0; i < rows.length; i++) {
-      var r = rows[i];
-      var q = parseFloat(String(r.qtyStr || '').trim());
-      if (isNaN(q) || q <= 0) continue;
-      lines.push({
-        depId: subNum,
-        foodId: Number(r.foodId),
-        quantity: q,
-      });
+    var groups = this.data.foodGroups || [];
+    for (var gi = 0; gi < groups.length; gi++) {
+      var children = groups[gi].children || [];
+      for (var ci = 0; ci < children.length; ci++) {
+        var r = children[ci];
+        var q = parseFloat(String(r.qtyStr || '').trim());
+        if (isNaN(q) || q <= 0) continue;
+        lines.push({
+          depId: subNum,
+          foodId: Number(r.foodId),
+          quantity: q,
+        });
+      }
     }
 
     var dineInOrders = parseInt(this.data.dineInOrderCount, 10) || 0;
@@ -774,9 +579,10 @@ Page({
     };
 
     load.showLoading('保存中...');
-    var self = this;
+    
     var savePromise = api.submitDailyFoodSalesAndRevenue(body);
     savePromise.then(function (res) {
+        console.log("depGetDepFoodList", res.result.data);
         load.hideLoading();
         if (res.result.code == 0) {
           wx.showToast({ title: '保存成功', icon: 'success' });

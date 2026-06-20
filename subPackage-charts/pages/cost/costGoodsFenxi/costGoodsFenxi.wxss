@@ -1,5 +1,5 @@
 /**
- * 出库分析 — 顶部 summary 三卡 + 列表滚动区
+ * 配料分析 — 出库去向三卡 + 去向分布 + 核销筛选 + 配料四格卡片
  */
 
 page {
@@ -74,21 +74,7 @@ page {
   margin-left: 8rpx;
 }
 
-.cog-list-footer {
-  padding: 24rpx 16rpx 8rpx;
-  text-align: center;
-}
-
-.cog-list-footer-text {
-  font-size: 24rpx;
-  color: #9ca3af;
-}
-
-.cog-list-footer-done {
-  color: #c4c4c4;
-}
-
-/* ========== 顶部 summary 三卡（参考：蓝 / 绿 / 橙） ========== */
+/* ========== 顶部 summary 三卡（浅色底 + 彩色边，与设计图一致） ========== */
 .cog-sum-row {
   display: flex;
   flex-direction: row;
@@ -102,221 +88,37 @@ page {
   min-width: 0;
   border-radius: 20rpx;
   padding: 18rpx 14rpx 16rpx;
-  color: #ffffff;
-  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
 .cog-sum-card--blue {
-  background: linear-gradient(160deg, #3b82f6 0%, #2563eb 100%);
+  background: #eff6ff;
+  border: 2rpx solid #bfdbfe;
 }
 
 .cog-sum-card--green {
-  background: linear-gradient(160deg, #34d399 0%, #059669 100%);
+  background: #fff7ec;
+  border: 2rpx solid #fde8c9;
 }
 
-.cog-sum-card--orange {
-  background: linear-gradient(160deg, #fb923c 0%, #ea580c 100%);
-}
-
-/* 异常配料（前端文案「异常菜品」）：白底卡片 */
-.cog-sum-card--abnormal {
-  background: #ede9fe;
-  color: #1f2937;
-  border: 1rpx solid #ddd8f4;
-  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.08);
-}
-
-.cog-sum-card--abnormal .cog-sum-card-title {
-  color: #374151;
-  opacity: 1;
-}
-
-.cog-sum-icon--bell {
-  background: #ede9fe;
-  color: #7c3aed;
-  font-size: 24rpx;
-  font-weight: 700;
-}
-
-.cog-sum-card-val--abnormal {
-  color: #111827;
-  font-size: 36rpx;
-}
-
-.cog-sum-card-ing-unit {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #6b7280;
-}
-
-.cog-abnormal-foot {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: baseline;
-  margin-top: auto;
-  padding-top: 10rpx;
-  font-size: 22rpx;
-  line-height: 1.4;
-}
-
-.cog-abnormal-foot-muted {
-  color: #9ca3af;
-}
-
-.cog-abnormal-foot-flat {
-  color: #9ca3af;
-}
-
-.cog-abnormal-foot-delta {
-  font-weight: 600;
-}
-
-.cog-mom--worse {
-  color: #dc2626;
-}
-
-.cog-mom--better {
-  color: #16a34a;
-}
-
-.cog-mom--flat {
-  color: #9ca3af;
-}
-
-/* 利用率分布 */
-.cog-util-dist {
-  margin: 0 16rpx 16rpx;
-  padding: 20rpx 18rpx;
-  background: #fff;
-  border-radius: 20rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-
-.cog-util-dist-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 16rpx;
-}
-
-.cog-util-dist-body {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.cog-util-dist-chart {
-  width: 240rpx;
-  height: 240rpx;
-  flex-shrink: 0;
-}
-
-.cog-util-ec {
-  width: 100%;
-  height: 100%;
-}
-
-ec-canvas.cog-util-ec {
-  display: block;
-}
-
-.cog-util-dist-legend {
-  flex: 1;
-  min-width: 0;
-  padding-left: 8rpx;
-}
-
-.cog-util-legend-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 10rpx 0;
-  border-bottom: 1rpx solid #f3f4f6;
-}
-
-.cog-util-legend-row:last-child {
-  border-bottom: none;
-}
-
-.cog-util-legend-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-right: 12rpx;
-}
-
-.cog-util-legend-dot--CRITICAL {
-  background: #dc2626;
-}
-
-.cog-util-legend-dot--HIGH {
-  background: #ea580c;
-}
-
-.cog-util-legend-dot--NORMAL {
-  background: #16a34a;
-}
-
-.cog-util-legend-dot--LOW {
-  background: #2563eb;
-}
-
-.cog-util-legend-mid {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-
-.cog-util-legend-name {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.cog-util-legend-range {
-  font-size: 22rpx;
-  color: #9ca3af;
-}
-
-.cog-util-legend-right {
-  flex-shrink: 0;
-  text-align: right;
-  padding-left: 8rpx;
-}
-
-.cog-util-legend-count {
-  display: block;
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #374151;
-}
-
-.cog-util-legend-pct {
-  display: block;
-  font-size: 22rpx;
-  color: #6b7280;
-  margin-top: 4rpx;
+.cog-sum-card--red {
+  background: #fff5f5;
+  border: 2rpx solid #ffcccc;
 }
 
 .cog-sum-card-hd {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 14rpx;
+  margin-bottom: 12rpx;
 }
 
 .cog-sum-icon {
   width: 40rpx;
   height: 40rpx;
   border-radius: 10rpx;
-  background: rgba(255, 255, 255, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -324,75 +126,194 @@ ec-canvas.cog-util-ec {
   line-height: 1;
   margin-right: 10rpx;
   flex-shrink: 0;
+  color: #ffffff;
 }
+
+.cog-sum-card--blue .cog-sum-icon { background: #3b82f6; }
+.cog-sum-card--green .cog-sum-icon--check { background: #fb923c; }
+.cog-sum-card--red .cog-sum-icon--cross { background: #ef4444; }
 
 .cog-sum-card-title {
   font-size: 22rpx;
   font-weight: 500;
-  opacity: 0.95;
+  color: #4b5563;
   line-height: 1.25;
   flex: 1;
   min-width: 0;
 }
 
 .cog-sum-card-val {
-  font-size: 34rpx;
+  font-size: 36rpx;
   font-weight: 700;
   letter-spacing: 0.02em;
-  line-height: 1.2;
+  line-height: 1.25;
   word-break: break-all;
-}
-
-.cog-sum-card-suf {
-  font-size: 26rpx;
-  font-weight: 600;
-  opacity: 0.9;
-  margin-left: 2rpx;
-}
-
-.cog-sum-val-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 8rpx;
-}
-
-.cog-sum-pill {
-  margin-left: 10rpx;
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.96);
-  max-width: 100%;
-}
-
-.cog-sum-pill .util-text {
-  font-size: 22rpx;
+  color: #111827;
 }
 
 .cog-sum-card-foot {
   margin-top: auto;
   padding-top: 10rpx;
-  font-size: 20rpx;
-  font-weight: 400;
-  opacity: 0.82;
+  font-size: 22rpx;
+  color: #6b7280;
   line-height: 1.35;
 }
 
-.cog-sum-card-foot--muted {
-  opacity: 0.72;
+.cog-sum-foot-info {
+  margin-left: 6rpx;
+  opacity: 0.5;
 }
 
-.cog-scroll-pad {
-  height: 40rpx;
+/* 核销总额卡片 — 辅助指标双列 */
+.cog-sum-sub-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16rpx;
+  margin-top: auto;
+  padding-top: 8rpx;
 }
 
-.cog-empty {
-  padding: 48rpx 32rpx;
-  text-align: center;
-  font-size: 30rpx;
+.cog-sum-sub-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.cog-sum-sub-cap {
+  font-size: 20rpx;
+  color: #9ca3af;
+  margin-bottom: 2rpx;
+}
+
+.cog-sum-sub-val {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #374151;
+}
+
+.cog-sum-sub-dev {
+  color: #ea580c;
+}
+
+/* ========== 出库去向分布 ========== */
+.cog-dist-block {
+  margin: 10rpx 20rpx 0;
+  padding: 18rpx 18rpx 14rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  border: 1rpx solid #e8e8e8;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.cog-dist-hd {
+  margin-bottom: 14rpx;
+}
+
+.cog-dist-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #111827;
+}
+
+.cog-dist-bar-wrap {
+  margin-bottom: 14rpx;
+}
+
+.cog-dist-bar {
+  display: flex;
+  flex-direction: row;
+  height: 24rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.cog-dist-seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.cog-dist-seg--verified   { background: #3b82f6; }
+.cog-dist-seg--nonverified{ background: #ef4444; }
+.cog-dist-seg--meal      { background: #fb923c; }
+
+.cog-dist-legend {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8rpx 32rpx;
+}
+
+.cog-dist-leg-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 24rpx;
+  color: #4b5563;
+}
+
+.cog-dist-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.cog-dist-dot--verified   { background: #3b82f6; }
+.cog-dist-dot--nonverified{ background: #ef4444; }
+.cog-dist-dot--meal      { background: #fb923c; }
+
+.cog-dist-leg-lab {
+  margin-right: 8rpx;
+  font-weight: 500;
+}
+
+.cog-dist-leg-val {
+  font-weight: 600;
+  color: #111827;
+  margin-right: 6rpx;
+}
+
+.cog-dist-leg-pct {
+  color: #9ca3af;
+}
+
+/* ========== 核销状态筛选栏 ========== */
+.cog-vfilter-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12rpx 20rpx 14rpx;
+  gap: 12rpx;
+}
+
+.cog-vfilter-label {
+  font-size: 26rpx;
   color: #6b7280;
-  line-height: 1.5;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.cog-vfilter-chips {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.cog-vfilter-chip {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #333;
+  background: #f5f6f8;
+  border: none;
+}
+
+.cog-vfilter-chip.is-on {
+  color: #2563eb;
+  background: #eff6ff;
+  font-weight: 600;
+  border: 1rpx solid #bfdbfe;
 }
 
 /* ---------- 排序条 ---------- */
@@ -481,36 +402,52 @@ ec-canvas.cog-util-ec {
   border-color: #bfdbfe;
 }
 
-.cog-sort-chip--util.is-on {
+.cog-sort-chip--deviance.is-on {
   color: #059669;
   background: #ecfdf5;
   border-color: #a7f3d0;
 }
 
-.cog-sort-chip--wasteloss.is-on {
+.cog-sort-chip--devianceAmount.is-on {
   color: #c2410c;
   background: #fff7ed;
   border-color: #fed7aa;
 }
 
-.cog-sort-filter {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  font-size: 28rpx;
+.cog-sort-chip-arrow {
+  margin-left: 6rpx;
+  font-size: 22rpx;
+  color: inherit;
+}
+
+/* ---------- 空状态 / 分页 ---------- */
+.cog-list-footer {
+  padding: 24rpx 16rpx 8rpx;
+  text-align: center;
+}
+
+.cog-list-footer-text {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.cog-list-footer-done {
+  color: #c4c4c4;
+}
+
+.cog-scroll-pad {
+  height: 40rpx;
+}
+
+.cog-empty {
+  padding: 48rpx 32rpx;
+  text-align: center;
+  font-size: 30rpx;
   color: #6b7280;
-  font-weight: 500;
-  padding: 8rpx 0 8rpx 12rpx;
+  line-height: 1.5;
 }
 
-.cog-sort-filter-ico {
-  margin-right: 4rpx;
-  font-size: 26rpx;
-  opacity: 0.75;
-}
-
-/* ---------- 原料卡片 ---------- */
+/* ---------- 配料卡片（新版：去向四格） ---------- */
 .cog-ing-list {
   padding: 8rpx 0 0;
 }
@@ -520,12 +457,14 @@ ec-canvas.cog-util-ec {
   padding: 20rpx 18rpx 12rpx;
   background: #fff;
   border-radius: 20rpx;
-  border: 2rpx solid #ffd6d6;
+  border: 1rpx solid #e8e8e8;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
 }
 
-.cog-ing-main {
+/* 卡片头：图片 + 名称 */
+.cog-ing-hd {
   align-items: flex-start;
+  margin-bottom: 14rpx;
 }
 
 .cog-ing-thumb {
@@ -537,18 +476,13 @@ ec-canvas.cog-util-ec {
   background: #f5f5f5;
 }
 
-.cog-ing-body {
+.cog-ing-hd-body {
   margin-left: 18rpx;
-}
-
-.cog-ing-title-row {
-  align-items: flex-start;
-  margin-bottom: 16rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .cog-ing-name {
-  flex: 1;
-  min-width: 0;
   font-size: 34rpx;
   font-weight: 700;
   color: #1a1a1a;
@@ -556,108 +490,77 @@ ec-canvas.cog-util-ec {
   margin-right: 12rpx;
 }
 
-.cog-ing-util {
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  max-width: 52%;
-}
-
-.cog-ing-util-lab {
+.cog-ing-spec {
   font-size: 24rpx;
   color: #9ca3af;
-  margin-right: 6rpx;
+  margin-top: 6rpx;
 }
 
-.cog-ing-util-num {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #374151;
-}
-
-.cog-ing-util-pct {
-  font-size: 24rpx;
-  color: #6b7280;
-  margin-right: 8rpx;
-}
-
-.cog-ing-pill {
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
-  background: #fff;
-  border: 1rpx solid #e8e8e8;
-}
-
-.cog-ing-pill .util-text {
-  font-size: 22rpx;
-}
-
-.cog-stat-row {
+/* 四格去向行 */
+.cog-ing-stat4-row {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 10rpx;
+  gap: 8rpx;
+  margin-bottom: 8rpx;
 }
 
-.cog-stat-cell {
+.cog-stat4-cell {
   flex: 1;
   min-width: 0;
-  padding: 14rpx 8rpx;
-  background: #fafafa;
+  padding: 14rpx 6rpx;
   border-radius: 12rpx;
-  border: 1rpx solid #ececec;
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  background: #fafafa;
+  border: 1rpx solid #ececec;
 }
 
-.cog-stat-cap {
-  font-size: 24rpx;
-  color: #6b7280;
-  font-weight: 500;
-  margin-bottom: 8rpx;
-  line-height: 1.25;
+.cog-stat4--outbound {
+  background: #f0f9ff;
+  border-color: #bae6fd;
 }
 
-.cog-stat-val {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.25;
-  word-break: break-all;
+.cog-stat4--verified {
+  background: #eff6ff;
+  border-color: #dbeafe;
 }
 
-.cog-stat-unit {
-  font-size: 22rpx;
-  color: #6b7280;
-  margin-top: 4rpx;
-}
-
-.cog-diff--pos {
-  color: #fa5151;
-}
-
-.cog-diff--neg {
-  color: #07c160;
-}
-
-.cog-diff--zero {
-  color: #666;
-}
-
-.cog-diff--na {
-  color: #999;
-}
-
-.cog-stat-cell--cost-alert {
-  background: #fff1f2;
+.cog-stat4--nonverified {
+  background: #fef2f2;
   border-color: #fecdd3;
 }
 
-.cog-stat-cell--cost-good {
-  background: #ecfdf5;
-  border-color: #bbf7d0;
+.cog-stat4--meal {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.cog-stat4-cap {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 6rpx;
+  font-weight: 500;
+}
+
+.cog-stat4-val {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #111827;
+  word-break: break-all;
+}
+
+.cog-stat4--outbound .cog-stat4-val { color: #0369a1; }
+.cog-stat4--verified .cog-stat4-val  { color: #2563eb; }
+.cog-stat4--nonverified .cog-stat4-val { color: #dc2626; }
+.cog-stat4--meal .cog-stat4-val      { color: #ea580c; }
+
+.cog-stat4-sub {
+  font-size: 24rpx;
+  font-weight: 400;
+  color: #9ca3af;
+  margin-top: 4rpx;
 }
 
 /* ---------- 关联菜品表 ---------- */
@@ -739,11 +642,6 @@ ec-canvas.cog-util-ec {
   text-align: left;
 }
 
-.cog-td--right {
-  text-align: right;
-}
-
 .min-w-0 {
   min-width: 0;
 }
-

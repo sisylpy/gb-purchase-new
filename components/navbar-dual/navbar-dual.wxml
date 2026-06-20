@@ -7,26 +7,15 @@
     <!-- 左侧条：图标 + 门店 + 设置 -->
     <view class="dual-left-bar">
       <view class="dual-icon" bindtap="onNavTap">
-        <live-pulse wx:if="{{livePulse && !showBack}}" />
         <image
-          wx:elif="{{avatar && !showBack}}"
+        
           class="dual-avatar"
           src="{{avatar}}"
           mode="aspectFill"
         />
-        <image
-          wx:if="{{showBack}}"
-          class="dual-back"
-          src="{{avatar}}"
-          mode="aspectFit"
-        />
+       
       </view>
-      <view class="dual-actions1">
-        <view class="dual-link-hit dual-link-hit--minor" catchtap="onSecondaryTap">
-          <image src="/images/points.png" mode="aspectFill" class="dual-back" />
-        </view>
-        
-      </view>
+    
     </view>
     
     <view class="dual-title-layer">

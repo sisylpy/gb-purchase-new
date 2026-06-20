@@ -1,0 +1,141 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="whithBack">
+  <!-- <view class="top_bar flex-row " style="padding-top: {{navBarHeight}}rpx;">
+    <image src="../../../../images/back.png" class="back_icon" bindtap="toBack"></image>
+    <view class="flex-column">
+      <text class="top_bar_title">送货单</text>
+    </view>
+  </view> -->
+
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="管理" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+<!--  top -->
+<view class=" flex-row-between pr-10 pl-10 border-bottom-shadow bg-white">
+  <view class="flex-row">
+    <view class="p-20" bindtap="toDatePage">
+      <image src="/images/calender.png" class="icon"></image>
+    </view>
+    <view class="flex-column">
+      <view class="flex-row" wx:if="{{startDate == stopDate}}">
+        <view class=" small"> {{tool.transferDateString(startDate)}}</view>
+
+      </view>
+      <view class="flex-row" wx:else>
+        <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        <text class="p-10">-</text>
+        <view class=" small" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+      </view>
+    </view>
+  </view>
+  <view class="flex-row p-20" bindtap="toMyDate">
+    <image src="{{searchDepIds == -1 ? '/images/filter.png' : '../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+  </view>
+</view>
+
+<block wx:if="{{deliveryBillArr.length > 0}}">
+          <view class="flex-column liziBack big_full_padding ">
+            <text class="small gray">账款总额</text>
+            <view class="flex-row-between">
+              <view class="flex-column">
+                <view class="flex-row">
+                <text class="excreambig mr-20">{{total}}</text> <text class="small">元</text>
+              </view>
+              <view>
+                未结账单{{count}}个
+              </view>
+              </view>
+             
+              <view class="mainBack settleBtn" bindtap="toSettleBills">结账</view>
+            </view>
+          </view>
+
+          <view class="flex-column with-l-margin-bottom bg-white" wx:for="{{deliveryBillArr}}" wx:for-item="month" wx:if="{{month.arr.length  > 0 }}">
+             <view class="flex-column p-20 border-bottom font-sl">
+              <view class="flex-row">
+              <text>{{month.month}}月</text>
+            </view> 
+            <view class="flex-row">
+              <view class="flex-row half-row">
+              <text class="mr-10">未结账:</text>
+              <text class="mainColor">{{month.unSubtotal !== null ? month.unSubtotal: '0'}}元</text>
+            </view> 
+            <view class="flex-row half-row">
+              <text class="mr-10">已结账:</text>
+              <text>{{month.haveSubtotal !== null ?  month.haveSubtotal: '0'}}元</text>
+            </view>
+            </view>
+             
+             </view>
+
+            
+            <view class="flex-row-between p-20 border-bottom" wx:for="{{month.arr}}" wx:for-item="item" style="width: {{windowWidth - 40}}rpx; " hover-class="hover" bindtap="openDeliveryDetail" data-id="{{item.gbDepartmentBillId}}" data-depid="{{item.gbDepartmentEntity.gbDepartmentId}}">
+            <view class="flex-column" style=" width: {{windowWidth - 300}}rpx;">
+              <view class="flex-row font-sl">
+                <text class="mr-10">{{tool.transferDateString(item.gbDbDate)}}</text>
+                <text>{{item.gbDbWeek}}</text>
+              </view>
+              <view class="flex-row ">
+                <text>{{item.gbDepartmentEntity.gbDepartmentName}}</text>
+              </view>
+
+
+
+            </view>
+
+            <view class="flex-row with-mr-20">
+              <view class="flex-column">
+
+                <view class="flex-row-between">
+                  <view></view>
+                  <view class="flex-column">
+                    <view class="flex-row">
+                      <text class="big ">{{item.gbDbTotal}}</text>
+                      <text class="small">元</text>
+                    </view>
+                  </view>
+                </view>
+
+
+
+                <view class="flex-row-between">
+                  <view></view>
+                  <view class="font-xs">
+                    <block wx:if="{{disInfo.gbDistributerBusinessType == 10}}">
+                      <text wx:if="{{item.gbDbStatus == 0}}" class="confirmBillColor">待核对价格</text>
+                      <text wx:elif="{{item.gbDbStatus == 1}}" class=" confirmPriceColor">待核对价格</text>
+                      <text wx:elif="{{item.gbDbStatus == 2}}" class=" confirmSettleColor">待结算</text>
+                      <text wx:elif="{{item.gbDbStatus == 3}}" class=" mainColor">结算完成</text>
+                    </block>
+                    <block wx:else>
+                      <text wx:if="{{item.gbDbStatus < 4}}" class=" mainColor">待结算</text>
+                      <text wx:else class=" gray">已结账</text>
+
+                    </block>
+
+                  </view>
+                </view>
+              </view>
+              <view>
+                <image src="../../../../images/arrow-right-3.png" class="icon pr-10 pl-10"></image>
+              </view>
+            </view>
+          </view>
+          </view>
+
+           <view class="with_bottom_padding">
+             
+           </view>
+         
+        </block>
+        <view wx:else style="height:{{windowHeight - 480 - navBarHeight}}rpx; ">
+          <view class="empty_View center-content">
+            <image class="empty_image_2" src="../../../images/file-empty.png"></image>
+            <text class="font-lg">暂无送货单</text>
+          </view>
+        </view>
+
+
+
+</view>

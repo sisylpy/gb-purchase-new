@@ -2,3 +2,16 @@
 .quarter-row {
   width: 25%;
 }
+
+.current-tag {
+  font-size: 22rpx;
+  color: #5ab464;
+  background: rgba(90, 180, 100, 0.1);
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+}
+
+.flex-1 {
+  flex: 1;
+}

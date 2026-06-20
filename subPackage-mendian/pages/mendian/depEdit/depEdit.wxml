@@ -18,7 +18,7 @@
         <view  class="flex-row-between  p-10 border-bottom" wx:for="{{depInfo.gbDepartmentUserEntities}}" wx:for-item="user"  style="width: {{windowWidth - 80}}rpx;">
          <view class="flex-row font-lg">
           <text class="mr-20">{{index + 1}}.</text>
-          <image src="{{url + user.gbDuWxAvartraUrl}}" mode="aspectFill" class="itemPic mr-30"/>
+          <image src="{{url + user.gbDuWxAvartraUrl}}" mode="aspectFill" class="icon mr-30"/>
              <text class="font-sl mr-30">{{user.gbDuWxNickName}}</text>
              <text wx:if="{{depInfo.gbDepartmentEntityList.length  > 0}}">{{user.gbDepartmentEntity.gbDepartmentName}}</text>
          </view>

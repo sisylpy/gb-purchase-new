@@ -51,90 +51,63 @@
 }
 .wner-empty-text { font-size: 26rpx; color: #bbb; }
 
-/* ========== 表格 ========== */
-.wner-table {
-  margin-top: 20rpx;
+/* ========== 紧凑行列表 ========== */
+.wner-list {
+  margin-top: 16rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  border: 1rpx solid #f0f0f0;
 }
 
-/* 表头 */
-.wner-thead {
+.wner-row {
   display: flex;
   align-items: center;
-  padding: 10rpx 0 14rpx;
-  border-bottom: 1rpx solid #eee;
-}
-
-.wner-th {
-  font-size: 22rpx;
-  color: #999;
-  font-weight: 400;
-}
-
-.wner-th--goods   { flex: 1; min-width: 0; }
-.wner-th--batch   { width: 100rpx; flex-shrink: 0; text-align: center; }
-.wner-th--stock   { width: 120rpx; flex-shrink: 0; text-align: right; }
-.wner-th--date    { width: 150rpx; flex-shrink: 0; text-align: right; }
-.wner-th--risk    { width: 120rpx; flex-shrink: 0; text-align: center; }
-
-/* 数据行 */
-.wner-tr {
-  display: flex;
-  align-items: center;
-  padding: 18rpx 0;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
   border-bottom: 1rpx solid #f7f7f7;
 }
-.wner-tr:last-child { border-bottom: none; }
 
-.wner-tr--expired {
+.wner-row:last-child {
+  border-bottom: none;
+}
+
+.wner-row--expired {
   background: #fef5f5;
-  margin: 0 -12rpx;
-  padding-left: 12rpx;
-  padding-right: 12rpx;
-  border-radius: 6rpx;
 }
 
-.wner-tr--due-today {
+.wner-row--due-today {
   background: #fffdf5;
-  margin: 0 -12rpx;
-  padding-left: 12rpx;
-  padding-right: 12rpx;
-  border-radius: 6rpx;
 }
 
-/* 单元格 */
-.wner-td {
+.wner-row-name {
   font-size: 26rpx;
   color: #1a1a1a;
-  line-height: 1.4;
-}
-
-.wner-td--goods {
-  flex: 1;
-  min-width: 0;
+  font-weight: 500;
+  flex-shrink: 0;
+  max-width: 180rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.wner-row-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.wner-row-batch {
+  font-size: 22rpx;
+  color: #aaa;
+}
+
+.wner-row-stock {
+  font-size: 26rpx;
+  color: #333;
   font-weight: 500;
 }
 
-.wner-td--batch {
-  width: 100rpx;
-  flex-shrink: 0;
-  text-align: center;
-  color: #888;
-}
-
-.wner-td--stock {
-  width: 120rpx;
-  flex-shrink: 0;
-  text-align: right;
-  font-weight: 500;
-}
-
-.wner-td--date {
-  width: 150rpx;
-  flex-shrink: 0;
-  text-align: right;
+.wner-row-date {
   font-size: 24rpx;
   color: #555;
 }
@@ -149,19 +122,13 @@
   font-weight: 600;
 }
 
-.wner-td--risk {
-  width: 120rpx;
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-}
-
 /* 风险标签 */
 .wner-risk-tag {
   font-size: 22rpx;
   padding: 4rpx 12rpx;
   border-radius: 16rpx;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .wner-tier--expired {
@@ -194,8 +161,6 @@
   align-items: center;
   gap: 8rpx;
 }
-
-.wner-footer-icon { font-size: 22rpx; }
 
 .wner-footer-text {
   font-size: 22rpx;

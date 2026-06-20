@@ -1,0 +1,599 @@
+
+
+function getAttrName(string){
+  if (string) {
+    var string = string.toString(string);
+    if(string.length > 3){
+
+    string = string.substring(0, 3);
+    string = string + "..."
+    return string;
+    }else{
+      return string;
+    }
+    
+  }
+}
+
+function getDifferentPrice(a){
+  return Math.abs(a);
+
+}
+
+function getAttrDateString(string){
+  if (string) {
+    var string = string.toString(string);
+    var  month = string.substring(5, 7);
+   var monthFirst =  month.substring(0,1);
+   if(monthFirst == '0'){
+     month =  string.substring(6, 7);
+   }
+    var  date = string.substring(8, 10);
+
+    return month + "月" + date + "日";
+    
+  }
+}
+
+
+function getGongli(a,b){
+  var bbb  = a / 1000;
+  return  bbb.toFixed(b);
+}
+
+function getPercent(a, b){
+  var c = ((a/b) * 100).toFixed(1) ;
+  return c;
+}
+function getProfitPercent(a,b){
+  var c =(((b - a) / a) * 100 ).toFixed(1)
+  return c;
+}
+
+
+function getAttrDate(string){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(5, 10);
+  
+    return string; 
+  }
+}
+
+
+function getAttrFullTime(string){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(5, 16);
+    return string; 
+  }
+}
+
+function getAttrString(string, from, long){
+  if (string) {
+    var string = string.toString(string);
+    string = string.substring(from, long);
+    return string; 
+
+  }
+}
+
+
+function transferDateString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = str[1];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    dateString = yue + "月" + ri +"日"
+  }
+  return  dateString ;
+}
+
+function getProducePercent(a,b){
+  if(b !== 0){
+    var  abc = (a / b * 100).toFixed(2);
+    return  abc;
+  }else{
+    return 0;
+  }
+}
+
+
+function getCostTotal(a,b,c){
+  // 将字符串参数转换为数字，处理空值或无效值
+  // WXS 不支持 Number() 函数，使用一元加号操作符
+  var numA = +a || 0;
+  var numB = +b || 0;
+  var numC = +c || 0;
+  
+  // 计算总和
+  var total = numA + numB + numC;
+  
+  // 检查是否为有效数字
+  if (isNaN(total)) {
+    return '0.0';
+  }
+  
+  var rounded = Math.round(total * 100) / 100;
+  
+  // 转换为字符串并确保有一位小数
+  var str = rounded.toString();
+  var dotIndex = str.indexOf('.');
+  
+  if (dotIndex === -1) {
+    // 没有小数点，添加 .0
+    str = str + '.0';
+  } else if (dotIndex === str.length - 2) {
+    // 已经是一位小数，不需要添加
+  } else if (dotIndex === str.length - 1) {
+    // 只有小数点，添加0
+    str = str + '0';
+  }
+  
+  return str;
+}
+
+function transferDateTimeString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var time = str[1].split(" ");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = time[0];
+    var clock = time[1];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    colock = Number(clock)
+    dateString = yue + "月" + ri +"日" + " " + clock
+  }
+  return  dateString ;
+}
+
+
+function transferFullTimeString(date){
+  date =  date.substring(0, 10);
+  var str =  date.split("-");
+  var dateString = ""
+    var nian = str[0];
+    var yue = str[1];
+    var ri = str[2];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    dateString = nian + "年" +  yue + "月" + ri +"日" 
+  
+  return  dateString ;
+}
+
+
+function getCompareTime(startTime, endTime){
+  if(startTime && endTime){
+ var  endTimeFormat =endTime.replace(getRegExp('-','g'),'/');
+  var endTimeDown = Date.parse(getDate(endTimeFormat)); 
+  var  startTimeFormat =startTime.replace(getRegExp('-','g'),'/');
+  var startTimeDown = Date.parse(getDate(startTimeFormat)); 
+  var  thisResult =  endTimeDown -  startTimeDown;
+     thisResult =  Math.floor(thisResult / 1000 / 60 / 60)
+  
+  return thisResult;
+
+  }
+  
+}
+
+function getCompareTimeSecond(startTime, endTime){
+  if(startTime && endTime){
+  
+  var  thisResult =  startTime -  endTime;
+     thisResult =  Math.floor(thisResult / 1000 / 60 / 60)
+  return thisResult;
+
+  }
+}
+
+function changeDateStyleDot(dateStr){
+
+  return  dateStr.split("-").join(".");;
+}
+
+// 判断采购批次供货商是否在选择的供货商列表中，返回颜色
+function getSupplierPriceColor(supplierId, selectedSupplierIds) {
+  // 如果供货商ID为-1（没有关联供货商），则不显示特殊颜色
+  if (!supplierId || supplierId === -1 || !selectedSupplierIds || selectedSupplierIds === -1) {
+    return '#333'; // 默认颜色
+  }
+  
+  // 将选择的供货商ID字符串转换为数组
+  var supplierIdArray = selectedSupplierIds.toString().split(',');
+  
+  // 检查当前供货商ID是否在选择的列表中
+  for (var i = 0; i < supplierIdArray.length; i++) {
+    if (supplierIdArray[i] == supplierId) {
+      return '#4CAF50'; // 绿色，表示匹配
+    }
+  }
+  
+  return '#333'; // 默认颜色，表示不匹配
+}
+
+// 判断采购员是否在选择的采购员列表中，返回颜色
+function getPurchaseUserColor(purchaseUserId, selectedPurchaseUserIds) {
+  if (!purchaseUserId || !selectedPurchaseUserIds || selectedPurchaseUserIds === -1) {
+    return '#333'; // 默认颜色
+  }
+  
+  // 将选择的采购员ID字符串转换为数组
+  var purchaseUserIdArray = selectedPurchaseUserIds.toString().split(',');
+  
+  // 检查当前采购员ID是否在选择的列表中
+  for (var i = 0; i < purchaseUserIdArray.length; i++) {
+    if (purchaseUserIdArray[i] == purchaseUserId) {
+      return '#FF6B35'; // 橙色，与采购员筛选器颜色保持一致
+    }
+  }
+  
+  return '#333'; // 默认颜色，表示不匹配
+}
+
+// 判断单价颜色，同时参考供货商和采购员
+function getPriceColor(supplierId, purchaseUserId, selectedSupplierIds, selectedPurchaseUserIds) {
+  var hasSupplierMatch = false;
+  var hasPurchaseUserMatch = false;
+  
+  // 检查供货商是否匹配
+  if (supplierId && supplierId !== -1 && selectedSupplierIds && selectedSupplierIds !== -1) {
+    var supplierIdArray = selectedSupplierIds.toString().split(',');
+    for (var i = 0; i < supplierIdArray.length; i++) {
+      if (supplierIdArray[i] == supplierId) {
+        hasSupplierMatch = true;
+        break;
+      }
+    }
+  }
+  
+  // 检查采购员是否匹配
+  if (purchaseUserId && selectedPurchaseUserIds && selectedPurchaseUserIds !== -1) {
+    var purchaseUserIdArray = selectedPurchaseUserIds.toString().split(',');
+    for (var i = 0; i < purchaseUserIdArray.length; i++) {
+      if (purchaseUserIdArray[i] == purchaseUserId) {
+        hasPurchaseUserMatch = true;
+        break;
+      }
+    }
+  }
+  
+  // 如果供货商ID为-1（没有关联供货商），返回默认色
+  if (supplierId === -1) {
+    return '#333'; // 默认颜色
+  }
+  
+  // 供货商ID有实际值时的逻辑
+  if (hasSupplierMatch && hasPurchaseUserMatch) {
+    return '#9B59B6'; // 紫色，表示供货商和采购员都匹配
+  } else if (hasSupplierMatch) {
+    return '#4CAF50'; // 绿色，表示只有供货商匹配
+  } else if (hasPurchaseUserMatch) {
+    return '#FF6B35'; // 橙色，表示只有采购员匹配
+  } else {
+    return '#333'; // 默认颜色，表示都不匹配
+  }
+}
+
+// 判断供货商是否匹配，返回布尔值
+function isSupplierMatch(supplierId, selectedSupplierIds) {
+  if (!supplierId || !selectedSupplierIds || selectedSupplierIds === -1) {
+    return false;
+  }
+  
+  var supplierIdArray = selectedSupplierIds.toString().split(',');
+  for (var i = 0; i < supplierIdArray.length; i++) {
+    if (supplierIdArray[i] == supplierId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// 判断采购员是否匹配，返回布尔值
+function isPurchaseUserMatch(purchaseUserId, selectedPurchaseUserIds) {
+  if (!purchaseUserId || !selectedPurchaseUserIds || selectedPurchaseUserIds === -1) {
+    return false;
+  }
+  
+  var purchaseUserIdArray = selectedPurchaseUserIds.toString().split(',');
+  for (var i = 0; i < purchaseUserIdArray.length; i++) {
+    if (purchaseUserIdArray[i] == purchaseUserId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
+function getRestTime(endTime, startTime){
+  if(startTime && endTime){
+ var  endTimeFormat =endTime.replace(getRegExp('-','g'),'/');
+  var endTimeDown = Date.parse(getDate(endTimeFormat)); 
+  var  startTimeFormat =startTime.replace(getRegExp('-','g'),'/');
+  var startTimeDown = Date.parse(getDate(startTimeFormat)); 
+  var  thisResult =  endTimeDown -  startTimeDown;
+     thisResult =  Math.floor(thisResult / 1000 / 60 / 60)
+  
+  return thisResult;
+
+  }
+
+  
+}
+
+
+function transferCouponTimeString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var time = str[1].split(" ");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = time[0];
+    var clock = time[1];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    clock =  clock.substring(0,5);
+    colock = Number(clock);
+    dateString = yue + "月" + ri +"日" + " " + clock
+  }
+  return  clock ;
+}
+
+
+function transferCouponDateString(date){
+  date =  date.substring(5);
+  var str =  date.split("-");
+  var time = str[1].split(" ");
+  var dateString = ""
+  if(str.length  == 2){
+    var yue = str[0];
+    var ri = time[0];
+    var clock = time[1];
+    yue  =  Number(yue);
+    ri  = Number(ri);
+    clock =  clock.substring(0,5);
+    colock = Number(clock);
+    dateString = yue + "月" + ri +"日" 
+  }
+  return  dateString ;
+}
+
+// 根据日期字符串计算星期几
+function getWeekDay(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  
+  // 将日期字符串转换为Date对象
+  // 格式: "2025-08-01"
+  var dateFormat = dateString.replace(getRegExp('-','g'),'/');
+  var date = getDate(dateFormat);
+  
+  // 获取星期几 (0-6, 0是星期日)
+  var dayOfWeek = date.getDay();
+  
+  // 转换为中文星期
+  var weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+  
+  return weekDays[dayOfWeek];
+}
+
+// 从日期字符串中提取日期号数
+function getDayNumber(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  
+  // 格式: "2025-08-01" -> 提取 "01"
+  var day = dateString.substring(8, 10);
+  
+  // 去掉前导零，如 "01" -> "1"
+  if (day.charAt(0) === '0') {
+    day = day.charAt(1);
+  }
+  
+  return day;
+}
+
+// 获取月日格式，如 "9月1日"
+function getMonthDay(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  
+  // 格式: "2025-08-01" -> 提取月份和日期
+  var month = dateString.substring(5, 7);
+  var day = dateString.substring(8, 10);
+  
+  // 去掉前导零
+  if (month.charAt(0) === '0') {
+    month = month.charAt(1);
+  }
+  if (day.charAt(0) === '0') {
+    day = day.charAt(1);
+  }
+  
+  return month + '月' + day + '日';
+}
+
+// 获取日期范围
+function getDateRange(rangeType) {
+  if (!rangeType) {
+    return { startDate: '', stopDate: '' };
+  }
+  
+  var today = getDate();
+  var year = today.getFullYear();
+  var month = today.getMonth() + 1; // 0-11 转为 1-12
+  var date = today.getDate();
+  
+  // 格式化日期为 YYYY-MM-DD
+  function formatDate(d) {
+    var y = d.getFullYear();
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    return y + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
+  }
+  
+  var startDate = '';
+  var stopDate = '';
+  
+  switch (rangeType) {
+    case 'today':
+      startDate = stopDate = formatDate(today);
+      break;
+      
+    case 'yesterday':
+      var yesterday = getDate(today.getTime() - 24 * 60 * 60 * 1000);
+      startDate = stopDate = formatDate(yesterday);
+      break;
+      
+    case 'thisWeek':
+      // 获取本周一
+      var dayOfWeek = today.getDay();
+      var daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // 周日为0，需要-6天到周一
+      var thisWeekStart = getDate(today.getTime() + daysToMonday * 24 * 60 * 60 * 1000);
+      startDate = formatDate(thisWeekStart);
+      
+      // 结束时间是今天
+      stopDate = formatDate(today);
+      break;
+      
+    case 'lastWeek':
+      // 获取上周一
+      var dayOfWeek = today.getDay();
+      var daysToLastMonday = dayOfWeek === 0 ? -13 : -6 - dayOfWeek;
+      var lastWeekStart = getDate(today.getTime() + daysToLastMonday * 24 * 60 * 60 * 1000);
+      startDate = formatDate(lastWeekStart);
+      
+      // 获取上周日
+      var lastWeekEnd = getDate(lastWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+      stopDate = formatDate(lastWeekEnd);
+      break;
+      
+    case 'lastSevenDays':
+      // 过去7天（不包括今天）
+      var sevenDaysAgo = getDate(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      startDate = formatDate(sevenDaysAgo);
+      
+      var yesterday = getDate(today.getTime() - 24 * 60 * 60 * 1000);
+      stopDate = formatDate(yesterday);
+      break;
+      
+    case 'thisMonth':
+      // 本月第一天
+      var thisMonthStart = getDate(year + '-' + (month < 10 ? '0' + month : month) + '-01');
+      startDate = formatDate(thisMonthStart);
+      
+      // 结束时间是今天
+      stopDate = formatDate(today);
+      break;
+      
+    case 'lastMonth':
+      // 上月第一天
+      var lastMonth = month === 1 ? 12 : month - 1;
+      var lastYear = month === 1 ? year - 1 : year;
+      var lastMonthStart = getDate(lastYear + '-' + (lastMonth < 10 ? '0' + lastMonth : lastMonth) + '-01');
+      startDate = formatDate(lastMonthStart);
+      
+      // 上月最后一天 - 使用本月第一天减去一天
+      var thisMonthFirst = getDate(year + '-' + (month < 10 ? '0' + month : month) + '-01');
+      var lastMonthEnd = getDate(thisMonthFirst.getTime() - 24 * 60 * 60 * 1000);
+      stopDate = formatDate(lastMonthEnd);
+      break;
+      
+    case 'lastThirtyDays':
+      // 过去30天（不包括今天）
+      var thirtyDaysAgo = getDate(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      startDate = formatDate(thirtyDaysAgo);
+      
+      var yesterday = getDate(today.getTime() - 24 * 60 * 60 * 1000);
+      stopDate = formatDate(yesterday);
+      break;
+      
+    default:
+      startDate = stopDate = '';
+  }
+  
+  // 获取中文名称
+  var chineseName = '';
+  switch (rangeType) {
+    case 'today':
+      chineseName = '今天';
+      break;
+    case 'yesterday':
+      chineseName = '昨天';
+      break;
+    case 'thisWeek':
+      chineseName = '本周';
+      break;
+    case 'lastWeek':
+      chineseName = '上周';
+      break;
+    case 'lastSevenDays':
+      chineseName = '过去7天';
+      break;
+    case 'thisMonth':
+      chineseName = '本月';
+      break;
+    case 'lastMonth':
+      chineseName = '上月';
+      break;
+    case 'lastThirtyDays':
+      chineseName = '过去30天';
+      break;
+    default:
+      chineseName = rangeType;
+  }
+
+  return {
+    startDate: startDate,
+    stopDate: stopDate,
+    name: chineseName
+  };
+}
+
+
+
+
+module.exports = {
+  getGongli:getGongli,
+  getPercent: getPercent,
+  getProfitPercent:getProfitPercent,
+  getAttrName: getAttrName,
+  getAttrDate: getAttrDate,
+  getAttrFullTime: getAttrFullTime,
+  transferDateString: transferDateString,
+  transferDateTimeString: transferDateTimeString,
+  transferFullTimeString: transferFullTimeString,
+  getAttrString: getAttrString,
+  getAttrDateString: getAttrDateString,
+  getProducePercent: getProducePercent,
+  getCompareTime: getCompareTime,
+  getRestTime: getRestTime,
+  getDifferentPrice: getDifferentPrice,
+  changeDateStyleDot: changeDateStyleDot,
+  transferCouponTimeString: transferCouponTimeString,
+  transferCouponDateString: transferCouponDateString,
+  getSupplierPriceColor: getSupplierPriceColor,
+  getPurchaseUserColor: getPurchaseUserColor,
+  getPriceColor: getPriceColor,
+  getCostTotal: getCostTotal,
+  getCompareTimeSecond: getCompareTimeSecond,
+  getWeekDay: getWeekDay,
+  getDayNumber: getDayNumber,
+  getMonthDay: getMonthDay,
+  getDateRange: getDateRange
+
+}

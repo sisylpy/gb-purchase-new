@@ -1,0 +1,458 @@
+/* ===== 页面容器 ===== */
+.dds-page {
+  min-height: 100vh;
+  background: #f5f6f7;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 汇总卡片 ===== */
+.dds-summary {
+  margin: 16rpx 24rpx 0;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.dds-summary-grid {
+  display: flex;
+}
+
+.dds-summary-cell {
+  flex: 1;
+  text-align: center;
+  padding: 8rpx 4rpx;
+}
+
+.dds-summary-label {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.dds-summary-val {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.dds-summary-val--green {
+  color: #52c41a;
+}
+
+.dds-summary-val--orange {
+  color: #fa8c16;
+}
+
+.dds-summary-val--blue {
+  color: #1890ff;
+}
+
+.dds-summary-val--red {
+  color: #e74c3c;
+}
+
+.dds-summary-unit {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: #aaa;
+  margin-left: 4rpx;
+}
+
+/* ===== 图表区域 ===== */
+.dds-chart-section {
+  margin: 16rpx 24rpx 0;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx 16rpx 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.dds-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.dds-chart-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.dds-chart-tabs {
+  display: flex;
+  background: #f5f6f7;
+  border-radius: 8rpx;
+  padding: 4rpx;
+}
+
+.dds-chart-tab {
+  padding: 8rpx 20rpx;
+  font-size: 22rpx;
+  color: #999;
+  border-radius: 6rpx;
+}
+
+.dds-chart-tab--on {
+  background: #1890ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 简易柱状图 */
+.dds-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 240rpx;
+  padding: 0 8rpx;
+}
+
+.dds-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.dds-bar-val-label {
+  font-size: 18rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+  white-space: nowrap;
+}
+
+.dds-bar-col {
+  width: 36rpx;
+  background: linear-gradient(180deg, #69c0ff, #1890ff);
+  border-radius: 6rpx 6rpx 0 0;
+  min-height: 4rpx;
+  transition: height 0.3s ease;
+}
+
+.dds-bar-col--abnormal {
+  background: linear-gradient(180deg, #ff9c6e, #e74c3c);
+}
+
+.dds-bar-date {
+  font-size: 18rpx;
+  color: #bbb;
+  margin-top: 8rpx;
+}
+
+/* ===== 每日列表 ===== */
+.dds-list-section {
+  margin: 16rpx 24rpx 0;
+}
+
+.dds-list-title {
+  padding: 16rpx 4rpx 8rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.dds-day-card {
+  background: #fff;
+  border-radius: 14rpx;
+  margin-bottom: 12rpx;
+  padding: 16rpx 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.03);
+}
+
+/* 日期头部 */
+.dds-day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dds-day-head--abnormal {
+  background: #fff8f0;
+  margin: -16rpx -20rpx 0;
+  padding: 16rpx 20rpx 12rpx;
+  border-radius: 14rpx 14rpx 0 0;
+}
+
+.dds-day-head-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.dds-day-date {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.dds-day-total {
+  font-size: 24rpx;
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.dds-day-head-right {
+  text-align: right;
+}
+
+.dds-day-amount {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fa8c16;
+}
+
+/* 五类标签 */
+.dds-types-row {
+  display: flex;
+  padding: 14rpx 0 10rpx;
+  gap: 10rpx;
+}
+
+.dds-type-tag {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10rpx 4rpx;
+  background: #f8f9fb;
+  border-radius: 8rpx;
+  min-width: 0;
+}
+
+.dds-type-tag--1 {
+  border-left: 3rpx solid #52c41a;
+}
+
+.dds-type-tag--2 {
+  border-left: 3rpx solid #1890ff;
+}
+
+.dds-type-tag--3 {
+  border-left: 3rpx solid #722ed1;
+}
+
+.dds-type-tag--4 {
+  border-left: 3rpx solid #fa8c16;
+}
+
+.dds-type-tag--5 {
+  border-left: 3rpx solid #e74c3c;
+}
+
+.dds-type-name {
+  font-size: 20rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.dds-type-val {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 编辑按钮 */
+.dds-day-actions {
+  padding-top: 10rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.dds-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  padding: 12rpx 0;
+  font-size: 22rpx;
+  color: #1890ff;
+  background: #f0f7ff;
+  border-radius: 8rpx;
+}
+
+.dds-edit-icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+/* ===== 编辑弹窗 ===== */
+.dds-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dds-popup {
+  width: 100%;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: ddsSlideUp 0.25s ease;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@keyframes ddsSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.dds-popup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 28rpx 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dds-popup-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.dds-popup-close {
+  font-size: 44rpx;
+  color: #ccc;
+  padding: 0 8rpx;
+  line-height: 1;
+}
+
+.dds-popup-body {
+  padding: 16rpx 28rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* ===== 编辑弹窗表单 ===== */
+.dds-edit-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+  box-sizing: border-box;
+}
+
+.dds-edit-item:last-child {
+  border-bottom: none;
+}
+
+.dds-edit-type-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.dds-edit-fields {
+  display: flex;
+  gap: 16rpx;
+}
+
+.dds-edit-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.dds-edit-field-hint {
+  font-size: 20rpx;
+  color: #bbb;
+  margin-bottom: 6rpx;
+}
+
+.dds-edit-field-box {
+  display: flex;
+  align-items: center;
+  background: #f5f6f7;
+  border-radius: 8rpx;
+  padding: 4rpx 10rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dds-edit-field-box--disabled {
+  background: #eee;
+}
+
+.dds-edit-field-input {
+  width: 0;
+  flex: 1;
+  height: 56rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  min-width: 0;
+}
+
+.dds-edit-field-unit {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-left: 2rpx;
+  flex-shrink: 0;
+}
+
+.dds-popup-foot {
+  display: flex;
+  gap: 16rpx;
+  padding: 20rpx 28rpx 36rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.dds-popup-btn {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  border-radius: 14rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.dds-popup-btn--cancel {
+  color: #666;
+  background: #f5f6f7;
+}
+
+.dds-popup-btn--confirm {
+  color: #fff;
+  background: #1890ff;
+}
+
+/* ===== 空/加载 ===== */
+.dds-empty {
+  display: flex;
+  justify-content: center;
+  padding: 120rpx 0;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.dds-loading {
+  display: flex;
+  justify-content: center;
+  padding: 80rpx 0;
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ===== 底部安全区 ===== */
+.dds-bottom-safe {
+  height: 40rpx;
+}

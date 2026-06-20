@@ -16,7 +16,7 @@ var saveDisPurGoodsBatchGb = function (data) {
 };
 
 var purUserSaveMendain = function (data) {
-  return requestUtil.post('gbdepartment/purUserSaveMendain', data, { useUrlParams: true });
+  return requestUtil.post('gbdepartment/purUserSaveMendain', data);
 };
 
 var puraserReturnPurGoods = function (data) {
@@ -43,6 +43,10 @@ var deleteDisPurBatchGbItem = function (id) {
   return requestUtil.get('gbdistributerpurchasebatch/deleteDisPurBatchGbItem/' + id);
 };
 
+var deleteDisPurBatchGb = function (batchId) {
+  return requestUtil.get('gbdistributerpurchasebatch/deleteDisPurBatchGb/' + batchId);
+};
+
 var deleteDisPurAndNxDataItem = function (id) {
   return requestUtil.get('gbdistributerpurchasegoods/deleteDisPurAndNxDataItem/' + id);
 };
@@ -57,8 +61,8 @@ var cancleTuihuoByPurGoodsId = function (id) {
 
 // ===== chefOrder 页面需要的 API =====
 
-var updateOrderGbJj = function (data) {
-  return requestUtil.post('gbdepartmentorders/updateOrderGbJj', data);
+var updateOrderGbJj = function (data, options) {
+  return requestUtil.post('gbdepartmentorders/updateOrderGbJj', data, options);
 };
 
 var updateOrderGbJjSx = function (data) {
@@ -73,6 +77,14 @@ var depGetApplyAiByTime = function (id) {
   return requestUtil.get('gbdepartmentorders/depGetApplyAiByTime/' + id);
 };
 
+
+var subDepGetApplyAiByTime = function (id) {
+  return requestUtil.get('gbdepartmentorders/subDepGetApplyAiByTime/' + id);
+};
+
+var subDepGetApplyAiFather = function (id) {
+  return requestUtil.get('gbdepartmentorders/subDepGetApplyAiFather/' + id);
+};
 var depGetApplyAiFather = function (id) {
   return requestUtil.get('gbdepartmentorders/depGetApplyAiFather/' + id);
 };
@@ -377,6 +389,46 @@ var getDisDepartmentGbMendianJing = function (disId) {
   return requestUtil.get('gbdepartment/getDisDepartmentGbMendianJing/' + disId);
 };
 
+var saveDepGoodsStockAdjust = function (kind, stock) {
+  return requestUtil.post('gbdepartmentdisgoods/saveDepGoodsStockAdjust', {
+    kind: kind,
+    stock: stock,
+  });
+};
+
+var getDepGoodsBusiness = function (data) {
+  return requestUtil.post(
+    'gbdepartmentgoodsstock/getDepGoodsBusiness',
+    {
+      depGoodsId: data.depGoodsId,
+      startDate: data.startDate,
+      stopDate: data.stopDate,
+    },
+    { useUrlParams: true }
+  );
+};
+
+var deleteReduceItem = function (id) {
+  return requestUtil.get('gbdepartmentgoodsstockreduce/deleteReduceItem/' + id);
+};
+
+var deleteReduceAttachment = function (attachId) {
+  return requestUtil.get('gbdepartmentgoodsstockreduceattachment/delAttem/' + attachId);
+};
+
+var supplierGetStars = function (data) {
+  return requestUtil.post(
+    'gbdepartmentgoodsstock/supplierGetStars',
+    {
+      supplierId: data.supplierId,
+      goodsId: data.goodsId,
+      startDate: data.startDate,
+      stopDate: data.stopDate,
+    },
+    { useUrlParams: true }
+  );
+};
+
 module.exports = {
   getStorePurchaseGoodsGbWithTabCount: getStorePurchaseGoodsGbWithTabCount,
   saveDisPurGoodsBatchGb: saveDisPurGoodsBatchGb,
@@ -387,6 +439,7 @@ module.exports = {
   storeGetBuyingGoodsGb: storeGetBuyingGoodsGb,
   jingjingGetBuyingGoodsGbWithNx: jingjingGetBuyingGoodsGbWithNx,
   deleteDisPurBatchGbItem: deleteDisPurBatchGbItem,
+  deleteDisPurBatchGb: deleteDisPurBatchGb,
   deleteDisPurAndNxDataItem: deleteDisPurAndNxDataItem,
   addAutoOrderGoods: addAutoOrderGoods,
   cancleTuihuoByPurGoodsId: cancleTuihuoByPurGoodsId,
@@ -395,7 +448,9 @@ module.exports = {
   updateOrderGbJjSx: updateOrderGbJjSx,
   deleteOrderGb: deleteOrderGb,
   depGetApplyAiByTime: depGetApplyAiByTime,
+  subDepGetApplyAiByTime: subDepGetApplyAiByTime,
   depGetApplyAiFather: depGetApplyAiFather,
+  subDepGetApplyAiFather: subDepGetApplyAiFather,
   depReceiveStock: depReceiveStock,
   depSearchTodayOrders: depSearchTodayOrders,
   gbDisSaveStandard: gbDisSaveStandard,
@@ -464,4 +519,9 @@ module.exports = {
   finishPayPurchaseBatchGb: finishPayPurchaseBatchGb,
   /** 集团门店列表（首页切换门店） */
   getDisDepartmentGbMendianJing: getDisDepartmentGbMendianJing,
+  saveDepGoodsStockAdjust: saveDepGoodsStockAdjust,
+  getDepGoodsBusiness: getDepGoodsBusiness,
+  deleteReduceItem: deleteReduceItem,
+  deleteReduceAttachment: deleteReduceAttachment,
+  supplierGetStars: supplierGetStars,
 };

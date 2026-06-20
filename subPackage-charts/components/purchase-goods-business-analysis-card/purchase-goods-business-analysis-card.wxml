@@ -1,0 +1,214 @@
+<view class="biz-card biz-pba" wx:if="{{cardData}}">
+
+  <!-- ===== 卡片头部 ===== -->
+  <view class="pba-header">
+    <view class="pba-header-left">
+      <text class="pba-header-icon-text">📊</text>
+      <text class="pba-header-title">采购经营分析</text>
+    </view>
+    <view class="pba-header-right" wx:if="{{_dataAsOfDate}}">
+      <text class="pba-header-date">数据截至：{{_dataAsOfDate}}</text>
+      <text class="pba-header-info">ⓘ</text>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="pba-empty" wx:if="{{_isEmpty}}">
+    <text class="pba-empty-text">{{_emptyReason}}</text>
+  </view>
+
+  <!-- 有数据 -->
+  <block wx:else>
+
+    <!-- ===== 商品信息行 ===== -->
+    <view class="pba-goods-row">
+      <view class="pba-goods-img-wrap">
+        <view class="pba-goods-img-placeholder"></view>
+      </view>
+      <view class="pba-goods-info">
+        <view class="pba-goods-name-row">
+          <text class="pba-goods-name">{{_goodsName}}</text>
+          <text class="pba-tag pba-tag-green" wx:if="{{_dominantSourceLabel}}">{{_dominantSourceLabel}}</text>
+        </view>
+        <text class="pba-goods-query" wx:if="{{_showQueryName}}">用户查询：{{_queryGoodsName}}</text>
+        <view class="pba-goods-meta">
+          <text class="pba-meta-item">门店：{{_scopeName}}</text>
+          <text class="pba-meta-divider">|</text>
+          <text class="pba-meta-item">日期：{{_timeLabel}}</text>
+        </view>
+      </view>
+      <view class="pba-stock-card" wx:if="{{_hasStock}}">
+        <view class="pba-stock-head">
+          <text class="pba-stock-icon">📦</text>
+          <text class="pba-stock-label">当前库存</text>
+        </view>
+        <view class="pba-stock-value-row">
+          <text class="pba-stock-num">{{_currentStockQty}}</text>
+          <text class="pba-stock-unit" wx:if="{{_stockUnit}}">{{_stockUnit}}</text>
+        </view>
+        <text class="pba-stock-date" wx:if="{{_stockAsOfDate}}">截至 {{_stockAsOfDate}}</text>
+      </view>
+    </view>
+
+    <!-- ===== 三列核心指标 ===== -->
+    <view class="pba-metrics-row">
+      <!-- 采购量 -->
+      <view class="pba-metric-col">
+        <view class="pba-metric-icon-wrap pba-icon-green">
+          <text class="pba-metric-icon">🛒</text>
+        </view>
+        <view class="pba-metric-body">
+          <text class="pba-metric-label">采购量</text>
+          <view class="pba-metric-value-row">
+            <text class="pba-metric-value pba-val-green">{{_totalQuantity}}</text>
+            <text class="pba-metric-unit" wx:if="{{_stockUnit}}">{{_stockUnit}}</text>
+          </view>
+          <text class="pba-metric-sub">{{_totalLineCount}} 次采购</text>
+        </view>
+      </view>
+      <!-- 理论消耗 -->
+      <view class="pba-metric-col">
+        <view class="pba-metric-icon-wrap pba-icon-orange">
+          <text class="pba-metric-icon">📈</text>
+        </view>
+        <view class="pba-metric-body">
+          <text class="pba-metric-label">理论消耗</text>
+          <view class="pba-metric-value-row">
+            <text class="pba-metric-value pba-val-orange">{{_theoryQtyDisplay}}</text>
+            <text class="pba-metric-unit" wx:if="{{_stockUnit}}">{{_stockUnit}}</text>
+          </view>
+        </view>
+      </view>
+      <!-- 库存可支撑 -->
+      <view class="pba-metric-col">
+        <view class="pba-metric-icon-wrap pba-icon-purple">
+          <text class="pba-metric-icon">🕐</text>
+        </view>
+        <view class="pba-metric-body">
+          <text class="pba-metric-label">库存可支撑</text>
+          <view class="pba-metric-value-row">
+            <text class="pba-metric-value pba-val-purple">{{_coverDaysDisplay}}</text>
+            <text class="pba-metric-unit" wx:if="{{_hasCoverDays}}">天</text>
+          </view>
+          <text class="pba-metric-sub" wx:if="{{_firstImpactedDishName}}">影响菜品：{{_firstImpactedDishName}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 双面板 ===== -->
+    <view class="pba-panels-row">
+      <!-- 左面板：采购来源 -->
+      <view class="pba-panel pba-panel-left">
+        <view class="pba-panel-head">
+          <text class="pba-panel-icon">🛍️</text>
+          <text class="pba-panel-title">采购来源</text>
+          <text class="pba-tag pba-tag-green-sm" wx:if="{{_dominantSourceLabel}}">{{_dominantSourceLabel}}</text>
+        </view>
+        <view class="pba-source-row">
+          <view class="pba-source-item">
+            <text class="pba-source-name">自采金额</text>
+            <text class="pba-source-val pba-src-green">￥{{_selfAmt}}</text>
+          </view>
+          <view class="pba-source-item">
+            <text class="pba-source-name">供货商采购</text>
+            <text class="pba-source-val pba-src-orange">￥{{_supplierAmt}}</text>
+          </view>
+          <view class="pba-source-item">
+            <text class="pba-source-name">其他采购</text>
+            <text class="pba-source-val pba-src-gray">￥{{_otherAmt}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 右面板：用量匹配 -->
+      <view class="pba-panel pba-panel-right">
+        <view class="pba-panel-head">
+          <text class="pba-panel-icon">⚖️</text>
+          <text class="pba-panel-title">用量匹配</text>
+        </view>
+        <view class="pba-match-row">
+          <view class="pba-match-item">
+            <text class="pba-match-name">实际采购</text>
+            <text class="pba-match-val pba-mat-blue">{{_matchTotalQtyDisplay}}</text>
+          </view>
+          <view class="pba-match-item">
+            <text class="pba-match-name">理论消耗</text>
+            <text class="pba-match-val pba-mat-dark">{{_matchTheoryQtyDisplay}}</text>
+          </view>
+          <view class="pba-match-item">
+            <text class="pba-match-name">采购/理论</text>
+            <view class="pba-match-ratio-row">
+              <text class="pba-match-val pba-mat-red">{{_ratioDisplay}}</text>
+              <text class="pba-tag pba-tag-red-sm" wx:if="{{_ratioTagHigh}}">采购偏高</text>
+              <text class="pba-tag pba-tag-blue-sm" wx:if="{{_ratioTagLow}}">采购偏低</text>
+              <text class="pba-tag pba-tag-green-sm" wx:if="{{_ratioTagNormal}}">基本合理</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 关联菜品表格 ===== -->
+    <view class="pba-dish-section" wx:if="{{_hasDishRows}}">
+      <view class="pba-section-head">
+        <text class="pba-section-icon">🔗</text>
+        <text class="pba-section-title">关联菜品</text>
+      </view>
+      <!-- 表头 -->
+      <view class="pba-table-head">
+        <text class="pba-th pba-th-dish">菜品名称</text>
+        <text class="pba-th pba-th-recipe">每份用量</text>
+        <text class="pba-th pba-th-sales">周期销量</text>
+        <text class="pba-th pba-th-support">当前库存可做</text>
+        <text class="pba-th pba-th-days">库存支撑天数</text>
+      </view>
+      <!-- 表体 -->
+      <view class="pba-table-body">
+        <view class="pba-tr" wx:for="{{_dishRows}}" wx:key="dishId" wx:for-item="dish">
+          <view class="pba-td pba-td-dish">
+            <view class="pba-dish-avatar">
+              <view class="pba-dish-img-placeholder"></view>
+            </view>
+            <text class="pba-dish-cell-name">{{dish.dishName}}</text>
+          </view>
+          <text class="pba-td pba-td-recipe">{{dish.recipeUnitPerDish}} {{_stockUnit}}</text>
+          <text class="pba-td pba-td-sales">{{dish.salesPortionsInBaseline}} 份</text>
+          <text class="pba-td pba-td-support">{{dish.supportedPortionsFromStock}} 份</text>
+          <text class="pba-td pba-td-days pba-td-days-highlight">{{dish.coverDays}} 天</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 判断信号标签 ===== -->
+    <view class="pba-signal-list" wx:if="{{_hasSignals}}">
+      <!-- WARN 标签 -->
+      <block wx:if="{{_signalWarnList.length > 0}}">
+        <view class="pba-signal-pill pba-signal-warn" wx:for="{{_signalWarnList}}" wx:key="code" wx:for-item="sig">
+          <text class="pba-signal-prefix">⚠️</text>
+          <text class="pba-signal-text">{{sig.label}}</text>
+        </view>
+      </block>
+      <!-- ERROR 标签 -->
+      <block wx:if="{{_signalErrorList.length > 0}}">
+        <view class="pba-signal-pill pba-signal-error" wx:for="{{_signalErrorList}}" wx:key="code" wx:for-item="sig">
+          <text class="pba-signal-prefix">↑</text>
+          <text class="pba-signal-text">{{sig.label}}</text>
+        </view>
+      </block>
+      <!-- INFO 标签 -->
+      <block wx:if="{{_signalInfoList.length > 0}}">
+        <view class="pba-signal-pill pba-signal-info" wx:for="{{_signalInfoList}}" wx:key="code" wx:for-item="sig">
+          <text class="pba-signal-prefix">ℹ️</text>
+          <text class="pba-signal-text">{{sig.label}}</text>
+        </view>
+      </block>
+    </view>
+
+    <!-- ===== 能力边界提示 ===== -->
+    <view class="pba-gap-list" wx:if="{{_hasGaps}}">
+      <text class="pba-gap-item" wx:for="{{_gapLabels}}" wx:key="*this" wx:for-item="gap">💡 {{gap}}</text>
+    </view>
+
+  </block>
+
+</view>

@@ -1,7 +1,24 @@
 {
-  "description": "粮心乐采购管理系统 - 重构版",
+  "description": "京采市场 - 批发市场平台型饭店下单端",
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "value": "docs",
+        "type": "folder"
+      },
+      {
+        "value": "app copy.wxss",
+        "type": "file"
+      },
+      {
+        "value": "CODE_STYLE.md",
+        "type": "file"
+      },
+      {
+        "value": "MIGRATION.md",
+        "type": "file"
+      }
+    ],
     "include": []
   },
   "setting": {

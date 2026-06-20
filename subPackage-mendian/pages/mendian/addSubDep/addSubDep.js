@@ -1,7 +1,7 @@
 const globalData = getApp().globalData;
 
 import apiUrl from '../../../../config/index.js'
-import { saveSubDepartment } from '../../../services/mendian.js'
+import { saveSubDepartment } from '../../../../services/mendian.js'
 
 Page({
 
@@ -30,9 +30,7 @@ Page({
 
 
 bindKeyInput(e){
-  console.log(e);
   if(e.detail.value.length > 0){
-    console.log("valelellelelele", e.detail.value);
     var data  = "depInfo.gbDepartmentName";
     var dataAttr = "depInfo.gbDepartmentPrintName";
     this.setData({
@@ -43,13 +41,14 @@ bindKeyInput(e){
 
 },
 
+
   toSave(){
   
     saveSubDepartment(this.data.depInfo).then(res => {
       if(res.result.code == 0){
-        console.log("disinfofofofoofofoof", res.result.data);
-        wx.setStorageSync('disInfo', res.result.data);
-        // wx.navigateBack({delta : 1});
+        wx.setStorageSync('disInfo', res.result.data.disInfo);
+        wx.setStorageSync('mendianInfo', res.result.data.mendianInfo);
+        wx.navigateBack({delta : 1});
       }
     })
   },

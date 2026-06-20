@@ -225,20 +225,13 @@ page {
   margin-top: 4rpx;
 }
 
-.food-fgf-sum-trend {
-  margin-top: 10rpx;
-  font-size: 20rpx;
+.food-fgf-sum-sub {
+  margin-top: 6rpx;
+  font-size: 22rpx;
   color: #6b7280;
 }
 
-.food-fgf-sum-card--red .food-fgf-sum-trend,
-.food-fgf-sum-card--blue .food-fgf-sum-trend {
-  color: #dc2626;
-}
 
-.food-fgf-sum-card--orange .food-fgf-sum-trend {
-  color: #059669;
-}
 
 /* ========== 列表头 ========== */
 .food-fgf-section-title-row {
@@ -269,106 +262,51 @@ page {
   font-weight: 600;
 }
 
-/* ---------- 排序条（与配料分析 costGoodsFenxi 一致） ---------- */
+/* ---------- 排序条（紧凑三选项） ---------- */
 .cog-sort-wrap {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 12rpx 16rpx 8rpx;
+  padding: 12rpx 16rpx 14rpx;
   background: #fff;
   border-bottom: 1rpx solid #eee;
 }
 
-.cog-sort-left {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-right: 12rpx;
-}
-
-.cog-sort-arrows {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-right: 10rpx;
-  gap: 2rpx;
-}
-
-.cog-sort-arrow {
-  font-size: 30rpx;
-  color: #d1d5db;
-  line-height: 1;
-  font-weight: 700;
-  padding: 0 2rpx;
-}
-
-.cog-sort-arrow.is-on {
-  color: #2563eb;
-}
-
-.cog-sort-label {
-  flex-shrink: 0;
-  font-size: 28rpx;
-  color: #4b5563;
-  font-weight: 500;
-}
-
-.cog-sort-scroll {
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-}
-
-.cog-sort-scroll--row .cog-sort-chips {
-  flex-wrap: wrap;
-}
-
 .cog-sort-chips {
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 4rpx 0 8rpx;
-  gap: 12rpx;
+  gap: 0;
 }
 
 .cog-sort-chip {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
-  padding: 10rpx 18rpx;
+  padding: 10rpx 20rpx;
   border-radius: 999rpx;
   font-size: 26rpx;
   color: #333;
-  background: #fff;
-  border: 1rpx solid #e5e5e5;
-}
-
-.cog-sort-chip-ico {
-  margin-right: 6rpx;
-  font-size: 26rpx;
+  background: #f5f6f8;
 }
 
 .cog-sort-chip.is-on {
   font-weight: 600;
-}
-
-.cog-sort-chip--outbound.is-on {
-  color: #1d4ed8;
-  background: #eff6ff;
-  border-color: #bfdbfe;
-}
-
-.cog-sort-chip--util.is-on {
   color: #059669;
   background: #ecfdf5;
-  border-color: #a7f3d0;
+  border: 1rpx solid #a7f3d0;
 }
 
-.cog-sort-chip--wasteloss.is-on {
-  color: #c2410c;
-  background: #fff7ed;
-  border-color: #fed7aa;
+.cog-sort-chip-arrow {
+  margin-left: 6rpx;
+  font-size: 24rpx;
+  color: inherit;
+}
+
+.cog-sort-sep {
+  font-size: 24rpx;
+  color: #d1d5db;
+  padding: 0 4rpx;
 }
 
 .food-fgf-list {
@@ -500,17 +438,83 @@ page {
   color: #d1d5db;
 }
 
-/* 成本条：实际 / 理论 / 偏差 / 销售额 */
-.food-fgf-cost-strip {
+/* ========== 分区标题栏 + 白色卡片（与 depFoodList 风格统一） ========== */
+.fgf-sec-block {
+  margin-bottom: 16rpx;
+}
+
+.fgf-sec-hd {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 4rpx;
+  margin-bottom: 12rpx;
+}
+
+.fgf-sec-icon {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.fgf-sec-icon--green {
+  background: #ecfdf5;
+}
+
+.fgf-sec-icon-txt {
+  font-size: 24rpx;
+  line-height: 1;
+}
+
+.fgf-sec-tit {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+}
+
+/* 卡片内容区（替代旧 food-fgf-cost-strip） */
+.fgf-sec-card {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  background: #f9fafb;
-  border-radius: 14rpx;
-  border: 1rpx solid #ececec;
-  padding: 16rpx 8rpx;
-  margin-bottom: 12rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx 12rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
 }
+
+.fgf-sec-card--3col .food-fgf-cost-col {
+  flex: 1;
+}
+
+/* 绿色强调文字（成本偏差 / 偏差率 / 成本差额） */
+.fgf-val-green {
+  color: #059669 !important;
+}
+
+.fgf-cap-green {
+  color: #059669 !important;
+  font-weight: 600 !important;
+}
+
+/* 配料区域内的 scroll-view */
+.fgf-ing-scroll {
+  width: 100%;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 8rpx 0 12rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* 成本条：实际 / 理论 / 偏差 / 销售额 */
 
 .food-fgf-cost-col {
   flex: 1;
@@ -763,4 +767,35 @@ page {
 
 .min-w-0 {
   min-width: 0;
+}
+
+/* ========== 展开按钮 ========== */
+.fgf-expand-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 0 16rpx;
+  gap: 8rpx;
+}
+
+.fgf-expand-btn__arrow {
+  font-size: 28rpx;
+  color: #059669;
+  line-height: 1;
+}
+
+.fgf-expand-btn__label {
+  font-size: 26rpx;
+  color: #059669;
+  font-weight: 500;
+}
+
+/* ========== 展开详情面板 ========== */
+.fgf-detail-panel {
+  display: none;
+}
+
+.fgf-detail-panel.is-open {
+  display: block;
 }

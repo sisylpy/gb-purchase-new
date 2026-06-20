@@ -1,0 +1,245 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex-column height-100 ">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="查找商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column" style="margin-top: {{navBarHeight}}rpx;">
+    <view class="flex-column p-20 font-lg bg-white">
+
+      <view class="flex-row">
+        <text class="mr-10">新商品名称:</text>
+        <text>{{applyItem.gbDoGoodsName}}</text>
+      </view>
+
+    </view>
+
+
+
+    <view class="flex-row p-20" style="background-color: #f0f9ff; width: {{windowWidth}}rpx; ">
+      <view class="searchInput flex-row">
+        <input class="" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" style="width:{{windowWidth - 60}}rpx;line-height: 60rpx; height: 60rpx; " placeholder-class="holderClass" bindinput="getString" confirm-type='search' ></input>
+        <view class="" style=" position: absolute; right: 40rpx; z-index: 99999; " bindtap="delSearch" hover-class="hover" wx:if="{{searchString.length > 0}}">
+          <image src="/images/del.png" class="icon pt-20"></image>
+        </view>
+      </view>
+    </view>
+
+    <view class="  flex-column " catchtouchmove='ture' style="height:{{windowHeight - 310}}rpx; width: {{windowWidth}}rpx; background: #FFF;">
+      <view wx:if="{{searchResult || disSearchArr.length > 0}}" style="width:{{windowWidth}}rpx;">
+        <view class='navbarSearch bg-white border-bottom '>
+          <block wx:for="{{tabsSearch}}" wx:for-item="tabsSearch" wx:key="id">
+            <view id="{{index}}" class="navbar-item {{tab1IndexSearch==index?'bar-item-on':''}}" data-index='{{index}}' bindtap='onTab1ClickSearch' hover-class="hover">
+              <view class='navbar-title'>{{tabsSearch.words}}
+                <text>({{tabsSearch.amount}})</text>
+              </view>
+            </view>
+          </block>
+
+          <view class="navbar-slider" style="left: {{sliderLeftSearch}}px; width:{{windowWidth / 4}}rpx; transform: translateX({{sliderOffsetSearch}}px); -webkit-transform: translateX({{sliderOffsetSearch}}px);">
+          </view>
+        </view>
+
+        <swiper style="height: {{windowHeight - 380}}rpx;" bindchange='swiperChangeSearch' current="{{itemIndexSearch}}" data-index='{{itemIndexSearch}}'>
+
+          <!-- depSearchArr -->
+          <swiper-item>
+            <scroll-view scroll-y style="height:{{windowHeight - 420}}rpx;">
+              <!-- empty -->
+              <view class="{{depSearchArr.length == 0  ? 'show' : 'hide'}}" style="height: {{windowHeight - 420}}rpx; text-align:center;">
+                <view class="normal  empty_view">
+                  <view class="flex-column center-content">
+                    <image class="empty_image" src="../../images/cart-Empty.png"></image>
+                    <text class="big">没有搜索到订购商品</text>
+                  </view>
+                </view>
+              </view>
+
+              <!-- ./empty -->
+              <view class="flex-row-default  border-bottom middle p-20 bg-white" wx:for="{{depSearchArr}}" wx:key="gbDepartmentDisGoodsId" wx:for-item="goods" wx:for-index="index">
+
+                <image bindtap="showDialogBtn" data-item="{{goods.gbDistributerGoodsEntity}}" src="{{url + goods.gbDistributerGoodsEntity.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item margin-right" />
+
+                <view class="flex-row" catch:tap="applyGoodsDep" data-order="{{goods.gbDepartmentOrdersEntity}}" data-disgoods="{{goods.gbDistributerGoodsEntity}}" data-index="{{index}}" data-depgoods="{{goods}}" hover-class="hover">
+                  <view class="flex-column " style="width: {{windowWidth - 340}}rpx; ">
+                    <view class="middle five-weight nnnn" style="width: {{windowWidth - 340}}rpx; ">
+                      <text>{{goods.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+                      <block wx:if="{{goods.gbDistributerGoodsEntity.nxDistributerAliasEntities.length > 0}}">
+                        <text wx:for="{{goods.gbDistributerGoodsEntity.gbDistributerAliasEntities}}" wx:for-item="alias">@{{alias.gbDaAliasName}}</text>
+                      </block>
+                    </view>
+
+                    <view class="flex-row small">
+                      <view class="flex-row">
+                        <text class="gray">规格:</text>
+                        <block wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
+                          <view class="" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">
+                            {{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}
+                          </view>
+                        </block>
+
+                        <block wx:else>
+                          <text class="">{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+                        </block>
+                      </view>
+                    </view>
+                    <view class="flex-row font-xs">
+                      <view class="flex-row half-row" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsDetail !== null && goods.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0}}">
+                        <text class="gray">说明:</text>
+                        <text>{{goods.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+                      </view>
+                      <view class="flex-row" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsPlace !== null && goods.gbDistributerGoodsEntity.gbDgGoodsPlace.length > 0}}">
+                        <text>产地:</text>
+                        <text class="">{{goods.gbDistributerGoodsEntity.gbDgGoodsPlace}}</text>
+                      </view>
+                    </view>
+
+                  </view>
+
+
+
+                  <view class="flex-row">
+                    <!-- <view wx:if="{{goods.gbDepartmentOrdersEntity !== null}}" class="flex-row-between middle ">
+                      <view class="flex-row ">
+                        <text class="five-weight his_price  {{goods.gbDepartmentOrdersEntity.gbDoBuyStatus > 1 ? 'is-gray' : ''}}">{{goods.gbDepartmentOrdersEntity.gbDoQuantity}}{{goods.gbDepartmentOrdersEntity.gbDoStandard}}</text>
+                      </view>
+                    </view> -->
+                    <view class="flex-row-between half-row pr-10 pl-10" >
+                      <text></text>
+                      <view class=" pr-10 pl-10">
+                        <!-- <view class="add_btn">
+                          <image src="/images/add-3.png" mode="aspectFill" class="btn_img" />
+                        </view> -->
+                        <view class="sel_btn">
+                            选择
+                          </view>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+
+
+              </view>
+
+              <view class="flex-column center-content" style="margin-top: 100rpx;">
+                <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+                  <text>添加新商品</text>
+                </view>
+              </view>
+
+            </scroll-view>
+          </swiper-item>
+
+
+          <swiper-item>
+            <!-- disSearchArr -->
+
+            <scroll-view scroll-y style="height:{{windowHeight - 420}}rpx;">
+
+              <view class="flex-row-between border-bottom p-20 bg-white" wx:for="{{disSearchArr}}" wx:for-item="sons" wx:for-index="index" wx:key="gbDistributerGoodsId">
+
+                <view class="flex-row-default">
+                  <image bindtap="showDialogBtnNx" data-item="{{sons}}" src="{{sons.nxGoodsFile !== null ? url + sons.nxGoodsFile : '/images/logo.png'}}" mode="aspectFill" class="goods_item margin-right" />
+                  <view class="flex-row" catch:tap="applyGoods" data-order="{{sons.gbDepartmentOrdersEntity}}" data-nxgoods="{{sons}}" data-index="{{index}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}" data-depgoods="{{sons.gbDepartmentDisGoodsEntity}}" hover-class="{{sons.gbDepartmentOrdersEntity == null ? 'hover' :''}}">
+                    <view class="flex-column" style="width: {{windowWidth - 320}}rpx;  ">
+                      <view class="flex-row middle">
+                        <text class=" {{sons.nxGoodsBrand !== null && sons.nxGoodsBrand.length > 0 ? 'brand' : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand.length > 0 ? sons.nxGoodsBrand : ''}}</text>
+                        <text class=" five-weight margin-right">{{sons.nxGoodsName}}</text>
+                        <block wx:if="{{sons.nxDistributerAliasEntities.length > 0}}">
+                          <text class="small" wx:for="{{sons.nxDistributerAliasEntities}}" wx:for-item="alias">@{{alias.nxDaAliasName}}</text>
+                        </block>
+                      </view>
+                      <view class="flex-row small">
+                        <view class="flex-row">
+                          <text class="gray">规格:</text>
+                          <block wx:if="{{sons.nxGoodsStandardWeight.length > 0}}">
+                            <view class="">{{sons.nxGoodsStandardWeight}}/{{sons.nxGoodsStandardname}}
+                            </view>
+                          </block>
+
+                          <block wx:else>
+                            <text class="">{{sons.nxGoodsStandardname}}</text>
+
+                          </block>
+                        </view>
+                      </view>
+
+                      <view class="flex-row small">
+                        <view class="flex-row half-row" wx:if="{{sons.nxGoodsDetail !== null}}">
+                          <text class="gray">说明:</text>
+                          <text>{{sons.nxGoodsDetail}}</text>
+                        </view>
+                      </view>
+                    </view>
+
+                    <view class="flex-row">
+                      <!-- <view class="flex-row " wx:if="{{sons.gbDepartmentOrdersEntity !== null}}">
+                        <text class="five-weight his_price  {{sons.gbDepartmentOrdersEntity.gbDoBuyStatus > 1 ? 'is-gray' : ''}}">{{sons.gbDepartmentOrdersEntity.gbDoQuantity}}{{sons.gbDepartmentOrdersEntity.gbDoStandard}}</text>
+                      </view>
+                      <block wx:else=""> -->
+                        <view class="" style="margin-left: -30rpx;" wx:if="{{sons.gbDistributerGoodsEntity.gbDgPullOff == 1}}">
+                          <view class="font-xs">停止订货</view>
+                        </view>
+
+                        <view class="pr-10 pl-10" wx:else="">
+                          <view class="sel_btn">
+                            选择
+                          </view>
+                        </view>
+                      <!-- </block> -->
+                    </view>
+
+                  </view>
+
+                </view>
+              </view>
+
+              <view class="flex-column center-content" style="margin-top: 100rpx;">
+                <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+                  <text>添加新商品</text>
+                </view>
+              </view>
+
+            </scroll-view>
+          </swiper-item>
+
+        </swiper>
+
+
+      </view>
+
+      <!-- // -->
+
+      <view class="flex-column center-content" style="margin-top: 40rpx;" wx:if="{{disSearchArr.length == 0}}">
+        <view class="flex-row gray p-20">
+          <image class="icon margin-right" src="../../images/a-Nothappy.png"></image>
+          <text class="">没有搜索到商品</text>
+        </view>
+
+        <view class="flex-column center-content" style="margin-top: 100rpx;">
+          <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+            <text>添加新商品</text>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+
+  </view>
+
+
+</view>
+
+
+
+
+<delWarnModal wx:if="{{showPopupWarn}}"  type="{{popupType}}"  warnContent="{{warnContent}}"   bind:closeWarn="onClosePopup" bind:confirmWarn="confirmWarn" />
+
+
+
+<myDismodal show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply"    binddelStandard="delStandard"    bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}"  hasStock="{{hasStock}}"   applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}"  expectPrice="{{expectPrice}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemDis}}"  applyStandardName="{{applyStandardName}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" canSave="{{canSave}}"  />
+
+
+    <myDismodalNx show="{{showNx}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" bindconfirmStandardNx="confirmStandardNx" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" expectPrice="{{expectPrice}}" navBarHeight="{{navBarHeight}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{nxGoods}}"  applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}" windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}" />

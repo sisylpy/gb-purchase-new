@@ -2,9 +2,9 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 
-import * as echarts from '../../../ec-canvas/echarts';
+import * as echarts from '../../../../ec-canvas/echarts';
 
-var dateUtils = require('../../../../utils/dateUtil');
+var dateUtils = require('../../../../lib/dateUtil');
 var chartsApi = require('../../../services/api.js');
 var itemWidth = "";
 var windowWidth  = "";
@@ -198,8 +198,6 @@ this.setData({
     chartsApi.getGoodsReduceWithDayData(data).then(res => {
       if(res.result.code == 0){
         load.hideLoading();
-        console.log(res.result.data)
-        console.log("fenxiprororoor")
         const d = res.result.data || {};
         const aiRaw = d.aiAnalysis || null;
       
@@ -241,16 +239,10 @@ this.setData({
 
         // 初始化图表，添加延迟确保DOM已更新
         setTimeout(() => {
-          console.log('准备初始化图表，当前数据:', {
-            produceList: this.data.produceList,
-            lossList: this.data.lossList,
-            wasteList: this.data.wasteList
-          });
           this.initDailyChart();
           
           // 强制触发图表渲染
           setTimeout(() => {
-            console.log('强制触发图表渲染');
             this.forceChartRender();
           }, 1000); // 增加延迟时间
         }, 500); // 增加延迟时间
@@ -320,7 +312,6 @@ this.setData({
   
 
 
-
   toDatePage() {
     
     this.setData({
@@ -353,18 +344,14 @@ this.setData({
 
   // 点击制作行，显示库存批次
   showOne(e) {
-    console.log('=== showOne 方法被调用 ===');
     const itemIndex = e.currentTarget.dataset.itemIndex;
     const dayIndex = e.currentTarget.dataset.dayIndex;
     const key = `${itemIndex}_${dayIndex}`;
     
-    console.log('showOne 被调用，key:', key);
-    console.log('当前 expandedRows:', this.data.expandedRows);
     
     let expandedRows = { ...this.data.expandedRows };
     // 如果当前行已展开，则关闭；否则展开当前行，保持其他行状态
     if (expandedRows[key]) {
-      console.log('当前行已展开，关闭它');
       // 先设置动画状态为收起
       this.setData({ 
         [`expandedRows.${key}`]: 'collapsing'
@@ -380,20 +367,15 @@ this.setData({
       return;
     }
     
-    console.log('当前行未展开，展开它');
-    console.log('展开前的 expandedRows:', expandedRows);
     // 展开当前行，保持其他行状态
     expandedRows[key] = 'stock';
-    console.log('展开后的 expandedRows:', expandedRows);
     this.setData({ expandedRows });
     
     // 延迟检查设置后的状态
     setTimeout(() => {
-      console.log('设置后的 expandedRows:', this.data.expandedRows);
     }, 100);
 
   },
-
 
 
   toFenxi(e) {
@@ -414,33 +396,22 @@ this.setData({
   },
 
 
-
   // 强制触发图表渲染
   forceChartRender() {
-    console.log('=== 强制渲染图表 ===');
     
     // 尝试重新设置图表配置
     if (this.dailyChart) {
-      console.log('找到图表实例，重新渲染');
-      console.log('当前图表尺寸:', this.dailyChart.getWidth(), 'x', this.dailyChart.getHeight());
       
       const chartData = this.processChartData();
-      console.log('重新处理的数据:', chartData);
       
       const option = this.getChartOption(chartData);
-      console.log('重新生成的配置:', option);
       
       this.dailyChart.setOption(option, true);
-      console.log('图表配置已重新应用');
       
       // 再次检查渲染结果
       setTimeout(() => {
-        console.log('=== 重新渲染后检查 ===');
-        console.log('图表尺寸:', this.dailyChart.getWidth(), 'x', this.dailyChart.getHeight());
-        console.log('图表是否可见:', this.dailyChart.getWidth() > 0 && this.dailyChart.getHeight() > 0);
       }, 200);
     } else {
-      console.log('没有找到图表实例，重新初始化');
       this.initDailyChart();
     }
   },
@@ -461,11 +432,6 @@ this.setData({
     const rawMax = Math.max(maxTotalHeight, maxValue, 0);
     const yAxisMax = rawMax > 0 ? rawMax * 1.2 : 1;
     
-    console.log('=== Y轴范围计算 ===');
-    console.log('单个数据最大值:', maxValue);
-    console.log('堆叠后总高度:', totalHeight);
-    console.log('堆叠后最大高度:', maxTotalHeight);
-    console.log('建议Y轴最大值:', yAxisMax);
     
     const legendData = ['销售', '损耗', '废弃'];
 
@@ -587,14 +553,8 @@ this.setData({
     // 先获取容器尺寸
     const query = wx.createSelectorQuery().in(that);
     query.select('.chart-container').boundingClientRect((rect) => {
-      console.log('=== 容器尺寸检查 ===');
-      console.log('容器尺寸:', rect);
-      console.log('globalData.rpxR:', globalData.rpxR);
       
       that.dailyEchartsComponent.init((canvas, width, height) => {
-        console.log('=== 图表组件初始化 ===');
-        console.log('图表初始化参数:', { width, height });
-        console.log('canvas:', canvas);
         
         // // 强制设置宽度和高度
         const finalWidth = width || (rect ? rect.width * globalData.rpxR : 350);
@@ -611,31 +571,16 @@ this.setData({
           devicePixelRatio: globalData.rpxR
         });
         
-        console.log("=== Chart 初始化完成 ===");
-        console.log("Chart 实例:", Chart);
         
         // 处理数据
         const chartData = that.processChartData();
-        console.log('=== 处理后的图表数据 ===');
-        console.log('chartData:', chartData);
-        console.log('dates 长度:', chartData.dates.length);
-        console.log('produceData 长度:', chartData.produceData.length);
-        console.log('前3个日期:', chartData.dates.slice(0, 3));
-        console.log('前3个销售数据:', chartData.produceData.slice(0, 3));
         
         const option = that.getChartOption(chartData);
-        console.log("=== 图表配置 ===");
-        console.log("option:", option);
-        console.log("series 数量:", option.series ? option.series.length : 0);
         
         Chart.setOption(option);
-        console.log("=== 图表配置已应用 ===");
         
         // 检查图表是否正确渲染
         setTimeout(() => {
-          console.log("=== 图表渲染检查 ===");
-          console.log("图表容器是否可见:", Chart.getWidth(), 'x', Chart.getHeight());
-          console.log("图表数据点数量:", Chart.getOption().series ? Chart.getOption().series[0].data.length : 0);
         }, 100);
         
         // 保存图表实例
@@ -656,25 +601,13 @@ this.setData({
     const lossList = this.data.lossList || [];
     const wasteList = this.data.wasteList || [];
     
-    console.log('处理图表数据 - 原始数据:', {
-      produceList: produceList.slice(0, 3), // 只显示前3条
-      lossList: lossList.slice(0, 3),
-      wasteList: wasteList.slice(0, 3)
-    });
     
     // 详细检查数据结构
-    console.log('=== 数据结构检查 ===');
     if (produceList.length > 0) {
-      console.log('produceList[0] 结构:', produceList[0]);
-      console.log('produceList[0] 所有字段:', Object.keys(produceList[0]));
     }
     if (lossList.length > 0) {
-      console.log('lossList[0] 结构:', lossList[0]);
-      console.log('lossList[0] 所有字段:', Object.keys(lossList[0]));
     }
     if (wasteList.length > 0) {
-      console.log('wasteList[0] 结构:', wasteList[0]);
-      console.log('wasteList[0] 所有字段:', Object.keys(wasteList[0]));
     }
     
     // 特别检查14日的数据
@@ -683,7 +616,6 @@ this.setData({
       loss: lossList.find(item => item.date && item.date.includes('14')),
       waste: wasteList.find(item => item.date && item.date.includes('14'))
     };
-    console.log('14日数据检查:', day14Data);
     
     // 日期仅来自 produce / loss / waste（与每条自带的 yyyy-MM-dd 对齐）
     const allDates = new Set();
@@ -694,7 +626,6 @@ this.setData({
     });
     
     const dates = Array.from(allDates).sort();
-    console.log('提取的日期列表:', dates);
     
     // 创建数据映射
     const produceMap = {};
@@ -735,38 +666,13 @@ this.setData({
       wasteData
     };
     
-    console.log('最终图表数据:', result);
-    console.log('所有销售数据:', produceData);
-    console.log('所有损耗数据:', lossData);
-    console.log('所有废弃数据:', wasteData);
     
     // 特别检查9月18日的数据（图片显示的数据）
     const sep18Index = dates.findIndex(d => d.includes('09-18') || d.includes('9-18'));
-    console.log('9月18日数据检查:', {
-      date: dates[sep18Index],
-      produce: produceData[sep18Index],
-      loss: lossData[sep18Index],
-      waste: wasteData[sep18Index],
-      produceRaw: produceList.find(item => item.date && (item.date.includes('09-18') || item.date.includes('9-18'))),
-      lossRaw: lossList.find(item => item.date && (item.date.includes('09-18') || item.date.includes('9-18'))),
-      wasteRaw: wasteList.find(item => item.date && (item.date.includes('09-18') || item.date.includes('9-18')))
-    });
     
     // 特别检查9月3日和9月4日的数据
     const sep3Index = dates.findIndex(d => d.includes('09-03'));
     const sep4Index = dates.findIndex(d => d.includes('09-04'));
-    console.log('9月3日数据:', {
-      date: dates[sep3Index],
-      produce: produceData[sep3Index],
-      loss: lossData[sep3Index],
-      waste: wasteData[sep3Index]
-    });
-    console.log('9月4日数据:', {
-      date: dates[sep4Index],
-      produce: produceData[sep4Index],
-      loss: lossData[sep4Index],
-      waste: wasteData[sep4Index]
-    });
     
     return result;
   }

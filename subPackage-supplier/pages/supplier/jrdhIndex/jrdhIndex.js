@@ -1,7 +1,7 @@
 const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
-import * as echarts from '../../../../../subPackage-charts/ec-canvas/echarts';
+import * as echarts from '../../../../ec-canvas/echarts';
 
 import apiUrl from '../../../../config/index.js';
 let windowWidth = 0;
@@ -17,14 +17,7 @@ var listValue = "";
 Page({
 
 
-  onShow() {
-    
-    console.log("Athisdadfdddfafais", this.data.isFirstLoadCost);
-    if(this.data.isFirstLoadCost){
-      console.log("isfifiifiifiifiififiififiiffiif")
-      var disInfo = wx.getStorageSync('disInfo');
-      console.log(disInfo);
-      if(disInfo){
+  onShow() {if(this.data.isFirstLoadCost){var disInfo = wx.getStorageSync('disInfo');if(disInfo){
         this.setData({
           disInfo: disInfo,
           disId: disInfo.gbDistributerId
@@ -98,28 +91,20 @@ Page({
 
 
 
-  _getSearchDepIds() {
-    console.log("_getSearchDepIds_getSearchDepIds");
-    var allArr = [];
+  _getSearchDepIds() {var allArr = [];
     var searchDeps = wx.getStorageSync('selMendianDepList');
     if (searchDeps) {
       allArr = allArr.concat(searchDeps);
     }
-    var searchStockDeps = wx.getStorageSync('selStockDepList');
-    console.log("stockckkckckkcckkckckckkckckckckckckckckkc")
-    if (searchStockDeps) {
-      allArr = allArr.concat(searchStockDeps);
-      console.log("sellarrrrrrrrr", allArr);
-    }
+    var searchStockDeps = wx.getStorageSync('selStockDepList');if (searchStockDeps) {
+      allArr = allArr.concat(searchStockDeps);}
 
     var selDepKitchenList = wx.getStorageSync('selKitchenDepList');
     if (selDepKitchenList) {
       allArr = allArr.concat(selDepKitchenList);
     }
 
-    if (allArr.length > 0) {
-      console.log("thisdldeldpdpdplisthisdldeldpdpdplis", allArr);
-      var ids = "";
+    if (allArr.length > 0) {var ids = "";
       for (var j = 0; j < allArr.length; j++) {
         var id = allArr[j].gbDepartmentId;
         ids = id + "," + ids;
@@ -171,9 +156,7 @@ Page({
   },
 
 
-  onTab1ClickDep(event) {
-    console.log("costcosotsto", event)
-    let index = event.currentTarget.dataset.index;
+  onTab1ClickDep(event) {let index = event.currentTarget.dataset.index;
     this.setData({
       tab1IndexDep: index,
       itemIndexDep: index,
@@ -187,9 +170,7 @@ Page({
         searchDepId: -1
       })
     }
-    const depId = event.currentTarget.dataset.id === "-1" ? "dep_fixed" : `dep_${event.currentTarget.dataset.id}`;
-    console.log("idididiidididii", depId);
-    this.scrollToCenter(depId);
+    const depId = event.currentTarget.dataset.id === "-1" ? "dep_fixed" : `dep_${event.currentTarget.dataset.id}`;this.scrollToCenter(depId);
     this._initCostCataData();
   },
 
@@ -201,9 +182,7 @@ Page({
       query.select(`#${depId}`).boundingClientRect();
       query.select('.nav_dep').boundingClientRect();
       query.select('.nav_dep').scrollOffset();
-      query.exec((res) => {
-        console.log("zahuishsisshisisisiisi", res)
-        if (res[0] && res[1] && res[2]) {
+      query.exec((res) => {if (res[0] && res[1] && res[2]) {
           const item = res[0]; // 目标元素
           const container = res[1]; // scroll-view 容器
           const scrollOffset = res[2].scrollLeft; // 当前的 scrollLeft 值
@@ -223,9 +202,7 @@ Page({
           // 设置 scrollLeft
           this.setData({
             leftWidthDep: scrollLeft
-          });
-          console.log("diidnsxbegbuemsrlllll", this.data.tab1IndexDep, "lefc", this.data.leftWidthDep)
-        } else {
+          });} else {
           console.error(`元素不存在或未渲染: #${depId}`);
         }
       });
@@ -234,15 +211,10 @@ Page({
 
 
   animationfinishDep(event) {
-    console.log("amddddep")
     this.setData({
-      // sliderOffset: this.data.sliderOffsets[event.detail.current],
       tab1IndexDep: event.detail.current,
       itemIndexDep: event.detail.current,
-     
-    })
-
-    console.log("thisdkadiifiaidftiememinss=====", this.data.itemIndexDep)
+    });
     if (event.detail.current > 0) {
       this.setData({
         searchDepId: this.data.searchDepList[event.detail.current - 1].gbDepartmentId,
@@ -258,10 +230,7 @@ Page({
     depId = "dep_fixed";
     }else{
       depId = "dep_" + this.data.searchDepId;
-    }
-
-    console.log("idididiidididii", depId);
-    this.scrollToCenter(depId);
+    }this.scrollToCenter(depId);
 
     this._initCostCataData();
 
@@ -277,12 +246,8 @@ Page({
         disId: this.data.disId,
         searchDepIds: this.data.searchDepIds,
         searchDepId: this.data.searchDepId,
-      }
-      console.log("daadsididiididiididi", data);
-      load.showLoading("获取数据")
-      disGetJrdhBills(data).then(res => {
-        console.log(res.result.data);
-        if (res.result.data.code == 0) {
+      }load.showLoading("获取数据")
+      disGetJrdhBills(data).then(res => {if (res.result.data.code == 0) {
           load.hideLoading();
         
           this.setData({
@@ -294,9 +259,7 @@ Page({
             that.init_echarts_total()
           }
 
-        } else {
-          console.log("-1--1--1-1--1--1-1--1-1--1-1-1")
-          load.hideLoading();
+        } else {load.hideLoading();
           wx.showToast({
             title: res.result.msg,
             icon: 'none'

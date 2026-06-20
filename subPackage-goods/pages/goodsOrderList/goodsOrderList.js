@@ -1,6 +1,6 @@
 const globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
-var dateUtils = require('../../../utils/dateUtil');
+var dateUtils = require('../../../lib/dateUtil.js');
 var goodsApi = require('../../services/api.js');
 
 Page({
@@ -97,9 +97,7 @@ Page({
     goodsApi.getDisGoodsOrderDayJingjinig(data)
       .then(res => {
         if (res.result.code == 0) {
-          load.hideLoading();
-          console.log(res.result.data);
-          this.setData({
+          load.hideLoading();this.setData({
             businessArr: res.result.data,
           })
         } else {

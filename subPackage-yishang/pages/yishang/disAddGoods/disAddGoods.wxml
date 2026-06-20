@@ -1,0 +1,71 @@
+
+
+
+  <view class="flex flex-column ">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="添加临时商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column center-content text-center">
+  <text class="p-20 sub-title mt-10" >临时商品会被系统客服整理正确的商品类别</text>
+  </view>
+  <view class="p-20 flex-row-reverse" >
+      <view class="addBtn {{canSave ? 'is-active' : ''}}" bindtap="saveDisGoods">添加
+      </view>
+
+  </view>
+
+  <view class="flex-column font-lg font-md">
+
+     <view class="flex-row p-20 text-secondary">必填:</view>
+      <view class="flex-column bg-white pt-10">
+        <view class=" flex-row p-30">
+      <view class="flex-row flex-fixed ">
+        <image src="/images/Star.png" mode="aspectFill" class="icon mr-10" />
+        <text class="text-secondary mr-10">商品名称:</text>
+      </view>
+      <input class="inputAddGoods" bindinput="getDisGoodsContent" data-type="0" value="{{goods.gbDgGoodsName}}"></input>
+    </view>
+
+    <view class=" flex-row p-30 mb-20">
+      <view class="flex-row flex-fixed ">
+        <image src="/images/Star.png" mode="aspectFill" class="icon mr-10" />
+        <text class="text-secondary mr-10">商品规格:</text>
+      </view>
+      <input class="inputAddGoods pt-20 pb-20" value="{{goods.gbDgGoodsStandardname}}" bindinput="getDisGoodsContent" data-type="1"></input>
+    </view>
+      </view>
+  
+
+      <view class="flex-row plr-20 mt-10 text-secondary ">选填:</view>
+
+      <view class="flex-column bg-white p-20">
+       <view class="flex-row-default " style="height: 240rpx; margin-top: 40rpx;">
+      <text class="text-secondary mr-10">照片:</text>
+      <view class="flex-column" style="margin-left: 10rpx;">
+
+        <image class='url_item_big' wx:if="{{src.length > 0}}" src="{{src.length > 0 ? src : '/images/photo.png' }}"></image>
+        <image class='url_item_big' wx:else="" src="/images/Photo.png" bind:tap="choiceImg"></image>
+        <view wx:if="{{src.length > 0}}" bindtap="delPic" style="margin-left: 180rpx;margin-top: -200rpx;">
+          <image src="../../../images/del.png" mode="aspectFill" class="icon-lg" />
+        </view>
+      </view>
+    </view>
+
+
+    <view class=" flex-row p-20">
+      <text class="text-secondary flex-fixed mr-10">说明:</text>
+      <input class="inputAddGoods pt-20 pb-20" value="{{goods.gbDgGoodsDetail}}" bindinput="getDisGoodsContent" data-type="5"></input>
+    </view>
+
+    <view class="" style="height: 100rpx;"></view>
+      
+      </view>
+
+    
+
+    <view style="height: 100rpx;"></view>
+
+  </view>
+
+
+
+</view>

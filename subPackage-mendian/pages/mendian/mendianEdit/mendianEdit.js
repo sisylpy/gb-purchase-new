@@ -1,7 +1,7 @@
 const globalData = getApp().globalData;
 
 import apiUrl from '../../../../config/index.js'
-import { updateGroupNameGb } from '../../../services/mendian.js'
+import { updateGroupNameGb } from '../../../../services/mendian.js'
 var load = require('../../../../lib/load.js')
 
 Page({
@@ -30,9 +30,7 @@ Page({
 
 
   bindKeyInput(e) {
-    console.log(e);
     if (e.detail.value.length > 0) {
-      console.log("valelellelelele", e.detail.value);
       var data = "depInfo.gbDepartmentName";
       var dataAttr = "depInfo.gbDepartmentPrintName";
       this.setData({
@@ -115,7 +113,6 @@ Page({
 
 
   confirmWarn() {
-    console.log("de");
     deleteMendian(this.data.depInfo.gbDepartmentId)
       .then(res => {
         if (res.result.code == 0) {
@@ -135,7 +132,6 @@ Page({
             success: function (res) {
               if (res.cancel) {
                 //点击取消
-                console.log("您点击了取消")
 
               } else if (res.confirm) {
                 that.cancle();

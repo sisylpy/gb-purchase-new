@@ -7,12 +7,11 @@ var dateUtils = require('../../../../lib/dateUtil.js');
 
 import {
   depGeFoodBusiness,
-  cancleDownloadFood as apiCancelDownloadDepFood,
  
   menuCategoryDishBusinessList,
-} from '../../../services/apiDistributerFood'
+} from '../../../../services/apiDistributerFood'
 
-import { deleteFood, updateGbFood } from '../../../services/apiDistributerGbFood'
+import { deleteFood, updateGbFood } from '../../../../services/apiDistributerGbFood'
 
 var foodSalesTemplateWx = require('../../../../lib/foodSalesTemplateWx.js');
 
@@ -359,22 +358,9 @@ Page({
   },
 
   onShow() {
-    if (this.data.foodManageMode) {
-      if (this.data.update || this.data.toAdd) {
-        this.setData({ update: false, toAdd: false });
-        this._fetchDishes();
-      }
-      return;
-    }
-    if (this.data.update) {
-      this._syncDatesFromMyDateStorage();
-      this.setData({ update: false });
-      this._initData();
-      return;
-    }
-    if (this.data.toAdd) {
-      this._initData();
-    }
+    this._fetchDishes();
+
+  
   },
 
   onLoad(optons) {
@@ -402,60 +388,19 @@ Page({
         var u = wx.getStorageSync('userInfo');
         did = u && u.gbDuDistributerId;
       }
-      var smode = opts.scopeMode || 'GROUP';
-      var depId = opts.departmentId || null;
+     
       this.setData({
         windowHeight: globalData.windowHeight * globalData.rpxR,
         navBarHeight: globalData.navBarHeight * globalData.rpxR,
-        foodManageMode: true,
         categoryId: String(categoryId),
         categoryName: cname,
         distributerId: did,
-        scopeMode: smode,
-        departmentId: depId,
-        type: opts.type,
-        // 兼容旧字段
-        manageFoodFatherId: String(categoryId),
-        manageFatherName: cname,
-        disId: did,
+        
       });
-      this._fetchDishes();
-      return;
+     
     }
-
-    this.setData({
-      windowWidth: globalData.windowWidth * globalData.rpxR,
-      windowHeight: globalData.windowHeight * globalData.rpxR,
-      statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
-      navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      disId: opts.disId,
-      url: apiUrl.server ,
-      type: opts.type,
-    })
-
-    var value = wx.getStorageSync('disInfo');
-    if (value) {
-      this.setData({
-        disInfo: value,
-      })
-    }
-    var value = wx.getStorageSync('mendianInfo');
-    if (value) {
-      var patch = this._patchSubDepFromMendian(value);
-      this.setData(
-        Object.assign(
-          {
-            mendianInfo: value,
-            depFatherId: value.gbDepartmentId,
-          },
-          patch
-        )
-      );
-    }
-    
-    this._syncDatesFromMyDateStorage();
-
-    this._initData();
+    // this._fetchDishes();
+  
 
   },
 
@@ -517,31 +462,15 @@ Page({
         } else {
           // 接口异常时 fallback 到 mock
           console.warn('[depFoodList] API code != 0, fallback to mock');
-          that._loadMockDishes(categoryId);
         }
       })
       .catch(function (err) {
         load.hideLoading();
         console.error('[depFoodList] API error, fallback to mock:', err);
-        that._loadMockDishes(categoryId);
       });
   },
 
-  /** Mock 数据（仅开发兜底，真实接口接通后不走主链路） */
-  _loadMockDishes(categoryId) {
-    var that = this;
-    setTimeout(function () {
-      var mock = _getMockCategoryDishData(categoryId);
-      var summary = Object.assign({}, mock.summary, {
-        changeClass: _resolveChangeClass(mock.summary.grossMarginRateChange),
-      });
-      var enriched = (mock.dishes || []).map(_enrichDishCard);
-      that.setData({
-        categorySummary: summary,
-        dishes: enriched,
-      });
-    }, 300);
-  },
+  
 
   // ========== 分类菜品经营：筛选 & 排序（走后端接口） ==========
   /** 角色筛选：重新请求接口 */
@@ -593,7 +522,7 @@ Page({
   // ========== 分类菜品经营：底部操作 ==========
 
   addDishFromCategory() {
-    var id = this.data.manageFoodFatherId;
+    var id = this.data.categoryId;
     this.setData({ toAdd: true });
     wx.navigateTo({
       url:
@@ -606,9 +535,7 @@ Page({
 
   onDishEdit(e) {
     var dish = e.currentTarget.dataset.dish;
-    console.log("dis",dish);
     if (!dish) return;
-    // var foodId = _resolveDistributerFoodId(dish);
     wx.navigateTo({
       url: '../addFood/addFood?fatherName=' + this.data.categoryName + '&type=edit&foodId=' + dish.dishId,
     });
@@ -616,11 +543,7 @@ Page({
 
   onDishIngredients(e) {
     var dish = e.currentTarget.dataset.dish;
-    if (!dish) return;
-    // 确保 gbdisFoodGoodsEntities 为数组，避免 addRaw 页渲染异常
-    // if (!Array.isArray(dish.gbdisFoodGoodsEntities)) {
-    //   dish.gbdisFoodGoodsEntities = [];
-    // }
+    
     wx.setStorageSync('Food', dish);
     wx.navigateTo({
       url: '../addRaw/addRaw',
@@ -665,7 +588,6 @@ Page({
   },
 
   deleteFather() {
-    var that = this;
     var categoryId = this.data.categoryId;
     if (!categoryId) {
       wx.showToast({ title: '分类数据异常', icon: 'none' });
@@ -765,160 +687,6 @@ Page({
     this.setData({ showRenamePopup: false });
   },
 
-  _findMendianById(disInfo, fatherId) {
-    var list = (disInfo && disInfo.mendianDepartmentList) || [];
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].gbDepartmentId === fatherId) return list[i];
-    }
-    return null;
-  },
-
-  /** 构建子部门 picker：默认首项不按子部门传参，不预填 subDepId */
-  _patchSubDepFromMendian(mendianInfo) {
-    var subs = mendianInfo && mendianInfo.gbDepartmentEntityList;
-    console.log('[depFoodList] _patchSubDepFromMendian subs.length=', subs ? subs.length : 0, 'subs[0]=', subs && subs[0]);
-    if (!subs || subs.length < 2) {
-      return {
-        subDepPickerRange: [],
-        activeSubDepIndex: 0,
-        activeSubDepId: '',
-        activeSubDepName: '',
-      };
-    }
-    var range = [{ _all: true, gbDepartmentName: '全部（不按子部门）', gbDepartmentId: '' }].concat(subs);
-    return {
-      subDepPickerRange: range,
-      activeSubDepIndex: 0,
-      activeSubDepId: '',
-      activeSubDepName: '',
-    };
-  },
-
-  onSubDepChange(e) {
-    console.log('[depFoodList] onSubDepChange detail=', e && e.detail, 'rangeLen=', (this.data.subDepPickerRange || []).length);
-    var idx = parseInt(e.detail.value, 10);
-    if (isNaN(idx) || idx < 0) {
-      console.warn('[depFoodList] onSubDepChange 无效 idx=', e.detail.value);
-      return;
-    }
-    var range = this.data.subDepPickerRange;
-    if (!range || !range[idx]) {
-      console.warn('[depFoodList] onSubDepChange 无 range[idx] idx=', idx, 'range=', range);
-      return;
-    }
-    var row = range[idx];
-    console.log('[depFoodList] onSubDepChange 选中 idx=', idx, 'row=', row);
-    var patch = { activeSubDepIndex: idx };
-    if (row._all) {
-      patch.activeSubDepId = '';
-      patch.activeSubDepName = '';
-    } else {
-      var id = row.gbDepartmentId;
-      patch.activeSubDepId = id != null && id !== '' ? id : '';
-      patch.activeSubDepName = row.gbDepartmentName != null ? String(row.gbDepartmentName) : '';
-    }
-    console.log('[depFoodList] onSubDepChange patch=', patch);
-    var subIdForReq = patch.activeSubDepId;
-    this.setData(patch, () => {
-      this._initData(subIdForReq);
-    });
-  },
-
-  _syncDatesFromMyDateStorage() {
-    var myDate = wx.getStorageSync('myDate');
-    if (myDate) {
-      var dateRange;
-      if (myDate.name === 'custom') {
-        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-      } else {
-        dateRange = dateUtils.getDateRange(myDate.name);
-      }
-      this.setData({
-        startDate: dateRange.startDate,
-        stopDate: dateRange.stopDate,
-        dateType: myDate.dateType,
-        hanzi: myDate.hanzi || dateRange.name,
-      });
-    } else {
-      this.setData({
-        dateType: 'month',
-        startDate: dateUtils.getFirstDateInMonth(),
-        stopDate: dateUtils.getArriveDate(0),
-        hanzi: "本月",
-      });
-    }
-  },
-
-  _initData(overrideSubDepId) {
-      var data = {
-        startDate: this.data.startDate,
-        stopDate: this.data.stopDate,
-        disId: this.data.disId,
-        depFatherId: this.data.depFatherId,
-        sortBy: this.data.foodSortBy || 'sales',
-        sortOrder: this.data.foodSortOrder || 'desc',
-      };
-      var sid =
-        overrideSubDepId !== undefined
-          ? overrideSubDepId
-          : this.data.activeSubDepId;
-      console.log(
-        '[depFoodList] _initData activeSubDepId(data)=',
-        this.data.activeSubDepId,
-        'overrideSubDepId=',
-        overrideSubDepId,
-        '最终用于请求的 sid=',
-        sid
-      );
-      if (sid != null && sid !== '') {
-        data.subDepId = sid;
-      }
-      load.showLoading("加载菜品经营数据");
-    depGeFoodBusiness(data)
-      .then(res => {
-        console.log("res",res);
-        var api = _normalizeDepGetAllFoodBody(res.result);
-        if (api.code == 0 || api.code === '0') {
-          load.hideLoading();
-          var that = this;
-          that._disposeWeekCharts();
-          var rawList = Array.isArray(api.data) ? api.data : [];
-          var enriched = _enrichFoodRowsForCharts(rawList, api.weekdayLegend);
-          that._foodRowsSource = enriched;
-          var display = _filterFoodRowsByName(enriched, that.data.foodNameSearch);
-          that.setData(
-            {
-              foodRows: display,
-              foodRowsSourceCount: enriched.length,
-              bossColumnHintsZh: api.bossColumnHintsZh,
-              businessInsightSummary: api.businessInsightSummary,
-              scopeOutboundSubtotals: api.scopeOutboundSubtotals,
-              insightStartDate: api.insightStartDate,
-              insightStopDate: api.insightStopDate,
-              scopeDepIds: api.scopeDepIds,
-              weekdayLegend: api.weekdayLegend,
-              foodSortOrder:
-                api.sortOrder === 'asc' || api.sortOrder === 'desc' ? api.sortOrder : that.data.foodSortOrder,
-            },
-            function () {
-              that._initWeekdayCharts();
-            }
-          );
-        } else {
-          load.hideLoading();
-          wx.showToast({
-            title: api.msg || '加载失败',
-            icon: 'none',
-          });
-        }
-      })
-      .catch(function (err) {
-        load.hideLoading();
-        console.error('depGeFoodBusiness', err);
-        wx.showToast({ title: '网络异常', icon: 'none' });
-      });
-
-  },
 
   _applyFoodSearchFilter: function () {
     var that = this;
@@ -1166,62 +934,10 @@ Page({
     });
   },
 
-  onCloseFoodSalesTemplateModal() {
-    this.setData({ showFoodSalesTemplateModal: false });
-  },
-
-  onFoodSalesTemplateStartChange(e) {
-    const value = e.detail.value;
-    const today = dateUtils.getArriveDate(0);
-    let v = value > today ? today : value;
-    const { foodSalesTemplateEndDate: end0 } = this.data;
-    const patch = { foodSalesTemplateStartDate: v };
-    if (end0 && v > end0) {
-      patch.foodSalesTemplateEndDate = v;
-    }
-    this.setData(patch);
-  },
-
-  onFoodSalesTemplateEndChange(e) {
-    const value = e.detail.value;
-    const today = dateUtils.getArriveDate(0);
-    let v = value > today ? today : value;
-    const { foodSalesTemplateStartDate: start0 } = this.data;
-    if (start0 && v < start0) {
-      v = start0;
-    }
-    this.setData({ foodSalesTemplateEndDate: v });
-  },
-
-  onConfirmDownloadFoodSales() {
-    const startDate = this.data.foodSalesTemplateStartDate;
-    const endDate = this.data.foodSalesTemplateEndDate;
-    if (!startDate || !endDate) {
-      wx.showToast({ title: '请选择日期范围', icon: 'none' });
-      return;
-    }
-    if (startDate > endDate) {
-      wx.showToast({ title: '开始日期不能晚于结束日期', icon: 'none' });
-      return;
-    }
-    const today = dateUtils.getArriveDate(0);
-    if (startDate > today || endDate > today) {
-      wx.showToast({ title: '开始/结束日期不能晚于今天', icon: 'none' });
-      return;
-    }
-    this.onCloseFoodSalesTemplateModal();
-    this._downloadFoodSalesTemplateFile(startDate, endDate);
-  },
-
-  _downloadFoodSalesTemplateFile(startDate, endDate) {
-    foodSalesTemplateWx.downloadFoodSalesSmartTemplate(apiUrl.apiUrl, startDate, endDate);
-  },
-
 
 
 
   toDatePage() {
-    console.log("dddfd")
     this.setData({
       update: true
     })
@@ -1302,39 +1018,4 @@ function _costGapClassNumber(v) {
   if (v > 0.5) return 'is-warn';
   if (v < -0.3) return 'is-good';
   return '';
-}
-
-/** Mock 分类菜品数据（等后台接口就绪后替换） */
-function _getMockCategoryDishData(categoryId) {
-  var id = parseInt(categoryId, 10) || 1;
-  var map = {
-    1: {
-      summary: { dishCount: 3, averageGrossMarginRate: '76.4%', salesAmount: '12,090.00', actualProfitAmount: '7,820.77', grossMarginRateChange: '+18.5%' },
-      dishes: [
-        { dishId: 101, dishName: '\u7ea2\u70e7\u8089', imageUrl: '', categoryId: 1, categoryName: '\u70ed\u83dc', currentPrice: '35.00', soldPortionsTotal: 120, salesAmount: '4,200.00', actualGrossMarginRate: '62.5%', theoreticalGrossMarginRate: '65.0%', actualCostPerUnit: '13.13', theoreticalCostPerUnit: '12.25', costGapPerUnit: '0.88', actualProfitAmount: '2,624.40', roleCode: 'STAR', roleName: '\u660e\u661f\u83dc', tags: ['\u70ed\u9500', '\u5229\u6da6\u4f18\u79c0'], businessHint: '\u5b9e\u9645\u6bdb\u5229\u4e0e\u7406\u8bba\u63a5\u8fd1\uff0c\u6210\u672c\u63a7\u5236\u826f\u597d' },
-        { dishId: 102, dishName: '\u7cd6\u918b\u6392\u9aa8', imageUrl: '', categoryId: 1, categoryName: '\u70ed\u83dc', currentPrice: '42.00', soldPortionsTotal: 85, salesAmount: '3,570.00', actualGrossMarginRate: '58.3%', theoreticalGrossMarginRate: '62.0%', actualCostPerUnit: '17.51', theoreticalCostPerUnit: '15.96', costGapPerUnit: '1.55', actualProfitAmount: '2,081.65', roleCode: 'TRAFFIC', roleName: '\u5f15\u6d41\u83dc', tags: ['\u6210\u672c\u5f02\u5e38'], businessHint: '\u5b9e\u9645\u6210\u672c\u9ad8\u4e8e\u7406\u8bba\u6210\u672c\uff0c\u5efa\u8bae\u590d\u6838\u539f\u6599\u635f\u8017\u4e0e\u51fa\u5e93\u8bb0\u5f55' },
-        { dishId: 103, dishName: '\u6e05\u7092\u65f6\u852c', imageUrl: '', categoryId: 1, categoryName: '\u70ed\u83dc', currentPrice: '18.00', soldPortionsTotal: 240, salesAmount: '4,320.00', actualGrossMarginRate: '72.1%', theoreticalGrossMarginRate: '70.0%', actualCostPerUnit: '5.02', theoreticalCostPerUnit: '5.40', costGapPerUnit: '-0.38', actualProfitAmount: '3,114.72', roleCode: 'TRAFFIC', roleName: '\u5f15\u6d41\u83dc', tags: ['\u70ed\u9500'], businessHint: '\u9500\u91cf\u9ad8\u4e14\u5229\u6da6\u5065\u5eb7\uff0c\u9002\u5408\u6301\u7eed\u5f15\u6d41' },
-      ],
-    },
-    4: {
-      summary: { dishCount: 2, averageGrossMarginRate: '48.3%', salesAmount: '840.00', actualProfitAmount: '410.06', grossMarginRateChange: '-11.7%' },
-      dishes: [
-        { dishId: 401, dishName: '\u51c9\u62cc\u9ec4\u74dc', imageUrl: '', categoryId: 4, categoryName: '\u51c9\u83dc', currentPrice: '12.00', soldPortionsTotal: 15, salesAmount: '360.00', actualGrossMarginRate: '45.2%', theoreticalGrossMarginRate: '55.0%', actualCostPerUnit: '6.58', theoreticalCostPerUnit: '5.40', costGapPerUnit: '1.18', actualProfitAmount: '162.72', roleCode: 'TRAFFIC', roleName: '\u5f15\u6d41\u83dc', tags: ['\u6210\u672c\u5f02\u5e38'], businessHint: '\u5b9e\u9645\u6bdb\u5229\u4f4e\u4e8e\u7406\u8bba\u6bdb\u5229\uff0c\u5efa\u8bae\u67e5\u770b\u539f\u6599\u635f\u8017' },
-        { dishId: 402, dishName: '\u76ae\u86cb\u8c46\u8150', imageUrl: '', categoryId: 4, categoryName: '\u51c9\u83dc', currentPrice: '15.00', soldPortionsTotal: 12, salesAmount: '480.00', actualGrossMarginRate: '51.5%', theoreticalGrossMarginRate: '58.0%', actualCostPerUnit: '7.28', theoreticalCostPerUnit: '6.30', costGapPerUnit: '0.97', actualProfitAmount: '247.34', roleCode: 'POTENTIAL', roleName: '\u6f5c\u529b\u83dc', tags: [], businessHint: '\u9500\u91cf\u4f4e\u4f46\u5229\u6da6\u7387\u5c1a\u53ef\uff0c\u53ef\u8003\u8651\u589e\u52a0\u66dd\u5149' },
-      ],
-    },
-    7: {
-      summary: { dishCount: 1, averageGrossMarginRate: '25.1%', salesAmount: '360.00', actualProfitAmount: '90.36', grossMarginRateChange: '-34.7%' },
-      dishes: [
-        { dishId: 701, dishName: '\u8292\u679c\u73ed\u621f', imageUrl: '', categoryId: 7, categoryName: '\u751c\u54c1', currentPrice: '30.00', soldPortionsTotal: 12, salesAmount: '360.00', actualGrossMarginRate: '25.1%', theoreticalGrossMarginRate: '42.0%', actualCostPerUnit: '22.47', theoreticalCostPerUnit: '12.06', costGapPerUnit: '10.41', actualProfitAmount: '90.36', roleCode: 'STAR', roleName: '\u660e\u661f\u83dc', tags: ['\u6210\u672c\u5f02\u5e38'], businessHint: '\u5b9e\u9645\u6bdb\u5229\u7387\u8fdc\u4f4e\u4e8e\u7406\u8bba\u503c\uff0c\u5efa\u8bae\u7d27\u6025\u590d\u6838\u539f\u6599\u635f\u8017\u4e0e\u5b9a\u4ef7' },
-      ],
-    },
-    10: {
-      summary: { dishCount: 1, averageGrossMarginRate: '63.2%', salesAmount: '544.00', actualProfitAmount: '344.00', grossMarginRateChange: '-7.4%' },
-      dishes: [
-        { dishId: 1001, dishName: '\u9999\u714e\u4e09\u6587\u9c7c', imageUrl: '', categoryId: 10, categoryName: '\u9999\u714e', currentPrice: '68.00', soldPortionsTotal: 8, salesAmount: '544.00', actualGrossMarginRate: '63.2%', theoreticalGrossMarginRate: '60.0%', actualCostPerUnit: '25.00', theoreticalCostPerUnit: '27.20', costGapPerUnit: '-2.20', actualProfitAmount: '344.00', roleCode: 'STAR', roleName: '\u660e\u661f\u83dc', tags: ['\u5229\u6da6\u4f18\u79c0'], businessHint: '\u5b9e\u9645\u6bdb\u5229\u9ad8\u4e8e\u7406\u8bba\u6bdb\u5229\uff0c\u6210\u672c\u63a7\u5236\u4f18\u79c0' },
-      ],
-    },
-  };
-  return map[id] || map[1];
 }

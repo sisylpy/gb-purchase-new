@@ -244,21 +244,19 @@ Component({
       }
 
       var onePrice = this.data.item.nxDgWillPrice;
-      var subtotal = (Number(this.data.applyNumber) * Number(onePrice)).toFixed(1);
-      this.setData({
-        // level: 1,
-        applySubtotal: subtotal
-
-      })
-      if(this.data.level == 2 ){
-        var subtotal = (Number(this.data.applyNumber) * Number(this.data.item.nxDgWillPriceTwo)).toFixed(1);
-        this.setData({
-          applySubtotal: subtotal
-
-        })
+      var priceValid = this.data.item.priceValidOne;
+      if (this.data.level == 2) {
+        onePrice = this.data.item.nxDgWillPriceTwo;
+        priceValid = this.data.item.priceValidTwo;
       }
+      var subtotal = priceValid
+        ? (Number(this.data.applyNumber) * Number(onePrice)).toFixed(1)
+        : '待确认';
+      this.setData({
+        applySubtotal: subtotal
+      });
 
-      if(this.data.applySubtotal > 0){
+      if(Number(this.data.applyNumber) > 0){
         this.setData({
           canSave: true,
         })

@@ -1,0 +1,101 @@
+<view class="flex flex-column">
+
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="我的App配送商" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+    <view class="flex-row-reverse bg-white p-20 border-bottom" >
+      <view class="flex-row font-sl" >
+        <view class="flex-row mr-20 p-10"  hover-class="hover" bindtap="toInvite">
+          <image src="../../../../images/jjsh.png" class="icon"></image>
+      <text class="font-xs text-primary">邀请配送商</text>
+    </view>
+    <view class="flex-row margin-left" bindtap="toMarket">
+      <image src="../../../../images/a-CLIENTCOST.png" class="icon mr-10"></image>
+      <text class="">查询配送商</text>
+      </view>
+     </view>
+      
+    </view>
+
+  <view class="flex-column {{nxDisArr.length == 0  ? 'show' : 'hide'}}" style="height: {{windowHeight - 360}}rpx; margin-top:160rpx;">
+    <view class="font-lg">
+      <view class="center-content flex-column">
+        <image class="empty_image" src="../../../../images/xiuxi-2.png"></image>
+        <text class="big">添加固定配送商</text>
+        <text class="small darkgray pb-20 pt-20">适合有稳定供货关系的订货</text>
+      </view>
+    </view>
+  </view>
+
+  
+  <view class="flex-row-default p-20 bg-white border-bottom"   wx:for="{{nxDisArr}}" wx:for-item="dis" >
+    <image class="companyUrl" src="{{url + dis.nxDistributerEntity.nxDistributerImg}}"></image>
+    <view class="flex-row-between" style="width: {{windowWidth - 100}}rpx;  ">
+      <view class="flex-column" style="width: {{windowWidth - 240}}rpx;" >
+        <text class="font-lg five-weight ">{{dis.nxDistributerEntity.nxDistributerName}}</text>
+        <view class="flex-row-default small">
+          <text class="mr-10 flex-fixed text-secondary">地址:</text>
+          <text class="">{{dis.nxDistributerEntity.nxDistributerAddress}}</text>
+        </view>
+        <view class="flex-row font-sm" style="width: {{windowWidth - 160}}rpx; ">
+                <view class="flex-row half-row">
+                  <text class="text-secondary mr-10">未结订单:</text>
+                  <text>{{dis.nxDistributerEntity.billCount}}</text>
+                </view>
+                <view class="flex-row half-row">
+                  <text class="text-secondary mr-10">未结金额:</text>
+                  <text>{{dis.nxDistributerEntity.total}}元</text>
+                </view>
+              </view>
+      </view>
+
+      <view class="button-container-white" bindtap="selNxDis"  data-nxdis="{{dis.nxDistributerEntity}}" hover-class="hover" >
+        <image src="../../../../images/points.png" class="icon"></image>
+      </view>
+    </view>
+
+  </view>
+
+
+</view>
+
+
+
+
+<view class='overlay {{showOperation ? "show" : "hide"}}' catchtouchmove='ture' catchtap="hideMask">
+  <view class="flex-column nnn bg-white" wx:if="{{chooseSize}}" animation='{{animationData}}'>
+
+
+    <view class="p-30  flex-row border-bottom" catch:tap="toMyNxDistributer">
+      <image src="../../../../images/duizhangdanbill.png" class="icon mr-20"></image>
+      <text class="font-md">配送账单</text>
+    </view>
+    <!-- <view class="p-30  flex-row border-bottom" catch:tap="toSupplierGoods">
+      <image src="../../../../images/To_Do.png" class="icon mr-20"></image>
+      <text class="font-md">配送商品</text>
+    </view> -->
+    <view class="p-30  flex-row border-bottom" catch:tap="toSupplierStars">
+      <image src="../../../../images/starGray.png" class="icon mr-20"></image>
+      <text class="font-md">退货</text>
+    </view>
+    <view class="p-30  flex-row border-bottom" catch:tap="toSupplierFenxi">
+      <image src="../../../../images/icon_goods.png" class="icon mr-20"></image>
+      <text class="font-md">配送商品</text>
+    </view>
+    <view class="p-30  flex-row " catch:tap="toDeleteSupplier">
+      <image src="../../../../images/delete.png" class="icon mr-20"></image>
+      <text class="font-md">删除配送商</text>
+    </view>
+
+    <view style="height: 20rpx;"></view>
+
+
+    <!-- <view class="p-20  flex-row" bindtap="">
+			<image src="../../../../../images/person.png" class="icon mr-20"></image>
+			<text class="font-md">换采购员</text>
+		</view> -->
+
+
+
+  </view>
+</view>

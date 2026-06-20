@@ -1,0 +1,6 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "business-card-renderer": "/components/businessCardRenderer/businessCardRenderer"
+  }
+}

@@ -75,6 +75,12 @@
               <view class="font-lg font-bold" style="color: #05c0a7;">{{costTotal}}元</view>
               <view class="font-sl font-bold text-secondary" >本期:{{costTotalPer}}元</view>
             </view>
+            <view class="flex-column font-md" style="margin-top: 12rpx;">
+              <view class="flex-row-between">
+                <view class="font-sl text-secondary">员工餐</view>
+                <view class="font-sl font-bold" style="color: #ff9500;">{{employeeMealCostTotal}}元</view>
+              </view>
+            </view>
             <view class="flex-column font-md">
               <view class="font-sl text-secondary">平均</view>
               <view class="font-lg font-bold" style="color: #05c0a7;">{{costPerDay}}元/天</view>
@@ -164,6 +170,10 @@
                   <view class="flex-row-between mb-8">
                     <text class="font-sl text-secondary">废弃:</text>
                     <text class="font-sl">{{item.wasteTotal}}元</text>
+                  </view>
+                  <view class="flex-row-between mb-8">
+                    <text class="font-sl text-secondary">员工餐:</text>
+                    <text class="font-sl">{{item.employeeMealCostTotal}}元</text>
                   </view>
                   <view class="flex-row-between">
                     <text class="font-md font-bold">合计:</text>

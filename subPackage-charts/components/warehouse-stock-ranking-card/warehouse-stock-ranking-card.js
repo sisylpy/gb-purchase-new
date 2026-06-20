@@ -26,6 +26,21 @@ Component({
       value: null,
       observer: '_onCardDataChange',
     },
+    /** 卡片类型（用于记入工作记录） */
+    cardType: {
+      type: String,
+      value: '',
+    },
+    /** 所属消息 ID */
+    messageId: {
+      type: Number,
+      value: null,
+    },
+    /** 所属 Run ID */
+    runId: {
+      type: Number,
+      value: null,
+    },
   },
 
   data: {
@@ -71,6 +86,7 @@ Component({
         return {
           rank: rankNum,
           goodsName: r.goodsName || '未知商品',
+          goodsId: r.goodsId != null ? r.goodsId : null,
           restAmountTotal: amount,
           restAmountStr: fmtAmount(amount),
           restWeightTotal: weight,
@@ -90,6 +106,24 @@ Component({
       var showAll = !this.data.showAll;
       var rows = this.data.rows;
       this.setData({ showAll: showAll, displayRows: showAll ? rows : rows.slice(0, 5) });
+    },
+
+    /** 行级「记入工作记录」 */
+    onRecordItem: function (e) {
+      var rank = e.currentTarget.dataset.rank;
+      var allRows = this.data.rows;
+      var item = null;
+      for (var i = 0; i < allRows.length; i++) {
+        if (allRows[i].rank === rank) { item = allRows[i]; break; }
+      }
+      if (!item) return;
+      var itemKey = item.goodsId ? 'goodsId:' + item.goodsId : '__CARD__';
+      this.triggerEvent('recordWork', {
+        cardType: this.properties.cardType || 'WAREHOUSE_STOCK_RANKING_CARD',
+        itemKey: itemKey,
+        messageId: this.properties.messageId,
+        runId: this.properties.runId,
+      });
     },
   },
 });

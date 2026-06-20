@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "订货",
+  "usingComponents": {
+    "myDismodalNx": "/components/myDismodalNx/myDismodalNx"
+  }
+}

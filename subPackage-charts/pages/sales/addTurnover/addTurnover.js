@@ -329,7 +329,7 @@ Page({
       gbAiDailyRevenuePlatformFee: parseFloat(this.data.platformFee) || 0,
     }
     
-    api.saveDailyTuxrnover(data).then(res => {
+    api.saveDailyTurnover(data).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
         wx.showToast({ title: '保存成功', icon: 'success' });

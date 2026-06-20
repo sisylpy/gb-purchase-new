@@ -3,7 +3,7 @@
 <view class="flex flex-column">
 
   <!-- 导航栏 -->
-  <navbar title="餐厅画像" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="餐厅画像" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
   <view class="flex-column p-20">
 

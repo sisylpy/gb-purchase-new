@@ -7,8 +7,8 @@ var depOrder = require('../../../../services/depOrder');
 const {
   updateOrderGbJj,
   deleteOrderGb,
-  depGetApplyAiByTime: subDepGetApplyAiByTime,
-  depGetApplyAiFather: subDepGetApplyAiFather,
+  subDepGetApplyAiByTime,
+  subDepGetApplyAiFather,
   depSearchTodayOrders,
   gbDisDeleteStandard: disDeleteStandard,
   depReceiveStock,
@@ -59,7 +59,6 @@ Page({
    const needImmediateRefresh = wx.getStorageSync('needRefreshOrderData');
 
    if (needImmediateRefresh) {
-     console.log("检测到订单数据变更，立即刷新");
      wx.removeStorageSync('needRefreshOrderData'); // 清除标记
 
      if(this.data.showType == 'time'){
@@ -123,13 +122,33 @@ Page({
     this._initDataSub();
   },
 
+  /**
+   * 下拉刷新
+   */
+  onPullDownRefresh() {
+    const refreshTask = this.data.showType === 'time' 
+      ? this._initDataSub() 
+      : this._initDataSubByFather();
+    
+    refreshTask.finally(() => {
+      wx.stopPullDownRefresh();
+    });
+  },
+
 
 
   onNavButtonTap() {
-    console.log("onNavButtonTap")
     wx.navigateTo({
-      url: '../../../../subPackage/pages/mendian/depUserEdit/depUserEdit',
+      url: '/subPackage-mendian/pages/mendian/depUserEdit/depUserEdit',
     })
+  },
+
+  toStoreAnnounce: function () {
+    // 保存当前部门信息，供公告牌页面读取
+    wx.setStorageSync('orderDepInfo', this.data.depInfo);
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/storeAnnouncement/storeAnnouncement?boardType=ORDER_STAFF_DAILY_BOARD',
+    });
   },
 
 
@@ -227,9 +246,8 @@ Page({
    */
   onShareAppMessage: function (options) {
 
-    var path = "subPackage/pages/mendian/depUserRegister/depUserRegister?disId=" + this.data.disId + '&depFatherId=' + this.data.depFatherId + '&depId=' + this.data.depId + '&admin=1';
+    var path = "subPackage/pages/mendian/depUserRegister/depUserRegister?disId=" + this.data.disId + '&depFatherId=' + this.data.depFatherId + '&depId=' + this.data.depId + '&admin=12';
    
-    console.log("分享路径:", path)
 
     return {
       title: "订货员注册", // 默认是小程序的名称(可以写slogan等)
@@ -243,10 +261,9 @@ Page({
   _initDataSub() {
 
     load.showLoading("获取数据中");
-    subDepGetApplyAiByTime(this.data.depInfo.gbDepartmentId)
+    return subDepGetApplyAiByTime(this.data.depInfo.gbDepartmentId)
       .then(res => {
         load.hideLoading();
-        console.log("_initData_initData", res.result.data);
         if (res.result.code == 0) {
 
           // 根据显示模式选择不同的序列号计算方法
@@ -286,18 +303,10 @@ Page({
     return subDepGetApplyAiFather(this.data.depInfo.gbDepartmentId)
       .then(res => {
         load.hideLoading();
-        console.log("_initData_initData", res.result.data);
-        console.log("类目模式数据结构检查:", {
-          arr: res.result.data.arr,
-          arrLength: res.result.data.arr ? res.result.data.arr.length : 0,
-          firstItem: res.result.data.arr && res.result.data.arr.length > 0 ? res.result.data.arr[0] : null
-        });
         if (res.result.code == 0) {
           // 计算全局序号
           const applyArrWithGlobalIndex = this._calculateGlobalOrderIndex(res.result.data.arr);
 
-          console.log('设置 applyArr 数据:', applyArrWithGlobalIndex);
-          console.log('applyArr 长度:', applyArrWithGlobalIndex ? applyArrWithGlobalIndex.length : 0);
           this.setData({
             applyArr: applyArrWithGlobalIndex,
           })
@@ -326,34 +335,15 @@ Page({
     if (!applyArr || !Array.isArray(applyArr)) return applyArr;
 
     let depOrderIndex = 1;
-    console.log('开始计算单部门订单序列号，订单总数:', applyArr.length);
 
     return applyArr.map(father => {
-      console.log('处理 father 项:', father);
-      console.log('father 字段检查:', {
-        nxDfgFatherGoodsName: father.nxDfgFatherGoodsName,
-        gbDfgFatherGoodsName: father.gbDfgFatherGoodsName,
-        gbDistributerGoodsEntities: father.gbDistributerGoodsEntities,
-        nxDistributerGoodsEntities: father.nxDistributerGoodsEntities
-      });
-      console.log('father 所有字段:', Object.keys(father));
       // 兼容不同的数据结构
       const goodsEntities = father.gbDistributerGoodsEntities || father.nxDistributerGoodsEntities;
-      console.log('goodsEntities:', goodsEntities);
       if (goodsEntities && Array.isArray(goodsEntities)) {
-        goodsEntities.forEach((goods, goodsIndex) => {
-          console.log(`goods ${goodsIndex}:`, goods);
-          console.log('goods 字段检查:', {
-            gbDgGoodsName: goods.gbDgGoodsName,
-            gbDepartmentOrdersEntities: goods.gbDepartmentOrdersEntities,
-            nxDepartmentOrdersEntities: goods.nxDepartmentOrdersEntities
-          });
-        });
         goodsEntities.forEach(goods => {
           if (goods.gbDepartmentOrdersEntities && Array.isArray(goods.gbDepartmentOrdersEntities)) {
             goods.gbDepartmentOrdersEntities.forEach(order => {
               order.globalOrderIndex = depOrderIndex++;
-              console.log(`订单 ${depOrderIndex-1}: ${order.gbDistributerGoodsEntity?.gbDgGoodsName || '未知商品'} - 数量: ${order.gbDoQuantity}`);
             });
           }
         });
@@ -367,11 +357,9 @@ Page({
   // 计算多部门订单的部门内序号（每个部门下所有订单合并编号）
   _calculateGlobalOrderIndexForDepArr(depArr) {
     if (!depArr || !Array.isArray(depArr)) return depArr;
-    console.log('开始计算多部门订单序列号，部门总数:', depArr.length);
 
     return depArr.map(dep => {
       let depOrderIndex = 1;
-      console.log(`部门 ${dep.depName} 开始计算订单序列号`);
 
       if (dep.depOrders && Array.isArray(dep.depOrders)) {
         dep.depOrders = dep.depOrders.map(father => {
@@ -382,7 +370,6 @@ Page({
               if (goods.gbDepartmentOrdersEntities && Array.isArray(goods.gbDepartmentOrdersEntities)) {
                 goods.gbDepartmentOrdersEntities.forEach(order => {
                   order.globalOrderIndex = depOrderIndex++;
-                  console.log(`部门 ${dep.depName} 订单 ${depOrderIndex-1}: ${order.gbDistributerGoodsEntity?.gbDgGoodsName || '未知商品'} - 数量: ${order.gbDoQuantity}`);
                 });
               }
             });
@@ -399,11 +386,9 @@ Page({
     if (!applyArr || !Array.isArray(applyArr)) return applyArr;
 
     let orderIndex = 1;
-    console.log('开始计算时间模式订单序列号，订单总数:', applyArr.length);
 
     return applyArr.map(order => {
       order.globalOrderIndex = orderIndex++;
-      console.log(`时间模式订单 ${orderIndex-1}: ${order.gbDistributerGoodsEntity?.gbDgGoodsName || '未知商品'} - 数量: ${order.gbDoQuantity}`);
       return order;
     });
   },
@@ -483,7 +468,6 @@ Page({
       load.hideLoading();
       if (res.result.code == 0) {
         if (this.data.searchArr !== null && this.data.searchValue && this.data.searchValue.trim()) {
-          console.log('[chefOrder] 检测到搜索状态，重新搜索');
           // 如果正在搜索，重新搜索并保持搜索状态
           this.reSearch();
         } else {
@@ -542,8 +526,6 @@ Page({
 
 
   toAddOrder(e) {
-    console.log("toAddOrdertoAddOrderee" , )
-    console.log(e.currentTarget.dataset.type)
     var type = e.currentTarget.dataset.type;
     wx.setStorageSync('orderDepInfo', this.data.depInfo)
     if (type == 'paste') {
@@ -663,7 +645,6 @@ Page({
             }
           }
           
-          console.log('找到的缓存:', { tempOrders, cacheKey, depId: that.data.depId, depFatherId: that.data.depFatherId });
           
           if (tempOrders && tempOrders.length > 0 && cacheKey) {
             // 从缓存中移除被删除的订单
@@ -671,7 +652,6 @@ Page({
               item.gbDepartmentOrdersId !== e.currentTarget.dataset.id
             );
             
-            console.log('删除订单后的剩余订单:', updatedOrders);
             
             if (updatedOrders.length > 0) {
               // 检查是否还有临时订单（-2状态）
@@ -686,19 +666,15 @@ Page({
               if (hasTempOrders) {
                 // 还有临时订单，更新缓存
                 wx.setStorageSync(cacheKey, updatedOrders);
-                console.log(`更新部门缓存 ${cacheKey}，删除订单后剩余:`, updatedOrders.length);
               } else {
                 // 没有临时订单了，清除缓存
                 wx.removeStorageSync(cacheKey);
-                console.log(`清除部门缓存 ${cacheKey} - 删除订单后没有-2状态的订单`);
               }
             } else {
               // 缓存中没有订单了，清除缓存
               wx.removeStorageSync(cacheKey);
-              console.log(`清除部门缓存 ${cacheKey} - 删除订单后缓存为空`);
             }
           } else {
-            console.log('未找到相关的临时订单缓存');
           }
         } catch (error) {
           console.error('更新临时订单缓存失败:', error);
@@ -738,7 +714,6 @@ Page({
         printStandard: this.data.applyItem.gbDistributerGoodsEntity.gbDgGoodsStandardname
       })
     }
-    console.log("thisdaprinfir", this.data.printStandard)
   },
 
   hideMaskGoods() {
@@ -804,9 +779,7 @@ Page({
 
 
   toEditApplyDis(e) {
-    console.log("contoEditApplytoEditApply")
     var applyItem = e.currentTarget.dataset.order;
-    console.log("arritme", e)
     var itemStatus = applyItem.nxDoPurchaseStatus;
     applyItem.disgoods = e.currentTarget.dataset.disgoods;
     if (itemStatus > 2) {
@@ -835,9 +808,7 @@ Page({
         canSave: false,
         priceLevel: e.currentTarget.dataset.order.gbDoCostPriceLevel,
       })
-      console.log("cansaveee", this.data.canSave)
       if (this.data.applyItem.gbDoSubtotal !== null) {
-        console.log("eidididiiidid");
         this.setData({
           applySubtotal: applyItem.gbDoSubtotal + "元"
         })
@@ -888,7 +859,6 @@ Page({
         load.hideLoading();
 
         if (this.data.searchArr !== null && this.data.searchValue && this.data.searchValue.trim()) {
-          console.log('[chefOrder] 检测到搜索状态，重新搜索');
           // 如果正在搜索，重新搜索并保持搜索状态
           this.reSearch();
         } else {
@@ -916,7 +886,6 @@ Page({
 
 
   openOperationLinshi(e) {
-    console.log(e);
     this.setData({
       showOperationLinshi: true,
       applyItem: e.currentTarget.dataset.order,
@@ -926,7 +895,6 @@ Page({
 
 
   toPasteFromGoods1(e) {
-    console.log("toPasteFromGoodstoPasteFromGoods")
     this.hideMaskLinshi();
     wx.navigateTo({
       url: '../paste/paste?depFatherId=' + this.data.depFatherId +
@@ -937,7 +905,6 @@ Page({
 
 
   toPasteFromGoods(e) {
-    console.log("toPasteFromGoodstoPasteFromGoods");
     wx.setStorageSync('applyItem', this.data.applyItem)
     this.hideMaskLinshi();
     wx.navigateTo({
@@ -970,7 +937,6 @@ Page({
   },
 
   onSortByChange(e) {
-    console.log(e);
     const {
       type
     } = e.detail;
@@ -981,7 +947,6 @@ Page({
     })
     if (type === 'time') {
       // TODO: 按时间排序逻辑
-      console.log('页面收到：按时间排序');
         this._initDataSub();
 
     } else if (type === 'category') {
@@ -993,15 +958,12 @@ Page({
 
   onSearchInput(e) {
     const value = e.detail.value;
-    console.log('[chefOrder] 收到输入内容:', value);
-    console.log('[chefOrder] 事件详情:', e);
 
     this.setData({
       searchValue: value
     });
 
     if (!value) {
-      console.log('[chefOrder] 搜索值为空，清空搜索结果');
       this.setData({
         searchArr: null // 改为null，这样搜索蒙版会消失
       });
@@ -1014,15 +976,12 @@ Page({
       depId: this.data.depInfo.gbDepartmentId,
       searchStr: value
     };
-    console.log('[chefOrder] 搜索参数:', data);
 
     depSearchTodayOrders(data).then(res => {
-      console.log('[chefOrder] 搜索API返回:', res);
       if (res.result.code == 0) {
         this.setData({
           searchArr: res.result.data || [], // 确保返回空数组而不是null
         });
-        console.log('[chefOrder] 搜索成功，结果数量:', res.result.data ? res.result.data.length : 0);
       } else {
         console.error('[chefOrder] 搜索失败:', res.result.msg);
         // 搜索失败时也显示空结果
@@ -1041,7 +1000,6 @@ Page({
 
 
   reSearch() {
-    console.log("重新搜索", this.data.searchValue)
     var depId = this.data.depId;
     if (this.data.depHasSubs > 1) {
       depId = -1
@@ -1052,19 +1010,16 @@ Page({
       depId: depId,
       searchStr: this.data.searchValue
     };
-    console.log("搜索参数:", data);
 
     // 同时执行搜索和页面数据更新
     Promise.all([
       depSearchTodayOrders(data),
       this.updatePageData()
     ]).then(([searchRes, pageRes]) => {
-      console.log("搜索API返回:", searchRes);
       if (searchRes.result.code == 0) {
         this.setData({
           searchArr: searchRes.result.data || [], // 确保返回空数组而不是null
         });
-        console.log("搜索成功，结果数量:", searchRes.result.data ? searchRes.result.data.length : 0);
       } else {
         console.error("搜索失败:", searchRes.result.msg);
         // 搜索失败时也显示空结果
@@ -1094,7 +1049,6 @@ Page({
   },
 
   onSearchCancel() {
-    console.log('[chefOrder] 点击取消搜索');
     // 清空搜索结果，恢复原订单列表
     this.setData({
       searchArr: null, // 改为null，这样搜索蒙版会消失
@@ -1111,7 +1065,6 @@ Page({
       if (res.result.code == 0) {
        
         if (this.data.searchArr !== null && this.data.searchValue && this.data.searchValue.trim()) {
-          console.log('[chefOrder] 检测到搜索状态，重新搜索');
           // 如果正在搜索，重新搜索并保持搜索状态
           this.reSearch();}else{
             if(this.data.showType == 'time'){
@@ -1142,7 +1095,6 @@ Page({
 
   onSelectDep(e) {
     const item = e.currentTarget.dataset.item;
-    console.log("切换部门:", item);
 
     // 切换部门逻辑 - 先清理旧数据，再设置新数据
     this.setData({
@@ -1221,9 +1173,7 @@ Page({
           duration: 500
         });
         
-        console.log('滚动到第一个新商品订单位置');
       } else {
-        console.log('未找到新商品订单元素');
       }
     }).exec();
   },
@@ -1241,11 +1191,9 @@ Page({
       success: (res) => {
         if (res.confirm) {
           // 用户确认离开，执行返回操作
-          console.log('用户确认离开页面');
           wx.navigateBack({delta: 1});
         } else {
           // 用户选择继续处理，滚动到第一个新商品订单
-          console.log('用户选择继续处理订单');
           setTimeout(() => {
             this._scrollToFirstNewGoods();
           }, 300); // 延迟300ms确保模态框完全关闭
@@ -1279,7 +1227,6 @@ Page({
         confirmText: '知道了',
         showCancel: false,
         success: (res) => {
-          console.log('用户确认离开页面，有新商品订单未处理');
         }
       });
     }
@@ -1297,7 +1244,6 @@ Page({
           confirmText: '知道了',
           showCancel: false,
           success: (res) => {
-            console.log('用户确认离开页面，有新商品订单未处理');
           }
         });
       }, 100);

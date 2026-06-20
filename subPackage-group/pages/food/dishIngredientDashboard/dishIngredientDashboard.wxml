@@ -187,19 +187,19 @@
             >
               <view class="dga-dev-nums">
                 <text
-                  class="dga-dev-nums__pct {{item.utilization ? utilLv.textClass(item.utilization.level) : utilLv.textClassFromRate(item.utilizationRate)}}"
+                  class="dga-dev-nums__pct {{item.deviance ? utilLv.textClass(item.deviance.level) : utilLv.textClassFromRate(item.devianceRate)}}"
                 >{{item.usageDeviationPercent > 0 ? '+' : ''}}{{item.usageDeviationPercent || '0.00'}}%</text>
                 <text class="dga-dev-nums__arrow" wx:if="{{dga.isPos(item.usageDeviationPercent)}}">↑</text>
                 <text class="dga-dev-nums__arrow is-down" wx:elif="{{dga.isNeg(item.usageDeviationPercent)}}">↓</text>
               </view>
               <text
-                wx:if="{{item.utilization && item.utilization.labelZh}}"
-                class="dga-ing-util-tag {{utilLv.textClass(item.utilization.level)}}"
-              >{{item.utilization.labelZh}}</text>
+                wx:if="{{item.deviance && item.deviance.labelZh}}"
+                class="dga-ing-util-tag {{utilLv.textClass(item.deviance.level)}}"
+              >{{item.deviance.labelZh}}</text>
               <text
-                wx:elif="{{utilLv.labelZhFromRate(item.utilizationRate)}}"
-                class="dga-ing-util-tag {{utilLv.textClassFromRate(item.utilizationRate)}}"
-              >{{utilLv.labelZhFromRate(item.utilizationRate)}}</text>
+                wx:elif="{{utilLv.labelZhFromRate(item.devianceRate)}}"
+                class="dga-ing-util-tag {{utilLv.textClassFromRate(item.devianceRate)}}"
+              >{{utilLv.labelZhFromRate(item.devianceRate)}}</text>
               <text wx:elif="{{item.usageStatus === 'ABNORMAL'}}" class="dga-pill dga-pill--bad">异常</text>
               <text wx:else class="dga-pill dga-pill--ok">正常</text>
             </view>

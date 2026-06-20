@@ -32,10 +32,11 @@
 					<block wx:if="{{item.gbDpgBuyScale !== null && item.gbDpgBuyScale > 0}}">
 						<text class="mr-10">单价:</text>
 						<view class="flex-row">
-							<view class="input-view" style="width: {{windowWidth / 6}}rpx; margin-right: 10rpx;">
-								<input class='input' type='digit' value="{{item.gbDpgBuyScalePrice}}" bindinput="getPurchasePriceScale"
-									bindblur="_checkPrice" hold-keyboard='true' focus="{{foucusPrice}}"></input>
-							</view>
+							<view class="input-view" style="width: {{windowWidth / 3}}rpx; margin-right: 10rpx;">
+									<input class='input' type='digit' value="{{item.gbDpgBuyScalePrice}}" 
+										bindinput="getPurchasePriceScale" bindblur="_checkPrice" focus="{{foucusPrice}}"
+										hold-keyboard='true'></input>
+								</view>
 							<view class="flex-column">
 								<text>元/{{item.gbDpgStandard}}({{item.gbDpgBuyScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
 							</view>
@@ -45,9 +46,10 @@
 					<block wx:else>
 						<text class="mr-10">单价:</text>
 						<view class="flex-row">
-							<view class="input-view" style="width: {{windowWidth / 3}}rpx; margin-right: 10rpx;">
-								<input class='input' type='digit' value="{{item.gbDpgBuyPrice}}" bindinput="getPurchasePrice"
-									bindblur="_checkPrice" hold-keyboard='true' focus="{{foucusPrice}}"></input>
+							<view class="input-view" style="width: {{windowWidth / 3}}rpx; margin-right: 10rpx; ">
+								<input class='input' placeholder-style="font-size: 30rpx" type='digit' value="{{item.gbDpgBuyPrice}}" 
+									bindinput="getPurchasePrice" bindblur="_checkPrice" focus="{{foucusPrice}}"
+									hold-keyboard='true'></input>
 							</view>
 							<text>元/{{priceUnitSuffix ? priceUnitSuffix : item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
 						</view>

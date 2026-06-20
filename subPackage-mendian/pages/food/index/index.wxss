@@ -1,1 +1,316 @@
 @import '../food-common.wxss';
+
+/* ========== 页面整体 ========== */
+.food-menu-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: #f5f6f8;
+}
+
+.food-menu-scroll {
+  flex: 1;
+  height: 0;
+  box-sizing: border-box;
+}
+
+/* ========== 顶部操作区 ========== */
+.food-menu-head--new {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16rpx 24rpx 8rpx;
+  background: transparent;
+  border-bottom: none;
+}
+
+.food-menu-head--new .food-menu-action-btn--cat {
+  padding: 12rpx 28rpx;
+  background: #fff;
+  border: 1rpx solid #4A90D9;
+  border-radius: 999rpx;
+  margin-right: 16rpx;
+}
+
+.food-menu-head--new .food-menu-action-btn__txt {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #4A90D9;
+}
+
+/* ========== 菜单概览卡片 ========== */
+.overview-card {
+  margin: 12rpx 24rpx 20rpx;
+  padding: 28rpx 24rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.overview-card__title {
+  display: block;
+  margin-bottom: 20rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.overview-card__grid {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.overview-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.overview-cell__label {
+  font-size: 24rpx;
+  color: #9aa0a6;
+  margin-bottom: 10rpx;
+}
+
+.overview-cell__value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.overview-cell__change {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.overview-cell__change.is-up {
+  color: #34C759;
+}
+
+.overview-cell__change.is-down {
+  color: #FF3B30;
+}
+
+/* ========== 分类卡片列表 ========== */
+.cat-card-list {
+  padding: 0 24rpx 40rpx;
+}
+
+.cat-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx 24rpx 0;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.cat-card:not(:first-child) {
+  margin-top: 20rpx;
+}
+
+.cat-card--hover {
+  opacity: 0.92;
+}
+
+/* 上半部分 */
+.cat-card__top {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.cat-card__left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.cat-card__icon-box {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 20rpx;
+}
+
+.cat-card__icon-emoji {
+  font-size: 40rpx;
+}
+
+.cat-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cat-card__name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6rpx;
+}
+
+.cat-card__count {
+  font-size: 26rpx;
+  color: #9aa0a6;
+}
+
+/* 右侧：环形图 + 图例 */
+.cat-card__right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.cat-card__pie-wrap {
+  width: 120rpx;
+  height: 120rpx;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+
+.cat-card__pie {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cat-card__pie-hole {
+  width: 72rpx;
+  height: 72rpx;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cat-card__pie-num {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.cat-card__pie-unit {
+  font-size: 20rpx;
+  color: #9aa0a6;
+  line-height: 1;
+  margin-top: 2rpx;
+}
+
+/* 图例 */
+.cat-card__legend {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.legend-item:not(:first-child) {
+  margin-top: 8rpx;
+}
+
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+}
+
+.legend-name {
+  font-size: 24rpx;
+  color: #5f6368;
+}
+
+/* 三列指标 */
+.cat-card__metrics {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.metric-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.metric-cell__label {
+  font-size: 24rpx;
+  color: #9aa0a6;
+  margin-bottom: 10rpx;
+}
+
+.metric-cell__value {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.metric-cell__value--highlight {
+  color: #FF9500;
+}
+
+/* 底部提示 */
+.cat-card__tip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 18rpx 24rpx;
+  margin: 0 -24rpx;
+  background: #f8f9fb;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.cat-card__tip-icon {
+  font-size: 26rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.cat-card__tip-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #5f6368;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cat-card__tip-arrow {
+  font-size: 30rpx;
+  color: #bdc1c6;
+  margin-left: 8rpx;
+  flex-shrink: 0;
+}

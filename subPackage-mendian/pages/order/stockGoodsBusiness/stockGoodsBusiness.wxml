@@ -182,6 +182,28 @@
           <view class="flex-row-default p-20 ">
 
             <view class="flex-row flex-shrink-0 mr-20">
+              <text class="line_father_employee_meal icon mr-10"></text>
+              <text class="">员工餐</text>
+            </view>
+
+            <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
+              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 6 || reduce.gbDgsrType == '6'}}">
+                <view class="flex-row line_father_item  mr-20">
+                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
+                  <text>{{reduce.gbDgsrEmployeeMealWeight || reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+                </view>
+                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                  <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
+                </view>
+              </view>
+            </view>
+
+          </view>
+
+
+          <view class="flex-row-default p-20 ">
+
+            <view class="flex-row flex-shrink-0 mr-20">
               <text class="line_father_return icon mr-10"></text>
               <text class="">退货</text>
             </view>

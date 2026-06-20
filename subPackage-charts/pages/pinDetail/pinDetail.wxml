@@ -1,0 +1,67 @@
+<view class="pd-page">
+  <!-- 自定义导航栏 -->
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="图钉详情" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!-- 加载中 -->
+  <view class="pd-loading" wx:if="{{loading}}">
+    <text class="pd-loading-text">加载中...</text>
+  </view>
+
+  <!-- 错误 -->
+  <view class="pd-error" wx:elif="{{error}}">
+    <text class="pd-error-text">{{error}}</text>
+  </view>
+
+  <!-- 详情内容 -->
+  <block wx:elif="{{!loading && !error}}">
+    <scroll-view
+      scroll-y="{{true}}"
+      class="pd-scroll"
+      style="padding-top: {{navBarHeight }}rpx;"
+    >
+      <!-- 图钉标题 -->
+      <view class="pd-header">
+        <text class="pd-title">{{title || '未命名图钉'}}</text>
+        <text class="pd-time" wx:if="{{_timeLabel}}">{{_timeLabel}}</text>
+      </view>
+
+      <!-- 原 AI 回答正文 -->
+      <view class="pd-answer" wx:if="{{sourceText}}">
+        <view class="pd-section-label">
+          <text class="pd-section-label-text">AI 回答</text>
+        </view>
+        <view class="pd-answer-body">
+          <text class="pd-answer-text">{{sourceText}}</text>
+        </view>
+      </view>
+
+      <!-- 业务卡片 — 公共渲染组件，只读 -->
+      <view class="pd-cards" wx:if="{{cards.length > 0}}">
+        <view class="pd-section-label">
+          <text class="pd-section-label-text">业务卡片</text>
+        </view>
+
+        <business-card-renderer
+          wx:for="{{cards}}"
+          wx:for-item="dc"
+          wx:key="_cardKey"
+          card-type="{{dc.cardType}}"
+          card-data="{{dc.cardData}}"
+          readonly="{{true}}"
+          scene="pin"
+        />
+      </view>
+
+      <!-- 底部留白 -->
+      <view class="pd-scroll-spacer"></view>
+    </scroll-view>
+
+    <!-- 底部操作栏 -->
+    <view class="pd-bar">
+      
+      <view class="pd-bar-btn pd-bar-btn--delete" catchtap="onDeletePin">
+        <text class="pd-bar-btn-text">删除图钉</text>
+      </view>
+    </view>
+  </block>
+</view>

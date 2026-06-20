@@ -1,0 +1,235 @@
+page{
+  background-color: #ecebeb;
+}
+
+.full-height {
+  height: 100vh;
+}
+.flex-row-default {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+.flex-1 {
+  flex: 1;
+}
+.min-height-0 {
+  min-height: 0;
+}
+.right-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  padding-bottom: 20rpx;
+  padding-top: 20rpx;
+  padding-left: 20rpx;
+}
+.left {
+  width: 16vw;
+  height: 100%;
+  background-color: #f5f5f5;
+}
+
+/* 其余原有样式保持不变 */
+.add_btn{
+  background-color: #1abba3;
+  color: #FFF;
+  border-radius: 50%;
+  width: 45rpx;
+  height: 45rpx;
+  text-align: center;
+}
+.btn_img{
+  width: 22rpx;
+  height: 22rpx;
+}
+button{
+  background: none;
+  border: none;
+  background-color: none;
+  padding: 0 6rpx ;
+  width: 70rpx;
+  height: 70rpx;
+  margin-left: 20rpx;
+}
+button::after { border: none; }
+.search_bar{
+  background: #ecebeb;
+}
+.searchInput{
+  line-height: 80rpx;
+  height: 80rpx;
+  background: #fff;
+  border-radius: 40rpx;
+  padding-left: 20rpx;
+}
+.smallDot{
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  margin-bottom: 40rpx;
+  margin-left: -30rpx;
+  border-radius: 50%;
+  background-color: rgb(185, 9, 9);
+  color: #fff;
+  font-size: 24rpx;
+  text-align: center;
+  z-index: 99999;
+  visibility: hidden;
+}
+.smallDot.is-active{
+  visibility: visible;
+}
+.whole{
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+.goods_name{
+  display: flex;
+  flex-flow: column nowrap;
+}
+.hideView{
+  display: none;
+}
+.hideView.is-active{
+  display: block;
+}
+.nav {
+  width: 100%;
+  overflow: hidden;
+  padding: 20rpx;
+  background: #fff;
+  white-space: nowrap;
+}
+.nav scroll-view{
+  height: 100%;
+  width: auto;
+  overflow:hidden;
+}
+scroll-view {
+	white-space: nowrap;
+}
+.itemPic{
+  width: 60rpx;
+  height: 60rpx;
+}
+.picView.is-active{
+  border: 1px solid #167063;
+}
+.left-item {
+  padding: 30rpx 10rpx;
+  background-color: #eee;
+}
+.left-active {
+  background-color: #fff;
+  border-left: 6rpx solid #187e6e;
+}
+.searchList{
+  display: none;
+}
+.searchList.is-active{
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  background: rgb(250, 249, 249);
+}
+.fatherGoods{
+  border: 1px solid #a5a5a5;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  text-align: center;
+  margin-right:20rpx;
+  margin-bottom: 10rpx;
+  border-radius: 4rpx;
+}
+.fatherGoods.is-active{
+  background-color: #20afb8;
+  color: #fff;
+}
+
+
+/* ai */
+
+.subcat-popup {
+  position: fixed;
+  left: 5vw;
+  right: 5vw;
+  top: 80rpx; /* 适当调整，避开导航栏 */
+  background: #fff;
+  border-radius: 32rpx;
+  z-index: 1001;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.10);
+  padding-bottom: 32rpx;
+  animation: popupIn 0.2s;
+}
+@keyframes popupIn {
+  from { transform: translateY(-30rpx); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.subcat-popup-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  padding: 32rpx 32rpx 0 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.subcat-bar,
+.subcat-bar.expand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 24rpx 32rpx 0 32rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+.subcat-bar-scroll {
+  width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  background: #fff;
+  padding: 0 0 8rpx 0;
+}
+.subcat-tag {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 28rpx;
+  height: 48rpx;
+  margin: 0 12rpx 0 0;
+  border-radius: 24rpx;
+  background: #fff;
+  color: #333;
+  font-size: 28rpx;
+  border: 1rpx solid #f0f0f0;
+  box-sizing: border-box;
+  transition: border-color 0.2s, color 0.2s;
+}
+.subcat-tag.active {
+  border: 1rpx solid #ff2d2d;
+  color: #ff2d2d;
+  background: #fff;
+}
+.subcat-toggle {
+  display: inline-block;
+  vertical-align: middle;
+  height: 48rpx;
+  width: 48rpx;
+  text-align: center;
+  line-height: 48rpx;
+}
+.toggle-icon {
+  width: 32rpx;
+  height: 32rpx;
+  vertical-align: middle;
+}
+.subcat-mask {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 1000;
+}

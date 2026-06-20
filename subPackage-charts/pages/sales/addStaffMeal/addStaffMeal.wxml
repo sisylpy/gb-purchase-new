@@ -1,0 +1,161 @@
+<view class="flex-column page-add-staff-meal">
+  <back-navbar title="添加员工餐" style="height: {{navBarHeight}}rpx;" button-text="返回" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex flex-column p-20 page-body">
+
+    <!-- 日期 & 部门选择 -->
+    <view class="module-card mb-20">
+      <view class="field-row date-row">
+        <text class="field-label">日期</text>
+        <picker mode="date" value="{{singleDate}}" end="{{todayDate}}" bindchange="onDateChange">
+          <view class="date-input-wrapper" style="width: {{windowWidth - 240}}rpx;">
+            <text>{{singleDate || '请选择日期'}}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="field-row" wx:if="{{hasDepartmentChoices}}">
+        <text class="field-label">销售部门</text>
+        <picker mode="selector" range="{{departmentChoiceList}}" range-key="gbDepartmentName" value="{{salesDepIndex}}" bindchange="onSalesDepChange">
+          <view class="date-input-wrapper" style="width: {{windowWidth - 240}}rpx;">
+            <text>{{departmentChoiceList[salesDepIndex] ? departmentChoiceList[salesDepIndex].gbDepartmentName : ''}}</text>
+          </view>
+        </picker>
+      </view>
+      <view class="field-row dep-readonly-row" wx:if="{{!hasDepartmentChoices && departmentChoiceList.length}}">
+        <text class="field-label">销售部门</text>
+        <text class="dep-readonly">{{departmentChoiceList[0].gbDepartmentName}}</text>
+      </view>
+    </view>
+
+    <!-- 销售类型标签 -->
+    <view class="type-tag-row mb-20">
+      <view class="type-tag type-tag--staff">
+        <text class="type-tag__label">员工餐</text>
+      </view>
+      <text class="type-tag__hint">点击菜品录入员工餐 · 不计入营业收入</text>
+    </view>
+
+    <!-- 菜品列表 -->
+    <view class="module-card module-card--food-list">
+      <text class="food-list-hint" wx:if="{{foodsLoading}}">加载中…</text>
+      <text class="food-list-hint" wx:elif="{{!foodGroups.length}}">暂无菜品，请先在菜单中维护</text>
+      <view wx:else>
+        <block wx:for="{{foodGroups}}" wx:for-item="group" wx:for-index="gi" wx:key="groupId">
+          <!-- 分类头部 -->
+          <view class="food-parent-header" data-gid="{{group.groupId}}" bindtap="onParentGroupTap" hover-class="food-parent-header--hover">
+            <text class="food-parent-header__name">{{group.parentName}}</text>
+            <text class="food-parent-header__count">（{{group.children.length}}）</text>
+            <text class="food-parent-header__arrow {{group.expanded ? 'is-open' : ''}}">▾</text>
+          </view>
+
+          <!-- 子级菜品列表 -->
+          <view wx:if="{{group.expanded}}" class="food-parent-body">
+            <block wx:for="{{group.children}}" wx:for-item="item" wx:for-index="idx" wx:key="rowKey">
+              <view class="dish-card {{item.offShelf ? 'dish-card--off' : ''}}" data-gid="{{group.groupId}}" data-index="{{idx}}" bindtap="onDishTap" hover-class="dish-card--hover">
+
+                <!-- 左侧：信息 -->
+                <view class="dish-card__info">
+                  <view class="dish-card__name-row">
+                    <text class="dish-card__name">{{item.foodName}}</text>
+                    <text wx:if="{{item.offShelf}}" class="dish-card__badge">停用</text>
+                  </view>
+                  <text class="dish-card__price">标价 ¥{{item.unitPriceDisplay}}</text>
+
+                  <!-- 已有员工餐记录 -->
+                  <view wx:if="{{item.staffMealQty > 0}}" class="dish-card__meal">
+                    <text class="dish-card__meal-qty">{{item.staffMealQty}} 份</text>
+                    <text wx:if="{{item.staffMealUnitPrice > 0}}" class="dish-card__meal-price">¥{{item.staffMealUnitPrice}}/份</text>
+                  </view>
+                </view>
+
+                <!-- 右侧：操作 -->
+                <view class="dish-card__actions" wx:if="{{!item.offShelf}}">
+                  <view wx:if="{{item.staffMealQty > 0}}" class="dish-btn dish-btn--del" data-gid="{{group.groupId}}" data-index="{{idx}}" catchtap="onDeleteMeal">
+                    <text>删除</text>
+                  </view>
+                  <view class="dish-btn dish-btn--tap">
+                    <text>{{item.staffMealQty > 0 ? '修改' : '录入'}}</text>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </view>
+        </block>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ===== 弹窗：录入员工餐 ===== -->
+  <view class="meal-modal" wx:if="{{showModal}}">
+    <view class="meal-modal-mask" bindtap="onMaskTap"></view>
+    <view class="meal-modal-panel">
+      <text class="meal-modal__title">{{modalIsEdit ? '修改员工餐' : '录入员工餐'}}</text>
+
+      <!-- 菜品名（只读） -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">菜品</text>
+        <view class="meal-form-input meal-form-readonly">
+          <text class="meal-dish-name">{{modalFoodName}}</text>
+        </view>
+      </view>
+
+      <!-- 销售类型 -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">类型</text>
+        <view class="meal-type-inline">
+          <text class="meal-type-badge">员工餐</text>
+        </view>
+      </view>
+
+      <!-- 份数 -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">份数</text>
+        <input
+          class="meal-form-input"
+          type="digit"
+          placeholder="请输入份数"
+          value="{{modalQuantity}}"
+          placeholder-class="meal-placeholder"
+          bindinput="onModalQuantityInput"
+          focus="{{true}}"
+        />
+      </view>
+
+      <!-- 单价 -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">单价（元/份）</text>
+        <input
+          class="meal-form-input"
+          type="digit"
+          placeholder="0.00"
+          value="{{modalUnitPrice}}"
+          placeholder-class="meal-placeholder"
+          bindinput="onModalUnitPriceInput"
+        />
+      </view>
+
+      <!-- 备注 -->
+      <view class="meal-form-item meal-form-item--notes">
+        <text class="meal-form-label">备注（选填）</text>
+        <textarea
+          class="meal-textarea"
+          placeholder="请输入备注"
+          maxlength="50"
+          value="{{modalNotes}}"
+          placeholder-class="meal-placeholder"
+          bindinput="onModalNotesInput"
+          auto-height
+        ></textarea>
+        <view class="meal-textarea-count"><text>{{modalNotes.length}}/50</text></view>
+      </view>
+
+      <!-- 按钮 -->
+      <view class="meal-modal-actions">
+        <button class="meal-btn-cancel" bindtap="onCloseModal">取消</button>
+        <button class="meal-btn-confirm" bindtap="onConfirmModal">确定</button>
+      </view>
+    </view>
+  </view>
+
+</view>

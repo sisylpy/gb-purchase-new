@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我的图钉",
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar"
+  }
+}

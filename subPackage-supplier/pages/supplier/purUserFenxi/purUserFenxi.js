@@ -89,17 +89,13 @@ Page({
       purUserId: this.data.purUserId,
       startDate: this.data.startDate,
       stopDate: this.data.stopDate,
-    }
-    
-    console.log('请求参数:', data);
-    
-    load.showLoading("获取数据中")
+    };
+    load.showLoading("获取数据中");
     supplierService.disGetPurchaseDetaiTypeWithId(data)
       .then(res => {
         if (res.result.code == 0) {
           load.hideLoading();
-          console.log('API返回数据:', res.result.data);
-           this.setData({
+          this.setData({
              item: res.result.data,
              arr: res.result.data.arr || []
            })
@@ -122,9 +118,7 @@ Page({
 
 
 toDetail(e) {
-  const type = e.currentTarget.dataset.type;
-  console.log("hanzi",this.data.hanzi);
-  if (type === '0') {
+  const type = e.currentTarget.dataset.type;if (type === '0') {
     // 自采 - 跳转到采购详情页面
     wx.navigateTo({
       url: '../purchaseDeatil/purchaseDeatil?startDate=' + this.data.startDate + '&stopDate=' + 
@@ -233,10 +227,7 @@ checkAndCloseOverflowOnScroll() {
             const isTopOut = containerTop < 0;  // 顶部超出屏幕上方
             const isBottomOut = containerBottom > viewportHeight;  // 底部超出屏幕下方
             
-            if (isTopOut || isBottomOut) {
-              console.log(`滚动检测：商品 ${actualIndex} 超出屏幕，自动关闭`);
-              
-              const newArr = [...this.data.arr];
+            if (isTopOut || isBottomOut) {const newArr = [...this.data.arr];
               newArr[actualIndex].showPurchaseList = false;
               
               this.setData({
@@ -293,12 +284,7 @@ onScroll(event) {
 
 // 标签页点击事件
 onTab1Click(event) {
-  const type = event.currentTarget.dataset.type;
-  console.log('=== 按钮点击事件 ===');
-  console.log('点击类型:', type);
-  console.log('事件目标:', event.currentTarget);
-
-  // 根据按钮类型执行相应操作
+  const type = event.currentTarget.dataset.type;// 根据按钮类型执行相应操作
   if (type === '0') {
     // 自采按钮
     this.toDetail({ currentTarget: { dataset: { type: '0' } } });

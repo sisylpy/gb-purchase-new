@@ -20,7 +20,7 @@
 
     <view class="flex-row">
       <view class="p-20" bindtap="toDatePageSearch">
-        <image src="../../../images/calender.png" class="icon"></image>
+        <image src="../../../../images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">
         <view class="font-yuan">{{hanzi}}</view>
@@ -104,6 +104,20 @@
             <view class="cost-total" wx:if="{{!isScrolled}}">商品{{wasteCount}}个</view>
           </view>
 
+          <!-- 员工餐成本卡片 -->
+          <view class="cost-card {{tab1Index == 3 ? 'cost-card-active' : ''}} {{isScrolled ? 'collapsed' : ''}}" data-index='3' bindtap='onTab1Click' data-type="employeeMeal">
+            <view class="cost-card-header mt-10">
+              <view class="cost-icon employee-meal-icon">
+                <image src="/images/qiandaizi.png" class="icon-image"></image>
+              </view>
+              <view class="cost-title" wx:if="{{!isScrolled}}">员工餐成本</view>
+              <view class="cost-title-collapsed" wx:if="{{isScrolled}}">员工餐成本</view>
+            </view>
+            <view class="cost-amount" wx:if="{{!isScrolled}}">{{employeeMealTotal}}元</view>
+
+            <view class="cost-total" wx:if="{{!isScrolled}}">商品{{employeeMealCount}}个</view>
+          </view>
+
         </view>
 
         <!-- 今日总支出 -->
@@ -134,9 +148,9 @@
 
               <!-- 右侧总计和按钮 -->
               <view class="goods-price-section">
-                <view class="price-container {{itemIndex == 0 ? 'sales-type' : (itemIndex == 1 ? 'loss-type' : (itemIndex == 2 ? 'waste-type' : 'return-type'))}}">
-                  <text class="price-label">{{itemIndex == 0 ? '售出' : (itemIndex == 1 ? '损耗' : (itemIndex == 2 ? '废弃' : '退货'))}}</text>
-                  <text class="price-value">¥{{itemIndex == 0 ? item.goodsProduceTotal : (itemIndex == 1 ? item.goodsLossTotal : (itemIndex == 2 ? item.goodsWasteTotal : item.goodsReturnTotal))}}</text>
+                <view class="price-container {{itemIndex == 0 ? 'sales-type' : (itemIndex == 1 ? 'loss-type' : (itemIndex == 2 ? 'waste-type' : (itemIndex == 3 ? 'employee-meal-type' : 'return-type')))}}">
+                  <text class="price-label">{{itemIndex == 0 ? '售出' : (itemIndex == 1 ? '损耗' : (itemIndex == 2 ? '废弃' : (itemIndex == 3 ? '员工餐' : '退货')))}}</text>
+                  <text class="price-value">¥{{itemIndex == 0 ? item.goodsProduceTotal : (itemIndex == 1 ? item.goodsLossTotal : (itemIndex == 2 ? item.goodsWasteTotal : (itemIndex == 3 ? item.goodsEmployeeMealTotal : item.goodsReturnTotal)))}}</text>
                 </view>
                 <!-- 右侧箭头 -->
                 <view class="arrow-container {{item.showCostList ? 'expanded' : 'collapsed'}}">
@@ -168,25 +182,25 @@
 
                       <!-- 中间价格数量区域 -->
                       <view class="stock-info-center">
-                        <block wx:if="{{reduceDay.gbDgsrType == 1}}">
-                          <view class="stock-amount">{{reduceDay.gbDgsrProduceSubtotal}}元</view>
+                        <view class="stock-amount">{{reduceDay.gbDgsrSubtotal}}元</view>
                           <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
+
+                        <block wx:if="{{reduceDay.gbDgsrType == 1}}">                 
                           <view class="stock-type sales-type">售出</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 2}}">
-                          <view class="stock-amount">{{reduceDay.gbDgsrWasteSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
+                        
                           <view class="stock-type waste-type">废弃</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 3}}">
-                          <view class="stock-amount">{{reduceDay.gbDgsrLossSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type loss-type">损耗</view>
                         </block>
                         <block wx:if="{{reduceDay.gbDgsrType == 4}}">
-                          <view class="stock-amount">{{reduceDay.gbDgsrReturnSubtotal}}元</view>
-                          <view class="stock-quantity">{{reduceDay.gbDgsrWeight}}{{item.gbDgGoodsStandardname}}</view>
                           <view class="stock-type return-type">退货</view>
+                        </block>
+                        <block wx:if="{{reduceDay.gbDgsrType == 6}}">
+                        
+                          <view class="stock-type employee-meal-type">员工餐</view>
                         </block>
                       </view>
 

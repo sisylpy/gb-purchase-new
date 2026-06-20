@@ -7,5 +7,7 @@
     "myDismodal": "/components/myDismodal/myDismodal",
     "myDismodalNx": "/components/myDismodalNx/myDismodalNx",
     "myDismodalCashSingle": "/components/myDismodalCashSingle/myDismodalCashSingle"
-  }
+  },
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
 }

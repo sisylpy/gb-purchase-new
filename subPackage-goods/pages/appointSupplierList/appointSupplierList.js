@@ -52,9 +52,7 @@ Page({
 
 
   choiceSupplier(e) {
-    var supplierItem = e.currentTarget.dataset.item;
-    console.log(e);
-     var goodsItem = wx.getStorageSync('disGoods');
+    var supplierItem = e.currentTarget.dataset.item;var goodsItem = wx.getStorageSync('disGoods');
      var aaa = supplierItem.nxJrdhSupplierId;
      goodsItem.gbDgGbSupplierId = aaa;
      goodsItem.gbDgGoodsType = 21;

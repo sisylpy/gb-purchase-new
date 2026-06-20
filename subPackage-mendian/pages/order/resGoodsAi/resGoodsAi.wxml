@@ -87,39 +87,41 @@
                     <view class="flex-column" style="width: {{windowWidth - 320}}rpx;">
 
                       <view class="flex-row-between ">
-                        <view class="flex-row">
+                        <view class="flex-row flex-wrap dep-goods-title-row">
+                          <text wx:if="{{goods.gbDdgDepGoodsBrand || goods.gbDistributerGoodsEntity.gbDgGoodsBrand}}" class="dep-goods-brand">{{goods.gbDdgDepGoodsBrand || goods.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                           <text class="font-bold font-xl">{{goods.gbDdgDepGoodsName}}</text>
-
-                          <block wx:if="{{goods.gbDgControlFresh == 1}}">
-                            <text class="fresh_goods ml-10">保鲜{{goods.gbDgFreshWasteHour}}小时</text>
+                          <block wx:if="{{goods.gbDistributerGoodsEntity.gbDgControlFresh == 1}}">
+                            <text class="fresh_goods ml-10">保鲜{{goods.gbDistributerGoodsEntity.gbDgFreshWasteHour}}小时</text>
                           </block>
                         </view>
 
                         <view class="button-container" bind:tap="toBusiness" data-id="{{goods.gbDepartmentDisGoodsId}}" data-index="{{depGoodsIndex}}" data-goods="{{goods}}" hover-class="hover">
                           <image src="{{goods.gbDepartmentGoodsStockEntities.length > 0 ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFill" class="icon" />
-
                         </view>
                       </view>
 
-                      <view class="flex-row " >
-                        <view class="flex-row">
+                      <view class="flex-row font-sm">
+                        <view class="flex-row half-row">
                           <text class="gray">规格:</text>
-
-                          <view class="" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}">
-                            {{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{goods.gbDdgShowStandardName}}
-                          </view>
-                          <view wx:else="">{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</view>
-
+                          <block wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}">
+                            <view wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">
+                              {{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname || goods.gbDdgShowStandardName}}
+                            </view>
+                          </block>
+                          <block wx:else>
+                            <text>{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname || goods.gbDdgShowStandardName}}</text>
+                          </block>
+                        </view>
+                        <view class="flex-row" wx:if="{{goods.gbDistributerGoodsEntity.gbDgItemsPerCarton}}">
+                          <text class="gray">大包装:</text>
+                          <view>{{goods.gbDistributerGoodsEntity.gbDgItemsPerCarton}}{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname || goods.gbDdgShowStandardName}}/{{goods.gbDistributerGoodsEntity.gbDgCartonUnit}}</view>
                         </view>
                       </view>
-                      <view class="flex-row ">
-                        <view class="flex-row half-row" wx:if="{{goods.gbDdgDepGoodsDetail}}">
-                          <text class="gray">说明:</text>
-                          <text>{{goods.gbDdgDepGoodsDetail}}</text>
-                        </view>
-                       
-                      </view>
 
+                      <view class="flex-row font-sm" wx:if="{{goods.gbDdgDepGoodsDetail || goods.gbDistributerGoodsEntity.gbDgGoodsDetail}}">
+                        <text class="gray">说明:</text>
+                        <text>{{goods.gbDdgDepGoodsDetail || goods.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+                      </view>
 
                       <view class="stock-batches-wrap" wx:if="{{goods.gbDepartmentGoodsStockEntities.length > 0}}">
                         <view class="stock-batches-title">库存批次（点击可处理）</view>
@@ -368,7 +370,23 @@
 
 <delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />
 
-<stockGoods show="{{showStock}}" bindconfirm="confirmStock" item="{{stockItem}}" disGoods="{{disGoods}}" bindcancle="cancle" bindupdateStars="updateStars" modalHeight="{{windowHeight > maskHeight ? windowHeight : maskHeight }}" scrollViewTop="{{scrollViewTop}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" nowTime="{{nowTime}}" src="{{src}}" reason="{{reason}}" depGoods="{{depGoods}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" item="{{item}}" />
+<stockGoods
+  show="{{showStock}}"
+  bindconfirm="confirmStock"
+  bindcancle="cancle"
+  item="{{item}}"
+  consultItem="{{item}}"
+  depGoods="{{depGoods}}"
+  canWaste="{{canWaste}}"
+  canSure="{{canSure}}"
+  showType="{{showType}}"
+  resultTime="{{resultTime}}"
+  stockBatchIndex="{{stockIndex}}"
+  src="{{src}}"
+  reason="{{reason}}"
+  resWeight="{{resWeight}}"
+  nowTime="{{nowTime}}"
+/>
 
 <!-- 图片弹窗 -->
 <view class="image-modal" wx:if="{{showImageModal}}" bindtap="hideImageModal">

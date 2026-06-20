@@ -1,6 +1,6 @@
 var api = require('../../../services/api');
 var config = require('../../../../config/index');
-var dateUtil = require('../../../../utils/dateUtil');
+var dateUtil = require('../../../../lib/dateUtil');
 var globalData = getApp().globalData;
 
 Page({

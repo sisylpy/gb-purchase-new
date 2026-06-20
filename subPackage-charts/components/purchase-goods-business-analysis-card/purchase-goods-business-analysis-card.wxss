@@ -1,0 +1,584 @@
+/* ===== 采购经营分析卡片 - 全局 ===== */
+.biz-pba {
+  padding: 24rpx;
+}
+
+/* ===== 卡片头部 ===== */
+.pba-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.pba-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.pba-header-icon-text {
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+.pba-header-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.pba-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.pba-header-date {
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+.pba-header-info {
+  font-size: 24rpx;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+/* ===== 空状态 ===== */
+.pba-empty {
+  padding: 48rpx 20rpx;
+  text-align: center;
+}
+
+.pba-empty-text {
+  font-size: 26rpx;
+  color: #9ca3af;
+}
+
+/* ===== 商品信息行 ===== */
+.pba-goods-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 18rpx;
+  border: 1rpx solid #eef0f2;
+}
+
+.pba-goods-img-wrap {
+  flex-shrink: 0;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.pba-goods-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #d1d5db, #e5e7eb);
+  border-radius: 16rpx;
+}
+
+.pba-goods-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.pba-goods-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.pba-goods-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.pba-goods-query {
+  font-size: 22rpx;
+  color: #6b7280;
+}
+
+.pba-goods-meta {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 2rpx;
+  white-space: nowrap;
+}
+
+.pba-meta-item {
+  font-size: 20rpx;
+  color: #6b7280;
+}
+
+.pba-meta-divider {
+  font-size: 20rpx;
+  color: #d1d5db;
+}
+
+/* 当前库存卡片 */
+.pba-stock-card {
+  flex-shrink: 0;
+  width: 180rpx;
+  background: #eff6ff;
+  border-radius: 14rpx;
+  padding: 12rpx 14rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.pba-stock-head {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.pba-stock-icon {
+  font-size: 22rpx;
+}
+
+.pba-stock-label {
+  font-size: 22rpx;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.pba-stock-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+
+.pba-stock-num {
+  font-size: 44rpx;
+  font-weight: 800;
+  color: #2563eb;
+  line-height: 1;
+}
+
+.pba-stock-unit {
+  font-size: 24rpx;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.pba-stock-date {
+  font-size: 16rpx;
+  color: #93c5fd;
+  white-space: nowrap;
+}
+
+/* ===== 标签通用 ===== */
+.pba-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 2rpx 14rpx;
+  line-height: 1.5;
+}
+
+.pba-tag-green {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.pba-tag-green-sm {
+  background: #f0fdf4;
+  color: #22c55e;
+  font-size: 18rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+.pba-tag-red-sm {
+  background: #fef2f2;
+  color: #ef4444;
+  font-size: 18rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+.pba-tag-blue-sm {
+  background: #eff6ff;
+  color: #3b82f6;
+  font-size: 18rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+/* ===== 三列核心指标 ===== */
+.pba-metrics-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12rpx;
+  margin-bottom: 18rpx;
+}
+
+.pba-metric-col {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  background: #fafbfc;
+  border-radius: 14rpx;
+  padding: 18rpx 14rpx;
+  border: 1rpx solid #f0f1f3;
+}
+
+.pba-metric-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pba-metric-icon {
+  font-size: 26rpx;
+}
+
+.pba-icon-green { background: #ecfdf5; }
+.pba-icon-orange { background: #fff7ed; }
+.pba-icon-purple { background: #f5f3ff; }
+
+.pba-metric-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.pba-metric-label {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-bottom: 2rpx;
+}
+
+.pba-metric-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+
+.pba-metric-value {
+  font-size: 36rpx;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.pba-val-green { color: #059669; }
+.pba-val-orange { color: #ea580c; }
+.pba-val-purple { color: #7c3aed; }
+
+.pba-metric-unit {
+  font-size: 22rpx;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.pba-metric-sub {
+  font-size: 20rpx;
+  color: #9ca3af;
+  margin-top: 2rpx;
+}
+
+/* ===== 双面板行 ===== */
+.pba-panels-row {
+  display: flex;
+  flex-direction: row;
+  gap: 14rpx;
+  margin-bottom: 18rpx;
+}
+
+.pba-panel {
+  flex: 1;
+  background: #fafbfc;
+  border-radius: 14rpx;
+  padding: 18rpx 16rpx;
+  border: 1rpx solid #f0f1f3;
+}
+
+.pba-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 14rpx;
+}
+
+.pba-panel-icon {
+  font-size: 24rpx;
+}
+
+.pba-panel-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #374151;
+}
+
+/* 左面板 - 采购来源 */
+.pba-source-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0;
+}
+
+.pba-source-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.pba-source-name {
+  font-size: 21rpx;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.pba-source-val {
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pba-src-green { color: #16a34a; }
+.pba-src-orange { color: #f97316; }
+.pba-src-gray { color: #9ca3af; }
+
+/* 右面板 - 用量匹配 */
+.pba-match-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0;
+}
+
+.pba-match-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.pba-match-name {
+  font-size: 21rpx;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.pba-match-val {
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pba-mat-blue { color: #2563eb; }
+.pba-mat-dark { color: #374151; }
+.pba-mat-red { color: #dc2626; }
+
+.pba-match-ratio-row {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  flex-wrap: wrap;
+}
+
+/* ===== 关联菜品表格 ===== */
+.pba-dish-section {
+  margin-bottom: 16rpx;
+}
+
+.pba-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.pba-section-icon {
+  font-size: 24rpx;
+}
+
+.pba-section-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #374151;
+}
+
+.pba-table-head {
+  display: flex;
+  flex-direction: row;
+  background: #f3f4f6;
+  border-radius: 10rpx 10rpx 0 0;
+  padding: 12rpx 8rpx;
+}
+
+.pba-th {
+  font-size: 20rpx;
+  color: #6b7280;
+  font-weight: 500;
+  text-align: left;
+}
+
+.pba-th-dish   { flex: 2.2; padding-left: 12rpx; }
+.pba-th-recipe { flex: 1; text-align: center; }
+.pba-th-sales { flex: 1; text-align: center; }
+.pba-th-support { flex: 1.2; text-align: center; }
+.pba-th-days  { flex: 1.2; text-align: center; padding-right: 8rpx; }
+
+.pba-table-body {
+  border: 1rpx solid #f0f1f3;
+  border-top: none;
+  border-radius: 0 0 10rpx 10rpx;
+  overflow: hidden;
+}
+
+.pba-tr {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 14rpx 8rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+  background: #fff;
+}
+
+.pba-tr:last-child {
+  border-bottom: none;
+}
+
+.pba-td {
+  font-size: 23rpx;
+  color: #374151;
+  font-weight: 500;
+}
+
+.pba-td-dish {
+  flex: 2.2;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding-left: 12rpx;
+}
+
+.pba-dish-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 10rpx;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pba-dish-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e5e7eb, #f3f4f6);
+  border-radius: 10rpx;
+}
+
+.pba-dish-cell-name {
+  font-size: 25rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.pba-td-recipe  { flex: 1; text-align: center; font-size: 22rpx; color: #4b5563; }
+.pba-td-sales  { flex: 1; text-align: center; font-size: 22rpx; color: #4b5563; }
+.pba-td-support{ flex: 1.2; text-align: center; font-size: 22rpx; color: #4b5563; }
+.pba-td-days   { flex: 1.2; text-align: center; font-size: 22rpx; }
+.pba-td-days-highlight {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 25rpx;
+}
+
+/* ===== 判断信号标签 ===== */
+.pba-signal-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.pba-signal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.pba-signal-warn {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.pba-signal-error {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.pba-signal-info {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.pba-signal-prefix {
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.pba-signal-text {
+  font-size: 22rpx;
+  line-height: 1.3;
+}
+
+/* ===== 能力边界提示 ===== */
+.pba-gap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx dashed #e5e7eb;
+}
+
+.pba-gap-item {
+  font-size: 20rpx;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+/* 行级「记入工作记录」按钮 */
+.pba-td-action {
+  flex: 0 0 56rpx;
+  min-width: 0;
+  text-align: center;
+}
+
+.pba-action-text {
+  font-size: 24rpx;
+  opacity: 0.5;
+}

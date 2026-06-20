@@ -1,0 +1,25 @@
+
+
+
+<view class="wrapper " >
+
+  <!-- <view class="bg-white top_bar_index flex-row border-bottom-shadow"  style=" padding-top: {{navBarHeight}}rpx;">
+  <image src="../../../../images/back.png" class="back_icon" bindtap="toBack"></image>
+    <view class="flex-column">
+      <text class="top_bar_title">{{fatherName}}</text>
+    </view>  
+</view> -->
+  
+<back-navbar style="height: {{navBarHeight}}rpx;" title="管理" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column" style="margin-top: {{navBarHeight}}rpx;">
+    <!-- <template is="peisongGoodsList"
+       	data='{{ goodsList:goodsList, windowWidth:windowWidth,windowHeight:windowHeight, totalPagePurchase:totalPagePurchase,currentPagePurchase:currentPagePurchase, index:index}}' /> -->
+
+				 <view class="p-20 gray small" wx:if="{{currentPage == totalPage}}" style="text-align:center;">没有数据啦！
+						</view>
+  </view>
+
+	
+
+</view>

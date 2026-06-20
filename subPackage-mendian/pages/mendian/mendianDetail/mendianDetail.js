@@ -2,7 +2,7 @@
 const globalData = getApp().globalData;
 
 import apiUrl from '../../../../config/index.js'
-import { getDepUsersByFatherIdGb } from '../../../services/mendian.js'
+import { getDepUsersByFatherIdGb } from '../../../../services/mendian.js'
 var load = require('../../../../lib/load.js');
 
 let scrollDdirection = 0; // 用来计算滚动的方向
@@ -122,7 +122,6 @@ Page({
     depGetDepGoodsGb(this.data.depInfo.gbDepartmentId).then(res => {
       if (res.result.code == 0) {
         load.hideLoading();
-        console.log("depgoods", res.result.data);
         if (res.result.data.arr.length > 0) {
           // 如果商品类目发生变化，需要重新计算偏移量
           let isCategoryChanged = !this.data.depGoodsArr.length || this.data.depGoodsArr[0].categoryId !== res.result.data[0].categoryId;
@@ -274,7 +273,6 @@ Page({
     }
     depGetDepFood(data).then(res =>{
       if(res.result.code == 0){
-        console.log(res);
         this.setData({
           foodArr: res.result.data,
         })
@@ -490,31 +488,6 @@ Page({
     }, 200)
   },
 
-  toDepartmentGoods(e) {
-
-    wx.navigateTo({
-      url: '../mendianGoodsList/mendianGoodsList?id=' + e.currentTarget.dataset.id +
-          '&depName=' + this.data.depInfo.gbDepartmentAttrName + '&depFatherId=' + this.data.depFatherId
-          +'&goodsType=' + this.data.goodsType + '&nxDisId=-1',
-    })
-
-   
-  },
-
-
-
-
-  openDeliveryDetailNew(e){
-    wx.navigateTo({
-      url: '/subPackage-mendian/pages/data/issuePage/issuePage?billId=' + e.currentTarget.dataset.id
-       +'&depFatherId=' + e.currentTarget.dataset.depid,
-    })
-
-  },
-
-
-
-
   /**
    * 计算偏移量
    */
@@ -525,7 +498,6 @@ Page({
         itemWidth = Math.ceil(res.windowWidth / that.data.tabs.length);
         let tempArr = [];
         for (let i in that.data.tabs) {
-          console.log(i)
           tempArr.push(itemWidth * i);
         }
         // tab 样式初始化
@@ -663,7 +635,6 @@ Page({
    * @param {*} e 
    */
   onPageScroll: function (e) { // 页面滚动监听
-    console.log(e)
     this.setData({
       scrollViewTop: e.scrollTop,
     })
@@ -729,10 +700,9 @@ Page({
 
 
   toOpenOrder(e) {
-    console.log('depId=' + this.data.depFatherId + '&disId=' + this.data.disId + '&subAmount=' + this.data.depInfo.gbDepartmentSubAmount + '&depName=' + this.data.depInfo.gbDepartmentAttrName +'&disName=' + this.data.disInfo.gbDistributerName )
     wx.navigateToMiniProgram({
       appId: "wx1ea78d3f33234284",
-      path: '/pages/inviteAndOrder/inviteAndOrder?depId=' + this.data.depFatherId + '&disId=' + this.data.disId + '&subAmount=' + this.data.depInfo.gbDepartmentSubAmount + '&depName=' + this.data.depInfo.gbDepartmentAttrName +'&disName=' + this.data.disInfo.gbDistributerName ,
+      path: '/pages/inviteAndOrder/inviteAndOrder?depId=' + this.data.depFatherId + '&disId=' + this.data.disId + '&subAmount=' + this.data.depInfo.gbDepartmentSubAmount + '&depName=' + this.data.depInfo.gbDepartmentName +'&disName=' + this.data.disInfo.gbDistributerName ,
       envVersion: 'release', //release develop trial
       success(res) {
         // that.setData({
@@ -745,7 +715,6 @@ Page({
 
 
 changeService(e){
-  console.log(e);
   var index = e.currentTarget.dataset.index;
   var item  = this.data.userArr[index];
  var itemData = "userArr["+ index +"].gbDuCustomerService";
@@ -765,7 +734,6 @@ changeService(e){
 
 _updateDepUserInfo(index){
   var item = this.data.userArr[index];
-   console.log(item);
   updateDepUserAdminGb(item).then(res =>{
     if(res.result.code == 0){
       this._getGroupUsers()

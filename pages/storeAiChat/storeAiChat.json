@@ -1,7 +1,0 @@
-{
-  "usingComponents": {
-    "navbar": "/components/navbar/navbar",
-    "dish-cost-analysis-card": "/components/dish-cost-analysis-card/dish-cost-analysis-card",
-    "dish-sales-single-dish-card": "/components/dish-sales-single-dish-card/dish-sales-single-dish-card"
-  }
-}

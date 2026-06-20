@@ -1,5 +1,5 @@
 <!-- components/custom-navbar/custom-navbar.wxml -->
-<view class="custom-navbar" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
+<view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
   <view class="nav-container" style="height: {{navBarContentHeight}}px; ">
     <!-- 左侧区域 -->
     <view class="nav-left"  bindtap="navbuttontap" >

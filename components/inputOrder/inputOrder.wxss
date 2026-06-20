@@ -101,6 +101,7 @@
 /* 输入框 */
 .input {
   padding: 5rpx 10rpx;
+  font-size: 38rpx;
 }
 
 .input-view {

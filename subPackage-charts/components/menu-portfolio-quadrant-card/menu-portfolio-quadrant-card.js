@@ -12,7 +12,7 @@
  * }
  */
 
-var echarts = require('../../ec-canvas/echarts');
+var echarts = require('../../../ec-canvas/echarts');
 
 var CATEGORY_COLORS = {
   STAR: '#F5A623',

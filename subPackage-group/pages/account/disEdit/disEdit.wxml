@@ -1,0 +1,253 @@
+<view class="flex flex-column font-lg">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="公司信息" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+
+ <view class="flex-column bg-white">
+  <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toFood">
+      <view class="flex-row">
+        <image src="/images/home/stock0.png" class="icon mr-20" />
+        <text>菜单</text>
+      </view>
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+    </view>
+
+    <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toGroupGoods">
+      <view class="flex-row">
+        <image src="/images/home/stock0.png" class="icon mr-20" />
+        <text>商品管理</text>
+      </view>
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+    </view>
+
+    <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toReportStock">
+     <view class="flex-row">
+      <image src="/images/home/stock0.png" class="icon mr-20" />
+      <text>报表</text>
+    </view>
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+
+   
+
+ 
+ </view>
+
+</view>
+
+  <view style="height:  20rpx;"></view>
+
+
+  <view class="flex-column bg-white">
+    <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="showDisName">
+      <text>公司名称</text>
+      <view class="flex-row">
+        <text class="mr-20">{{disInfo.gbDistributerName}}</text>
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+      </view>
+    </view>
+
+    <view class="flex-row-between p-30 border-bottom" bind:tap="showDisPhone" hover-class="hover">
+      <text>联系电话</text>
+      <view>
+        <text class="margin-right gray">{{disInfo.gbDistributerPhone}}</text>
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class=" icon" />
+      </view>
+    </view>
+    
+
+
+    <view class="flex-row-between p-30 border-bottom" bindtap="toPayPage" hover-class="hover">
+      <view class="flex-row">
+        <text class="mr-10">流量剩余:</text>
+        <text class="">{{disInfo.gbDistributerBuyQuantity}}</text>
+      </view>
+      <view class="flex-row">
+        <text class="">获取流量</text>
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+      </view>
+    </view>
+
+    <view class="flex-row-between p-30 border-bottom" bindtap="toPayList" hover-class="hover">
+      <text>充值记录</text>
+      <view class="flex-row">
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+      </view>
+    </view>
+   
+    <view class="flex-row-between p-30 border-bottom" bind:tap="showStockCycle" hover-class="hover">
+      <text>库存显示周期</text>
+      <view>
+        <text class="margin-right gray" wx:if="{{disInfo.gbDistributerStockCycle == 0}}">按天</text>
+        <text class="margin-right gray" wx:elif="{{disInfo.gbDistributerStockCycle == 1}}">按周</text>
+        <text class="margin-right gray" wx:else="">按月</text>
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class=" icon" />
+      </view>
+    </view>
+
+    <!-- <view class="flex-row-between p-30 border-bottom"  bindtap="toCouponList"    hover-class="hover"  wx:if="{{disInfo.nxDistributerEntity !== null}}">
+      <text>京京送货优惠卷</text>
+      <view class="flex-row">
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
+      </view>
+    </view> -->
+
+    <view class="flex-row-between p-30 border-bottom" bindtap="requestSubscribeMessage" hover-class="hover">
+
+      <view class="flex-row">
+        <view class="flex-column">
+          <view class="title">消息通知设置</view>
+          <view class=" font-sm">
+            开启后，您将及时收到订货变更和退货通知。
+          </view>
+        </view>
+
+      </view>
+      <view class="flex-row">
+        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+      </view>
+    </view>
+
+
+
+  </view>
+  <!-- <view style="height:  20rpx;"></view>
+  <text class="p-30 font-sd " >分店管理:</text>
+
+  <view class="flex-column bg-white">
+    <block wx:if="{{disInfo.mendianDepartmentList.length > 1}}">
+
+<view class="flex-row-between p-30 border-bottom" bindtap="showMendianPicker" hover-class="hover">
+    <view class="flex-row">
+      <text>选择分店</text>
+    </view>
+  </view>
+
+
+<view class="flex-row-between p-30 border-bottom" bindtap="showMendianPicker" hover-class="hover">
+    <view class="flex-row">
+      <text>公司管理用户</text>
+    </view>
+  </view>
+
+
+
+    </block>
+   
+  </view> -->
+
+
+
+
+
+
+
+</view>
+
+
+
+ 
+
+
+<view class=" overlay {{showPhone ? 'show' : 'hide'}}" catch:tap="hideMask">
+  <view class="flex-column-center nnn bg-white">
+    <text class="flex-row p-30">修改手机</text>
+    <view class="flex-row p-30">
+      <input type="number" style="width: {{windowWidth - 100}}rpx; border: 1px solid gray; border-radius: 20rpx;height: 120rpx;font-size: 38rpx; " value="{{disInfo.gbDistributerPhone}}" bindinput="getPhone" catchtap="stopPropagation" bindblur="finish" />
+    </view>
+
+    <view class="submit-section flex-row" style="width: {{windowWidth - 60}}rpx;margin-bottom: 20rpx;">
+      <view class="submit-btn" bindtap="updateInfo">确定</view>
+    </view>
+
+  </view>
+</view>
+
+
+
+
+<!-- operation -->
+<view class='overlay {{showName ? "show" : "hide"}}' catchtap="hideMask">
+
+  <!-- name -->
+  <view class="flex-column  center-content nnn bg-white ">
+    <view class="p-30">
+      <text class="flex-row ">修改名称</text>
+    </view>
+
+    <view class="flex-column">
+      <textarea style="background-color: rgb(238, 238, 238); border-radius: 20rpx; width: {{windowWidth - 140}}rpx; padding: 20rpx 20rpx; height: 160rpx; font-size: 38rpx;" value="{{disInfo.gbDistributerName}}" bindinput="getName" catchtap="stopPropagation" bindblur="finish" />
+    </view>
+
+
+
+    <view class="submit-section flex-row" style="width: {{windowWidth - 60}}rpx;margin-bottom: 20rpx;">
+      <view class="submit-btn" bindtap="updateInfo">确定</view>
+    </view>
+
+
+  </view>
+
+  <!-- ../name -->
+
+  <!-- name -->
+
+  <!-- ../gender -->
+
+
+</view>
+<!-- ../operation -->
+
+<!-- 录音时长编辑弹窗 -->
+<view class='overlay {{showRecordSeconds ? "show" : "hide"}}' catchtap="hideMask">
+  <view class="flex-column  center-content nnn bg-white ">
+    <view class="p-30">
+      <text class="flex-row ">修改录音时长</text>
+    </view>
+
+    <view class="flex-column">
+      <input type="number" style="background-color: rgb(238, 238, 238); border-radius: 20rpx; width: {{windowWidth - 140}}rpx; padding: 20rpx 20rpx; height: 80rpx; font-size: 38rpx;" value="{{recordSecondsInput}}" bindinput="getRecordSeconds" catchtap="stopPropagation" bindblur="finish" placeholder="请输入录音时长（秒）" />
+      <view class="flex-row p-20" style="color: #999; font-size: 28rpx;">
+        <text>当前录音时长：{{disInfo.gbDistributerRecordSeconds}}秒</text>
+      </view>
+    </view>
+
+    <view class="submit-section flex-row" style="width: {{windowWidth - 60}}rpx;margin-bottom: 20rpx;">
+      <view class="submit-btn" bindtap="updateRecordSeconds">确定</view>
+    </view>
+  </view>
+</view>
+
+<!-- 库存显示周期选择弹窗 -->
+<view class='overlay {{showStockCycle ? "show" : "hide"}}' catchtap="hideMask">
+  <view class="flex-column bg-white stock-cycle-modal" style="width: 80%; max-width: 600rpx;" catchtap="stopPropagation">
+    <view class="p-30 border-bottom">
+      <text class="font-lg">选择库存显示周期</text>
+    </view>
+    
+    <view class="cycle-options">
+      <view class="cycle-option {{selectedStockCycle == 0 ? 'cycle-option-selected' : ''}}" 
+            bindtap="selectStockCycle" data-cycle="0">
+        <text class="cycle-text">按天</text>
+        <image wx:if="{{selectedStockCycle == 0}}" src="/images/check.png" class="check-icon"></image>
+      </view>
+      
+      <view class="cycle-option {{selectedStockCycle == 1 ? 'cycle-option-selected' : ''}}" 
+            bindtap="selectStockCycle" data-cycle="1">
+        <text class="cycle-text">按周</text>
+        <image wx:if="{{selectedStockCycle == 1}}" src="/images/check.png" class="check-icon"></image>
+      </view>
+      
+      <view class="cycle-option {{selectedStockCycle == 2 ? 'cycle-option-selected' : ''}}" 
+            bindtap="selectStockCycle" data-cycle="2">
+        <text class="cycle-text">按月</text>
+        <image wx:if="{{selectedStockCycle == 2}}" src="/images/check.png" class="check-icon"></image>
+      </view>
+    </view>
+    
+    <view class="flex-row p-20">
+      <button class="btn-cancel" bindtap="hideStockCycleModal">取消</button>
+      <button class="btn-confirm btn-confirm-active" bindtap="updateStockCycle">确认</button>
+    </view>
+  </view>
+</view>

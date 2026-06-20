@@ -1,6 +1,6 @@
 var load = require('../../../lib/load.js');
 const globalData = getApp().globalData;
-var dateUtils = require('../../../utils/dateUtil');
+var dateUtils = require('../../../lib/dateUtil.js');
 var config = require('../../../config/index.js');
 var goodsApi = require('../../services/api.js');
 import * as echarts from '../../../ec-canvas/echarts';
@@ -143,14 +143,9 @@ Page({
     load.showLoading("获取数据中");
     goodsApi.getGbPurGoodsFenxi(data)
       .then(res => {
-        load.hideLoading();
-        console.log(res.result.data)
-        console.log("searittem",res.result.data.goodsData)
-        if (res.result.code == 0) {
+        load.hideLoading();if (res.result.code == 0) {
           var goodsCode = Number(res.result.data.goodsData.code);
-          var goodsData = res.result.data;
-          console.log("ressss", res.result.data);
-          this.setData({
+          var goodsData = res.result.data;this.setData({
             goods: goodsData,
             searchItem: goodsData.goodsData.searchItem,
             goodsCode: goodsCode,
@@ -188,13 +183,7 @@ Page({
               supplierListValue = goodsData.purEveryDay.supplierListValue || [];
               purUserListValue = goodsData.purEveryDay.purUserListValue || [];
 
-            }
-            console.log('[Debug] API dateList:', dateList);
-
-            const xAxisDateList = this._generateDateRange(this.data.startDate, this.data.stopDate);
-            console.log('[Debug] Generated xAxisDateList:', xAxisDateList);
-
-            const dishIng = this._buildDishIngredientSummary(goodsData, xAxisDateList);
+            }const xAxisDateList = this._generateDateRange(this.data.startDate, this.data.stopDate);const dishIng = this._buildDishIngredientSummary(goodsData, xAxisDateList);
 
             this.setData({
               dateList: dateList,
@@ -687,11 +676,7 @@ Page({
     const {
       dateList = this.data.xAxisDateList || [],
         boundaryGap
-    } = options;
-
-    console.log('[Debug] _getCommonXAxisConfig received dateList:', dateList);
-
-    if (dateList.length === 0) {
+    } = options;if (dateList.length === 0) {
       return {};
     }
 
@@ -710,8 +695,7 @@ Page({
       } else {
         label = parseInt(day, 10).toString();
       }
-      // console.log(`[Debug] Formatting date: ${dateStr} -> ${label}`);
-      return label;
+      //return label;
     });
 
     const maxLabels = 10;
@@ -1628,13 +1612,7 @@ Page({
   },
 
   // 根据筛选条件更新图表，不重新请求接口
-  _updateChartsWithFilter() {
-    console.log('根据筛选条件更新图表，当前筛选条件:', {
-      supplierIds: this.data.supplierIds,
-      purUserIds: this.data.purUserIds
-    });
-
-    // 直接使用现有数据更新图表
+  _updateChartsWithFilter() {// 直接使用现有数据更新图表
     if (this.data.xAxisDateList && this.data.xAxisDateList.length > 0) {
       // 更新合并的价格图表
       if ((this.data.supplierListValue && this.data.supplierListValue.length > 0) ||
@@ -1664,9 +1642,7 @@ Page({
     }
   },
 
-  toDatePageSearch() {
-    console.log("d")
-    this.setData({
+  toDatePageSearch() {this.setData({
       update: true,
     })
   
@@ -1719,9 +1695,7 @@ Page({
   },
 
 
-  toPurchase() {
-    console.log("goodsPurList");
-    wx.setStorageSync('disGoods', this.data.goods);
+  toPurchase() {wx.setStorageSync('disGoods', this.data.goods);
     wx.navigateTo({
       url: '/subPackage-charts/pages/cost/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + this.data.goods.gbDistributerGoodsId,
     })

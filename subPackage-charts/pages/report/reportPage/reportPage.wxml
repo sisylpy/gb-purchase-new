@@ -238,6 +238,17 @@
                                 {{item.wastePercent}}%
                               </view>
                             </view>
+                             <view class="flex-row form_line" >
+                              <view class="form_zero third-row">
+                                员工餐成本
+                              </view>
+                              <view class="form_one third-row p-10">
+                                ¥{{item.employeeMealCostTotal}}
+                              </view>
+                              <view class="form_one third-row p-10">
+                                {{item.employeeMealPercent}}%
+                              </view>
+                            </view>
                           </view>
                         </view>
 
@@ -387,8 +398,8 @@
                               <view class="form_data">{{item.totalWasteSubtotal}}元</view>
                             </view>
                             <view class="flex-column-center half-row p-30">
-                              <view class="text-secondary">退货成本</view>
-                              <view class="form_data">{{item.totalReturnSubtotal}}元</view>
+                              <view class="text-secondary">员工餐成本</view>
+                              <view class="form_data">{{item.totalEmployeeMealSubtotal}}元</view>
                             </view>
                           </view>
                         </view>

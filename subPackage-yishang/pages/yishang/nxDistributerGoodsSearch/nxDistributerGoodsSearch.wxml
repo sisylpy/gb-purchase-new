@@ -1,0 +1,144 @@
+<view class="flex flex-column">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="京京送货" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <view class="flex-row ">
+    <view class="flex-row p-20" style="background-color: #f0f9ff; width: {{windowWidth}}rpx;">
+      <view class="searchInput flex-row">
+        <input class="inputView" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" style="width:{{windowWidth - 160}}rpx;line-height: 60rpx; height: 60rpx; " placeholder-class="holderClass" bindinput="getString" confirm-type='search' focus="{{isSearching ? 'true':''}}"></input>
+        <view class="flex-column-center p-10 delSearch {{searchString.length > 0 ? 'is-show' : ''}}" bindtap="delSearch" hover-class="hover">
+          <image src="/images/close.png" class="close_icon">
+          </image>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>
+
+
+<!-- searchGoodsPage -->
+<view class="  flex-column " catchtouchmove='ture' style="height:{{windowHeight - 310}}rpx; width: {{windowWidth}}rpx; background: #FFF;">
+  <view wx:if="{{searchResult && disSearchArr.length > 0}}" style="width:{{windowWidth}}rpx;">
+
+    <scroll-view scroll-y style="height:{{windowHeight - 320}}rpx; ">
+
+      <view class="flex-row-between border-bottom p-20 whiteBack" wx:for="{{disSearchArr}}" wx:for-item="sons" wx:for-index="index" wx:key="nxDistributerGoodsId">
+
+        <view class="flex-row-default">
+          <image bindtap="showDialogBtn" data-item="{{sons}}" data-nxgoods="{{sons.nxGoodsEntity}}"  src="{{sons.nxDgGoodsFile !== null ? url + sons.nxDgGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="url_item mr-20" />
+
+          <view class="flex-row" catch:tap="{{sons.nxDepartmentOrdersEntity == null ? 'applyGoods' : 'toEditApply'}}" data-index="{{index}}" data-order="{{sons.nxDepartmentOrdersEntity}}" data-item="{{sons}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}"   data-depgoods="{{sons.gbDistributerGoodsEntity.gbDepartmentDisGoodsEntity}}"  data-nxgoods="{{sons.nxGoodsEntity}}" hover-class="{{sons.nxDepartmentOrdersEntity == null ? 'hover' :''}}">
+            <view class="flex-column " style="width: {{windowWidth - 260}}rpx; ">
+              <view class="flex-row font-md">
+                <text class=" {{sons.nxDgGoodsBrand !== null && sons.nxDgGoodsBrand.length > 0 ? 'brand' : ''}}">{{sons.nxDgGoodsBrand !== null && sons.nxDgGoodsBrand.length > 0 ? sons.nxDgGoodsBrand : ''}}</text>
+                <text class=" mr-10 font-sl font-bold">{{sons.nxDgGoodsName}}</text>
+                <block wx:if="{{sons.nxDgNxGoodsId == null}}">
+                  <text class="red extremeSmall">[临时商品]</text>
+                </block>
+                <block wx:if="{{sons.nxDistributerAliasEntities.length > 0}}">
+                  <text class="small" wx:for="{{sons.nxDistributerAliasEntities}}" wx:for-item="alias">@{{alias.nxDaAliasName}}</text>
+                </block>
+              </view>
+             
+
+              <view class="flex-row small">
+                <view class="flex-row half-row" wx:if="{{sons.nxDgGoodsDetail !== null}}">
+                  <text class="gray">说明:</text>
+                  <text>{{sons.nxDgGoodsDetail}}</text>
+                </view>
+              </view>
+              <view class="flex-row ">
+                <view class="flex-row " style="width: {{windowWidth - 380}}rpx;">
+                  <view class="flex-row third-row" wx:if="{{sons.nxDgWillPrice !== '0.1'}}">
+                    <text class="font-yuan">¥</text>
+                          <text class="font-lg font-bold ">{{sons.nxDgWillPrice}}</text>
+                          <text class="font-xs ">/{{sons.nxDgGoodsStandardname}}</text>
+                          <block wx:if="{{sons.nxDgGoodsStandardWeight.length > 0}}">
+                        <view class="" wx:if="{{sons.nxDgGoodsStandardname !== '斤'}}">
+                          /({{sons.nxDgGoodsStandardWeight}}/{{sons.nxDgGoodsStandardname}})</view>
+                      </block>
+                  </view>
+                  <view class="flex-row third-row" wx:else="">待报价</view>
+                </view>
+
+
+                <!-- <block wx:if="{{sons.nxDepartmentOrdersEntity == null}}">
+              <view class="with-lr-padding" >
+                <view class="add_btn">
+                  <image src="/images/add-3.png" mode="aspectFill" class="btn_img" />
+                </view>
+              </view>
+            </block> -->
+              </view>
+            </view>
+            <view class="flex-row  font-md ">
+              <view class="flex-row " wx:if="{{sons.nxDepartmentOrdersEntity !== null}}">
+                <text class="five-weight his_price  {{sons.nxDepartmentOrdersEntity.nxDoPurchaseStatus > 1 ? 'is-gray' : ''}}">{{sons.nxDepartmentOrdersEntity.nxDoQuantity}}{{sons.nxDepartmentOrdersEntity.nxDoStandard}}</text>
+              </view>
+              <view class="with-lr-padding" wx:else="">
+                <view class="add_btn center-content flex-column-center">
+                  <image src="/images/add-3.png" mode="aspectFill" class="btn_img" />
+                </view>
+
+              </view>
+
+            </view>
+          </view>
+        </view>
+      </view>
+      <!-- <view class="flex-column-center" style="margin-top: 100rpx;">
+        <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: rgb(3, 106, 240); border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+          <text>添加新商品</text>
+        </view>
+      </view> -->
+
+
+    </scroll-view>
+  </view>
+
+  <!-- // -->
+
+  <view class="flex-column-center" style="margin-top: 40rpx;" wx:if="{{disSearchArr.length == 0}}">
+    <view class="flex-row gray p-20">
+      <image class="icon margin-right" src="../../images/a-Nothappy.png"></image>
+      <text class="">没有搜索到商品</text>
+    </view>
+    <!-- <view class="flex-column-center" style="margin-top: 100rpx;">
+      <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: rgb(3, 106, 240); border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
+        <text>添加新商品</text>
+      </view>
+    </view> -->
+  </view>
+</view>
+<!-- ./searchGoodsPage -->
+
+
+
+
+
+
+
+
+<myDismodalCashSingle show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" maskHeight="{{maskHeight}}" expectPrice="{{expectPrice}}"  statusBarHeight="{{statusBarHeight}}"  windowWidth="{{windowWidth}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{item}}" maskHeight="{{maskHeight > windowHeight ? maskHeight : windowHeight}}" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" canSave="{{canSave}}"   windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}"/>
+<!-- 
+<myDismodalCashSingle show="{{show}}" bindconfirm="confirm" bindcancle="cancle" binddelApply="delApply" bindconfirmStandard="confirmStandard" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applySubtotal="{{applySubtotal}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" maskHeight="{{maskHeight}}" expectPrice="{{expectPrice}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemDis}}" maskHeight="{{maskHeight > windowHeight ? maskHeight : windowHeight}}" applyStandardName="{{applyStandardName}}"   windowWidth="{{windowWidth}}" windowHeight="{{windowHeight}}"  statusBarHeight="{{statusBarHeight}}" /> -->
+
+
+
+
+<myIndependentNx show="{{showInd}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
+
+<cover-view class="modal-mask" bindtap="hideModal" wx:if="{{showModal}}"></cover-view>
+<cover-view class="modal-dialog" wx:if="{{showModal}}">
+  <cover-view class="modal-title">{{item.nxDgGoodsName}}</cover-view>
+  <cover-view>{{url + item.nxDgGoodsFileLarge}}</cover-view>
+  <cover-view class="modal-content">
+    <!-- <cover-image wx:if="{{item.nxDgGoodsFileLarge.length > 0}}" src="{{url + item.nxDgGoodsFileLarge}}" class="img-full" style="height:auto; max-height: {{windowHeight / 3}}rpx;" mode="widthFix"></cover-image> -->
+    <cover-image style="width: 400rpx; height: 500rpx;" src="{{url + item.nxDgGoodsFileLarge}}"></cover-image>
+  </cover-view>
+
+</cover-view>
+
+
+<delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />

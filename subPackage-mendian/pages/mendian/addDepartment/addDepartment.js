@@ -3,10 +3,10 @@ const globalData = app.globalData;
 
 import {
   saveGbDepartment,
-} from '../../../services/mendian';
+} from '../../../../services/mendian';
 import {
   updateDepUserAdminGb,
-} from '../../../services/apiGbDepartmentUser';
+} from '../../../../services/apiGbDepartmentUser';
 
 
 Page({
@@ -62,6 +62,15 @@ Page({
      
     }
 
+    var disInfo = wx.getStorageSync('disInfo');
+    if(disInfo){
+      this.setData({
+        disInfo: disInfo,
+        gbDmPurchaseNumber: disInfo.gbDistributerModuleEntity.gbDmPurchaseNumber
+      })
+     
+    }
+
   },
 
 
@@ -79,6 +88,19 @@ Page({
   },
   
   radioChangeCankao(e){
+    if(e.detail.value == -1){
+      if(this.data.gbDmPurchaseNumber == -1){
+        wx.showToast({
+          title: '无权限设置',
+          icon : 'none'
+        })
+      }
+      // 强制刷新 radio 选中状态，恢复到"参考现有门店"
+      this.setData({
+        cankaoDepId: this.data.cankaoDepId,
+      })
+      return;
+    }
     this.setData({
       cankaoDepId: e.detail.value, 
     })  
@@ -178,7 +200,6 @@ Page({
   },
 
   getDepartmentName(e){
-    console.log(e);
     var index = e.currentTarget.dataset.index;
     var name = e.detail.value;
     var depNameData = "gbDepartmentEntities["+index+"].gbDepartmentName"
@@ -196,26 +217,21 @@ Page({
    */
    _ifCanSave(){
      //resName
-     console.log(" this._ifCanSave(); this._ifCanSave();")
      if(this.data.resName.length > 0){
         var empty = 0;
        if(this.data.gbDepartmentEntities.length == this.data.selNumber){
         
          var arr  = this.data.gbDepartmentEntities;
-         console.log("arr.len", arr.length);
          for(var i = 0; i < arr.length; i++){
-          console.log("arr.len", arr[i].gbDepartmentName.length);
            if(arr[i].gbDepartmentName.length == 0){
               empty = empty + 1;
            }
          }
-         console.log("arr.leemptyemptyn", empty);
          if(empty  >  0){
           this.setData({
             addFinished: false
           })
          }else{
-          console.log("arr.leemptyemptynokokkokkk");    
           this.setData({
             addFinished: true
           })
@@ -258,7 +274,7 @@ Page({
       gbDepartmentDisId: this.data.disId,
       gbDepartmentFatherId: 0,
       gbDepartmentName: this.data.resName,
-      gbDepartmentAttrName: this.data.resName,
+      gbDepartmentName: this.data.resName,
       gbDepartmentSubAmount: this.data.gbDepartmentEntities.length,
       gbDepartmentIsGroupDep: 1,
       gbDepartmentType: 1,
@@ -271,7 +287,6 @@ Page({
       .then(res =>{
         wx.hideLoading();
         if(res.result.code == 0){
-          console.log(res.result.data);
 
           that._updateDepUserInfo()
           wx.setStorageSync('disInfo', res.result.data);
@@ -298,15 +313,14 @@ Page({
   },
 
 
-
 _updateDepUserInfo(index){
   var item = this.data.userInfo;
-   console.log(item);
   updateDepUserAdminGb(item).then(res =>{
     if(res.result.code == 0){
-
-      wx.setStorageSync('userInfo', res.result.data);
-
+    
+      wx.setStorageSync('userInfo', res.result.data.userInfo);
+      wx.setStorageSync('disInfo', res.result.data.disInfo);
+      wx.navigateBack({delta: 2})
     }
   })
 

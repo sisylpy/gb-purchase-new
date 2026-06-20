@@ -1,0 +1,51 @@
+<view class="flex flex-column height-100">
+
+
+  <back-navbar title="申请配送商品" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+    <!-- <view class="flex-row-reverse bg-white p-30 border-bottom" style="margin-top: {{navBarHeight}}rpx;" >
+      <view class="flex-row font-sl">
+        <view class="flex-row mr-20" hover-class="hover" bindtap="toInvite" >
+          <image src="../../../../images/book-3.png" class="icon mr-10"></image>
+      <text class="">邀请配送商</text>
+    </view>
+    <view class="flex-row margin-left" bindtap="toMarket">
+      <image src="../../../../images/a-CLIENTCOST.png" class="icon mr-10"></image>
+      <text class="">查询配送商</text>
+      </view>
+     </view>
+      
+    </view> -->
+
+  <view class="flex-column {{nxDisArr.length == 0  ? 'show' : 'hide'}}" style="height: {{windowHeight - 360}}rpx; margin-top:160rpx;">
+    <view class="font-lg">
+      <view class="center-content flex-column">
+        <image class="empty_image" src="../../../../images/xiuxi-2.png"></image>
+        <text class="big">添加固定配送商</text>
+        <text class="small darkgray pb-20 pt-20">适合有稳定供货关系的订货</text>
+      </view>
+    </view>
+  </view>
+
+  
+  <view class="flex-row-default p-20 bg-white border-bottom"  bindtap="applyAppGoods" data-id="{{dis.nxDistributerEntity.nxDistributerId}}" data-name="{{dis.nxDistributerEntity.nxDistributerName}}" data-fromdep="{{dis.nxDgdFromNxDepId}}" hover-class="hover"   wx:for="{{nxDisArr}}" wx:for-item="dis" >
+    <image class="companyUrl" src="{{url + dis.nxDistributerEntity.nxDistributerImg}}"></image>
+    <view class="flex-row-between" style="width: {{windowWidth - 100}}rpx;  ">
+      <view class="flex-column" style="width: {{windowWidth - 340}}rpx; " >
+        <text class="font-lg five-weight ">{{dis.nxDistributerEntity.nxDistributerName}}</text>
+        <view class="flex-row-default small">
+          <!-- <text class="mr-10 flex-fixed">地址:</text> -->
+          <text class="">{{dis.nxDistributerEntity.nxDistributerMarketName}}</text>
+        </view>
+      </view>
+
+      <view class="font-xs bg-success radius-10 p-10" >
+        <text class="">选择</text>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ./ -->
+
+</view>

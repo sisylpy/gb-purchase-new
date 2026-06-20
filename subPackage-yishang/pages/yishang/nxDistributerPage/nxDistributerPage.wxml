@@ -1,0 +1,163 @@
+<view class="flex flex-column">
+   <!-- bar -->
+    
+<back-navbar title="配送商户信息" style="height: {{navBarHeight}}rpx;"  avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column ">
+    <view class="p-20"> 
+      <image class="" wx:if="{{url.length > 0}}" style="width: {{windowWidth - 40}}rpx;height: 300rpx; border-radius: 20rpx;" src="{{url + dis.nxDistributerImg}}"></image>
+    </view>
+
+    <view class="flex-column p-20">
+      <text class="flex-column-center ">{{dis.nxDistributerName}}</text>
+      <block wx:if="{{dis.nxDistributerGbDistributerEntity !== null}}">
+        <text class="flex-column-center mainColor small" wx:if="{{dis.nxDistributerGbDistributerEntity.nxDgdStatus == -1}}">申请中</text>
+        <text class="flex-column-center small red" wx:elif="{{dis.nxDistributerGbDistributerEntity.nxDgdStatus == -2}}">清先拨打业务咨询电话联系</text>
+      </block>
+
+      <view class="flex-row-default " style="width: {{windowWidth - 80}}rpx; ">
+        <text class="margin-l-right flex-fixed">地址:</text>
+         <view class="flex-row-wrap">
+          <text class="">{{dis.nxDistributerMarketName}}</text>
+        <text class="">{{dis.nxDistributerAddress}}</text>
+         
+         </view>
+      
+      </view>
+
+
+      <view class="flex-row-default small gray whiteBackRadius with-padding margin_bottom">
+        <text class="margin-l-right flex-fixed">配送:</text>
+        <view class="flex-row-wrap">
+          <view class="small margin-l-right flex-row" wx:for="{{dis.nxDistributerServiceCityEntities}}" wx:for-item="city" wx:for-index="cityIndex">
+            <text>{{city.nxDsCityName}}</text>
+            <text wx:if="{{cityIndex != dis.nxDistributerServiceCityEntities.length - 1}}">,</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="flex-column " bindtap="toNxGoods" data-id="{{dis.nxDistributerId}}">
+        <text class="font-bold">配送商品</text>
+        <view class="flex-row-between">
+          <view class="flex-column">
+            <view class="flex-row p-20" wx:for="{{dis.nxGoodsEntities}}" wx:for-item="father">
+              <text class="point"></text>
+              <view class="">{{father.nxDfgFatherGoodsName}}</view>
+            </view>
+          </view>
+          <view>
+            <image src="../../../../images/arrow-right-3.png" class="icon"></image>
+          </view>
+        </view>
+      </view>
+
+
+      <block wx:if="{{dis.nxDistributerGbDistributerEntity !== null}}">
+        <view class="flex-column p-20" wx:if="{{dis.nxDistributerGbDistributerEntity.nxDgdGbGoodsPrice  == 1}}">
+        <view class="flex-row" >
+          <view class="flex-column-center margin-l-right" style="width: 50rpx; height: 50rpx;">
+            <image   src="../../../../images/selected-2.png" class="icon "></image>
+          </view>
+
+          <text>商议定价方式</text>
+        </view>
+        <view class="flex-row-wrap small gray">客户协商商品的价格，在双方认可的时期内，按商定价格配送</view>
+
+      </view>
+
+      <view class="flex-column p-20">
+        <view class="flex-row">
+          <view class="flex-row" style="width: {{windowWidth / 2}}rpx;"  wx:if="{{dis.nxDistributerGbDistributerEntity.nxDgdGbPayMethod  == 0}}"  >
+            <view class="flex-column-center margin-l-right" style="width: 50rpx; height: 50rpx;" bindtap="payMethod" data-type="0">
+              <image src="../../../../images/selected-2.png" class="icon "></image>
+            </view>
+            <text>现金支付</text>
+          </view>
+
+          <view class="flex-row" style="width: {{windowWidth / 2}}rpx;" wx:else>
+            <view class="flex-column-center margin-l-right" style="width: 50rpx; height: 50rpx;"  >
+              <image src="../../../../images/selected-2.png" class="icon "></image>
+            </view>
+            <text>记账</text>
+          </view>
+        </view>
+        <view class="flex-row-wrap small gray">客户协商商品的价格，在双方认可的时期内，按商定价格配送</view>
+      </view>
+      </block>
+  
+
+  <block wx:else>
+  
+    <view class="flex-column p-20">
+        <view class="flex-row">
+          <view class="flex-column-center margin-l-right" style="width: 50rpx; height: 50rpx;">
+            <image bindtap="fixedPrice" data-type="0" wx:if="{{goodsPrice == 1}}" src="../../../../images/selected-2.png" class="icon "></image>
+            <view bindtap="fixedPrice" data-type="1" class="unSelected " wx:else></view>
+          </view>
+
+          <text>商议定价方式</text>
+        </view>
+        <view class="flex-row-wrap small gray">客户协商商品的价格，在双方认可的时期内，按商定价格配送</view>
+
+      </view>
+
+      <view class="flex-column p-20">
+        <view class="flex-row">
+          <view class="flex-row" style="width: {{windowWidth / 2}}rpx;">
+            <view class="flex-column-center margin-l-right" style="width: 50rpx; height: 50rpx;" bindtap="payMethod" data-type="0">
+              <image  wx:if="{{payMethond == 0}}"  src="../../../../images/selected-2.png" class="icon "></image>
+              
+              <view class="unSelected " wx:else></view>
+            </view>
+            <text>现金支付</text>
+          </view>
+
+          <view class="flex-row" style="width: {{windowWidth / 2}}rpx;">
+            <view class="flex-column-center margin-l-right" style="width: 50rpx; height: 50rpx;"  bindtap="payMethod" data-type="1">
+              <image  wx:if="{{payMethond == 1}}" src="../../../../images/selected-2.png" class="icon "></image>
+              <view class="unSelected " wx:else></view>
+            </view>
+            <text>记账</text>
+          </view>
+        </view>
+        <view class="flex-row-wrap small gray">客户协商商品的价格，在双方认可的时期内，按商定价格配送</view>
+      </view>
+  
+  
+  
+  </block>
+     
+    </view>
+  </view>
+
+  <view class="fixed_bottom " style="width: {{windowWidth}}rpx; height: 150rpx; ">
+  <block wx:if="{{dis.nxDistributerGbDistributerEntity.nxDgdStatus == 0}}">
+    <view class="flex-column-center"  >
+      <view class="fix-main-btn" bindtap="toNxdistributer" data-id="{{dis.nxDistributerId}}" data-name="{{dis.nxDistributerName}}" >已添加为配送商,可在配送商中查看</view>
+    </view>
+  </block>
+
+  <block wx:else>
+
+    <view class="flex-row-between" wx:if="{{dis.nxDistributerGbDistributerEntity.nxDgdStatus == -1 || dis.nxDistributerGbDistributerEntity.nxDgdStatus == -2}}" style="width: {{windowWidth - 40}}rpx; height: 150rpx;">
+      <view class="phone_btn flex-row" bindtap="havePhone" data-phone="{{dis.nxDistributerPhone}}" style="width:{{(windowWidth - 80 ) / 3 + 20}}rpx; margin-right: 20rpx; ">
+        <image src="../../../../images/lianxikefu.png" class="icon with-lr-padding"></image>
+        <text>配送咨询</text>
+      </view>
+      <view class="   red" bindtap="delteBusiness" data-id="{{dis.nxDistributerGbDistributerEntity.nxDistributerGbDistributerId}}" style="width:{{(windowWidth - 80) / 3 * 2 - 40}}rpx">删除申请</view>
+    </view>
+
+    <view class="flex-row " wx:else style="width: {{windowWidth - 40}}rpx; height: 150rpx;margin-left: 20rpx;">
+      <view class="phone_btn flex-row" bindtap="havePhone" data-phone="{{dis.nxDistributerPhone}}" style="width:{{(windowWidth - 80 ) / 3 + 40}}rpx; margin-right: 40rpx;">
+        <image src="../../../../images/lianxikefu.png" class="icon p-20"></image>
+        <text>业务咨询</text>
+      </view>
+      <view class="  send-main-btn active" bindtap="addBusiness" data-id="{{dis.nxDistributerId}}" style="width:{{(windowWidth - 80) / 3 * 2  - 40}}rpx">发送供货邀请</view>
+      <!-- <button class="bg-primary  " open-type="share">发送供货邀请</button> -->
+    </view>
+  </block>
+    
+  
+
+  </view>
+</view>

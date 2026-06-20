@@ -65,6 +65,7 @@
                 <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">销售</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsProduceSubtotal}}元</text><text class="font-sl">({{stock.gbDgsProduceWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
                 <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">损耗</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsLossSubtotal}}元</text><text class="font-sl">({{stock.gbDgsLossWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
                 <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">废弃</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsWasteSubtotal}}元</text><text class="font-sl">({{stock.gbDgsWasteWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">员工餐</text><view class="flex-row"><text class="mr-10">{{stock.gbDgsEmployeeMealSubtotal}}元</text><text class="font-sl">({{stock.gbDgsEmployeeMealWeight}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></view></view>
               </view>
             </view>
 

@@ -9,7 +9,7 @@
   <view class='p-20 with-margin-top with-lr-margin' style='height: {{windowHeight - 340}}rpx; background:white;'  bind:tap="{{showDepartment ? 'hideNumber' : ''}}">
    
 
-    <view class='type p-20'>
+    <view class='type p-20' wx:if="{{subDepArr.length > 0}}">
       <view class="p-10 pb-10" style="font-size: 34rpx;font-weight: 500;">选择你所在的部门</view>
       <view class="flex-row" >
         <view class="flex-column">
@@ -23,7 +23,6 @@
         </view>
       </view>
     </view>
-
 
     <view class="flex-row form-item">
 

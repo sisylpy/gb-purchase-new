@@ -1,0 +1,447 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="配送商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!--  top -->
+  <view class=" flex-row-between pr-10 pl-10 border-bottom-shadow bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column">
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="p-10">-</text>
+          <view class=" small" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilter">
+      <image src="{{searchDepIds !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+    <view class="flex-row p-20" bindtap="showSearch">
+      <image src="{{type !==  'goods' ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view>
+  </view>
+
+
+
+
+  <block wx:if="{{arr.length > 0}}">
+    <view class="flex-row-default p-10">
+
+      <view class="flex-column p-10">
+        <image src="{{url + nxDisItem.nxDistributerImg}}" class="url mr-20"> </image>
+        <text class="font-sm">{{nxDisItem.nxDistributerName }}</text>
+      </view>
+
+      <view class="flex-column  font-sm">
+
+        <view class="flex-row" style="width: {{windowWidth - 160}}rpx; ">
+
+          <view class="flex-row half-row">
+            <text class="mr-10">采购总额:</text>
+            <text class="font-bold">{{nxDisItem.purGoodsTotalString}}元</text>
+          </view>
+          <view class="flex-row half-row">
+            <text class="mr-10">库存总额:</text>
+            <text class="font-bold">{{nxDisItem.stockGoodsTotalString}}元</text>
+          </view>
+        </view>
+
+        <view class="flex-row" style="width: {{windowWidth - 160}}rpx; ">
+
+          <view class="flex-row half-row">
+            <text class="mr-10">销售金额:</text>
+            <text class="font-bold">{{nxDisItem.produceGoodsTotalString}}元</text>
+          </view>
+          <view class="flex-row half-row">
+            <text class="mr-10">损耗金额:</text>
+            <text class="font-bold">{{nxDisItem.lossGoodsTotalString}}元</text>
+          </view>
+        </view>
+
+        <view class="flex-row" style="width: {{windowWidth - 160}}rpx; ">
+          <view class="flex-row half-row">
+            <text class="mr-10">退货金额:</text>
+            <text class="font-bold">{{nxDisItem.returnGoodsTotalString}}元</text>
+          </view>
+          <view class="flex-row half-row">
+            <text class="mr-10">废弃金额:</text>
+            <text class="font-bold">{{nxDisItem.wasteGoodsTotalString}}元</text>
+          </view>
+
+        </view>
+
+        <view class="flex-row" style="width: {{windowWidth - 160}}rpx; ">
+
+          <view class="flex-row half-row">
+            <text class="mr-10">新鲜品级:</text>
+            <view class="flex-row">
+              <image wx:for="{{nxDisItem.starGreen}}" src="/images/starGreen.png" mode="aspectFill" class="icon-sm" />
+              <image wx:if="{{nxDisItem.starHalf > 0}}" src="/images/starHalf.png" mode="aspectFill" class="icon-sm" />
+              <block wx:if="{{nxDisItem.starGreen + nxDisItem.starHalf < 5}}">
+                <image wx:for="{{nxDisItem.starGray}}" src="/images/starGray.png" mode="aspectFill" class="icon-sm" />
+              </block>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="flex-column p-10">
+      <block wx:if="{{typeString !== ''}}">
+        <view class="center-content">
+          <view class="p-10" bind:tap="cancleSarch">
+            <view class="bg-success radius-20 p-10">
+              <text class="mr-20"> {{typeString}}</text>
+              <image src="/images/del-2.png" mode="aspectFill" class="icon-sm" />
+            </view>
+
+          </view>
+        </view>
+      </block>
+      <scroll-view scroll-y="true" scroll-with-animation="true" bindscroll="scrollTo" scroll-into-view="{{positionId}}" style="width: {{windowWidth - 20}}rpx; height: {{windowHeight - 340- navBarHeight}}rpx; ">
+
+        <view class="flex-column  border-bottom p-20 bg-white mb-20" wx:for-item="goods" wx:key="gbDepartmentGoodsId" wx:for-index="depGoodsIndex" wx:for="{{arr}}">
+
+          <view class="flex-row-default">
+            <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{url + goods.gbDgNxFatherImg}}" mode="aspectFill" class="url_item mr-20" />
+            <view class="flex-column " style="width: {{windowWidth - 180}}rpx;">
+              <view class="flex-row-wrap font-md" style="width: {{windowWidth - 200}}rpx; ">
+                <text class="font-md ">{{goods.gbDgGoodsName}}</text>
+                <block wx:if="{{goods.gbDistributerAliasEntities.length > 0}}">
+                  <text class="font-sm" wx:for="{{goods.gbDistributerAliasEntities}}" wx:for-item="alias">@{{alias.gbDaAliasName}}</text>
+                </block>
+                <block wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
+                  <view class="">
+                    ({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})
+                  </view>
+                </block>
+
+                <block wx:else>
+                  <text class="ml-10 ">({{goods.gbDgGoodsStandardname}})</text>
+                </block>
+              </view>
+
+              <view class="flex-row font-sm">
+                <view class="flex-row half-row" wx:if="{{goods.gbDgGoodsDetail !== null && goods.gbDgGoodsDetail.length > 0}}">
+                  <text class="text-secondary">说明:</text>
+                  <text>{{goods.gbDgGoodsDetail}}</text>
+                </view>
+                <view class="flex-row" wx:if="{{goods.gbDgGoodsPlace !== null && goods.gbDgGoodsPlace.length > 0}}">
+                  <text>产地:</text>
+                  <text class="">{{goods.gbDgGoodsPlace}}</text>
+                </view>
+              </view>
+
+              <view class="flex-row font-sm pt-10" bind:tap="showGoodStar" data-item="{{goods}}">
+                <view class="flex-row mr-30">
+                  <text class="mr-10">新鲜品级:</text>
+                  <view class="flex-row">
+                    <image wx:for="{{goods.goodsStarGreen}}" src="/images/starGreen.png" mode="aspectFill" class="icon-sm" />
+                    <image wx:if="{{goods.goodsStarHalf > 0}}" src="/images/starHalf.png" mode="aspectFill" class="icon-sm" />
+                    <block wx:if="{{goods.goodsStarGreen + goods.goodsStarGray < 5}}">
+                      <image wx:for="{{goods.goodsStarGray}}" src="/images/starGray.png" mode="aspectFill" class="icon-sm" />
+                    </block>
+                  </view>
+                </view>
+                <view>
+                  <image src="/images/open.png" mode="aspectFill" class="icon mt-10" />
+                </view>
+              </view>
+
+            </view>
+            <view class="button-container-white" hover-class="hover" bind:tap="toDetail" data-item="{{goods}}">
+              <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+            </view>
+          </view>
+
+
+          <view class="flex-column p-20 form_data_border_out mt-20 mb-20">
+            <view class="flex-row xia">
+              <view class="flex-column center-content half-row you p-10 ">
+                <text class="text-secondary">采购</text>
+                <view class="flex-row">
+                  <text class="form_data-sm mr-10">{{goods.goodsCostWeightTotalString}}{{goods.gbDgGoodsStandardname}}</text>
+                  <text class="form_data-sm">{{goods.goodsCostTotalString}}元</text>
+
+                </view>
+
+              </view>
+              <view class="flex-column center-content half-row p-10  ">
+                <text class="text-secondary">库存</text>
+                <view class="flex-row">
+                  <text class="form_data-sm mr-10">{{goods.goodsStockWeightTotalString}}{{goods.gbDgGoodsStandardname}}</text>
+                  <text class="form_data-sm">{{goods.goodsStockTotalString}}元</text>
+
+                </view>
+              </view>
+            </view>
+
+            <view class="flex-row xia">
+              <view class="flex-column center-content half-row you p-10 ">
+                <text class="text-secondary">销售</text>
+                <view class="flex-row">
+                  <text class="form_data-sm mr-10">{{goods.goodsProduceWeightTotalString}}{{goods.gbDgGoodsStandardname}}</text>
+                  <text class="form_data-sm">{{goods.goodsProduceTotalString}}元</text>
+
+                </view>
+
+              </view>
+              <view class="flex-column center-content half-row p-10  ">
+                <text class="text-secondary">损耗</text>
+                <view class="flex-row">
+                  <text class="form_data-sm mr-10">{{goods.goodsLossWeightTotalString}}{{goods.gbDgGoodsStandardname}}</text>
+                  <text class="form_data-sm">{{goods.goodsLossTotalString}}元</text>
+
+                </view>
+              </view>
+            </view>
+            <view class="flex-row xia">
+              <view class="flex-column center-content half-row you p-10 ">
+                <text class="text-secondary">废弃</text>
+                <view class="flex-row">
+                  <text class="form_data-sm  mr-10">{{goods.goodsWasteWeightTotalString}}{{goods.gbDgGoodsStandardname}}</text>
+                  <text class="form_data-sm">{{goods.goodsWasteTotalString}}元</text>
+
+                </view>
+
+              </view>
+              <view class="flex-column center-content half-row p-10  ">
+                <text class="text-secondary">退货</text>
+                <view class="flex-row">
+                  <text class="form_data-sm mr-10">{{goods.goodsReturnWeightTotalString}}{{goods.gbDgGoodsStandardname}}</text>
+                  <text class="form_data-sm">{{goods.goodsReturnTotalString}}元</text>
+
+                </view>
+              </view>
+            </view>
+
+
+            <view class="flex-row xia">
+              <view class="flex-column center-content half-row   you p-10">
+                <text class="text-secondary">平均单价</text>
+                <text class="form_data-sm">{{goods.gbDgGoodsAveragePrice}}元/{{goods.gbDgGoodsStandardname}}</text>
+              </view>
+              <view class="flex-column center-content half-row p-10 ">
+                <text class="text-secondary">采购次数</text>
+                <text class="form_data-sm">{{goods.goodsData.purCount}}</text>
+              </view>
+            </view>
+
+            <view class="flex-row ">
+
+              <view class="flex-column center-content half-row p-10 you">
+                <text class="text-secondary">最高单价</text>
+                <text class="form_data-sm">{{goods.goodsData.maxPrice}}元/{{goods.gbDgGoodsStandardname}}</text>
+              </view>
+
+              <view class="flex-column center-content half-row    p-10">
+                <text class="text-secondary">最低单价</text>
+                <text class="form_data-sm">{{goods.goodsData.minPrice}}元/{{goods.gbDgGoodsStandardname}}</text>
+              </view>
+
+            </view>
+
+
+          </view>
+
+          <!-- <view class="flex-column text-center">
+              <view class="flex-row bg-light font-sm text-primary">
+                <text class="quarter-row"></text>
+                <text class="third-row p-10 text-center you_soild">数量</text>
+                <text class="third-row p-10 text-center you_soild">金额</text>
+                <text class="third-row p-10 text-center">比例</text>
+              </view>
+
+              <view class="flex-column">
+
+
+                <view class="flex-row border-bottom">
+
+                  <text class="quarter-row bg-light font-sm text-primary p-10">库存</text>
+                  <text class="third-row p-10 ">{{goods.goodsStockWeightTotalString}}</text>
+                  <text class="third-row p-10 ">{{goods.goodsStockTotalString}}</text>
+                  <text class="third-row p-10">10%</text>
+                </view>
+
+                <view class="flex-row  border-bottom">
+                  <text class="quarter-row bg-light font-sm text-primary p-10">销售</text>
+                  <text class="third-row p-10">{{goods.goodsProduceWeightTotalString}}</text>
+                  <text class="third-row p-10">{{goods.goodsProduceTotalString}}</text>
+                  <text class="third-row p-10">10%</text>
+                </view>
+
+                <view class="flex-row  border-bottom">
+
+                  <text class="quarter-row bg-light font-sm text-primary p-10">损耗</text>
+                  <text class="third-row p-10">{{goods.goodsLossWeightTotalString}}</text>
+                  <text class="third-row p-10">{{goods.goodsLossTotalString}}</text>
+                  <text class="third-row p-10">10%</text>
+                </view>
+
+                <view class="flex-row  border-bottom">
+                  <text class="quarter-row bg-light font-sm text-primary p-10">退货</text>
+                  <text class="third-row p-10">{{goods.goodsReturnWeightTotalString}}</text>
+                  <text class="third-row p-10">{{goods.goodsReturnTotalString}}</text>
+                  <text class="third-row p-10">10%</text>
+                </view>
+
+                <view class="flex-row ">
+                  <text class="quarter-row  bg-light font-sm text-primary p-10">废弃</text>
+                  <text class="third-row p-10">{{goods.goodsWasteWeightTotalString}}</text>
+                  <text class="third-row p-10">{{goods.goodsWasteTotalString}}</text>
+                  <text class="third-row p-10">10%</text>
+                </view>
+
+              </view>
+            </view> -->
+
+
+        </view>
+
+        <view class="font-sm center-content flex-column ">
+          <view class="flex-row">
+            <image src="{{url + '/userImage/daodile3.png'}}" mode="aspectFill" class="icon-lg margin-right" />
+            <view style="line-height: 200rpx;">没有数据啦!</view>
+          </view>
+
+        </view>
+
+
+      </scroll-view>
+
+    </view>
+
+  </block>
+
+
+  <view class="{{arr.length == 0 ? 'show' : 'hide'}}" style="height: {{windowHeight - 360}}rpx;">
+
+    <view class="center-content flex-column" style="padding-top: 200rpx;">
+      <image class="empty_image" src="/images/cart-Empty.png"></image>
+      <text class="big">无数据</text>
+    </view>
+
+  </view>
+  <!-- ./empty -->
+
+
+
+
+
+
+</view>
+
+
+
+
+
+<view class="overlay {{showStar ? 'show' : 'hide'}}" bind:tap="hideMask">
+
+  <view class="flex-column font-md popup p-20">
+    <view class="flex-row p-20">
+      <text>{{showGoods.gbDgGoodsName}}</text>
+      <text>({{showGoods.gbDgGoodsStandardname}})</text>
+    </view>
+
+    <view class="flex-column p-30">
+      <view class="flex-row p-10" wx:if="{{showGoods.goodsData.starsCount.starsFive > 0}}">
+        <view class="flex-row-default" style="width: {{windowWidth / 6}}rpx; ">
+          <image wx:for="11111" src="/images/starGreen.png" mode="aspectFill" class="icon-sm" />
+        </view>
+
+        <text class="ml-20">{{showGoods.goodsData.starsCount.starsFive}}次</text>
+      </view>
+
+
+      <view class="flex-row  p-10" wx:if="{{showGoods.goodsData.starsCount.starsFour > 0}}">
+
+        <view class="flex-row-default" style="width: {{windowWidth / 6}}rpx; ">
+          <image wx:for="1111" src="/images/starGreen.png" mode="aspectFill" class="icon-sm" />
+          <image src="/images/starGray.png" mode="aspectFill" class="icon-sm" />
+        </view>
+        <text class="ml-20">{{showGoods.goodsData.starsCount.starsFour}}次</text>
+      </view>
+
+
+      <view class="flex-row  p-10" wx:if="{{showGoods.goodsData.starsCount.starsThree > 0}}">
+        <view class="flex-row-default" style="width: {{windowWidth / 6}}rpx; ">
+          <image wx:for="111" src="/images/starGreen.png" mode="aspectFill" class="icon-sm" />
+          <image wx:for="11" src="/images/starGray.png" mode="aspectFill" class="icon-sm" />
+        </view>
+        <text class="ml-20">{{showGoods.goodsData.starsCount.starsThree}}次</text>
+      </view>
+
+
+      <view class="flex-row  p-10" wx:if="{{showGoods.goodsData.starsCount.starsTwo > 0}}">
+        <view class="flex-row-default" style="width: {{windowWidth / 6}}rpx; ">
+          <image wx:for="11" src="/images/starGreen.png" mode="aspectFill" class="icon-sm" />
+          <image wx:for="111" src="/images/starGray.png" mode="aspectFill" class="icon-sm" />
+
+        </view>
+        <text class="ml-20">{{showGoods.goodsData.starsCount.starsTwo}}次</text>
+      </view>
+      <view class=" p-10 flex-row" wx:if="{{showGoods.goodsData.starsCount.starsOne > 0}}">
+        <image src="/images/starGreen.png" mode="aspectFill" class="icon-sm" />
+        <image wx:for="1111" src="/images/starGray.png" mode="aspectFill" class="icon-sm" />
+        <text class="ml-20">{{showGoods.goodsData.starsCount.starsOne}}次</text>
+      </view>
+
+    </view>
+
+  </view>
+</view>
+
+
+<view class="overlay {{showSearch ? 'show' : 'hide'}}" catch:tap="hideMask">
+  <view class="flex-column nnn bg-white font-md">
+
+
+    <view class="flex-row p-30 border-bottom" catch:tap="searchData" data-type="stars" data-string="按新鲜品级">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按新鲜品级</text>
+    </view>
+    <view class="flex-row p-30  border-bottom" catch:tap="searchData" data-type="cost" data-string="按采购金额">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按采购金额</text>
+    </view>
+    <view class="flex-row p-30  border-bottom" catch:tap="searchData" data-type="costWeight" data-string="按采购数量">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按采购数量</text>
+    </view>
+    <view class="flex-row p-30  border-bottom" catch:tap="searchData" data-type="stock" data-string="按库存数量">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按库存数量</text>
+    </view>
+    <view class="flex-row p-30  border-bottom" catch:tap="searchData" data-type="produce" data-string="按销售金额">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按销售金额</text>
+    </view>
+    <view class="flex-row p-30  border-bottom" catch:tap="searchData" data-type="loss" data-string="按损耗金额">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按损耗金额</text>
+    </view>
+    <view class="flex-row p-30  border-bottom" catch:tap="searchData" data-type="return" data-string="按退货金额">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按退货金额</text>
+    </view>
+    <view class="flex-row p-30" catch:tap="searchData" data-type="lossTotal" data-string="按废弃金额">
+      <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon mr-20" />
+      <text>按废弃金额</text>
+    </view>
+    <view style="height: 20rpx;"></view>
+
+
+
+  </view>
+
+
+</view>

@@ -292,7 +292,7 @@
                       <text class="gfc-dep-head-date" wx:elif="{{day.departmentGoodsDailyEntity && day.departmentGoodsDailyEntity.gbDgdDate}}">{{tool.transferDateString(day.departmentGoodsDailyEntity.gbDgdDate)}}</text>
                       <text class="gfc-dep-head-sep" wx:if="{{everyday.date || (day.departmentGoodsDailyEntity && day.departmentGoodsDailyEntity.gbDgdDate)}}">·</text>
                       <text class="gfc-dep-head-dept">{{day.gbDepartmentName}}</text>
-                      <text class="gfc-dep-head-attr" wx:if="{{day.gbDepartmentAttrName}}">（{{day.gbDepartmentAttrName}}）</text>
+                      <text class="gfc-dep-head-attr" wx:if="{{day.gbDepartmentName}}">（{{day.gbDepartmentName}}）</text>
                     </view>
 
                     <!-- 三模块：出库 | 菜品销售 | 本原料收支 -->

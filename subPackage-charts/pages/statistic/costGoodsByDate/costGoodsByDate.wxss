@@ -128,6 +128,18 @@
   box-shadow: 0 4rpx 12rpx rgba(126, 126, 126, 0.15) !important;
 }
 
+.price-container.employee-meal-type {
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.1) 0%, rgba(255, 149, 0, 0.05) 100%) !important;
+  border-color: rgba(255, 149, 0, 0.2) !important;
+  box-shadow: 0 2rpx 8rpx rgba(255, 149, 0, 0.1) !important;
+}
+
+.price-container.employee-meal-type:hover {
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.15) 0%, rgba(255, 149, 0, 0.1) 100%) !important;
+  border-color: rgba(255, 149, 0, 0.3) !important;
+  box-shadow: 0 4rpx 12rpx rgba(255, 149, 0, 0.15) !important;
+}
+
 /* 统一所有类型的价格数值颜色 */
 .price-container .price-value {
   color: #05c0a7 !important;
@@ -163,7 +175,7 @@
   overflow: hidden;
   flex: 1;
   min-width: 0;
-  max-width: calc(33.333% - 7rpx);
+  max-width: calc(25% - 7rpx);
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;
@@ -259,6 +271,10 @@
   background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
 }
 
+.employee-meal-icon {
+  background: linear-gradient(135deg, #ff9500 0%, #e67e22 100%);
+}
+
 .icon-image {
   width: 28rpx;
   height: 28rpx;
@@ -291,9 +307,9 @@
   margin-bottom: 12rpx;
   text-shadow: 0 2rpx 4rpx rgba(5, 192, 167, 0.1);
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* white-space: nowrap; */
+  /* overflow: hidden; */
+  /* text-overflow: ellipsis; */
 }
 
 /* 详细信息区域 */
@@ -678,6 +694,11 @@ ec-canvas {
 .return-type{
   background: rgba(126, 126, 126, 0.1);
   color: #000000;
+}
+
+.employee-meal-type{
+  background: rgba(255, 159, 67, 0.15);
+  color: #e67e22;
 }
 
 /* 右侧箭头区域 */

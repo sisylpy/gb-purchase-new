@@ -1,6 +1,6 @@
 const globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
-var dateUtils = require('../../../utils/dateUtil');
+var dateUtils = require('../../../lib/dateUtil.js');
 
 import {
   getDisGoodsBusiness,
@@ -154,9 +154,7 @@ Page({
     load.showLoading("获取数据中")
     getDisGoodsBusiness(data)
       .then(res => {
-        load.hideLoading();
-        console.log(res);
-        if (res.result.code == 0) {
+        load.hideLoading();if (res.result.code == 0) {
           this.setData({
             stockArr: res.result.data,
             update: false,
@@ -178,11 +176,7 @@ Page({
   // 自动滚动到目标库存批次
   _scrollToTargetStock() {
     const targetStockId = this.data.targetStockId;
-    if (!targetStockId) return;
-    
-    console.log('🎯 开始滚动到目标库存批次:', targetStockId);
-    
-    // 延迟执行，确保DOM渲染完成
+    if (!targetStockId) return;// 延迟执行，确保DOM渲染完成
     setTimeout(() => {
       // 查找目标库存批次在数组中的索引
       const stockArr = this.data.stockArr;
@@ -195,14 +189,8 @@ Page({
         }
       }
       
-      if (targetIndex === -1) {
-        console.log('❌ 未找到目标库存批次:', targetStockId);
-        return;
-      }
-      
-      console.log('✅ 找到目标库存批次，索引:', targetIndex);
-      
-      // 设置选中状态
+      if (targetIndex === -1) {return;
+      }// 设置选中状态
       this.setData({
         selectedStockIndex: targetIndex
       });
@@ -214,23 +202,10 @@ Page({
         if (res[0]) {
           const rect = res[0];
           // 修复滚动计算：使用 rect.top 减去导航栏高度和偏移量
-          const scrollTop = Math.max(0, rect.top - this.data.navBarHeight - 20); // 20px 的偏移量
-          
-          console.log('📏 滚动参数:', {
-            rect: rect,
-            scrollTop: scrollTop,
-            navBarHeight: this.data.navBarHeight
-          });
-          
-          wx.pageScrollTo({
+          const scrollTop = Math.max(0, rect.top - this.data.navBarHeight - 20); // 20px 的偏移量wx.pageScrollTo({
             scrollTop: scrollTop,
             duration: 500
-          });
-          
-          console.log('🎯 滚动完成');
-        } else {
-          console.log('❌ 未找到目标元素');
-        }
+          });} else {}
       });
     }, 300);
   },
@@ -256,16 +231,7 @@ Page({
   }, 
 
   
-  showStock(e){
-      console.log("=== showStock 方法开始 ===");
-      console.log("点击事件数据:", e.currentTarget.dataset.item);
-      console.log("当前页面数据状态:", {
-        showStock: this.data.showStock,
-        disGoods: this.data.disGoods,
-        disInfo: this.data.disInfo
-      });
-      
-     var item = e.currentTarget.dataset.item;
+  showStock(e){var item = e.currentTarget.dataset.item;
      if (!item) {
        console.error("item 数据为空!");
        return;
@@ -273,16 +239,8 @@ Page({
      
      item.gbDistributerGoodsEntity = this.data.disGoods;
      var mendianInfo = wx.getStorageSync('mendianInfo');
-     var depList = mendianInfo ? mendianInfo.gbDepartmentEntityList : [];
-     console.log("部门列表长度:", depList.length);
-     
-     // 设置初始showType
-     var initialShowType = (depList.length > 1) ? 6 : 1;
-     console.log("初始showType:", initialShowType);
-     
-     // 处理废弃时间逻辑
-     console.log("废弃时间检查:", item.gbDgsWasteFullTime);
-     if (item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== '') {
+     var depList = mendianInfo ? mendianInfo.gbDepartmentEntityList : [];// 设置初始showType
+     var initialShowType = (depList.length > 1) ? 6 : 1;// 处理废弃时间逻辑if (item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== '') {
         var endTime = item.gbDgsWasteFullTime;
         var startTime = this.data.nowTime;
         var endTimeFormat = endTime.replace(/-/g, '/') //所有的- 都替换成/
@@ -290,28 +248,16 @@ Page({
         var startTimeFormat = startTime.replace(/-/g, '/') //所有的- 都替换成/
         var startTimeDown = Date.parse(new Date(startTimeFormat));
         var thisResult = Number(endTimeDown) - Number(startTimeDown);
-        thisResult = Math.floor(thisResult / 1000 / 60 / 60);
-        
-        console.log("时间计算结果:", {
-          endTime: endTime,
-          startTime: startTime,
-          thisResult: thisResult
-        });
-        
-        if (thisResult < 0) { // 超过废弃时间
+        thisResult = Math.floor(thisResult / 1000 / 60 / 60);if (thisResult < 0) { // 超过废弃时间
           var restWeight = item.gbDgsRestWeight;
           item.gbDgsMyWasteWeight = restWeight;
-          item.gbDgsMyProduceWeight = "0";
-          console.log("超过废弃时间，设置为废弃模式");
-          this.setData({
+          item.gbDgsMyProduceWeight = "0";this.setData({
             canWaste: true,
             canSure: true,
             showType: 4,
           })
         } else {
-          item.gbDgsMyProduceWeight = item.gbDgsRestWeight;
-          console.log("未超过废弃时间，设置为生产模式");
-          this.setData({
+          item.gbDgsMyProduceWeight = item.gbDgsRestWeight;this.setData({
             canWaste: false,
             resultTime: thisResult,
             canSure: true,
@@ -319,24 +265,12 @@ Page({
           })
         }
       } else {
-        item.gbDgsMyProduceWeight = item.gbDgsRestWeight;
-        console.log("无废弃时间，设置为生产模式");
-        this.setData({
+        item.gbDgsMyProduceWeight = item.gbDgsRestWeight;this.setData({
           canWaste: false,
           canSure: true,
           showType: initialShowType
         })
-      }
-  
-      console.log("最终item数据:", {
-        gbDgsRestWeight: item.gbDgsRestWeight,
-        gbDgsMyProduceWeight: item.gbDgsMyProduceWeight,
-        gbDgsMyWasteWeight: item.gbDgsMyWasteWeight
-      });
-      
-      // 修复数据传递问题：使用stockItem而不是item
-      console.log("设置弹窗显示数据...");
-      item.gbDistributerGoodsEntity = this.data.disGoods;
+      }// 修复数据传递问题：使用stockItem而不是itemitem.gbDistributerGoodsEntity = this.data.disGoods;
       this.setData({
         showStock: true,
         stockItem: item,  // 修复：使用stockItem
@@ -344,24 +278,17 @@ Page({
         consultItem: JSON.parse(JSON.stringify(item)),
         depGoods: e.currentTarget.dataset.goods,
         depList: depList
-      });
-      
-      console.log("弹窗数据设置完成，当前showStock状态:", this.data.showStock);
-      console.log("=== showStock 方法结束 ===");
-    },
+      });},
     
 
 
     confirmStock(e) {
       var item = e.detail.item;
-      var showType = e.detail.showType;
-      console.log("showtypeoeoe", showType);
-      if (this.data.transfer !== '1') {
+      var showType = e.detail.showType;if (this.data.transfer !== '1') {
         item.gbDgsReduceWeightUserId = this.data.userInfo.gbDepartmentUserId;
       }
       if (showType == 1) {
-        load.showLoading("保存数据中")
-        console.log(item);
+        load.showLoading("保存数据中");
         saveDepProduceGoodsStock(item)
           .then(res => {
             load.hideLoading();
@@ -378,10 +305,7 @@ Page({
   
         saveDepLossGoodsStock(item)
           .then(res => {
-            load.hideLoading();
-            console.log(res.result.data);
-            console.log("---==========")
-            if (res.result.code == 0) {
+            load.hideLoading();if (res.result.code == 0) {
               
               this._getInitData();
   
@@ -389,11 +313,7 @@ Page({
               var that = this;
               var src = that.data.src;
               var reason = that.data.reason;
-              var id = res.result.data.gbDepartmentGoodsStockReduceId;
-              console.log(src + reason + id);
-              reduceAttachmentSaveWithFile(src, reason, id).then((res) => {
-                console.log(res);
-                if (res.result == '{"code":0}') {
+              var id = res.result.data.gbDepartmentGoodsStockReduceId;reduceAttachmentSaveWithFile(src, reason, id).then((res) => {if (res.result == '{"code":0}') {
                 
                  
                 } else {
@@ -411,14 +331,10 @@ Page({
       } else if (showType == 3) {
         if (this.data.transfer !== '1') {
           item.gbDgsReturnUserId = this.data.userInfo.gbDepartmentUserId;
-        }
-        console.log(item);
-        load.showLoading("保存数据中")
+        }load.showLoading("保存数据中")
         saveDepReturnGoodsStock(item)
           .then(res => {
-            load.hideLoading();
-            console.log(res.result.data);
-            if (res.result.code == 0) {
+            load.hideLoading();if (res.result.code == 0) {
               this._getInitData();
             }else{
               wx.showToast({
@@ -428,10 +344,7 @@ Page({
             }
           })
       } else if (showType == 4) {
-        load.showLoading("保存数据中");
-  
-        console.log(item);
-        saveDepWasteGoodsStock(item)
+        load.showLoading("保存数据中");saveDepWasteGoodsStock(item)
           .then(res => {
             load.hideLoading();
             if (res.result.code == 0) {
@@ -468,13 +381,10 @@ Page({
     var id = this.data.item.gbDepartmentGoodsStockId;
     var userId = this.data.userInfo.gbDepartmentUserId;
     var stars = e.detail.item.gbDgsStars;
-     load.showLoading("保存数据中")
-     console.log("stars", stars)
-    reduceAttachmentSaveWithFileStar(src, reason, id,stars, userId).then((res) => {
-      console.log(res);
-      load.hideLoading();
-      console.log("resres", res.result)
-      if (res.result == '{"code":0}') {
+     load.showLoading("保存数据中");
+     reduceAttachmentSaveWithFileStar(src, reason, id,stars, userId).then((res) => {
+       load.hideLoading();
+       if (res.result == '{"code":0}') {
         that.setData({
           showStar: false
         })
@@ -530,12 +440,8 @@ Page({
         var id = this.data.item.gbDepartmentGoodsStockId;
         var stars = that.data.stars;
          load.showLoading("保存数据中")
-        reduceAttachmentSaveWithFileStar(src, reason, id,stars).then((res) => {
-          console.log(res);
-          load.hideLoading();
-          if (res.result.code == 0) {
-            console.log("that",that);
-            that._getInitData();
+        reduceAttachmentSaveWithFileStar(src, reason, id,stars).then((res) => {load.hideLoading();
+          if (res.result.code == 0) {that._getInitData();
           } else {
             load.hideLoading();
             wx.showToast({
@@ -555,9 +461,7 @@ Page({
     });
   },
 
-  updateStars(e) {
-    console.log(e);
-    var data = {
+  updateStars(e) {var data = {
       id: this.data.item.gbDepartmentGoodsStockId,
       stars: e.detail.gbDgsStars,
     }
@@ -582,10 +486,7 @@ Page({
 
 
 
-  deleteReduce(e) {
-
-    console.log(e)
-    var id = e.currentTarget.dataset.id;
+  deleteReduce(e) {var id = e.currentTarget.dataset.id;
 
     deleteReduceItem(id)
       .then(res => {

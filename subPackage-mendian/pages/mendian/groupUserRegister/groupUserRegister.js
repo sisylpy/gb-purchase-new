@@ -8,7 +8,7 @@ var load = require('../../../../lib/load.js');
 const {
   gbPurchaserRegitsteWithFile,
   gbLogin,
-} = require('../../../services/apiDistributerGbUser.js');
+} = require('../../../../services/apiDistributerGbUser.js');
 
 Page({
 
@@ -51,7 +51,6 @@ Page({
   _aaa(){
     wx.login({
       success: (res) => {
-        console.log(res);
        this.setData({
          code: res.code
        })
@@ -76,7 +75,7 @@ _userLogin() {
             wx.setStorageSync('disInfo', res.result.data.disInfo);
             wx.setStorageSync('userInfo', res.result.data.depUserInfo);
             wx.redirectTo({
-              url: '/subPackage-ai/pages/ai/chefOrder/chefOrder',
+              url: '/subPackage-mendian/pages/order/chefOrder/chefOrder',
             })
             //跳转到首页
           } else {
@@ -102,7 +101,6 @@ onNicknameInput(e) {
   this.setData({
     nickName: value
   });
-  console.log('实时昵称:', value);
   this._checkRegister();
 },
 
@@ -147,9 +145,7 @@ save(e) {
           var gbDisId = this.data.disId;
           var admin = this.data.admin;
           load.showLoading("保存修改内容")
-          console.log(userName + gbDisId + code + "adin==" + admin)
           gbPurchaserRegitsteWithFile(avatarUrl, userName, code, admin, gbDisId, depFatherId, depId).then((res) => {
-            console.log(res);
             load.hideLoading();
             const jsonObject = JSON.parse(res.result);
             if (jsonObject.code === 0) {

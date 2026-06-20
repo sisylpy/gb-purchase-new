@@ -1,0 +1,95 @@
+<view class="pa-card" wx:if="{{cardData}}">
+  <!-- 卡片标题 -->
+  <view class="pa-header">
+    <view class="pa-title-row">
+      <text class="pa-title">{{cardData.title || '采购异常'}}</text>
+      <text class="pa-time" wx:if="{{cardData.timeLabel}}">{{cardData.timeLabel}}</text>
+    </view>
+    <text class="pa-scope" wx:if="{{cardData.scopeLabel}}">{{cardData.scopeLabel}}</text>
+  </view>
+
+  <!-- 重点异常行 -->
+  <view class="pa-section" wx:if="{{cardData.focusRows && cardData.focusRows.length > 0}}">
+    <view class="pa-section-label">
+      <text class="pa-section-dot"></text>
+      <text class="pa-section-text">重点关注</text>
+    </view>
+
+    <view class="pa-row-item pa-row-item--focus" wx:for="{{cardData.focusRows}}" wx:key="disGoodsId" wx:for-item="row" wx:for-index="rowIdx">
+      <!-- 商品名称 + 变动标签 -->
+      <view class="pa-row-head">
+        <text class="pa-row-goods">{{row.goodsName || '—'}}{{row.standardName ? '（' + row.standardName + '）' : ''}}</text>
+        <text class="pa-row-badge {{_badgeClass(row.priceChangePercent)}}">{{_formatChange(row.priceChangePercent)}}</text>
+      </view>
+      <!-- 价格对比 -->
+      <view class="pa-row-price-cmp">
+        <text class="pa-price-old">¥{{row.previousUnitPrice || '—'}}</text>
+        <text class="pa-price-arrow">→</text>
+        <text class="pa-price-new">¥{{row.currentUnitPrice || '—'}}</text>
+      </view>
+      <!-- 批次对比详情 -->
+      <view class="pa-batch-compare" wx:if="{{row.compareBatches && row.compareBatches.length > 0}}">
+        <view class="pa-batch-label">批次对比</view>
+        <view class="pa-batch-cols">
+          <block wx:for="{{row.compareBatches}}" wx:key="batchRole" wx:for-item="batch">
+            <view class="pa-batch-col {{batch.batchRole === 'CURRENT' ? 'pa-batch-col--current' : 'pa-batch-col--prev'}}">
+              <text class="pa-batch-role">{{batch.batchRole === 'CURRENT' ? '当期' : '上期'}}</text>
+              <text class="pa-batch-date">采购日 {{_shortDate(batch.purchaseDate)}}</text>
+              <text class="pa-batch-qty">数量 {{batch.quantity || '—'}}{{batch.unit || ''}}</text>
+              <text class="pa-batch-price">单价 ¥{{batch.unitPrice || '—'}}</text>
+              <text class="pa-batch-amount">总额 ¥{{batch.amount || '—'}}</text>
+              <text class="pa-batch-source">{{_formatSource(batch)}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+      <!-- 库存耗尽日期 -->
+      <view class="pa-row-expire" wx:if="{{row.stockFinishDate}}">
+        <text class="pa-expire-text">预计库存可支撑至 {{_shortDate(row.stockFinishDate)}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 次要异常行 -->
+  <view class="pa-section" wx:if="{{cardData.secondaryRows && cardData.secondaryRows.length > 0}}">
+    <view class="pa-section-label pa-section-label--secondary">
+      <text class="pa-section-dot pa-section-dot--secondary"></text>
+      <text class="pa-section-text">其他变动</text>
+    </view>
+
+    <view class="pa-row-item pa-row-item--secondary" wx:for="{{cardData.secondaryRows}}" wx:key="disGoodsId" wx:for-item="row" wx:for-index="rowIdx">
+      <view class="pa-row-head">
+        <text class="pa-row-goods pa-row-goods--dim">{{row.goodsName || '—'}}{{row.standardName ? '（' + row.standardName + '）' : ''}}</text>
+        <text class="pa-row-badge {{_badgeClass(row.priceChangePercent)}}">{{_formatChange(row.priceChangePercent)}}</text>
+      </view>
+      <view class="pa-row-price-cmp">
+        <text class="pa-price-old">¥{{row.previousUnitPrice || '—'}}</text>
+        <text class="pa-price-arrow">→</text>
+        <text class="pa-price-new">¥{{row.currentUnitPrice || '—'}}</text>
+      </view>
+      <view class="pa-batch-compare" wx:if="{{row.compareBatches && row.compareBatches.length > 0}}">
+        <view class="pa-batch-label">批次对比</view>
+        <view class="pa-batch-cols">
+          <block wx:for="{{row.compareBatches}}" wx:key="batchRole" wx:for-item="batch">
+            <view class="pa-batch-col {{batch.batchRole === 'CURRENT' ? 'pa-batch-col--current' : 'pa-batch-col--prev'}}">
+              <text class="pa-batch-role">{{batch.batchRole === 'CURRENT' ? '当期' : '上期'}}</text>
+              <text class="pa-batch-date">采购日 {{_shortDate(batch.purchaseDate)}}</text>
+              <text class="pa-batch-qty">数量 {{batch.quantity || '—'}}{{batch.unit || ''}}</text>
+              <text class="pa-batch-price">单价 ¥{{batch.unitPrice || '—'}}</text>
+              <text class="pa-batch-amount">总额 ¥{{batch.amount || '—'}}</text>
+              <text class="pa-batch-source">{{_formatSource(batch)}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+      <view class="pa-row-expire" wx:if="{{row.stockFinishDate}}">
+        <text class="pa-expire-text">预计库存可支撑至 {{_shortDate(row.stockFinishDate)}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 无数据 -->
+  <view class="pa-empty" wx:if="{{(!cardData.focusRows || cardData.focusRows.length === 0) && (!cardData.secondaryRows || cardData.secondaryRows.length === 0)}}">
+    <text class="pa-empty-text">暂无异常数据</text>
+  </view>
+</view>

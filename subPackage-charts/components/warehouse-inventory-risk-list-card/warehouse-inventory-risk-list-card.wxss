@@ -1,27 +1,31 @@
 .wir-card {
-  margin: 20rpx 24rpx;
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx 20rpx;
   background: #fff;
-  border-radius: 16rpx;
-  padding: 28rpx 24rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #eaeaea;
+  box-sizing: border-box;
 }
 
 /* 头部 */
 .wir-header {
-  margin-bottom: 16rpx;
+  margin-bottom: 4rpx;
 }
 
 .wir-title {
   font-size: 32rpx;
-  font-weight: 600;
+  font-weight: 700;
   color: #1a1a1a;
   display: block;
+  line-height: 1.3;
 }
 
 .wir-subtitle {
   font-size: 24rpx;
   color: #999;
-  margin-top: 4rpx;
   display: block;
+  margin-top: 4rpx;
+  line-height: 1.4;
 }
 
 /* 摘要 */
@@ -29,51 +33,86 @@
   background: #f5f7fa;
   border-radius: 10rpx;
   padding: 16rpx 20rpx;
-  margin-bottom: 16rpx;
+  margin-top: 16rpx;
 }
 
 .wir-summary-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #555;
   line-height: 1.6;
 }
 
-/* 风险项列表 */
+/* ========== 紧凑行列表 ========== */
 .wir-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.wir-item {
-  background: #fafafa;
+  margin-top: 16rpx;
   border-radius: 12rpx;
-  padding: 20rpx;
-  margin-bottom: 16rpx;
+  overflow: hidden;
+  border: 1rpx solid #f0f0f0;
 }
 
-.wir-item:last-child {
-  margin-bottom: 0;
-}
-
-.wir-item-head {
+.wir-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #f7f7f7;
 }
 
-.wir-item-name {
-  font-size: 28rpx;
-  font-weight: 600;
+.wir-row:last-child {
+  border-bottom: none;
+}
+
+.wir-row-name {
+  font-size: 26rpx;
   color: #1a1a1a;
-  flex: 1;
+  font-weight: 500;
+  flex-shrink: 0;
+  max-width: 180rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.wir-item-level {
-  font-size: 22rpx;
-  padding: 4rpx 14rpx;
-  border-radius: 20rpx;
+.wir-row-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.wir-row-stock {
+  font-size: 26rpx;
+  color: #333;
   font-weight: 500;
+}
+
+.wir-row-daily {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.wir-row-idle {
+  font-size: 22rpx;
+  color: #e8632d;
+  background: #fff3e0;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+.wir-row-support {
+  font-size: 22rpx;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+/* 风险标签 */
+.wir-risk-tag {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .wir-risk-high {
@@ -91,49 +130,8 @@
   color: #389e0d;
 }
 
-/* 三项指标 */
-.wir-item-stats {
-  display: flex;
-  gap: 20rpx;
-  margin-bottom: 12rpx;
-}
-
-.wir-stat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #fff;
-  border-radius: 8rpx;
-  padding: 12rpx 8rpx;
-}
-
-.wir-stat-label {
-  font-size: 22rpx;
-  color: #999;
-  margin-bottom: 4rpx;
-}
-
-.wir-stat-value {
-  font-size: 26rpx;
-  color: #333;
-  font-weight: 500;
-}
-
-/* 原因 */
-.wir-item-reason {
-  display: flex;
+/* 记入工作记录按钮 */
+.wir-record-btn {
   font-size: 24rpx;
-  line-height: 1.5;
-  padding-top: 8rpx;
-  border-top: 1rpx solid #eee;
-}
-
-.wir-reason-label {
-  color: #999;
   flex-shrink: 0;
-}
-
-.wir-reason-text {
-  color: #666;
 }

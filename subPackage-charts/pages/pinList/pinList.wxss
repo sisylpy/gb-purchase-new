@@ -1,0 +1,193 @@
+/* ========== 页面根容器 ========== */
+.pin-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #faf8f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+/* ========== 主滚动区 ========== */
+.pin-scroll {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ========== 加载中 ========== */
+.pin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 40rpx;
+}
+
+.pin-loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ========== 空状态 ========== */
+.pin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 160rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.pin-empty-img {
+  width: 200rpx;
+  height: 200rpx;
+  opacity: 0.6;
+}
+
+.pin-empty-text {
+  margin-top: 24rpx;
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #5f5f5f;
+}
+
+.pin-empty-sub {
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ========== 图钉卡片 ========== */
+.pin-card {
+  margin: 20rpx 24rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04), 0 1rpx 4rpx rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  transition: opacity 0.15s ease;
+}
+
+.pin-card:active {
+  opacity: 0.85;
+}
+
+/* 卡片头部：图标 + 标题 + 删除 */
+.pin-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.pin-card-icon {
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.pin-card-title {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.pin-card-more {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 44rpx;
+  border-radius: 12rpx;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.pin-card-more-icon {
+  font-size: 28rpx;
+  color: #999;
+  line-height: 1;
+  letter-spacing: 2rpx;
+}
+
+/* 卡片数量标识 */
+.pin-card-badge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 14rpx;
+}
+
+.pin-card-badge-text {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  font-size: 22rpx;
+  color: #999;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8rpx;
+  line-height: 1.6;
+}
+
+/* 预览内容（最多 2 行） */
+.pin-card-preview {
+  margin-top: 16rpx;
+}
+
+.pin-card-preview-text {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+/* 底部：来源 + 时间 */
+.pin-card-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20rpx;
+}
+
+.pin-card-source {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.pin-card-time {
+  font-size: 24rpx;
+  color: #bbb;
+  line-height: 1.4;
+}
+
+/* 底部留白 */
+.pin-scroll-spacer {
+  height: 120rpx;
+}
+
+/* ========== 上拉加载更多 ========== */
+.pin-loadmore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx 40rpx;
+}
+
+.pin-loadmore-text {
+  font-size: 26rpx;
+  color: #bbb;
+}

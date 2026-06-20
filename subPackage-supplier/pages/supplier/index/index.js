@@ -182,9 +182,7 @@ hideModal: function (e) {
 },
 
 
-toSupplierDetail(e) {
-  console.log("ee",e);
-  wx.setStorageSync('supplierItem', e.currentTarget.dataset.item);
+toSupplierDetail(e) {wx.setStorageSync('supplierItem', e.currentTarget.dataset.item);
   wx.navigateTo({
     url: '../supplierBills/supplierBills?type=' + e.currentTarget.dataset.type + '&supplierId=' +
     e.currentTarget.dataset.item.nxJrdhSupplierId + '&value=' + e.currentTarget.dataset.value,
@@ -192,9 +190,7 @@ toSupplierDetail(e) {
 },
 
 
-toSupplierGoods(){
-  console.log("aaa")
-  this.hideMask();
+toSupplierGoods(){this.hideMask();
   wx.setStorageSync('supplierItem', this.data.supplierItem);
   wx.navigateTo({
     url: '../resGoods/resGoods',
@@ -214,27 +210,16 @@ toDeleteSupplier(){
       
       this._initData();
       
-    }else{
-      console.log('删除失败，准备弹出确认框');
-      this.setData({
+    }else{this.setData({
         showOperation: false,
       })
-      load.hideLoading();
-      
-      console.log('调用 wx.showModal');
-      wx.showModal({
+      load.hideLoading();wx.showModal({
         title: res.result.msg,
         content: "如果账单已付款，请供货商操作结账订单",
         showCancel: true,
         confirmText: "删除",
         cancelText: "知道了",
-        success: (res) => {
-          console.log('弹窗回调执行:', res);
-          if (res.cancel) {
-            console.log('用户点击了取消');
-          } else if (res.confirm) {
-            console.log('用户点击了确认');
-            addGbSupplierBlack(this.data.supplierItem.nxJrdhSupplierId).then(res =>{
+        success: (res) => {if (res.cancel) {} else if (res.confirm) {addGbSupplierBlack(this.data.supplierItem.nxJrdhSupplierId).then(res =>{
               if(res.result.code == 0){
                 this.setData({
                   supplierItem: ""
@@ -247,9 +232,7 @@ toDeleteSupplier(){
         fail: (err) => {
           console.error('弹窗显示失败:', err);
         }
-      })
-      console.log('wx.showModal 调用完成');
-    }
+      })}
   })
 },
 

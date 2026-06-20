@@ -1,169 +1,253 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
 
-
 <view class="flex flex-column">
 
   <back-navbar title="每日营业额" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="添加" bindnavbuttontap="toBack"></back-navbar>
 
-  <!-- 添加按钮下拉菜单 -->
-  
-
   <!-- 顶部日期选择 -->
   <view class="flex-row-between pl-20 pr-20 border-bottom bg-white">
-    <view class="flex-row">
-      <view class="p-20" bindtap="toDatePage">
+    <view class="flex-row" bindtap="toDatePage">
+      <view class="p-20">
         <image src="../../../../images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">
         <view class="font-yuan">{{hanzi}}</view>
         <view class="flex-row" wx:if="{{startDate == stopDate}}">
-          <view class="small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <view class="small" wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
         </view>
         <view class="flex-row" wx:else>
-          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <view wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
           <text class="plr-10">-</text>
-          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+          <view wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
         </view>
       </view>
     </view>
-  
-    <view class="turnover-add-btn" hover-class="turnover-add-btn--hover" catchtap="addSingleDay">
-      <image src="../../../../images/add.png" class="turnover-add-btn__icon" mode="aspectFit"></image>
-      <text class="turnover-add-btn__text">添加营业额</text>
+
+    <!-- 下载/上传模板 -->
+    <view class="tool-btns">
+      <view class="download-btn" bindtap="onDownloadCombinedTemplate">下载模板</view>
+      <view class="upload-btn" bindtap="onUploadCombinedExcel">上传模板</view>
     </view>
-  
   </view>
 
-  <!-- 统计数据卡片 -->
-  <view class="flex-column p-20" wx:if="{{stats}}">
-    <!-- 核心指标 -->
-    <view class="flex-row-between mb-20">
-      <view class="stat-card flex-1 mr-20">
-        <view class="font-sl text-secondary">总营业额</view>
-        <view class="font-lg font-bold" style="color: #007aff;">{{stats.totalRevenue}}元</view>
-        <view class="font-sl text-secondary">日均 {{stats.avgRevenuePerDay}}元</view>
-      </view>
-      <view class="stat-card flex-1">
-        <view class="font-sl text-secondary">总订单数</view>
-        <view class="font-lg font-bold" style="color: #ff9500;">{{stats.totalOrders}}单</view>
-        <view class="font-sl text-secondary">共 {{stats.days}} 天</view>
-      </view>
-    </view>
-
-    <!-- 堂食/外卖对比 -->
-    <view class="flex-row-between mb-20">
-      <view class="stat-card flex-1 mr-10 bg-dinein">
-        <view class="flex-row align-center mb-10">
-          <image src="../../../../images/chicang.png" class="icon-sm mr-10"></image>
-          <text class="font-sm font-bold">堂食</text>
+  <!-- 合并模板日期弹窗 -->
+  <view class="combined-tpl-modal" wx:if="{{showCombinedTemplateModal}}">
+    <view class="combined-tpl-mask" bindtap="onCloseCombinedTemplateModal"></view>
+    <view class="combined-tpl-panel">
+      <view class="combined-tpl-title">合并模板 · 日期范围</view>
+      <view class="combined-tpl-form">
+        <view class="combined-tpl-form-item">
+          <text class="combined-tpl-form-label">开始日期</text>
+          <picker mode="date" value="{{combinedTemplateStartDate}}" end="{{todayDate}}"
+            bindchange="onCombinedTemplateStartChange">
+            <view class="combined-tpl-form-input flex-row-between">
+              <text>{{combinedTemplateStartDate || '请选择'}}</text>
+              <text class="text-secondary">›</text>
+            </view>
+          </picker>
         </view>
-        <view class="font-lg font-bold" style="color: #007aff;">{{stats.totalDineIn}}元</view>
-        <view class="font-sl text-secondary">日均 {{stats.avgDineInPerDay}}元</view>
+        <view class="combined-tpl-form-item">
+          <text class="combined-tpl-form-label">结束日期</text>
+          <picker mode="date" value="{{combinedTemplateEndDate}}" start="{{combinedTemplateStartDate}}"
+            end="{{todayDate}}" bindchange="onCombinedTemplateEndChange">
+            <view class="combined-tpl-form-input flex-row-between">
+              <text>{{combinedTemplateEndDate || '请选择'}}</text>
+              <text class="text-secondary">›</text>
+            </view>
+          </picker>
+        </view>
       </view>
-      <view class="stat-card flex-1 ml-10 bg-takeout">
-        <view class="flex-row align-center mb-10">
-          <image src="../../../../images/waimai.png" class="icon-sm mr-10"></image>
-          <text class="font-sm font-bold">外卖</text>
-        </view>
-        <view class="font-lg font-bold" style="color: #34c759;">{{stats.totalTakeout}}元</view>
-        <view class="font-sl text-secondary">日均 {{stats.avgTakeoutPerDay}}元</view>
-      </view>
-    </view>
-
-    <!-- 平台抽成 -->
-    <view class="stat-card bg-platform mb-20">
-      <view class="flex-row-between">
-        <view>
-          <view class="font-sl text-secondary">平台抽成</view>
-          <view class="font-lg font-bold" style="color: #ff3b30;">{{stats.totalPlatformFee}}元</view>
-        </view>
-        <view class="text-right">
-          <view class="font-sl text-secondary">实收</view>
-          <view class="font-lg font-bold" style="color: #007aff;">{{actualRevenue}}元</view>
-        </view>
+      <view class="combined-tpl-actions">
+        <view class="combined-tpl-btn combined-tpl-btn--ghost" bindtap="onCloseCombinedTemplateModal">取消</view>
+        <view class="combined-tpl-btn combined-tpl-btn--primary" bindtap="onConfirmDownloadCombined">确认下载</view>
       </view>
     </view>
   </view>
 
-  <!-- 曲线图 -->
-  <view class="bg-white p-20 mb-20" wx:if="{{chartData && chartData.length > 0}}">
-    <view class="flex-row-between mb-20">
-      <text class="font-sm font-bold">营业额趋势</text>
-      <view class="flex-row">
-        <view class="chart-legend">
-          <view class="legend-dot" style="background: #007aff;"></view>
-          <text class="font-sl">堂食</text>
-        </view>
-        <view class="chart-legend ml-20">
-          <view class="legend-dot" style="background: #34c759;"></view>
-          <text class="font-sl">外卖</text>
-        </view>
+  <!-- ========== 九宫格汇总统计卡片 ========== -->
+  <view class="summary-grid p-20" wx:if="{{summary}}">
+    <!-- 第一行：总营业额 / 实收 / 总订单数 -->
+    <view class="sg-row">
+      <view class="sg-card">
+        <view class="sg-card__label">总营业额</view>
+        <view class="sg-card__value sg-card__value--green">{{summary.totalRevenueAmount}}</view>
+        <view class="sg-card__sub">日均 {{summary.averageDailyRevenue}}</view>
+      </view>
+      <view class="sg-card">
+        <view class="sg-card__label">实收</view>
+        <view class="sg-card__value sg-card__value--blue">{{summary.netReceivedAmount}}</view>
+        <view class="sg-card__sub">日均 {{summary.averageDailyRevenue}}</view>
+      </view>
+      <view class="sg-card">
+        <view class="sg-card__label">总订单数</view>
+        <view class="sg-card__value sg-card__value--orange">{{summary.totalOrderCount}}<text class="sg-card__unit">单</text></view>
+        <view class="sg-card__sub">日均 {{summary.averageDailyOrderCount}} 单</view>
       </view>
     </view>
-    <view style="height: 300rpx;">
+
+    <!-- 第二行：堂食营业额 / 外卖营业额 / 员工餐 -->
+    <view class="sg-row">
+      <view class="sg-card">
+        <view class="sg-card__header">
+          <text class="sg-card__label">堂食营业额</text>
+          <image src="../../../../images/dish.png" class="sg-card__icon"></image>
+        </view>
+        <view class="sg-card__value sg-card__value--green">{{summary.dineInRevenueAmount}}</view>
+        <view class="sg-card__sub">占比 {{dineInPercent}}%</view>
+      </view>
+      <view class="sg-card">
+        <view class="sg-card__header">
+          <text class="sg-card__label">外卖营业额</text>
+          <image src="../../../../images/delivery.png" class="sg-card__icon"></image>
+        </view>
+        <view class="sg-card__value sg-card__value--green">{{summary.takeoutRevenueAmount}}</view>
+        <view class="sg-card__sub">占比 {{takeoutPercent}}%</view>
+      </view>
+      <view class="sg-card">
+        <view class="sg-card__header">
+          <text class="sg-card__label">员工餐</text>
+          <image src="../../../../images/user-group-2.png" class="sg-card__icon" mode="aspectFit"></image>
+        </view>
+        <view class="sg-card__value sg-card__value--purple">{{empSummaryDisplay || (summary.employeeMealPortions + '份')}}</view>
+        <view class="sg-card__sub">日均 {{empDailyAverage}} 份</view>
+      </view>
+    </view>
+
+    <!-- 第三行：折扣餐额 / 赠送金额 / 平台抽成 -->
+    <view class="sg-row">
+      <view class="sg-card">
+        <view class="sg-card__header">
+          <text class="sg-card__label">折扣餐额</text>
+          <text class="sg-card__tag sg-card__tag--orange">折</text>
+        </view>
+        <view class="sg-card__value sg-card__value--orange">{{summary.discountSalesAmount}}</view>
+        <view class="sg-card__sub">占比 {{discountPercent}}%</view>
+      </view>
+      <view class="sg-card">
+        <view class="sg-card__header">
+          <text class="sg-card__label">赠送金额</text>
+          <text class="sg-card__tag sg-card__tag--pink">赠</text>
+        </view>
+        <view class="sg-card__value sg-card__value--pink">{{summary.complimentaryOriginalValue}}</view>
+        <view class="sg-card__sub">占比 {{complimentaryPercent}}%</view>
+      </view>
+      <view class="sg-card">
+        <view class="sg-card__header">
+          <text class="sg-card__label">平台抽成</text>
+          <text class="sg-card__tag sg-card__tag--orange">%</text>
+        </view>
+        <view class="sg-card__value sg-card__value--orange">{{summary.platformFeeAmount}}</view>
+        <view class="sg-card__sub">占比 {{platformPercent}}%</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 营业额趋势图 ========== -->
+  <view class="chart-section bg-white mb-20" wx:if="{{dailyRows.length > 0}}">
+    <view class="chart-section__header">
+      <view class="chart-section__title-bar"></view>
+      <text class="chart-section__title">营业额趋势</text>
+    </view>
+    <view style="height: 400rpx;">
       <ec-canvas id="turnoverChart" canvas-id="turnoverChart" ec="{{ ecTurnover }}" style="width: 100%; height: 100%;"></ec-canvas>
     </view>
   </view>
 
-  <!-- 每日详情列表 -->
-  <view class="bg-white" wx:if="{{dailyList && dailyList.length > 0}}">
-    <view class="p-20 border-bottom">
-      <text class="font-sm font-bold">每日详情</text>
+  <!-- ========== 每日营业详情 ========== -->
+  <view class="bg-white" wx:if="{{dailyRows.length > 0}}">
+    <!-- 标题栏 -->
+    <view class="detail-header border-bottom">
+      <view class="detail-header__left">
+        <view class="detail-header__bar"></view>
+        <text class="detail-header__title">每日营业详情</text>
+      </view>
+      <view class="detail-header__right" bindtap="toggleDailyRows">
+        <text class="detail-header__action">{{showAllDailyRows ? '展开更多' : '收起'}}</text>
+        <text class="detail-header__arrow {{showAllDailyRows ? '' : 'rotated'}}">&#xe900;</text>
+      </view>
     </view>
-    <view class="flex-column" wx:for="{{dailyList}}" wx:key="gbAiDailyRevenueId">
-      <view class="daily-item daily-item--tappable p-20 border-bottom" hover-class="daily-item--hover" bindtap="openFoodSalesEdit" data-record-date="{{item.gbAiDailyRevenueRecordDate}}">
-        <!-- 日期头部 -->
-        <view class="flex-row-between mb-20">
-          <view class="flex-row align-center">
-            <view class="date-badge">
-              <text class="date-day">{{tool.getDay(item.gbAiDailyRevenueRecordDate)}}</text>
-              <text class="date-month">{{tool.getMonth(item.gbAiDailyRevenueRecordDate)}}月</text>
-            </view>
-            <view class="ml-20">
-              <text class="font-md">{{tool.getWeekDayName(item.gbAiDailyRevenueWeekday)}}</text>
+
+    <!-- 每日卡片列表 -->
+    <view class="flex-column" wx:for="{{dailyRows}}" wx:key="date" wx:for-item="row" wx:if="{{showAllDailyRows || index < 3}}">
+      <view class="daily-card" hover-class="daily-card--hover" bindtap="openFoodSalesEdit" data-date="{{row.date}}" data-record-date="{{row.date}}">
+        <!-- 主体行：日期 + 数据 + 箭头 -->
+        <view class="daily-card__top">
+          <!-- 左侧：日期 + 星期 + 天气图标 -->
+          <view class="daily-card__date-info">
+            <text class="daily-card__date-text">{{row.date}}</text>
+            <view class="daily-card__date-sub">
+              <text class="daily-card__weekday">{{row.weekLabel}}</text>
+              <text class="daily-card__weather">☀</text>
             </view>
           </view>
-          <view class="revenue-badge">
-            <text class="font-lg font-bold" style="color: #007aff;">{{item.gbAiDailyRevenueGrossRevenue}}</text>
-            <text class="font-sm text-secondary">元</text>
+
+          <!-- 中间数据列：总营业额 / 堂食 / 外卖 / 订单数 -->
+          <view class="daily-card__main-stats">
+            <view class="dc-stat-col dc-stat-col--total">
+              <text class="dc-stat-label">总营业额</text>
+              <text class="dc-stat-val">¥ {{row.totalRevenueAmount}}</text>
+              <text class="dc-stat-sub">实收 ¥ {{row.netReceivedAmount}}</text>
+            </view>
+            <view class="dc-stat-col">
+              <text class="dc-stat-label">堂食</text>
+              <text class="dc-stat-val dc-stat-val--blue">¥ {{row.dineInRevenueAmount}}</text>
+              <text class="dc-stat-pct">{{row._dineInPercent}}%</text>
+            </view>
+            <view class="dc-stat-col">
+              <text class="dc-stat-label">外卖</text>
+              <text class="dc-stat-val dc-stat-val--green">¥ {{row.takeoutRevenueAmount}}</text>
+              <text class="dc-stat-pct">{{row._takeoutPercent}}%</text>
+            </view>
+            <view class="dc-stat-col dc-stat-col--order">
+              <text class="dc-stat-label">订单数</text>
+              <text class="dc-stat-val dc-stat-val--orange">{{row.orderCount}}<text class="dc-unit"> 单</text></text>
+            </view>
           </view>
+
+          <!-- 右侧箭头 -->
+          <image src="../../../../images/arrow-right-3.png" class="daily-card__arrow"></image>
         </view>
 
-        <!-- 堂食/外卖数据 -->
-        <view class="flex-row-between">
-          <view class="bg-gray radius-sm p-15 flex-1 mr-10 flex flex-col">
-            <view class="flex items-center mb-10">
-              <text class="font-sm text-secondary">堂食</text>
-            </view>
-            <view class="flex items-center mb-10">
-              <text class="font-xxl font-bold" style="color: #007aff;">{{item.gbAiDailyRevenueDineInRevenue}}元</text>
-            </view>
-            <view class="flex items-center">
-              <text class="font-md text-secondary">{{item.gbAiDailyRevenueDineInOrders}}单</text>
-              <text class="font-md text-secondary ml-10">{{item.gbAiDailyRevenueDineInCustomers}}人</text>
-            </view>
+        <!-- 标签行：员工餐 / 折扣餐 / 赠送金额 / 平台抽成 + 箭头 -->
+        <view class="daily-card__tags">
+          <view class="dc-tag dc-tag--purple" wx:if="{{row.normalPortions && row.normalPortions !== '0'}}">
+            <text class="dc-tag__label">销售</text>
+            <text class="dc-tag__value">{{row.normalPortions}}</text>
           </view>
-          <view class="bg-gray radius-sm p-15 flex-1 ml-10 flex flex-col">
-            <view class="flex items-center mb-10">
-              <text class="font-sm text-secondary">外卖</text>
-            </view>
-            <view class="flex items-center mb-10">
-              <text class="font-xxl font-bold" style="color: #34c759;">{{item.gbAiDailyRevenueTakeoutRevenue}}元</text>
-            </view>
-            <view class="flex items-center">
-              <text class="font-md text-secondary">{{item.gbAiDailyRevenueTakeoutOrders}}单</text>
-              <text class="font-md ml-10" style="color: #ff3b30;">-{{item.gbAiDailyRevenuePlatformFee}}元</text>
-            </view>
+          <view class="dc-tag dc-tag--orange" wx:if="{{row.discountPortions && row.discountPortions !== '0'}}">
+            <text class="dc-tag__label">折扣餐</text>
+            <text class="dc-tag__value">{{row.discountPortions}}</text>
           </view>
+          <view class="dc-tag dc-tag--purple" wx:if="{{row.employeeMealPortions && row.employeeMealPortions !== '0'}}">
+            <text class="dc-tag__label">员工餐</text>
+            <text class="dc-tag__value">{{row.employeeMealPortions}}</text>
+          </view>
+          <view class="dc-tag dc-tag--orange" wx:if="{{row.discountPortions && row.discountPortions !== '0'}}">
+            <text class="dc-tag__label">折扣餐</text>
+            <text class="dc-tag__value">{{row.discountPortions}}</text>
+          </view>
+          <view class="dc-tag dc-tag--pink" wx:if="{{row.complimentaryPortions && row.complimentaryPortions !== '0'}}">
+            <text class="dc-tag__label">赠送金额</text>
+            <text class="dc-tag__value">{{row.complimentaryPortions}}</text>
+          </view>
+          <view class="dc-tag dc-tag--orange-light" wx:if="{{row.platformFeeAmount && row.platformFeeAmount !== '0.00'}}">
+            <text class="dc-tag__label">平台抽成</text>
+            <text class="dc-tag__value">{{row._platformDisplay}}</text>
+          </view>
+          <image src="../../../../images/arrow-right-3.png" class="dc-tags-arrow"></image>
         </view>
       </view>
     </view>
 
-    <view class="text-secondary font-sl flex-column center-content" style="height: 100rpx;">没有更多数据了</view>
+    <!-- 底部提示 -->
+    <view class="detail-footer" wx:if="{{showAllDailyRows}}">
+      <text class="detail-footer__icon-text">i</text>
+      <text class="detail-footer__text">已显示全部数据（{{tool.transferDateString(startDate)}}-{{tool.transferDateString(stopDate)}}）</text>
+    </view>
   </view>
 
   <!-- 无数据 -->
-  <view wx:if="{{!stats || (chartData.length == 0 && (!dailyList || dailyList.length == 0))}}" style="height: {{windowHeight - 360}}rpx;">
+  <view wx:if="{{!summary || dailyRows.length === 0}}" style="height: {{windowHeight - 360}}rpx;">
     <view class="center-content flex-column" style="padding-top: 200rpx;">
       <image class="empty_image" src="/images/cart-Empty.png"></image>
       <text class="big">无数据</text>

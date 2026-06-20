@@ -1,0 +1,376 @@
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+<wxs module="utilLv" src="/wxs/utilizationLevel.wxs" />
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="./dga.wxs" module="dga" />
+<view class="dga-page">
+  <back-navbar
+    style="height: {{navBarHeight}}rpx;"
+    title="{{pageTitle}}"
+    avatar="/images/back.png"
+    bindnavbuttontap="toBack"
+  />
+
+ 
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- <view class="flex-row p-20" bindtap="toFilterType">
+      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+    </view> -->
+  </view>
+
+  <view class="dga-state" wx:if="{{loading}}">
+    <text class="dga-state__txt">加载中…</text>
+  </view>
+  <view class="dga-state dga-state--err" wx:elif="{{errMsg}}">
+    <text class="dga-state__txt">{{errMsg}}</text>
+  </view>
+  <scroll-view wx:else scroll-y class="dga-scroll" enhanced="{{true}}" show-scrollbar="{{false}}">
+    <view class="dga-hero">
+      <view class="dga-hero__title-row">
+        <view class="dga-hero__name-row">
+          <text class="dga-hero__name">{{dish.foodName}}</text>
+        </view>
+      </view>
+      <view class="dga-hero__subline">
+        <text class="dga-hero__sub">单价：¥ {{dish.listPricePerPortion}}/份</text>
+        <text class="dga-hero__subsep" wx:if="{{dish.salesPortions}}">　</text>
+        <text class="dga-hero__sub" wx:if="{{dish.salesPortions}}">销量：{{dish.salesPortions}} 份</text>
+      </view>
+     
+
+      <view class="dga-hero__kpi-scroll" >
+       
+        <view class="dia-summary-grid">
+          <view class="dia-summary-cell">
+            <text class="dia-summary-label">本期消费份数</text>
+            <text class="dia-summary-val">{{auditDishSummary.salesPortions}}<text class="dia-summary-unit">份</text></text>
+          </view>
+          <view class="dia-summary-cell">
+            <text class="dia-summary-label">销售额</text>
+            <text class="dia-summary-val">¥{{auditDishSummary.salesAmount}}</text>
+          </view>
+          <view class="dia-summary-cell">
+            <text class="dia-summary-label">配料数</text>
+            <text class="dia-summary-val">{{consumptionAuditIngredients.length}}<text class="dia-summary-unit">种</text></text>
+          </view>
+        </view>
+       
+        <view class="dga-hero__kpi dga-hero__kpi--row">
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">综合实际毛利率</text>
+          <view class="dga-hero__kpi-val-wrap">
+            <text class="dga-hero__kpi-val--em">{{dish.comprehensiveGrossMarginRateOnListPrice}}</text>
+            <text class="dga-hero__kpi-pct">%</text>
+          </view>
+        </view>
+        <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">配料毛利率</text>
+          <view class="dga-hero__kpi-val-wrap">
+            <text class="dga-hero__kpi-val--em">{{dish.grossMarginRateTheoryOnListPrice}}</text>
+            <text class="dga-hero__kpi-pct">%</text>
+          </view>
+        </view>
+        <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">实际成本/份</text>
+          <text class="dga-hero__kpi-amt">¥ {{dish.actualCostPerPortion}}</text>
+        </view>
+        <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">理论成本/份</text>
+          <text class="dga-hero__kpi-amt">¥ {{dish.theoryCostPerPortion}}</text>
+        </view>
+        <!-- <view class="dga-hero__kdiv" />
+        <view class="dga-hero__kcell">
+          <text class="dga-hero__kpi-lab">净菜品毛利/份</text>
+          <view class="dga-hero__kpi-val-wrap">
+            <text class="dga-hero__kpi-val--em is-profit">¥ {{dish.netGrossProfitPerPortion}}</text>
+          </view>
+        </view> -->
+        </view>
+
+        <view class="dia-margin-row">
+          <view class="dia-margin-cell">
+            <text class="dia-margin-label">配料实际分摊成本</text>
+            <text class="dia-margin-val dia-summary-val--blue">¥{{auditDishSummary.actualOutboundAmount}}</text>
+          </view>
+          <view class="dia-margin-cell">
+            <text class="dia-margin-label">配料理论出库</text>
+            <text class="dia-margin-val dia-margin-val--theory">¥{{auditDishSummary.theoryOutboundAmount}}</text>
+          </view>
+          <view class="dia-margin-cell">
+            <text class="dia-margin-label">配料差异金额</text>
+            <text class="dia-margin-val {{auditDishSummary.grossMarginRateDeviation < 0 ? 'dia-margin-val--warn' : ''}}">¥{{auditDishSummary.outboundCostDeviation}}</text>
+          </view>
+        </view>
+
+
+      </view>
+
+      <view
+        class="dga-hero__margin {{tool.marginStandardHintModDga(dish)}}"
+        wx:if="{{tool.marginStandardShowBlock(dish)}}"
+      >
+        <text
+          class="dga-hero__margin-range"
+          wx:if="{{tool.marginStandardMetaLine(dish)}}"
+        >{{tool.marginStandardMetaLine(dish)}}</text>
+        <view class="dga-hero__margin-inner">
+          <text
+            wx:if="{{dish.grossMarginLevel == 'IN_BAND'}}"
+            class="dga-hero__margin-emoji"
+          >👍</text>
+          <text
+            wx:elif="{{dish.grossMarginLevel == 'BELOW'}}"
+            class="dga-hero__margin-emoji"
+          >😭</text>
+          <text
+            wx:elif="{{dish.grossMarginLevel == 'ABOVE'}}"
+            class="dga-hero__margin-emoji"
+          >😢</text>
+          <text class="dga-hero__margin-txt">{{tool.marginStandardHint(dish)}}</text>
+        </view>
+      </view>
+
+      <view class="dga-hero__hint" wx:if="{{summarySuggestionZh}}">
+        <text class="dga-hero__hint-txt">{{summarySuggestionZh}}</text>
+      </view>
+    </view>
+
+
+<!-- 配料消耗排查 -->
+<view class="dga-sec">
+      <view class="p-20">
+        <text class="dga-sec__tit">配料消耗排查</text>
+      </view>
+
+      <view class="dia-ingredient-card" wx:for="{{consumptionAuditIngredients}}" wx:for-item="ing" wx:for-index="aIdx" wx:key="goodsId" >
+        <view class="flex-column" bindtap="onToggleAuditIngredient" data-index="{{aIdx}}">
+          <view class="flex-row" >
+            <image class="dia-ing-img" src="{{ing.goodsImage || ing.imageUrl}}" mode="aspectFill" />
+            <view class="dia-ing-info">
+              <text class="dia-ing-name">{{ing.goodsName}}</text>
+              <text class="dia-ing-price">¥{{ing.unitPrice}}/{{ing.unit}}</text>
+              <text class="dia-ing-weight" wx:if="{{ing.gbDgGoodsStandardWeight}}">规格 {{ing.gbDgGoodsStandardWeight}}g</text>
+            </view>
+            <view class="dia-ing-status {{ing.consumptionDeviation > 0 ? 'dia-ing-status--warn' : 'dia-ing-status--ok'}}">
+              <text>{{ing.consumptionDeviation > 0 ? '重点检查' : (ing.consumptionDeviation < 0 ? '略偏高' : '正常')}}</text>
+            </view>
+            <image class="dia-arrow {{auditExpandedList[aIdx] ? 'dia-arrow--up' : ''}}" src="/images/arrow-down.png" mode="aspectFit" />
+          </view>
+          <view>
+            <view class="dia-core-metrics1 flex-row-around p-20">
+              <view class="dcm-cell">
+                <text class="dcm-label">理论(总)</text>
+                <text class="dcm-val">{{ing.theoryOutboundQty}}<text class="dcm-unit">{{ing.unit}}</text></text>
+              </view>
+              <view class="dcm-cell">
+                <text class="dcm-label">实际分摊(总)</text>
+                <text class="dcm-val">{{ing.dishAllocatedQty}}<text class="dcm-unit">{{ing.unit}}</text></text>
+              </view>
+              <view class="dcm-cell">
+                <text class="dcm-label">差异(总)</text>
+                <text class="dcm-val {{ing.outboundQtyDeviation > 0 ? 'dcm-val--orange' : ''}}">{{ing.outboundQtyDeviation > 0 ? '+' : ''}}{{ing.outboundQtyDeviation}}<text class="dcm-unit">{{ing.unit}}</text></text>
+              </view>
+              <view class="dcm-cell">
+                <text class="dcm-label">分摊成本</text>
+                <text class="dcm-val">¥{{ing.dishAllocatedAmount}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="flex-column-center"><image src="/images/arrow-down.svg" mode="aspectFill" class="icon" /></view>
+        </view>
+
+        <!-- 展开内容 -->
+        <view class="dia-ing-body" wx:if="{{auditExpandedList[aIdx]}}">
+          <!-- 理论和实际对比条 -->
+          <view class="dia-bar-chart">
+            <view class="dia-bar-row">
+              <text class="dia-bar-label dia-bar-label--theory">理论</text>
+              <view class="dia-bar-track">
+                <view class="dia-bar-fill dia-bar-fill--blue" style="width: {{ing._chart.theoryPercent}}%;"></view>
+              </view>
+              <text class="dia-bar-val">{{ing.recipeUsagePerPortion}}<text class="dia-bar-unit">{{ing.unit}}/份</text></text>
+            </view>
+            <view class="dia-bar-row">
+              <text class="dia-bar-label dia-bar-label--actual">实际</text>
+              <view class="dia-bar-track">
+                <view class="dia-bar-fill dia-bar-fill--red" style="width: {{ing._chart.actualPercent}}%;"></view>
+              </view>
+              <text class="dia-bar-val">{{ing.actualPerPortion}}<text class="dia-bar-unit">{{ing.unit}}/份</text></text>
+            </view>
+            <view class="dia-bar-scale">
+              <view class="dia-bar-scale-inner">
+                <text class="dia-scale-tick" wx:for="{{ing._chart.ticks}}" wx:for-item="tick" wx:key="*this">{{tick}}<text class="dia-scale-unit">{{tick === 0 ? '' : ing.unit}}</text></text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 实际消耗记录 -->
+          <view class="dia-subsection">
+            <view class="dia-subsection-header">
+              <text class="dia-subsection-title">实际消耗记录</text>
+              <view>
+                <text class="dia-extra-label">总出库</text>
+                <text class="dia-extra-val dia-extra-val--blue">{{ing.actualOutboundQty}}<text class="dia-extra-unit">{{ing.unit}}</text></text>
+              </view>
+            </view>
+            <view class="dia-records-wrap">
+              <view class="dia-recs-scroll">
+                <view class="dia-recs-header">
+                  <text class="dia-recs-th dia-recs-th--date">日期/商品</text>
+                  <text class="dia-recs-th">采购日期/人</text>
+                  <text class="dia-recs-th">采购总数</text>
+                  <text class="dia-recs-th">消耗前剩</text>
+                  <text class="dia-recs-th">消耗数</text>
+                  <text class="dia-recs-th">消耗后剩</text>
+                </view>
+                <view class="dia-recs-row" wx:for="{{ing.stockReduceRecords}}" wx:for-item="rec" wx:for-index="ri" wx:key="ri">
+                  <view class="dia-recs-td dia-recs-td--date">
+                    <text class="dia-recs-val">{{tool.transferDateTimeShort(rec.reduceTime)}}</text>
+                  </view>
+                  <view class="dia-recs-td">
+                    <text class="dia-recs-val">{{tool.transferDateString(rec.purchaseBatch.purchaseDate)}}</text>
+                    <text class="dia-recs-sub">{{rec.purchaseBatch.sourceDisplayName}}</text>
+                  </view>
+                  <view class="dia-recs-td">
+                    <text class="dia-recs-val">{{rec.purchaseBatch.totalQuantity}}{{rec.purchaseBatch.unit}}</text>
+                  </view>
+                  <view class="dia-recs-td">
+                    <text class="dia-recs-val dia-recs-val--blue">{{rec.purchaseBatch.remainingBeforeOutbound}}{{rec.purchaseBatch.unit}}</text>
+                  </view>
+                  <view class="dia-recs-td">
+                    <text class="dia-recs-val dia-recs-val--orange">{{rec.quantity}}{{ing.unit}}</text>
+                    <text class="dia-recs-sub dia-rec-type {{rec.reduceTypeName == '制作' ? 'dia-rec-type--make' : (rec.reduceTypeName == '损耗' ? 'dia-rec-type--loss' : 'dia-rec-type--waste')}}">{{rec.reduceTypeName}}</text>
+                  </view>
+                  <view class="dia-recs-td">
+                    <text class="dia-recs-val">{{tool.remainingAfterOutbound(rec.purchaseBatch.remainingBeforeOutbound, rec.quantity)}}{{rec.purchaseBatch.unit}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 关联菜品累计分摊 -->
+          <view class="dia-subsection">
+            <view class="dia-subsection-header">
+              <text class="dia-subsection-title">关联菜品累计分摊（{{tool.transferDateString(startDate)}} ~ {{tool.transferDateString(stopDate)}}）</text>
+            </view>
+            <view class="dia-related-card {{rel.isCurrentDish ? 'dia-related-card--current' : ''}}"
+              wx:for="{{ing.relatedDishAllocations}}" wx:for-item="rel" wx:for-index="ri" wx:key="ri">
+              <view class="related-card-head">
+                <text class="related-card-name">{{rel.dishName}}</text>
+                <text class="related-card-tag" wx:if="{{rel.isCurrentDish}}">当前菜品</text>
+                <text class="related-card-link" wx:if="{{rel.isCurrentDish}}">查看主部</text>
+              </view>
+              <view class="related-card-metrics">
+                <view class="rcm-cell">
+                  <text class="rcm-label">销量</text>
+                  <text class="rcm-val">{{rel.salesPortions}}<text class="rcm-unit">份</text></text>
+                </view>
+                <view class="rcm-cell">
+                  <text class="rcm-label">单份理论</text>
+                  <text class="rcm-val rcm-val--green">{{tool.perPortionDisplay(ing.gbDgGoodsStandardWeight, rel.recipeUsagePerPortion, ing.unit, rel.gbDfgPortionAmount, rel.gbDfgPortionUnit)}}</text>
+                </view>
+                <view class="rcm-cell">
+                  <text class="rcm-label">理论总耗</text>
+                  <text class="rcm-val">{{rel.theoryConsumption}}<text class="rcm-unit">{{ing.unit}}</text></text>
+                </view>
+                <view class="rcm-cell">
+                  <text class="rcm-label">每份实际</text>
+                  <text class="rcm-val">{{rel.actualPerPortion}}<text class="rcm-unit">{{ing.unit}}/份</text></text>
+                </view>
+                <view class="rcm-cell">
+                  <text class="rcm-label">实际分摊</text>
+                  <text class="rcm-val rcm-val--orange">{{rel.allocatedConsumption}}<text class="rcm-unit">{{ing.unit}}</text></text>
+                </view>
+                <view class="rcm-cell">
+                  <text class="rcm-label">每份差异</text>
+                  <text class="rcm-val {{rel.recipeUsagePerPortion - rel.actualPerPortion > 0 ? 'rcm-val--red' : ''}}">{{tool.perPortionDeviation(rel.recipeUsagePerPortion, rel.actualPerPortion, ing.unit)}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+   
+
+    <!-- 成本结构饼图 -->
+    <view class="dga-charts">
+      <view class="dga-chart-card">
+        <text class="dga-chart-card__tit">成本结构占比</text>
+        <view class="dga-donut">
+          <ec-canvas
+            id="dga_pie"
+            canvas-id="dga_pie"
+            ec="{{ ecLazy }}"
+            class="dga-donut__ec"
+          />
+          <view class="dga-donut__cent">
+            <text class="dga-donut__amt">¥{{costStructure.totalCostPerPortion}}</text>
+            <text class="dga-donut__sub">总成本/份</text>
+          </view>
+        </view>
+        <view class="dga-legend">
+          <view
+            class="dga-legend__row"
+            wx:for="{{costStructure.segments}}"
+            wx:for-item="seg"
+            wx:for-index="li"
+            wx:key="name"
+          >
+            <view class="dga-legend__left">
+              <view
+                class="dga-legend__dot"
+                style="background-color: {{dga.pieColorAt(li)}}"
+              />
+              <text class="dga-legend__name">{{seg.name}}</text>
+            </view>
+            <text class="dga-legend__val">{{seg.sharePercentDisplay}}% ¥{{seg.costPerPortion}}</text>
+          </view>
+        </view>
+        <text class="dga-foot">*损耗率(出库) {{scopeOutboundSubtotals.wasteLossRatioInOutbound123}}%</text>
+      </view>
+    </view>
+
+    <!-- 成本趋势折线图 -->
+    <view class="dga-charts">
+      <view class="dga-chart-card">
+        <text class="dga-chart-card__tit">成本趋势 ({{costTrend.primaryGoodsName}})</text>
+        <ec-canvas
+          id="dga_line"
+          canvas-id="dga_line"
+          ec="{{ ecLazyLine }}"
+          class="dga-line__ec"
+        />
+        <view class="dga-trend-hint">
+          <text class="dga-trend-hint__txt">{{costTrend.changeSummaryZh}}</text>
+        </view>
+      </view>
+    </view>
+
+    
+
+    <view class="dga-pad"/>
+  </scroll-view>
+
+</view>

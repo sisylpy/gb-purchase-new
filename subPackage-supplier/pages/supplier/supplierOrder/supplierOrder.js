@@ -88,9 +88,7 @@ _getPurSelArr() {
   var arr = this.data.selArr;
   var temp = [];
   if (arr.length > 0) {
-    for (var i = 0; i < arr.length; i++) {
-      console.log("itetm==", arr[i].item)
-      arr[i].item.purchaseDepartmentEntity = null;
+    for (var i = 0; i < arr.length; i++) {arr[i].item.purchaseDepartmentEntity = null;
       arr[i].item.purchaseDepartmentUser = null;
       arr[i].item.wasteDepartmentEntities = null;
       temp.push(arr[i].item);
@@ -99,13 +97,12 @@ _getPurSelArr() {
   return temp;
 },
 
-
  saveNxBatch(e){
    var supplier = e.currentTarget.dataset.item;
   var arr = this.data.selArr;
   var batch = {
     gbDpbPurUserId: this.data.userInfo.gbDepartmentUserId,
-    gbDpbDistributerId: this.data.disInfo.gbDistributerId,
+    gbDpbDistributerId: this.data.userInfo.gbDuDistributerId,
     gbDpbPurDepartmentId: this.data.depId,
     gbDpbUserAdminType: 11,
     gbDPGEntities: arr,
@@ -115,10 +112,7 @@ _getPurSelArr() {
     gbDpbSupplierId: supplier.nxJrdhSupplierId,
     gbDpbNxDistributerId: supplier.nxJrdhsNxDistributerId
 
-  };
-
-  console.log(batch);
-  load.showLoading("保存订货")
+  };load.showLoading("保存订货")
   saveDisPurGoodsBatchGbSupplier(batch).then(res => {
     load.hideLoading();
     wx.navigateBack({delta: 1})

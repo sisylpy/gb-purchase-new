@@ -90,9 +90,7 @@ Page({
     }
     load.showLoading("商品搜索中")
     goodsApi.queryDisGoodsByQuickSearchGb(data).then(res => {
-      load.hideLoading();
-      console.log(res.result.data);
-      if (res.result.code == 0) {
+      load.hideLoading();if (res.result.code == 0) {
         this.setData({
           disArr: res.result.data,
         })
@@ -128,9 +126,7 @@ Page({
   },
 
   toGoods(e){
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
-    console.log("goods",e)
-    wx.navigateTo({
+    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);wx.navigateTo({
       url: '../disGoodsPage/disGoodsPage?disGoodsId=' + e.currentTarget.dataset.id,
     })
   },

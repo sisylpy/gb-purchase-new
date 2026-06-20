@@ -1,8 +1,8 @@
 var config = require('../../../../config/index.js');
 var load = require('../../../../lib/load.js');
-var dateUtils = require('../../../../utils/dateUtil');
-var reorderApi = require('../../../services/depReorderReminderApi.js');
-var orderApi = require('../../../services/resGoodsAiApi.js');
+var dateUtils = require('../../../../lib/dateUtil');
+var reorderApi = require('../../../../services/depReorderReminderApi.js');
+var orderApi = require('../../../../services/depOrder.js');
 
 function enrichReorderRow(raw) {
   var item = Object.assign({}, raw);
@@ -161,7 +161,6 @@ Page({
           showSkeleton: false
         });
         var body = res.result;
-        console.log("boody", body);
         if (body && body.code === 0) {
           var pageData = body.page || {};
           var newData = enrichReorderList(pageData.list || []);

@@ -1,7 +1,7 @@
 <!-- 自定义导航：左图标 / 中间标题 / 右侧单按钮（如「设置」） -->
 <view
   class="navbar-host custom-navbar"
-  style="height: {{navBarFullHeightPx}}px; padding-top: {{statusBarHeight}}px; --nav-height: {{navBarFullHeightPx}}px;"
+  style="height: {{navBarFullHeightPx}}px; padding-top: {{statusBarHeight}}px; --nav-height: {{navBarFullHeightPx}}px; "
 >
   <view class="navbar-inner" style="height: {{navBarFullHeightPx - statusBarHeight}}px;">
     <view class="navbar-zone navbar-zone--left" bindtap="onNavButtonTap">

@@ -1,0 +1,57 @@
+<view class="page-checkout">
+  <view class="checkout-loading" wx:if="{{loading}}">
+    <text>加载结算预览...</text>
+  </view>
+
+  <block wx:elif="{{previewReady}}">
+    <view class="section-block" wx:if="{{confirmedLines.length}}">
+      <view class="section-head">
+        <text class="section-title">已知价格商品</text>
+        <text class="section-count">{{confirmedLines.length}}项 · 计入本次应付</text>
+      </view>
+      <view class="preview-line" wx:for="{{confirmedLines}}" wx:key="nxOrderId">
+        <view class="preview-line-main">
+          <text class="preview-name">{{item.goodsName}}</text>
+          <text class="preview-qty">{{item.quantity}}{{item.standard}}</text>
+        </view>
+        <text class="preview-subtotal">{{item.subtotalText}}</text>
+      </view>
+    </view>
+
+    <view class="section-block" wx:if="{{pendingPriceLines.length}}">
+      <view class="section-head">
+        <text class="section-title">未知价格商品</text>
+        <text class="section-count">{{pendingPriceLines.length}}项 · 不计入本次支付</text>
+      </view>
+      <view class="preview-line" wx:for="{{pendingPriceLines}}" wx:key="nxOrderId">
+        <view class="preview-line-main">
+          <text class="preview-name">{{item.goodsName}}</text>
+          <text class="preview-qty">{{item.quantity}}{{item.standard}}</text>
+          <text class="preview-tag">待称重确认 · checkout 后进入同一张 bill</text>
+        </view>
+        <text class="preview-subtotal pending">待确认</text>
+      </view>
+    </view>
+
+    <view class="summary-card">
+      <view class="summary-row">
+        <text>已知价格合计</text>
+        <text class="summary-value">¥{{knownTotal}}</text>
+      </view>
+      <view class="summary-row" wx:if="{{pendingPriceItemCount > 0}}">
+        <text>未知价格商品</text>
+        <text class="summary-pending">{{pendingPriceItemCount}}项</text>
+      </view>
+      <view class="summary-row pay-row">
+        <text>本次应付</text>
+        <text class="summary-pay">¥{{payAmount}}</text>
+      </view>
+      <text class="summary-notice" wx:if="{{notice}}">{{notice}}</text>
+    </view>
+
+    <view class="confirm-btn {{confirming ? 'is-loading' : ''}}" bindtap="onConfirmCheckout">
+      {{confirming ? '提交中...' : '确认结算并生成采购单'}}
+    </view>
+    <text class="confirm-hint">确认后将生成 bill，商品从购物车移除；真实微信支付本轮不做</text>
+  </block>
+</view>

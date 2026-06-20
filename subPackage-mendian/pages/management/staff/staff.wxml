@@ -4,7 +4,7 @@
 
 <view class="flex flex-column">
 
- <back-navbar style="height: {{navBarHeight}}rpx;" title="采购员用户" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+ <back-navbar style="height: {{navBarHeight}}rpx;" title="管理员" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
   <!--  top -->
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">

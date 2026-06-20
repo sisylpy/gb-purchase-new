@@ -1,13 +1,7 @@
 <view class="flex flex-column">
 
 <!-- 导航栏 -->
-<navbar 
-  title="饭店注册信息" 
-  avatar="/images/back-gray.png" 
-  button-text="设置" 
-  style="height: {{navBarHeight}}rpx;" 
-  bindnavbuttontap="toBack"
-></navbar>
+<back-navbar style="height: {{navBarHeight}}rpx;" title="饭店注册信息" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
 <!-- 表单容器 -->
 <view class="form-container font-lg" style="margin-top: 20rpx;">

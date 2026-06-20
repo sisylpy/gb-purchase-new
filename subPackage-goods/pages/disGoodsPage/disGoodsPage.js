@@ -3,7 +3,7 @@ var load = require('../../../lib/load.js');
 let windowWidth = 0;
 let itemWidth = 0;
 const globalData = getApp().globalData;
-var dateUtils = require('../../../utils/dateUtil');
+var dateUtils = require('../../../lib/dateUtil.js');
 
 var goodsApi = require('../../services/api.js');
 
@@ -54,9 +54,7 @@ Page({
     load.showLoading("获取商品信息")
     goodsApi.gbDisGetGoodsDetail(this.data.disGoodsId).then(res => {
       load.hideLoading();
-      if (res.result.code == 0) {
-        console.log(res.result.data);
-        this.setData({
+      if (res.result.code == 0) {this.setData({
           goods: res.result.data.goodsInfo,
           standard: res.result.data.goodsInfo.gbDgGoodsStandardname,
           depGoodArr: res.result.data.depGoodArr,
@@ -122,9 +120,7 @@ Page({
    * 点击订货单位
    * @param {*} e 
    */
-  clickItem(e) {
-    console.log(e);
-    this.setData({
+  clickItem(e) {this.setData({
       depGoodsName: this.data.goods.gbDgGoodsName,
     })
 
@@ -338,9 +334,7 @@ Page({
     }
     load.showLoading("更新别名")
     goodsApi.updateDisAlias(data).then(res => {
-      if (res.result.code == 0) {
-        console.log(res)
-        load.hideLoading();
+      if (res.result.code == 0) {load.hideLoading();
         var alias = "goods.gbDistributerAliasEntities[" + this.data.indexAlias + "]";
         this.setData({
           [alias]: data,
@@ -420,8 +414,7 @@ Page({
   //   goodsApi.canclePostDgnGoodsGb(data).then(res => {
   //     load.hideLoading();
   //     if (res.result.code == 0) {
-  //       console.log(res);
-  //       var pages = getCurrentPages();
+  ////       var pages = getCurrentPages();
   //       var prevPage = pages[pages.length - 2];//上一个页面
   //   //直接调用上一个页面的setData()方法，把数据存到上一个页面中去
   //   var disGoodsArrAi = prevPage.data.disGoodsArrAi;
@@ -455,9 +448,7 @@ Page({
     load.showLoading("删除商品")
     goodsApi.canclePostDgnGoodsGb(data).then(res => {
       load.hideLoading();
-      if (res.result.code == 0) {
-        console.log(res);
-        var pages = getCurrentPages();
+      if (res.result.code == 0) {var pages = getCurrentPages();
         var prevPage = pages[pages.length - 2]; //上一个页面
         
         // 1. 获取上一个页面的数据
@@ -486,9 +477,7 @@ Page({
     })
   },
 
-  switchChangeAuto(e) {
-    console.log(e)
-    var pullOff = "goods.gbDgGoodsIsWeight"
+  switchChangeAuto(e) {var pullOff = "goods.gbDgGoodsIsWeight"
     if (e.detail.value) {
       this.setData({
         [pullOff]: 1
@@ -635,9 +624,7 @@ Page({
   },
 
 
-  switchIsFranchisePrice(e) {
-    console.log(e)
-    var pullOff = "goods.gbDgIsFranchisePrice"
+  switchIsFranchisePrice(e) {var pullOff = "goods.gbDgIsFranchisePrice"
 
     if(e.detail.value == 1){
       this.setData({
@@ -698,9 +685,7 @@ Page({
     this.hideMask();
   },
   
-  cancleContrl(e){
-    console.log("cancleContrl")
-    if (this.data.goods.gbDgIsSelfControl == 0) {
+  cancleContrl(e){if (this.data.goods.gbDgIsSelfControl == 0) {
       var goodsData = "goods.gbDgIsSelfControl";
       this.setData({
         [goodsData]: 0,
@@ -726,36 +711,7 @@ Page({
     }
   },
   
-  _updateGoodsFreshData(){
-    load.showLoading("修改商品")
-    var goods = this.data.goods;
-    // goods.gbDgFreshWarnHour = 1;
-    goodsApi.changeGbGoodsFresh(goods)
-      .then(res => {
-        load.hideLoading();
-        if (res.result.code == 0) {
-          wx.showToast({
-            title: '修改成功',
-          })
-          this.setData({
-            showChoice: false,
-            showFresh: false,
-            showPrice: false,
-            showFranchisePrice: false,
-            showOperation: false,
-            showIsSelfControl: false,
-            goods: res.result.data
-          })
-          this._getGoodsDetail();
-          }else{
-            wx.showToast({
-              title: res.result.msg,
-              icon: 'none'
-            })
-          }
-      })
-
-  },
+  
 
   // 设置采购价格
   switchControlPrice(e) {
@@ -789,9 +745,7 @@ Page({
 
  
 
-  getPrice(e) {
-    console.log(e);
-    var priceData = "goods." + e.currentTarget.dataset.type;
+  getPrice(e) {var priceData = "goods." + e.currentTarget.dataset.type;
     if (e.detail.value.length > 0) {
       this.setData({
         [priceData]: e.detail.value
@@ -803,9 +757,7 @@ Page({
     }
   },
 
-  editDisGoodsSelfPrice(){
-    console.log("editselfproi")
-    this.setData({
+  editDisGoodsSelfPrice(){this.setData({
       showOperation: true,
       showOperationBtn: false,
         showIsSelfControl: true,
@@ -813,9 +765,7 @@ Page({
     
   },
 
-  getIsFranchisePrice(e){
-    console.log(e);
-    var priceData = "goods." + e.currentTarget.dataset.type;
+  getIsFranchisePrice(e){var priceData = "goods." + e.currentTarget.dataset.type;
     var priceTimeData = "goods." + e.currentTarget.dataset.typetime;
     if (e.detail.value.length > 0) {
       this.setData({
@@ -829,9 +779,7 @@ Page({
     }
   },
   
-  getSelfPrice(e){
-    console.log(e);
-    var priceData = "goods.gbDgSelfPrice" ;
+  getSelfPrice(e){var priceData = "goods.gbDgSelfPrice" ;
     if (e.detail.value.length > 0) {
       this.setData({
         [priceData]: e.detail.value,
@@ -854,10 +802,7 @@ Page({
     });
   },
 
-  getFresh(e) {
-    console.log('保鲜时间输入事件:', e);
-    
-    var inputValue = e.detail.value;
+  getFresh(e) {var inputValue = e.detail.value;
     var freshData = "goods." + e.currentTarget.dataset.type;
     
     // 输入验证和格式化
@@ -938,10 +883,7 @@ Page({
           duration: 1500
         });
       }
-    }
-    
-    console.log('保鲜时间已更新为:', inputValue, '小时');
-  },
+    }},
 
   _updateGoodsControlPrice(e) {
     var lowestPrice = this.data.goods.gbDgGoodsLowestPrice;
@@ -1074,8 +1016,7 @@ Page({
   toLiziMarket(e) {
     this.setData({
       showOperationBtn: false,
-    })
-    console.log("aaab")
+    });
     wx.navigateTo({
       url: '/subPackage-yishang/pages/yishang/map/map?nxGoodsId=' + this.data.goods.gbDgNxGoodsId + '&nxGoodsName=' +  this.data.goods.gbDgGoodsName,
     })

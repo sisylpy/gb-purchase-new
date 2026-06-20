@@ -59,7 +59,7 @@
   <block wx:if="{{searchDepList.length == 1}}">
     <view class="flex-row border-bottom">
       <scroll-view scroll-x="true" show-scrollbar="false" enhanced="true" class="nav_dep" scroll-with-animation="{{true}}" scroll-left="{{leftWidthDep}}" style="width: {{windowWidth - 40 }}rpx; ">
-        <text id="dep_fixed" data-id="-1" class="dep_item  {{itemIndexDep == 0 ? 'is-active' : ''}}" data-index='0' data-total="{{whichTotalDep}}" bindtap="onTab1ClickDep" data-item="all">{{resultDepList[0].gbDepartmentAttrName}}({{resultDepList[0].depCostGoodsTotalString}}元)</text>
+        <text id="dep_fixed" data-id="-1" class="dep_item  {{itemIndexDep == 0 ? 'is-active' : ''}}" data-index='0' data-total="{{whichTotalDep}}" bindtap="onTab1ClickDep" data-item="all">{{resultDepList[0].gbDepartmentName}}({{resultDepList[0].depCostGoodsTotalString}}元)</text>
 
       </scroll-view>
     </view>

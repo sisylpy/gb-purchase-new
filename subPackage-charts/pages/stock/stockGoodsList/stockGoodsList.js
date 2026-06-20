@@ -1,6 +1,6 @@
 var api = require('../../../services/api');
 var config = require('../../../../config/index');
-var dateUtil = require('../../../../utils/dateUtil');
+var dateUtil = require('../../../../lib/dateUtil');
 var load = require('../../../../lib/load.js');
 
 Page({
@@ -83,7 +83,6 @@ Page({
       
       if (res.result.code == 0) {
         var data = res.result.data || [];
-         console.log("rreee",res.result.data);
         // 处理数据，计算汇总
         var totalIn = 0;
         var totalRest = 0;
@@ -253,22 +252,6 @@ Page({
 
   // 阻止冒泡
   stopBubble: function () {},
-
-  // 出库操作
-  toOutStock: function (e) {
-    var item = e.currentTarget.dataset.item;
-    wx.navigateTo({
-      url: '/subPackage-charts/pages/stock/stockOut/stockOut?stockId=' + item.gbDepartmentGoodsStockId
-    });
-  },
-
-  // 报废/损耗
-  toWaste: function (e) {
-    var item = e.currentTarget.dataset.item;
-    wx.navigateTo({
-      url: '/subPackage-charts/pages/stock/stockWaste/stockWaste?stockId=' + item.gbDepartmentGoodsStockId
-    });
-  },
 
   toBack: function () {
     wx.navigateBack({ delta: 1 });

@@ -1,6 +1,6 @@
 /**
- * 食材制作率等级 → 公共 class 后缀（与 app.wxss 中 .util-text--* / .util-fill--* 对应）
- * 后端 utilization.level：LOW | NORMAL | HIGH | CRITICAL
+ * 食材偏差率等级 → 公共 class 后缀（与 app.wxss 中 .util-text--* / .util-fill--* 对应）
+ * 后端 deviance.level：LOW | NORMAL | HIGH | CRITICAL
  *
  * 使用：
  *   <wxs src="/wxs/utilizationLevel.wxs" module="utilLv" />
@@ -69,7 +69,7 @@ function suffix(level) {
   return 'unknown';
 }
 
-/** 按制作率百分数字符串推导等级（与后端口径一致：<90 偏低；90～110 正常；110～120 偏高；>120 浪费严重） */
+/** 按偏差率百分数字符串推导等级（与后端口径一致：<90 偏低；90～110 正常；110～120 偏高；>120 浪费严重） */
 function parseRate(rateStr) {
   if (rateStr == null || rateStr === undefined || rateStr === '') {
     return NaN;

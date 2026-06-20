@@ -1,0 +1,161 @@
+.prk-card {
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx 20rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  border: 1rpx solid #eaeaea;
+  box-sizing: border-box;
+}
+
+.prk-header { margin-bottom: 4rpx; }
+
+.prk-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: block;
+  line-height: 1.3;
+}
+
+.prk-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-top: 4rpx;
+}
+
+.prk-summary {
+  background: #f5f7fa;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  margin-top: 16rpx;
+}
+
+.prk-summary-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.prk-empty {
+  padding: 48rpx 0;
+  text-align: center;
+}
+
+.prk-empty-text { font-size: 26rpx; color: #bbb; }
+
+.prk-table { margin-top: 20rpx; }
+
+.prk-thead {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.prk-th {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.prk-th--rank { width: 88rpx; flex-shrink: 0; text-align: center; }
+.prk-th--name { flex: 1; min-width: 0; padding-left: 12rpx; }
+.prk-th--metric { width: 200rpx; flex-shrink: 0; text-align: right; }
+.prk-th--highlight { color: #e02020; }
+.prk-th--action { width: 48rpx; flex-shrink: 0; }
+
+.prk-tr {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+
+.prk-tr:last-child { border-bottom: none; }
+
+.prk-tr--first {
+  background: linear-gradient(90deg, #fffbeb, transparent);
+  margin: 0 -12rpx;
+  padding-left: 12rpx;
+  padding-right: 12rpx;
+  border-radius: 8rpx;
+}
+
+.prk-td { display: flex; align-items: center; }
+.prk-td--rank { width: 88rpx; flex-shrink: 0; justify-content: center; }
+.prk-td--name { flex: 1; min-width: 0; padding-left: 12rpx; flex-wrap: wrap; }
+.prk-td--metric { width: 200rpx; flex-shrink: 0; justify-content: flex-end; }
+.prk-td--action { width: 48rpx; flex-shrink: 0; justify-content: center; }
+
+.prk-medal {
+  width: 48rpx;
+  height: 52rpx;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.prk-medal--gold { background: linear-gradient(135deg, #ffd54f, #ffb300); }
+.prk-medal--gold .prk-medal-num { color: #fff; font-weight: 800; font-size: 26rpx; }
+.prk-medal--silver { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); }
+.prk-medal--silver .prk-medal-num { color: #666; font-weight: 700; font-size: 26rpx; }
+.prk-medal--bronze { background: linear-gradient(135deg, #d4a574, #b8865c); }
+.prk-medal--bronze .prk-medal-num { color: #fff; font-weight: 700; font-size: 26rpx; }
+.prk-medal--normal {
+  background: #f5f5f5;
+  border-radius: 50%;
+  width: 40rpx;
+  height: 40rpx;
+}
+.prk-medal--normal .prk-medal-num { color: #999; font-weight: 600; font-size: 22rpx; }
+
+.prk-name {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.prk-standard {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.prk-metric-val {
+  font-size: 26rpx;
+  color: #e02020;
+  font-weight: 600;
+}
+
+.prk-record-btn {
+  font-size: 28rpx;
+  opacity: 0.55;
+  padding: 4rpx;
+}
+
+.prk-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.prk-footer-left { display: flex; align-items: center; }
+.prk-footer-icon { font-size: 24rpx; margin-right: 6rpx; }
+.prk-footer-text { font-size: 23rpx; color: #999; }
+
+.prk-footer-right {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  background: #fafafa;
+  border-radius: 8rpx;
+}
+
+.prk-expand-text { font-size: 23rpx; color: #555; }
+.prk-expand-arrow { font-size: 20rpx; color: #999; margin-left: 6rpx; }

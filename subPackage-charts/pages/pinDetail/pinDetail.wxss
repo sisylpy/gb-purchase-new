@@ -1,0 +1,168 @@
+/* ========== 页面根容器 ========== */
+.pd-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #faf8f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+/* ========== 加载 & 错误 ========== */
+.pd-loading,
+.pd-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 120rpx 40rpx;
+}
+
+.pd-loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.pd-error-text {
+  font-size: 28rpx;
+  color: #fa5151;
+}
+
+/* ========== 主滚动区 ========== */
+.pd-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ========== 图钉标题 ========== */
+.pd-header {
+  margin: 20rpx 24rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04), 0 1rpx 4rpx rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+}
+
+.pd-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+
+.pd-time {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+/* ========== 分段标签 ========== */
+.pd-section-label {
+  margin: 24rpx 24rpx 8rpx 24rpx;
+  display: flex;
+  align-items: center;
+}
+
+.pd-section-label-text {
+  font-size: 24rpx;
+  color: #999;
+  position: relative;
+  padding-left: 24rpx;
+}
+
+.pd-section-label-text::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #e0e0e0;
+}
+
+/* ========== AI 回答正文 ========== */
+.pd-answer-body {
+  margin: 0 24rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04), 0 1rpx 4rpx rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+}
+
+.pd-answer-text {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ========== 业务卡片区域 ========== */
+.pd-cards {
+  margin: 0 24rpx;
+}
+
+/* ========== 底部操作栏 ========== */
+.pd-bar {
+  display: flex;
+  flex-direction: row;
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  border-top: 1rpx solid rgba(0, 0, 0, 0.06);
+  gap: 20rpx;
+}
+
+.pd-bar-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0;
+  border-radius: 16rpx;
+  box-sizing: border-box;
+}
+
+.pd-bar-btn--conv {
+  background: rgba(87, 107, 149, 0.08);
+}
+
+.pd-bar-btn--conv:active {
+  opacity: 0.75;
+}
+
+.pd-bar-btn--delete {
+  background: rgba(250, 81, 81, 0.08);
+}
+
+.pd-bar-btn--delete:active {
+  opacity: 0.75;
+}
+
+.pd-bar-btn-text {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.pd-bar-btn--conv .pd-bar-btn-text {
+  color: #576b95;
+}
+
+.pd-bar-btn--delete .pd-bar-btn-text {
+  color: #fa5151;
+}
+
+/* ========== 底部留白 ========== */
+.pd-scroll-spacer {
+  height: 40rpx;
+}

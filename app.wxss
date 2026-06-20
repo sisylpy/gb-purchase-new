@@ -754,8 +754,8 @@ button::after {
   padding: 0 6rpx;
   font-size: 35rpx;
   font-weight: 300;
-  color: var(--gb-text-inverse);
-  border: 1rpx solid var(--gb-text-inverse);
+  color: var(--gb-text-warning);
+  border: 1rpx solid var(--gb-text-warning);
   border-radius: 10rpx;
 }
 

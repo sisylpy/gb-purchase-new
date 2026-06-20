@@ -111,7 +111,7 @@ Page({
      
      // 如果是 lastThirtyDays，使用客户端计算
      if (dateName === 'lastThirtyDays') {
-       var dateUtils = require('../../../../utils/dateUtil');
+       var dateUtils = require('../../../../lib/dateUtil');
        var dateRange = dateUtils.getDateRange('lastThirtyDays');
        startDate = dateRange.startDate;
        stopDate = dateRange.stopDate;

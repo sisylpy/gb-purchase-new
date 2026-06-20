@@ -5,6 +5,8 @@ var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
 var echarts = require('../../../../ec-canvas/echarts');
+var foodSalesTemplateWx = require('../../../../lib/foodSalesTemplateWx.js');
+var foodSalesExcelApi = require('../../../../lib/foodSalesExcelApi.js');
 
 Page({
 
@@ -15,21 +17,29 @@ Page({
     ecTurnover: {
       lazyLoad: false
     },
-    
+
     // 日期相关默认值
     startDate: '',
     stopDate: '',
     dateType: 'month',
     hanzi: '本月',
     update: false,
-    
-    // 数据
-    stats: null,
-    arr: [],
-    dailyList: [],
-    
-    // 添加菜单
-    showAddMenu: false
+
+    // 批发商
+    distributerId: '',
+
+    // 新数据结构
+    summary: null,
+    dailyRows: [],
+
+    // 每日行展开控制
+    showAllDailyRows: true,
+
+    // 合并模板相关
+    showCombinedTemplateModal: false,
+    combinedTemplateStartDate: '',
+    combinedTemplateEndDate: '',
+    todayDate: '',
   },
 
   onShow() {
@@ -48,9 +58,11 @@ Page({
           dateType: myDate.dateType,
           hanzi: myDate.hanzi || dateRange.name,
           update: false
-        })
+        }, () => {
+          this._initData();
+        });
+        return;
       }
-     
     }
     this._initData();
   },
@@ -68,15 +80,31 @@ Page({
 
     this._syncDatesFromMyDateStorage();
 
-    
-
     var value = wx.getStorageSync('mendianInfo');
-    if(value){
+    if (value) {
       this.setData({
         mendianInfo: value,
         depFatherId: value.gbDepartmentId,
-      })
+      });
+
     }
+
+    // 获取批发商信息
+    var disInfo = wx.getStorageSync('disInfo');
+    if (disInfo && disInfo.gbDistributerId) {
+      this.setData({
+        distributerId: disInfo.gbDistributerId,
+      });
+    }
+
+    // 合并模板日期初始化
+    var today = dateUtils.getArriveDate(0);
+    var firstDay = today.substring(0, 8) + '01';
+    this.setData({
+      todayDate: today,
+      combinedTemplateStartDate: firstDay,
+      combinedTemplateEndDate: today,
+    });
 
     this._initData();
   },
@@ -105,6 +133,7 @@ Page({
       });
     }
   },
+
   /**
    * 初始化数据
    */
@@ -114,65 +143,39 @@ Page({
       departmentId: this.data.depFatherId,
       startDate: this.data.startDate,
       endDate: this.data.stopDate,
+    };
+    // 传入批发商 ID
+    if (this.data.distributerId) {
+      params.distributerId = this.data.distributerId;
     }
 
     api.getDailyTurnover(params).then(res => {
       load.hideLoading();
-      console.log('原始响应:', res);
-      console.log('接口返回数据:', JSON.stringify(res.result, null, 2));
-      var data = res.result;
-      console.log("dailyList",data.dailyList)
-      if (data.code == 0) {
-        // 计算统计数据
-        var stats = {
-          totalRevenue: 0,
-          avgRevenuePerDay: 0,
-          totalOrders: 0,
-          days: data.dailyList ? data.dailyList.length : 0,
-          totalDineIn: 0,
-          avgDineInPerDay: 0,
-          totalTakeout: 0,
-          avgTakeoutPerDay: 0,
-          totalPlatformFee: 0
-        };
-        
-        if (data.dailyList && data.dailyList.length > 0) {
-          data.dailyList.forEach(item => {
-            stats.totalDineIn += item.gbAiDailyRevenueDineInRevenue || 0;
-            stats.totalTakeout += item.gbAiDailyRevenueTakeoutRevenue || 0;
-            stats.totalOrders += (item.gbAiDailyRevenueDineInOrders || 0) + (item.gbAiDailyRevenueTakeoutOrders || 0);
-          });
-          stats.totalRevenue = stats.totalDineIn + stats.totalTakeout;
-          stats.avgDineInPerDay = (stats.totalDineIn / stats.days).toFixed(2);
-          stats.avgTakeoutPerDay = (stats.totalTakeout / stats.days).toFixed(2);
-          stats.avgRevenuePerDay = (stats.totalRevenue / stats.days).toFixed(2);
-        }
-        
-        // 计算实收金额
-        var actualRevenue = 0;
-        if (data.dailyList && data.dailyList.length > 0) {
-          data.dailyList.forEach(item => {
-            stats.totalPlatformFee += item.gbAiDailyRevenuePlatformFee || 0;
-          });
-          actualRevenue = (stats.totalRevenue - stats.totalPlatformFee).toFixed(2);
-        }
-        
+
+      var result = res.result;
+      var data = result.data;
+
+      if (result.code == 0 && data) {
+        var summary = data.summary || null;
+        var dailyRows = data.dailyRows || [];
+
         this.setData({
-          stats: stats,
-          chartData: data.chartData || [],
-          dailyList: data.dailyList || [],
-          actualRevenue: actualRevenue
+          summary: summary,
+          dailyRows: dailyRows,
         });
 
-        // 初始化图表
-        if (data.chartData && data.chartData.length > 0) {
-          this.init_chart();
+        // 延迟初始化图表
+        if (dailyRows && dailyRows.length > 0) {
+          var that = this;
+          setTimeout(function() {
+            that.init_chart();
+          }, 300);
         }
       } else {
         wx.showToast({
-          title: data.msg || '获取数据失败',
+          title: result.msg || '获取数据失败',
           icon: 'none'
-        })
+        });
       }
     }).catch(err => {
       load.hideLoading();
@@ -180,7 +183,7 @@ Page({
       wx.showToast({
         title: '网络请求失败',
         icon: 'none'
-      })
+      });
     });
   },
 
@@ -189,7 +192,6 @@ Page({
    */
   init_chart: function () {
     var that = this;
-
     that.echartsComponent = that.selectComponent('#turnoverChart');
     if (!that.echartsComponent) {
       return;
@@ -201,9 +203,7 @@ Page({
         devicePixelRatio: globalData.rpxR
       });
       const option = that.getChartOption();
-
       Chart.setOption(option);
-
       that.setData({
         chartDrawn: true
       });
@@ -212,133 +212,131 @@ Page({
   },
 
   /**
-   * 获取图表配置
+   * 获取图表配置：堂食/外卖双折线图
    */
   getChartOption() {
-    const chartData = this.data.chartData || [];
-    if (!chartData || chartData.length === 0) {
+    const dailyRows = this.data.dailyRows || [];
+    if (!dailyRows || dailyRows.length === 0) {
       return {
-        title: {
-          text: '暂无数据',
-          left: 'center',
-          top: 'center'
-        }
+        title: { text: '暂无数据', left: 'center', top: 'center' }
       };
     }
 
-    // 处理数据 (date格式: "2026-04-14")
-    const dates = chartData.map(item => {
-      const dateStr = item.date; // 取 "2026-04-14"
-      return dateStr.split('-')[2] + '日'; // 取 "14日"
+    var dates = [];
+    var dineInData = [];
+    var takeoutData = [];
+
+    dailyRows.forEach(function(item) {
+      var d = item.date || '';
+      if (d) {
+        var parts = d.split('-');
+        dates.push(parts[1] + '/' + parts[2]);
+      } else {
+        dates.push('');
+      }
+      dineInData.push(parseFloat(item.dineInRevenueAmount) || 0);
+      takeoutData.push(parseFloat(item.takeoutRevenueAmount) || 0);
     });
-    const dineInData = chartData.map(item => item.dineIn || 0);
-    const takeoutData = chartData.map(item => item.takeout || 0);
 
     return {
       animation: true,
       tooltip: {
         trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        },
+        axisPointer: { type: 'line' },
         formatter: function(params) {
           var day = params[0].axisValue;
           var html = day + '<br/>';
-          params.forEach(item => {
+          params.forEach(function(item) {
             html += item.marker + item.seriesName + ': ' + item.value + '元<br/>';
           });
           return html;
         }
       },
       legend: {
-        show: false
+        show: true,
+        top: 0,
+        right: 0,
+        itemWidth: 16,
+        itemHeight: 8,
+        textStyle: { fontSize: 12, color: '#666' },
+        data: ['堂食', '外卖']
       },
       grid: {
         left: '3%',
         right: '4%',
-        bottom: '10%',
-        top: '10%',
+        bottom: '8%',
+        top: '15%',
         containLabel: true
       },
       xAxis: {
         type: 'category',
         data: dates,
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666',
-          fontSize: 10,
-          rotate: 45
-        },
-        splitLine: {
-          show: false
-        }
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: '#e0e0e0' } },
+        axisLabel: { color: '#999', fontSize: 11 },
+        axisTick: { show: false }
       },
       yAxis: {
         type: 'value',
-        name: '金额(元)',
-        nameTextStyle: {
-          color: '#666',
-          fontSize: 10
-        },
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666',
-          fontSize: 10
-        },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            color: '#f0f0f0',
-            type: 'dashed'
-          }
-        }
+        axisLine: { show: false },
+        axisLabel: { color: '#999', fontSize: 11 },
+        splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } }
       },
       series: [
         {
           name: '堂食',
-          type: 'bar',
-          stack: '总量',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6,
           data: dineInData,
-          itemStyle: {
-            color: '#007aff'
-          },
-          barWidth: '40%',
-          emphasis: {
-            disabled: true
+          itemStyle: { color: '#007aff' },
+          lineStyle: { width: 2.5 },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(0,122,255,0.15)' },
+                { offset: 1, color: 'rgba(0,122,255,0.02)' }
+              ]
+            }
           }
         },
         {
           name: '外卖',
-          type: 'bar',
-          stack: '总量',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6,
           data: takeoutData,
-          itemStyle: {
-            color: '#34c759'
-          },
-          barWidth: '40%',
-          emphasis: {
-            disabled: true
+          itemStyle: { color: '#34c759' },
+          lineStyle: { width: 2.5 },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(52,199,89,0.15)' },
+                { offset: 1, color: 'rgba(52,199,89,0.02)' }
+              ]
+            }
           }
         }
       ]
     };
   },
 
+  /** 展开/收起每日详情 */
+  toggleDailyRows: function () {
+    this.setData({ showAllDailyRows: !this.data.showAllDailyRows });
+  },
+
   /**
    * 跳转日期选择
    */
   toDatePage() {
-    this.setData({
-      update: true
-    })
+    this.setData({ update: true })
     wx.navigateTo({
       url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate +
         '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
@@ -346,66 +344,16 @@ Page({
   },
 
   /**
-   * 跳转每日详情
-   */
-  toDayDetail(e) {
-    var item = e.currentTarget.dataset.item;
-    var week = this.getChineseWeekDay(item.day);
-    
-    wx.navigateTo({
-      url: '../turnoverDetail/turnoverDetail?day=' + item.day + '&departmentId=' + this.data.departmentId + '&hanzi=' + week
-    })
-  },
-
-  /**
-   * 获取中文星期几
-   */
-  getChineseWeekDay(dateString) {
-    try {
-      var date = new Date(dateString);
-      var dayOfWeek = date.getDay();
-      var weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-      return weekDays[dayOfWeek];
-    } catch (error) {
-      return '未知';
-    }
-  },
-
-  /**
    * 返回
    */
   toBack() {
-    wx.navigateBack({
-      delta: 1,
-    })
-  },
-
-  /**
-   * 点击添加按钮
-   */
-  onAddTap() {
-    this.setData({
-      showAddMenu: !this.data.showAddMenu
-    })
-  },
-
-  /**
-   * 隐藏菜单
-   */
-  hideMenu() {
-    this.setData({
-      showAddMenu: false
-    })
+    wx.navigateBack({ delta: 1 })
   },
 
   /**
    * 添加单日营业额
    */
   addSingleDay() {
-    this.setData({
-      showAddMenu: false
-    })
-    /** 列表当前筛选区间的最后一天，用于添加页模板起算日（不从当月 1 号起） */
     var anchor =
       (this.data.stopDate && String(this.data.stopDate).substring(0, 10)) ||
       (this.data.startDate && String(this.data.startDate).substring(0, 10)) ||
@@ -413,35 +361,211 @@ Page({
     wx.navigateTo({
       url:
         '../addFoodSales/addFoodSales?type=single&departmentId=' +
-        this.data.departmentId +
+        (this.data.depFatherId || '') +
         '&anchorDate=' +
         encodeURIComponent(anchor),
-    })
+    });
   },
 
   /**
-   * 每日详情某一行：进入「修改菜品销量」（拉取当日已有数据）
+   * 每日详情某一行：进入「修改菜品销量」
    */
   openFoodSalesEdit(e) {
-    var raw = e.currentTarget.dataset.recordDate
+    var raw = e.currentTarget.dataset.recordDate || e.currentTarget.dataset.date;
     if (raw == null || raw === '') {
-      wx.showToast({ title: '日期缺失', icon: 'none' })
-      return
+      wx.showToast({ title: '日期缺失', icon: 'none' });
+      return;
     }
-    var day = String(raw).trim().substring(0, 10)
+    var day = String(raw).trim().substring(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
-      wx.showToast({ title: '日期格式异常', icon: 'none' })
-      return
+      wx.showToast({ title: '日期格式异常', icon: 'none' });
+      return;
     }
     wx.navigateTo({
       url:
         '../editFoodSales/editFoodSales?edit=1&type=single&departmentId=' +
-        (this.data.departmentId || '') +
+        (this.data.depFatherId || '') +
         '&anchorDate=' +
         encodeURIComponent(day),
-    })
+    });
   },
 
+  // ========== 合并模板：下载 / 上传 ==========
 
- 
+  _ensureTemplateDepartmentId: function () {
+    var id = this.data.depFatherId;
+    if (!id) {
+      wx.showToast({ title: '请先登录门店', icon: 'none' });
+      return '';
+    }
+    return id;
+  },
+
+  _resolveDistributerId: function () {
+    var disInfo = this.data.disInfo || wx.getStorageSync('disInfo');
+    if (disInfo && disInfo.gbDistributerId != null) {
+      return disInfo.gbDistributerId;
+    }
+    return '';
+  },
+
+  onDownloadCombinedTemplate: function () {
+    if (!this._ensureTemplateDepartmentId()) return;
+    var today = dateUtils.getArriveDate(0);
+    var patch = { showCombinedTemplateModal: true, todayDate: today };
+    if (this.data.combinedTemplateStartDate > today) {
+      patch.combinedTemplateStartDate = today;
+    }
+    if (this.data.combinedTemplateEndDate > today) {
+      patch.combinedTemplateEndDate = today;
+    }
+    this.setData(patch);
+  },
+
+  onCloseCombinedTemplateModal: function () {
+    this.setData({ showCombinedTemplateModal: false });
+  },
+
+  onCombinedTemplateStartChange: function (e) {
+    var value = e.detail.value;
+    var today = dateUtils.getArriveDate(0);
+    var v = value > today ? today : value;
+    var end0 = this.data.combinedTemplateEndDate;
+    var patch = { combinedTemplateStartDate: v };
+    if (end0 && v > end0) {
+      patch.combinedTemplateEndDate = v;
+    }
+    this.setData(patch);
+  },
+
+  onCombinedTemplateEndChange: function (e) {
+    var value = e.detail.value;
+    var today = dateUtils.getArriveDate(0);
+    var v = value > today ? today : value;
+    var start0 = this.data.combinedTemplateStartDate;
+    if (start0 && v < start0) {
+      v = start0;
+    }
+    this.setData({ combinedTemplateEndDate: v });
+  },
+
+  onConfirmDownloadCombined: function () {
+    var startDate = this.data.combinedTemplateStartDate;
+    var endDate = this.data.combinedTemplateEndDate;
+    if (!startDate || !endDate) {
+      wx.showToast({ title: '请选择日期范围', icon: 'none' });
+      return;
+    }
+    if (startDate > endDate) {
+      wx.showToast({ title: '开始日期不能晚于结束日期', icon: 'none' });
+      return;
+    }
+    var today = dateUtils.getArriveDate(0);
+    if (startDate > today || endDate > today) {
+      wx.showToast({ title: '开始/结束日期不能晚于今天', icon: 'none' });
+      return;
+    }
+    var departmentId = this._ensureTemplateDepartmentId();
+    if (!departmentId) return;
+    this.onCloseCombinedTemplateModal();
+    foodSalesTemplateWx.downloadCombinedDailyTemplate(apiUrl.apiUrl, startDate, endDate, departmentId);
+  },
+
+  _isExcelChatFile: function (f) {
+    if (!f) return false;
+    var name = String(f.name || '').toLowerCase();
+    var path = String(f.path || '').toLowerCase();
+    return (
+      name.endsWith('.xlsx') ||
+      name.endsWith('.xls') ||
+      path.endsWith('.xlsx') ||
+      path.endsWith('.xls')
+    );
+  },
+
+  _promptNonExcelChatFile: function (f) {
+    var name = String((f && f.name) || '').toLowerCase();
+    if (name.endsWith('.numbers')) {
+      wx.showModal({
+        title: '当前是 Numbers 格式',
+        content:
+          '您选的是 Apple「Numbers」表格（.numbers），与 Excel（.xlsx/.xls）不同，无法直接导入。\n\n请用 Numbers 打开后：右上角「共享」→「Excel」→ 导出 .xlsx，再发到微信里上传。',
+        showCancel: false,
+        confirmText: '知道了',
+      });
+      return;
+    }
+    wx.showToast({
+      title: '请选 .xlsx 或 .xls（Excel）',
+      icon: 'none',
+      duration: 2800,
+    });
+  },
+
+  onUploadCombinedExcel: function () {
+    var departmentId = this._ensureTemplateDepartmentId();
+    if (!departmentId) return;
+    var distributerId = this._resolveDistributerId();
+    if (!distributerId) {
+      wx.showToast({ title: '缺少批发商信息', icon: 'none' });
+      return;
+    }
+    var that = this;
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      success: function (res) {
+        var list = res.tempFiles || [];
+        var f = list[0];
+        if (!f || !f.path) {
+          wx.showToast({ title: '未获取到文件', icon: 'none' });
+          return;
+        }
+        if (!that._isExcelChatFile(f)) {
+          that._promptNonExcelChatFile(f);
+          return;
+        }
+        wx.showModal({
+          title: '确认上传',
+          content: '确定上传该合并模板 Excel（菜品销量 + 日营业额）？',
+          success: function (modalRes) {
+            if (modalRes.confirm) {
+              that._uploadCombinedExcelFile(f.path, departmentId, distributerId);
+            }
+          },
+        });
+      },
+      fail: function (err) {
+        var msg = err && err.errMsg ? String(err.errMsg) : '';
+        if (msg.indexOf('cancel') >= 0 || msg.indexOf('取消') >= 0) {
+          return;
+        }
+        wx.showToast({ title: '未选择文件', icon: 'none' });
+      },
+    });
+  },
+
+  _uploadCombinedExcelFile: function (filePath, departmentId, distributerId) {
+    var that = this;
+    wx.showLoading({ title: '正在上传...', mask: true });
+    foodSalesExcelApi
+      .uploadCombinedDailyExcel(filePath, departmentId, distributerId)
+      .then(function (res) {
+        wx.hideLoading();
+        var code = res.result && res.result.code;
+        var msg = res.result && res.result.msg;
+        if (code === 0 || code === '0') {
+          wx.showToast({ title: '导入成功', icon: 'success' });
+          that._initData();
+        } else {
+          wx.showToast({ title: msg || '上传失败', icon: 'none' });
+        }
+      })
+      .catch(function (err) {
+        wx.hideLoading();
+        console.error('upload combined excel', err);
+        wx.showToast({ title: '网络请求失败', icon: 'none' });
+      });
+  },
+
 })

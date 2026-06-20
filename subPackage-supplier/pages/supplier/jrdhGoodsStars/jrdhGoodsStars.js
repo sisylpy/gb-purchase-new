@@ -1,21 +1,16 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
+var depOrder = require('../../../../services/depOrder.js');
 
 import apiUrl from '../../../../config/index.js'
-
-// import {
-//   supplierGetStars
-// } from '../../../../lib/apiDepOrder.js'
 
 Page({
 
   onShow(){
     if(this.data.update){
       
-      var myDate = wx.getStorageSync('myDate');
-      console.log("showowowow", myDate)
-      if(myDate){
+      var myDate = wx.getStorageSync('myDate');if(myDate){
         this.setData({
           startDate: myDate.startDate,
           stopDate: myDate.stopDate,
@@ -90,11 +85,9 @@ Page({
       
     }
     load.showLoading("获取数据中");
-    supplierGetStars(data)
+    depOrder.supplierGetStars(data)
       .then(res => {
-        load.hideLoading();
-        console.log(res.result.data)
-        if (res.result.code == 0) {
+        load.hideLoading();if (res.result.code == 0) {
           this.setData({
             arr: res.result.data.arr,
             supplierInfo: res.result.data.supplierInfo,
@@ -134,7 +127,7 @@ Page({
   
 
   toBack() {
-    if(this.data.from = 'supplier'){
+    if(this.data.from == 'supplier'){
       wx.navigateBack({
         delta: 1,
       })

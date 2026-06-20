@@ -168,9 +168,7 @@ Page({
 
     // 4) 合并后按 sortDisGoodsArr 顺序排序
     const idOrder = (this.data.sortDisGoodsArr || []).map(String);
-    // console.log('sortDisGoodsArr:', idOrder);
-    // console.log('merged ids:', merged.map(i => i.gbDistributerGoodsId));
-    const sortedArr = merged.slice().sort((a, b) => {
+    ////const sortedArr = merged.slice().sort((a, b) => {
       const idxA = idOrder.indexOf(String(a.gbDistributerGoodsId));
       const idxB = idOrder.indexOf(String(b.gbDistributerGoodsId));
       return (idxA === -1 ? 99999 : idxA) - (idxB === -1 ? 99999 : idxB);
@@ -216,16 +214,10 @@ Page({
       );
       
       if (hasGoods) {
-        console.log('[leftMenuClickDep] 商品足够，直接滚动');
         this.setData({
           scrollIntoViewDep: `cat-dep-${firstSubCat.gbDistributerFatherGoodsId}`
-        }, () => {
-          console.log('[leftMenuClickDep] 滚动位置已设置:', {
-            scrollIntoViewDep: `cat-dep-${firstSubCat.gbDistributerFatherGoodsId}`
-          });
         });
       } else {
-        console.log('[leftMenuClickDep] 商品不足，继续请求接口');
         // 直接调用loadGoodsBySubCatIdDep方法，请求特定分类的商品
         this.loadGoodsBySubCatIdDep(firstSubCat.gbDistributerFatherGoodsId, this.data.currentPage + 1, goodsArr);
       }
@@ -257,9 +249,7 @@ Page({
     const hasGoods = goodsArr.some(
       item => String(item.gbDgDfgGoodsGrandId) === String(subCatId)
     );
-    if (hasGoods) {
-      console.log('[onSubCatTapDep] 商品足够，直接滚动');
-    wx.createSelectorQuery()
+    if (hasGoods) {wx.createSelectorQuery()
         .select(`#cat-dep-${subCatId}`)
         .boundingClientRect(rect => {
           if (rect) {
@@ -269,9 +259,7 @@ Page({
           }
         })
         .exec();
-    } else {
-      console.log('[onSubCatTapDep] 商品不足，继续请求接口');
-      // 递归请求接口，page 参数递增
+    } else {// 递归请求接口，page 参数递增
       this.loadGoodsBySubCatIdDep(subCatId, this.data.currentPage + 1, goodsArr);
     }
   },
@@ -305,18 +293,13 @@ Page({
         list.forEach((item, idx) => {
           item.viewId = 'goods_' + (base + idx);
         });
-        for(var i = 0 ; i < list.length ; i++){
-          console.log("第" + page + "页面请求的数据是:" + list[i].gbDdgDepGoodsName);
-        }
+        for(var i = 0 ; i < list.length ; i++){}
 
         // 3) 合并数据
         const merged = this.data.disGoodsArrAi.concat(list);
 
         // 4) 合并后按 sortDisGoodsArr 顺序排序
-        const idOrder = (this.data.sortDisGoodsArr || []).map(String);
-        console.log('sortDisGoodsArr:', idOrder);
-        console.log('merged ids:', merged.map(i => i.gbDistributerGoodsId));
-        const sortedArr = merged.slice().sort((a, b) => {
+        const idOrder = (this.data.sortDisGoodsArr || []).map(String);const sortedArr = merged.slice().sort((a, b) => {
           const idxA = idOrder.indexOf(String(a.gbDistributerGoodsId));
           const idxB = idOrder.indexOf(String(b.gbDistributerGoodsId));
           return (idxA === -1 ? 99999 : idxA) - (idxB === -1 ? 99999 : idxB);
@@ -336,9 +319,7 @@ Page({
           const goodsArr = this.data.disGoodsArrAi;
           const idx = goodsArr.findIndex(item => String(item.gbDgDfgGoodsGrandId) === String(subCatId));
         
-          if (idx !== -1) {
-            console.log('[loadGoodsBySubCatIdDep] 自动滚动到目标商品', subCatId);
-            wx.createSelectorQuery()
+          if (idx !== -1) {wx.createSelectorQuery()
               .select(`#cat-dep-${subCatId}`)
               .boundingClientRect(rect => {
                 if (rect) {    
@@ -352,15 +333,11 @@ Page({
                 }
               })
               .exec();
-          } else {
-            console.log('[loadGoodsBySubCatIdDep] 商品数量不足，继续请求下一页', subCatId);
-            // 如果还有下一页，继续请求
+          } else {// 如果还有下一页，继续请求
             if (page < totalPages) {
               // 递归调用自身，请求下一页
               this.loadGoodsBySubCatIdDep(subCatId, page + 1, goodsArr);
-            } else {
-              console.log('[loadGoodsBySubCatIdDep] 已加载所有页面，仍未找到目标分类商品', subCatId);
-            }
+            } else {}
           }
           this.calculateCategoryPositionsDep();
         });
@@ -441,40 +418,23 @@ Page({
    
     // 精准高亮二级分类，并联动一级分类
     const scrollTop = e && e.detail && typeof e.detail.scrollTop === 'number' ? e.detail.scrollTop : 0;
-    const positions = this.data.categoryPositionsDep || [];
-    console.log('[onGoodsScrollDep] 当前 scrollTop:', scrollTop, 'positions:', positions);
-    let activeId = '';
+    const positions = this.data.categoryPositionsDep || [];let activeId = '';
     
     // 添加调试日志：检查每个分类位置
-    for (let i = positions.length - 1; i >= 0; i--) {
-      console.log(`[onGoodsScrollDep] 检查位置 ${i}: id=${positions[i].id}, top=${positions[i].top}, scrollTop=${scrollTop}`);
-      if (scrollTop >= positions[i].top) {
-        activeId = positions[i].id;
-        console.log(`[onGoodsScrollDep] 找到匹配的分类: ${activeId}, 位置: ${positions[i].top}`);
-        break;
+    for (let i = positions.length - 1; i >= 0; i--) {if (scrollTop >= positions[i].top) {
+        activeId = positions[i].id;break;
       }
     }
     
     // 边界兜底：如果没找到，默认第一个
     if (!activeId && positions.length > 0) {
-      activeId = positions[0].id;
-      console.log('[onGoodsScrollDep] 边界兜底，activeId 设为第一个:', activeId);
-    }
+      activeId = positions[0].id;}
     
-    // 添加调试日志：显示 activeId 和当前状态
-    console.log(`[onGoodsScrollDep] 最终确定的 activeId: ${activeId}, 当前 activeSubCatIdDep: ${this.data.activeSubCatIdDep}`);
-    
-    // 二级分类高亮
-    if (activeId && activeId !== this.data.activeSubCatIdDep) {
-      console.log('[onGoodsScrollDep] 需要更新二级分类高亮:', activeId);
-      this.setData({
+    // 添加调试日志：显示 activeId 和当前状态// 二级分类高亮
+    if (activeId && activeId !== this.data.activeSubCatIdDep) {this.setData({
         activeSubCatIdDep: activeId,
         subcatScrollIntoViewDep: `subcat-dep-${activeId}`
-      });
-      console.log('[onGoodsScrollDep] 二级分类高亮更新完成');
-    } else {
-      console.log('[onGoodsScrollDep] 二级分类高亮无需更新, activeId:', activeId, 'activeSubCatIdDep:', this.data.activeSubCatIdDep);
-    }
+      });} else {}
     
     // 联动一级分类高亮
     if (activeId && this.data.disGoodsCataArr) {
@@ -488,54 +448,45 @@ Page({
       // 在 disGoodsCataArr 里找 greatId 的索引
       const subIndex = this.data.disGoodsCataArr.findIndex(
         c => String(c.gbDistributerFatherGoodsId) === String(greatId)
-      );
-      console.log('[onGoodsScrollDep] 联动一级分类 greatId:', greatId, '一级分类索引:', subIndex, '当前 selectedSub:', this.data.selectedSub);
-      if (subIndex !== -1 && subIndex !== this.data.selectedSub) {
+      );if (subIndex !== -1 && subIndex !== this.data.selectedSub) {
           this.setData({
             selectedSub: subIndex,
           fatherArr: this.data.disGoodsCataArr[subIndex].fatherGoodsEntities
-        });
-        console.log('[onGoodsScrollDep] setData 联动一级分类 selectedSub', subIndex);
-      } else {
-        console.log('[onGoodsScrollDep] 未触发 setData 联动一级分类');
-      }
+        });} else {}
     }
   },
 
   // 1. 新增：部门端商品分类锚点位置缓存
   calculateCategoryPositionsDep() {
-    // console.log('[calculateCategoryPositionsDep] 方法开始执行');
-    const query = wx.createSelectorQuery();
-    query.selectAll('.goods-category-title-dep').boundingClientRect();
-    query.select('.goods-list-dep').boundingClientRect();
-    query.exec((res) => {
-      // console.log('[calculateCategoryPositionsDep] query.exec 回调，res:', res);
-      if (res[0] && res[1]) {
-        const listRect = res[1];
-        // 先计算所有原始 top
-        let rawPositions = res[0].map(item => ({
-          id: item.id.replace('cat-dep-', ''),
-          top: item.top - listRect.top
-        }));
-        // 取第一个的 top 作为基准
-        const baseTop = rawPositions.length > 0 ? rawPositions[0].top : 0;
-        // 重新计算所有 top，让第一个为 0
-        let positions = rawPositions.map((item, idx) => ({
-          id: item.id,
-          top: item.top - baseTop
-        }));
-        // 按 top 从小到大排序
-        positions.sort((a, b) => a.top - b.top);
-        // console.log('[calculateCategoryPositionsDep] 归一化后 positions:', positions);
-        this.setData({
-          categoryPositionsDep: positions
-        });
-        const goodsOrder = (this.data.disGoodsArrAi || []).map(g => g.gbDgDfgGoodsGrandId);
-        // console.log('[calculateCategoryPositionsDep] disGoodsArrAi 渲染顺序:', goodsOrder);
-        // console.log('[calculateCategoryPositionsDep] 分类锚点位置(已排序):', positions);
-      } else {
-        // console.warn('[calculateCategoryPositionsDep] 未获取到有效的节点信息', res);
-        }
+    var that = this;
+    wx.createSelectorQuery()
+      .selectAll('.goods-category-title-dep')
+      .boundingClientRect(function(rects) {
+        wx.createSelectorQuery()
+          .select('.goods-list-dep')
+          .boundingClientRect(function(listRect) {
+            if (rects && listRect) {
+              var rawPositions = [];
+              for (var ri = 0; ri < rects.length; ri++) {
+                rawPositions.push({
+                  id: rects[ri].id.replace('cat-dep-', ''),
+                  top: rects[ri].top - listRect.top
+                });
+              }
+              var baseTop = rawPositions.length > 0 ? rawPositions[0].top : 0;
+              var positions = [];
+              for (var pidx = 0; pidx < rawPositions.length; pidx++) {
+                positions.push({
+                  id: rawPositions[pidx].id,
+                  top: rawPositions[pidx].top - baseTop
+                });
+              }
+              positions.sort(function(a, b) { return a.top - b.top; });
+              that.setData({
+                categoryPositionsDep: positions
+              });
+            }
+          });
       });
   },
   
@@ -591,9 +542,7 @@ Page({
   },
 
   toGoods(e){
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
-    console.log("goods",e)
-    wx.navigateTo({
+    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);wx.navigateTo({
       url: '/subPackage-goods/pages/goods/disGoodsPage/disGoodsPage?disGoodsId=' + e.currentTarget.dataset.id,
     })
   },

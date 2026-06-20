@@ -299,3 +299,52 @@ page {
   margin: 0 4rpx;
   flex-shrink: 0;
 }
+
+.waste-time-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  margin-top: 6rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 8rpx;
+  font-size: 20rpx;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.waste-time-tag--pending {
+  color: #FF9800;
+  background: rgba(255, 152, 0, 0.12);
+  border: 1rpx solid rgba(255, 152, 0, 0.35);
+}
+
+.waste-time-tag--pending .waste-time-tag__value {
+  font-weight: 700;
+}
+
+.waste-time-tag--expired {
+  color: #fff;
+  background: linear-gradient(135deg, #F44336, #D32F2F);
+  border: 1rpx solid #C62828;
+  box-shadow: 0 2rpx 8rpx rgba(244, 67, 54, 0.4);
+  font-weight: 600;
+  padding: 6rpx 12rpx;
+}
+
+.waste-time-tag--expired .waste-time-tag__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  font-size: 18rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.waste-time-tag--expired .waste-time-tag__value {
+  font-weight: 700;
+}

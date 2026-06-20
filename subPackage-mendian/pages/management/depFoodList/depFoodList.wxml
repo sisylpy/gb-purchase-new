@@ -1,0 +1,429 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+
+<view class="food-page food-page--boss">
+  <back-navbar title="菜品经营" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack">
+  </back-navbar>
+
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePage">
+        <image src="../../../../images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="flex-row">
+      <view class="flex-row p-20" bindtap="onToggleSearchBar">
+        <image src="/images/search-3.png"
+          class="icon mr-20 dfl-search-top-ico {{foodNameSearch ? 'dfl-search-top-ico--on' : ''}}"></image>
+      </view>
+
+    </view>
+
+
+
+  </view>
+
+  <view class="dfl-search-panel bg-white border-bottom" wx:if="{{searchBarOpen}}">
+    <view class="dfl-search-inner">
+      <image class="dfl-search-inner-ico" src="/images/search-3.png" mode="aspectFit" />
+      <input class="dfl-search-input" value="{{foodNameSearchDraft}}" placeholder="搜索菜品名称" confirm-type="search"
+        focus="{{searchInputFocus}}" bindinput="onFoodNameSearchInput" bindconfirm="onFoodNameSearchConfirm" />
+      <text class="dfl-search-clear" wx:if="{{foodNameSearchDraft}}" catchtap="onFoodNameSearchClear">×</text>
+    </view>
+  </view>
+
+  <view class="dfl-banner" wx:if="{{(scopeOutboundSubtotals || businessInsightSummary) && !foodNameSearch}}">
+    <view class="dfl-banner__head">
+      <text class="dfl-banner__title">本区间经营概览</text>
+      <view class="dfl-banner__info">
+        <text class="dfl-banner__info-icon">ⓘ</text>
+      </view>
+    </view>
+
+    <!-- A 销售概况 -->
+    <view class="dfl-section-block">
+      <view class="dfl-section-block__tag dfl-section-block__tag--green">
+        <text class="dfl-section-block__tag-letter">A</text>
+        <text class="dfl-section-block__tag-label">销售概况</text>
+      </view>
+      <view class="dfl-overview-row dfl-overview-row--4col">
+        <view class="dfl-overview-cell2">
+          <text class="dfl-overview-cell2__lab">营业额</text>
+          <text class="dfl-overview-cell2__val">¥{{businessInsightSummary.totalActualRevenue}}</text>
+          <view class="dfl-overview-cell2__trend" wx:if="{{businessInsightSummary.totalListPriceRevenueMom !== undefined}}">
+            <text>较上月</text>
+            <text class="dfl-overview-cell2__pct {{businessInsightSummary.totalListPriceRevenueMom >= 0 ? 'is-up' : 'is-down'}}">{{businessInsightSummary.totalListPriceRevenueMom}}%</text>
+            <text class="dfl-overview-cell2__arrow {{businessInsightSummary.totalListPriceRevenueMom >= 0 ? 'is-up' : 'is-down'}}">{{businessInsightSummary.totalListPriceRevenueMom >= 0 ? '↑' : '↓'}}</text>
+          </view>
+        </view>
+        <view class="dfl-overview-cell2">
+          <text class="dfl-overview-cell2__lab">销售菜品</text>
+          <text class="dfl-overview-cell2__val">{{businessInsightSummary.totalNormalSaleQty}}份</text>
+          <view class="dfl-overview-cell2__trend" wx:if="{{businessInsightSummary.totalNormalSaleQtyMom !== undefined}}">
+            <text>较上月</text>
+            <text class="dfl-overview-cell2__pct {{businessInsightSummary.totalNormalSaleQtyMom >= 0 ? 'is-up' : 'is-down'}}">{{businessInsightSummary.totalNormalSaleQtyMom}}%</text>
+            <text class="dfl-overview-cell2__arrow {{businessInsightSummary.totalNormalSaleQtyMom >= 0 ? 'is-up' : 'is-down'}}">{{businessInsightSummary.totalNormalSaleQtyMom >= 0 ? '↑' : '↓'}}</text>
+          </view>
+        </view>
+        <view class="dfl-overview-cell2">
+          <text class="dfl-overview-cell2__lab">员工餐金额</text>
+          <text class="dfl-overview-cell2__val">¥{{businessInsightSummary.totalEmployeeMealAmount}}</text>
+          <view class="dfl-overview-cell2__trend">
+            <text>{{businessInsightSummary.totalEmployeeMealQty}}份</text>
+            <text wx:if="{{businessInsightSummary.totalEmployeeMealMom !== undefined}}" class="dfl-overview-cell2__pct is-flat">{{businessInsightSummary.totalEmployeeMealMom}}%</text>
+          </view>
+        </view>
+        <view class="dfl-overview-cell2">
+          <text class="dfl-overview-cell2__lab">折扣餐</text>
+          <text class="dfl-overview-cell2__val">¥{{businessInsightSummary.totalDiscountGiftAmount}}</text>
+          <view class="dfl-overview-cell2__trend">
+            <text>{{businessInsightSummary.totalDiscountGiftQty}}份</text>
+            <text wx:if="{{businessInsightSummary.totalDiscountGiftMom !== undefined}}" class="dfl-overview-cell2__pct {{businessInsightSummary.totalDiscountGiftMom >= 0 ? 'is-up' : 'is-down'}}">{{businessInsightSummary.totalDiscountGiftMom}}%</text>
+            <text wx:if="{{businessInsightSummary.totalDiscountGiftMom !== undefined}}" class="dfl-overview-cell2__arrow {{businessInsightSummary.totalDiscountGiftMom >= 0 ? 'is-up' : 'is-down'}}">{{businessInsightSummary.totalDiscountGiftMom >= 0 ? '↑' : '↓'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- B 制作成本 -->
+    <view class="dfl-section-block">
+      <view class="dfl-section-block__tag dfl-section-block__tag--blue">
+        <text class="dfl-section-block__tag-letter">B</text>
+        <text class="dfl-section-block__tag-label">制作成本</text>
+      </view>
+      <view class="dfl-cost-formula">
+        <view class="dfl-cost-formula__item">
+          <view class="dfl-cost-card">
+            <text class="dfl-cost-card__lab">制作总成本</text>
+            <text class="dfl-cost-card__val">¥{{businessInsightSummary.totalVerifiedAmount}}</text>
+            <view class="dfl-cost-card__trend" wx:if="{{businessInsightSummary.totalVerifiedAmountMom !== undefined}}">
+              <text>较上月</text>
+              <text class="dfl-cost-card__pct is-up">{{businessInsightSummary.totalVerifiedAmountMom}}% ↑</text>
+            </view>
+          </view>
+        </view>
+        <text class="dfl-cost-formula__op">=</text>
+        <view class="dfl-cost-formula__item">
+          <view class="dfl-cost-card">
+            <text class="dfl-cost-card__lab">菜品制作</text>
+            <text class="dfl-cost-card__val dfl-cost-card__val--blue">¥{{businessInsightSummary.totalActualCostAmount}}</text>
+            <text class="dfl-cost-card__sub">菜品{{businessInsightSummary.dishRowCount}}个</text>
+            <view class="dfl-cost-card__trend" wx:if="{{businessInsightSummary.totalActualCostAmountMom !== undefined}}">
+              <text>较上月</text>
+              <text class="dfl-cost-card__pct is-up">{{businessInsightSummary.totalActualCostAmountMom}}% ↑</text>
+            </view>
+          </view>
+        </view>
+        <text class="dfl-cost-formula__op">+</text>
+        <view class="dfl-cost-formula__item">
+          <view class="dfl-cost-card">
+            <text class="dfl-cost-card__lab">损耗+废弃</text>
+            <text class="dfl-cost-card__val">¥{{scopeOutboundSubtotals.wasteLossAmountType23}}</text>
+            <view class="dfl-cost-card__trend" wx:if="{{scopeOutboundSubtotals.wasteLossMom !== undefined}}">
+              <text>较上月</text>
+              <text class="dfl-cost-card__pct is-up">{{scopeOutboundSubtotals.wasteLossMom}}% ↑</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- C 毛利表现 -->
+    <view class="dfl-section-block">
+      <view class="dfl-section-block__tag dfl-section-block__tag--orange">
+        <text class="dfl-section-block__tag-letter">C</text>
+        <text class="dfl-section-block__tag-label">毛利表现</text>
+      </view>
+      <view class="dfl-overview-row dfl-overview-row--3col">
+        <view class="dfl-overview-cell2 dfl-overview-cell2--wide">
+          <text class="dfl-overview-cell2__lab">制作总毛利率</text>
+          <text class="dfl-overview-cell2__val dfl-overview-cell2__val--lg dfl-overview-cell2__val--green">{{businessInsightSummary.totalVerifiedAmountPercent}}%</text>
+          <view class="dfl-overview-cell2__trend" wx:if="{{businessInsightSummary.totalVerifiedPercentMom !== undefined}}">
+            <text>较上月</text>
+            <text class="dfl-overview-cell2__pct is-up">{{businessInsightSummary.totalVerifiedPercentMom}}% ↑</text>
+          </view>
+          <text class="dfl-overview-cell2__desc">无考虑损耗·含储值易耗</text>
+        </view>
+        <view class="dfl-overview-cell2 dfl-overview-cell2--wide">
+          <text class="dfl-overview-cell2__lab">配料毛利率</text>
+          <text class="dfl-overview-cell2__val dfl-overview-cell2__val--lg dfl-overview-cell2__val--blue">{{businessInsightSummary.blendedGrossMarginRateOnListPrice}}%</text>
+          <view class="dfl-overview-cell2__trend" wx:if="{{businessInsightSummary.blendedGmMom !== undefined}}">
+            <text>较上月</text>
+            <text class="dfl-overview-cell2__pct is-up">{{businessInsightSummary.blendedGmMom}}% ↑</text>
+          </view>
+          <text class="dfl-overview-cell2__desc">后台返回·菜品毛利率(理论)</text>
+        </view>
+        <view class="dfl-overview-cell2 dfl-overview-cell2--wide">
+          <text class="dfl-overview-cell2__lab">理论毛利率</text>
+          <text class="dfl-overview-cell2__val dfl-overview-cell2__val--lg">{{businessInsightSummary.blendedGrossMarginRateTheoryOnListPrice}}%</text>
+          <view class="dfl-overview-cell2__trend" wx:if="{{businessInsightSummary.theoryGmMom !== undefined}}">
+            <text>较上月</text>
+            <text class="dfl-overview-cell2__pct is-up">{{businessInsightSummary.theoryGmMom}}% ↑</text>
+          </view>
+          <text class="dfl-overview-cell2__desc">¥{{businessInsightSummary.totalTheoryCostAmount}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="dfl-banner__meta" wx:if="{{businessInsightSummary}}">
+      <text>菜品 {{businessInsightSummary.dishRowCount}} 道 · 标价收入 ¥{{businessInsightSummary.totalActualRevenue}} · 实际成本 ¥{{businessInsightSummary.totalActualCostAmount}} · 理论成本 ¥{{businessInsightSummary.totalTheoryCostAmount}}</text>
+    </view>
+  </view>
+
+  <!-- 吸顶：标题 + 排序栏（搜索时隐藏） -->
+  <view class="dfl-section-sticky" wx:if="{{foodRowsSourceCount > 0 && !foodNameSearch}}" style="top: {{navBarHeight}}rpx;">
+    <view class="dfl-section__bar">
+      <text class="dfl-section__title">菜品销售与毛利</text>
+    </view>
+    <view class="dfl-sort-wrap">
+      <view class="dfl-sort-left">
+        <view class="dfl-sort-arrows">
+          <text class="dfl-sort-arrow dfl-sort-arrow--up {{foodSortOrder === 'asc' ? 'is-on' : ''}}">↑</text>
+          <text class="dfl-sort-arrow dfl-sort-arrow--down {{foodSortOrder === 'desc' ? 'is-on' : ''}}">↓</text>
+        </view>
+        <text class="dfl-sort-label">排序{{foodSortOrder === 'asc' ? '·升序' : '·降序'}}</text>
+      </view>
+      <scroll-view scroll-x class="dfl-sort-scroll" show-scrollbar="{{false}}">
+        <view class="dfl-sort-chips">
+          <view class="dfl-sort-chip dfl-sort-chip--sales {{foodSortBy === 'sales' ? 'is-on' : ''}}"
+            bindtap="onFoodSort" data-sort="sales">
+            <text class="dfl-sort-chip-ico">份</text>
+            <text>销量</text>
+          </view>
+          <view class="dfl-sort-chip dfl-sort-chip--margin {{foodSortBy === 'margin' ? 'is-on' : ''}}"
+            bindtap="onFoodSort" data-sort="margin">
+            <text class="dfl-sort-chip-ico">%</text>
+            <text>综合毛利率</text>
+          </view>
+          <view class="dfl-sort-chip dfl-sort-chip--profit {{foodSortBy === 'profit' ? 'is-on' : ''}}"
+            bindtap="onFoodSort" data-sort="profit">
+            <text class="dfl-sort-chip-ico">¥</text>
+            <text>实际利润</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <view class="dfl-section" wx:if="{{foodRowsSourceCount > 0}}">
+
+    <view class="dfl-list-empty" wx:if="{{!foodRows.length && foodNameSearch}}">
+      <text>未找到「{{foodNameSearch}}」相关菜品</text>
+    </view>
+
+    <view class="dfl-list" wx:if="{{foodRows.length}}">
+      <view class="dfl-boss-card" wx:for="{{foodRows}}" wx:for-item="food" wx:key="_rowKey">
+
+        <!-- 顶栏：菜名 / 单价 | 占位图 | 销量（对齐稿图） -->
+        <view class="dfl-dish-head">
+          <view class="dfl-dish-head__main">
+            <text class="dfl-dish-head__idx">{{index + 1}}.</text>
+            <view class="dfl-dish-head__titles">
+              <text class="dfl-dish-head__name">{{food.gbDfFoodName}}</text>
+              <text class="dfl-dish-head__price text-secondary">单价 ¥{{food.gbDfFoodPrice}}/份</text>
+            </view>
+          </view>
+          <view class="dfl-dish-head__aside">
+
+            <view class="dfl-dish-head__sales">
+              <text class="dfl-dish-head__sales-lab">销量</text>
+              <text
+                class="dfl-dish-head__sales-val">{{food.gbDfBusinessInsight ? food.gbDfBusinessInsight.soldPortionsTotal : food.gbDfSalesAmount}}份</text>
+            </view>
+          </view>
+        </view>
+
+        <block wx:if="{{food.gbDfSalesAmount > 0}}">
+
+          <block wx:if="{{food.gbDfBusinessInsight}}">
+            <!-- 摘要行：综合毛利率 + 实际利润 + 展开按钮 -->
+            <view class="dish-summary-row">
+              <!-- 综合毛利率卡片 -->
+              <view class="dish-summary-card dish-summary-card--green">
+                <view class="dish-summary-card__icon">
+                  <text class="dish-summary-card__bar-ico">▌</text>
+                </view>
+                <view class="dish-summary-card__body">
+                  <text class="dish-summary-card__lab">综合毛利率</text>
+                  <text class="dish-summary-card__val dish-summary-card__val--green">{{food.gbDfBusinessInsight.blendedGrossMarginRateOnListPrice}}%</text>
+                </view>
+              </view>
+              <!-- 实际利润卡片 -->
+              <view class="dish-summary-card dish-summary-card--orange">
+                <view class="dish-summary-card__icon dish-summary-card__icon--yen">
+                  <text class="dish-summary-card__yen-txt">¥</text>
+                </view>
+                <view class="dish-summary-card__body">
+                  <text class="dish-summary-card__lab">实际利润</text>
+                  <text class="dish-summary-card__val dish-summary-card__val--orange">¥{{food.gbDfBusinessInsight.actualProfitAmount}}</text>
+                </view>
+              </view>
+              <!-- 展开按钮 -->
+              <view class="dish-expand-btn" bindtap="onToggleFoodDetail" data-index="{{index}}">
+                <text class="dish-expand-btn__arrow">{{food._expanded ? '∧' : '∨'}}</text>
+              </view>
+            </view>
+
+            <!-- 展开的详细内容（默认隐藏，保留DOM用于图表初始化） -->
+            <view class="dish-detail-panel {{food._expanded ? 'is-open' : ''}}">
+            <view class="dish-insight">
+
+              <!-- 收入构成 -->
+              <view class="dish-section-block">
+                <view class="dish-section-label dish-section-label--green">收入构成</view>
+                <view class="dish-overview-row">
+                  <view class="dish-cell">
+                    <text class="dish-cell__lab">销售标价收入</text>
+                    <text class="dish-cell__val">¥{{food.gbDfBusinessInsight.actualRevenue}}</text>
+                  </view>
+                  <view class="dish-cell">
+                    <text class="dish-cell__lab">销售</text>
+                    <text class="dish-cell__val dish-cell__val--green">¥{{food.gbDfBusinessInsight.normalSaleAmount}}</text>
+                    <text class="dish-cell__sub">{{food.gbDfBusinessInsight.normalSaleQty}}份</text>
+                  </view>
+                  <view class="dish-cell">
+                    <text class="dish-cell__lab">员工</text>
+                    <text class="dish-cell__val dish-cell__val--green">¥{{food.gbDfBusinessInsight.employeeMealCostAmount}}</text>
+                    <text class="dish-cell__sub">{{food.gbDfBusinessInsight.employeeMealQty}}份</text>
+                  </view>
+                  <view class="dish-cell">
+                    <text class="dish-cell__lab">折扣</text>
+                    <text class="dish-cell__val dish-cell__val--green">¥{{food.gbDfBusinessInsight.discountGiftAmount}}</text>
+                    <text class="dish-cell__sub">{{food.gbDfBusinessInsight.discountGiftQty}}份</text>
+                  </view>
+                </view>
+              </view>
+
+              <!-- 制作成本构成 -->
+              <view class="dish-section-block">
+                <view class="dish-section-label dish-section-label--blue">制作成本构成</view>
+                <view class="dish-cost-formula">
+                  <view class="dish-cost-formula__item">
+                    <view class="dish-cost-card">
+                      <text class="dish-cost-card__lab">制作总成本</text>
+                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.actualCostTotalAmount123}}</text>
+                    </view>
+                  </view>
+                  <text class="dish-cost-formula__op">=</text>
+                  <view class="dish-cost-formula__item">
+                    <view class="dish-cost-card">
+                      <text class="dish-cost-card__lab">菜品制作</text>
+                      <text class="dish-cost-card__val dish-cost-card__val--blue">¥{{food.gbDfBusinessInsight.actualCostAmount}}</text>
+                    </view>
+                  </view>
+                  <text class="dish-cost-formula__op">+</text>
+                  <view class="dish-cost-formula__item">
+                    <view class="dish-cost-card">
+                      <text class="dish-cost-card__lab">损耗+废弃</text>
+                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.wasteLossCostAmount}}</text>
+                    </view>
+                  </view>
+                </view>
+                <!-- 单份 -->
+                <view class="dish-cost-formula">
+                  <view class="dish-cost-formula__item">
+                    <view class="dish-cost-card">
+                      <text class="dish-cost-card__lab">单份制作成本</text>
+                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.actualCostPerPortion123}}/份</text>
+                    </view>
+                  </view>
+                  <text class="dish-cost-formula__op">=</text>
+                  <view class="dish-cost-formula__item">
+                    <view class="dish-cost-card">
+                      <text class="dish-cost-card__lab">菜品制作</text>
+                      <text class="dish-cost-card__val dish-cost-card__val--blue">¥{{food.gbDfBusinessInsight.actualCostPerPortion}}/份</text>
+                    </view>
+                  </view>
+                  <text class="dish-cost-formula__op">+</text>
+                  <view class="dish-cost-formula__item">
+                    <view class="dish-cost-card">
+                      <text class="dish-cost-card__lab">损耗+废弃</text>
+                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.wasteLossCostPerPortion}}/份</text>
+                    </view>
+                  </view>
+                </view>
+
+
+              </view>
+
+            
+
+              <!-- 毛利结果 -->
+              <!-- <view class="dish-section-block">
+                <view class="dish-section-label dish-section-label--green">毛利结果</view>
+                <view class="dish-overview-row">
+
+                  <view class="dish-cell">
+                    <text class="dish-cell__lab">制作毛利率</text>
+                    <text class="dish-cell__val">{{food.gbDfBusinessInsight.grossMarginRateOnListPrice}}%</text>
+                  </view>
+                  <view class="dish-cell">
+                    <text class="dish-cell__lab">理论毛利率</text>
+                    <text class="dish-cell__val">{{food.gbDfBusinessInsight.grossMarginRateTheoryOnListPrice}}%</text>
+                    <text>¥{{food.gbDfBusinessInsight.theoryCostAmount}}</text>
+                  </view>
+
+                </view>
+              </view> -->
+
+            </view>
+
+            <view class="dfl-week-chart" wx:if="{{food._hasInsightRow}}">
+              <view class="dfl-week-chart__head flex-row-between">
+                <text class="dfl-week-chart__title">按星期销售表现</text>
+                <text class="dfl-week-chart__muted" wx:if="{{!food._weekChartHasData}}">暂无分日销量</text>
+              </view>
+              <view class="dfl-week-chart__canvas-wrap">
+                <ec-canvas id="{{food._weekChartDomId}}" canvas-id="{{food._weekChartDomId}}" ec="{{ weekEcLazy }}"
+                  class="dfl-week-ec"></ec-canvas>
+              </view>
+            </view>
+
+            <text class="dfl-boss-card__method dfl-boss-card__method--below-chart"
+              wx:if="{{food.gbDfFoodMethod}}">{{food.gbDfFoodMethod}}</text>
+
+            <view class="dfl-ingredient-cta" hover-class="food-add-btn--hover" catchtap="onOpenIngredients"
+              data-food="{{food}}">
+              <text class="dfl-ingredient-cta__txt">查看配料成本分析</text>
+              <text class="dfl-ingredient-cta__chev">›</text>
+            </view>
+            <text class="dfl-data-disclaimer">* 数据仅供参考，请以实际经营情况为准</text>
+            </view>
+          </block>
+
+        </block>
+
+        <view class="dfl-boss-card__no-insight" wx:elif="{{businessInsightSummary || scopeOutboundSubtotals}}">
+          <text>本菜暂无经营分析数据（无销售或未进成本分摊）</text>
+        </view>
+
+        <view class="dfl-boss-card__foot flex-row-between"
+          wx:if="{{!(food.gbDfSalesAmount > 0 && food.gbDfBusinessInsight)}}">
+          <text class="dfl-boss-card__method" wx:if="{{food.gbDfFoodMethod}}">{{food.gbDfFoodMethod}}</text>
+          <text class="dfl-boss-card__method dfl-boss-card__method--muted" wx:else>暂无做法说明</text>
+          <view class="dfl-boss-card__link" hover-class="food-add-btn--hover" catchtap="onOpenIngredients"
+            data-food="{{food}}">
+            配料详情
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="dfl-empty" wx:if="{{foodRowsSourceCount === 0}}">当前日期范围暂无菜品数据</view>
+</view>

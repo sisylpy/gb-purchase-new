@@ -6,7 +6,7 @@
 
  <view class="flex-column bg-white">
 	<view class=' p-30 '>
-		<view class="text-secondary" style="font-size: 38rpx; font-weight: 500;margin-bottom: 10rpx;">店铺名称:</view>
+		<view class="text-secondary" style="font-size: 38rpx; font-weight: 500;margin-bottom: 10rpx;">分店名称:</view>
 		<view class=" flex-column">
 			<input class="numInput"
 				style="width:{{windowWidth/2}}rpx; font-size: 40rpx;  height: 80rpx; line-height: 80rpx;padding-left: 10rpx; margin-bottom:10rpx;"
@@ -19,16 +19,16 @@
 	</view>
 	<view class="flex-row">
 		<radio-group class="pr-10 pl-10 font-md" bindchange="radioChangeCankao">
-    	<label class="radio">
+			<label class="radio">
 				<view class="flex-row p-20">
-					<radio value="1" checked="true" />
+					<radio value="1" checked="{{cankaoDepId != -1}}" />
 					<text class='wxNumber'>参考现有门店</text>
 				</view>
 			</label>
 
 			<label class="radio ">
 				<view class="flex-row p-20">
-					<radio value="-1" />
+					<radio value="-1" checked="{{cankaoDepId == -1}}" />
 					<text class='wxNumber'>不参考现有门店</text>
 				</view>
 			</label>

@@ -1,726 +1,420 @@
+const app = getApp();
+var stockUnit = require('../../lib/stockUnitConvert.js');
+
+var LOSS_REASONS = ['自然损耗', '加工损耗', '过称误差', '其他'];
+
 Component({
-  /**
-   * 组件的属性列表
-   */
   properties: {
-    //是否显示modal
-    show: {
-      type: Boolean,
-      value: true
-    },
-
-    item: {
-      type: Object,
-      value: {
-        gbDgsStars: 3, // 默认值，外部传入
-      },
-    },
-    modalHeight: {
-      type: Number,
-      value: ""
-    },
-    scrollViewTop: {
-      type: Number,
-      value: ""
-    },
-
-    windowHeight: {
-      type: Number,
-      value: ""
-    },
-    windowWidth: {
-      type: Number,
-      value: ""
-    },
-
-    consultItem: {
-      type: Object,
-      value: ""
-    },
-    canSure: {
-      type: Boolean,
-      value: true
-    },
-    nowTime: {
-      type: String,
-      value: ""
-    },
-    canWaste: {
-      type: Boolean,
-      value: false,
-    },
-    resWeight: {
-      type: String,
-      value: "0"
-    },
-    showType: {
-      type: String,
-      value: ""
-    },
-    resultTime: {
-      type: String,
-      value: ""
-    },
-    depGoods: {
-      type: Object,
-      value: ""
-    }
-
+    show: { type: Boolean, value: false },
+    item: { type: Object, value: { gbDgsStars: 3 } },
+    consultItem: { type: Object, value: null },
+    depGoods: { type: Object, value: null },
+    modalHeight: { type: Number, value: 0 },
+    scrollViewTop: { type: Number, value: 0 },
+    windowHeight: { type: Number, value: 0 },
+    windowWidth: { type: Number, value: 0 },
+    canSure: { type: Boolean, value: true },
+    nowTime: { type: String, value: '' },
+    canWaste: { type: Boolean, value: false },
+    resWeight: { type: String, value: '0' },
+    showType: { type: String, value: '1' },
+    resultTime: { type: String, value: '' },
+    stockBatchIndex: { type: Number, value: 0 },
   },
 
-  /**
-   * 组件的初始数据
-   */
   data: {
-    items: [{
-        name: '1',
-        value: '销售',
-      },
-      {
-        name: '2',
-        value: '损耗',
-      },
-      {
-        name: '3',
-        value: '退货',
-      },
-      {
-        name: '4',
-        value: '废弃',
-      },
-    
-    ],
-
-    greenStars: [], // 绿色星星数组
-    grayStars: [],
-    reason: "",
-    src: ""
+    minUnitOptions: stockUnit.MIN_UNIT_OPTIONS,
+    keyboardOffset: 0,
+    inputAmountMin: '',
+    stockMinUnit: 'g',
+    stockMinUnitIndex: 1,
+    packUnit: '',
+    packQtyInMin: 0,
+    canPickUnit: false,
+    useMinUnit: false,
+    restPack: 0,
+    restMin: 0,
+    stockPackLabel: '',
+    stockRestLabel: '',
+    equivPackText: '',
+    calcUseMin: '',
+    calcRestPack: '',
+    calcRestMin: '',
+    goodsImg: '',
+    lossReasons: LOSS_REASONS,
+    lossReasonIndex: 1,
+    reason: '',
+    src: '',
   },
+
   observers: {
-    // 当 item.gbDgsStars 发生变化时触发
-    'item.gbDgsStars': function (gbDgsStars) {
-      const validStars = parseInt(gbDgsStars, 10);
-      if (isNaN(validStars) || validStars < 0) {
-        // console.warn("Invalid gbDgsStars value:", gbDgsStars);
+    show: function (show) {
+      if (show) {
+        this._initUnitContext();
+        this.setData({ keyboardOffset: 0 });
+      }
+    },
+    'depGoods, item': function () {
+      if (this.data.show) {
+        this._initUnitContext();
+      }
+    },
+  },
+
+  methods: {
+    _getGoodsEntity() {
+      var item = this.data.item || {};
+      var dep = this.data.depGoods || {};
+      return item.gbDistributerGoodsEntity || dep.gbDistributerGoodsEntity || {};
+    },
+
+    _initUnitContext() {
+      var ctx = stockUnit.buildStockUnitContext(this.data.depGoods, this.data.item);
+      var restLabel = ctx.useMin
+        ? (stockUnit.trimAmount(ctx.restPack, 4) + ctx.packUnit
+          + ' ≈ ' + stockUnit.formatDisplayAmount(ctx.restMin, ctx.minUnit) + ctx.minUnit)
+        : (stockUnit.trimAmount(ctx.restPack, 4) + ctx.packUnit);
+      var entity = ctx.entity;
+      var img = entity.gbDgNxFatherImg || entity.gbDgGoodsFile || entity.gbDgGoodsFileImg || '';
+      if (img && String(img).indexOf('http') !== 0) {
+        var base = (app.globalData && app.globalData.server) || '';
+        img = base + img;
+      }
+      var unitOpts = ctx.unitPickerOptions || stockUnit.MIN_UNIT_OPTIONS;
+      var displayUnit = ctx.packUnit || ctx.minUnit;
+      var idx = unitOpts.indexOf(displayUnit);
+      if (idx < 0) idx = 0;
+      this.setData({
+        packUnit: ctx.packUnit,
+        packQtyInMin: ctx.packQtyInMin,
+        canPickUnit: ctx.canPickUnit,
+        useMinUnit: false,
+        minUnitOptions: unitOpts,
+        restPack: ctx.restPack,
+        restMin: ctx.restMin,
+        stockPackLabel: ctx.packLabel,
+        stockRestLabel: restLabel,
+        stockMinUnit: displayUnit,
+        stockMinUnitIndex: idx,
+        goodsImg: img,
+        inputAmountMin: '',
+        equivPackText: '',
+        calcUseMin: '',
+        calcRestPack: '',
+        calcRestMin: '',
+      }, () => {
+        if (String(this.data.showType) === '4' && this.data.canWaste) {
+          this._maybePrefillWasteAmount(true);
+        } else {
+          this._recalcByShowType();
+        }
+      });
+    },
+
+    _wasteDefaultInput(ctx) {
+      ctx = ctx || this._ctxSnapshot();
+      if (ctx.useMin) {
+        return stockUnit.formatDisplayAmount(ctx.restMin, ctx.minUnit);
+      }
+      return stockUnit.trimAmount(ctx.restPack, 4);
+    },
+
+    _maybePrefillWasteAmount(force) {
+      if (String(this.data.showType) !== '4' || !this.data.canWaste) return;
+      if (!force && this.data.inputAmountMin) return;
+      var amount = this._wasteDefaultInput();
+      if (!amount || amount === '0') return;
+      this.setData({ inputAmountMin: amount }, () => this._recalcDirectUse());
+    },
+
+    _recalcByShowType() {
+      var showType = String(this.data.showType);
+      if (showType === '1') {
+        this._recalcNormalUse();
+      } else if (showType === '2' || showType === '3' || showType === '4' || showType === '6') {
+        this._recalcDirectUse();
+      }
+    },
+
+    _recalcNormalUse() {
+      var inputMin = parseFloat(this.data.inputAmountMin);
+      var ctx = this._ctxSnapshot();
+      if (!this.data.inputAmountMin || isNaN(inputMin)) {
+        this.setData({
+          equivPackText: '',
+          calcUseMin: '',
+          calcRestPack: '',
+          calcRestMin: '',
+          canSure: false,
+        });
         return;
       }
-      this.updateStars(validStars);
-    },
-  },
-  
-  /**
-   * 组件的方法列表
-   */
-  methods: {
-
-
-    onStarClick(e) {
-      const totalStars = 5;
-      const greenCount = this.data.greenStars.length;
-      const index = e.currentTarget.dataset.index; // 获取点击的星星索引
-        console.log("indeixxxxxx", index);
-      // 判断点击的星星属于绿色还是灰色
-      const isGreenStar = index < greenCount;
-      let newStarCount;
-      console.log("indeixxxxxx", isGreenStar);
-
-      if (isGreenStar) {
-        // 如果点击的是绿色星星，则减少到当前点击的星星数量
-        newStarCount = index + 1;
-      } else {  
-        // 如果点击的是灰色星星，则增加到当前点击的星星数量
-        newStarCount = greenCount + (index - greenCount + 1);
-       
+      if (ctx.useMin && inputMin >= ctx.restMin) {
+        wx.showToast({ title: '不能大于或等于剩余数量', icon: 'none' });
+        this.setData({ canSure: false });
+        return;
       }
-
-      // 限制星星数量范围
-      newStarCount = Math.min(Math.max(newStarCount, 0), totalStars);
-
-      // 更新数据
+      if (!ctx.useMin && inputMin >= ctx.restPack) {
+        wx.showToast({ title: '不能大于或等于剩余数量', icon: 'none' });
+        this.setData({ canSure: false });
+        return;
+      }
+      var remainPack = ctx.useMin
+        ? stockUnit.minToPack(inputMin, ctx.packQtyInMin)
+        : inputMin;
+      var usePack = parseFloat((ctx.restPack - remainPack).toFixed(8));
+      if (usePack < 0) {
+        this.setData({ canSure: false });
+        return;
+      }
+      var useMin = ctx.useMin ? (ctx.restMin - inputMin) : usePack;
+      var myProduce = stockUnit.trimAmount(usePack, 4);
+      var remainPackStr = stockUnit.trimAmount(remainPack, 8);
       this.setData({
-        'item.gbDgsStars': newStarCount,
+        equivPackText: ctx.useMin
+          ? ('折合：' + stockUnit.trimAmount(remainPack, 4) + ctx.packUnit)
+          : '',
+        calcUseMin: ctx.useMin
+          ? (stockUnit.formatDisplayAmount(useMin, ctx.minUnit) + ctx.minUnit)
+          : (myProduce + ctx.packUnit),
+        calcRestPack: stockUnit.trimAmount(remainPack, 4) + ctx.packUnit,
+        calcRestMin: ctx.useMin
+          ? ('≈ ' + stockUnit.formatDisplayAmount(inputMin, ctx.minUnit) + ctx.minUnit)
+          : '',
+        resWeight: remainPackStr,
+        canSure: true,
       });
- // 强制调用更新星星数组
-       this.updateStars(newStarCount);
-      // 如果需要将新值传递给父组件，可以通过 triggerEvent 通知父组件
-      this.triggerEvent('updateStars', { gbDgsStars: newStarCount });
+      var itemData = 'item.gbDgsMyProduceWeight';
+      this.setData({ [itemData]: myProduce });
     },
 
+    _recalcDirectUse() {
+      var inputMin = parseFloat(this.data.inputAmountMin);
+      var ctx = this._ctxSnapshot();
+      var showType = String(this.data.showType);
+      if (!this.data.inputAmountMin || isNaN(inputMin) || inputMin <= 0) {
+        this.setData({
+          equivPackText: '',
+          calcRestPack: '',
+          calcRestMin: '',
+          canSure: false,
+        });
+        this._clearDirectWeight();
+        return;
+      }
+      var amountPack = ctx.useMin
+        ? stockUnit.minToPack(inputMin, ctx.packQtyInMin)
+        : inputMin;
+      if (amountPack > ctx.restPack) {
+        wx.showToast({ title: '不能大于剩余数量', icon: 'none' });
+        this.setData({ canSure: false });
+        this._clearDirectWeight();
+        return;
+      }
+      var restAfterPack = parseFloat((ctx.restPack - amountPack).toFixed(8));
+      var restAfterMin = ctx.useMin
+        ? (ctx.restMin - inputMin)
+        : restAfterPack;
+      var amountPackStr = stockUnit.trimAmount(amountPack, 8);
+      var patch = {
+        equivPackText: ctx.useMin
+          ? ('折合：' + stockUnit.trimAmount(amountPack, 4) + ctx.packUnit)
+          : '',
+        calcRestPack: stockUnit.trimAmount(restAfterPack, 4) + ctx.packUnit,
+        calcRestMin: ctx.useMin
+          ? ('≈ ' + stockUnit.formatDisplayAmount(restAfterMin, ctx.minUnit) + ctx.minUnit)
+          : '',
+        canSure: showType === '2' ? !!this._lossFormReady() : true,
+      };
+      if (showType === '2') {
+        patch['item.gbDgsMyLossWeight'] = amountPackStr;
+      } else if (showType === '3') {
+        patch['item.gbDgsMyReturnWeight'] = amountPackStr;
+      } else if (showType === '4') {
+        patch['item.gbDgsMyWasteWeight'] = amountPackStr;
+        var proPack = parseFloat((ctx.restPack - amountPack).toFixed(8));
+        patch['item.gbDgsMyProduceWeight'] = stockUnit.trimAmount(proPack, 4);
+      } else if (showType === '6') {
+        patch['item.gbDgsMyEmployeeMealWeight'] = amountPackStr;
+      }
+      this.setData(patch);
+    },
 
-
-    updateStars(greenCount) {
-      const totalStars = 5; // 总星星数量
-      const grayCount = totalStars - greenCount; // 计算灰色星星数量
-
+    _clearDirectWeight() {
       this.setData({
-        greenStars: new Array(greenCount).fill(1), // 用数组填充绿色星星
-        grayStars: new Array(grayCount).fill(1),  // 用数组填充灰色星星
+        'item.gbDgsMyLossWeight': '-1',
+        'item.gbDgsMyReturnWeight': '-1',
+        'item.gbDgsMyWasteWeight': '-1',
+        'item.gbDgsMyEmployeeMealWeight': '-1',
       });
     },
 
+    _lossFormReady() {
+      var w = this.data.item && this.data.item.gbDgsMyLossWeight;
+      if (!w || w === '-1' || parseFloat(w) <= 0) return false;
+      if (this.data.lossReasonIndex === 3) {
+        return !!(this.data.reason && String(this.data.reason).trim());
+      }
+      return true;
+    },
+
+    _ctxSnapshot() {
+      return {
+        packUnit: this.data.packUnit,
+        packQtyInMin: this.data.packQtyInMin,
+        useMin: this.data.useMinUnit,
+        restPack: this.data.restPack,
+        restMin: this.data.restMin,
+        minUnit: this.data.stockMinUnit,
+      };
+    },
+
+    onTabSelect(e) {
+      var type = e.currentTarget.dataset.type;
+      if (String(type) === String(this.data.showType)) return;
+      this._applyShowType(type);
+    },
+
+    _applyShowType(type) {
+      var typeStr = String(type);
+      var item = this.data.item || {};
+      var patch = {
+        showType: typeStr,
+        inputAmountMin: '',
+        equivPackText: '',
+        calcUseMin: '',
+        calcRestPack: '',
+        calcRestMin: '',
+        resWeight: '0',
+        reason: '',
+        src: '',
+        canSure: false,
+        lossReasonIndex: 1,
+        'item.gbDgsMyLossWeight': '-1',
+        'item.gbDgsMyReturnWeight': '-1',
+        'item.gbDgsMyWasteWeight': '-1',
+        'item.gbDgsMyEmployeeMealWeight': '-1',
+        'item.gbDgsMyProduceWeight': typeStr === '1' ? item.gbDgsRestWeight : '0',
+      };
+      if (typeStr === '4' && !this.data.canWaste) {
+        patch.canSure = false;
+      }
+      this.setData(patch, () => {
+        if (typeStr === '4' && this.data.canWaste) {
+          this._maybePrefillWasteAmount(true);
+        }
+      });
+    },
 
     radioChange(e) {
-      var type = e.detail.value;
-      console.log(type);
-      if(type == 1){
-        var restWeight = this.data.item.gbDgsRestWeight;
-        var itemData = "item.gbDgsMyProduceWeight";
-        this.setData({
-          [itemData]: restWeight
-        })
-        var lossCan =   this._checkLoss();
-        var returnCan =  this._checkReturn();
-        if(lossCan && returnCan){
-          this.setData({
-            canChange: true,
-          })
-        }else{
-         
-          this._showTishi()
-        }
-      }
-      else if(type == 2){
-        var produceCan =   this._checkProduce();
-        var returnCan =  this._checkReturn();
-        console.log(produceCan);
-        console.log(returnCan);
-        if(produceCan && returnCan){
-          this.setData({
-            canChange: true,
-          })
-        }else{
-       
-          this._showTishi()
-        }
-      }
-      else if(type == 3){
-        var produceCan =  this._checkProduce();
-        var lossCan =   this._checkLoss();
-        if(produceCan && lossCan){
-          this.setData({
-            canChange: true,
-          })
-        }else{
-        
-          this._showTishi()
-        }
-      }
-      else{
-        var produceCan =  this._checkProduce();
-        var lossCan =   this._checkLoss();
-        var returnCan =  this._checkReturn();
-        if(produceCan && lossCan && returnCan){
-          this.setData({
-            canChange: true,
-          })
-        }else{
-          this._showTishi()
-
-        }
-      }
-      if(this.data.canChange){
-        this._changeShowType(e);
-      }
-    
+      this._applyShowType(e.detail.value);
     },
 
-    _showTishi(){
+    onAmountInput(e) {
+      this.setData({ inputAmountMin: e.detail.value }, () => {
+        this._recalcByShowType();
+      });
+    },
+
+    onInputFocus(e) {
+      var h = (e.detail && e.detail.height) || 0;
+      this.setData({ keyboardOffset: h });
+    },
+
+    onInputBlur() {
+      this.setData({ keyboardOffset: 0 });
+    },
+
+    onMinUnitChange(e) {
+      var idx = parseInt(e.detail.value, 10) || 0;
+      var opts = this.data.minUnitOptions || stockUnit.MIN_UNIT_OPTIONS;
+      var unit = opts[idx] || 'g';
+      var entity = this._getGoodsEntity();
+      var packUnit = this.data.packUnit;
+      var pq = stockUnit.resolvePackQtyInMin(packUnit, unit, entity);
+      var restPack = this.data.restPack;
+      var useMin = pq > 0 && unit !== packUnit;
+      var canPick = pq > 0;
+      var restMin = useMin ? stockUnit.packToMin(restPack, pq) : restPack;
       this.setData({
-        showType: this.data.showType,
-        canChange: false
-      })
-      wx.showModal({
-        title: '有未完成操作',
-        content: '只能一次操作一种库存。',
-        complete: (res) => {
-          if (res.cancel) {
-            
-          }
-      
-          if (res.confirm) {
-            
-          }
-        }
-      })
+        stockMinUnitIndex: idx,
+        stockMinUnit: unit,
+        packQtyInMin: pq,
+        canPickUnit: canPick,
+        useMinUnit: useMin,
+        restMin: restMin,
+        stockRestLabel: useMin
+          ? (stockUnit.trimAmount(restPack, 4) + packUnit
+            + ' ≈ ' + stockUnit.formatDisplayAmount(restMin, unit) + unit)
+          : (stockUnit.trimAmount(restPack, 4) + packUnit),
+      }, () => this._recalcByShowType());
     },
 
-    _checkProduce(){
-      var prw = this.data.resWeight;
-      console.log("------------------")
-      console.log(prw);
-
-      if(prw > 0){
-        return false;
-      }else{
-        return true;
-      }
-    },
-
-    _checkLoss(){
-      var retWeight = this.data.item.gbDgsMyLossWeight;
-      var src = this.data.src;
-      var reason = this.data.reason;
-      if(retWeight > 0){
-        return false;
-      }else{
-        return true;
-      }
-    },
-
-    _checkReturn(){
-      var  restWeight = this.data.item.gbDgsMyReturnWeight;
-      if(restWeight > 0){
-        return false;
-      }else{
-        return true;
-      }
-    },
-
-
-    _changeShowType(e){
-      var type = e.detail.value;
-      var myReturnWeightData = "item.gbDgsMyReturnWeight";
-      var myLossWeightData = "item.gbDgsMyLossWeight";
-      this.setData({
-        showType: type,
-        [myReturnWeightData]: "-1",
-        [myLossWeightData]: "-1",
-        resWeight: 0,
-      })
-
-      if (type == 1) {
-        var inventoryWeight = "consultItem.gbDgsRestWeight";
-        var restWeightData = "item.gbDgsRestWeight";
-        var wasteWeightData = "item.gbDgsMyWasteWeight";
-        this.setData({
-          canSure: true,
-          [inventoryWeight]: this.data.item.gbDgsRestWeight,
-          [restWeightData]: this.data.item.gbDgsRestWeight,
-          [wasteWeightData]: "0",
-        })
-
-      } else if (type == 4) {
-        // var endTime = this.data.item.gbDgsWasteFullTime;
-        // var startTime = this.data.nowTime;
-        // var endTimeFormat = endTime.replace(/-/g, '/') //所有的- 都替换成/
-        // var endTimeDown = Date.parse(new Date(endTimeFormat));
-        // var startTimeFormat = startTime.replace(/-/g, '/') //所有的- 都替换成/
-        // var startTimeDown = Date.parse(new Date(startTimeFormat));
-        // var thisResult = Number(endTimeDown) - Number(startTimeDown);
-        // thisResult = Math.floor(thisResult / 1000 / 60 / 60);
-        // if (thisResult < 0) {
-        //   var wasteWeightData = "item.gbDgsMyWasteWeight";
-        //   var myProduceWeightData = "item.gbDgsMyProduceWeight";
-        //   var restWeight = this.data.item.gbDgsRestWeight;
-        //   this.setData({
-        //     canWaste: true,
-        //     [wasteWeightData]: restWeight,
-        //     [myProduceWeightData]: "-1",
-        //     canSure: true,
-        //   })
-        // } else {
-        //   this.setData({
-        //     canWaste: false,
-        //     resultTime: thisResult,
-        //     canSure: false
-        //   })
-        // }
-      } else {
-        this.setData({
-          canSure: false
-        })
-      }
-    },
-
-
-    costFocus() {
-      var inventoryWeight = "consultItem.gbDgsRestWeight";
-      this.setData({
-        [inventoryWeight]: "",
-        canSure: false,
-        resWeight: ""
-      })
-    },
-
-
-    costFocusWaste() {
-      console.log("acd")
-      var inventoryWeight = "item.gbDgsMyWasteWeight";
-      this.setData({
-        [inventoryWeight]: "",
-        canSure: false,
-      })
-    },
-
-    getWasteWeight(e) {
-      var myProduceWeightData = "item.gbDgsMyProduceWeight";
-      var myWasteWeightData = "item.gbDgsMyWasteWeight";
-      var restWeight = this.data.item.gbDgsRestWeight;
-      var proWeight = (Number(restWeight) - Number(e.detail.value)).toFixed(1);
-      if (e.detail.value.length > 0) {
-        if (Number(e.detail.value) < Number(restWeight) || Number(e.detail.value) == Number(restWeight)) {
-          this.setData({
-            [myProduceWeightData]: proWeight,
-            canSure: true,
-            [myWasteWeightData]: e.detail.value,
-           
-          })
-        } else {
-
-          wx.showToast({
-            title: '输入不正确ww,不能大于剩余数量ww',
-            icon: 'none'
-          })
-          this.setData({
-            [myWasteWeightData]: "",
-            canSure: false,
-            [myProduceWeightData]: "-1",
-
-          })
-        }
-      } else {
-        this.setData({
-          canSure: false,
-          [myWasteWeightData]: "",
-          [myProduceWeightData]: "-1",
-        })
-      }
-    },
-
-  
-
-    getProduceWeight(e) {
-      var myProduceWeightData = "item.gbDgsMyProduceWeight";
-      var restWeight = this.data.item.gbDgsRestWeight;
-      console.log("zhelieiieierestWeightrestWeight" + restWeight)  
-      var proWeight = (Number(restWeight) - Number(e.detail.value)).toFixed(1);
-      console.log(e.detail.value)
-      if (e.detail.value.length > 0) {
-        if (Number(e.detail.value) < Number(restWeight) ) {
-          this.setData({
-            [myProduceWeightData]: proWeight,
-            canSure: true,
-            resWeight: e.detail.value,
-          })
-        } else {
-
-          wx.showToast({
-            title: '输入不正确,不能大于或等于剩余数量',
-            icon: 'none'
-          })
-          this.setData({
-            resWeight: "",
-            canSure: false,
-          })
-        }
-      } else {
-        this.setData({
-          canSure: false,
-          resWeight: ""
-        })
-      }
-
-    
-    },
-
-
-    getReturnWeight(e) {
-      var myReturnWeightData = "item.gbDgsMyReturnWeight";
-      var restWeight = this.data.item.gbDgsRestWeight;
-      if (e.detail.value.length > 0) {
-        if (Number(e.detail.value) < Number(restWeight) || Number(e.detail.value) == Number(restWeight)) {
-          this.setData({
-            [myReturnWeightData]: e.detail.value,
-            canSure: true,
-          })
-        } else {
-          wx.showToast({
-            title: '不能大于剩余数量',
-            icon: 'none'
-          })
-          this.setData({
-            [myReturnWeightData]: "-1",
-            canSure: false,
-          })
-        }
-      } else {
-        this.setData({
-          [myReturnWeightData]: "-1",
-          canSure: false,
-        })
-      }
-
+    onLossReasonTap(e) {
+      var idx = parseInt(e.currentTarget.dataset.index, 10) || 0;
+      var patch = { lossReasonIndex: idx };
+      if (idx !== 3) patch.reason = '';
+      this.setData(patch, () => this._recalcDirectUse());
     },
 
     getLossReason(e) {
-      this.setData({
-        reason: e.detail.value
-      })
-      // this._checkLossCanSure(e)
+      this.setData({ reason: e.detail.value }, () => this._recalcDirectUse());
     },
 
-    //选择图片
-    choiceImg: function (e) {
-      var _this = this;
+    choiceImg() {
+      var that = this;
       wx.chooseImage({
-        count: 1, // 最多可以选择的图片张数，默认9
-        sizeType: ['original', 'compressed'], // original 原图，compressed 压缩图，默认二者都有
-        sourceType: ['album', 'camera'], // album 从相册选图，camera 使用相机，默认二者都有
-        success: function (res) {
-          _this.setData({
-            src: res.tempFilePaths,
-            isSelectImg: true,
-          })
+        count: 1,
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success(res) {
+          that.setData({ src: res.tempFilePaths }, () => that._recalcDirectUse());
         },
-        fail: function () {
-
-        },
-        complete: function () {
-          _this._checkLossCanSure(e)
-        }
-      })
+      });
     },
 
-    delPic(){
-      this.setData({
-        src: ""
-      })
-      this._checkLossCanSure()
+    delPic() {
+      this.setData({ src: '' }, () => this._recalcDirectUse());
     },
-
-    _checkLossCanSure(){
-      console.log("canlosssosocansave")
-      var item = this.data.item;
-      if(item.gbDgsMyLossWeight ){
-        this.setData({
-          canSure: true
-        })
-      }else{
-        this.setData({
-          canSure: false
-        })
-      }
-    },
-
-
-    getLossWeight(e) {
-      var myLossWeightData = "item.gbDgsMyLossWeight";
-      var restWeight = this.data.item.gbDgsRestWeight;
-      if (e.detail.value.length > 0) {
-        if (Number(e.detail.value) < Number(restWeight) || Number(e.detail.value) == Number(restWeight)) {
-          this.setData({
-            [myLossWeightData]: e.detail.value,
-          })
-        this._checkLossCanSure(e)      
-        } else {
-
-          wx.showToast({
-            title: '不能大于剩余数量',
-            icon: 'none'
-          })
-          this.setData({
-            [myLossWeightData]: "-1",
-            canSure: false,
-          })
-        }
-      } else {
-        this.setData({
-          [myLossWeightData]: "-1",
-          canSure: false,
-        })
-      }
-    },
-
 
     cancle() {
       this.setData({
         show: false,
-        showType: 4,
+        showType: '1',
         canSure: true,
-        stockArr: [],
-        resWeight: 0,
-        reason: "",
-        src: ""
-      })
-      this.triggerEvent('cancle')
-    },
-
-
-    confirm(e) {
-      if (this.data.canSure) {
-        console.log("stockfonfimrmr",this.data.src);
-        this.triggerEvent('confirm', {
-          item: this.data.item,
-          showType: this.data.showType,
-          src: this.data.src,
-          reason: this.data.reason,
-        })
-        this.setData({
-          show: false,
-          showType: "1",
-          canSure: true,
-          reason: "",
-          src: "",
-          resWeight: "0"
-        })
-      } 
-      
-    },
-
-
-    // 
-
-
-    onStarClick(e) {
-      const totalStars = 5;
-      const greenCount = this.data.greenStars.length;
-      const index = e.currentTarget.dataset.index; // 获取点击的星星索引
-      console.log("indeixxxxxx", index);
-      // 判断点击的星星属于绿色还是灰色
-      const isGreenStar = index < greenCount;
-      let newStarCount;
-      console.log("indeixxxxxx", isGreenStar);
-
-      if (isGreenStar) {
-        // 如果点击的是绿色星星，则减少到当前点击的星星数量
-        newStarCount = index + 1;
-      } else {
-        // 如果点击的是灰色星星，则增加到当前点击的星星数量
-        newStarCount = greenCount + (index - greenCount + 1);
-
-      }
-
-      // 限制星星数量范围
-      newStarCount = Math.min(Math.max(newStarCount, 0), totalStars);
-
-      // 更新数据
-      this.setData({
-        'item.gbDgsStars': newStarCount,
-        gbDgsStars: newStarCount
+        resWeight: '0',
+        reason: '',
+        src: '',
+        inputAmountMin: '',
+        keyboardOffset: 0,
       });
-      // 强制调用更新星星数组
-      //  this.updateStars(newStarCount);
-      // 如果需要将新值传递给父组件，可以通过 triggerEvent 通知父组件
-      // this.triggerEvent('updateStars', {
-      //   gbDgsStars: newStarCount
-      // });
+      this.triggerEvent('cancle');
     },
 
-
-
-    updateStars(greenCount) {
-      const totalStars = 5; // 总星星数量
-      const grayCount = totalStars - greenCount; // 计算灰色星星数量
+    confirm() {
+      if (!this.data.canSure) return;
+      var reason = this.data.reason;
+      if (String(this.data.showType) === '2') {
+        var lr = LOSS_REASONS[this.data.lossReasonIndex] || '';
+        reason = reason ? (lr + '：' + reason) : lr;
+      }
+      this.triggerEvent('confirm', {
+        item: this.data.item,
+        showType: this.data.showType,
+        src: this.data.src,
+        reason: reason,
+      });
       this.setData({
-        greenStars: new Array(greenCount).fill(1), // 用数组填充绿色星星
-        grayStars: new Array(grayCount).fill(1), // 用数组填充灰色星星
+        show: false,
+        showType: '1',
+        canSure: true,
+        reason: '',
+        src: '',
+        resWeight: '0',
+        inputAmountMin: '',
       });
     },
 
-
-    
-
-    getStarsReason(e) {
-      this.setData({
-        reason: e.detail.value
-      })
-      this._checkStarsCanSure();
-    },
-
-    //选择图片
-    choiceImg: function (e) {
-      var _this = this;
-      wx.chooseImage({
-        count: 1, // 最多可以选择的图片张数，默认9
-        sizeType: ['original', 'compressed'], // original 原图，compressed 压缩图，默认二者都有
-        sourceType: ['album', 'camera'], // album 从相册选图，camera 使用相机，默认二者都有
-        success: function (res) {
-          _this.setData({
-            src: res.tempFilePaths,
-            isSelectImg: true,
-          })
-        },
-        fail: function () {
-
-        },
-
-        complete: function () {
-          // _this._checkStarsCanSure(e)
-        }
-      })
-    },
-
-    delPic() {
-      this.setData({
-        src: ""
-      })
-      this._checkLossCanSure()
-    },
-
-    choiceImgLarge: function (e) {
-      var _this = this;
-      wx.chooseImage({
-        count: 1, // 最多可以选择的图片张数，默认9
-        sizeType: ['original', 'compressed'], // original 原图，compressed 压缩图，默认二者都有
-        sourceType: ['album', 'camera'], // album 从相册选图，camera 使用相机，默认二者都有
-        success: function (res) {
-          _this.setData({
-            srcLarge: res.tempFilePaths,
-            isSelectImg: true,
-          })
-        },
-        fail: function () {
-
-        },
-        complete: function () {
-          // _this._checkStarsCanSure(e)
-        }
-      })
-    },
-
-    delPicLarge() {
-      this.setData({
-        srcLarge: ""
-      })
-      // this._checkLossCanSure()
-    },
-
-    
-
-    _checkStarsCanSure(){
-      console.log("canlosssosocansave")
-     
-      if (this.data.src.length > 0 && this.data.reason.length > 0) {
-        this.setData({
-          canSure: true
-        })
-      } else {
-        this.setData({
-          canSure: false
-        })
-      }
-    },
-
-
+    stopTap() {},
   },
-
-  // lifetimes: {
-  //   attached() {
-
-  //       this.updateStars(this.data.item.gbDgsStars);
-      
-  //     // 初始化星星数据
-     
-  //   },
-  // },
-
-
-
-
-
-
-
-
-
-
-})
+});

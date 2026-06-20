@@ -66,39 +66,48 @@
   <view class="module-card mb-20 module-card--food-sales">
     <view class="module-title">菜品销量</view>
     <text class="food-list-hint" wx:if="{{foodsLoading}}">加载中…</text>
-    <text class="food-list-hint" wx:elif="{{!salesFoodRows.length}}">暂无菜品，请先在菜单中维护</text>
-    <view wx:else  class="food-sales-scroll1 flex-column" >
-      <block wx:for="{{salesFoodRows}}" wx:key="rowKey" wx:for-index="idx">
-        <view class="food-cat-stripe" wx:if="{{idx === 0 || item.catName !== salesFoodRows[idx - 1].catName}}">
-          <text class="food-cat-stripe__text">{{item.catName}}</text>
+    <text class="food-list-hint" wx:elif="{{!foodGroups.length}}">暂无菜品，请先在菜单中维护</text>
+    <view wx:else class="food-sales-scroll1 flex-column">
+      <block wx:for="{{foodGroups}}" wx:for-item="group" wx:for-index="gi" wx:key="groupId">
+        <!-- 父级分类头部 -->
+        <view class="food-parent-header" data-gid="{{group.groupId}}" bindtap="onParentGroupTap" hover-class="food-parent-header--hover">
+          <text class="food-parent-header__name">{{group.parentName}}</text>
+          <text class="food-parent-header__count">（{{group.children.length}}）</text>
+          <text class="food-parent-header__arrow {{group.expanded ? 'is-open' : ''}}">▾</text>
         </view>
-        <view class="food-dish-block {{item.offShelf ? 'food-dish-block--off' : ''}}">
-          <view class="food-dish-block__title-row">
-            <text class="food-dish-block__name">{{item.foodName}}</text>
-            <text wx:if="{{item.offShelf}}" class="food-dish-block__badge">停用</text>
-          </view>
-          <view class="food-dish-block__meta-row">
-            <view class="food-dish-block__price-col">
-              <text class="food-dish-block__label">单价</text>
-              <text class="food-dish-block__price">¥{{item.unitPriceDisplay}}</text>
+        <!-- 子级菜品列表 -->
+        <view wx:if="{{group.expanded}}" class="food-parent-body">
+          <block wx:for="{{group.children}}" wx:for-item="item" wx:for-index="idx" wx:key="rowKey">
+            <view class="food-dish-block {{item.offShelf ? 'food-dish-block--off' : ''}}">
+              <view class="food-dish-block__title-row">
+                <text class="food-dish-block__name">{{item.foodName}}</text>
+                <text wx:if="{{item.offShelf}}" class="food-dish-block__badge">停用</text>
+              </view>
+              <view class="food-dish-block__meta-row">
+                <view class="food-dish-block__price-col">
+                  <text class="food-dish-block__label">单价</text>
+                  <text class="food-dish-block__price">¥{{item.unitPriceDisplay}}</text>
+                </view>
+                <view class="food-dish-block__qty-col">
+                  <text class="food-dish-block__label food-dish-block__label--qty">份数</text>
+                  <input
+                    class="food-dish-block__qty-input"
+                    type="digit"
+                    placeholder="填份数"
+                    placeholder-class="food-dish-block__qty-placeholder"
+                    value="{{item.qtyStr}}"
+                    data-gid="{{group.groupId}}"
+                    data-index="{{idx}}"
+                    bindinput="onFoodQtyInput"
+                  />
+                </view>
+              </view>
             </view>
-            <view class="food-dish-block__qty-col">
-              <text class="food-dish-block__label food-dish-block__label--qty">份数</text>
-              <input
-                class="food-dish-block__qty-input"
-                type="digit"
-                placeholder="填份数"
-                placeholder-class="food-dish-block__qty-placeholder"
-                value="{{item.qtyStr}}"
-                data-index="{{idx}}"
-                bindinput="onFoodQtyInput"
-              />
-            </view>
-          </view>
+          </block>
         </view>
       </block>
     </view>
-    <view class="dinein-estimate" wx:if="{{salesFoodRows.length}}">
+    <view class="dinein-estimate" wx:if="{{foodGroups.length}}">
       <text class="dinein-estimate__text">按标价汇总（本页）：¥{{dineInFromDishes}}</text>
     </view>
   </view>

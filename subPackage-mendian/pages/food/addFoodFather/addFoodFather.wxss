@@ -1,6 +1,0 @@
-@import '../food-common.wxss';
-
-.food-page-body.flex-1 {
-  flex: 1;
-  min-height: 0;
-}

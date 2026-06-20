@@ -1,0 +1,683 @@
+/* ========== 页面级 ========== */
+.page {
+  min-height: 100vh;
+  background: #f5f6f8;
+  padding-bottom: env(safe-area-inset-bottom);
+  color: #1a1a1a;
+  font-size: 28rpx;
+}
+
+/* ========== 导航栏 ========== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  background: #fff;
+  box-sizing: border-box;
+}
+.navbar-back {
+  display: flex;
+  align-items: center;
+  color: #3b82f6;
+  font-size: 28rpx;
+}
+.navbar-back-icon {
+  font-size: 44rpx;
+  font-weight: 300;
+  margin-right: 4rpx;
+  line-height: 1;
+}
+.navbar-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.navbar-placeholder {
+  width: 120rpx;
+}
+
+/* ========== 日期选择器 ========== */
+.date-bar {
+  background: #fff;
+  white-space: nowrap;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.date-bar-inner {
+  display: inline-flex;
+  padding: 0 20rpx;
+  gap: 12rpx;
+}
+.date-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100rpx;
+  height: 90rpx;
+  border-radius: 16rpx;
+  background: #f8f9fb;
+  flex-shrink: 0;
+}
+.date-chip--active {
+  background: #3b82f6;
+}
+.date-chip-day {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.2;
+}
+.date-chip-date {
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.2;
+  margin-top: 2rpx;
+}
+.date-chip--active .date-chip-day,
+.date-chip--active .date-chip-date {
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ========== 顶部标题区 ========== */
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 32rpx 30rpx 20rpx 30rpx;
+  background: #fff;
+}
+.header-scope {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.header-date {
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* ========== 摘要统计栏 ========== */
+.summary-bar {
+  display: flex;
+  align-items: center;
+  margin: 0 30rpx 8rpx 30rpx;
+  padding: 20rpx 24rpx;
+  background: linear-gradient(135deg, #f0f5ff 0%, #eef2ff 100%);
+  border-radius: 16rpx;
+}
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stat-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #3b82f6;
+  line-height: 1.1;
+}
+.stat-label {
+  font-size: 22rpx;
+  color: #6b7280;
+  margin-top: 4rpx;
+}
+.stat-divider {
+  width: 1rpx;
+  height: 48rpx;
+  background: #d1d5ff;
+}
+
+/* ========== 区块通用 ========== */
+.section {
+  margin: 24rpx 20rpx;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+  padding: 0 8rpx;
+}
+.section-head-left {
+  display: flex;
+  align-items: center;
+}
+.section-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+.section-dot--note { background: #f59e0b; }
+.section-dot--inventory { background: #ef4444; }
+.section-dot--price { background: #8b5cf6; }
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.section-count {
+  font-size: 24rpx;
+  color: #999;
+  background: #f2f3f5;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+/* ========== 公告卡片 ========== */
+.note-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 1rpx 8rpx rgba(0,0,0,0.04);
+}
+.note-card--ai {
+  border-left: 6rpx solid #f59e0b;
+}
+
+.note-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #fef3c7;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+}
+.note-badge--work {
+  background: #e0e7ff;
+}
+.note-badge-icon {
+  font-size: 24rpx;
+  margin-right: 6rpx;
+}
+.note-badge-text {
+  font-size: 22rpx;
+  color: #92400e;
+  font-weight: 500;
+}
+.note-badge--work .note-badge-text {
+  color: #3730a3;
+}
+
+.note-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 12rpx;
+  line-height: 1.4;
+}
+.note-body {
+  margin-bottom: 12rpx;
+}
+.note-text {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+.note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+.note-author {
+  font-size: 24rpx;
+  color: #888;
+}
+.note-time {
+  font-size: 22rpx;
+  color: #b0b0b0;
+}
+
+/* 旧卡快照 */
+.note-old-tip {
+  margin-top: 12rpx;
+  padding: 10rpx 16rpx;
+  background: #f9fafb;
+  border-radius: 8rpx;
+}
+.note-old-tip-text {
+  font-size: 24rpx;
+  color: #999;
+}
+.note-old-cards {
+  margin-top: 8rpx;
+}
+.note-old-card {
+  padding: 10rpx 16rpx;
+  background: #fafbfc;
+  border-radius: 8rpx;
+  margin-bottom: 6rpx;
+}
+.note-old-card-title {
+  font-size: 26rpx;
+  color: #444;
+}
+.note-old-card-sub {
+  font-size: 22rpx;
+  color: #aaa;
+  display: block;
+  margin-top: 2rpx;
+}
+
+/* ========== 库存卡片通用 ========== */
+.inv-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 1rpx 8rpx rgba(0,0,0,0.04);
+}
+.inv-card--waste { border-left: 6rpx solid #ef4444; }
+.inv-card--storage { border-left: 6rpx solid #f59e0b; }
+.inv-card--inventory { border-left: 6rpx solid #3b82f6; }
+
+.inv-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6rpx;
+}
+.inv-card-head-left {
+  display: flex;
+  align-items: center;
+}
+.inv-card-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.inv-card-badge {
+  display: flex;
+  align-items: baseline;
+  background: #fff1f0;
+  padding: 4rpx 14rpx;
+  border-radius: 12rpx;
+}
+.inv-card-badge-num {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #ef4444;
+}
+.inv-card-badge-label {
+  font-size: 20rpx;
+  color: #ef4444;
+  margin-left: 2rpx;
+}
+.inv-card--storage .inv-card-badge { background: #fefce8; }
+.inv-card--storage .inv-card-badge-num,
+.inv-card--storage .inv-card-badge-label { color: #ca8a04; }
+.inv-card--inventory .inv-card-badge { background: #eff6ff; }
+.inv-card--inventory .inv-card-badge-num,
+.inv-card--inventory .inv-card-badge-label { color: #2563eb; }
+
+.inv-card-subtitle {
+  font-size: 24rpx;
+  color: #888;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.inv-storage-hint {
+  font-size: 22rpx;
+  color: #f59e0b;
+  background: #fefce8;
+  padding: 10rpx 16rpx;
+  border-radius: 8rpx;
+  display: block;
+  margin-bottom: 14rpx;
+}
+
+.inv-section-label {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+/* ========== 库存表格 ========== */
+.inv-table {
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #fafbfc;
+}
+.inv-table-head {
+  display: flex;
+  align-items: center;
+  background: #f2f3f7;
+  padding: 14rpx 16rpx;
+}
+.inv-th {
+  font-size: 22rpx;
+  color: #888;
+  font-weight: 500;
+}
+.inv-th--name { flex: 2; }
+.inv-th--qty { flex: 1.5; text-align: right; }
+.inv-th--date { flex: 1.8; text-align: right; }
+.inv-th--status { flex: 2; text-align: right; }
+.inv-th--info { flex: 1.5; text-align: right; }
+
+.inv-table-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.inv-table-row:last-child { border-bottom: none; }
+.inv-td--name { flex: 2; }
+.inv-td--qty { flex: 1.5; text-align: right; }
+.inv-td--date { flex: 1.8; text-align: right; }
+.inv-td--status { flex: 2; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+.inv-td--info { flex: 1.5; text-align: right; }
+
+.inv-goods-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: block;
+}
+.inv-goods-detail {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+  margin-top: 2rpx;
+}
+.inv-goods-tag {
+  font-size: 20rpx;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  background: #eff6ff;
+  color: #3b82f6;
+  margin-top: 4rpx;
+  display: inline-block;
+}
+.inv-qty {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #333;
+}
+.inv-date {
+  font-size: 24rpx;
+  color: #666;
+}
+.inv-date-delta {
+  font-size: 20rpx;
+  color: #ef4444;
+  display: block;
+  margin-top: 2rpx;
+}
+.inv-info-val {
+  font-size: 24rpx;
+  color: #555;
+}
+
+/* ========== 风险标签 ========== */
+.inv-risk-tag {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  font-weight: 500;
+  display: inline-block;
+}
+.inv-risk-tag--danger { background: #fef2f2; color: #dc2626; }
+.inv-risk-tag--warn { background: #fefce8; color: #ca8a04; }
+.inv-risk-tag--normal { background: #f0fdf4; color: #15803d; }
+
+.inv-risk-time {
+  font-size: 20rpx;
+  color: #ef4444;
+  margin-top: 4rpx;
+  display: block;
+}
+
+/* ========== 采购价格影响 ========== */
+.price-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  border-left: 6rpx solid #8b5cf6;
+  box-shadow: 0 1rpx 8rpx rgba(0,0,0,0.04);
+}
+
+.price-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 4rpx 0 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 20rpx;
+}
+.price-summary-only .price-stat-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 12rpx;
+}
+.price-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.price-stat-num {
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #8b5cf6;
+  line-height: 1.1;
+}
+.price-stat-num--danger { color: #ef4444; }
+.price-stat-lbl {
+  font-size: 22rpx;
+  color: #888;
+  margin-top: 6rpx;
+}
+.price-empty-note {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  display: block;
+  padding: 10rpx 0;
+}
+
+.price-subtitle {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #444;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.price-summary-only {
+  padding: 10rpx 0;
+}
+
+/* 商品波动行 */
+.goods-row-list {
+  margin-bottom: 20rpx;
+}
+.goods-row-item {
+  padding: 18rpx;
+  background: #fafbfc;
+  border-radius: 12rpx;
+  margin-bottom: 10rpx;
+}
+.goods-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+.goods-row-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.goods-row-delta {
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.goods-row-delta--up { color: #ef4444; }
+.goods-row-delta--down { color: #22c55e; }
+.goods-row-bottom {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 6rpx;
+}
+.goods-row-price {
+  font-size: 24rpx;
+  color: #555;
+}
+.goods-row-old-price {
+  font-size: 24rpx;
+  color: #aaa;
+}
+.goods-row-footer {
+  display: flex;
+  justify-content: space-between;
+}
+.goods-row-buyer {
+  font-size: 22rpx;
+  color: #888;
+}
+.goods-row-date {
+  font-size: 22rpx;
+  color: #aaa;
+}
+
+/* 受影响菜品 */
+.dish-list {
+  margin-bottom: 20rpx;
+}
+.dish-item {
+  padding: 18rpx;
+  background: #fafbfc;
+  border-radius: 12rpx;
+  margin-bottom: 10rpx;
+}
+.dish-item--high {
+  background: #fef2f2;
+  border: 1rpx solid #fecaca;
+}
+.dish-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4rpx;
+}
+.dish-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.dish-tag {
+  font-size: 20rpx;
+  background: #ef4444;
+  color: #fff;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+.dish-info {
+  font-size: 24rpx;
+  color: #666;
+}
+.dish-info--margin {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* recipeDebug */
+.debug-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx;
+  background: #f9fafb;
+  border-radius: 12rpx;
+  border: 1rpx dashed #ddd;
+}
+.debug-toggle-text {
+  font-size: 24rpx;
+  color: #888;
+}
+.debug-toggle-arrow {
+  font-size: 20rpx;
+  color: #888;
+  margin-left: 8rpx;
+}
+.debug-list {
+  margin-top: 12rpx;
+}
+.debug-item {
+  padding: 14rpx 16rpx;
+  background: #fafbfc;
+  border-radius: 10rpx;
+  margin-bottom: 8rpx;
+}
+.debug-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6rpx;
+}
+.debug-dish-name {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #444;
+}
+.debug-reason {
+  font-size: 22rpx;
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+.debug-detail {
+  margin-bottom: 2rpx;
+}
+.debug-detail-text {
+  font-size: 22rpx;
+  color: #888;
+  margin-right: 16rpx;
+}
+
+/* ========== 空状态 ========== */
+.empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+.empty-icon {
+  width: 160rpx;
+  height: 160rpx;
+  opacity: 0.4;
+  margin-bottom: 24rpx;
+}
+.empty-text {
+  font-size: 28rpx;
+  color: #aaa;
+}
+.empty-retry {
+  margin-top: 30rpx;
+  padding: 14rpx 40rpx;
+  background: #3b82f6;
+  border-radius: 12rpx;
+  color: #fff;
+  font-size: 26rpx;
+}

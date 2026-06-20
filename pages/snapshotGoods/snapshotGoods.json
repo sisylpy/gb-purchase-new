@@ -1,0 +1,7 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "navbar-dual": "/components/navbar-dual/navbar-dual",
+    "myDismodalNx": "/components/myDismodalNx/myDismodalNx"
+  }
+}

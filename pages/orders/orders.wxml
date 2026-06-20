@@ -1,0 +1,187 @@
+<view class="platform-tab-page page-orders">
+  <view class="platform-tab-header platform-tab-header--fixed platform-tab-header--white">
+    <view class="platform-title-block" style="padding-top: {{statusBarHeight}}px;">
+      <text class="platform-title-main">我的订货</text>
+      <text class="platform-title-sub">购物车结算后生成正式采购单</text>
+    </view>
+    <view class="orders-tab-bar">
+      <view class="orders-tab-item {{activeTab === 'cart' ? 'active' : ''}}" data-tab="cart" bindtap="onTabSwitch">购物车</view>
+      <view class="orders-tab-item {{activeTab === 'formal' ? 'active' : ''}}" data-tab="formal" bindtap="onTabSwitch">今日订货</view>
+    </view>
+  </view>
+
+  <!-- 购物车 -->
+  <block wx:if="{{activeTab === 'cart'}}">
+    <scroll-view scroll-y class="platform-tab-scroll cart-scroll-with-bar" style="padding-top: {{scrollTopPadding + 44}}px;">
+      <view class="cart-loading" wx:if="{{loading}}">
+        <text>加载中...</text>
+      </view>
+
+      <view class="cart-empty" wx:elif="{{empty}}">
+        <image class="cart-empty-icon" src="/images/orderlisto.png" mode="aspectFit" />
+        <text class="cart-empty-text">购物车是空的</text>
+        <text class="cart-empty-hint">去「全部类别」或首页选批发商加购</text>
+        <view class="cart-empty-actions">
+          <view class="cart-empty-btn secondary" bindtap="goCategory">去全部类别</view>
+          <view class="cart-empty-btn" bindtap="goShop">去选批发商</view>
+        </view>
+      </view>
+
+      <block wx:else>
+        <view class="section-block" wx:if="{{confirmedLines.length}}">
+          <view class="section-head">
+            <text class="section-title">已知价格商品</text>
+            <text class="section-count">{{confirmedLines.length}}项</text>
+          </view>
+          <view class="cart-line-row" wx:for="{{confirmedLines}}" wx:key="nxOrderId">
+            <view class="cart-check {{item.selected ? 'checked' : ''}}" data-id="{{item.nxOrderId}}" bindtap="onToggleLine">
+              <text wx:if="{{item.selected}}">✓</text>
+            </view>
+            <view class="cart-line-body">
+              <view class="line-name">{{item.goodsName}}</view>
+              <view class="line-meta">
+                <text class="line-qty">{{item.quantity}}{{item.standard}}</text>
+                <text class="line-tag confirmed">已知价</text>
+                <text class="line-tag supplier" wx:if="{{item.hasSupplier}}">已选批发商</text>
+              </view>
+            </view>
+            <view class="line-right">
+              <text class="line-subtotal">{{item.subtotalText}}</text>
+              <view class="cart-line-actions">
+                <text class="cart-action" data-id="{{item.nxOrderId}}" catchtap="onEditCartLine">修改</text>
+                <text class="cart-action danger" data-id="{{item.nxOrderId}}" catchtap="onDeleteCartLine">删除</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="section-block" wx:if="{{pendingPriceLines.length}}">
+          <view class="section-head">
+            <text class="section-title">未知价格商品</text>
+            <text class="section-count">{{pendingPriceLines.length}}项</text>
+          </view>
+          <view class="cart-line-row" wx:for="{{pendingPriceLines}}" wx:key="nxOrderId">
+            <view class="cart-check {{item.selected ? 'checked' : ''}}" data-id="{{item.nxOrderId}}" bindtap="onToggleLine">
+              <text wx:if="{{item.selected}}">✓</text>
+            </view>
+            <view class="cart-line-body">
+              <view class="line-name">{{item.goodsName}}</view>
+              <view class="line-meta">
+                <text class="line-qty">{{item.quantity}}{{item.standard}}</text>
+                <text class="line-tag pending">待称重确认</text>
+                <text class="line-tag supplier" wx:if="{{!item.hasSupplier}}">待分配批发商</text>
+              </view>
+            </view>
+            <view class="line-right">
+              <text class="line-subtotal pending">待确认</text>
+              <view class="cart-line-actions">
+                <text class="cart-action" data-id="{{item.nxOrderId}}" catchtap="onEditCartLine">修改</text>
+                <text class="cart-action danger" data-id="{{item.nxOrderId}}" catchtap="onDeleteCartLine">删除</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <view class="platform-tab-bottom-spacer cart-bottom-spacer"></view>
+    </scroll-view>
+
+    <view class="cart-checkout-bar" wx:if="{{!empty && !loading}}">
+      <view class="checkout-select-all" bindtap="onToggleSelectAll">
+        <view class="cart-check {{selectAll ? 'checked' : ''}}">
+          <text wx:if="{{selectAll}}">✓</text>
+        </view>
+        <text>全选</text>
+      </view>
+      <view class="checkout-summary">
+        <view class="checkout-row">
+          <text class="checkout-label">已知价格合计</text>
+          <text class="checkout-value">¥{{knownTotal}}</text>
+        </view>
+        <view class="checkout-row" wx:if="{{pendingPriceItemCount > 0}}">
+          <text class="checkout-label">未知价格</text>
+          <text class="checkout-pending">{{pendingPriceItemCount}}项不计入本次支付</text>
+        </view>
+        <view class="checkout-row pay-row">
+          <text class="checkout-label">本次应付</text>
+          <text class="checkout-pay">¥{{payAmount}}</text>
+        </view>
+        <text class="checkout-notice" wx:if="{{checkoutNotice}}">{{checkoutNotice}}</text>
+      </view>
+      <view class="checkout-btn {{selectedIds.length ? '' : 'disabled'}}" bindtap="onGoCheckout">去结算</view>
+    </view>
+  </block>
+
+  <!-- 今日正式订货 -->
+  <block wx:else>
+    <scroll-view scroll-y class="platform-tab-scroll" style="padding-top: {{scrollTopPadding + 44}}px;">
+      <view class="cart-empty" wx:if="{{formalEmpty}}">
+        <image class="cart-empty-icon" src="/images/orderlisto.png" mode="aspectFit" />
+        <text class="cart-empty-text">今日暂无正式订货</text>
+        <text class="cart-empty-hint">购物车结算后将在此展示</text>
+      </view>
+
+      <view class="section-block" wx:else>
+        <view class="section-head">
+          <text class="section-title">今日订货</text>
+          <text class="section-count">{{platformLines.length}}项</text>
+        </view>
+
+        <view class="order-card" wx:for="{{platformLines}}" wx:key="orderId">
+          <view class="order-card-body">
+            <block wx:if="{{item.titleLine || item.priceLine || item.supplierLine}}">
+              <view class="order-line order-line-title" wx:if="{{item.titleLine}}">{{item.titleLine}}</view>
+              <view class="order-line order-line-price" wx:if="{{item.priceLine}}">{{item.priceLine}}</view>
+              <view class="order-line order-line-supplier status-{{item.statusCode}}" wx:if="{{item.supplierLine}}">{{item.supplierLine}}</view>
+            </block>
+            <block wx:else>
+              <view class="order-line order-line-title">
+                <text wx:if="{{item.goodsBrand}}">{{item.goodsBrand}} </text>
+                <text>{{item.goodsName}}</text>
+              </view>
+              <view class="order-line order-line-meta">
+                <text wx:if="{{item.quantity}}">订货: {{item.quantity}}{{item.standard}}</text>
+              </view>
+              <view class="order-line order-line-meta" wx:if="{{item.orderPrice}}">
+                <text>单价: {{item.orderPrice}}/{{item.standard}}</text>
+              </view>
+              <view class="order-line order-line-meta" wx:if="{{item.orderSubtotal}}">
+                <text>小计: {{item.orderSubtotal}}元</text>
+              </view>
+              <view class="order-line order-line-meta pending-hint" wx:elif="{{item.priceConfirmStatus === 'PENDING' || !item.orderSubtotal}}">
+                <text>价格待称重确认 · 后续可能补款</text>
+              </view>
+              <view class="order-line order-line-supplier status-{{item.statusCode}}">
+                <text wx:if="{{item.statusText}}">{{item.statusText}}</text>
+                <text wx:if="{{item.assignedDistributerName}}"> · {{item.assignedDistributerName}}</text>
+              </view>
+            </block>
+            <view class="order-line order-line-remark" wx:if="{{item.remark}}">备注: {{item.remark}}</view>
+          </view>
+          <view class="order-card-menu" wx:if="{{item.editable}}" catchtap="onEditPlatformLine" data-index="{{index}}">
+            <text class="order-menu-dots">···</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="platform-tab-bottom-spacer"></view>
+    </scroll-view>
+  </block>
+</view>
+
+<myDismodalNx
+  show="{{show}}"
+  bindconfirm="confirm"
+  bindcancle="cancle"
+  binddelApply="delApply"
+  applyStandardName="{{applyStandardName}}"
+  applyNumber="{{applyNumber}}"
+  applySubtotal="{{applySubtotal}}"
+  applyRemark="{{applyRemark}}"
+  editApply="{{editApply}}"
+  bindchangeStandard="changeStandard"
+  item="{{nxGoods}}"
+  canSave="{{canSave}}"
+  windowWidth="{{windowWidth}}"
+  windowHeight="{{windowHeight}}"
+/>

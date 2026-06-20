@@ -252,4 +252,4 @@
 </view>
 
 
-<myIndependentStars show="{{showStarDialage}}" url="{{url}}" item="{{showGoods}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" cancle="cancle" />
+<myIndependent show="{{showStarDialage}}" url="{{url}}" item="{{showGoods}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />

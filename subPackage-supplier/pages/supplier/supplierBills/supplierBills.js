@@ -117,9 +117,7 @@ Page({
       stopDate: this.data.stopDate,
       disId: this.data.disId
     }
-    disGetGbSupplierBillsWithStatus(data).then(res => {
-      console.log(res.result.data)
-      if (res.result.code == 0) {
+    disGetGbSupplierBillsWithStatus(data).then(res => {if (res.result.code == 0) {
         load.hideLoading();
         this.setData({
           billArr: res.result.data

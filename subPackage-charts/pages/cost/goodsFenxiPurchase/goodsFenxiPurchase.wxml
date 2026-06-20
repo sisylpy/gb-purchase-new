@@ -151,6 +151,10 @@
           <text class="purchase-info-label">退货</text>
           <text class="purchase-info-value">{{stock.gbDgsReturnWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
         </view>
+        <view class="purchase-info-item">
+          <text class="purchase-info-label">员工餐</text>
+          <text class="purchase-info-value">{{stock.gbDgsEmployeeMealWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
+        </view>
       </view>
     </view>
 

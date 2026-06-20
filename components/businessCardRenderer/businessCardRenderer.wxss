@@ -1,0 +1,36 @@
+.bcr-wrap {
+  width: 100%;
+}
+
+.bcr-wrap--scene-chat {
+  margin-top: 8rpx;
+}
+
+.bcr-wrap--scene-pin,
+.bcr-wrap--scene-workRecord,
+.bcr-wrap--scene-announcement {
+  margin-top: 16rpx;
+}
+
+.bcr-fallback {
+  padding: 24rpx;
+  background: #f7f8fa;
+  border-radius: 16rpx;
+  border: 1rpx solid #ebedf0;
+}
+
+.bcr-fallback-title {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.5;
+}
+
+.bcr-fallback-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.5;
+  word-break: break-all;
+}

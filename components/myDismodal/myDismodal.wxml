@@ -1,3 +1,5 @@
+<wxs module="fmt" src="/wxs/format.wxs" />
+
 <view class='mask' wx:if='{{show}}' catchtouchmove='ture' >
 	<view class='flex-column' style=" margin-top:{{windowHeight / 7}}rpx;">
 		<view class="top">
@@ -30,10 +32,10 @@
 					<view class=" flex-row-wrap shrink_change " >
 						<text class="standardName {{applyStandardName == item.gbDgGoodsStandardname ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{item.gbDgGoodsStandardname}}" >{{item.gbDgGoodsStandardname}}</text>
 
-						<text wx:if="{{showOuterPack}}" class="standardName {{applyStandardName == outerPackStandard ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{outerPackStandard}}">{{outerPackStandard}}</text>
+						<text wx:if="{{showOuterPack}}" class="standardName {{applyStandardName == outerPackStandard ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{outerPackStandard}}">{{outerPackLabel || outerPackStandard}}</text>
 
 						<text  class="standardName {{applyStandardName == standard.gbDsStandardName ? 'is-active' : ''}}" bindtap="changeStandard" data-name="{{standard.gbDsStandardName}}" catchlongpress="delStandard" data-id="{{standard.gbDistributerStandardId}}"   wx:for="{{item.gbDistributerStandardEntities}}" wx:key="gbDgDistributerStandardId"
-            wx:for-item="standard">{{standard.gbDsStandardName}}</text>
+            wx:for-item="standard">{{fmt.dsStandardLabel(standard, item.gbDgGoodsStandardname)}}</text>
             <text class="standardName" bindtap="showInputStandard"> +</text>
 					</view>
 

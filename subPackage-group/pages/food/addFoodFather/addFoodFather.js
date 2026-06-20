@@ -5,7 +5,7 @@ var load = require('../../../../lib/load.js');
 import {
   saveGbFoodFather,
   updateGbFood
-} from '../../../services/apiDistributerGbFood'
+} from '../../../../services/apiDistributerGbFood'
 Page({
   /**
    * 页面的初始数据

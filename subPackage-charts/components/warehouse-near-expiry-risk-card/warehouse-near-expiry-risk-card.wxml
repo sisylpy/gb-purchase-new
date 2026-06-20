@@ -13,45 +13,32 @@
 
   <!-- 空数据 -->
   <view class="wner-empty" wx:if="{{totalCount === 0}}">
-    <text class="wner-empty-text">暂无临期/过期库存批次</text>
+    <text class="wner-empty-text">暂无{{isStorageReminder ? storageDaysLabel : '临期/过期'}}记录</text>
   </view>
 
-  <!-- 表格列表 -->
-  <view class="wner-table" wx:if="{{displayItems.length > 0}}">
-
-    <!-- 表头 -->
-    <view class="wner-thead">
-      <text class="wner-th wner-th--goods">商品</text>
-      <text class="wner-th wner-th--batch">批次</text>
-      <text class="wner-th wner-th--stock">剩余库存</text>
-      <text class="wner-th wner-th--date">到期日期</text>
-      <text class="wner-th wner-th--risk">风险等级</text>
-    </view>
-
-    <!-- 数据行 -->
+  <!-- 紧凑列表 -->
+  <view class="wner-list" wx:if="{{displayItems.length > 0}}">
     <view
-      class="wner-tr {{item.isExpired ? 'wner-tr--expired' : item.isDueToday ? 'wner-tr--due-today' : ''}}"
+      class="wner-row {{item.isExpired ? 'wner-row--expired' : item.isDueToday ? 'wner-row--due-today' : ''}}"
       wx:for="{{displayItems}}"
-      wx:key="batchId"
+      wx:key="*this"
     >
-      <text class="wner-td wner-td--goods">{{item.goodsName}}</text>
-      <text class="wner-td wner-td--batch">#{{item.batchId}}</text>
-      <text class="wner-td wner-td--stock">{{item.restWeight}}{{item.weightUnit}}</text>
-      <text class="wner-td wner-td--date {{item.isExpired ? 'wner-date--expired' : item.isDueToday ? 'wner-date--today' : ''}}">{{item.expiryDate}}</text>
-      <view class="wner-td wner-td--risk">
+      <text class="wner-row-name">{{item.goodsName}}</text>
+      <view class="wner-row-right">
+        <text class="wner-row-batch">批次#{{item.batchId}}</text>
+        <text class="wner-row-stock">{{item.restWeight}}{{item.weightUnit}}</text>
+        <text class="wner-row-date {{item.isExpired ? 'wner-date--expired' : item.isDueToday ? 'wner-date--today' : ''}}">{{item.displayDate}}</text>
         <text class="wner-risk-tag {{item.riskTierCls}}">{{item.riskTierLabel}}</text>
       </view>
     </view>
-
   </view>
 
   <!-- 底部操作栏 -->
   <view class="wner-footer" wx:if="{{totalCount > 0}}">
     <view class="wner-footer-left">
-      <text class="wner-footer-icon">⚠️</text>
       <text class="wner-footer-text">共 {{totalCount}} 个风险批次</text>
       <text class="wner-footer-tag wner-footer-tag--expired" wx:if="{{expiredCount > 0}}">{{expiredCount}} 过期</text>
-      <text class="wner-footer-tag wner-footer-tag--today" wx:if="{{dueTodayCount > 0}}">{{dueTodayCount}} 今日到期</text>
+      <text class="wner-footer-tag wner-footer-tag--today" wx:if="{{dueTodayCount > 0}}">{{dueTodayCount}} 今日</text>
       <text class="wner-footer-tag wner-footer-tag--near" wx:if="{{nearExpiryCount > 0}}">{{nearExpiryCount}} 临期</text>
     </view>
     <view class="wner-footer-right" wx:if="{{hasMore}}" catchtap="onToggleExpand">

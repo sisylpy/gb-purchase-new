@@ -10,7 +10,7 @@ import {
   sellerReceiveReturnBill,
 } from '../../../services/depOrder'
 
-import dateUtil from '../../../utils/dateUtil';
+import dateUtil from '../../../lib/dateUtil.js';
 
 Page({
 

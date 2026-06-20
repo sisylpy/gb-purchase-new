@@ -12,7 +12,7 @@ import {
   getDisPurchaseGoodsBatchGb,
 } from '../../../services/depOrder'
 
-import dateUtil from '../../../utils/dateUtil';
+import dateUtil from '../../../lib/dateUtil.js';
 
 Page({
 
@@ -421,9 +421,7 @@ Page({
       var sum = this._buySubtotalSumFromBatch(this.data.batch);
       var batchPayload = Object.assign({}, this.data.batch, {
         gbDpbSubtotal: sum,
-      });
-      console.log("batch", batchPayload);
-      sellerFinishPurchaseGoodsBatchGb(batchPayload)
+      });sellerFinishPurchaseGoodsBatchGb(batchPayload)
         .then(res => {
           load.hideLoading();
           if (res.result.code == 0) {
@@ -463,12 +461,8 @@ Page({
         'wCtYVih8kAdCHjfaYL1qwOtQnmQEKAGO_EgRmlB6cOE',
         '_KhWtCVg3fIBH-tHqSV0hUk5m_vuKmxw1CGn0PEv6D0'
       ],
-      success(res) {
-        console.log("订阅消息成功", res);
-      },
-      fail(res) {
-        console.log('订阅消息失败', res);
-      }
+      success(res) {},
+      fail(res) {}
     })
   },
 })

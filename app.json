@@ -1,15 +1,13 @@
 {
   "pages": [
-
-
+    "pages/home/home",
+    "pages/categoryGoods/categoryGoods",
+    "pages/snapshotGoods/snapshotGoods",
+    "pages/orders/orders",
+    "pages/checkout/checkout",
+    "pages/billPending/billPending",
+    "pages/mine/mine",
     "pages/index/index",
-
-    "pages/storeAiChat/storeAiChat",
-    "pages/myDashboard/myDashboard",
-   
- 
-
-   
     "pages/splash/splash",
     "pages/common/selectDate/selectDate",
     "pages/register/register",
@@ -28,6 +26,8 @@
         "pages/order/chefOrder/chefOrder",
         "pages/order/chefOrderDep/chefOrderDep",
         "pages/order/purGoods/purGoods",
+        "pages/order/paste/paste",
+        "pages/order/editDepApplyGoods/editDepApplyGoods",
         "pages/order/resGoodsAi/resGoodsAi",
         "pages/order/disAddGoods/disAddGoods",
         "pages/order/aiAddGoods/aiAddGoods",
@@ -39,6 +39,8 @@
         "pages/management/purUserEveryDay/purUserEveryDay",
         "pages/management/disUserEdit/disUserEdit",
         "pages/management/purUserDayDeatil/purUserDayDeatil",
+        "pages/management/depFoodList/depFoodList",
+        "pages/management/dishIngredientDashboard/dishIngredientDashboard",
         "pages/mendian/index/index",
         "pages/mendian/mendianDetail/mendianDetail",
         "pages/mendian/mendianEdit/mendianEdit",
@@ -49,19 +51,11 @@
         "pages/mendian/depUserEdit/depUserEdit",
         "pages/mendian/groupUserRegister/groupUserRegister",
         
-        "pages/account/payPage/payPage",
-        "pages/account/payList/payList",
-        "pages/account/couponList/couponList",
-        "pages/account/payDetail/payDetail",
-        "pages/account/userEdit/userEdit",
-        "pages/account/loginPay/loginPay",
-
+      
         "pages/food/index/index",
         "pages/food/depFoodList/depFoodList",
-        "pages/food/dishIngredientDashboard/dishIngredientDashboard",
-        "pages/food/addFood/addFood",
-        "pages/food/addFoodFather/addFoodFather",
-        "pages/food/addRaw/addRaw"
+        "pages/food/dishDailySales/dishDailySales"
+       
       ]
     },
     {
@@ -77,6 +71,7 @@
       "name": "goods",
       "pages": [
         "pages/depGoodsIndex/depGoodsIndex",
+        "pages/depGoodsDetail/depGoodsDetail",
         "pages/searchGoods/searchGoods",
         "pages/disGoodsDetail/disGoodsDetail",
         "pages/disGoodsPage/disGoodsPage",
@@ -105,7 +100,12 @@
         "pages/supplier/purUserFenxi/purUserFenxi",
         "pages/supplier/resGoods/resGoods",
         "pages/supplier/appointSupplierList/appointSupplierList",
-        "pages/supplier/myPurchaseDetail/myPurchaseDetail"
+        "pages/supplier/myPurchaseDetail/myPurchaseDetail",
+        "pages/supplier/jrdhGoodsStars/jrdhGoodsStars",
+        "pages/supplier/jrdhGoodsList/jrdhGoodsList",
+        "pages/supplier/jrdhOrderList/jrdhOrderList",
+        "pages/supplier/jrdhGoodsFenxi/jrdhGoodsFenxi",
+        "pages/supplier/jrdhIndex/jrdhIndex"
       ]
     },
     {
@@ -113,6 +113,11 @@
       "name": "charts",
       "pages": [
         "pages/aiChat/aiChat",
+        "pages/pinList/pinList",
+        "pages/pinDetail/pinDetail",
+        "pages/workRecord/workRecord",
+        "pages/workNoteList/workNoteList",
+        "pages/storeAnnouncement/storeAnnouncement",
         "pages/statistic/index/index",
         "pages/statistic/indexGoods/indexGoods",
         "pages/statistic/costGoodsByDate/costGoodsByDate",
@@ -127,12 +132,12 @@
         "pages/cost/costGoodsFenxi/costGoodsFenxi",
         "pages/cost/foodGoodsFenxi/foodGoodsFenxi",
         "pages/cost/goodsFenxiCost/goodsFenxiCost",
-        "pages/cost/costGoodsByDate/costGoodsByDate",
         "pages/cost/goodsFenxiPurchase/goodsFenxiPurchase",
         "pages/sales/dailyTurnover/dailyTurnover",
         "pages/sales/addTurnover/addTurnover",
         "pages/sales/addFoodSales/addFoodSales",
         "pages/sales/editFoodSales/editFoodSales",
+        "pages/sales/addStaffMeal/addStaffMeal",
         "pages/report/reportPage/reportPage",
         "pages/report/dateReport/dateReport",
         "pages/report/selSupplier/selSupplier",
@@ -141,12 +146,29 @@
       ]
     },
     {
+      "root": "subPackage-yishang/",
+      "name": "yishang",
+      "pages": [
+        "pages/yishang/nxDistributerGoods/nxDistributerGoods",
+        "pages/yishang/nxDistributerGoodsSearch/nxDistributerGoodsSearch"
+      ]
+    },
+    {
       "root": "subPackage-group/",
       "name": "group",
       "pages": [
-        "pages/homePage/homePage",
-        "pages/disEdit/disEdit",
-       
+        "pages/account/disEdit/disEdit",
+        "pages/account/payPage/payPage",
+        "pages/account/payList/payList",
+        "pages/account/couponList/couponList",
+        "pages/account/payDetail/payDetail",
+        "pages/account/loginPay/loginPay",
+        "pages/account/invitePage/invitePage",
+
+        "pages/goods/searchGoods/searchGoods",
+        "pages/goods/disGoodsDetail/disGoodsDetail",
+        "pages/goods/disGoodsPage/disGoodsPage",
+        "pages/goods/resGoods/resGoods",
         
         "pages/food/index/index",
         "pages/food/depFoodList/depFoodList",
@@ -161,18 +183,50 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarTitleText": "粮心乐",
+    "navigationBarTitleText": "京采市场",
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
   },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#187e6e",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "images/tab/home.png",
+        "selectedIconPath": "images/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/categoryGoods/categoryGoods",
+        "text": "全部类别",
+        "iconPath": "images/book.png",
+        "selectedIconPath": "images/dish.png"
+      },
+      {
+        "pagePath": "pages/snapshotGoods/snapshotGoods",
+        "text": "快照商品",
+        "iconPath": "images/goods-3.png",
+        "selectedIconPath": "images/goods.png"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "订货",
+        "iconPath": "images/tab/orders.png",
+        "selectedIconPath": "images/tab/orders-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "images/tab/mine.png",
+        "selectedIconPath": "images/tab/mine-active.png"
+      }
+    ]
+  },
   "networkTimeout": {
     "request": 300000
-  },
-  "plugins": {
-    "QCloudAIVoice": {
-      "version": "2.3.10",
-      "provider": "wx3e17776051baf153"
-    }
   },
   "usingComponents": {
     "navbar-dual": "/components/navbar-dual/navbar-dual"

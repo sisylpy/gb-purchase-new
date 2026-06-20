@@ -1,6 +1,7 @@
 var globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
-var purGoodsApi = require('../../../services/purGoodsApi.js');
+var purGoodsApi = require('../../../../services/purGoodsApi.js');
+var priceUtil = require('../../../../lib/purchasePriceUtil.js');
 
 /** 用户选中的待采订单：兼容接口返回 true / 1 */
 function isNoticeSelected(order) {
@@ -15,9 +16,7 @@ function logPurInput(msg, payload) {
     return;
   }
   if (payload !== undefined) {
-    console.log('[purGoods inputOrder]', msg, payload);
   } else {
-    console.log('[purGoods inputOrder]', msg);
   }
 }
 
@@ -72,12 +71,10 @@ Page({
     }
 
     var purArr = wx.getStorageSync('purArr');
-    console.log('[purGoods onLoad] purArr from storage:', purArr);
     if (purArr) {
       this.setData({
         purArr: purArr
       });
-      console.log('[purGoods onLoad] purArr length:', purArr.length);
 
       // 创建显示用的数据，只显示被选中的订单
       var displayPurArr = purArr.map(function (item) {
@@ -108,8 +105,6 @@ Page({
       this.setData({
         displayPurArr: displayPurArr
       });
-      console.log('[purGoods onLoad] displayPurArr length:', displayPurArr.length);
-      console.log('[purGoods onLoad] displayPurArr:', displayPurArr);
     }
   },
 
@@ -201,16 +196,23 @@ Page({
     var that = this;
     purGoodsApi.purUserGetPurGoodsInfo(data).then(function (res) {
       logPurInput('purUserGetPurGoodsInfo 返回', { code: res.result && res.result.code, data: res.result && res.result.data });
-      if (res.result.code == 0) {
-        var basePriceStr = res.result.data;
-        var basePrice = Number(basePriceStr);
+      var basePriceStr = priceUtil.normalizePurchasePrice(res.result.data);
+      var hasHistoryPrice = priceUtil.hasValidPurchasePrice(basePriceStr);
+      logPurInput('purUserGetPurGoodsInfo 解析单价', {
+        raw: res.result.data,
+        normalized: basePriceStr,
+        hasHistoryPrice: hasHistoryPrice,
+      });
 
+      if (res.result.code == 0) {
         if (needScalePack && scalePackMeta) {
           var sn = scalePackMeta.scale;
           displayItem.gbDpgBuyScale = String(sn);
           displayItem.gbDpgStandard = scalePackMeta.standard;
           displayItem.gbDpgBuyPrice = basePriceStr;
-          displayItem.gbDpgBuyScalePrice = isNaN(basePrice) ? "" : (basePrice * sn).toFixed(2);
+          displayItem.gbDpgBuyScalePrice = hasHistoryPrice
+            ? (Number(basePriceStr) * sn).toFixed(2)
+            : "";
 
           var arrList = [];
           var buySubtotal = 0;
@@ -221,10 +223,16 @@ Page({
             order.gbDoScalePrice = displayItem.gbDpgBuyScalePrice;
             order.gbDoScaleWeight = String(order.gbDoQuantity);
             order.gbDoWeight = String(Number(order.gbDoQuantity) * sn);
-            var subOne = (Number(order.gbDoScaleWeight) * Number(order.gbDoScalePrice)).toFixed(1);
-            order.gbDoSubtotal = subOne;
+            if (hasHistoryPrice) {
+              var subOne = (
+                Number(order.gbDoScaleWeight) * Number(order.gbDoScalePrice)
+              ).toFixed(1);
+              order.gbDoSubtotal = subOne;
+              buySubtotal = Number(buySubtotal) + Number(subOne);
+            } else {
+              order.gbDoSubtotal = "";
+            }
             arrList.push(order);
-            buySubtotal = Number(buySubtotal) + Number(subOne);
             scaleQtyTotal = Number(scaleQtyTotal) + Number(order.gbDoScaleWeight);
           }
           displayItem.gbDepartmentOrdersEntities = arrList;
@@ -232,111 +240,101 @@ Page({
             displayItem.gbDistributerGoodsEntity.gbDepartmentOrdersEntities = arrList;
           }
           displayItem.gbDpgBuyScaleQuantity = String(scaleQtyTotal);
-          displayItem.gbDpgBuySubtotal = buySubtotal.toFixed(1);
+          displayItem.gbDpgBuySubtotal = hasHistoryPrice ? buySubtotal.toFixed(1) : "";
           displayItem.gbDpgBuyQuantity = String(Number(scaleQtyTotal) * sn);
 
-          logPurInput('setData(大包装)', { orderListCount: arrList.length, gbDepartmentOrdersEntitiesLen: displayItem.gbDepartmentOrdersEntities && displayItem.gbDepartmentOrdersEntities.length });
           that.setData({
             item: displayItem,
             fullItem: fullItem,
             orderListCount: arrList.length,
             show: true,
             scaleInput: true,
-            foucusWeight: true,
-            foucusPrice: false,
-            canSave: true,
+            foucusWeight: hasHistoryPrice,
+            foucusPrice: !hasHistoryPrice,
+            canSave: hasHistoryPrice,
             windowHeight: that.data.windowHeight,
           });
         } else {
           displayItem.gbDpgBuyScale = 0;
           displayItem.gbDpgBuyScalePrice = "";
           displayItem.gbDpgBuyScaleQuantity = "";
-
           displayItem.gbDpgBuyPrice = basePriceStr;
-          var hasPriceCount = 0;
+
           var buySubtotal = 0;
+          var readyCount = 0;
           if (orderArr.length > 0) {
             var arrList2 = [];
             var dpgStd = displayItem.gbDpgStandard;
             for (var j = 0; j < orderArr.length; j++) {
               var row = orderArr[j];
-              var scale = row.gbDoDsStandardScale;
-              var scaleNum = Number(scale);
+              var scaleNum = Number(row.gbDoDsStandardScale);
               var isOuterPack = rowIsOuterPack(row);
-              /* 订单单位可与商品基准单位不同（如 箱 vs 桶）；scale 为 -1 时 isOuterPack 为 false。
-                 若订货单位与自采单行 gbDpgStandard 一致（如均为「箱」），仍应录入该行。 */
               var matchBaseUnit = row.gbDoStandard == goodsStandard;
               var matchPurchaseUnit =
                 dpgStd != null &&
-                dpgStd !== '' &&
+                dpgStd !== "" &&
                 String(row.gbDoStandard) === String(dpgStd);
               if (matchBaseUnit || isOuterPack || matchPurchaseUnit) {
                 var ord = row;
                 ord.gbDoPrice = basePriceStr;
                 ord.gbDoWeight = ord.gbDoQuantity;
-                var subtotal = isOuterPack
-                  ? (Number(ord.gbDoQuantity) * Number(basePriceStr) * scaleNum).toFixed(1)
-                  : (Number(ord.gbDoQuantity) * Number(basePriceStr)).toFixed(1);
-                ord.gbDoSubtotal = subtotal;
+                if (hasHistoryPrice) {
+                  ord.gbDoSubtotal = isOuterPack
+                    ? (
+                        Number(ord.gbDoQuantity) *
+                        Number(basePriceStr) *
+                        scaleNum
+                      ).toFixed(1)
+                    : (Number(ord.gbDoQuantity) * Number(basePriceStr)).toFixed(1);
+                  buySubtotal = Number(buySubtotal) + Number(ord.gbDoSubtotal);
+                  readyCount += 1;
+                } else {
+                  ord.gbDoSubtotal = "";
+                }
                 arrList2.push(ord);
-                hasPriceCount += 1;
-                buySubtotal = Number(buySubtotal) + Number(subtotal);
               }
             }
             displayItem.gbDepartmentOrdersEntities = arrList2;
             if (displayItem.gbDistributerGoodsEntity) {
               displayItem.gbDistributerGoodsEntity.gbDepartmentOrdersEntities = arrList2;
             }
-            logPurInput('普通订货 过滤结果', {
-              orderArrLen: orderArr.length,
-              arrList2Len: arrList2.length,
-              hasPriceCount: hasPriceCount,
-              hint:
-                orderArr.length > 0 && arrList2.length === 0
-                  ? '订单行未满足基准单位/外包装/与 gbDpgStandard 一致，已全部被跳过，弹层将 0 条'
-                  : '',
-            });
           }
-          displayItem.gbDpgBuySubtotal = buySubtotal;
-          var cnt2 = (displayItem.gbDepartmentOrdersEntities && displayItem.gbDepartmentOrdersEntities.length) || 0;
-          logPurInput('setData(普通)', { orderListCount: cnt2, cnt2: cnt2 });
+          displayItem.gbDpgBuySubtotal = hasHistoryPrice ? buySubtotal : "";
+          var cnt2 =
+            (displayItem.gbDepartmentOrdersEntities &&
+              displayItem.gbDepartmentOrdersEntities.length) ||
+            0;
           that.setData({
             item: displayItem,
             fullItem: fullItem,
             orderListCount: cnt2,
             show: true,
             scaleInput: false,
-            foucusWeight: true,
-            foucusPrice: false,
+            foucusWeight: hasHistoryPrice,
+            foucusPrice: !hasHistoryPrice,
+            canSave: hasHistoryPrice && readyCount > 0,
             windowHeight: that.data.windowHeight,
           });
-          var finalOrders = displayItem.gbDepartmentOrdersEntities || (displayItem.gbDistributerGoodsEntity && displayItem.gbDistributerGoodsEntity.gbDepartmentOrdersEntities) || [];
-          if (hasPriceCount == finalOrders.length) {
-            that.setData({ canSave: true });
-          } else {
-            that.setData({ canSave: false });
-          }
         }
       } else {
         if (needScalePack && scalePackMeta) {
           displayItem.gbDpgBuyScale = String(scalePackMeta.scale);
           displayItem.gbDpgStandard = scalePackMeta.standard;
-          displayItem.gbDpgBuyScalePrice = "";
-          displayItem.gbDpgBuyPrice = "";
         } else {
           displayItem.gbDpgBuyScale = 0;
-          displayItem.gbDpgBuyScalePrice = "";
           displayItem.gbDpgBuyScaleQuantity = "";
         }
-        logPurInput('询价失败或非0，仍打开弹层', { orderListCount: orderListCount, code: res.result && res.result.code });
+        displayItem.gbDpgBuyPrice = "";
+        displayItem.gbDpgBuyScalePrice = "";
+        displayItem.gbDpgBuySubtotal = "";
         that.setData({
           item: displayItem,
           fullItem: fullItem,
           orderListCount: orderListCount,
           show: true,
           scaleInput: !!(needScalePack && scalePackMeta),
-          foucusWeight: !(needScalePack && scalePackMeta),
-          foucusPrice: !!(needScalePack && scalePackMeta),
+          foucusWeight: false,
+          foucusPrice: true,
           canSave: false,
           windowHeight: that.data.windowHeight,
         });
@@ -348,21 +346,6 @@ Page({
 
   confirm: function (e) {
     var item = e.detail.item;
-    var orderSnap = item.gbDepartmentOrdersEntities || (item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities) || [];
-    console.log('[purGoods inputOrder confirm] 自采单价 gbDpgBuyPrice:', item.gbDpgBuyPrice, '| gbDpgBuySubtotal:', item.gbDpgBuySubtotal, '| gbDpgBuyQuantity:', item.gbDpgBuyQuantity);
-    console.log('[purGoods inputOrder confirm] 订单明细 (gbDoWeight 基准数量; gbDoScaleWeight/gbDoScalePrice 大包装件数/单价):', orderSnap.map(function (o) {
-      return {
-        gbDepartmentOrdersId: o.gbDepartmentOrdersId,
-        hasChoice: o.hasChoice,
-        gbDoWeight: o.gbDoWeight,
-        gbDoPrice: o.gbDoPrice,
-        gbDoSubtotal: o.gbDoSubtotal,
-        gbDoQuantity: o.gbDoQuantity,
-        gbDoStandard: o.gbDoStandard,
-        gbDoScaleWeight: o.gbDoScaleWeight,
-        gbDoScalePrice: o.gbDoScalePrice,
-      };
-    }));
 
     var fullItem = this.data.fullItem || e.detail.item;
 
@@ -435,7 +418,6 @@ Page({
   },
 
   cancle: function () {
-    console.log('[purGoods inputOrder cancle] 取消录入');
     this.setData({
       show: false,
       item: null,
@@ -448,7 +430,6 @@ Page({
 
   /** inputOrder 非 confirm 关闭（组件 finish） */
   markGbPurGoodsFinish: function (e) {
-    console.log('[purGoods inputOrder finish] 弹层关闭', e && e.detail);
   },
 
   toBack: function () {

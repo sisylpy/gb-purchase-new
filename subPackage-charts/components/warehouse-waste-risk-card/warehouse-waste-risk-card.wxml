@@ -1,0 +1,57 @@
+<view class="wwr-card" wx:if="{{visible}}">
+
+  <!-- 头部 -->
+  <view class="wwr-header">
+    <text class="wwr-title">{{title}}</text>
+    <text class="wwr-subtitle">{{subtitle}}</text>
+  </view>
+
+  <!-- 空数据 -->
+  <view class="wwr-empty" wx:if="{{totalCount === 0}}">
+    <text class="wwr-empty-text">暂无鲜品废弃风险批次</text>
+  </view>
+
+  <!-- 概览统计 -->
+  <view class="wwr-stats" wx:if="{{totalCount > 0}}">
+    <view class="wwr-stat-item wwr-stat-item--due" wx:if="{{wasteDueCount > 0}}">
+      <text class="wwr-stat-num">{{wasteDueCount}}</text>
+      <text class="wwr-stat-label">应废弃</text>
+    </view>
+    <view class="wwr-stat-item wwr-stat-item--warning" wx:if="{{wasteWarningCount > 0}}">
+      <text class="wwr-stat-num">{{wasteWarningCount}}</text>
+      <text class="wwr-stat-label">废弃预警</text>
+    </view>
+  </view>
+
+  <!-- 紧凑列表 -->
+  <view class="wwr-list" wx:if="{{displayItems.length > 0}}">
+    <view
+      class="wwr-row {{item._riskLevel === 0 ? 'wwr-row--due' : ''}}"
+      wx:for="{{displayItems}}"
+      wx:key="*this"
+    >
+      <text class="wwr-row-name">{{item.goodsName}}</text>
+      <view class="wwr-row-right">
+        <text class="wwr-row-batch" wx:if="{{item.batchId}}">批次#{{item.batchId}}</text>
+        <text class="wwr-row-stock">{{item.restWeight}}{{item.weightUnit}}</text>
+        <text class="wwr-row-date">{{item.stockInDate}}</text>
+        <text class="wwr-row-deadline {{item._riskLevel === 0 ? 'wwr-date--overdue' : ''}}">{{item.wasteDeadlineTime || '-'}}</text>
+        <text class="wwr-risk-tag {{item.riskCls}}">{{item.riskLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="wwr-footer" wx:if="{{totalCount > 0}}">
+    <view class="wwr-footer-left">
+      <text class="wwr-footer-text">共 {{totalCount}} 个风险批次</text>
+      <text class="wwr-footer-tag wwr-footer-tag--due" wx:if="{{wasteDueCount > 0}}">{{wasteDueCount}} 应废弃</text>
+      <text class="wwr-footer-tag wwr-footer-tag--warning" wx:if="{{wasteWarningCount > 0}}">{{wasteWarningCount}} 预警</text>
+    </view>
+    <view class="wwr-footer-right" wx:if="{{hasMore}}" catchtap="onToggleExpand">
+      <text class="wwr-expand-text">{{showAll ? '收起' : '查看全部'}}</text>
+      <text class="wwr-expand-arrow">{{showAll ? '∧' : '∨'}}</text>
+    </view>
+  </view>
+
+</view>

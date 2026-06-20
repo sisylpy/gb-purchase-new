@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "图钉详情",
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar",
+    "business-card-renderer": "/components/businessCardRenderer/businessCardRenderer"
+  }
+}

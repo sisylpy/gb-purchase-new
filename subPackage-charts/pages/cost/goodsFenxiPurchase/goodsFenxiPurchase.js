@@ -1,7 +1,7 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
-var dateUtils = require('../../../../utils/dateUtil');
-import * as echarts from '../../../ec-canvas/echarts';
+var dateUtils = require('../../../../lib/dateUtil');
+import * as echarts from '../../../../ec-canvas/echarts';
 
 import apiUrl from '../../../../config/index.js'
 import apiDistributer from '../../../../services/apiDistributer.js'

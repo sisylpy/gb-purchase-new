@@ -82,6 +82,23 @@ function transferDateString(date){
   return  dateString ;
 }
 
+/**
+ * 将 yyyy-MM-dd HH:mm 转为 X月X日 HH:mm 短格式
+ */
+function transferDateTimeShort(datetime){
+  if (datetime == null || datetime === '' || datetime === undefined) return '';
+  // yyyy-MM-dd HH:mm → 截取月份、日期、时间
+  var month = datetime.substring(5, 7);
+  var day = datetime.substring(8, 10);
+  var time = datetime.length >= 16 ? datetime.substring(11, 16) : ''; // HH:mm
+  // 去除前导0
+  if (month.charAt(0) === '0') month = month.charAt(1);
+  if (day.charAt(0) === '0') day = day.charAt(1);
+  var result = month + '月' + day + '日';
+  if (time !== '') result = result + ' ' + time;
+  return result;
+}
+
 function getProducePercent(a,b){
   if(b !== 0){
     var  abc = (a / b * 100).toFixed(2);
@@ -275,6 +292,11 @@ function getRestTime(startTime, endTime){
     return thisResult;
   }
   return 0;
+}
+
+function getWasteRemainHours(wasteFullTime, nowTime) {
+  var hours = getRestTime(wasteFullTime, nowTime);
+  return hours < 0 ? -hours : 0;
 }
 
 function getHaveWasteHours(nowTime, wasteTime){
@@ -726,6 +748,84 @@ function marginStandardHintModDga(ins) {
   return 'dga-hero__margin--muted';
 }
 
+/**
+ * 实际总利润 = 销售收入 - 实际总成本
+ */
+function calcActualProfit(actualRevenue, actualCostTotalAmount123) {
+  var rev = parseFloat(actualRevenue);
+  var cost = parseFloat(actualCostTotalAmount123);
+  if (rev !== rev || cost !== cost) {
+    return '—';
+  }
+  var profit = rev - cost;
+  return profit.toFixed(2);
+}
+
+/**
+ * 判断关联菜品的「单份理论」是否应使用小单位显示（而非长小数）。
+ * @param {any} standardWeight - 配料的 gbDgGoodsStandardWeight
+ * @param {number} recipeUsagePerPortion - 配方每份用量（如 0.18888889）
+ * @param {string} unit - 配料的大单位（如 斤）
+ * @param {number|string} portionAmount - 小单位用量数值（如 50）
+ * @param {string} portionUnit - 小单位（如 g）
+ * @returns {string} 格式化后的显示文本，如 "50g/份" 或 "0.19斤/份"
+ */
+function perPortionDisplay(standardWeight, recipeUsagePerPortion, unit, portionAmount, portionUnit) {
+  if (standardWeight != null && standardWeight !== '' && standardWeight !== undefined) {
+    var s = '' + recipeUsagePerPortion;
+    var dot = s.indexOf('.');
+    if (dot >= 0) {
+      var decimals = s.substring(dot + 1);
+      if (decimals.length > 2) {
+        for (var i = 2; i < decimals.length; i++) {
+          if (decimals.charAt(i) !== '0') {
+            if (portionAmount != null && portionAmount !== '' && portionUnit) {
+              return portionAmount + portionUnit + '';
+            }
+            return recipeUsagePerPortion + unit + '';
+          }
+        }
+      }
+    }
+  }
+  return recipeUsagePerPortion + unit + '';
+}
+
+/**
+ * 每份差异 = 单份理论 − 每份实际，带符号格式化
+ * @param {number} recipeUsagePerPortion - 单份理论用量
+ * @param {number} actualPerPortion - 每份实际用量
+ * @param {string} unit - 单位（如 斤）
+ * @returns {string} 如 "+0.12斤/份" / "-0.05斤/份" / "--"
+ */
+function perPortionDeviation(recipeUsagePerPortion, actualPerPortion, unit) {
+  if (recipeUsagePerPortion == null || actualPerPortion == null || recipeUsagePerPortion === '' || actualPerPortion === '') {
+    return '--';
+  }
+  var dev = recipeUsagePerPortion - actualPerPortion;
+  // 保留两位小数
+  dev = Math.round(dev * 100) / 100;
+  // 补齐两位小数（1 → 1.00, -0.5 → -0.50）
+  var str = '' + dev;
+  var dot = str.indexOf('.');
+  if (dot < 0) str = str + '.00';
+  else if (str.length - dot === 2) str = str + '0';
+  if (dev > 0) return '+' + str + unit + '/份';
+  return str + unit + '/份';
+}
+
+/**
+ * 消耗后剩余 = 出库前剩余 − 本次消耗
+ */
+function remainingAfterOutbound(remainingBeforeOutbound, quantity) {
+  if (remainingBeforeOutbound == null || quantity == null || remainingBeforeOutbound === '' || quantity === '') {
+    return '--';
+  }
+  var r = parseFloat(remainingBeforeOutbound) - parseFloat(quantity);
+  r = Math.round(r * 100) / 100;
+  return '' + r;
+}
+
 module.exports = {
   getGongli: getGongli,
   getPercent: getPercent,
@@ -741,6 +841,7 @@ module.exports = {
   getProducePercent: getProducePercent,
   getCompareTime: getCompareTime,
   getRestTime: getRestTime,
+  getWasteRemainHours: getWasteRemainHours,
   getHaveWasteHours: getHaveWasteHours,
   getDifferentPrice: getDifferentPrice,
   changeDateStyleDot: changeDateStyleDot,
@@ -768,5 +869,10 @@ module.exports = {
   marginStandardHint: marginStandardHint,
   marginStandardShowBlock: marginStandardShowBlock,
   marginStandardHintMod: marginStandardHintMod,
-  marginStandardHintModDga: marginStandardHintModDga
+  marginStandardHintModDga: marginStandardHintModDga,
+  calcActualProfit: calcActualProfit,
+  perPortionDisplay: perPortionDisplay,
+  perPortionDeviation: perPortionDeviation,
+  remainingAfterOutbound: remainingAfterOutbound,
+  transferDateTimeShort: transferDateTimeShort
 };

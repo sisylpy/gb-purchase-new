@@ -1,4 +1,4 @@
-<navbar title="自采商品" avatar="/images/back-gray.png" showBack bindnavbuttontap="toBack"></navbar>
+<back-navbar style="height: {{navBarHeight}}rpx;" title="自采商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
 <!-- 商品列表 -->
 <scroll-view scroll-y class="page-content">

@@ -1,4 +1,7 @@
-
+/**
+ * subPackage-goods 统一 API
+ * 汇总本子包 pages 所用接口；部分方法复用 services/depOrder.js
+ */
 
 var request = require('../../lib/request');
 var depOrder = require('../../services/depOrder');
@@ -44,20 +47,16 @@ var disUpdateDisGoodsGb = function (goods) {
   return request.post('gbdistributergoods/disUpdateDisGoodsGb', goods);
 };
 
-var gbDisUpdateStandard = function (data) {
-  return request.post('gbdistributerstandard/gbDisUpdateStandard', data);
-};
-
 var updateGbGoods = function (goods) {
   return request.post('gbdistributergoods/updateGbGoods', goods);
 };
 
-var updateGbGoodsPullOff = function (goods) {
-  return request.post('gbdistributergoods/updateGbGoodsPullOff', goods);
+var updateGbGoodsPullOff = function (data) {
+  return request.post('gbdistributergoods/updateGbGoodsPullOff', data);
 };
 
-var changeGbGoodsFresh = function (goods) {
-  return request.post('gbdistributergoods/changeGbGoodsFresh', goods);
+var gbDisUpdateStandard = function (data) {
+  return request.post('gbdistributerstandard/gbDisUpdateStandard', data);
 };
 
 var saveDisAlias = function (data) {
@@ -140,6 +139,16 @@ var changeDepStockToAnotherDep = function (data) {
   );
 };
 
+/** 根据部门商品ID查询部门商品详情 */
+var getDepGoodsDetail = function (depGoodsId) {
+  return request.post('gbdepartmentdisgoods/getDepGoodsDetail', { depGoodsId: depGoodsId }, { useUrlParams: true });
+};
+
+/** 更新部门商品（必须包含 gbDepartmentDisGoodsId） */
+var updateDepGoods = function (depGoods) {
+  return request.post('gbdepartmentdisgoods/updateDepGoods', depGoods);
+};
+
 // ============================================================
 // 导出
 // ============================================================
@@ -161,7 +170,6 @@ module.exports = {
   disDeleteAlias: disDeleteAlias,
   updateGbGoods: updateGbGoods,
   updateGbGoodsPullOff: updateGbGoodsPullOff,
-  changeGbGoodsFresh: changeGbGoodsFresh,
   canclePostDgnGoodsGb: canclePostDgnGoodsGb,
   getGbPurGoodsFenxi: getGbPurGoodsFenxi,
   getDisGoodsOrderDayJingjinig: getDisGoodsOrderDayJingjinig,
@@ -169,4 +177,6 @@ module.exports = {
   deleteReduceItem: deleteReduceItem,
   deleteReduceAttachment: deleteReduceAttachment,
   changeDepStockToAnotherDep: changeDepStockToAnotherDep,
+  getDepGoodsDetail: getDepGoodsDetail,
+  updateDepGoods: updateDepGoods,
 };

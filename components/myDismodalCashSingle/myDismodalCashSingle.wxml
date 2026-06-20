@@ -50,22 +50,22 @@
       <view class="flex-row-default" style="padding: 20rpx 20rpx;">
         <text class="explain shrink_fix">单价:</text>
         <view class="flex-row-wrap shrink_change ">
-          <view class="flex-row third-row" wx:if="{{item.nxDgWillPrice !== '0.1'}}">
-            <text class="">{{item.nxDgWillPrice}}元/{{item.nxDgGoodsStandardname}}</text>
+          <view class="flex-row third-row" wx:if="{{item.priceValidOne}}">
+            <text class="">参考价 {{item.nxDgWillPrice}}元/{{item.nxDgGoodsStandardname}}</text>
           </view>
           <view class="flex-row third-row" wx:else="">
-            <text class="">待报价</text>
+            <text class="">待确认价（价格以出库确认为准）</text>
           </view>
         </view>
 
       </view>
       <view class="flex-row-default " style="padding: 20rpx 20rpx;">
         <text class="explain shrink_fix">预计小价:</text>
-        <view class=" flex-row-wrap shrink_change rightPart" wx:if="{{item.nxDgWillPrice !== '0.1'}}">
+        <view class=" flex-row-wrap shrink_change rightPart" wx:if="{{item.priceValidOne}}">
           <text class="mainColor normal">{{applySubtotal}}</text>
         </view>
         <view class=" flex-row-wrap shrink_change rightPart" wx:else="">
-          <text class="mainColor normal">-</text>
+          <text class="mainColor normal">价格待确认</text>
         </view>
       </view>
 
@@ -88,20 +88,22 @@
       <view class="flex-row-default" style="padding: 20rpx 20rpx;">
         <text class="explain shrink_fix">单价:</text>
         <view class="flex-row-wrap shrink_change ">
-          <view class="flex-row third-row">
-            <text class="">{{item.nxDgWillPriceTwo}}元/{{item.nxDgWillPriceTwoStandard}}</text>
+          <view class="flex-row third-row" wx:if="{{item.priceValidTwo}}">
+            <text class="">参考价 {{item.nxDgWillPriceTwo}}元/{{item.nxDgWillPriceTwoStandard}}</text>
           </view>
-          
+          <view class="flex-row third-row" wx:else="">
+            <text class="">待确认价（价格以出库确认为准）</text>
+          </view>
         </view>
 
       </view>
       <view class="flex-row-default " style="padding: 20rpx 20rpx;">
         <text class="explain shrink_fix">预计小价:</text>
-        <view class=" flex-row-wrap shrink_change rightPart" wx:if="{{item.nxDgWillPrice !== '0.1'}}">
+        <view class=" flex-row-wrap shrink_change rightPart" wx:if="{{item.priceValidTwo}}">
           <text class="mainColor normal">{{applySubtotal}}</text>
         </view>
         <view class=" flex-row-wrap shrink_change rightPart" wx:else="">
-          <text class="mainColor normal">-</text>
+          <text class="mainColor normal">价格待确认</text>
         </view>
       </view>
 

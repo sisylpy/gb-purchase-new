@@ -1,5 +1,5 @@
 /**
- * subPackage-goods 统一 API
+ * subPackage-group 统一 API
  * 汇总本子包 pages 所用接口，风格对齐 subPackage-ai/services/api.js（request + 注释清单）
  *
  * 部分与部门订单/配送标准重复的方法直接复用 services/depOrder.js，保证路径与主包一致。
@@ -15,7 +15,6 @@
  * ====== 商品详情 disGoodsDetail ======
  * gbDisGetGoodsDetail(id)               GET  gbdistributergoods/gbDisGetGoodsDetail/{id}
  * gbDisGetAllNxDistributerAndSupplier(disId) GET gbdistributergoods/gbDisGetAllNxDistributerAndSupplier/{disId}
- * disUpdateDisGoodsGb(goods)             POST gbdistributergoods/disUpdateDisGoodsGb
  *
  * ====== 商品操作页 disGoodsPage ======
  * gbDisSaveStandard(data)                POST gbdistributerstandard/gbDisSaveStandard
@@ -24,9 +23,8 @@
  * saveDisAlias(data)                     POST gbdistributeralias/saveDisAlias
  * updateDisAlias(data)                   POST gbdistributeralias/updateDisAlias
  * disDeleteAlias(id)                     GET  gbdistributeralias/disDeleteAlias/{id}
- * updateGbGoods(goods)                   POST gbdistributergoods/updateGbGoods
- * updateGbGoodsPullOff(goods)            POST gbdistributergoods/updateGbGoodsPullOff
- * changeGbGoodsFresh(goods)              POST gbdistributergoods/changeGbGoodsFresh
+ * disUpdateDisGoodsGb(goods)                   POST gbdistributergoods/disUpdateDisGoodsGb
+ * disUpdateDisGoodsBasicGb(goods)        POST gbdistributergoods/disUpdateDisGoodsBasicGb
  * canclePostDgnGoodsGb(data)             POST gbdistributergoods/canclePostDgnGoodsGb
  *
  * ====== 商品分析 goodsFenxi ======
@@ -75,21 +73,15 @@ var disUpdateDisGoodsGb = function (goods) {
   return request.post('gbdistributergoods/disUpdateDisGoodsGb', goods);
 };
 
+var disUpdateDisGoodsBasicGb = function (goods) {
+  return request.post('gbdistributergoods/disUpdateDisGoodsBasicGb', goods);
+};
+
 var gbDisUpdateStandard = function (data) {
   return request.post('gbdistributerstandard/gbDisUpdateStandard', data);
 };
 
-var updateGbGoods = function (goods) {
-  return request.post('gbdistributergoods/updateGbGoods', goods);
-};
 
-var updateGbGoodsPullOff = function (goods) {
-  return request.post('gbdistributergoods/updateGbGoodsPullOff', goods);
-};
-
-var changeGbGoodsFresh = function (goods) {
-  return request.post('gbdistributergoods/changeGbGoodsFresh', goods);
-};
 
 var saveDisAlias = function (data) {
   return request.post('gbdistributeralias/saveDisAlias', data, { useUrlParams: true });
@@ -182,15 +174,13 @@ module.exports = {
   gbDisGetGoodsDetail: gbDisGetGoodsDetail,
   gbDisGetAllNxDistributerAndSupplier: gbDisGetAllNxDistributerAndSupplier,
   disUpdateDisGoodsGb: disUpdateDisGoodsGb,
+  disUpdateDisGoodsBasicGb: disUpdateDisGoodsBasicGb,
   gbDisSaveStandard: gbDisSaveStandard,
   gbDisUpdateStandard: gbDisUpdateStandard,
   gbDisDeleteStandard: gbDisDeleteStandard,
   saveDisAlias: saveDisAlias,
   updateDisAlias: updateDisAlias,
   disDeleteAlias: disDeleteAlias,
-  updateGbGoods: updateGbGoods,
-  updateGbGoodsPullOff: updateGbGoodsPullOff,
-  changeGbGoodsFresh: changeGbGoodsFresh,
   canclePostDgnGoodsGb: canclePostDgnGoodsGb,
   getGbPurGoodsFenxi: getGbPurGoodsFenxi,
   getDisGoodsOrderDayJingjinig: getDisGoodsOrderDayJingjinig,

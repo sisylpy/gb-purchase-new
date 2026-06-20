@@ -10,11 +10,19 @@ import {
   quickSearchDisGoodsForFoodIngredient,
   getFoodGoodsList,
   updateGrossMargin,
-} from '../../../services/apiDistributerGbFood'
+} from '../../../../services/apiDistributerGbFood'
 
-var MIN_UNIT_OPTIONS = ['ml', 'g', '个', '张', '只', '斤'];
+var stockUnit = require('../../../../lib/stockUnitConvert.js');
+var MIN_UNIT_OPTIONS = stockUnit.MIN_UNIT_OPTIONS;
 var COUNT_MIN_UNITS = ['个', '只', '张', '枚', '条', '根', '颗'];
 var QUICK_DOSAGE_PRESETS = [5, 10, 15];
+/** 规格≥该斤数且包装为袋/箱等 → 默认用「斤」而非 g（如 50斤/袋） */
+var BULK_WEIGHT_JIN_THRESHOLD = 10;
+/** 规格≥该克数且为大包装 → 同上 */
+var BULK_WEIGHT_G_THRESHOLD = 5000;
+/** 原料弹窗距顶：仅搜索时留白多；已选商品展示表单时上移 */
+var MODAL_PAD_TOP_RATIO_SEARCH = 0.23;
+var MODAL_PAD_TOP_RATIO_PICKED = 0.08;
 
 /** 解析规格字符串中的数值与单位（如 3Kg、500g、1.5斤） */
 function _parseWeightUnit(weightStr) {
@@ -37,13 +45,14 @@ function _weightToMinUnitQty(parsed, minUnit) {
   var n = parsed.amount;
   var u = (minUnit || '').trim();
   if (parsed.unit === 'kg') {
-    if (u === 'ml') return n * 1000;
-    return n * 1000;
+    if (u === '斤') return n * 2;
+    if (u === 'g') return n * 1000;
+    return 0;
   }
   if (parsed.unit === 'jin') {
+    if (u === '斤') return n;
     if (u === 'g') return n * 500;
-    if (u === 'ml') return n * 500;
-    return n * 500;
+    return 0;
   }
   if (parsed.unit === 'l') {
     return u === 'ml' ? n * 1000 : n * 1000;
@@ -54,24 +63,82 @@ function _weightToMinUnitQty(parsed, minUnit) {
 }
 
 function _minUnitFromWeightStr(weightStr, packUnit) {
-  var lower = String(weightStr || '').toLowerCase();
-  if (/ml|毫升/.test(lower) && !/kg|公斤|千克|斤|克/.test(lower)) return 'ml';
+  var s = String(weightStr || '');
+  var lower = s.toLowerCase();
+  if (/ml|毫升/.test(lower) && !/kg|公斤|千克|斤|克|\d\s*g|\dg/.test(lower)) return 'ml';
   if (/升|(^|\d)\s*l$/.test(lower) && !/ml/.test(lower)) return 'ml';
-  if (/kg|公斤|千克|g|克|斤/.test(lower)) return 'g';
-  if (/瓶|罐|桶|升/.test(packUnit || '')) return 'ml';
+  // 50斤/袋：规格本身是斤，默认按斤录入，避免 50×500 被当成 25000g
+  if (/斤/.test(s) && !/kg|公斤|千克|克|\d\s*g\b|\d+g\b|g\//.test(lower)) return '斤';
+  if (/kg|公斤|千克|g|克/.test(lower)) return 'g';
+  if (/瓶|罐|桶|升/.test(packUnit || '')) {
+    if (/kg|公斤|千克|斤|克/.test(lower)) return 'g';
+    return 'ml';
+  }
   return '';
 }
 
+function _parsedWeightSpec(goods) {
+  var g = _getGoodsEntity(goods);
+  var w = g.gbDgGoodsStandardWeight;
+  if (!w || w === 'null' || !String(w).trim()) return null;
+  return _parseWeightUnit(w);
+}
+
+function _rawPackSpecAmount(goods) {
+  var parsed = _parsedWeightSpec(goods);
+  return parsed ? parsed.amount : 0;
+}
+
+/** 大包装重量：50斤/袋、100斤/袋等，不宜默认拆成 g */
+function _isBulkWeightPack(goods, packUnit) {
+  var parsed = _parsedWeightSpec(goods);
+  if (!parsed) return false;
+  var pu = (packUnit || '').trim();
+  if (!/袋|箱|包|桶|筐|框|捆/.test(pu)) return false;
+  if (parsed.unit === 'jin') return parsed.amount >= BULK_WEIGHT_JIN_THRESHOLD;
+  if (parsed.unit === 'kg') return parsed.amount >= 5;
+  if (parsed.unit === 'g') return parsed.amount >= BULK_WEIGHT_G_THRESHOLD;
+  return false;
+}
+
+function _packQtyInMinUnit(goods, minUnit) {
+  var g = _getGoodsEntity(goods);
+  var packUnit = (g.gbDgGoodsStandardname || '').trim();
+  var mu = (minUnit || '').trim();
+  if (_isCountMinUnit(mu)) {
+    var raw = _rawPackSpecAmount(g);
+    if (raw > 0 && raw <= 500) return raw;
+    return 0;
+  }
+  var parsed = _parsedWeightSpec(g);
+  if (parsed) {
+    var fromWeight = _weightToMinUnitQty(parsed, mu);
+    if (fromWeight > 0) return fromWeight;
+  }
+  var rawAmt = parsed ? parsed.amount : 0;
+  var conventional = _conventionalPackRatio(packUnit, mu, rawAmt);
+  if (conventional > 0) return conventional;
+  if (rawAmt > 0) return rawAmt;
+  if (packUnit === '斤') return mu === '斤' ? 1 : 500;
+  if (packUnit === '公斤' || packUnit === 'kg' || packUnit === 'KG') {
+    return mu === '斤' ? 2 : 1000;
+  }
+  if (packUnit && mu === packUnit) return 1;
+  return 0;
+}
+
+/** @deprecated 请用 _rawPackSpecAmount / _packQtyInMinUnit */
 function _parsePackQty(goods) {
-  if (!goods) return 0;
-  var w = goods.gbDgGoodsStandardWeight;
-  if (!w || w === 'null' || !String(w).trim()) return 0;
-  var parsed = _parseWeightUnit(w);
-  if (!parsed) return 0;
-  var packUnit = (goods.gbDgGoodsStandardname || '').trim();
-  var minFromWeight = _minUnitFromWeightStr(w, packUnit);
-  var minUnit = minFromWeight || _suggestMinUnit(packUnit, parsed.amount, goods);
-  return _weightToMinUnitQty(parsed, minUnit);
+  var g = _getGoodsEntity(goods);
+  var packUnit = (g.gbDgGoodsStandardname || '').trim();
+  var minUnit = _suggestMinUnit(packUnit, _rawPackSpecAmount(g), g);
+  return _packQtyInMinUnit(g, minUnit);
+}
+
+function _minUnitOptionsForGoods(goods, suggestedMin) {
+  var g = _getGoodsEntity(goods);
+  var packUnit = (g.gbDgGoodsStandardname || '').trim();
+  return stockUnit.buildUnitPickerOptions(packUnit, suggestedMin, true, g);
 }
 
 function _isCountMinUnit(unit) {
@@ -99,12 +166,35 @@ function _isDozenPackUnit(packUnit) {
 
 function _suggestMinUnit(packUnit, parsedQty, goods) {
   var u = (packUnit || '').trim();
-  if (/瓶|罐|桶|升/i.test(u)) return 'ml';
+  // 瓶/桶/罐 等容器：优先检查标准规格是重量还是体积
+  if (/瓶|罐|桶|升/i.test(u)) {
+    var g = goods || {};
+    var w = String(g.gbDgGoodsStandardWeight || '').trim().toLowerCase();
+    // 标准规格含重量单位 → 按重量换算用 g
+    if (/kg|公斤|千克|斤|克/.test(w)) return 'g';
+    // 否则按体积换算用 ml
+    return 'ml';
+  }
   if (_isDozenPackUnit(u)) return '个';
   if (_isCountPerPackGoods(goods, u, parsedQty)) return '个';
   if (u === '斤' || u === '公斤' || u === 'kg' || u === 'KG') return 'g';
-  if (/个|只|张|枚|盒|包|袋/.test(u) && (!parsedQty || parsedQty <= 1)) return '个';
-  if (u === '袋') return parsedQty > 0 ? 'g' : '袋';
+  if (/个|只|张|枚/.test(u) && (!parsedQty || parsedQty <= 1)) return '个';
+  if (/盒|包|袋|箱/.test(u)) {
+    var wStr = (goods && goods.gbDgGoodsStandardWeight) || '';
+    if (_isBulkWeightPack(goods, u)) {
+      return _minUnitFromWeightStr(wStr, u) || '斤';
+    }
+    if (parsedQty > 1) {
+      return _minUnitFromWeightStr(wStr, u) || 'g';
+    }
+    return '个';
+  }
+  if (u === '袋' || u === '箱') {
+    var wStr2 = (goods && goods.gbDgGoodsStandardWeight) || '';
+    return _rawPackSpecAmount(goods) > 0
+      ? (_minUnitFromWeightStr(wStr2, u) || 'g')
+      : u;
+  }
   return u || 'g';
 }
 
@@ -133,9 +223,14 @@ function _conventionalPackRatio(packUnit, minUnit, parsedQty) {
     if (u === '斤') return 500;
     if (u === '公斤' || u === 'kg' || u === 'KG') return 1000;
   }
+  if (mu === '斤') {
+    if (u === '斤') return 1;
+    if (u === '公斤' || u === 'kg' || u === 'KG') return 2;
+  }
   if (mu === 'ml') {
     if (u === '升' || u === 'L' || u === 'l') return 1000;
-    if (_isVolumePurchaseUnit(u) && pq > 0) return pq;
+    // 仅规格已是毫升时 pq 才表示 ml（如 500ml/瓶）；4.5L/桶 须走 _weightToMinUnitQty
+    if (_isVolumePurchaseUnit(u) && pq >= 50) return pq;
   }
   if (_isCountMinUnit(mu)) {
     if (_isDozenPackUnit(u)) return 12;
@@ -147,6 +242,10 @@ function _defaultPackQtyInMinUnit(packUnit, parsedQty, minUnit, goods) {
   if (_isCountMinUnit(minUnit)) {
     if (parsedQty > 0 && parsedQty <= 500) return parsedQty;
     return 0;
+  }
+  if (goods) {
+    var fromSpec = _packQtyInMinUnit(goods, minUnit);
+    if (fromSpec > 0) return fromSpec;
   }
   var conventional = _conventionalPackRatio(packUnit, minUnit, parsedQty);
   if (conventional > 0) return conventional;
@@ -161,12 +260,12 @@ function _defaultPackQtyInMinUnit(packUnit, parsedQty, minUnit, goods) {
 function _hasGoodsDefaultSpec(goods, minUnit) {
   var g = _getGoodsEntity(goods);
   var packUnit = (g.gbDgGoodsStandardname || '').trim();
-  var parsedQty = _parsePackQty(g);
+  var rawAmt = _rawPackSpecAmount(g);
   var mu = (minUnit || '').trim();
   if (!packUnit) return false;
   if (mu === packUnit) return true;
-  if (_conventionalPackRatio(packUnit, mu, parsedQty) > 0) return true;
-  if (parsedQty > 0) return true;
+  if (_conventionalPackRatio(packUnit, mu, rawAmt) > 0) return true;
+  if (_packQtyInMinUnit(g, mu) > 0) return true;
   return false;
 }
 
@@ -179,7 +278,7 @@ function _effectivePackQtyInMin(goods, minUnit, userInputStr) {
     : 0;
   if (userVal > 0) return userVal;
   if (_hasGoodsDefaultSpec(goods, minUnit)) {
-    var def = _defaultPackQtyInMinUnit(packUnit, _parsePackQty(g), minUnit, g);
+    var def = _defaultPackQtyInMinUnit(packUnit, _rawPackSpecAmount(g), minUnit, g);
     if (def > 0) return def;
   }
   if (packUnit && (minUnit || '').trim() === packUnit) return 1;
@@ -214,24 +313,35 @@ function _getGoodsEntity(rawOrGoods) {
     || rawOrGoods;
 }
 
+function _defaultPortionAmount(minUnit) {
+  if (_isCountMinUnit(minUnit)) return '1';
+  if ((minUnit || '').trim() === '斤') return '0.2';
+  return '5';
+}
+
 function _buildUnitContext(goods, opts) {
   var options = opts || {};
   var g = _getGoodsEntity(goods);
   var packUnit = g.gbDgGoodsStandardname || '';
-  var parsedQty = _parsePackQty(g);
-  var minUnit = options.minUnit || _suggestMinUnit(packUnit, parsedQty, g);
+  var rawAmt = _rawPackSpecAmount(g);
+  var stdWeight = (g.gbDgGoodsStandardWeight || '').trim();
+  var minUnit = options.minUnit || _suggestMinUnit(packUnit, rawAmt, g);
   var packQtyInMin = _effectivePackQtyInMin(g, minUnit, options.packQtyInMin);
   var packLabel = '';
-  if (parsedQty > 0) {
+  if (stdWeight && packUnit && stdWeight !== 'null') {
+    packLabel = stdWeight + '/' + packUnit;
+  } else if (rawAmt > 0) {
     if (minUnit === 'ml' || minUnit === 'g') {
-      packLabel = parsedQty + minUnit + '/' + packUnit;
+      packLabel = rawAmt + minUnit + '/' + packUnit;
     } else if (_isCountMinUnit(minUnit)) {
-      packLabel = parsedQty + minUnit + '/' + packUnit;
+      packLabel = rawAmt + minUnit + '/' + packUnit;
+    } else if (minUnit === '斤') {
+      packLabel = rawAmt + '斤/' + packUnit;
     } else {
-      packLabel = parsedQty + '/' + packUnit;
+      packLabel = rawAmt + '/' + packUnit;
     }
   } else if (packUnit) {
-    var convQty = _defaultPackQtyInMinUnit(packUnit, parsedQty, minUnit, g);
+    var convQty = _defaultPackQtyInMinUnit(packUnit, rawAmt, minUnit, g);
     if (convQty > 0 && (minUnit === 'g' || minUnit === 'ml' || _isCountMinUnit(minUnit))
       && (_isWeightPurchaseUnit(packUnit) || _isVolumePurchaseUnit(packUnit) || _isDozenPackUnit(packUnit))) {
       packLabel = convQty + minUnit + '/' + packUnit;
@@ -240,7 +350,7 @@ function _buildUnitContext(goods, opts) {
     }
   }
   var price = parseFloat(g.gbDgGoodsAveragePrice) || 0;
-  var convHint = _conventionalPackRatio(packUnit, minUnit, parsedQty);
+  var convHint = _conventionalPackRatio(packUnit, minUnit, rawAmt);
   var conversionPlaceholder = '如500';
   if (_isCountMinUnit(minUnit)) {
     conversionPlaceholder = _isDozenPackUnit(packUnit) ? '12' : '如8';
@@ -261,6 +371,7 @@ function _buildUnitContext(goods, opts) {
     conversionPlaceholder: conversionPlaceholder,
     conversionRequired: conversionRequired,
     hasGoodsDefaultSpec: _hasGoodsDefaultSpec(g, minUnit),
+    isBulkWeightPack: _isBulkWeightPack(g, packUnit),
   };
 }
 
@@ -282,6 +393,9 @@ function _formatMinUnitPortion(n, minUnit) {
   if (u === 'g' || u === 'ml') {
     var ri = Math.round(n);
     if (Math.abs(n - ri) < 0.008) return String(ri);
+    return parseFloat(n.toFixed(3)).toString();
+  }
+  if (u === '斤') {
     return parseFloat(n.toFixed(3)).toString();
   }
   if (_isCountMinUnit(u)) {
@@ -367,9 +481,7 @@ function _minUnitToPackAmount(portion, packQty) {
 function _convertMinUnitToPack(portion, minUnit, ctx, goods) {
   var g = _getGoodsEntity(goods);
   var packUnit = (ctx && ctx.packUnit) || g.gbDgGoodsStandardname || '';
-  var packQty = ctx ? ctx.packQtyInMin : _defaultPackQtyInMinUnit(
-    packUnit, _parsePackQty(g), minUnit, g
-  );
+  var packQty = ctx ? ctx.packQtyInMin : _packQtyInMinUnit(g, minUnit);
   var p = parseFloat(portion) || 0;
   if (!packUnit) {
     return { amount: String(portion), standardName: minUnit || '' };
@@ -412,30 +524,79 @@ function _inferPackQtyFromSavedPackAmount(amountPack, minUnit, portionHint) {
   return { portion: '1', packQtyInMin: String(pq0) };
 }
 
+/** 是否已存弹窗录入的每份用量（gbDfgPortionAmount / Unit / PackQtyInMin） */
+function _hasPersistedPortion(raw) {
+  if (!raw) return false;
+  var u = (raw.gbDfgPortionUnit || '').trim();
+  var a = parseFloat(raw.gbDfgPortionAmount);
+  return !!u && !isNaN(a) && a > 0;
+}
+
+function _displayFromPersistedPortion(raw) {
+  var u = (raw.gbDfgPortionUnit || '').trim();
+  var a = parseFloat(raw.gbDfgPortionAmount) || 0;
+  var pq = parseFloat(raw.gbDfgPackQtyInMin);
+  return {
+    portion: _formatMinUnitPortion(a, u),
+    minUnit: u,
+    packQtyInMin: !isNaN(pq) && pq > 0 ? String(pq) : '',
+  };
+}
+
+/** 保存时写入后端的每份用量展示字段 */
+function _buildPortionPersistPayload(portionMin, minUnit, ctx) {
+  var p = parseFloat(portionMin) || 0;
+  var mu = (minUnit || '').trim();
+  var packUnit = (ctx && ctx.packUnit) || '';
+  var pq = ctx ? (parseFloat(ctx.packQtyInMin) || 0) : 0;
+  var payload = {
+    gbDfgPortionAmount: _formatMinUnitPortion(p, mu),
+    gbDfgPortionUnit: mu,
+    gbDfgPackQtyInMin: '',
+  };
+  if (mu && packUnit && mu !== packUnit && pq > 0) {
+    payload.gbDfgPackQtyInMin = pq === Math.floor(pq)
+      ? String(Math.round(pq))
+      : _trimDecimal(pq, 4);
+  }
+  return payload;
+}
+
 /** 接口存的默认规格用量 → 弹窗展示用最小单位（如 0.125斤 → 1个，换算 8个/斤） */
 function _convertPackToMinUnitForDisplay(amount, savedUnit, goods, rawLine) {
+  if (rawLine && _hasPersistedPortion(rawLine)) {
+    return _displayFromPersistedPortion(rawLine);
+  }
   var g = _getGoodsEntity(goods);
   var packUnit = g.gbDgGoodsStandardname || '';
-  var parsedQty = _parsePackQty(g);
+  var rawAmt = _rawPackSpecAmount(g);
   var a = parseFloat(amount) || 0;
   var saved = (savedUnit || '').trim();
   var displayHint = rawLine && rawLine._displayAmount ? rawLine._displayAmount : null;
   var displayUnitHint = rawLine && rawLine._displayUnit ? rawLine._displayUnit : '';
 
   if (saved && saved !== packUnit && MIN_UNIT_OPTIONS.indexOf(saved) >= 0) {
-    var pqSaved = _defaultPackQtyInMinUnit(packUnit, parsedQty, saved, g);
+    var pqSaved = _packQtyInMinUnit(g, saved);
     return {
       portion: String(amount),
       minUnit: saved,
       packQtyInMin: pqSaved > 0 ? String(pqSaved) : '',
     };
   }
+  // 已按采购单位保存（如 1盒/份），列表直接展示，勿用规格重量当换算系数
+  if (packUnit && saved === packUnit) {
+    return {
+      portion: String(amount),
+      minUnit: packUnit,
+      packQtyInMin: '',
+    };
+  }
   if (packUnit && a > 0) {
-    var minU = _suggestMinUnit(packUnit, parsedQty, g);
+    var minU = _suggestMinUnit(packUnit, rawAmt, g);
     if (displayUnitHint && MIN_UNIT_OPTIONS.indexOf(displayUnitHint) >= 0) {
       minU = displayUnitHint;
     }
-    var pq = _defaultPackQtyInMinUnit(packUnit, parsedQty, minU, g);
+    var pq = _packQtyInMinUnit(g, minU);
     if (pq > 0) {
       var portion = _restoreMinPortionFromPackAmount(a, pq, minU);
       return { portion: portion, minUnit: minU, packQtyInMin: String(pq) };
@@ -459,10 +620,12 @@ function _convertPackToMinUnitForDisplay(amount, savedUnit, goods, rawLine) {
       };
     }
   }
+  var fallbackMin = saved || _suggestMinUnit(packUnit, rawAmt, g);
+  var fallbackPq = _packQtyInMinUnit(g, fallbackMin);
   return {
     portion: String(amount),
-    minUnit: saved || _suggestMinUnit(packUnit, parsedQty, g),
-    packQtyInMin: parsedQty > 0 ? String(parsedQty) : '',
+    minUnit: fallbackMin,
+    packQtyInMin: fallbackPq > 0 ? String(fallbackPq) : '',
   };
 }
 
@@ -484,6 +647,26 @@ function _calcRawLineCost(raw) {
   var amount = parseFloat(raw.gbDfgGoodsAmount) || 0;
   var price = _getRawLinePrice(raw, entity);
   if (amount <= 0 || price <= 0) return 0;
+
+  if (_hasPersistedPortion(raw)) {
+    var pUnit = (raw.gbDfgPortionUnit || '').trim();
+    var pAmt = parseFloat(raw.gbDfgPortionAmount) || 0;
+    var pqSaved = parseFloat(raw.gbDfgPackQtyInMin) || 0;
+    if (packUnit && savedUnit === packUnit && pUnit === packUnit) {
+      return amount * price;
+    }
+    if (pAmt > 0 && pqSaved > 0 && pUnit && packUnit && pUnit !== packUnit) {
+      var ctxSaved = _buildUnitContext(entity, {
+        minUnit: pUnit,
+        packQtyInMin: String(pqSaved),
+      });
+      ctxSaved.packPrice = price;
+      return _calcPortionCost(pAmt, pUnit, ctxSaved, entity);
+    }
+    if (packUnit && savedUnit === packUnit) {
+      return amount * price;
+    }
+  }
 
   // 保存单位 = 商品默认采购单位（如 0.003333大框 × 145元/大框）
   if (packUnit && savedUnit === packUnit) {
@@ -531,12 +714,7 @@ function _calcPortionCost(amount, useUnit, ctx, entity) {
   if (useUnit && packUnit && useUnit === packUnit) {
     return portion * price;
   }
-  var packQty = ctx ? ctx.packQtyInMin : _defaultPackQtyInMinUnit(
-    packUnit,
-    _parsePackQty(entity),
-    useUnit,
-    entity
-  );
+  var packQty = ctx ? ctx.packQtyInMin : _packQtyInMinUnit(entity, useUnit);
   if (useUnit && packUnit && useUnit !== packUnit) {
     if (packQty <= 0) return 0;
     if (price > 0) return (price / packQty) * portion;
@@ -578,6 +756,7 @@ Page({
     modalPackQtyInMin: '',
     modalConversionPlaceholder: '如8',
     modalConversionRequired: false,
+    modalBulkWeightPack: false,
     modalCanCalcCost: false,
     modalQuickTags: [],
   },
@@ -588,20 +767,14 @@ Page({
    */
   onLoad: function (options) {
     var wh = globalData.windowHeight * globalData.rpxR;
-    var padTop = Math.round(wh * 0.23);
-    var panelMax = Math.max(400, Math.round(wh - padTop - 40));
-    var inner = Math.round(wh - padTop - 56);
-    var scrollLong = Math.max(320, Math.round(inner * 0.68));
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: wh,
-      foodSearchModalPadTopRpx: padTop,
-      foodSearchModalPanelMaxRpx: panelMax,
-      foodSearchScrollRpx: scrollLong,
       statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: globalData.server,
-    })
+    });
+    this._syncFoodSearchModalLayout();
 
     var foodItem = wx.getStorageSync('Food');
     if (!foodItem) {
@@ -633,6 +806,24 @@ Page({
     this._tryDrawDonut();
   },
 
+  /** 已选配料时弹窗上移，避免表单变长后底部被挡 */
+  _syncFoodSearchModalLayout() {
+    var wh = this.data.windowHeight
+      || Math.round(globalData.windowHeight * globalData.rpxR);
+    if (!wh) return;
+    var picked = !!(this.data.modalGoods && !this.data.isSearching);
+    var ratio = picked ? MODAL_PAD_TOP_RATIO_PICKED : MODAL_PAD_TOP_RATIO_SEARCH;
+    var padTop = Math.round(wh * ratio);
+    var panelMax = Math.max(400, Math.round(wh - padTop - 40));
+    var inner = Math.round(wh - padTop - 56);
+    var scrollLong = Math.max(320, Math.round(inner * 0.68));
+    this.setData({
+      foodSearchModalPadTopRpx: padTop,
+      foodSearchModalPanelMaxRpx: panelMax,
+      foodSearchScrollRpx: scrollLong,
+    });
+  },
+
   _fetchFoodGoods(foodId, options) {
     var that = this;
     var opts = options || {};
@@ -645,7 +836,6 @@ Page({
         load.hideLoading();
       }
       if (res.result.code == 0) {
-        console.log("rres", res.result.data)
         var list = res.result.data;
         that._processRawArr(Array.isArray(list) ? list : []);
       } else if (opts.toastOnError) {
@@ -687,7 +877,6 @@ Page({
     }
     load.showLoading('刷新配料');
     getFoodGoodsList(foodId).then(function (res) {
-      console.log("rres", res.result.data)
 
       load.hideLoading();
       if (res.result.code == 0) {
@@ -894,6 +1083,7 @@ Page({
   },
 
   toAddGoods(e) {
+    var that = this;
     this._resetModalForm();
     this.setData({
       modalType: 'add',
@@ -905,6 +1095,8 @@ Page({
       standardName: "",
       searchKeyword: '',
       editGoods: null,
+    }, function () {
+      that._syncFoodSearchModalLayout();
     });
   },
 
@@ -927,11 +1119,12 @@ Page({
       modalConversionRequired: false,
       modalCanCalcCost: false,
       modalQuickTags: [],
-    });
+    }, () => this._syncFoodSearchModalLayout());
   },
 
-  _minUnitIndex(unit) {
-    var idx = MIN_UNIT_OPTIONS.indexOf(unit);
+  _minUnitIndex(unit, options) {
+    var opts = options || this.data.minUnitOptions || MIN_UNIT_OPTIONS;
+    var idx = opts.indexOf(unit);
     return idx >= 0 ? idx : 0;
   },
 
@@ -939,7 +1132,7 @@ Page({
     if (!goods || !goods.gbDgGoodsName) return;
     var minUnit = minUnitOverride || _suggestMinUnit(
       goods.gbDgGoodsStandardname,
-      _parsePackQty(goods),
+      _rawPackSpecAmount(goods),
       goods
     );
     var packQtyStr = packQtyInMinOverride != null && packQtyInMinOverride !== ''
@@ -954,10 +1147,11 @@ Page({
     } else if (!packQtyStr && ctx.packUnit === minUnit) {
       packQtyStr = '1';
     }
-    var idx = this._minUnitIndex(minUnit);
+    var minUnitOpts = _minUnitOptionsForGoods(goods, minUnit);
+    var idx = this._minUnitIndex(minUnit, minUnitOpts);
     var portion = portionAmount != null && portionAmount !== ''
       ? String(portionAmount)
-      : (_isCountMinUnit(minUnit) ? '1' : '5');
+      : _defaultPortionAmount(minUnit);
     var img = goods.gbDgNxFatherImg || goods.gbDgGoodsFile || goods.gbDgGoodsFileImg;
     var modalGoodsImg = img
       ? (String(img).indexOf('http') === 0 ? img : (this.data.url + img))
@@ -968,12 +1162,14 @@ Page({
       modalPortionAmount: portion,
       modalMinUnit: minUnit,
       modalMinUnitIndex: idx,
+      minUnitOptions: minUnitOpts,
       modalPackUnit: ctx.packUnit,
       modalPackLabel: ctx.packLabel,
       modalPackPriceLabel: ctx.packPriceLabel,
       modalPackQtyInMin: packQtyStr,
       modalConversionPlaceholder: ctx.conversionPlaceholder,
       modalConversionRequired: ctx.conversionRequired,
+      modalBulkWeightPack: ctx.isBulkWeightPack,
       goodsName: goods.gbDgGoodsName,
       disGoodsId: goods.gbDistributerGoodsId,
       standardName: minUnit,
@@ -983,6 +1179,7 @@ Page({
       strArr: [],
     }, () => {
       this._recalcModalSummary();
+      this._syncFoodSearchModalLayout();
     });
   },
 
@@ -1009,7 +1206,8 @@ Page({
     var demoCost = canCalcCost && cost > 0
       ? (cost * demoPortions).toFixed(2)
       : '—';
-    var quickTags = QUICK_DOSAGE_PRESETS.map(function (v) {
+    var quickPresets = minUnit === '斤' ? [0.1, 0.2, 0.5] : QUICK_DOSAGE_PRESETS;
+    var quickTags = quickPresets.map(function (v) {
       return {
         value: String(v),
         label: v + minUnit,
@@ -1030,6 +1228,7 @@ Page({
       modalQuickTags: quickTags,
       modalConversionPlaceholder: ctx.conversionPlaceholder,
       modalConversionRequired: ctx.conversionRequired,
+      modalBulkWeightPack: ctx.isBulkWeightPack,
       modalCanCalcCost: canCalcCost,
       modalPackEquivText: packEquivText,
     });
@@ -1042,10 +1241,13 @@ Page({
   },
 
   clearSearchKeyword() {
+    var that = this;
     this.setData({
       searchKeyword: '',
       isSearching: false,
       strArr: [],
+    }, function () {
+      that._syncFoodSearchModalLayout();
     });
   },
 
@@ -1074,7 +1276,8 @@ Page({
 
   onMinUnitChange(e) {
     var idx = parseInt(e.detail.value, 10) || 0;
-    var unit = MIN_UNIT_OPTIONS[idx] || MIN_UNIT_OPTIONS[0];
+    var opts = this.data.minUnitOptions || MIN_UNIT_OPTIONS;
+    var unit = opts[idx] || opts[0];
     var goods = this.data.modalGoods;
     var packQtyInMin = '';
     if (goods) {
@@ -1149,14 +1352,19 @@ Page({
 
   onSearchKeywordInput(e) {
     var string = e.detail.value || '';
+    var that = this;
     this.setData({
       searchKeyword: string,
       isSearching: string.length > 0,
+    }, function () {
+      that._syncFoodSearchModalLayout();
     });
     if (string.replace(/\s*/g, '').length > 0) {
       this._searchGoods(string);
     } else {
-      this.setData({ strArr: [], isSearching: false });
+      this.setData({ strArr: [], isSearching: false }, function () {
+        that._syncFoodSearchModalLayout();
+      });
     }
   },
 
@@ -1167,7 +1375,10 @@ Page({
       wx.showToast({ title: '请输入搜索关键词', icon: 'none' });
       return;
     }
-    this.setData({ searchKeyword: string, isSearching: true });
+    var that = this;
+    this.setData({ searchKeyword: string, isSearching: true }, function () {
+      that._syncFoodSearchModalLayout();
+    });
     this._searchGoods(string);
   },
 
@@ -1201,6 +1412,8 @@ Page({
           that.setData({
             strArr: res.result.data && res.result.data.length > 0 ? res.result.data : [],
             isSearching: true,
+          }, function () {
+            that._syncFoodSearchModalLayout();
           });
         } else {
           wx.showToast({ title: res.result.msg || '查询失败', icon: 'none' });
@@ -1288,6 +1501,7 @@ Page({
       wx.showToast({ title: '换算后用量过小', icon: 'none' });
       return;
     }
+    var portionPersist = _buildPortionPersistPayload(portionMin, minUnit, ctx);
 
     if (this.data.modalType == 'edit') {
       var baseEdit = this.data.editGoods || {};
@@ -1296,6 +1510,9 @@ Page({
         gbDfgGoodsAmount: packSave.amount,
         gbDfgGoodsStandardname: packSave.standardName,
         gbDfgDisGoodsId: this.data.disGoodsId || baseEdit.gbDfgDisGoodsId,
+        gbDfgPortionAmount: portionPersist.gbDfgPortionAmount,
+        gbDfgPortionUnit: portionPersist.gbDfgPortionUnit,
+        gbDfgPackQtyInMin: portionPersist.gbDfgPackQtyInMin,
       });
       load.showLoading("修改原料");
       updateGbFoodGoods(editGoods)
@@ -1324,6 +1541,9 @@ Page({
       gbDfgDisGoodsId: this.data.disGoodsId,
       gbDfgGoodsAmount: packSave.amount,
       gbDfgGoodsStandardname: packSave.standardName,
+      gbDfgPortionAmount: portionPersist.gbDfgPortionAmount,
+      gbDfgPortionUnit: portionPersist.gbDfgPortionUnit,
+      gbDfgPackQtyInMin: portionPersist.gbDfgPackQtyInMin,
     };
     load.showLoading("保存原料");
     saveGbFoodGoodsItem(item).then(res => {

@@ -240,20 +240,13 @@ Page({
   toDetail(e) {
     const type = e.currentTarget.dataset.type;
     console.log("hanzi",this.data.hanzi);
-    // if (type === '1') {
-      // 自采 - 跳转到采购详情页面
+    
       wx.navigateTo({
         url: '../purchaseDeatil/purchaseDeatil?startDate=' + this.data.startDate + '&stopDate=' + 
         this.data.stopDate + '&hanzi=' + this.data.hanzi + '&greatId=' + this.data.greatId + '&type='
         + type,
       })
-    // } else if (type === '5') {
-    //   // 订货 - 跳转到订货详情页面
-    //   wx.navigateTo({
-    //     url: '../purchaseDeatil/purchaseDeatil?startDate=' + this.data.startDate + '&stopDate=' + 
-    //     this.data.stopDate + '&type=1&hanzi=' + this.data.hanzi  + '&greatId=' + this.data.greatId,
-    //   })
-    // }
+    
   },
 
 

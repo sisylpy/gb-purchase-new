@@ -82,8 +82,9 @@ Page({
     console.log("opttionsst", options.stopDate);
     if(options.startDate !== null){
       this.setData({
-        startDate: options.stopDate,
+        startDate: options.startDate,
         stopDate: options.stopDate,
+        hanzi: options.hanzi,
 
       })
       console.log("opttionsst", options.stopDate);

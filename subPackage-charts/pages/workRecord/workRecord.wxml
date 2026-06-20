@@ -1,0 +1,210 @@
+
+<view class="wr-page">
+  <!-- 自定义导航栏 -->
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="我的工作记录" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!-- 分类筛选栏 -->
+  <scroll-view class="wr-category-bar " scroll-x="{{true}}" show-scrollbar="{{false}}" wx:if="{{categoryList.length > 0}}">
+    <view class="wr-category-list">
+      <view
+        class="wr-category-filter {{activeCategoryId === item.id ? 'wr-category-filter--active' : ''}}"
+        wx:for="{{categoryList}}"
+        wx:key="id"
+        catchtap="onFilterCategory"
+        data-id="{{item.id}}"
+        style="background: {{activeCategoryId === item.id ? (item.color || '#2e7d32') : item.bg || '#e8f5e9'}}; color: {{activeCategoryId === item.id ? '#ffffff' : (item.color || '#2e7d32')}};"
+      >
+        <text class="wr-category-filter-icon" wx:if="{{item.icon}}">{{item.icon}}</text>
+        <text class="wr-category-filter-name">{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 主内容区 -->
+  <scroll-view
+    scroll-y="{{true}}"
+    class="wr-scroll"
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="onLoadMore"
+    scroll-into-view="{{scrollIntoView}}"
+    scroll-with-animation="{{true}}"
+  >
+    <!-- 空状态 -->
+    <view class="wr-empty" wx:if="{{!loading && groupedRecords.length === 0}}">
+      <image class="wr-empty-img" src="/images/xiuxi.png" mode="aspectFit"></image>
+      <text class="wr-empty-text">暂无工作记录</text>
+      <text class="wr-empty-sub">在底部输入框记录今天的工作事项</text>
+    </view>
+
+    <!-- 按日期分组渲染 -->
+    <block wx:if="{{groupedRecords.length > 0}}">
+      <view class="wr-date-group" wx:for="{{groupedRecords}}" wx:for-item="group" wx:key="dateKey">
+        <!-- 日期标签 -->
+        <view class="wr-date-badge">
+          <text class="wr-date-badge-text">{{group.dateLabel}}</text>
+        </view>
+
+        <!-- 记录卡片列表 -->
+        <view class="wr-card-list">
+          <block wx:for="{{group.records}}" wx:for-item="record" wx:key="id">
+            <!-- AI整理视图 -->
+            <block>
+              <view class="wr-card">
+                <!-- 列表抬头：displayTitle 优先，否则沿用分类标签 -->
+                <view class="wr-card-header">
+                  <text class="wr-card-title" wx:if="{{record.title}}">{{record.displayTitle || record.title}}</text>
+                  <view class="wr-category-tag" style="background: {{record.categoryBg || '#e8f5e9'}}; color: {{record.categoryColor || '#2e7d32'}};">
+                    <text class="wr-category-icon">{{record.categoryIcon || '•'}}</text>
+                    <text class="wr-category-name">{{record.categoryName || '未分类'}}</text>
+                  </view>
+                </view>
+
+                <!-- 整理内容（AI polish；业务卡记录的正文走下方来源卡片 + 店长原话） -->
+                <view class="wr-card-body" wx:if="{{record.polishedContent || (!record._isBusinessCard && record.rawContent)}}">
+                  <text class="wr-polished-text">{{record.polishedContent || record.rawContent}}</text>
+                </view>
+
+                <!-- 业务卡来源：自动加载 source-card，复用 AI 对话同款卡片样式 -->
+                <view class="wr-source-card-section" wx:if="{{record._isBusinessCard && record._sourceExpanded}}">
+                  <view class="wr-source-card-section-head">
+                    <text class="wr-source-card-section-label">来源卡片</text>
+                    <text class="wr-source-card-section-type" wx:if="{{record.sourceCardType}}">{{record.sourceCardType}}</text>
+                  </view>
+                  <view class="wr-source-inline-loading" wx:if="{{record._sourceLoading}}">
+                    <text>来源卡片加载中…</text>
+                  </view>
+                  <view class="wr-source-inline-error" wx:elif="{{record._sourceError}}">
+                    <text>{{record._sourceError}}</text>
+                  </view>
+                  <view class="wr-source-card-preview" wx:elif="{{record._sourceCardType}}">
+                    <business-card-renderer
+                      card-type="{{record._sourceCardType}}"
+                      card-data="{{record._sourceCardData}}"
+                      title="{{record._sourceCardTitle}}"
+                      subtitle="{{record._sourceCardSubtitle}}"
+                      source-item-key="{{record.sourceItemKey}}"
+                      readonly="{{true}}"
+                      scene="workRecord"
+                    />
+                  </view>
+                </view>
+
+                <!-- 店长原话 / 手动记录原话 -->
+                <view class="wr-raw-toggle" catchtap="toggleRawExpand" data-id="{{record.id}}">
+                  <text class="wr-raw-toggle-text">{{record._rawExpanded ? (record._isBusinessCard ? '店长原话已展开' : '原话已展开') : (record._isBusinessCard ? '店长原话已收起' : '原话已收起')}}</text>
+                  <text class="wr-raw-toggle-arrow">{{record._rawExpanded ? '⌃' : '⌄'}}</text>
+                </view>
+
+                <!-- 展开后的原话 -->
+                <view class="wr-raw-content" wx:if="{{record._rawExpanded}}">
+                  <text class="wr-raw-text">{{record.rawContent}}</text>
+                </view>
+
+                <!-- 底部状态栏：时间 + 状态 -->
+                <view class="wr-card-footer">
+                  <view class="wr-status-row">
+                    <text class="wr-status-label {{record.status === 'SUCCESS' ? 'wr-status--success' : record.status === 'FAILED' ? 'wr-status--failed' : 'wr-status--pending'}}">
+                      {{record.statusText}}
+                    </text>
+                    <text class="wr-card-time">{{record.timeStr}}</text>
+                  </view>
+                  <!-- FAILED 时显示重新整理入口 -->
+                  <view class="wr-retry-btn" wx:if="{{record.status === 'FAILED'}}" catchtap="onRetryPolish" data-id="{{record.id}}">
+                    <text class="wr-retry-text">重新整理</text>
+                  </view>
+                </view>
+
+                <!-- 修改 / 删除 操作按钮 -->
+                <view class="wr-card-actions">
+                  <view class="wr-action-btn wr-action-btn--edit" catchtap="onEditRecord" data-id="{{record.id}}">
+                    <text class="wr-action-btn-text">修改</text>
+                  </view>
+                  <view class="wr-action-btn wr-action-btn--delete" catchtap="onDeleteRecord" data-id="{{record.id}}">
+                    <text class="wr-action-btn-text">删除</text>
+                  </view>
+                  <view class="wr-action-btn wr-action-btn--announce" catchtap="onPushToAnnouncement" data-id="{{record.id}}">
+                    <text class="wr-action-btn-text">公告</text>
+                  </view>
+                  <!-- 业务卡来源：收起/展开来源卡片 -->
+                  <view class="wr-source-btn" wx:if="{{record._isBusinessCard}}" catchtap="onViewSource" data-id="{{record.id}}">
+                    <text class="wr-source-text">{{record._sourceExpanded ? '收起来源卡片' : '展开来源卡片'}}</text>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </block>
+        </view>
+      </view>
+    </block>
+
+    <!-- 加载更多 -->
+    <view class="wr-loadmore" wx:if="{{loadingMore}}">
+      <text class="wr-loadmore-text">加载中…</text>
+    </view>
+    <view class="wr-loadmore" wx:if="{{noMore && groupedRecords.length > 0}}">
+      <text class="wr-loadmore-text">没有更多记录了</text>
+    </view>
+
+    <!-- 底部安全间距 -->
+    <view class="wr-scroll-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部输入栏 -->
+  <view class="wr-composer" style="padding-bottom: calc(16rpx + env(safe-area-inset-bottom));">
+    <view class="wr-composer-inner">
+      <textarea
+        class="wr-input"
+        placeholder="记录今天发现的问题、想法或需要跟进的事项…"
+        placeholder-class="wr-input-placeholder"
+        value="{{inputValue}}"
+        maxlength="500"
+        auto-height="{{true}}"
+        fixed="{{true}}"
+        show-confirm-bar="{{false}}"
+        cursor-spacing="16"
+        adjust-position="{{true}}"
+        bindinput="onInputChange"
+        bindconfirm="onSubmit"
+        confirm-type="send"
+        disabled="{{submitting}}"
+      />
+      <view class="wr-submit-btn {{canSubmit && !submitting ? 'wr-submit-btn--active' : ''}}" catchtap="onSubmit">
+        <text class="wr-submit-text">记录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 修改弹窗 -->
+  <view class="wr-edit-popup-mask {{showEditPopup ? 'wr-edit-popup-mask--show' : ''}}" catchtap="onCancelEdit"></view>
+  <view class="wr-edit-popup {{showEditPopup ? 'wr-edit-popup--show' : ''}}">
+    <view class="wr-edit-popup-header">
+      <text class="wr-edit-popup-title">修改工作记录</text>
+      <view class="wr-edit-popup-close" catchtap="onCancelEdit">
+        <text class="wr-edit-popup-close-icon">✕</text>
+      </view>
+    </view>
+    <view class="wr-edit-popup-body">
+      <textarea
+        class="wr-edit-popup-textarea"
+        value="{{editingContent}}"
+        maxlength="2000"
+        auto-height="{{true}}"
+        focus="{{showEditPopup}}"
+        bindinput="onEditInputChange"
+        show-confirm-bar="{{false}}"
+      >
+      </textarea>
+    </view>
+    <view class="wr-edit-popup-footer">
+      <view class="wr-edit-popup-cancel" catchtap="onCancelEdit">
+        <text>取消</text>
+      </view>
+      <view class="wr-edit-popup-save" catchtap="onSaveEdit">
+        <text>保存</text>
+      </view>
+    </view>
+  </view>
+
+</view>

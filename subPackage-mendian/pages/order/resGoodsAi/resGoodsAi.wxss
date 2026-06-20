@@ -430,6 +430,76 @@ show-btn {
 
 }
 
+.dep-goods-title-row {
+  flex: 1;
+  align-items: center;
+  gap: 8rpx;
+  padding-right: 12rpx;
+}
+
+.dep-goods-brand {
+  padding: 2rpx 10rpx;
+  font-size: 22rpx;
+  color: #187e6e;
+  background: rgba(24, 126, 110, 0.1);
+  border: 1rpx solid rgba(24, 126, 110, 0.25);
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+
+.dep-goods-meta {
+  margin-top: 8rpx;
+}
+
+.dep-goods-meta__row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  line-height: 1.4;
+}
+
+.dep-goods-meta__label {
+  width: 72rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.dep-goods-meta__value {
+  flex: 1;
+  color: #333;
+  word-break: break-all;
+}
+
+.dep-goods-fresh-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  flex: 1;
+}
+
+.dep-goods-fresh-tag {
+  padding: 2rpx 10rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  border-radius: 6rpx;
+  line-height: 1.4;
+}
+
+.dep-goods-fresh-tag--warn {
+  color: #e65100;
+  background: rgba(255, 152, 0, 0.16);
+  border: 1rpx solid rgba(255, 152, 0, 0.45);
+}
+
+.dep-goods-fresh-tag--waste {
+  color: #c62828;
+  background: rgba(244, 67, 54, 0.14);
+  border: 1rpx solid rgba(244, 67, 54, 0.4);
+}
+
 .goods-item-dep-wrap{
   background-color: #fff;
   border-radius: 40rpx;
@@ -857,7 +927,8 @@ show-btn {
 }
 
 .stock-batch-card__status--danger {
-  color: #c0392b;
+  color: #b71c1c;
+  font-weight: 600;
 }
 
 .stock-batch-card__action {

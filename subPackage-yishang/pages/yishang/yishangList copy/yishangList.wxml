@@ -1,0 +1,54 @@
+
+<view class="flex flex-column">
+  
+  
+<back-navbar title="配送商户" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+      <view class="flex-column" style="margin-top: {{navBarHeight}}rpx;">
+         <!-- emptyView -->
+      <view class="{{typeArr.length == 0 ? 'show' : 'hide'}}" style="height: {{windowHeight - 460}}rpx; text-align:center;">
+        <view class="font-lg flex-column">
+          <view class="center-content">
+            <image class="empty_image" src="../../../../images/xiuxi.png"></image>
+            <view class="flex-row big">
+              <text class="">暂时没有进货</text>
+            </view>
+            <text class="small gray pb-20 pt-20">可参考客户订单 手动添加进货数量</text>
+          </view>
+        </view>
+      </view>
+      <!-- ./emptyView -->
+
+
+        <view class="bg-light">
+          <view class="flex-column border-bottom bg-white mb-20" wx:for="{{typeArr}}" wx:for-item="cata" style="width: {{windowWidth}}rpx;" >
+            <view class="flex-column p-20">
+              <view class="pb-20 pt-20 font-sl">{{cata.sysCmMarketName}}</view>
+              <view class="flex-row-default pb-20 pt-20 border-bottom " wx:for="{{cata.nxDistributerEntities}}" wx:for-item="dis">
+                <image class="companyUrl" src="{{url + dis.nxDistributerImg}}"></image>
+
+                <view class="flex-row-between" style="width: {{windowWidth - 140}}rpx;  ">
+                  <view class="flex-column" style="width: {{windowWidth - 280}}rpx; ">
+                    <text class="font-lg ">{{dis.nxDistributerName}}</text>
+                    <view class="flex-row-default small">
+                      <text class="gray small">{{dis.nxDistributerAddress}}</text>
+                    </view>
+                 
+                  </view>
+
+                  <view class="text-success p-10 radius-20 center-content " bindtap="addBusiness" data-item="{{dis}}" data-id="{{dis.nxDistributerId}}" data-name="{{dis.nxDistributerName}}" wx:if="{{dis.nxDistributerGbDistributerEntity.nxDgdStatus == 0}}" style="width: 120rpx;">
+                  <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
+                  </view>
+                  <view class="center-content  bg-warning radius-10  font-md p-10" bindtap="addBusiness" data-item="{{dis}}" data-id="{{dis.nxDistributerId}}" data-name="{{dis.nxDistributerName}}" wx:elif="{{dis.nxDistributerGbDistributerEntity.nxDgdStatus == -1}}" style="width: 100rpx;">申请中</view>
+                  <view class=" center-content mainButton red" bindtap="addBusiness" data-item="{{dis}}" data-id="{{dis.nxDistributerId}}" data-name="{{dis.nxDistributerName}}" wx:elif="{{dis.nxDistributerGbDistributerEntity.nxDgdStatus == -2}}" style="width: 100rpx;">请来电</view>
+                  <view class="font-sm center-content  bg-success p-10 radius-20" bindtap="addBusiness" data-id="{{dis.nxDistributerId}}" wx:else style="width: 100rpx;">添加</view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+     
+
+
+</view>

@@ -3,21 +3,12 @@
 <view class="flex flex-column">
 
   <navbar-dual
-    wx:if="{{isGroupPurchaseMode}}"
-    title="{{(mendianInfo && mendianInfo.name) || disInfo.gbDistributerName}}"
-    live-pulse="{{true}}"
-    secondary-text="门店"
-    primary-text="设置"
-    bindsecondarynavtap="onOpenGroupStoreSheet"
-    bindnavbuttontap="toEditUser"
-  />
-  <navbar
-    wx:else
-    title="{{(mendianInfo && mendianInfo.name) || disInfo.gbDistributerName}}"
+   
+    title="{{mendianInfo.gbDepartmentName}}"
     live-pulse="{{true}}"
     button-text="设置"
-    bindnavbuttontap="toEditUser"
-  ></navbar>
+    bindnavbuttontap="onNavTap"
+  ></navbar-dual>
 
   <view class="flex-column" style="margin-top: {{navBarHeight}}rpx;">
     <view class="flex-row-between p-20">
@@ -33,14 +24,31 @@
           <text class="font-sl">管理</text>
         </view>
       
-        <view class="flex-column center-content p-20 mr-10" bindtap="toResGoods" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
+        <!-- <view class="flex-column center-content p-20 mr-10" bindtap="toResGoods" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
           <image src="../../images/book.png" class="icon"></image>
           <text class="font-sl">商品</text>
+        </view> -->
+
+        <view class="flex-column center-content p-20 mr-10" bindtap="toWork" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
+          <image src="../../images/book.png" class="icon"></image>
+          <text class="font-sl">笔记</text>
         </view>
-        <view class="flex-column center-content p-20 mr-10" bindtap="toStock" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
+
+        <view class="flex-column center-content p-20 mr-10" bindtap="toStoreAnnounce" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
+          <image src="../../images/pingjunjia.png" class="icon"></image>
+          <text class="font-sl">公告</text>
+        </view>
+       
+        <!-- <view class="flex-column center-content p-20 mr-10" bindtap="toStock" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
           <image src="../../images/goods.png" class="icon"></image>
           <text class="font-sl">库存</text>
-        </view>
+        </view> -->
+
+        <!-- <view class="flex-column center-content p-20 mr-10" bindtap="toStaffMeal" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
+          <image src="../../images/dish.png" class="icon"></image>
+          <text class="font-sl">菜品</text>
+        </view> -->
+
         <view class="flex-column center-content p-20 mr-10" bindtap="toAiOrders" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
           <image src="../../images/edit-2.png" class="icon"></image>
           <text class="font-sl">下单</text>
@@ -72,7 +80,7 @@
           <block wx:if="{{purArr.length > 0}}">
             <view class="flex-column bg-white" wx:for="{{purArr}}" wx:for-item="item" wx:for-index="index">
 
-              <block wx:if="{{mendianInfo && mendianInfo.gbDepartmentSubAmount == 1}}">
+              <block wx:if="{{disInfo.mendianDepartmentList.length == 1 && mendianInfo && mendianInfo.gbDepartmentSubAmount == 1}}">
                 <view class="flex-column font-lg">
                   <view class="flex-row-between p-20 border-bottom">
                     <view class="flex-row-default" style="width: {{windowWidth - 140}}rpx;">
@@ -206,20 +214,31 @@
               <view class="flex-stretch">
                 <view class="vline"></view>
                 <view class="body bg-white" style="width:{{windowWidth - 60}}rpx; margin-left: 10rpx; ">
-                  <view class="flex-row p-10 font-sl border-bottom" style="width: {{windowWidth - 100}}rpx;">
+                  <view class="flex-row p-10 font-sl border-bottom" style="width: {{windowWidth - 80}}rpx; background-color: beige;">
                     <view class="flex-column center-content third-row">
                       <image src="{{url + batch.nxJrdhPurEntity.gbDuWxAvartraUrl}}" class="face_img"></image>
                       <view><text>{{batch.nxJrdhPurEntity.gbDuWxNickName}}</text></view>
                     </view>
-                    <view class="flex-column center-content third-row">
-                      <view class="flex-row text-danger"><text>{{batch.gbDpbPurchaseType == 9 ? '退货' : ''}}</text></view>
+                    <view class="flex-column center-content third-row" style="background-color: aqua;">
+                      <view class="flex-row text-danger" wx:if="{{batch.gbDpbPurchaseType == 9}}"><text>{{batch.gbDpbPurchaseType == 9 ? '退货' : ''}}</text></view>
+                      <view wx:else="">
+                      <image src="/images/-report_forms.png" mode="aspectFill" class="icon" />
+                      </view>
                     </view>
-                    <view class="flex-column center-content third-row">
+                    
+                    <view class="flex-row-between third-row" style="background-color: #ffbc65;">
+                      <view class="flex-column center-content ">
                       <block wx:if="{{batch.nxJrdhSellerEntity !== null}}"><image src="{{url + batch.nxJrdhSellerEntity.nxJrdhWxAvartraUrl}}" class="face_img"></image></block>
                       <block wx:else><image src="../../images/user.png" class="face_img"></image></block>
-                      <view class="font-sl" wx:if="{{batch.nxJrdhSellerEntity !== null}}">{{batch.nxJrdhSellerEntity.nxJrdhWxNickName}}</view>
+                      <view class="font-sl flex-row" wx:if="{{batch.nxJrdhSellerEntity !== null}}">{{batch.nxJrdhSellerEntity.nxJrdhWxNickName}}</view>
                       <view class="font-sl text-danger" wx:else>卖家未读</view>
                     </view>
+
+                    <view class="button-container-white" hover-class="hover" bindtap="onBatchMenuTap" data-batch="{{batch}}" data-bindex="{{bIndex}}">
+                      <image src="/images/points.png" mode="aspectFill" class="icon" />
+                    </view>
+                    </view>
+                   
                   </view>
                   <view class="flex-column form_body">
                     <view class="flex-row-default p-20 {{batch.gbDPGEntities.length - 1 == index ? '' : 'border-bottom'}} {{item.gbDpgOrdersFinishAmount == item.gbDpgOrdersAmount ? 'bg-light' : ''}}" wx:for="{{batch.gbDPGEntities}}" wx:key="gbDistributerPurchaseGoodsId" wx:for-index="gIndex">
@@ -397,44 +416,38 @@
   </view>
 </view>
 
-<!-- 集团用户：导航「门店」打开底部弹层，可切换门店或返回经营看板 -->
-<view
-  wx:if="{{isGroupPurchaseMode}}"
-  class="overlay group-store-overlay {{showGroupStoreSheet ? 'show' : 'hide'}}"
-  catchtap="onCloseGroupStoreSheet"
-  catchtouchmove="noopForSheet"
-></view>
-<view wx:if="{{isGroupPurchaseMode}}" class="group-store-sheet-wrap {{showGroupStoreSheet ? 'is-open' : ''}}">
-  <view class="group-store-sheet-card" catchtap="noopForSheet">
-    <view class="group-store-sheet-handle"></view>
-    <view
-      class="group-store-sheet-strip"
-      hover-class="group-store-sheet-strip-hover"
-      bindtap="toGroupAiChatBoard"
-    >
-      <text class="group-store-sheet-strip-text">返回集团经营看板（切换门店）</text>
-      <text class="group-store-sheet-strip-arrow">›</text>
+<!-- 设置部门弹出层 -->
+<view wx:if="{{showPage}}" class="popup-mask" bindtap="hidePopup"></view>
+
+<view wx:if="{{showPage}}" class="popup-container font-lg" animation="{{popupAnimation}}">
+  <view class="popup-header">
+    <text class="popup-title">设置门店的部门</text>
+    <image src="/images/close-icon.png" class="close-icon" bindtap="hidePopup" />
+  </view>
+
+  <view class="popup-content">
+    <!-- 门店名称 -->
+    <view class="flex-row p-10">
+      <text class="form-label">门店名称:</text>
+      <input class="flex-input" placeholder="请输入门店名称" bindblur="bindKeyInput" value="{{disInfo.gbDistributerName}}" />
     </view>
-    <view class="group-store-sheet-heading">
-      <text class="group-store-sheet-heading-mark"></text>
-      <text class="group-store-sheet-heading-text">选择门店</text>
+
+    <!-- 部门数量 -->
+    <view class="flex-row p-20" wx:if="{{hasSubs == 2}}">
+      <text class="form-label">部门数量:</text>
+      <input style="width: 300rpx; border-bottom: 1px solid gray;" type="number" value="{{selNumber}}" placeholder="请输入数量" bindinput="handleDepartmentNumber" />
     </view>
-    <view wx:if="{{groupStoreListLoading}}" class="group-store-sheet-loading">加载中…</view>
-    <scroll-view wx:else scroll-y class="group-store-sheet-scroll">
-      <view
-        wx:for="{{groupStoreList}}"
-        wx:key="gbDepartmentId"
-        class="group-store-sheet-row {{depId == item.gbDepartmentId ? 'is-current' : ''}}"
-        hover-class="group-store-sheet-row-hover"
-        bindtap="onSelectGroupStoreItem"
-        data-deptid="{{item.gbDepartmentId}}"
-      >
-        <text class="group-store-sheet-name">{{item.gbDepartmentName || item.gbDepartmentPrintName || '门店'}}</text>
-        <view wx:if="{{depId == item.gbDepartmentId}}" class="group-store-sheet-check">当前</view>
+
+    <!-- 部门名称列表 -->
+    <view class="department-list">
+      <view wx:for="{{gbDepartmentEntities}}" wx:for-item="item" wx:for-index="index" wx:key="index" class="flex-row p-20">
+        <text class="form-label">部门{{index + 1}}:</text>
+        <input class="form-input" placeholder="请输入部门名称" value="{{item.gbDepartmentName}}" bindinput="getDepartmentName" data-index="{{index}}" />
       </view>
-    </scroll-view>
-    <view class="group-store-sheet-footer">
-      <view class="group-store-sheet-close" hover-class="group-store-sheet-close-hover" bindtap="onCloseGroupStoreSheet">关闭</view>
     </view>
+  </view>
+
+  <view class="popup-footer">
+    <button class="save-btn" bindtap="toSave">确定设置</button>
   </view>
 </view>

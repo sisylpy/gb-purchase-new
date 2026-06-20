@@ -1,0 +1,142 @@
+<view class="bcr-wrap bcr-wrap--scene-{{scene || 'chat'}}">
+  <block wx:if="{{_canRender && _resolvedCardData}}">
+    <menu-portfolio-quadrant-card
+      wx:if="{{cardType === 'MENU_PORTFOLIO_QUADRANT_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <dish-cost-analysis-card
+      wx:elif="{{cardType === 'DISH_COST_ANALYSIS_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <dish-sales-single-dish-card
+      wx:elif="{{cardType === 'DISH_SALES_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <menu-high-sales-low-margin-card
+      wx:elif="{{cardType === 'MENU_HIGH_SALES_LOW_MARGIN_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <menu-action-recommendation-card
+      wx:elif="{{cardType === 'MENU_ACTION_RECOMMENDATION_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <dish-profit-prescription-card
+      wx:elif="{{cardType === 'DISH_PROFIT_PRESCRIPTION_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <revenue-report-card
+      wx:elif="{{cardType === 'REVENUE_REPORT_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <purchase-check-card
+      wx:elif="{{cardType === 'PURCHASE_CHECK_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <purchase-anomaly-card
+      wx:elif="{{cardType === 'PURCHASE_ANOMALY_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <stock-reconcile-card
+      wx:elif="{{cardType === 'STOCK_RECONCILE_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <reorder-reminder-card
+      wx:elif="{{cardType === 'REORDER_REMINDER_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <purchase-goods-detail-card
+      wx:elif="{{cardType === 'PURCHASE_GOODS_DETAIL_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <dish-sales-ranking-card
+      wx:elif="{{cardType === 'DISH_SALES_RANKING_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <dish-profit-cost-ranking-card
+      wx:elif="{{cardType === 'DISH_PROFIT_COST_RANKING_CARD' || cardType === 'DISH_PROFIT_RANKING_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <dish-ingredient-cover-days-card
+      wx:elif="{{cardType === 'DISH_INGREDIENT_COVER_DAYS_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <warehouse-inventory-risk-list-card
+      wx:elif="{{cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      card-type="{{cardType}}"
+      message-id="{{messageId}}"
+      run-id="{{runId}}"
+      readonly="{{readonly}}"
+      bind:recordWork="onBubbleRecordWork"
+    />
+    <warehouse-stock-ranking-card
+      wx:elif="{{cardType === 'WAREHOUSE_STOCK_RANKING_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <goods-supported-dish-cover-card
+      wx:elif="{{cardType === 'GOODS_SUPPORTED_DISH_COVER_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <warehouse-near-expiry-risk-card
+      wx:elif="{{cardType === 'WAREHOUSE_NEAR_EXPIRY_RISK_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <warehouse-inventory-supervision-card
+      wx:elif="{{cardType === 'WAREHOUSE_INVENTORY_SUPERVISION_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <warehouse-waste-risk-card
+      wx:elif="{{cardType === 'WAREHOUSE_WASTE_RISK_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <purchase-goods-business-analysis-card
+      wx:elif="{{cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <purchase-ranking-card
+      wx:elif="{{cardType === 'PURCHASE_GOODS_AMOUNT_RANKING_CARD' || cardType === 'PURCHASE_GOODS_COUNT_RANKING_CARD' || cardType === 'PURCHASE_GOODS_QUANTITY_RANKING_CARD' || cardType === 'PURCHASE_STORE_AMOUNT_RANKING_CARD' || cardType === 'PURCHASE_SUPPLIER_AMOUNT_RANKING_CARD'}}"
+      card-type="{{cardType}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+      message-id="{{messageId}}"
+      run-id="{{runId}}"
+      bind:recordWork="onBubbleRecordWork"
+    />
+    <purchase-goods-anchor-detail-card
+      wx:elif="{{cardType === 'PURCHASE_GOODS_ANCHOR_DETAIL_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <goods-stock-batch-detail-card
+      wx:elif="{{cardType === 'GOODS_STOCK_BATCH_DETAIL_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+  </block>
+
+  <view class="bcr-fallback" wx:elif="{{_showFallback}}">
+    <text class="bcr-fallback-title">{{_fallbackText}}</text>
+    <text class="bcr-fallback-sub" wx:if="{{_fallbackSub}}">{{_fallbackSub}}</text>
+  </view>
+</view>

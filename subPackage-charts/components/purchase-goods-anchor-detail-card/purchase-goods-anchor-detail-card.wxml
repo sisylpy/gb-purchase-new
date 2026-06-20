@@ -1,0 +1,71 @@
+<view class="biz-card biz-anchor-detail" wx:if="{{cardData}}">
+
+  <!-- 卡片标题 -->
+  <view class="biz-header">
+    <view class="biz-icon-wrap biz-icon-blue">
+      <text class="biz-icon">📦</text>
+    </view>
+    <view class="biz-header-right">
+      <text class="biz-title">{{_title}}</text>
+      <view class="biz-scope-bar" wx:if="{{_timeLabel || _scopeLabel}}">
+        <text class="biz-scope-name">{{_timeLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="biz-empty" wx:if="{{_isEmpty}}">
+    <text class="biz-empty-text">{{_emptyReason}}</text>
+  </view>
+
+  <!-- 有数据 -->
+  <block wx:else>
+    <!-- 顶部汇总 KPI -->
+    <view class="biz-kpi-row">
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">采购总量</text>
+        <view class="biz-kpi-value-row">
+          <text class="biz-kpi-value">{{_totalPurchaseQuantity}}</text>
+          <text class="biz-kpi-unit">{{_unit}}</text>
+        </view>
+      </view>
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">采购总金额</text>
+        <text class="biz-kpi-value biz-kpi-amount">¥{{_totalPurchaseAmount}}</text>
+      </view>
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">采购笔数</text>
+        <text class="biz-kpi-value biz-kpi-normal">{{_purchaseLineCount}} 笔</text>
+      </view>
+    </view>
+
+    <!-- 范围说明 -->
+    <view class="biz-scope-notice" wx:if="{{_scopeLabel}}">
+      <text class="biz-scope-notice-text">{{_scopeLabel}}</text>
+    </view>
+
+    <!-- 采购明细列表 -->
+    <view class="biz-lines-section">
+      <view class="biz-lines-section-title">采购明细</view>
+      <view class="biz-line-row" wx:for="{{_lines}}" wx:key="purchaseGoodsId" wx:for-item="line">
+        <!-- 头部：日期 + 来源标签 + 采购人 -->
+        <view class="biz-line-head">
+          <text class="biz-line-date">{{line.purchaseDate}}</text>
+          <text class="biz-line-source-tag" wx:if="{{line._sourceTag}}">{{line._sourceTag}}</text>
+          <text class="biz-line-purchaser" wx:if="{{line.purchaserName}}">采购人：{{line.purchaserName}}</text>
+        </view>
+
+        <!-- 内容：数量 × 单价 = 金额 -->
+        <view class="biz-line-body">
+          <view class="biz-line-meta">
+            <text class="biz-line-qty">{{line._qtyDisplay}}</text>
+            <text class="biz-line-multiply">×</text>
+            <text class="biz-line-price">¥{{line._priceDisplay}}</text>
+          </view>
+          <text class="biz-line-amount">¥{{line._amountDisplay}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+</view>

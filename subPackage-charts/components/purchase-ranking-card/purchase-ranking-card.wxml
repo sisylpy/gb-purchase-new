@@ -1,0 +1,56 @@
+<view class="prk-card" wx:if="{{visible}}">
+  <view class="prk-header">
+    <text class="prk-title">{{title}}</text>
+    <text class="prk-subtitle" wx:if="{{subtitle}}">{{subtitle}}</text>
+  </view>
+
+  <view class="prk-summary" wx:if="{{narrative}}">
+    <text class="prk-summary-text">{{narrative}}</text>
+  </view>
+
+  <view class="prk-empty" wx:if="{{emptyReason && rows.length === 0}}">
+    <text class="prk-empty-text">{{emptyReason}}</text>
+  </view>
+
+  <view class="prk-table" wx:if="{{rows.length > 0}}">
+    <view class="prk-thead">
+      <text class="prk-th prk-th--rank">排名</text>
+      <text class="prk-th prk-th--name">{{nameLabel}}</text>
+      <text class="prk-th prk-th--metric prk-th--highlight">{{metricLabel}}</text>
+      <text class="prk-th prk-th--action" wx:if="{{!readonly && supportsRowRecord}}"></text>
+    </view>
+
+    <view
+      class="prk-tr {{item.rank === 1 ? 'prk-tr--first' : ''}}"
+      wx:for="{{displayRows}}"
+      wx:key="rank"
+    >
+      <view class="prk-td prk-td--rank">
+        <view class="prk-medal {{item.rank === 1 ? 'prk-medal--gold' : item.rank === 2 ? 'prk-medal--silver' : item.rank === 3 ? 'prk-medal--bronze' : 'prk-medal--normal'}}">
+          <text class="prk-medal-num">{{item.rank}}</text>
+        </view>
+      </view>
+      <view class="prk-td prk-td--name">
+        <text class="prk-name">{{item.name}}</text>
+        <text class="prk-standard" wx:if="{{item.standardName}}">（{{item.standardName}}）</text>
+      </view>
+      <view class="prk-td prk-td--metric">
+        <text class="prk-metric-val">{{item.metricStr}}</text>
+      </view>
+      <view class="prk-td prk-td--action" wx:if="{{!readonly && supportsRowRecord}}">
+        <text class="prk-record-btn" catchtap="onRecordItem" data-rank="{{item.rank}}">📝</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="prk-footer" wx:if="{{rows.length > 0}}">
+    <view class="prk-footer-left">
+      <text class="prk-footer-icon">📊</text>
+      <text class="prk-footer-text">共 {{totalCount}} {{footerUnit}}参与排行</text>
+    </view>
+    <view class="prk-footer-right" wx:if="{{hasMore}}" catchtap="onToggleExpand">
+      <text class="prk-expand-text">{{showAll ? '收起' : '查看完整排行'}}</text>
+      <text class="prk-expand-arrow">{{showAll ? '∧' : '∨'}}</text>
+    </view>
+  </view>
+</view>

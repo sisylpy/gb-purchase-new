@@ -1,0 +1,127 @@
+<view class="wn-page">
+  <!-- 自定义导航栏 -->
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="我的工作笔记" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!-- 主内容区 -->
+  <scroll-view
+    scroll-y="{{true}}"
+    class="wn-scroll"
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="onScrollToLower"
+    lower-threshold="100"
+    style="padding-top: {{navBarHeight}}rpx;"
+  >
+    <!-- 加载中 -->
+    <view class="wn-loading" wx:if="{{loading}}">
+      <text class="wn-loading-text">加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="wn-empty" wx:elif="{{!loading && notes.length === 0}}">
+      <image class="wn-empty-img" src="/images/xiuxi.png" mode="aspectFit"></image>
+      <text class="wn-empty-text">暂无工作笔记</text>
+      <text class="wn-empty-sub">在 AI 对话中保存的笔记，可在此集中查看</text>
+    </view>
+
+    <!-- 笔记列表 -->
+    <block wx:elif="{{notes.length > 0}}">
+      <view
+        class="wn-card"
+        wx:for="{{notes}}"
+        wx:key="noteId"
+        bindtap="onViewNote"
+        data-note-id="{{item.noteId}}"
+        data-conversation-id="{{item.conversationId}}"
+        data-run-id="{{item.runId}}"
+      >
+        <!-- 卡片头部：类型标签 + 标题 -->
+        <view class="wn-card-header">
+          <view class="wn-type-tag" style="background: {{item.typeBg}}; color: {{item.typeColor}};">
+            <text class="wn-type-tag-text">{{item.typeLabel}}</text>
+          </view>
+          <text class="wn-card-title">{{item.title}}</text>
+        </view>
+
+        <!-- 预览内容 -->
+        <view class="wn-card-preview" wx:if="{{item.preview}}">
+          <text class="wn-card-preview-text">{{item.preview}}</text>
+        </view>
+
+        <!-- 展开后的完整内容 -->
+        <view class="wn-card-full" wx:if="{{item._expanded && item.content !== item.preview}}">
+          <text class="wn-card-full-text">{{item.content}}</text>
+        </view>
+
+        <!-- 底部：来源 + 时间 -->
+        <view class="wn-card-footer">
+          <text class="wn-card-source" wx:if="{{item.conversationId}}">
+            来源对话 #{{item.conversationId}}
+          </text>
+          <text class="wn-card-source" wx:else>手动记录</text>
+          <text class="wn-card-time">{{item._timeLabel}}</text>
+        </view>
+
+        <!-- 操作按钮行 -->
+        <view class="wn-card-actions">
+          <text class="wn-action-btn wn-action-btn--edit" catchtap="onEditNote" data-note-id="{{item.noteId}}">修改</text>
+          <text class="wn-action-btn wn-action-btn--push" catchtap="onPushToAnnouncement" data-note-id="{{item.noteId}}">推送到公告</text>
+          <text class="wn-action-btn wn-action-btn--delete" catchtap="onDeleteNote" data-note-id="{{item.noteId}}">删除</text>
+        </view>
+      </view>
+
+      <!-- 加载更多 -->
+      <view class="wn-loadmore" wx:if="{{loadingMore}}">
+        <text class="wn-loadmore-text">加载中...</text>
+      </view>
+
+      <!-- 没有更多 -->
+      <view class="wn-loadmore" wx:elif="{{!hasMore && total > 0}}">
+        <text class="wn-loadmore-text">— 共 {{total}} 条 —</text>
+      </view>
+
+      <!-- 底部留白 -->
+      <view class="wn-scroll-spacer"></view>
+    </block>
+
+    <!-- 编辑弹窗背景遮罩 -->
+    <view class="wn-modal-mask" wx:if="{{showEditModal}}" catchtap="onCloseEditModal"></view>
+
+    <!-- 编辑弹窗 -->
+    <view class="wn-modal" wx:if="{{showEditModal}}">
+      <view class="wn-modal-header">
+        <text class="wn-modal-title">修改笔记</text>
+        <text class="wn-modal-close" bindtap="onCloseEditModal">✕</text>
+      </view>
+      <view class="wn-modal-body">
+        <view class="wn-modal-field">
+          <text class="wn-modal-label">标题</text>
+          <input
+            class="wn-modal-input"
+            placeholder="请输入标题"
+            value="{{editForm.title}}"
+            bindinput="onEditTitleInput"
+            maxlength="100"
+          />
+        </view>
+        <view class="wn-modal-field">
+          <text class="wn-modal-label">内容</text>
+          <textarea
+            class="wn-modal-textarea"
+            placeholder="请输入笔记内容（支持换行）"
+            value="{{editForm.content}}"
+            bindinput="onEditContentInput"
+            maxlength="5000"
+            auto-height="{{true}}"
+            style="min-height: 200rpx;"
+          />
+        </view>
+      </view>
+      <view class="wn-modal-footer">
+        <text class="wn-modal-btn wn-modal-btn--cancel" bindtap="onCloseEditModal">取消</text>
+        <text class="wn-modal-btn wn-modal-btn--confirm" bindtap="onSaveEdit">保存</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

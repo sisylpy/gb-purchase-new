@@ -1,4 +1,4 @@
-var dateUtils = require('../../../../utils/dateUtil');
+var dateUtils = require('../../../../lib/dateUtil.js');
 var goodsApi = require('../../../services/api.js');
 
 const globalData = getApp().globalData;
@@ -125,7 +125,6 @@ Page({
     goodsApi.gbDisGetGoodsDetail(this.data.disGoodsId).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
-        console.log(res.result.data);
         this.setData({
           goods: res.result.data.goodsInfo,
         })
@@ -392,7 +391,6 @@ Page({
       //如果是配送
       if (toDep.gbDepartmentType == 4) {
         var kitchenTemp = this.data.disInfo.kitchenDepartmentList;
-        console.log(kitchenTemp)
         for (var i = 0; i < kitchenTemp.length; i++) {
           var id = kitchenTemp[i].gbDepartmentId;
           if (toDepId == id) {
@@ -418,7 +416,6 @@ Page({
       if (toDep.gbDepartmentType == 5) {
         var nxDistributerListTemp = this.data.nxDistributerList;
         if (nxDistributerListTemp.length > 0) {
-          console.log(nxDistributerListTemp)
           var nxDisId = this.data.nxDisId;
 
           for (var i = 0; i < nxDistributerListTemp.length; i++) {
@@ -454,7 +451,6 @@ Page({
   },
 
   _getNoToDepartmentSetDeps() {
-    console.log("_getNoToDepartmentSetDeps_getNoToDepartmentSetDeps")
     var disInfo = this.data.disInfo;
     var purTemp = disInfo.mendianDepartmentList;
     var stockTemp = disInfo.stockDepartmentList;
@@ -478,7 +474,6 @@ Page({
 
     if (stockTemp.length > 0) {
       for (var i = 0; i < stockTemp.length; i++) {
-        console.log(stockTemp[i])
         if (i == 0) {
           stockTemp[i].isSelected = true;
         } else {
@@ -532,7 +527,6 @@ Page({
 
 
   getComGoodsContent(e) {
-    console.log(e.currentTarget.dataset.type)
     if (e.currentTarget.dataset.type == 0 && e.detail.value.length > 0) {
       var name = "goods.gbDgGoodsName";
       this.setData({
@@ -593,11 +587,9 @@ Page({
     if (e.currentTarget.dataset.type == 6) {
       var sellingPrice = "goods.gbDgSellingPrice";
       if (e.detail.value.length > 0) {
-        console.log(this.data.goods);
         this.setData({
           [sellingPrice]: e.detail.value
         })
-        console.log(this.data.goods);
 
       } else {
         this.setData({
@@ -610,9 +602,7 @@ Page({
   },
 
   radioChange(e) {
-    console.log(e);
     var type = e.detail.value;
-    console.log(type);
     var typeData = "goods.gbDgGoodsType";
     this.setData({
       [typeData]: type
@@ -726,7 +716,6 @@ Page({
       goods.gbDgNxDistributerGoodsId = this.data.nxGoodsId;
       goods.gbDgGbSupplierId = this.data.supplierId;
       load.showLoading("保存商品")
-      console.log(goods)
       goodsApi.disUpdateDisGoodsGb(goods).then(res => {
         load.hideLoading();
         if (res.result.code == 0) {
@@ -760,19 +749,16 @@ Page({
 
 
   _ifCanSave() {
-    console.log("ifCanseve")
     var goodsName = this.data.goods.gbDgGoodsName;
     var standard = this.data.goods.gbDgGoodsStandardname;
     var type = this.data.goods.gbDgGoodsType;
     if (goodsName.length > 0 && standard.length > 0) {
       if (type == 21) {
-        console.log("221212111211212112", this.data.goods.gbDgGbSupplierId)
         if (this.data.goods.gbDgGbSupplierId == -1 || this.data.goods.gbDgGbSupplierId == null) {
           this.setData({
             canSave: false
           })
         }
-        console.log("221212111211212112", this.data.canSave)
 
       } else if (type == 5) {
 

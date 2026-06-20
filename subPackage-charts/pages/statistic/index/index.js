@@ -4,7 +4,7 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
-var echarts = require('../../../ec-canvas/echarts');
+var echarts = require('../../../../ec-canvas/echarts');
 
 Page({
 
@@ -33,6 +33,7 @@ Page({
     stopDate: '',
     dateType: 'month',
     hanzi: '本月',
+    employeeMealCostTotal: 0,
 
   },
 
@@ -134,6 +135,7 @@ Page({
           costTotal: res.result.data.costTotal,
           costPerDay: res.result.data.costPerDay,
           purchasePerDay: res.result.data.purchasePerDay,
+          employeeMealCostTotal: res.result.data.employeeMealCostTotal || 0,
           arr: res.result.data.arr,
         });
     

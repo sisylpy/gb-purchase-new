@@ -3,8 +3,8 @@ var app = getApp();
 
 const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
-var dateUtils = require('../../../../utils/dateUtil');
-var gbDistributerGoodsApi = require('../../../services/gbDistributerGoodsApi.js');
+var dateUtils = require('../../../../lib/dateUtil');
+var gbDistributerGoodsApi = require('../../../../services/gbDistributerGoodsApi.js');
 
 
 Page({
@@ -196,7 +196,6 @@ Page({
   },
 
   _ifCanSave(){
-    console.log("_ifCanSave")
     if(this.data.isGrade == 0){
       if (this.data.goods.gbDgGoodsName != null  && this.data.goods.gbDgGoodsName.length > 0  && this.data.standard != null && this.data.standard.length > 0  && this.data.fatherName != null ) {
         this.setData({
@@ -209,7 +208,6 @@ Page({
       }
     }
     if(this.data.isGrade == 1){
-      console.log("changeRaidododo")
       if (this.data.name != null && this.data.standard != null  && this.data.fatherName != null  && this.data.goods.gbDgBuyingPriceOne > 0 
         && this.data.goods.gbDgBuyingPriceTwo > 0  && this.data.goods.gbDgBuyingPriceThree > 0 ) {
         this.setData({
@@ -275,15 +273,6 @@ Page({
     var depId = this.data.depId;
     var depFatherId = this.data.depFatherId;
     var _this = this;
-    console.log('[disAddGoods] saveLinshiGoodsGb', {
-      hasFile: !!(filePathList && (Array.isArray(filePathList) ? filePathList.length : String(filePathList).length)),
-      goodsName: goodsName,
-      standard: standard,
-      disId: disId,
-      toDepId: toDepId,
-      depId: depId,
-      depFatherId: depFatherId,
-    });
     gbDistributerGoodsApi
       .saveLinshiGoodsGb(filePathList, goodsName, standard, detail, disId, toDepId, depId, depFatherId, standardWeight, brand, place, cartonUnit, itemsPerCarton)
       .then(function (res) {

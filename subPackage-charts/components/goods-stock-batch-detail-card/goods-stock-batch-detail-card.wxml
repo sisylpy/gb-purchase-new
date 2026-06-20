@@ -1,0 +1,80 @@
+<view class="biz-card biz-stock-batch" wx:if="{{cardData}}">
+
+  <!-- 卡片标题 -->
+  <view class="biz-header">
+    <view class="biz-icon-wrap biz-icon-orange">
+      <text class="biz-icon">📦</text>
+    </view>
+    <view class="biz-header-right">
+      <text class="biz-title">{{_title}}</text>
+      <text class="biz-subtitle" wx:if="{{_subtitle}}">{{_subtitle}}</text>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="biz-empty" wx:if="{{_isEmpty}}">
+    <text class="biz-empty-text">{{_emptyReason}}</text>
+  </view>
+
+  <!-- 有数据 -->
+  <block wx:else>
+    <!-- 顶部 KPI -->
+    <view class="biz-kpi-row">
+      <view class="biz-kpi-col">
+        <text class="biz-kpi-label">活跃批次数</text>
+        <text class="biz-kpi-value biz-kpi-normal">{{_activeBatchCount}} 批</text>
+      </view>
+    </view>
+
+    <!-- 按单位分组展示批次 -->
+    <view class="biz-groups">
+      <view class="biz-group" wx:for="{{_unitGroups}}" wx:key="unit" wx:for-item="group">
+        <!-- 单位分组标题 -->
+        <view class="biz-group-head" wx:if="{{_unitGroups.length > 1 || group.unit !== '—'}}">
+          <text class="biz-group-unit">{{group.unit}}</text>
+          <text class="biz-group-count">{{group.batchCount}} 批</text>
+        </view>
+
+        <!-- 每批次的卡片 -->
+        <view class="biz-batch-row" wx:for="{{group.batches}}" wx:key="stockBatchId" wx:for-item="batch">
+          <!-- 入库日期 + 批次号 -->
+          <view class="biz-batch-head">
+            <text class="biz-batch-date">{{batch._inboundDate}}</text>
+            <text class="biz-batch-id">批次 #{{batch.stockBatchId}}</text>
+            <view class="biz-batch-balance-tag {{batch._balanceOk ? 'biz-balance-ok' : 'biz-balance-warn'}}">
+              <text>{{batch._balanceOk ? '账实相符' : '差异 ' + batch._balanceDiff}}</text>
+            </view>
+          </view>
+
+          <!-- 入库/剩余 + 单价 -->
+          <view class="biz-batch-kpi-line">
+            <view class="biz-batch-kpi-item">
+              <text class="biz-batch-kpi-label">入库</text>
+              <text class="biz-batch-kpi-value">{{batch._inboundQty}}{{batch._unit}}</text>
+            </view>
+            <view class="biz-batch-kpi-item">
+              <text class="biz-batch-kpi-label">剩余</text>
+              <text class="biz-batch-kpi-value biz-batch-rest">{{batch._restQty}}{{batch._unit}}</text>
+            </view>
+            <view class="biz-batch-kpi-item">
+              <text class="biz-batch-kpi-label">单价</text>
+              <text class="biz-batch-kpi-value">¥{{batch._unitPrice}}{{'/' + batch._unit}}</text>
+            </view>
+          </view>
+
+          <!-- 消耗明细 -->
+          <view class="biz-batch-consume" wx:if="{{batch._consumeItems.length > 0}}">
+            <text class="biz-batch-consume-title">消耗明细</text>
+            <view class="biz-batch-consume-list">
+              <view class="biz-consume-chip" wx:for="{{batch._consumeItems}}" wx:key="label" wx:for-item="ci">
+                <text class="biz-consume-chip-label">{{ci.label}}</text>
+                <text class="biz-consume-chip-val">{{ci.value}}{{ci.unit}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+</view>

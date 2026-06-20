@@ -1,7 +1,8 @@
 const globalData = getApp().globalData;
 
 import apiUrl from '../../../../config/index.js'
-import { updateGroupNameGb, deleteDepartment } from '../../../services/mendian.js'
+import { updateGroupNameGb, deleteDepartment } from '../../../../services/mendian.js'
+import { deleteDepUser } from '../../../../services/apiDistributer.js'
 var load = require('../../../../lib/load.js')
 
 Page({
@@ -33,9 +34,7 @@ Page({
 
 
 bindKeyInput(e){
-  console.log(e);
   if(e.detail.value.length > 0){
-    console.log("valelellelelele", e.detail.value);
     var data  = "depInfo.gbDepartmentName";
     var dataAttr = "depInfo.gbDepartmentPrintName";
     this.setData({
@@ -49,6 +48,8 @@ bindKeyInput(e){
   toSave(){
     updateGroupNameGb(this.data.depInfo).then(res => {
       if(res.result.code == 0){
+        wx.setStorageSync('disInfo', res.result.data.disInfo);
+        wx.setStorageSync('mendianInfo', res.result.data.mendianInfo);
         wx.navigateBack({delta : 1});
       }
     })
@@ -62,7 +63,6 @@ bindKeyInput(e){
       popupType: 'deleteSpec',
       showPopupWarn: true,
     })
-
   },
 
   delUser(e) {
@@ -71,28 +71,13 @@ bindKeyInput(e){
     deleteDepUser(id).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
-        this._getDepInfo();
-      }
-    })
-
-  },
-
-
-  _getDepInfo() {
-    load.showLoading("获取部门数据");
-    getDepInfoGb(this.data.depId).then(res => {
-      load.hideLoading();
-      if (res.result.code == 0) {
-        this.setData({
-          depInfo: res.result.data,
-        })
-        wx.setStorageSync(res.result.data);
+        wx.showToast({ title: '删除成功', icon: 'none' });
+        wx.navigateBack({ delta: 1 });
       }
     })
   },
 
   confirmWarn() {
-    console.log("de");
     deleteDepartment(this.data.depInfo.gbDepartmentId)
       .then(res => {
         if (res.result.code == 0) {
@@ -105,19 +90,10 @@ bindKeyInput(e){
         } else {
           var that = this;
           wx.showModal({
-            title: res.result.msg,
-            content: "请先删除门店商品、订单、用户等数据",
+            title: '提示',
+            content: res.result.msg || "请先删除门店商品、订单、用户等数据",
             showCancel: false,
             confirmText: "知道了",
-            success: function (res) {
-              if (res.cancel) {
-                //点击取消
-                console.log("您点击了取消")
-
-              } else if (res.confirm) {
-                that.cancle();
-              }
-            }
           })
         }
 

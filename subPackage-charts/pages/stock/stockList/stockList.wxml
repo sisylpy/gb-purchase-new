@@ -61,11 +61,20 @@
                   <text>{{tool.getHowManyDays(stock.gbDgsDate)}}天库存</text>
                 </view>
                 <text class="font-sm">{{stock.gbDepartmentName}}</text>
-                <block wx:if="{{stock.gbDgsWasteFullTime !== null}}">
-                    <view class="flex-row text-danger font-xs">
-                      <text class="">过期</text>
-                      <text class="{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime) < 0 ? 'text-danger' : ''}}">{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime)}}小时</text>
+                <block wx:if="{{stock.gbDgsWasteFullTime !== null && stock.gbDgsWasteFullTime !== ''}}">
+                  <block wx:if="{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime) < 0}}">
+                    <view class="waste-time-tag waste-time-tag--pending">
+                      <text class="waste-time-tag__label">剩余</text>
+                      <text class="waste-time-tag__value">{{tool.getWasteRemainHours(stock.gbDgsWasteFullTime, nowTime)}}小时</text>
                     </view>
+                  </block>
+                  <block wx:else>
+                    <view class="waste-time-tag waste-time-tag--expired">
+                      <text class="waste-time-tag__icon">!</text>
+                      <text class="waste-time-tag__label">已废弃</text>
+                      <text class="waste-time-tag__value">超{{tool.getRestTime(stock.gbDgsWasteFullTime, nowTime)}}小时</text>
+                    </view>
+                  </block>
                 </block>
               </view>
             </view>

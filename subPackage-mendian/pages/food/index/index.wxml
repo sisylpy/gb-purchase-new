@@ -1,76 +1,108 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
 <view class="food-menu-page flex flex-column">
   <back-navbar title="菜单" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
-  <scroll-view scroll-y class="food-menu-scroll">
-    <view class="food-menu-head">
-      <text class="food-menu-head__label">菜品分类</text>
-      <view class="flex-row">
-      
-        <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" bindtap="addFoodCategory">
-        <text class="food-menu-action-btn__txt">新建分类</text>
+
+
+  <!--  top -->
+  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="/images/calender.png" class="icon"></image>
       </view>
-      <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" bindtap="toMenuAi">
-        <text class="food-menu-action-btn__txt">菜单顾问</text>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
       </view>
-      </view>
-     
     </view>
 
-    <view class="food-menu-list">
-      <view class="food-cat-section" wx:for="{{storeArr}}" wx:for-item="cat" wx:for-index="catIdx" wx:key="gbDistributerFoodId">
-        <view class="food-cat-section__head">
-          <view
-            class="food-cat-section__head-main"
-            hover-class="food-cat-section__head-main--hover"
-            bindtap="openCategoryFoodList"
-            data-father-id="{{cat.gbDistributerFoodId}}"
-            data-father-name="{{cat.gbDfFoodName}}"
-          >
-            <text class="food-cat-section__idx">{{catIdx + 1}}</text>
-            <view class="food-cat-section__name-line">
-              <text class="food-cat-section__name">{{cat.gbDfFoodName}}</text>
-              <text wx:if="{{cat.foodEntityList && cat.foodEntityList.length}}" class="food-cat-section__fold-count"> · {{cat.foodEntityList.length}}道</text>
+    <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" bindtap="toMenuAi">
+          <text class="food-menu-action-btn__txt">菜单顾问</text>
+        </view> 
+  </view>
+
+
+  <scroll-view scroll-y class="food-menu-scroll">
+
+
+
+    <!-- 分类卡片列表 -->
+    <view class="cat-card-list">
+      <view
+        class="cat-card"
+        wx:for="{{categories}}"
+        wx:for-item="cat"
+        wx:key="categoryId"
+        hover-class="cat-card--hover"
+        bindtap="openCategoryFoodList"
+        data-father-id="{{cat.categoryId}}"
+        data-father-name="{{cat.categoryName}}"
+      >
+        <!-- 上半部分：信息 + 环形图 -->
+        <view class="cat-card__top">
+          <view class="cat-card__left">
+            <view class="cat-card__icon-box" style="background: {{cat.iconBg}};">
+              <text class="cat-card__icon-emoji" style="color: {{cat.iconColor}};">{{cat.iconEmoji}}</text>
+            </view>
+            <view class="cat-card__info">
+              <text class="cat-card__name">{{cat.categoryName}}</text>
+              <text class="cat-card__count">{{cat.dishCount}} 道菜品</text>
             </view>
           </view>
-        
+
+          <view class="cat-card__right">
+            <!-- 环形图 -->
+            <view class="cat-card__pie-wrap">
+              <view class="cat-card__pie" style="background: {{cat.pieStyle || '#f0f0f0'}};">
+                <view class="cat-card__pie-hole">
+                  <text class="cat-card__pie-num">{{cat.dishCount}}</text>
+                  <text class="cat-card__pie-unit">道</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 图例 -->
+            <view class="cat-card__legend">
+              <view class="legend-item" wx:for="{{cat.legendList}}" wx:for-item="leg" wx:key="name">
+                <view class="legend-dot" style="background: {{leg.color}};"></view>
+                <text class="legend-name">{{leg.name}} {{leg.count}} ({{leg.ratio}}%)</text>
+              </view>
+            </view>
+          </view>
         </view>
 
-        <view class="food-cat-section__margin">
-          <view class="food-cat-section__margin-left">
-            <view class="food-cat-section__margin-row">
-              <image class="food-cat-section__margin-icon" src="/images/ai-profit.png" mode="aspectFit" />
-              <text class="food-cat-section__margin-label">目标</text>
-              <text class="food-cat-section__margin-val">{{cat.displayTargetMargin}}</text>
-            </view>
-            <view class="food-cat-section__margin-gap" />
-            <view class="food-cat-section__margin-row">
-              <image class="food-cat-section__margin-icon" src="/images/arrow_up_right_square_fill.png" mode="aspectFit" />
-              <text class="food-cat-section__margin-label">浮动</text>
-              <text class="food-cat-section__margin-val">{{cat.displayMarginFloat}}</text>
-            </view>
+        <!-- 三列指标 -->
+        <!-- <view class="cat-card__metrics">
+          <view class="metric-cell">
+            <text class="metric-cell__label">目标毛利率</text>
+            <text class="metric-cell__value">{{cat.targetGrossMarginRate}}</text>
           </view>
-          <view
-            class="food-cat-section__margin-edit"
-            hover-class="food-cat-section__margin-edit--hover"
-            catchtap="showEditFather"
-            data-father-id="{{cat.gbDistributerFoodId}}"
-          >
-            <image class="food-cat-section__margin-edit-icon" src="/images/edit.png" mode="aspectFit" />
-            <text class="food-cat-section__margin-edit-txt">管理</text>
+          <view class="metric-cell">
+            <text class="metric-cell__label">实际平均毛利</text>
+            <text class="metric-cell__value">{{cat.actualAverageGrossMarginRate}}</text>
           </view>
-        </view>
+          <view class="metric-cell">
+            <text class="metric-cell__label">波动范围</text>
+            <text class="metric-cell__value metric-cell__value--highlight">{{cat.grossMarginRange}}</text>
+          </view>
+        </view> -->
 
+        <!-- 底部提示 -->
+        <!-- <view class="cat-card__tip">
+          <text class="cat-card__tip-icon">💡</text>
+          <text class="cat-card__tip-text">{{cat.summaryText}}</text>
+          <text class="cat-card__tip-arrow">›</text>
+        </view> -->
       </view>
     </view>
   </scroll-view>
 </view>
-
-<view class="mask {{showFatherMenu ? 'is-active' : ''}}" catchtap="hideMask">
-  <view class="popup" catchtap="noop">
-    <view class="popup-item" bindtap="editFatherFood">
-      <text>编辑「{{fatherItem.gbDfFoodName}}」</text>
-    </view>
-    <view class="popup-item popup-item--danger" bindtap="deleteFatherFood">删除「{{fatherItem.gbDfFoodName}}」</view>
-  </view>
-</view>
-

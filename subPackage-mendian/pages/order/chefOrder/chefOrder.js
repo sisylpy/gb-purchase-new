@@ -92,11 +92,10 @@ Page({
   /** 按时间加载部门申请数据 */
   _initData() {
     load.showLoading("获取数据中");
-    depOrder.depGetApplyAiByTime(this.data.depFatherId)
+    return depOrder.depGetApplyAiByTime(this.data.depFatherId)
       .then(function(res) {
         load.hideLoading();
         if (res.result.code == 0) {
-          console.log("rers", res.result.data);
           if (this.data.depHasSubs > 1) {
             var depArrWithGlobalIndex = this._calculateGlobalOrderIndexForDepArr(res.result.data.arr);
             this.setData({
@@ -137,6 +136,18 @@ Page({
         wx.showToast({ title: '网络异常，请重试', icon: 'none' });
         throw error;
       });
+  },
+
+  /**
+   * 下拉刷新
+   */
+  onPullDownRefresh() {
+    const refreshTask = this.data.showType === 'time'
+      ? this._initData()
+      : this._initDataByFather();
+    refreshTask.finally(() => {
+      wx.stopPullDownRefresh();
+    });
   },
 
   /** 刷新数据（根据当前显示模式自动选择 time/category） */
@@ -410,14 +421,14 @@ Page({
       var applyItem = this.data.applyItem;
       this.setData({
         show: true,
-        applyStandardName: applyItem.gbDoStandard,
-        printStandard: applyItem.gbDoPrintStandard,
-        itemDis: this.data.applyItem.gbDistributerGoodsEntity,
-        item: this.data.applyItem.gbDepartmentDisGoodsEntity,
+        applyStandardName: applyItem.gbDoStandard || '',
+        printStandard: applyItem.gbDoPrintStandard || '',
+        itemDis: this.data.applyItem.gbDistributerGoodsEntity || null,
+        item: this.data.applyItem.gbDepartmentDisGoodsEntity || null,
         editApply: true,
-        applyNumber: applyItem.gbDoQuantity,
-        applyRemark: applyItem.gbDoRemark,
-        priceLevel: applyItem.gbDoCostPriceLevel,
+        applyNumber: applyItem.gbDoQuantity || '',
+        applyRemark: applyItem.gbDoRemark || '',
+        priceLevel: applyItem.gbDoCostPriceLevel || '',
         canSave: true,
       });
     } else {
@@ -445,6 +456,7 @@ Page({
         applyItem: e.currentTarget.dataset.order,
         showCash: true,
         applyStandardName: applyItem.gbDoStandard,
+        printStandard: applyItem.gbDoPrintStandard,
         itemNxDis: e.currentTarget.dataset.item,
         itemDis: e.currentTarget.dataset.goods,
         editApply: true,
@@ -480,11 +492,14 @@ Page({
       id: this.data.applyItem.gbDepartmentOrdersId,
       weight: e.detail.applyNumber,
       standard: e.detail.applyStandardName,
-      remark: e.detail.applyRemark,
-      printStandard: this.data.printStandard,
-      priceLevel: this.data.priceLevel
+      remark: e.detail.applyRemark || '',
+      gbDoDsStandardScale: -1
     };
-    depOrder.updateOrderGbJj(dg).then(function(res) {
+    if (!dg.id) {
+      wx.showToast({ title: '订单ID缺失，无法修改', icon: 'none' });
+      return;
+    }
+    depOrder.updateOrderGbJj(dg, { useUrlParams: true }).then(function(res) {
       load.showLoading("修改订单");
       if (res.result.code == 0) {
         load.hideLoading();
@@ -593,7 +608,7 @@ Page({
     };
     depOrder.gbDisSaveStandard(data).then(function(res) {
       if (res.result.code == 0) {
-        var standardArr = this.data.itemDis.gbDistributerStandardEntities;
+        var standardArr = this.data.itemDis.gbDistributerStandardEntities || [];
         standardArr.push(res.result.data);
         var standards = "itemDis.gbDistributerStandardEntities";
         this.setData({ [standards]: standardArr, applyStandardName: res.result.data.gbDsStandardName });
@@ -602,6 +617,7 @@ Page({
         wx.showToast({ title: res.result.msg, icon: 'none' });
       }
     }.bind(this));
+    
   },
 
   /** 切换订单规格 */
@@ -745,7 +761,7 @@ Page({
 
   /** 分享订货员注册页面 */
   onShareAppMessage(options) {
-    var path = "/subPackage-mendian/pages/mendian/depUserRegister/depUserRegister?disId=" + this.data.disId + '&depFatherId=' + this.data.depFatherId + '&admin=1';
+    var path = "/subPackage-mendian/pages/mendian/depUserRegister/depUserRegister?disId=" + this.data.disId + '&depFatherId=' + this.data.depFatherId + '&admin=12';
     return {
       title: "订货员注册",
       path: path,

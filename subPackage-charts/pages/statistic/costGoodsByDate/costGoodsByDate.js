@@ -22,15 +22,6 @@ Page({
     // 滚动状态下的高度计算（隐藏日期选择行后）
     const scrollViewHeightCollapsed = totalHeight - navBarHeight - 0; // 滚动时顶部区域为0
 
-    console.log('=== 高度计算详情 ===');
-    console.log('原始窗口高度:', windowInfo.windowHeight);
-    console.log('rpxR 比例:', globalData.rpxR);
-    console.log('总高度 (rpx):', totalHeight);
-    console.log('导航栏高度 (rpx):', navBarHeight);
-    console.log('顶部区域高度 (rpx):', topAreaHeight);
-    console.log('计算出的 scrollViewHeight (rpx):', scrollViewHeight);
-    console.log('scrollViewHeight 像素值:', scrollViewHeight / globalData.rpxR);
-    console.log('=== 高度计算完成 ===');
 
     // 获取状态栏高度和胶囊按钮信息
     const statusBarHeight = windowInfo.statusBarHeight || 44;
@@ -71,7 +62,6 @@ Page({
     }
 
 
-
   },
 
   onHide() {
@@ -101,6 +91,8 @@ Page({
   
     // 展开状态控制
     expandedRows: {}, // 控制展开状态的对象
+    employeeMealTotal: 0,
+    employeeMealCount: 0,
   },
 
   /**
@@ -142,6 +134,12 @@ Page({
         itemIndex: 2,
       })
     }
+    if (this.data.type == 'employeeMeal') {
+      this.setData({
+        tab1Index: 3,
+        itemIndex: 3,
+      })
+    }
    
 
     this._getGoodsCostStatistics();
@@ -165,7 +163,6 @@ Page({
     api.getGbGoodsCostStatistics(data)
       .then(res => {
         if (res.result.code == 0) {
-          console.log("getGbGoodsCostStatistics......", res.result.data);
 
           this.setData({
 
@@ -174,9 +171,11 @@ Page({
             salesTotal: res.result.data.salesTotal,
             lossTotal: res.result.data.lossTotal,
             wasteTotal: res.result.data.wasteTotal,
+            employeeMealTotal: res.result.data.employeeMealTotal || 0,
             produceCount: res.result.data.produceCount,
             lossCount: res.result.data.lossCount,
             wasteCount: res.result.data.wasteCount,
+            employeeMealCount: res.result.data.employeeMealCount || 0,
 
           });
 
@@ -196,23 +195,8 @@ Page({
   },
 
 
-
   //
   _getInitData() {
-    console.log('=== _getInitData 开始 ===');
-    console.log('当前 scrollViewHeight:', this.data.scrollViewHeight);
-    console.log('当前 tab1Index:', this.data.tab1Index);
-    console.log('当前 type:', this.data.type);
-    console.log('请求参数:', {
-      startDate: this.data.startDate,
-      type: this.data.type,
-      startDate: this.data.startDate,
-      stopDate: this.data.stopDate,
-      disId: this.data.disId,
-      searchDepId: this.data.searchDepId,
-      page: this.data.currentPage,
-      limit: this.data.limit
-    });
 
     // 设置加载状态
     this.setData({
@@ -233,23 +217,12 @@ Page({
     api.getGoodsCostBySearchDate(data)
       .then(res => {
         load.hideLoading();
-        console.log(res.result.data);
-        console.log("abc")
         if (res.result.code == 0) {
           const result = res.result.data;
 
-          console.log('✅ 商品数据获取成功');
-          console.log('接口返回数据：', {
-            currentPage: this.data.currentPage,
-            arrLength: result.arr ? result.arr.length : 0,
-            totalCount: result.totalCount,
-            totalPages: result.totalPages
-          });
 
           // 如果是第一页，直接替换数据；否则追加数据
           if (this.data.currentPage === 1) {
-            console.log('🔄 第一页数据，替换商品列表');
-            console.log('🔄 准备 setData，数据:', result.arr);
             // 为每个商品添加独立的显示状态
             const goodsList = (result.arr || []).map(goods => ({
               ...goods,
@@ -260,16 +233,8 @@ Page({
               produceArr: goodsList,
               totalCount: result.totalCount || 0,
               totalPage: result.totalPages || 0,
-            }, () => {
-              // console.log('✅ setData 回调执行成功！');
-              // console.log('✅ 商品列表更新完成，商品数量:', result.arr ? result.arr.length : 0);
-              // console.log('✅ setData 后 produceArr 长度:', this.data.produceArr.length);
-              // console.log('✅ setData 后 totalCount:', this.data.totalCount);
-              // console.log('✅ setData 后 totalPage:', this.data.totalPage);
             });
-            console.log('🔄 setData 调用完成，等待回调...');
           } else {
-            console.log('🔄 追加数据到现有列表');
             // 为新增的商品添加独立的显示状态
             const newGoodsList = (result.arr || []).map(goods => ({
               ...goods,
@@ -281,15 +246,7 @@ Page({
               totalCount: result.totalCount || 0,
               totalPage: result.totalPages || 0,
             });
-            console.log('✅ 数据追加完成，总商品数量:', this.data.produceArr.length);
           }
-
-          console.log('更新后的数据状态：', {
-            produceArrLength: this.data.produceArr.length,
-            totalCount: this.data.totalCount,
-            totalPage: this.data.totalPage,
-            currentPage: this.data.currentPage
-          });
 
 
           // 设置加载状态为false
@@ -304,6 +261,7 @@ Page({
             salesTotal: 0,
             lossTotal: 0,
             wasteTotal: 0,
+            employeeMealTotal: 0,
             isLoading: false
           })
 
@@ -323,14 +281,6 @@ Page({
    */
   onTab1Click(event) {
     let index = event.currentTarget.dataset.index;
-    console.log('=== 标签页点击事件 ===');
-    console.log('点击的索引:', index);
-    console.log('事件目标:', event.currentTarget);
-    console.log('数据类型:', event.currentTarget.dataset.type);
-    console.log('切换前 tab1Index:', this.data.tab1Index);
-    console.log('当前 scrollViewHeight:', this.data.scrollViewHeight);
-    console.log('当前 windowHeight:', this.data.windowHeight);
-    console.log('当前 navBarHeight:', this.data.navBarHeight);
 
     this.setData({
       tab1Index: index,
@@ -345,11 +295,6 @@ Page({
       produceArr: [],
       // 重置当前标签页的初始化状态
     }, () => {
-      console.log('切换后 tab1Index:', this.data.tab1Index);
-      console.log('切换后 scrollViewHeight:', this.data.scrollViewHeight);
-      console.log('切换后 type:', this.data.type);
-      console.log('切换后 produceArr 长度:', this.data.produceArr.length);
-      console.log('=== 标签页切换完成 ===');
     });
 
     this._getInitData();
@@ -366,11 +311,9 @@ Page({
    */
   animationfinish(event) {
     const currentIndex = event.detail.current;
-    const typeMap = ['sales', 'loss', 'waste'];
+    const typeMap = ['sales', 'loss', 'waste', 'employeeMeal'];
     const currentType = typeMap[currentIndex];
 
-    console.log('=== swiper切换完成 ===');
-    console.log('切换到索引:', currentIndex, '类型:', currentType);
 
     // 一次性更新所有状态
     this.setData({
@@ -380,7 +323,6 @@ Page({
       currentPage: 1, // 重置分页
       // 重置当前标签页的初始化状态
     }, () => {
-      console.log('状态更新完成，开始加载数据...');
       this._getInitData();
 
 
@@ -397,41 +339,27 @@ Page({
     const threshold = this.data.scrollThreshold;
     const isScrolled = scrollTop > threshold;
 
-    console.log('=== 滚动事件触发 (costGoodsByDate) ===');
-    console.log('scrollTop:', scrollTop);
-    console.log('threshold:', threshold);
-    console.log('isScrolled:', isScrolled);
-    console.log('当前 isScrolled 状态:', this.data.isScrolled);
 
     // 清除之前的防抖定时器
     if (this.scrollDebounceTimer) {
-      console.log('清除之前的防抖定时器');
       clearTimeout(this.scrollDebounceTimer);
     }
 
     // 设置防抖延迟，避免频繁处理
     this.scrollDebounceTimer = setTimeout(() => {
-      console.log('防抖定时器执行，更新状态并调用检测方法');
       
       // 只有当状态改变时才更新setData，避免频繁setData
       if (isScrolled !== this.data.isScrolled) {
-        console.log('滚动状态发生变化，更新状态');
         this.setData({
           isScrolled: isScrolled,
           scrollTop: scrollTop
         });
       } else {
-        console.log('滚动状态未变化，只更新scrollTop');
         this.setData({
           scrollTop: scrollTop
         });
       }
 
-      console.log('滚动状态变化:', {
-        scrollTop: scrollTop,
-        isScrolled: isScrolled,
-        threshold: threshold
-      });
 
       // 每次滚动都检测并关闭超出屏幕的展开内容
       this.checkAndCloseOverflowOnScroll();
@@ -444,10 +372,6 @@ Page({
       index,
       type
     } = event.detail;
-    console.log('导航栏按钮点击:', {
-      index,
-      type
-    });
 
     // 调用原有的标签页点击方法
     this.onTab1Click({
@@ -462,7 +386,6 @@ Page({
 
   // 检查 swiper-item 位置信息
   checkSwiperItemPosition() {
-    console.log('=== 检查 swiper-item 位置信息 ===');
 
     // 查询 swiper 容器
     const swiperQuery = wx.createSelectorQuery().in(this);
@@ -482,48 +405,25 @@ Page({
 
     // 执行查询
     swiperQuery.exec((swiperRes) => {
-      console.log('swiper 容器位置:', swiperRes[0]);
     });
 
     swiperItemQuery.exec((itemsRes) => {
-      console.log('所有 swiper-item 位置:', itemsRes);
       itemsRes.forEach((item, index) => {
-        console.log(`swiper-item ${index + 1} 位置:`, {
-          top: item.top,
-          left: item.left,
-          width: item.width,
-          height: item.height,
-          bottom: item.bottom,
-          right: item.right
-        });
       });
     });
 
     currentSwiperItemQuery.exec((currentRes) => {
-      console.log(`当前激活的 swiper-item (索引${this.data.tab1Index}) 位置:`, currentRes[0]);
     });
 
     secondSwiperItemQuery.exec((secondRes) => {
-      console.log('第二个 swiper-item 位置:', secondRes[0]);
       if (secondRes[0]) {
-        console.log('第二个 swiper-item 距离顶部:', secondRes[0].top, 'px');
-        console.log('第二个 swiper-item 高度:', secondRes[0].height, 'px');
-        console.log('第二个 swiper-item 是否可见:', secondRes[0].top >= 0 && secondRes[0].top < wx.getSystemInfoSync().windowHeight);
       }
     });
 
-    console.log('=== swiper-item 位置检查完成 ===');
   },
 
 
-
-
-
-
-
-
   toStatistics(e) {
-    console.log("toStatistics", e);
     var item = e.currentTarget.dataset.item;
     this.setData({
       item: e.currentTarget.dataset.item,
@@ -591,17 +491,9 @@ Page({
     }
     api.getGoodsCostBySearchDate(data)
       .then(res => {
-        console.log(res.result.data);
-        console.log("abc")
         if (res.result.code == 0) {
           const result = res.result.data;
 
-          console.log('接口返回数据：', {
-            currentPage: page,
-            arrLength: result.arr ? result.arr.length : 0,
-            totalCount: result.totalCount,
-            totalPages: result.totalPages
-          });
 
           // 如果是第一页，直接替换数据；否则追加数据
           if (page === 1) {
@@ -618,13 +510,6 @@ Page({
             });
           }
 
-          console.log('更新后的数据状态：', {
-            produceArrLength: this.data.produceArr.length,
-            totalCount: this.data.totalCount,
-            totalPage: this.data.totalPage,
-            currentPage: this.data.currentPage
-          });
-
 
           // 设置加载状态为false
           this.setData({
@@ -638,6 +523,7 @@ Page({
             salesTotal: 0,
             lossTotal: 0,
             wasteTotal: 0,
+            employeeMealTotal: 0,
             isLoading: false
           })
 
@@ -653,44 +539,21 @@ Page({
   },
 
 
-
   // 上拉加载更多 (支持scroll-view的bindscrolltolower事件)
   onReachBottom(e) {
-    console.log('=== onReachBottom触发 ===', {
-      eventType: e ? 'scroll-view' : 'page',
-      isLoading: this.data.isLoading,
-      currentPage: this.data.currentPage,
-      totalPage: this.data.totalPage,
-      produceArrLength: this.data.produceArr.length,
-      totalCount: this.data.totalCount
-    });
 
     // 防止重复请求
     const shouldBlock = this.data.isLoading || this.data.produceArr.length >= this.data.totalCount;
-    console.log('是否阻止加载：', shouldBlock, {
-      isLoading: this.data.isLoading,
-      dataLength: this.data.produceArr.length,
-      totalCount: this.data.totalCount,
-      condition1: this.data.isLoading,
-      condition2: this.data.produceArr.length >= this.data.totalCount
-    });
 
     if (shouldBlock) {
-      console.log('❌ 阻止加载');
       return;
     }
 
     // 检查是否还有更多页
     const canLoadMore = this.data.currentPage < this.data.totalPage;
-    console.log('是否可以加载更多：', canLoadMore, {
-      currentPage: this.data.currentPage,
-      totalPage: this.data.totalPage,
-      comparison: `${this.data.currentPage} < ${this.data.totalPage}`
-    });
 
     if (canLoadMore) {
       const nextPage = this.data.currentPage + 1;
-      console.log('✅ 开始加载下一页：', nextPage);
       // 直接使用nextPage作为参数，不依赖this.data.currentPage
       this._getInitDataWithPage(nextPage);
       this.setData({
@@ -698,7 +561,6 @@ Page({
       });
     } else {
       // 已经到最后一页，显示提示
-      console.log('❌ 已到最后一页，无法继续加载');
       wx.showToast({
         title: '已加载全部数据',
         icon: 'none'
@@ -716,14 +578,6 @@ Page({
     
     const currentKey = `${goodsIndex}_${depIndex}_${reduceIndex}`;
     
-    console.log('=== showOne 点击事件 ===');
-    console.log('点击参数:', {
-      goodsIndex,
-      depIndex,
-      reduceIndex,
-      currentKey
-    });
-    console.log('当前展开状态:', this.data.expandedRows);
 
     // 切换展开状态
     const newExpandedRows = { ...this.data.expandedRows };
@@ -733,7 +587,6 @@ Page({
       expandedRows: newExpandedRows
     });
     
-    console.log('✅ 展开状态更新完成:', newExpandedRows);
   },
 
   // 控制成本详情列表的显示/隐藏
@@ -765,39 +618,28 @@ Page({
 
   // 滚动时检测并关闭超出屏幕的展开内容
   checkAndCloseOverflowOnScroll() {
-    console.log('=== checkAndCloseOverflowOnScroll 开始执行 (costGoodsByDate) ===');
     
     // 检查所有展开的商品
     const newProduceArr = [...this.data.produceArr];
     const expandedGoods = newProduceArr.filter((goods, index) => goods.showCostList);
     
-    console.log('当前数据数组长度:', newProduceArr.length);
-    console.log('展开的商品数量:', expandedGoods.length);
-    console.log('展开的商品索引:', expandedGoods.map((goods, index) => {
-      const actualIndex = newProduceArr.findIndex(item => item === goods);
-      return actualIndex;
-    }));
     
     if (expandedGoods.length === 0) {
-      console.log('没有展开的商品，直接返回');
       return;
     }
     
     expandedGoods.forEach((goods, goodsIndex) => {
       const actualIndex = newProduceArr.findIndex(item => item === goods);
-      console.log(`处理商品 ${actualIndex}，showCostList:`, goods.showCostList);
       
       if (goods.showCostList) {
         // 使用setTimeout确保DOM已更新
         setTimeout(() => {
-          console.log(`开始查询商品 ${actualIndex} 的位置信息`);
           
           const query = wx.createSelectorQuery();
           query.select(`#goods-container-${actualIndex}`).boundingClientRect();
           query.selectViewport().scrollOffset();
           
           query.exec((res) => {
-            console.log(`商品 ${actualIndex} 查询结果:`, res);
             
             if (res[0] && res[1]) {
               const containerRect = res[0];
@@ -808,22 +650,13 @@ Page({
               const containerBottom = containerRect.bottom;
               const viewportHeight = wx.getWindowInfo().windowHeight;
               
-              console.log(`商品 ${actualIndex} 位置信息:`);
-              console.log('- containerTop:', containerTop);
-              console.log('- containerBottom:', containerBottom);
-              console.log('- viewportHeight:', viewportHeight);
-              console.log('- scrollTop:', scrollInfo.scrollTop);
               
               // 修复判断逻辑：如果容器顶部超出屏幕上方或底部超出屏幕下方，则关闭
               const isTopOut = containerTop < 0;  // 顶部超出屏幕上方
               const isBottomOut = containerBottom > viewportHeight;  // 底部超出屏幕下方
               
-              console.log(`商品 ${actualIndex} 超出判断:`);
-              console.log('- isTopOut:', isTopOut);
-              console.log('- isBottomOut:', isBottomOut);
               
               if (isTopOut || isBottomOut) {
-                console.log(`滚动检测：商品 ${actualIndex} 超出屏幕，自动关闭`);
                 
                 const newArr = [...this.data.produceArr];
                 newArr[actualIndex].showCostList = false;
@@ -832,21 +665,16 @@ Page({
                   produceArr: newArr
                 });
                 
-                console.log(`商品 ${actualIndex} 已关闭展开状态`);
               } else {
-                console.log(`商品 ${actualIndex} 仍在可视区域内，保持展开状态`);
               }
             } else {
-              console.log(`商品 ${actualIndex} 查询失败，res[0]:`, res[0], 'res[1]:', res[1]);
             }
           });
         }, 100);
       } else {
-        console.log(`商品 ${actualIndex} 未展开，跳过处理`);
       }
     });
     
-    console.log('=== checkAndCloseOverflowOnScroll 执行完毕 (costGoodsByDate) ===');
   },
 
 
@@ -885,9 +713,6 @@ Page({
     wx.removeStorageSync('selectedPurUser');
     wx.removeStorageSync('costGoodsByDate_scrollState');
   }
-
-
-
 
 
 })

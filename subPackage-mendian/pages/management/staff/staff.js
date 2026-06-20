@@ -63,6 +63,14 @@ Page({
       })
     }
 
+    
+    var userInfo = wx.getStorageSync('userInfo');
+    if(userInfo){
+      this.setData({
+        userInfo: userInfo,
+      })
+    }
+
     var value = wx.getStorageSync('mendianInfo');
     if(value){
       this.setData({
@@ -101,7 +109,7 @@ Page({
   onShareAppMessage: function (options) {
     return {
       title: "注册京采账本小程序",
-      path: '/pages/inviteAdmin/inviteAdmin?disId=' + this.data.userInfo.gbDuDistributerId + '&depFatherId=' + this.data.depFatherId + '&depId=' + this.data.depFatherId + '&depName=' + this.data.userInfo.gbDuWxNickName + '&admin=2',
+      path: '/pages/inviteAdmin/inviteAdmin?disId=' + this.data.userInfo.gbDuDistributerId + '&depFatherId=' + this.data.depFatherId + '&depId=' + this.data.depFatherId + '&depName=' + this.data.userInfo.gbDuWxNickName + '&admin=11',
       imageUrl: this.data.url + 'userImage/say.png',
     };
   },
@@ -168,14 +176,10 @@ Page({
 
   /** 跳转采购员每日详情 */
   toPurUserDetail: function (e) {
-    console.log('toPurUserDetail e:', e);
-    console.log('item:', e.currentTarget.dataset.item);
     var item = e.currentTarget.dataset.item;
     var purUserId = item.gbDepartmentUserId;
-    console.log('purUserId:', purUserId);
     wx.setStorageSync('purUserItem', item);
     var url = '../purUserEveryDay/purUserEveryDay?purUserId=' + purUserId + '&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType;
-    console.log('跳转url:', url);
     wx.navigateTo({
       url: url,
     });
@@ -183,7 +187,6 @@ Page({
 
   /** 跳转采购员分析 */
   toPurUserFenxi: function () {
-    console.log("toPurUserFenxitoPurUserFenxitoPurUserFenxi")
     this.setData({
       showOperation: false,
     });

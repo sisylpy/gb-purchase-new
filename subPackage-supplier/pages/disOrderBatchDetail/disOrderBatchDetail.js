@@ -42,9 +42,7 @@ Page({
     load.showLoading("获取订货商品")
     var that = this;
     getDisPurchaseGoodsBatchGb(this.data.batchId)
-      .then(res => {
-        console.log(res)
-        load.hideLoading();
+      .then(res => {load.hideLoading();
         if (res.result.code == 0) {
           that.setData({
             batch: res.result.data,

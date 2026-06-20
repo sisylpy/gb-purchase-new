@@ -3,12 +3,12 @@
  * @module subPackage-supplier/services/supplier
  */
 
-var requestUtil = require('../../lib/request');
+var request = require('../../lib/request');
 
 
 
 var gbDisGetAllSuppliers = function (id) {
-  return requestUtil.get('nxjrdhsupplier/gbDisGetAllSuppliers/' + id);
+  return request.get('nxjrdhsupplier/gbDisGetAllSuppliers/' + id);
 };
 
 /**
@@ -16,7 +16,7 @@ var gbDisGetAllSuppliers = function (id) {
  * POST gbdistributergoods/disUpdateDisGoodsGb
  */
 var disUpdateDisGoodsGb = function (goods) {
-  return requestUtil.post('gbdistributergoods/disUpdateDisGoodsGb', goods);
+  return request.post('gbdistributergoods/disUpdateDisGoodsGb', goods);
 };
 
 
@@ -25,7 +25,7 @@ var disUpdateDisGoodsGb = function (goods) {
  * POST gbdistributerpurchasebatch/disGetPurchaseDetaiTypeWithId
  */
 var disGetPurchaseDetaiTypeWithId = function (data) {
-  return requestUtil.post('gbdistributerpurchasebatch/disGetPurchaseDetaiTypeWithId', {
+  return request.post('gbdistributerpurchasebatch/disGetPurchaseDetaiTypeWithId', {
     startDate: data.startDate,
     stopDate: data.stopDate,
     disId: data.disId,
@@ -40,7 +40,7 @@ var disGetPurchaseDetaiTypeWithId = function (data) {
  * POST nxjrdhsupplier/depGetSupplier
  */
 var depGetSupplier = function (data) {
-  return requestUtil.post('nxjrdhsupplier/depGetSupplier', {
+  return request.post('nxjrdhsupplier/depGetSupplier', {
     startDate: data.startDate,
     stopDate: data.stopDate,
     depId: data.depId,
@@ -53,7 +53,7 @@ var depGetSupplier = function (data) {
  * GET nxjrdhsupplier/deleteGbDisSuppler/{id}
  */
 var deleteGbDisSuppler = function (id) {
-  return requestUtil.get('nxjrdhsupplier/deleteGbDisSuppler/' + id);
+  return request.get('nxjrdhsupplier/deleteGbDisSuppler/' + id);
 };
 
 /**
@@ -61,7 +61,7 @@ var deleteGbDisSuppler = function (id) {
  * GET nxjrdhsupplier/addGbSupplierBlack/{id}
  */
 var addGbSupplierBlack = function (id) {
-  return requestUtil.get('nxjrdhsupplier/addGbSupplierBlack/' + id);
+  return request.get('nxjrdhsupplier/addGbSupplierBlack/' + id);
 };
 
 /**
@@ -69,15 +69,15 @@ var addGbSupplierBlack = function (id) {
  * POST nxjrdhsupplier/updateJrdhSupplier
  */
 var updateJrdhSupplier = function (data) {
-  return requestUtil.post('nxjrdhsupplier/updateJrdhSupplier', data);
+  return request.post('nxjrdhsupplier/updateJrdhSupplier', data);
 };
 
 var disGetDepGoodsGbPageWithSupplier = function (data) {
-  return requestUtil.post('gbdepartmentdisgoods/disGetDepGoodsGbPageWithSupplier', data, { useUrlParams: true });
+  return request.post('gbdepartmentdisgoods/disGetDepGoodsGbPageWithSupplier', data, { useUrlParams: true });
 };
 
 var disGetDepGoodsCataGbWithSupplier = function (data) {
-  return requestUtil.post('gbdepartmentdisgoods/disGetDepGoodsCataGbWithSupplier', data, { useUrlParams: true });
+  return request.post('gbdepartmentdisgoods/disGetDepGoodsCataGbWithSupplier', data, { useUrlParams: true });
 };
 module.exports = {
   depGetSupplier: depGetSupplier,

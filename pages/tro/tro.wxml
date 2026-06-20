@@ -1,9 +1,9 @@
 
 
   <view class="flex flex-column">
-  <navbar title="京采账本" avatar="/images/logo.png" button-text="设置"></navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="京采账本" avatar="/images/logo.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
-<view class="page " style="margin-top: {{navBarHeight}}rpx;">
+<view class="page " >
 
 <!-- 顶部头图/横幅 -->
 <view class="banner-wrap font-lg">

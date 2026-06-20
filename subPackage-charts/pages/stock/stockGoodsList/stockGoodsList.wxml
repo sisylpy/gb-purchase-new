@@ -122,16 +122,6 @@
             <text>{{item.statusText}}</text>
           </view>
         </view>
-
-        <!-- 操作按钮 -->
-        <view class="flex-row mt-15">
-          <view class="action-btn" bindtap="toOutStock" data-item="{{item}}">
-            <text>出库</text>
-          </view>
-          <view class="action-btn ml-20" bindtap="toWaste" data-item="{{item}}">
-            <text>报废/损耗</text>
-          </view>
-        </view>
       </view>
 
       <view class="p-30 text-center text-secondary font-sl" wx:if="{{noMore}}">

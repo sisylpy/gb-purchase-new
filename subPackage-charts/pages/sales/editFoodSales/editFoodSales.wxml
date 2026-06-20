@@ -1,165 +1,297 @@
-<view class="flex-column page-add-food-sales page-add-food-sales--edit">
-<back-navbar title="{{pageTitle}}" style="height: {{navBarHeight}}rpx;" button-text="返回"  avatar="/images/back-gray.png"  bindnavbuttontap="toBack"></back-navbar>
+<view class="page-food-sales-view flex-column">
+  <back-navbar title="菜品销量" style="height: {{navBarHeight}}rpx;" button-text="返回" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
 
-<view class="flex flex-column p-20 page-body">
-
-  <view class="module-card mb-20">
-    <view class="field-row date-row">
-      <text class="field-label">日期</text>
-      <view class="date-input-wrapper date-readonly-edit" style="width: {{windowWidth - 240}}rpx;">
-        <text class="date-readonly-edit__main">{{singleDate || '—'}}</text>
-        <text class="date-readonly-edit__hint">不可修改</text>
-      </view>
-    </view>
-    <view class="field-row" wx:if="{{hasDepartmentChoices}}">
-      <text class="field-label">销售部门</text>
-      <picker mode="selector" range="{{departmentChoiceList}}" range-key="gbDepartmentName" value="{{salesDepIndex}}" bindchange="onSalesDepChange">
-        <view class="date-input-wrapper" style="width: {{windowWidth - 240}}rpx;">
-          <text>{{departmentChoiceList[salesDepIndex] ? departmentChoiceList[salesDepIndex].gbDepartmentName : ''}}</text>
+  <view class="page-body">
+    <!-- 日期栏 -->
+    <view class="date-bar">
+      <picker mode="date" value="{{recordDate}}" end="{{todayDate}}" bindchange="onDateChange">
+        <view class="date-picker">
+          <image src="/images/calender.png" class="date-icon"></image>
+          <text class="date-text">{{dateDisplay}}</text>
+          <text class="week-text">{{weekDisplay}}</text>
+          <image src="/images/arrow-down.png" class="arrow-down"></image>
         </view>
       </picker>
+      <view class="status-tag status-tag--done" bindtap="onEditAll" wx:if="{{isCompleted}}">
+        <text>修改经营</text>
+        <image src="/images/arrow-right-3.png" class="status-arrow"></image>
+      </view>
     </view>
-    <view class="field-row dep-readonly-row" wx:if="{{!hasDepartmentChoices && departmentChoiceList.length}}">
-      <text class="field-label">销售部门</text>
-      <text class="dep-readonly">{{departmentChoiceList[0].gbDepartmentName}}</text>
-    </view>
-  </view>
 
-  <view class="module-card mb-20 module-card--food-sales">
-    <view class="module-title">菜品销量</view>
-    <text class="food-list-hint" wx:if="{{foodsLoading}}">加载中…</text>
-    <text class="food-list-hint" wx:elif="{{!salesFoodRows.length}}">暂无菜品，请先在菜单中维护</text>
-    <view wx:else  class="food-sales-scroll1 flex-column" >
-      <block wx:for="{{salesFoodRows}}" wx:key="rowKey" wx:for-index="idx">
-        <view class="food-cat-stripe" wx:if="{{idx === 0 || item.catName !== salesFoodRows[idx - 1].catName}}">
-          <text class="food-cat-stripe__text">{{item.catName}}</text>
+    <!-- 经营总账 -->
+    <view class="revenue-section" wx:if="{{revenueView && revenueView.hasRecord}}">
+      <view class="section-header">
+        <view class="section-bar"></view>
+        <text class="section-title">经营总账</text>
+        <view class="section-hint" bindtap="onEditAll">
+          <text class="hint-icon">?</text>
+          <text class="hint-text">填写说明</text>
         </view>
-        <view class="food-dish-block {{item.offShelf ? 'food-dish-block--off' : ''}}">
-          <view class="food-dish-block__title-row">
-            <text class="food-dish-block__name">{{item.foodName}}</text>
-            <text wx:if="{{item.offShelf}}" class="food-dish-block__badge">停用</text>
-          </view>
-          <view class="food-dish-block__meta-row">
-            <view class="food-dish-block__price-col">
-              <text class="food-dish-block__label">单价</text>
-              <text class="food-dish-block__price">¥{{item.unitPriceDisplay}}</text>
+      </view>
+      <view class="revenue-grid">
+        <view class="rg-row">
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/dish.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">堂食营业额</text>
             </view>
-            <view class="food-dish-block__qty-col">
-              <text class="food-dish-block__label food-dish-block__label--qty">份数</text>
-              <input
-                class="food-dish-block__qty-input"
-                type="digit"
-                placeholder="填份数"
-                placeholder-class="food-dish-block__qty-placeholder"
-                value="{{item.qtyStr}}"
-                data-index="{{idx}}"
-                bindinput="onFoodQtyInput"
-              />
-            </view>
+            <text class="rg-card__value rg-card__value--green">¥{{revenueView.dineInRevenueStored || revenueView.gbAiDailyRevenueDineInRevenue || '0.00'}}</text>
           </view>
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/delivery.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">外卖营业额</text>
+            </view>
+            <text class="rg-card__value rg-card__value--blue">¥{{revenueView.takeoutRevenue || revenueView.gbAiDailyRevenueTakeoutRevenue || '0.00'}}</text>
+          </view>
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/search-3.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">平台抽成</text>
+            </view>
+            <text class="rg-card__value rg-card__value--orange">¥{{revenueView.platformFee || revenueView.gbAiDailyRevenuePlatformFee || '0.00'}}</text>
+          </view>
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/search-3.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">实收</text>
+            </view>
+            <text class="rg-card__value rg-card__value--green">¥{{revenueView.netRevenue || revenueView.gbAiDailyRevenueNetRevenue || '0.00'}}</text>
+          </view>
+        </view>
+        <view class="rg-row">
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/search-3.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">堂食订单</text>
+            </view>
+            <text class="rg-card__value rg-card__value--blue">{{revenueView.dineInOrders || revenueView.gbAiDailyRevenueDineInOrders || '0'}}<text class="rg-card__unit">单</text></text>
+          </view>
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/search-3.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">外卖订单</text>
+            </view>
+            <text class="rg-card__value rg-card__value--green">{{revenueView.takeoutOrders || revenueView.gbAiDailyRevenueTakeoutOrders || '0'}}<text class="rg-card__unit">单</text></text>
+          </view>
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/user-group-2.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">顾客人数</text>
+            </view>
+            <text class="rg-card__value rg-card__value--purple">{{revenueView.dineInCustomers || revenueView.gbAiDailyRevenueDineInCustomers || '0'}}<text class="rg-card__unit">人</text></text>
+          </view>
+        </view>
+
+        <view class="rg-row">
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/search-3.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">销售</text>
+            </view>
+            <text class="rg-card__value rg-card__value--blue">{{revenueView.normalSaleQty || '0'}}<text class="rg-card__unit">份</text></text>
+          </view>
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/search-3.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">打折</text>
+            </view>
+            <text class="rg-card__value rg-card__value--green">{{revenueView.discountGiftQty || '0'}}<text class="rg-card__unit">份</text></text>
+          </view>
+          <view class="rg-card">
+            <view class="rg-card__header">
+              <image src="/images/user-group-2.png" class="rg-card__icon"></image>
+              <text class="rg-card__label">员工</text>
+            </view>
+            <text class="rg-card__value rg-card__value--purple">{{revenueView.employeeMealQty || '0'}}<text class="rg-card__unit">份</text></text>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- 菜品列表 -->
+    <view class="dish-section">
+      <view class="section-header" wx:if="{{!revenueView || !revenueView.hasRecord}}">
+        <view class="section-bar"></view>
+        <text class="section-title">菜品销量</text>
+      </view>
+
+      <!-- 按分类分组 -->
+      <block wx:for="{{foodCategories}}" wx:key="categoryName" wx:for-item="category" wx:for-index="catIdx">
+        <!-- 分类标题 -->
+        <view class="food-category-title">
+          <view class="food-category-bar"></view>
+          <text class="food-category-name">{{category.categoryName}}</text>
+        </view>
+
+        <view class="dish-list">
+          <block wx:for="{{category.dishes}}" wx:key="dishId" wx:for-item="dish">
+            <view class="dish-row {{dish.hasSales ? '' : 'dish-row--empty'}}" bindtap="onEditDish" data-category-index="{{catIdx}}" data-dish-id="{{dish.dishId}}">
+              <view class="dish-info">
+                <text class="dish-name">{{dish.dishName}}</text>
+                <view class="dish-tags" wx:if="{{dish.hasSales}}">
+                  <view class="dish-tag dish-tag--green">
+                    <text class="dish-tag__label">经营</text>
+                    <text class="dish-tag__value">{{dish.operatingSalesPortions || '0'}}</text>
+                  </view>
+                  <view class="dish-tag dish-tag--purple" wx:if="{{dish.complimentaryPortions && dish.complimentaryPortions !== '0'}}">
+                    <text class="dish-tag__label">赠送</text>
+                    <text class="dish-tag__value">{{dish.complimentaryPortions}}</text>
+                  </view>
+                  <view class="dish-tag dish-tag--orange" wx:if="{{dish.employeeMealPortions && dish.employeeMealPortions !== '0'}}">
+                    <text class="dish-tag__label">员工餐</text>
+                    <text class="dish-tag__value">{{dish.employeeMealPortions}}</text>
+                  </view>
+                  <text class="dish-sales-amount">销售额 ¥{{dish.salesAmount || '0.00'}}</text>
+                </view>
+                <view class="dish-tags" wx:else>
+                  <text class="dish-empty-text">已确认 0 份</text>
+                </view>
+              </view>
+              <view class="dish-action">
+                <view class="edit-btn">
+                  <image src="/images/edit.png" class="edit-btn__icon"></image>
+                  <text class="edit-btn__text">编辑</text>
+                </view>
+              </view>
+            </view>
+          </block>
         </view>
       </block>
-    </view>
-    <view class="dinein-estimate" wx:if="{{salesFoodRows.length}}">
-      <text class="dinein-estimate__text">按标价汇总（本页）：¥{{dineInFromDishes}}</text>
-    </view>
-    <view class="dinein-estimate dinein-estimate--muted" wx:if="{{dailyRevenueView && dailyRevenueView.dineInRevenueFromDishes}}">
-      <text class="dinein-estimate__text">入库按菜汇总：¥{{dailyRevenueView.dineInRevenueFromDishes}}（与日营收 dineInRevenueFromDishes 对齐）</text>
-    </view>
-  </view>
 
-  <view class="module-card mb-20 daily-revenue-readonly" wx:if="{{dailyRevenueView}}">
-    <view class="module-title">日营收明细（库 gb_ai_daily_revenue）</view>
-    <text class="dr-fetch-meta" wx:if="{{fetchLineCount != null}}">有效销量行：{{fetchLineCount}}</text>
-    <view class="dr-no-record" wx:if="{{!dailyRevenueView.hasRecord}}">
-      <text>当日暂无日营收入库记录；保存后与菜品销量一并写入。</text>
-    </view>
-    <view class="dr-body" wx:else>
-      <view class="dr-row" wx:if="{{dailyRevenueView.grossRevenue}}">
-        <text class="dr-k">总营业额</text>
-        <text class="dr-v">¥{{dailyRevenueView.grossRevenue}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.netRevenue}}">
-        <text class="dr-k">净营业额</text>
-        <text class="dr-v">¥{{dailyRevenueView.netRevenue}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInRevenueStored}}">
-        <text class="dr-k">堂食（库）</text>
-        <text class="dr-v">¥{{dailyRevenueView.dineInRevenueStored}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInRevenueFromDishes}}">
-        <text class="dr-k">堂食（按菜汇总）</text>
-        <text class="dr-v">¥{{dailyRevenueView.dineInRevenueFromDishes}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInOrders}}">
-        <text class="dr-k">堂食订单数</text>
-        <text class="dr-v">{{dailyRevenueView.dineInOrders}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.dineInCustomers}}">
-        <text class="dr-k">堂食人数</text>
-        <text class="dr-v">{{dailyRevenueView.dineInCustomers}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.takeoutRevenue}}">
-        <text class="dr-k">外卖营业额</text>
-        <text class="dr-v">¥{{dailyRevenueView.takeoutRevenue}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.takeoutOrders}}">
-        <text class="dr-k">外卖订单数</text>
-        <text class="dr-v">{{dailyRevenueView.takeoutOrders}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.platformFee}}">
-        <text class="dr-k">平台抽成</text>
-        <text class="dr-v">¥{{dailyRevenueView.platformFee}}</text>
-      </view>
-      <view class="dr-row dr-row--notes" wx:if="{{dailyRevenueView.notes}}">
-        <text class="dr-k">备注</text>
-        <text class="dr-notes">{{dailyRevenueView.notes}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.weekday}}">
-        <text class="dr-k">星期</text>
-        <text class="dr-v">{{dailyRevenueView.weekday}}</text>
-      </view>
-      <view class="dr-row" wx:if="{{dailyRevenueView.holiday}}">
-        <text class="dr-k">节假日</text>
-        <text class="dr-v">{{dailyRevenueView.holiday}}</text>
+      <view class="empty-state" wx:if="{{!foodCategories.length && !loading}}">
+        <image src="/images/cart-Empty.png" class="empty-image"></image>
+        <text class="empty-text">暂无菜品数据</text>
       </view>
     </view>
   </view>
 
-  <view class="module-card mb-20 module-card--form-fields">
-    <view class="module-title">堂食（指标）</view>
-    <view class="field-row">
-      <text class="field-label">订单数</text>
-      <input class="field-input" type="number" placeholder="0" bindinput="onDineInOrderInput" value="{{dineInOrderCount}}" />
-    </view>
-    <view class="field-row">
-      <text class="field-label">顾客数</text>
-      <input class="field-input" type="number" placeholder="0" bindinput="onDineInCustomerInput" value="{{dineInCustomerCount}}" />
+  <!-- ===== 弹窗：录入菜品销量 ===== -->
+  <view class="meal-modal" wx:if="{{showModal}}">
+    <view class="meal-modal-mask" bindtap="onMaskTap"></view>
+    <view class="meal-modal-panel">
+      <text class="meal-modal__title">{{modalIsEdit ? '修改菜品销量' : '录入菜品销量'}}</text>
+
+      <!-- 菜品名（只读） -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">菜品</text>
+        <view class="meal-form-input meal-form-readonly">
+          <text class="meal-dish-name">{{modalFoodName}}</text>
+        </view>
+      </view>
+
+      <!-- 销售类型 -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">类型</text>
+        <picker mode="selector" range="{{salesTypes}}" range-key="label" value="{{modalSalesTypeIndex}}" bindchange="onSalesTypeChange">
+          <view class="meal-form-input meal-type-picker">
+            <text class="meal-type-badge">{{salesTypes[modalSalesTypeIndex].label}}</text>
+            <image src="/images/arrow-down.png" class="meal-type-arrow"></image>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 份数 -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">份数</text>
+        <input
+          class="meal-form-input"
+          type="digit"
+          placeholder="请输入份数"
+          value="{{modalQuantity}}"
+          placeholder-class="meal-placeholder"
+          bindinput="onModalQuantityInput"
+          focus="{{modalQuantityFocus}}"
+        />
+      </view>
+
+      <!-- 单价 -->
+      <view class="meal-form-item">
+        <text class="meal-form-label">单价（元/份）</text>
+        <input
+          class="meal-form-input"
+          type="digit"
+          placeholder="0.00"
+          value="{{modalUnitPrice}}"
+          placeholder-class="meal-placeholder"
+          bindinput="onModalUnitPriceInput"
+        />
+      </view>
+
+      <!-- 备注 -->
+      <view class="meal-form-item meal-form-item--notes">
+        <text class="meal-form-label">备注（选填）</text>
+        <textarea
+          class="meal-textarea"
+          placeholder="请输入备注"
+          maxlength="50"
+          value="{{modalNotes}}"
+          placeholder-class="meal-placeholder"
+          bindinput="onModalNotesInput"
+          auto-height
+        ></textarea>
+        <view class="meal-textarea-count"><text>{{modalNotes.length}}/50</text></view>
+      </view>
+
+      <!-- 按钮 -->
+      <view class="meal-modal-actions">
+        <button class="meal-btn-cancel" bindtap="onCloseModal">取消</button>
+        <button class="meal-btn-confirm" bindtap="onConfirmModal">确定</button>
+      </view>
     </view>
   </view>
 
-  <view class="module-card mb-20 module-card--form-fields">
-    <view class="module-title">外卖与其它</view>
-    <view class="field-row">
-      <text class="field-label">外卖营业额</text>
-      <input class="field-input" type="digit" placeholder="0" bindinput="onTakeoutInput" value="{{takeoutRevenue}}" />
-    </view>
-    <view class="field-row">
-      <text class="field-label">外卖订单数</text>
-      <input class="field-input" type="number" placeholder="0" bindinput="onTakeoutOrderInput" value="{{takeoutOrderCount}}" />
-    </view>
-    <view class="field-row">
-      <text class="field-label">平台抽成</text>
-      <input class="field-input" type="digit" placeholder="0" bindinput="onPlatformFeeInput" value="{{platformFee}}" />
-    </view>
-    <view class="field-row">
-      <text class="field-label">备注</text>
-      <input class="field-input" placeholder="选填" bindinput="onNotesInput" value="{{notes}}" />
+  <!-- ===== 弹窗：修改经营 ===== -->
+  <view class="meal-modal" wx:if="{{showRevenueModal}}">
+    <view class="meal-modal-mask" bindtap="onRevenueMaskTap"></view>
+    <view class="meal-modal-panel">
+      <text class="meal-modal__title">修改经营</text>
+
+      <!-- 堂食（指标） -->
+      <view class="rev-section-label">堂食（指标）</view>
+      <view class="meal-form-item">
+        <text class="meal-form-label">订单数</text>
+        <input class="meal-form-input" type="number" placeholder="0" value="{{revDineInOrderCount}}" placeholder-class="meal-placeholder" bindinput="onRevDineInOrderInput" />
+      </view>
+      <view class="meal-form-item">
+        <text class="meal-form-label">顾客数</text>
+        <input class="meal-form-input" type="number" placeholder="0" value="{{revDineInCustomerCount}}" placeholder-class="meal-placeholder" bindinput="onRevDineInCustomerInput" />
+      </view>
+      <view class="meal-form-item">
+        <text class="meal-form-label">堂食营业额</text>
+        <input class="meal-form-input" type="digit" placeholder="0.00" value="{{revDineInRevenue}}" placeholder-class="meal-placeholder" bindinput="onRevDineInRevenueInput" />
+      </view>
+
+      <!-- 外卖与其它 -->
+      <view class="rev-section-label">外卖与其它</view>
+      <view class="meal-form-item">
+        <text class="meal-form-label">外卖营业额</text>
+        <input class="meal-form-input" type="digit" placeholder="0.00" value="{{revTakeoutRevenue}}" placeholder-class="meal-placeholder" bindinput="onRevTakeoutInput" />
+      </view>
+      <view class="meal-form-item">
+        <text class="meal-form-label">外卖订单数</text>
+        <input class="meal-form-input" type="number" placeholder="0" value="{{revTakeoutOrderCount}}" placeholder-class="meal-placeholder" bindinput="onRevTakeoutOrderInput" />
+      </view>
+      <view class="meal-form-item">
+        <text class="meal-form-label">平台抽成</text>
+        <input class="meal-form-input" type="digit" placeholder="0.00" value="{{revPlatformFee}}" placeholder-class="meal-placeholder" bindinput="onRevPlatformFeeInput" />
+      </view>
+
+      <!-- 总营业额（自动计算 = 堂食 + 外卖） -->
+      <view class="meal-form-item meal-form-item--total">
+        <text class="meal-form-label meal-form-label--total">总营业额</text>
+        <view class="meal-form-input meal-form-readonly">
+          <text class="meal-total-value">¥{{revGrossRevenue || '0.00'}}</text>
+        </view>
+      </view>
+
+      <!-- 按钮 -->
+      <view class="meal-modal-actions">
+        <button class="meal-btn-cancel" bindtap="onCloseRevenueModal">取消</button>
+        <button class="meal-btn-confirm" bindtap="onConfirmRevenue">确定</button>
+      </view>
     </view>
   </view>
 
-  <view class="save-btn-wrapper">
-    <button class="save-btn save-btn--edit" bindtap="onSave">保存修改</button>
-  </view>
-</view>
 </view>

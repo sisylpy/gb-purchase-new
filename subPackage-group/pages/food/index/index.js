@@ -1,6 +1,6 @@
 const app = getApp();
 const globalData = app.globalData;
-import { menuCategoryBusinessOverview } from '../../../services/apiDistributerFood.js';
+import { menuCategoryBusinessOverview } from '../../../../services/apiDistributerFood.js';
 
 // 四象限颜色配置（与设计图一致）
 var PORTFOLIO_COLORS = {

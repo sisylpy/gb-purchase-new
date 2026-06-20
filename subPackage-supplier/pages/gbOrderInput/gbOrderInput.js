@@ -1,5 +1,5 @@
 var load = require('../../../lib/load.js');
-var dateUtil = require('../../../utils/dateUtil.js');
+var dateUtil = require('../../../lib/dateUtil.js');
 var {
   getDisPurchaseGoodsBatchGb,
   sellerUpdatePurGoods,
@@ -54,9 +54,7 @@ Page({
     getDisPurchaseGoodsBatchGb(this.data.batchId)
       .then(res => {
         load.hideLoading();
-        if (res.result.code == 0) {
-          console.log(res.result.data)
-          this.setData({
+        if (res.result.code == 0) {this.setData({
             batchStatus: res.result.data.gbDpbStatus,
           })
           var arr = res.result.data.gbDPGEntities;
@@ -105,22 +103,16 @@ Page({
     }
   },
 
-  inputValue(e) {
-    console.log(e);
-    var purStandard = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDpgStandard;
+  inputValue(e) {var purStandard = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDpgStandard;
     var goodsStandard = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDgGoodsStandardname;
-    var buyScale = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDpgBuyScale;
-    console.log(purStandard + " standnnddkdkdk" + goodsStandard + "biuysclele==" + buyScale)
-    if (purStandard !== goodsStandard && buyScale !== '-1') {
+    var buyScale = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDpgBuyScale;if (purStandard !== goodsStandard && buyScale !== '-1') {
       this._inputBuyScalePrice(e);
     } else {
       this._inputBuyPrice(e)
     }
   },
 
-  _inputBuyPrice(e) {
-    console.log("inpubuytpriice")
-    var value = e.currentTarget.dataset.value;
+  _inputBuyPrice(e) {var value = e.currentTarget.dataset.value;
     var oldValue = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDpgBuyPrice;
 
     if (value <= 9 && value >= 0) {
@@ -137,9 +129,7 @@ Page({
       })
       this.try(value);
       this._changeBuyPriceToDoPrice(newValue);
-    } else {
-      console.log("点击了非数字")
-      if (value == ".") {
+    } else {if (value == ".") {
         var newValue = 0;
         if (oldValue != null && oldValue !== '' && String(oldValue).indexOf(".") != -1) {
           this.try("tishi");
@@ -306,10 +296,8 @@ Page({
         var scalePrice = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDpgBuyScalePrice;
         var scale = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDepartmentOrdersEntities[i].gbDoDsStandardScale;
         if (scalePrice != null && scale != null && scaleWeight != null) {
-          var doSubtotal = (Number(scalePrice) * Number(scaleWeight)).toFixed(1)
-          var doPrice = (Number(scalePrice) / Number(scale)).toFixed(1)
-          console.log("_putBuyPriceAndDoPriceScale_putBuyPriceAndDoPriceScale");
-          console.log(doSubtotal)
+          var doSubtotal = (Number(scalePrice) * Number(scaleWeight)).toFixed(1);
+          var doPrice = (Number(scalePrice) / Number(scale)).toFixed(1);
           this.setData({
             ["batch.gbDPGEntities[" + this.data.focusGoodsIndex + "].gbDepartmentOrdersEntities[" + i + "].gbDoScalePrice"]: data,
             ["batch.gbDPGEntities[" + this.data.focusGoodsIndex + "].gbDepartmentOrdersEntities[" + i + "].gbDoPrice"]: doPrice,
@@ -327,9 +315,7 @@ Page({
   _changeBuyPriceToDoPrice(data) {
     var orderArr = this.data.batch.gbDPGEntities[this.data.focusGoodsIndex].gbDepartmentOrdersEntities;
     for (var i = 0; i < orderArr.length; i++) {
-      var weight = orderArr[i].gbDoWeight;
-      console.log(weight);
-      if (weight != null && weight > 0) {
+      var weight = orderArr[i].gbDoWeight;if (weight != null && weight > 0) {
         var subtotal = Number(weight) * Number(data);
         this.setData({
           ["batch.gbDPGEntities[" + this.data.focusGoodsIndex + "].gbDepartmentOrdersEntities[" + i + "].gbDoSubtotal"]: subtotal.toFixed(1),
@@ -430,9 +416,7 @@ Page({
     })
   },
 
-  showShareTishi() {
-    console.log("showtishi")
-    var batch = this.data.batch;
+  showShareTishi() {var batch = this.data.batch;
     var orderAmount = 0;
     var finishAmount = 0;
     var unFinishAmount = 0;
@@ -441,9 +425,7 @@ Page({
       for (var j = 0; j < ordersArr.length; j++) {
         orderAmount = Number(orderAmount) + Number(1);
         var orderWeight = batch.gbDPGEntities[i].gbDepartmentOrdersEntities[j].gbDoWeight;
-        var orderSubtotal = batch.gbDPGEntities[i].gbDepartmentOrdersEntities[j].gbDoSubtotal;
-        console.log(orderSubtotal);
-        if (orderWeight > 0 && orderWeight !== null && orderSubtotal > 0 && orderSubtotal !== null) {
+        var orderSubtotal = batch.gbDPGEntities[i].gbDepartmentOrdersEntities[j].gbDoSubtotal;if (orderWeight > 0 && orderWeight !== null && orderSubtotal > 0 && orderSubtotal !== null) {
           finishAmount = Number(finishAmount) + Number(1);
         }
       }
@@ -470,9 +452,7 @@ Page({
     sellerUpdatePurGoods(this.data.purGoods)
       .then(res => {
         load.hideLoading();
-        if (res.result.code == 0) {
-          console.log(res.result.data)
-          this._getInitData()
+        if (res.result.code == 0) {this._getInitData()
         }
       })
   },

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我的工作笔记",
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar"
+  }
+}

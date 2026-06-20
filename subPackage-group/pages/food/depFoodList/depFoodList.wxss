@@ -360,7 +360,7 @@
 /* 售价 + 销量 + 变化 */
 .dcl-card__price-sales {
   margin-top: 8rpx;
-  font-size: 24rpx;
+  font-size: 30rpx;
   color: #999;
   line-height: 1.4;
 }
@@ -368,6 +368,7 @@
 .dcl-card__price {
   color: #e67e22;
   font-weight: 600;
+  font-size: 32rpx;
 }
 
 .dcl-card__divider {

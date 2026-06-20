@@ -1,0 +1,392 @@
+<!-- 每日公告牌 -->
+<view class="page" style="padding-top: {{navBarHeight}}px;">
+
+
+  <!-- ========== 导航栏 ========== -->
+  <view class="navbar" style="height: {{navBarHeight}}px;">
+    <view class="navbar-back" bindtap="toBack">
+      <text class="navbar-back-icon">‹</text>
+      <text>返回</text>
+    </view>
+    <text class="navbar-title">{{isManager ? '门店公告牌' : '部门公告牌'}}</text>
+    <view class="navbar-placeholder"></view>
+  </view>
+
+  <!-- ========== 加载状态 ========== -->
+  <block wx:if="{{loading}}">
+    <view class="empty-box">
+      <text class="empty-text">加载中…</text>
+    </view>
+    <view style="height: 100vh;"></view>
+  </block>
+
+  <!-- ========== 空状态 ========== -->
+  <block wx:elif="{{emptyReason}}">
+    <view class="empty-box">
+      <image class="empty-icon" src="../../images/empty.png" mode="aspectFit"></image>
+      <text class="empty-text">{{emptyReason}}</text>
+      <view class="empty-retry" bindtap="_loadBoard">
+        <text>重新加载</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- ========== 主内容 ========== -->
+  <block wx:else>
+
+    <!-- 日期选择器 -->
+    <scroll-view class="date-bar" scroll-x="true" enhanced show-scrollbar="{{false}}" wx:if="{{recentDates.length > 0}}">
+      <view class="date-bar-inner">
+        <block wx:for="{{recentDates}}" wx:key="asOfDate">
+          <view
+            class="date-chip {{item.asOfDate === asOfDate ? 'date-chip--active' : ''}}"
+            bindtap="onDateTap"
+            data-date="{{item.asOfDate}}"
+          >
+            <text class="date-chip-day">{{item.relativeDayLabel || item.shortWeekdayLabel || item.monthDayLabel}}</text>
+            <text class="date-chip-date">{{item.shortDateLabel || item.monthDayLabel}}</text>
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+
+    <!-- 顶部标题区 -->
+    <view class="header">
+      <text class="header-scope">{{scopeHeaderLabel || (storeName + ' · ' + '门店库存')}}</text>
+      <text class="header-date">{{dateLabel}}</text>
+    </view>
+
+    <!-- 摘要统计栏 -->
+    <view class="summary-bar" wx:if="{{summary.noteCount > 0 || summary.inventoryAlertCount > 0 || summary.priceChangedGoodsCount > 0}}">
+      <block wx:if="{{summary.noteCount > 0}}">
+        <view class="stat-item">
+          <text class="stat-num">{{summary.noteCount}}</text>
+          <text class="stat-label">条公告</text>
+        </view>
+        <view class="stat-divider"></view>
+      </block>
+      <block wx:if="{{summary.inventoryAlertCount > 0}}">
+        <view class="stat-item">
+          <text class="stat-num">{{summary.inventoryAlertCount}}</text>
+          <text class="stat-label">条库存提醒</text>
+        </view>
+        <view class="stat-divider" wx:if="{{isManager && summary.priceChangedGoodsCount > 0}}"></view>
+      </block>
+      <block wx:if="{{isManager && summary.priceChangedGoodsCount > 0}}">
+        <view class="stat-item">
+          <text class="stat-num">{{summary.priceChangedGoodsCount}}</text>
+          <text class="stat-label">个价格波动商品</text>
+        </view>
+      </block>
+    </view>
+
+    <!-- ==================== 1. 今日公告 ==================== -->
+    <view class="section" wx:if="{{notes.length > 0}}">
+      <view class="section-head">
+        <view class="section-head-left">
+          <view class="section-dot section-dot--note"></view>
+          <text class="section-title">今日公告</text>
+        </view>
+        <text class="section-count">{{notes.length}}</text>
+      </view>
+
+      <block wx:for="{{notes}}" wx:key="announcementId" wx:for-index="ni">
+        <view class="note-card {{item._isAi ? 'note-card--ai' : ''}}">
+          <!-- AI 消息标识 -->
+          <view class="note-badge" wx:if="{{item._isAi}}">
+            <text class="note-badge-icon">✨</text>
+            <text class="note-badge-text">AI 智能消息</text>
+          </view>
+          <view class="note-badge note-badge--work" wx:elif="{{item.sourceType === 'WORK_NOTE'}}">
+            <text class="note-badge-text">工作笔记</text>
+          </view>
+
+          <!-- 标题 -->
+          <text class="note-title">{{item.title}}</text>
+
+          <!-- 正文 -->
+          <view class="note-body" wx:if="{{item.textContent}}">
+            <text class="note-text">{{item.textContent}}</text>
+          </view>
+
+          <!-- 来源业务卡（sourceCard / cardSnapshotJson） -->
+          <business-card-renderer
+            wx:if="{{item._hasSourceCard}}"
+            card-type="{{item._sourceCardType}}"
+            payload="{{item._sourceCardPayload}}"
+            title="{{item._sourceCardTitle}}"
+            subtitle="{{item._sourceCardSubtitle}}"
+            source-item-key="{{item._sourceItemKey}}"
+            readonly="{{true}}"
+            scene="announcement"
+          />
+
+          <!-- 旧卡快照（仅兼容展示，无 cardType+payload） -->
+          <block wx:if="{{item._hasOldCards}}">
+            <view class="note-old-tip">
+              <text class="note-old-tip-text">📋 此公告关联了以下卡片快照：</text>
+            </view>
+            <view class="note-old-cards">
+              <block wx:for="{{item._oldCards}}" wx:key="cardKey" wx:for-item="oc">
+                <view class="note-old-card">
+                  <text class="note-old-card-title">▪ {{oc.title || oc.cardType}}</text>
+                  <text class="note-old-card-sub">{{oc.subtitle || ''}}</text>
+                </view>
+              </block>
+            </view>
+          </block>
+
+          <!-- 发布信息 -->
+          <view class="note-footer">
+            <text class="note-author">{{item.publisherName}}</text>
+            <text class="note-time">{{item.publishedAt}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- ==================== 2. 库存提醒 ==================== -->
+    <view class="section" wx:if="{{inventoryCards.length > 0}}">
+      <view class="section-head">
+        <view class="section-head-left">
+          <view class="section-dot section-dot--inventory"></view>
+          <text class="section-title">库存提醒</text>
+        </view>
+      </view>
+
+      <block wx:for="{{inventoryCards}}" wx:key="cardKey" wx:for-index="ci">
+        <view class="inv-card inv-card--{{item._type}}">
+
+          <!-- 卡片头 -->
+          <view class="inv-card-head">
+            <view class="inv-card-head-left">
+              <text class="inv-card-title">{{item.title}}</text>
+            </view>
+            <view class="inv-card-badge">
+              <text class="inv-card-badge-num">{{item.wasteCount || item.nearExpiryCount || item.itemCount || item.rowCount || 0}}</text>
+              <text class="inv-card-badge-label">项</text>
+            </view>
+          </view>
+
+          <text class="inv-card-subtitle" wx:if="{{item.subtitle}}">{{item.subtitle}}</text>
+
+          <!-- ===== 鲜品废弃风险 ===== -->
+          <block wx:if="{{item._type === 'waste' && item.wasteItems.length > 0}}">
+            <view class="inv-table">
+              <view class="inv-table-head">
+                <text class="inv-th inv-th--name">商品</text>
+                <text class="inv-th inv-th--qty">库存</text>
+                <text class="inv-th inv-th--date">入库日期</text>
+                <text class="inv-th inv-th--status">状态</text>
+              </view>
+              <view class="inv-table-row" wx:for="{{item.wasteItems}}" wx:key="batchId" wx:for-item="wi">
+                <view class="inv-td inv-td--name">
+                  <text class="inv-goods-name">{{wi.goodsName}}</text>
+                </view>
+                <view class="inv-td inv-td--qty">
+                  <text class="inv-qty">{{wi.restWeight}}{{wi.weightUnit}}</text>
+                </view>
+                <view class="inv-td inv-td--date">
+                  <text class="inv-date">{{wi.stockInDate}}</text>
+                </view>
+                <view class="inv-td inv-td--status">
+                  <text class="inv-risk-tag inv-risk-tag--{{wi.isOverdue ? 'danger' : 'warn'}}">{{wi.wasteRiskLabel}}</text>
+                  <text class="inv-risk-time" wx:if="{{wi.minuteLabel}}">{{wi.minuteLabel}}</text>
+                </view>
+              </view>
+            </view>
+          </block>
+
+          <!-- ===== 分类存放天数提醒 ===== -->
+          <block wx:if="{{item._type === 'storage' && item.nearExpiryItems.length > 0}}">
+            <text class="inv-storage-hint">注意：以下为{{item.storageDaysLabel || '分类存放天数'}}提醒，非保质期过期</text>
+            <view class="inv-table">
+              <view class="inv-table-head">
+                <text class="inv-th inv-th--name">商品</text>
+                <text class="inv-th inv-th--qty">库存</text>
+                <text class="inv-th inv-th--date">应存至</text>
+                <text class="inv-th inv-th--status">状态</text>
+              </view>
+              <view class="inv-table-row" wx:for="{{item.nearExpiryItems}}" wx:key="batchId" wx:for-item="si">
+                <view class="inv-td inv-td--name">
+                  <text class="inv-goods-name">{{si.goodsName}}</text>
+                  <text class="inv-goods-detail" wx:if="{{si.storageDays}}">（{{item.storageDaysLabel}}：{{si.storageDays}}天）</text>
+                </view>
+                <view class="inv-td inv-td--qty">
+                  <text class="inv-qty">{{si.restWeight}}{{si.weightUnit}}</text>
+                </view>
+                <view class="inv-td inv-td--date">
+                  <text class="inv-date">{{si.storageDueDate || si.stockInDate}}</text>
+                  <text class="inv-date-delta" wx:if="{{si.daysUntilStorageDue < 0}}">超 {{-si.daysUntilStorageDue}} 天</text>
+                </view>
+                <view class="inv-td inv-td--status">
+                  <text class="inv-risk-tag inv-risk-tag--{{si.storageReminderTier === 'exceeded' ? 'danger' : si.storageReminderTier === 'warning' ? 'warn' : 'normal'}}">{{si.storageReminderLabel}}</text>
+                </view>
+              </view>
+            </view>
+          </block>
+
+          <!-- ===== 库存风险清单 ===== -->
+          <block wx:if="{{item._type === 'inventory' && item.riskItems.length > 0}}">
+            <text class="inv-section-label" wx:if="{{item.sectionTitle}}">{{item.sectionTitle}} · {{item.timeLabel}}</text>
+            <view class="inv-table">
+              <view class="inv-table-head">
+                <text class="inv-th inv-th--name">商品</text>
+                <text class="inv-th inv-th--qty">库存</text>
+                <text class="inv-th inv-th--info">可支撑天数</text>
+                <text class="inv-th inv-th--info">日均用量</text>
+              </view>
+              <view class="inv-table-row" wx:for="{{item.riskItems}}" wx:key="goodsId" wx:for-item="ri">
+                <view class="inv-td inv-td--name">
+                  <text class="inv-goods-name">{{ri.goodsName}}</text>
+                  <text class="inv-goods-tag">{{ri.riskTypeLabel}}</text>
+                </view>
+                <view class="inv-td inv-td--qty">
+                  <text class="inv-qty">{{ri.restWeight}}{{ri.weightUnit}}</text>
+                </view>
+                <view class="inv-td inv-td--info">
+                  <text class="inv-info-val">{{ri.supportDays}} 天</text>
+                </view>
+                <view class="inv-td inv-td--info">
+                  <text class="inv-info-val">{{ri.dailyOutboundWeight}}{{ri.weightUnit}}/天</text>
+                </view>
+              </view>
+            </view>
+          </block>
+
+        </view>
+      </block>
+    </view>
+
+    <!-- ==================== 3. 采购价格影响（仅管理人员） ==================== -->
+    <view class="section" wx:if="{{isManager && purchasePriceCard}}">
+      <view class="section-head">
+        <view class="section-head-left">
+          <view class="section-dot section-dot--price"></view>
+          <text class="section-title">采购价格影响</text>
+        </view>
+      </view>
+
+      <view class="price-card">
+
+        <!-- 仅摘要模式（无详细卡片数据） -->
+        <block wx:if="{{purchasePriceCard._summaryOnly}}">
+          <view class="price-summary-only">
+            <view class="price-stat-row">
+              <view class="price-stat-box">
+                <text class="price-stat-num">{{purchasePriceCard.priceChangedGoodsCount}}</text>
+                <text class="price-stat-lbl">发生价格波动商品</text>
+              </view>
+              <view class="price-stat-box">
+                <text class="price-stat-num">{{purchasePriceCard.affectedDishCount}}</text>
+                <text class="price-stat-lbl">受影响菜品</text>
+              </view>
+            </view>
+            <text class="price-empty-note" wx:if="{{purchasePriceCard.affectedDishCount === 0 && purchasePriceCard.priceChangedGoodsCount > 0}}">暂无菜品超过影响阈值</text>
+          </view>
+        </block>
+
+        <!-- 完整卡片 -->
+        <block wx:else>
+          <!-- 顶部数字摘要 -->
+          <view class="price-summary">
+            <view class="price-stat-box">
+              <text class="price-stat-num">{{purchasePriceCard.priceChangedGoodsCount}}</text>
+              <text class="price-stat-lbl">价格波动商品</text>
+            </view>
+            <view class="price-stat-box">
+              <text class="price-stat-num">{{purchasePriceCard.affectedDishCount}}</text>
+              <text class="price-stat-lbl">受影响菜品</text>
+            </view>
+            <view class="price-stat-box" wx:if="{{purchasePriceCard.highImpactDishCount > 0}}">
+              <text class="price-stat-num price-stat-num--danger">{{purchasePriceCard.highImpactDishCount}}</text>
+              <text class="price-stat-lbl">高影响菜品</text>
+            </view>
+          </view>
+
+          <!-- 商品波动行 -->
+          <block wx:if="{{purchasePriceCard.hasGoodsRows}}">
+            <text class="price-subtitle">商品单价波动</text>
+            <view class="goods-row-list">
+              <block wx:for="{{purchasePriceCard.goodsRows}}" wx:key="goodsName">
+                <view class="goods-row-item">
+                  <view class="goods-row-top">
+                    <text class="goods-row-name">{{item.goodsName}}</text>
+                    <text class="goods-row-delta {{item.unitPriceDeltaRaw > 0 ? 'goods-row-delta--up' : 'goods-row-delta--down'}}">{{item.unitPriceDelta}} / {{item.unitPriceDeltaRate}}</text>
+                  </view>
+                  <view class="goods-row-bottom">
+                    <text class="goods-row-price">当前 {{item.currentUnitPrice}}元/{{item.unit}}</text>
+                    <text class="goods-row-old-price">上批 {{item.previousUnitPrice}}元/{{item.unit}}</text>
+                  </view>
+                  <view class="goods-row-footer" wx:if="{{item.purchaserName || item.purchaseDate}}">
+                    <text class="goods-row-buyer">{{item.purchaserName}}</text>
+                    <text class="goods-row-date">{{item.purchaseDate}}</text>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </block>
+
+          <!-- 受影响菜品 -->
+          <block wx:if="{{purchasePriceCard.hasAffectedDishes}}">
+            <text class="price-subtitle">受影响菜品</text>
+            <view class="dish-list">
+              <block wx:for="{{purchasePriceCard.affectedDishes}}" wx:key="dishName">
+                <view class="dish-item {{item.highImpact ? 'dish-item--high' : ''}}">
+                  <view class="dish-row">
+                    <text class="dish-name">{{item.dishName}}</text>
+                    <text class="dish-tag" wx:if="{{item.highImpact}}">高影响</text>
+                  </view>
+                  <view class="dish-row">
+                    <text class="dish-info">售价 {{item.dishPrice}}元</text>
+                    <text class="dish-info">配方用量 {{item.recipeAmountPerPortion}}{{item.recipeAmountUnit}}/份</text>
+                  </view>
+                  <view class="dish-row">
+                    <text class="dish-info">折合 {{item.normalizedUsagePerPortion}}{{item.normalizedUsageUnit}}</text>
+                    <text class="dish-info">成本影响 {{item.costImpactPerPortion}}</text>
+                  </view>
+                  <view class="dish-row">
+                    <text class="dish-info dish-info--margin">毛利率影响 {{item.grossMarginRateImpact}} 个百分点</text>
+                    <text class="dish-info">阈值 {{item.grossMarginFloatThreshold}} 个百分点</text>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </block>
+
+          <!-- recipeDebug -->
+          <block wx:if="{{purchasePriceCard.hasRecipeDebug}}">
+            <view class="debug-toggle" bindtap="onToggleRecipeDebug">
+              <text class="debug-toggle-text">{{showRecipeDebug ? '收起' : '展开'}}排除分析（{{purchasePriceCard.recipeDebug.length}} 项）</text>
+              <text class="debug-toggle-arrow">{{showRecipeDebug ? '▲' : '▼'}}</text>
+            </view>
+            <view class="debug-list" wx:if="{{showRecipeDebug}}">
+              <block wx:for="{{purchasePriceCard.recipeDebug}}" wx:key="dishName">
+                <view class="debug-item">
+                  <view class="debug-name-row">
+                    <text class="debug-dish-name">{{item.dishName}}</text>
+                    <text class="debug-reason">{{item.skippedReasonLabel}}</text>
+                  </view>
+                  <view class="debug-detail">
+                    <text class="debug-detail-text">配方用量 {{item.recipeAmountPerPortion}}{{item.recipeAmountUnit}} → 折合 {{item.normalizedUsagePerPortion}}{{item.normalizedUsageUnit}}</text>
+                  </view>
+                  <view class="debug-detail">
+                    <text class="debug-detail-text">成本影响 {{item.costImpactPerPortion}}</text>
+                    <text class="debug-detail-text">毛利率影响 {{item.grossMarginRateImpact}} 个百分点</text>
+                    <text class="debug-detail-text" wx:if="{{item.thresholdRate}}">阈值 {{item.thresholdRate}} 个百分点</text>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </block>
+        </block>
+
+      </view>
+    </view>
+
+    <!-- 底部留白 -->
+    <view style="height: 60rpx;"></view>
+
+  </block>
+
+</view>

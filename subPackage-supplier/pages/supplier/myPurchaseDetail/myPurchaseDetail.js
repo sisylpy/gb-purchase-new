@@ -54,10 +54,7 @@ Page({
       this.setData({
         arr: res.result.data,
       })
-      load.hideLoading();
-      console.log(res.result.data)
-     
-    })
+      load.hideLoading();})
   },
 
 
@@ -127,10 +124,7 @@ Page({
               const isTopOut = containerTop < 0;  // 顶部超出屏幕上方
               const isBottomOut = containerBottom > viewportHeight;  // 底部超出屏幕下方
               
-              if (isTopOut || isBottomOut) {
-                console.log(`滚动检测：商品 ${actualIndex} 超出屏幕，自动关闭`);
-                
-                const newArr = [...this.data.arr];
+              if (isTopOut || isBottomOut) {const newArr = [...this.data.arr];
                 newArr[actualIndex].showPurchaseList = false;
                 
                 this.setData({
@@ -187,12 +181,7 @@ Page({
 
   // 标签页点击事件
   onTab1Click(event) {
-    const type = event.currentTarget.dataset.type;
-    console.log('=== 按钮点击事件 ===');
-    console.log('点击类型:', type);
-    console.log('事件目标:', event.currentTarget);
-
-    // 根据按钮类型执行相应操作
+    const type = event.currentTarget.dataset.type;// 根据按钮类型执行相应操作
     if (type === '0') {
       // 自采按钮
       this.toDetail({ currentTarget: { dataset: { type: '0' } } });

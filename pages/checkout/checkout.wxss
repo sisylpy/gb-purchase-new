@@ -1,0 +1,153 @@
+.page-checkout {
+  min-height: 100vh;
+  background: #f4f6f5;
+  padding: 24rpx 24rpx 48rpx;
+}
+
+.checkout-loading {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.section-block {
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 28rpx 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.preview-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20rpx 28rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.preview-line-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-name {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.preview-qty {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.preview-tag {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #e6a23c;
+}
+
+.preview-subtotal {
+  font-size: 28rpx;
+  color: #187e6e;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.preview-subtotal.pending {
+  color: #ccc;
+}
+
+.summary-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 32rpx;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 28rpx;
+  color: #555;
+  margin-bottom: 12rpx;
+}
+
+.summary-value,
+.summary-pay {
+  color: #187e6e;
+  font-weight: 600;
+}
+
+.summary-pending {
+  color: #e6a23c;
+}
+
+.pay-row {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+  font-size: 30rpx;
+}
+
+.summary-pay {
+  font-size: 36rpx;
+}
+
+.summary-notice {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #e6a23c;
+  line-height: 1.5;
+}
+
+.confirm-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  background: #187e6e;
+  color: #fff;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.confirm-btn.is-loading {
+  opacity: 0.7;
+}
+
+.confirm-hint {
+  display: block;
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.5;
+}

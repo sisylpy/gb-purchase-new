@@ -1,0 +1,54 @@
+.unSelected{
+  border-radius: 50%;
+  height: 40rpx;
+  width: 40rpx;
+  border: 1px solid gray;
+}
+
+
+.phone_btn{
+  /* bottom: 20rpx; */
+  background: rgb(238, 238, 238);
+  color: #187e6e;
+  border-radius: 10rpx;
+  line-height: 100rpx;
+  text-align: center;
+  font-size: 38rpx;
+}
+
+.send-main-btn {
+  /* position: fixed; */
+  bottom: 20rpx;
+  background: rgb(138, 137, 137);
+  color: #fff;
+  border-radius: 10rpx;
+  line-height: 100rpx;
+  text-align: center;
+}
+
+.send-main-btn.active {
+  background: #187e6e;
+}
+
+
+
+.fix-main-btn {
+  position: fixed;
+  bottom: 20rpx;
+  width: 90%;
+  left: 5%;
+  background: #8a8989;
+  color: #fff;
+  border-radius: 10rpx;
+  line-height: 100rpx;
+  text-align: center;
+}
+
+.fix-main-btn.active {
+  background: #000;
+}
+
+.fixed_bottom{
+  position: fixed;
+  bottom: 0;
+}

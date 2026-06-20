@@ -34,22 +34,12 @@ Page({
       btnWidthContainer: (globalData.windowWidth / 8) * globalData.rpxR,
       bigBtnWidth: (globalData.windowWidth / 6) * globalData.rpxR - 20,
       bigBtnWidthContainer: (globalData.windowWidth / 6) * globalData.rpxR,
-    });
-
-    console.log("🔄 页面显示，准备刷新数据...");
-    console.log("userInfo:", this.data.userInfo);
-    console.log("isSellRegiste:", this.data.isSellRegiste);
-
-    if (this.data.jrdhUserInfo !== null) {
-      console.log("aaaaa")
-      // 用户已登录，隐藏注册弹窗并刷新数据
+    });if (this.data.jrdhUserInfo !== null) {// 用户已登录，隐藏注册弹窗并刷新数据
       this.setData({
         isSellRegiste: false
       });
       this._getInitData();
-    } else {
-      console.log("_userLogin_userLogin")
-      this._userLogin();
+    } else {this._userLogin();
     }
 
   },
@@ -142,14 +132,8 @@ Page({
             if (this.data.batch.gbDPGEntities[i].gbDpgStatus < 2) {
               waitWeightCount++;
             }
-          }
-
-          console.log("📊 重新计算 waitWeightCount:", waitWeightCount);
-          console.log("📊 商品状态详情:");
-          for (var i = 0; i < this.data.batch.gbDPGEntities.length; i++) {
-            var item = this.data.batch.gbDPGEntities[i];
-            console.log(`  商品${i}: gbDpgStatus=${item.gbDpgStatus}, gbDpgIsCheck=${item.gbDpgIsCheck}`);
-          }
+          }for (var i = 0; i < this.data.batch.gbDPGEntities.length; i++) {
+            var item = this.data.batch.gbDPGEntities[i];}
 
           for (var i = 0; i < this.data.batch.gbDPGEntities.length; i++) {
             var item = this.data.batch.gbDPGEntities[i];
@@ -162,21 +146,14 @@ Page({
               if (item.gbDepartmentOrdersEntities && item.gbDepartmentOrdersEntities.length > 0) {
                 for (var j = 0; j < item.gbDepartmentOrdersEntities.length; j++) {
                   var order = item.gbDepartmentOrdersEntities[j];
-                  if (order.gbDoBuyStatus == 3) {
-                    console.log(`  订单${j}状态为3，设置gbDpgIsCheck=1`);
-                    item.gbDpgIsCheck = 1;
+                  if (order.gbDoBuyStatus == 3) {item.gbDpgIsCheck = 1;
                     break; // 找到一个状态为3的订单就够了
                   }
                 }
-              } else {
-                console.log(`商品${i}没有订单数据`);
-              }
+              } else {}
             } else {
 
-            }
-
-            console.log(`商品${i}最终gbDpgIsCheck=${item.gbDpgIsCheck}`);
-          }
+            }}
           this.setData({
             waitWeightCount: waitWeightCount,
             batch: this.data.batch,
@@ -194,9 +171,7 @@ Page({
             duration: 3000
           });
         
-          setTimeout(() => {
-            console.log("athhthta", that.data.buyUser)
-            if(that.data.buyUser){
+          setTimeout(() => {if(that.data.buyUser){
               wx.redirectTo({
                 url: '../../../../pages/index/index',
               })
@@ -227,9 +202,7 @@ Page({
           buyUserId: this.data.buyUserId,
         }
         whichJrdhUserLoginGbJj(data)
-          .then((res) => {
-            console.log("logingingingi", res.result)
-            if (res.result.code == 0) {
+          .then((res) => {if (res.result.code == 0) {
               that.setData({
                 disInfo: res.result.data.disInfo,
               })
@@ -316,21 +289,10 @@ Page({
 
 
   sellerCheckUnPay() {
-    //本页面的this.data.batch.gbDpbSupplierId 供货商 Id，去寻找返回页面customerArr 的 item.nxJrdhSupplierId,
-    console.log('=== gbOrderBatch toBack 开始 ===');
-    console.log('this.data.batch:', this.data.batch);
-    console.log('this.data.batch.gbDpbSupplierId:', this.data.batch.gbDpbSupplierId);
-
-    // 存储供货商ID，用于返回时自动选择
-    wx.setStorageSync('returnSupplierId', this.data.batch.gbDpbSupplierId);
-    console.log('已存储 returnSupplierId:', this.data.batch.gbDpbSupplierId);
-
-
-    wx.redirectTo({
+    //本页面的this.data.batch.gbDpbSupplierId 供货商 Id，去寻找返回页面customerArr 的 item.nxJrdhSupplierId,// 存储供货商ID，用于返回时自动选择
+    wx.setStorageSync('returnSupplierId', this.data.batch.gbDpbSupplierId);wx.redirectTo({
       url: '../jinriListWithLogin/jinriListWithLogin',
-    })
-    console.log('=== gbOrderBatch toBack 结束 ===');
-  },
+    })},
 
 
   showPrice() {
@@ -409,9 +371,7 @@ Page({
     const value = e.detail.value;
     this.setData({
       nickName: value
-    });
-    console.log('实时昵称:', value);
-    this._checkRegister();
+    });this._checkRegister();
   },
 
 
@@ -469,11 +429,8 @@ Page({
               var code = this.data.code;
               var admin = 4;
               var buyUserId = this.data.buyUserId;
-              load.showLoading("保存修改内容")
-              console.log(filePathList, userName, code, admin, gbDisId, buyUserId, this.data.depId);
-              console.log("------------")
+              load.showLoading("保存修改内容");
               jrdhSellerRegisterWithFileGbJj(filePathList, userName, code, admin, gbDisId, buyUserId, this.data.depId).then((res) => {
-                console.log(res);
                 load.hideLoading();
                 if (res.result == '{"code":0}') {
                   this.setData({
@@ -620,22 +577,16 @@ Page({
   },
 
   toBack() {
-   
-    // 存储供货商ID，用于返回时自动选择
     wx.setStorageSync('returnSupplierId', this.data.batch.gbDpbSupplierId);
 
-    //就在上一个页面customerArr中选择供货商后，设置
     var pages = getCurrentPages();
     var prevPage = pages[pages.length - 2];
     prevPage.setData({
       supplierId: this.data.batch.gbDpbSupplierId,
-    })
-
-    console.log('使用 redirectTo 返回');
+    });
     wx.redirectTo({
       url: '../jinriListWithLogin/jinriListWithLogin',
-    })
-    console.log('=== gbOrderBatch toBack 结束 ===');
+    });
   },
 
 
@@ -683,10 +634,7 @@ Page({
   },
 
 
-  showShareTishi() {
-    console.log('检查完成订货条件...');
-
-    // 重新计算等待出库的商品个数，确保数据准确
+  showShareTishi() {// 重新计算等待出库的商品个数，确保数据准确
     var waitWeightCount = 0;
     for (var i = 0; i < this.data.batch.gbDPGEntities.length; i++) {
       if (this.data.batch.gbDPGEntities[i].gbDpgStatus < 2) {
@@ -717,11 +665,7 @@ Page({
       if (!item.gbDpgIsCheck) {
         uncheckedCount++;
       }
-    }
-
-    console.log('未录完单价的商品数量:', uncheckedCount);
-
-    if (uncheckedCount > 0) {
+    }if (uncheckedCount > 0) {
       wx.showModal({
         title: "单价没有录完",
         content: "还有" + uncheckedCount + "个商品单价未录入完成",
@@ -765,9 +709,7 @@ Page({
       var sum = this._buySubtotalSumFromBatch(this.data.batch);
       var batchPayload = Object.assign({}, this.data.batch, {
         gbDpbSubtotal: sum,
-      });
-      console.log("batch", batchPayload);
-      sellerFinishPurchaseGoodsBatchGb(this.data.batch)
+      });sellerFinishPurchaseGoodsBatchGb(this.data.batch)
         .then(res => {
           load.hideLoading();
           if (res.result.code == 0) {
@@ -800,12 +742,8 @@ Page({
         'wCtYVih8kAdCHjfaYL1qwOtQnmQEKAGO_EgRmlB6cOE',
         '_KhWtCVg3fIBH-tHqSV0hUk5m_vuKmxw1CGn0PEv6D0'
       ],
-      success(res) {
-        console.log("订阅消息成功", res);
-      },
-      fail(res) {
-        console.log('订阅消息失败', res);
-        // 订阅失败不影响业务流程，只记录日志
+      success(res) {},
+      fail(res) {// 订阅失败不影响业务流程，只记录日志
       }
     })
   },

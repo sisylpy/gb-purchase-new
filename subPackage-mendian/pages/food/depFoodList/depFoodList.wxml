@@ -1,224 +1,15 @@
 <wxs src="../../../../utils/fn.wxs" module="tool" />
 
-<view wx:if="{{foodManageMode}}" class="food-menu-page flex flex-column">
+<view class="flex-column flex">
+ 
   <back-navbar title="{{manageFatherName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBackManage"></back-navbar>
 
-  <scroll-view scroll-y class="food-menu-scroll">
-    <view class="food-menu-head">
-      <text class="food-menu-head__label">菜品</text>
-      <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" catchtap="addDishFromCategory">
-        <text class="food-menu-action-btn__txt">添加菜品</text>
-      </view>
-    </view>
-
-    <view class="food-cat-section__dishes food-cat-section__dishes--nested" style="margin-left: 0; border-left: none; padding-left: 0;">
-      <view
-        class="food-dish-cell"
-        wx:for="{{manageFoodList}}"
-        wx:for-item="food"
-        wx:key="gbDistributerFoodId"
-      >
-        <view class="food-dish-cell__inner">
-          <view class="food-dish-cell__content">
-            <view class="food-dish-cell__main-row">
-              <view class="food-dish-cell__main-left">
-                <view class="food-dish-cell__title-left">
-                  <text class="food-dish-cell__no-inline">{{index + 1}}.</text>
-                  <view class="food-dish-cell__name-wrap">
-                    <text class="font-lg font-bold food-dish-cell__title-name">{{food.gbDfFoodName}}</text>
-                    <text wx:if="{{food.gbDfStatus == 1}}" class="food-cat-item__badge food-cat-item__badge--off">停用</text>
-                  </view>
-                </view>
-                <view class="flex-row food-dish-cell__method-row font-md">
-                  <text class="text-secondary">售出方法</text>
-                  <text class="ml-10">{{food.gbDfFoodMethod}}</text>
-                </view>
-              </view>
-              <view class="food-dish-cell__price-inline">
-                <text class="food-dish-cell__price-lab">单价</text>
-                <text class="food-dish-cell__price-sym">¥</text>
-                <text class="food-dish-cell__price-num">{{food.gbDfFoodPrice}}</text>
-                <text class="food-dish-cell__price-suffix">元/份</text>
-              </view>
-            </view>
-            <view class="flex-column font-md food-dish-cell__extra">
-              <view class="flex-row pt-10 food-dish-cell__raw">
-                <text class="text-secondary food-dish-cell__raw-label">主要原料</text>
-                <view class="food-raw-chips food-raw-chips--in-cell">
-                  <view class="food-raw-chip" wx:for="{{food.gbdisFoodGoodsEntities}}" wx:for-item="goods" wx:key="gbDistributerFoodGoodsId">
-                    <text>{{goods.gbDfgGoodsName}} {{goods.gbDfgGoodsAmount}}{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
-                  </view>
-                </view>
-              </view>
-              <view class="flex-row pt-10 food-dish-cell__raw food-dish-cell__dep-block" wx:if="{{food.depFoodList && food.depFoodList.length}}">
-                <text class="text-secondary food-dish-cell__raw-label">部门菜品</text>
-                <view class="food-dep-food-rows">
-                  <view class="food-dep-food-row" wx:for="{{food.depFoodList}}" wx:for-item="depf" wx:key="_depRowKey">
-                    <view class="food-dep-food-row__main">
-                      <text class="food-dep-food-row__dep-name">{{depf._displayDepName}}</text>
-                      <text class="food-dep-food-row__price">¥{{depf.gbDfFoodPrice}}/份</text>
-                      <text wx:if="{{depf.gbDfStatus == 1}}" class="food-cat-item__badge food-cat-item__badge--off">停用</text>
-                    </view>
-                    <view
-                      class="food-dep-food-row__unlink"
-                      hover-class="food-dep-food-row__unlink--hover"
-                      catchtap="onManageRemoveDepFood"
-                      data-item="{{depf}}"
-                    >
-                      <text>移除</text>
-                    </view>
-                  </view>
-                </view>
-              </view>
-            </view>
-            <view class="food-dish-cell__actions">
-              <view
-                wx:if="{{food.gbDfStatus == 1}}"
-                class="food-dish-act food-dish-act--icon food-dish-act--ok"
-                hover-class="food-dish-act--hover"
-                catchtap="onDishRestartFood"
-                data-item="{{food}}"
-                data-father-id="{{manageFoodFatherId}}"
-                data-father-name="{{manageFatherName}}"
-              >
-                <image class="food-dish-act__icon" src="/images/correct.png" mode="aspectFit" />
-                <text class="food-dish-act__txt">恢复</text>
-              </view>
-              <view
-                wx:else=""
-                class="food-dish-act food-dish-act--icon food-dish-act--danger"
-                hover-class="food-dish-act--hover"
-                catchtap="onDishDeleteFood"
-                data-item="{{food}}"
-                data-father-id="{{manageFoodFatherId}}"
-                data-father-name="{{manageFatherName}}"
-              >
-                <image class="food-dish-act__icon" src="/images/ashbin.png" mode="aspectFit" />
-                <text class="food-dish-act__txt">删除</text>
-              </view>
-              <view
-                class="food-dish-act food-dish-act--icon"
-                hover-class="food-dish-act--hover"
-                catchtap="onDishEditFood"
-                data-item="{{food}}"
-                data-father-id="{{manageFoodFatherId}}"
-                data-father-name="{{manageFatherName}}"
-              >
-                <image class="food-dish-act__icon" src="/images/MapEditing.png" mode="aspectFit" />
-                <text class="food-dish-act__txt">编辑</text>
-              </view>
-              <view
-                class="food-dish-act food-dish-act--icon"
-                hover-class="food-dish-act--hover"
-                catchtap="onDishEditRaw"
-                data-item="{{food}}"
-                data-father-id="{{manageFoodFatherId}}"
-                data-father-name="{{manageFatherName}}"
-              >
-                <image class="food-dish-act__icon" src="/images/Cost.png" mode="aspectFit" />
-                <text class="food-dish-act__txt">原料</text>
-              </view>
-              <view
-                
-                class="food-dish-act food-dish-act--icon"
-                hover-class="food-dish-act--hover"
-                catchtap="onDishAddToDepartment"
-                data-item="{{food}}"
-                data-father-id="{{manageFoodFatherId}}"
-                data-father-name="{{manageFatherName}}"
-              >
-                <image class="food-dish-act__icon" src="/images/adduser.png" mode="aspectFit" />
-                <text class="food-dish-act__txt">加部门</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-      <view class="flex-column-center" wx:if="{{!manageFoodList || manageFoodList.length === 0}}">
-        <text class="p-30">暂无菜品，点击上方「添加菜品」</text>
-      </view>
-    </view>
-  </scroll-view>
-</view>
-
-<view class="mask {{showOperationDep ? 'is-active' : ''}}" wx:if="{{foodManageMode}}" catchtap="hideMaskManage">
-  <view class="food-dep-sheet" catchtap="noop">
-    <view class="food-dep-sheet__header">
-      <text class="food-dep-sheet__title">{{dishItem.gbDfFoodName}}</text>
-      <text class="food-dep-sheet__subtitle">添加到部门 · 设置门店销售价格</text>
-    </view>
-    <view class="food-dep-sheet__body">
-      <view class="food-dep-sheet__field">
-        <text class="food-dep-sheet__label">销售价格</text>
-        <view class="food-dep-sheet__input-wrap">
-          <text class="food-dep-sheet__currency">¥</text>
-          <input
-            class="food-dep-sheet__input"
-            bindinput="getNewPrice"
-            type="digit"
-            placeholder="请输入金额"
-            placeholder-class="food-dep-sheet__placeholder"
-            value="{{price}}"
-          />
-          <text class="food-dep-sheet__unit">元</text>
-        </view>
-      </view>
-      <view class="food-dep-sheet__field">
-        <text class="food-dep-sheet__label">销售部门</text>
-        <view class="food-dep-sheet__dep-chip">
-          <text class="food-dep-sheet__dep-text">{{selectedDepName}}</text>
-        </view>
-      </view>
-    </view>
-    <view class="food-dep-sheet__footer">
-      <view class="food-dep-sheet__actions">
-        <text class="food-dep-sheet__btn food-dep-sheet__btn--ghost" bindtap="hideMaskManage" hover-class="food-dep-sheet__btn--hover">取消</text>
-        <text class="food-dep-sheet__btn food-dep-sheet__btn--primary" catchtap="downLoadGoods" hover-class="food-dep-sheet__btn--hover">保存到部门</text>
-      </view>
-    </view>
-  </view>
-</view>
-
-
-<view class="overlay {{showChoiceDep ? 'show' : ''}}" wx:if="{{foodManageMode}}" catchtap="hideChoiceDepMask">
-  <view class="food-dep-sheet" catchtap="noop">
-    <view class="food-dep-sheet__header">
-      <text class="food-dep-sheet__title">选择销售部门</text>
-      <text class="food-dep-sheet__subtitle">将「{{dishItem.gbDfFoodName}}」添加到以下部门</text>
-    </view>
-    <scroll-view scroll-y class="food-dep-sheet__scroll" style="max-height: {{windowHeight * 0.5}}rpx;">
-      <view
-        class="food-dep-sheet__item"
-        wx:for="{{departmentChoiceList}}"
-        wx:key="gbDepartmentId"
-        wx:for-item="dep"
-        bindtap="selectDepartmentForFood"
-        data-item="{{dep}}"
-        hover-class="food-dep-sheet__item--hover"
-      >
-        <text class="food-dep-sheet__item-main">{{dep.gbDepartmentName}}</text>
-        <text class="food-dep-sheet__item-arrow">›</text>
-      </view>
-    </scroll-view>
-    <view class="food-dep-sheet__footer food-dep-sheet__footer--borderless">
-      <view class="food-dep-sheet__actions food-dep-sheet__actions--single">
-        <text class="food-dep-sheet__btn food-dep-sheet__btn--ghost" bindtap="hideChoiceDepMask" hover-class="food-dep-sheet__btn--hover">取消</text>
-      </view>
-    </view>
-  </view>
-</view>
-
-<block wx:if="{{!foodManageMode}}">
-<view class="food-page food-page--boss">
-  <back-navbar title="菜品经营" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack">
-  </back-navbar>
-
-
+    
   <!--  top -->
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
     <view class="flex-row">
-      <view class="p-20" bindtap="toDatePage">
-        <image src="../../../../images/calender.png" class="icon"></image>
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="/images/calender.png" class="icon"></image>
       </view>
       <view class="flex-column pt-10">
         <view class="font-yuan">{{hanzi}}</view>
@@ -233,334 +24,263 @@
       </view>
     </view>
 
-    <view class="flex-row">
-      <view class="flex-row p-20" bindtap="onToggleSearchBar">
-      <image src="/images/search-3.png" class="icon mr-20 dfl-search-top-ico {{foodNameSearch ? 'dfl-search-top-ico--on' : ''}}"></image>
-    </view>
-    
-    <picker
-      wx:if="{{subDepPickerRange.length > 1}}"
-      mode="selector"
-      range="{{subDepPickerRange}}"
-      range-key="gbDepartmentName"
-      value="{{activeSubDepIndex}}"
-      bindchange="onSubDepChange"
-    >
-      <view class="flex-row p-20">
-        <image src="/images/search-3.png" class="icon mr-20 dfl-search-top-ico"></image>
-        <text class="small">{{activeSubDepName ? activeSubDepName : '子部门'}}</text>
-      </view>
-    </picker>
-    
-    </view>
+  </view>
+
+
+
+  <scroll-view scroll-y class="dcl-scroll mt-10" >
 
    
 
-  </view>
-
-  <view class="dfl-search-panel bg-white border-bottom" wx:if="{{searchBarOpen}}">
-    <view class="dfl-search-inner">
-      <image class="dfl-search-inner-ico" src="/images/search-3.png" mode="aspectFit" />
+    <!-- 搜索栏 -->
+    <view class="dcl-search-bar">
+      <image class="dcl-search-icon" src="/images/search-3.png" mode="aspectFit" />
       <input
-        class="dfl-search-input"
-        value="{{foodNameSearchDraft}}"
+        class="dcl-search-input"
+        value="{{searchKeyword}}"
         placeholder="搜索菜品名称"
         confirm-type="search"
-        focus="{{searchInputFocus}}"
-        bindinput="onFoodNameSearchInput"
-        bindconfirm="onFoodNameSearchConfirm"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
       />
-      <text class="dfl-search-clear" wx:if="{{foodNameSearchDraft}}" catchtap="onFoodNameSearchClear">×</text>
-    </view>
-  </view>
-
-  <view class="dfl-banner" wx:if="{{scopeOutboundSubtotals || businessInsightSummary}}">
-    <view class="dfl-banner__head">
-      <text class="dfl-banner__title">本区间经营概览</text>
-      <!-- <text class="dfl-banner__badge">经营口径</text> -->
+      <text class="dcl-search-clear" wx:if="{{searchKeyword}}" bindtap="onSearchClear">×</text>
     </view>
 
-    <view class="dfl-banner__hero" wx:if="{{businessInsightSummary}}">
-      <view class="dfl-banner__hero-main">
-        <text class="dfl-banner__hero-lab">综合实际毛利率</text>
-        <text class="dfl-banner__hero-val">{{businessInsightSummary.comprehensiveGrossMarginRateOnListPrice}}%</text>
-        <text class="dfl-banner__hero-sub">销售总额 ¥{{businessInsightSummary.totalListPriceRevenue}}</text>
-      </view>
-      <view class="dfl-banner__hero-side">
-        <text class="dfl-banner__hero-side-lab">配料毛利率</text>
-        <text
-          class="dfl-banner__hero-side-val">{{businessInsightSummary.blendedGrossMarginRateTheoryOnListPrice}}%</text>
-        <text class="dfl-banner__hero-sub">后台返回 · 菜品毛利率（理论）</text>
-      </view>
-    </view>
-
-    <view class="dfl-banner__grid" wx:if="{{scopeOutboundSubtotals}}">
-      <view class="dfl-kpi">
-        <text class="dfl-kpi__val dfl-kpi__val--accent">{{scopeOutboundSubtotals.wasteLossRatioInOutbound123}}%</text>
-        <text class="dfl-kpi__lab">损耗率 (2+3)/(1+2+3)</text>
-      </view>
-      <view class="dfl-kpi">
-        <view class="flex-row">
-          <text class="dfl-kpi__val mr-30">¥{{scopeOutboundSubtotals.subtotalProduceType1}}</text>
-          <text class="dfl-kpi__val">{{businessInsightSummary.blendedGrossMarginRateOnListPrice}}%</text>
-
+    <!-- 角色筛选 & 排序：搜索时隐藏 -->
+    <block wx:if="{{!searchKeyword}}">
+    <scroll-view scroll-x class="dcl-role-scroll" show-scrollbar="{{false}}">
+      <view class="dcl-role-chips">
+        <view
+          class="dcl-role-chip {{activeRole === '' ? 'dcl-role-chip--on' : ''}}"
+          bindtap="onRoleFilter"
+          data-role=""
+          hover-class="dcl-role-chip--hover"
+        >
+          <text>全部角色</text>
         </view>
-        <text class="dfl-kpi__lab">生产出库</text>
-      </view>
-      <view class="dfl-kpi">
-        <text class="dfl-kpi__val">¥{{scopeOutboundSubtotals.wasteLossAmountType23}}</text>
-        <text class="dfl-kpi__lab">损耗+损失</text>
-      </view>
-      <view class="dfl-kpi">
-        <text class="dfl-kpi__val">¥{{scopeOutboundSubtotals.subtotalOutbound123}}</text>
-        <text class="dfl-kpi__lab">出库合计 1+2+3</text>
-      </view>
-    </view>
-    <!-- <text class="dfl-banner__hint"
-      wx:if="{{bossColumnHintsZh && bossColumnHintsZh.scopeOutboundSubtotals && bossColumnHintsZh.scopeOutboundSubtotals.wasteLossRatioInOutbound123}}">{{bossColumnHintsZh.scopeOutboundSubtotals.wasteLossRatioInOutbound123}}</text> -->
-    <view class="dfl-banner__meta" wx:if="{{businessInsightSummary}}">
-      <text>菜品 {{businessInsightSummary.dishRowCount}} 道 · 标价收入 ¥{{businessInsightSummary.totalListPriceRevenue}} · 实际成本  ¥{{businessInsightSummary.totalActualCostAmount}} · 理论成本
-        ¥{{businessInsightSummary.totalTheoryCostAmount}}</text>
-    </view>
-  </view>
-
-  <view class="dfl-section" wx:if="{{foodRowsSourceCount > 0}}">
-    <view class="dfl-section__bar">
-      <text class="dfl-section__title">菜品销售与毛利</text>
-    </view>
-    <view class="dfl-sort-wrap">
-      <view class="dfl-sort-left">
-        <view class="dfl-sort-arrows">
-          <text class="dfl-sort-arrow dfl-sort-arrow--up {{foodSortOrder === 'asc' ? 'is-on' : ''}}">↑</text>
-          <text class="dfl-sort-arrow dfl-sort-arrow--down {{foodSortOrder === 'desc' ? 'is-on' : ''}}">↓</text>
+        <view
+          class="dcl-role-chip dcl-role-chip--star {{activeRole === 'STAR' ? 'dcl-role-chip--on' : ''}}"
+          bindtap="onRoleFilter"
+          data-role="STAR"
+          hover-class="dcl-role-chip--hover"
+        >
+          <text>明星菜</text>
         </view>
-        <text class="dfl-sort-label">排序{{foodSortOrder === 'asc' ? '·升序' : '·降序'}}</text>
+        <view
+          class="dcl-role-chip dcl-role-chip--traffic {{activeRole === 'TRAFFIC' ? 'dcl-role-chip--on' : ''}}"
+          bindtap="onRoleFilter"
+          data-role="TRAFFIC"
+          hover-class="dcl-role-chip--hover"
+        >
+          <text>引流菜</text>
+        </view>
+        <view
+          class="dcl-role-chip dcl-role-chip--potential {{activeRole === 'POTENTIAL' ? 'dcl-role-chip--on' : ''}}"
+          bindtap="onRoleFilter"
+          data-role="POTENTIAL"
+          hover-class="dcl-role-chip--hover"
+        >
+          <text>潜力菜</text>
+        </view>
+        <view
+          class="dcl-role-chip dcl-role-chip--watch {{activeRole === 'WATCH' ? 'dcl-role-chip--on' : ''}}"
+          bindtap="onRoleFilter"
+          data-role="WATCH"
+          hover-class="dcl-role-chip--hover"
+        >
+          <text>观察菜</text>
+        </view>
       </view>
-      <scroll-view scroll-x class="dfl-sort-scroll" show-scrollbar="{{false}}">
-        <view class="dfl-sort-chips">
-          <view class="dfl-sort-chip dfl-sort-chip--sales {{foodSortBy === 'sales' ? 'is-on' : ''}}" bindtap="onFoodSort" data-sort="sales">
-            <text class="dfl-sort-chip-ico">份</text>
+    </scroll-view>
+
+    <!-- 排序 -->
+    <view class="dcl-sort-wrap">
+      <text class="dcl-sort-label">排序</text>
+      <scroll-view scroll-x class="dcl-sort-scroll" show-scrollbar="{{false}}">
+        <view class="dcl-sort-chips">
+          <view
+            class="dcl-sort-chip {{sortBy === 'sales' ? 'dcl-sort-chip--on' : ''}}"
+            bindtap="onSortBy"
+            data-sort="sales"
+            hover-class="dcl-sort-chip--hover"
+          >
             <text>销量</text>
           </view>
-          <view class="dfl-sort-chip dfl-sort-chip--margin {{foodSortBy === 'margin' ? 'is-on' : ''}}" bindtap="onFoodSort" data-sort="margin">
-            <text class="dfl-sort-chip-ico">%</text>
-            <text>综合毛利率</text>
+          <view
+            class="dcl-sort-chip {{sortBy === 'amount' ? 'dcl-sort-chip--on' : ''}}"
+            bindtap="onSortBy"
+            data-sort="amount"
+            hover-class="dcl-sort-chip--hover"
+          >
+            <text>销售额</text>
           </view>
-          <view class="dfl-sort-chip dfl-sort-chip--profit {{foodSortBy === 'profit' ? 'is-on' : ''}}" bindtap="onFoodSort" data-sort="profit">
-            <text class="dfl-sort-chip-ico">¥</text>
+          <view
+            class="dcl-sort-chip {{sortBy === 'profit' ? 'dcl-sort-chip--on' : ''}}"
+            bindtap="onSortBy"
+            data-sort="profit"
+            hover-class="dcl-sort-chip--hover"
+          >
             <text>实际利润</text>
+          </view>
+          <view
+            class="dcl-sort-chip {{sortBy === 'margin' ? 'dcl-sort-chip--on' : ''}}"
+            bindtap="onSortBy"
+            data-sort="margin"
+            hover-class="dcl-sort-chip--hover"
+          >
+            <text>毛利率</text>
+          </view>
+          <view
+            class="dcl-sort-chip {{sortBy === 'costGap' ? 'dcl-sort-chip--on' : ''}}"
+            bindtap="onSortBy"
+            data-sort="costGap"
+            hover-class="dcl-sort-chip--hover"
+          >
+            <text>成本异常</text>
           </view>
         </view>
       </scroll-view>
     </view>
+    </block>
+    
 
-    <view class="dfl-list-empty" wx:if="{{!foodRows.length && foodNameSearch}}">
-      <text>未找到「{{foodNameSearch}}」相关菜品</text>
+
+    <!-- 空状态 -->
+    <view class="dcl-empty" wx:if="{{!dishes.length}}">
+      <text>暂无符合条件的菜品</text>
     </view>
 
-    <view class="dfl-list" wx:if="{{foodRows.length}}">
-      <view class="dfl-boss-card" wx:for="{{foodRows}}" wx:for-item="food" wx:key="_rowKey">
-
-        <!-- 顶栏：菜名 / 单价 | 占位图 | 销量（对齐稿图） -->
-        <view class="dfl-dish-head">
-          <view class="dfl-dish-head__main">
-            <text class="dfl-dish-head__idx">{{index + 1}}.</text>
-            <view class="dfl-dish-head__titles">
-              <text class="dfl-dish-head__name">{{food.gbDfFoodName}}</text>
-              <text class="dfl-dish-head__price text-secondary">单价 ¥{{food.gbDfFoodPrice}}/份</text>
+    <!-- 菜品卡片列表 -->
+    <view class="dcl-list" wx:if="{{dishes.length}}">
+      <view
+        class="dcl-card"
+        wx:for="{{dishes}}"
+        wx:for-item="dish"
+        wx:key="foodId"
+      >
+        <!-- 顶部：图片 + 信息 -->
+        <view class="dcl-card__top">
+          <!-- <view class="dcl-card__img-wrap">
+            <image
+              wx:if="{{dish.imageUrl}}"
+              class="dcl-card__img"
+              src="{{dish.imageUrl}}"
+              mode="aspectFill"
+            />
+            <view wx:else class="dcl-card__img-placeholder">
+              <text class="dcl-card__img-ph-icon">🍽</text>
             </view>
-          </view>
-          <view class="dfl-dish-head__aside">
-            <!-- <view class="dfl-dish-head__photo-wrap">
-              <image wx:if="{{food._dishCoverUrl}}" class="dfl-dish-head__photo" src="{{food._dishCoverUrl}}" mode="aspectFill" />
-              <view wx:else class="dfl-dish-head__photo dfl-dish-head__photo--placeholder" />
-            </view> -->
-            <view class="dfl-dish-head__sales">
-              <text class="dfl-dish-head__sales-lab">销量</text>
-              <text class="dfl-dish-head__sales-val">{{food.gbDfBusinessInsight ? food.gbDfBusinessInsight.soldPortionsTotal : food.gbDfSalesAmount}}份</text>
-            </view>
-          </view>
-        </view>
-
-        <block wx:if="{{food.gbDfSalesAmount > 0}}">
-
-          <block wx:if="{{food.gbDfBusinessInsight}}">
-            <!-- 综合毛利率主卡 -->
-            <view class="dfl-blend-hero">
-              <text class="dfl-blend-hero__title">综合毛利率</text>
-              <view class="dfl-blend-hero__value-row">
-                <text class="dfl-blend-hero__num">{{food.gbDfBusinessInsight.blendedGrossMarginRateOnListPrice}}</text>
-                <text class="dfl-blend-hero__pct">%</text>
-              </view>
+          </view> -->
+          <view class="font-lg font-bold">{{index + 1}}.</view>
+          <view class="dcl-card__head-info">
+            <view class="dcl-card__name-row">
+              <text class="dcl-card__name">{{dish.dishName}}</text>
               <view
-                class="dfl-blend-hero__hint {{tool.marginStandardHintMod(food.gbDfBusinessInsight)}}"
-                wx:if="{{tool.marginStandardShowBlock(food.gbDfBusinessInsight)}}"
+                class="dcl-role-tag dcl-role-tag--{{dish.roleCode === 'STAR' ? 'star' : dish.roleCode === 'TRAFFIC' ? 'traffic' : dish.roleCode === 'POTENTIAL' ? 'potential' : 'watch'}}"
               >
-                <text
-                  class="dfl-blend-hero__hint-range"
-                  wx:if="{{tool.marginStandardMetaLine(food.gbDfBusinessInsight)}}"
-                >{{tool.marginStandardMetaLine(food.gbDfBusinessInsight)}}</text>
-                <view class="dfl-blend-hero__hint-inner">
-                  <text
-                    wx:if="{{food.gbDfBusinessInsight.grossMarginLevel == 'IN_BAND'}}"
-                    class="dfl-blend-hero__hint-emoji"
-                    aria-hidden="true"
-                  >👍</text>
-                  <text
-                    wx:elif="{{food.gbDfBusinessInsight.grossMarginLevel == 'BELOW'}}"
-                    class="dfl-blend-hero__hint-emoji"
-                    aria-hidden="true"
-                  >😭</text>
-                  <text
-                    wx:elif="{{food.gbDfBusinessInsight.grossMarginLevel == 'ABOVE'}}"
-                    class="dfl-blend-hero__hint-emoji"
-                    aria-hidden="true"
-                  >😢</text>
-                  <text class="dfl-blend-hero__hint-txt">{{tool.marginStandardHint(food.gbDfBusinessInsight)}}</text>
-                </view>
+                <text>{{dish.roleName}}</text>
               </view>
             </view>
 
-            <!-- 实际成本 | 配料毛利率（理论） -->
-            <view class="dfl-stat-dual">
-              <view class="dfl-stat-dual__col">
-                <view class="dfl-stat-dual__icon-row">
-                  <view class="dfl-stat-ico dfl-stat-ico--cost">
-                    <image wx:if="{{food._icoActualCost}}" class="dfl-stat-ico__img" src="{{food._icoActualCost}}" mode="aspectFit" />
-                    <text wx:else class="dfl-stat-ico__fallback">¥</text>
-                  </view>
-                  <view class="dfl-stat-dual__text">
-                    <text class="dfl-stat-dual__lab">实际成本</text>
-                    <text class="dfl-stat-dual__val dfl-stat-dual__val--dark">¥{{food.gbDfBusinessInsight.actualCostPerPortion123}}/份</text>
-                    <text class="dfl-stat-dual__sub">占售价 {{tool.getProducePercent(food.gbDfBusinessInsight.actualCostPerPortion123, food.gbDfFoodPrice)}}%</text>
-                  </view>
-                </view>
-              </view>
-              <view class="dfl-stat-dual__divider" />
-              <view class="dfl-stat-dual__col">
-                <view class="dfl-stat-dual__icon-row">
-                  <view class="dfl-stat-ico dfl-stat-ico--theory">
-                    <image wx:if="{{food._icoTheoryMargin}}" class="dfl-stat-ico__img" src="{{food._icoTheoryMargin}}" mode="aspectFit" />
-                    <text wx:else class="dfl-stat-ico__fallback">%</text>
-                  </view>
-                  <view class="dfl-stat-dual__text">
-                    <text class="dfl-stat-dual__lab">配料毛利率 (理论)</text>
-                    <view class="dfl-stat-dual__val dfl-stat-dual__val--green dfl-stat-dual__val-row">
-                      <text>{{food.gbDfBusinessInsight.grossMarginRateTheoryOnListPrice != null && food.gbDfBusinessInsight.grossMarginRateTheoryOnListPrice !== '' ? food.gbDfBusinessInsight.grossMarginRateTheoryOnListPrice : '—'}}</text>
-                      <text
-                        class="dfl-stat-dual__pct-suffix"
-                        wx:if="{{food.gbDfBusinessInsight.grossMarginRateTheoryOnListPrice != null && food.gbDfBusinessInsight.grossMarginRateTheoryOnListPrice !== ''}}"
-                      >%</text>
-                    </view>
-                    <text class="dfl-stat-dual__sub">配料成本 ¥{{tool.pricePerPortion(food.gbDfBusinessInsight.theoryCostAmount, food.gbDfBusinessInsight.soldPortionsTotal)}}/份</text>
-                  </view>
-                </view>
-              </view>
+            <view class="dcl-card__role-reason" wx:if="{{dish.roleReason}}">
+              <text>{{dish.roleReason}}</text>
             </view>
 
-            <!-- 销售收入 | 实际总成本 -->
-            <view class="dfl-stat-dual dfl-stat-dual--tight">
-              <view class="dfl-stat-dual__col">
-                <view class="dfl-stat-dual__icon-row">
-                  <view class="dfl-stat-ico dfl-stat-ico--revenue">
-                    <image wx:if="{{food._icoRevenue}}" class="dfl-stat-ico__img" src="{{food._icoRevenue}}" mode="aspectFit" />
-                    <text wx:else class="dfl-stat-ico__fallback">¥</text>
-                  </view>
-                  <view class="dfl-stat-dual__text">
-                    <text class="dfl-stat-dual__lab">销售收入</text>
-                    <text class="dfl-stat-dual__val dfl-stat-dual__val--dark">¥{{food.gbDfBusinessInsight.listPriceRevenue}}</text>
-                  </view>
-                </view>
-              </view>
-              <view class="dfl-stat-dual__divider" />
-              <view class="dfl-stat-dual__col">
-                <view class="dfl-stat-dual__icon-row">
-                  <view class="dfl-stat-ico dfl-stat-ico--wallet">
-                    <image wx:if="{{food._icoWallet}}" class="dfl-stat-ico__img" src="{{food._icoWallet}}" mode="aspectFit" />
-                    <text wx:else class="dfl-stat-ico__fallback">¥</text>
-                  </view>
-                  <view class="dfl-stat-dual__text">
-                    <text class="dfl-stat-dual__lab">实际总成本</text>
-                    <text class="dfl-stat-dual__val dfl-stat-dual__val--dark">¥{{food.gbDfBusinessInsight.actualCostTotalAmount123}}</text>
-                  </view>
-                </view>
-              </view>
+            <view class="dcl-card__price-sales">
+              <text class="dcl-card__price">¥{{dish.currentPrice}}/{{dish.saleUnitName || '份'}}</text>
+              <text class="dcl-card__divider">·</text>
+              <text class="dcl-card__sales">本期销量 <text class="dcl-card__sales-num">{{dish.soldPortionsTotal}}</text> 份</text>
             </view>
-
-            <view class="dfl-week-chart" wx:if="{{food._hasInsightRow}}">
-              <view class="dfl-week-chart__head flex-row-between">
-                <text class="dfl-week-chart__title">近7天销量趋势</text>
-                <text class="dfl-week-chart__muted" wx:if="{{!food._weekChartHasData}}">暂无分日销量</text>
-              </view>
-              <view class="dfl-week-chart__canvas-wrap">
-                <ec-canvas id="{{food._weekChartDomId}}" canvas-id="{{food._weekChartDomId}}" ec="{{ weekEcLazy }}"
-                  class="dfl-week-ec"></ec-canvas>
-              </view>
-            </view>
-
-            <text class="dfl-boss-card__method dfl-boss-card__method--below-chart" wx:if="{{food.gbDfFoodMethod}}">{{food.gbDfFoodMethod}}</text>
-
-            <view class="dfl-ingredient-cta" hover-class="food-add-btn--hover" catchtap="onOpenIngredients" data-food="{{food}}">
-              <!-- <image wx:if="{{food._icoLedger}}" class="dfl-ingredient-cta__ico" src="{{food._icoLedger}}" mode="aspectFit" /> -->
-              <!-- <view wx:else class="dfl-ingredient-cta__ico-slot" /> -->
-              <text class="dfl-ingredient-cta__txt">查看配料成本分析</text>
-              <text class="dfl-ingredient-cta__chev">›</text>
-            </view>
-            <text class="dfl-data-disclaimer">* 数据仅供参考，请以实际经营情况为准</text>
-          </block>
-
-        </block>
-
-        <view class="dfl-boss-card__no-insight" wx:elif="{{businessInsightSummary || scopeOutboundSubtotals}}">
-          <text>本菜暂无经营分析数据（无销售或未进成本分摊）</text>
+          </view>
         </view>
 
-        <view class="dfl-boss-card__foot flex-row-between" wx:if="{{!(food.gbDfSalesAmount > 0 && food.gbDfBusinessInsight)}}">
-          <text class="dfl-boss-card__method" wx:if="{{food.gbDfFoodMethod}}">{{food.gbDfFoodMethod}}</text>
-          <text class="dfl-boss-card__method dfl-boss-card__method--muted" wx:else>暂无做法说明</text>
-          <view class="dfl-boss-card__link" hover-class="food-add-btn--hover" catchtap="onOpenIngredients"
-            data-food="{{food}}">
-            配料详情
+        <!-- 核心指标区 -->
+        <view class="dcl-card__metrics">
+          <!-- 实际毛利率 + 理论毛利率 并排 -->
+          <view class="dcl-metrics-dual">
+            <view class="dcl-metrics-dual__col">
+              <text class="dcl-metrics-dual__label">实际毛利率</text>
+              <view class="dcl-metrics-dual__val-row">
+                <text class="dcl-metrics-dual__num dcl-metrics-dual__num--actual">{{dish.actualGrossMarginRateDisplay}}</text>
+                <text class="dcl-metrics-dual__pct">%</text>
+              </view>
+            </view>
+            <view class="dcl-metrics-dual__divider"></view>
+            <view class="dcl-metrics-dual__col dcl-metrics-dual__col--right">
+              <text class="dcl-metrics-dual__label">理论毛利率</text>
+              <view class="dcl-metrics-dual__val-row dcl-metrics-dual__val-row--r">
+                <text class="dcl-metrics-dual__num dcl-metrics-dual__num--theory">{{dish.theoreticalGrossMarginRateDisplay}}</text>
+                <text class="dcl-metrics-dual__pct dcl-metrics-dual__pct--theory">%</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 成本指标三列 -->
+          <view class="dcl-cost-grid">
+            <view class="dcl-cost-cell">
+              <text class="dcl-cost-cell__label">实际成本</text>
+              <text class="dcl-cost-cell__value">¥{{dish.actualCostPerUnit}}/份</text>
+            </view>
+            <view class="dcl-cost-cell">
+              <text class="dcl-cost-cell__label">理论成本</text>
+              <text class="dcl-cost-cell__value">¥{{dish.theoreticalCostPerUnit}}/份</text>
+            </view>
+            <view class="dcl-cost-cell">
+              <text class="dcl-cost-cell__label">成本差异</text>
+              <text class="dcl-cost-cell__value {{dish.costGapClass}}">{{dish.costGapPerUnitDisplay}}/份</text>
+            </view>
+          </view>
+
+          <!-- 实际利润 -->
+          <view class="dcl-profit-row">
+            <text class="dcl-profit-row__label">实际利润</text>
+            <text class="dcl-profit-row__value">¥{{dish.actualProfitAmount}}</text>
+          </view>
+        </view>
+
+        <!-- 经营诊断条（核心卖点：突出展示 title + message + 建议） -->
+        <view class="dcl-card__hint {{dish.hintClass}}" wx:if="{{dish.diagnosisMessage}}">
+          <text class="dcl-card__hint-icon">{{dish.hintIcon}}</text>
+          <view class="dcl-card__hint-body">
+            <text class="dcl-card__hint-title">{{dish.diagnosisTitle}}</text>
+            <text class="dcl-card__hint-text">{{dish.diagnosisMessage}}</text>
+            <text class="dcl-card__hint-action" wx:if="{{dish.diagnosisAction}}">💡 {{dish.diagnosisAction}}</text>
+          </view>
+        </view>
+
+        <!-- 底部操作 -->
+        <view class="dcl-card__actions">
+          <view
+            class="dcl-action-btn"
+            hover-class="dcl-action-btn--hover"
+            catchtap="onDishEdit"
+            data-dish="{{dish}}"
+          >
+            <image class="dcl-action-btn__icon" src="/images/MapEditing.png" mode="aspectFit" />
+            <text>日销量</text>
+          </view>
+          <view
+            class="dcl-action-btn"
+            hover-class="dcl-action-btn--hover"
+            catchtap="onDishCostAudit"
+            data-dish="{{dish}}"
+          >
+            <image class="dcl-action-btn__icon" src="/images/Cost.png" mode="aspectFit" />
+            <text>查询成本</text>
+          </view>
+          <view
+            class="dcl-action-btn dcl-action-btn--primary"
+            hover-class="dcl-action-btn--hover"
+            catchtap="onDishBusiness"
+            data-dish="{{dish}}"
+          >
+            <text>销售</text>
           </view>
         </view>
       </view>
     </view>
-  </view>
 
-  <view class="dfl-empty" wx:if="{{foodRowsSourceCount === 0}}">当前日期范围暂无菜品数据</view>
-</view>
-</block>
-
-<!-- 菜品销量模板：日期范围 -->
-<view class="food-tpl-modal" wx:if="{{!foodManageMode && showFoodSalesTemplateModal}}">
-  <view class="food-tpl-mask" bindtap="onCloseFoodSalesTemplateModal"></view>
-  <view class="food-tpl-panel">
-    <view class="food-tpl-title">选择日期范围</view>
-    <view class="food-tpl-form">
-      <view class="food-tpl-form-item">
-        <text class="food-tpl-form-label">开始日期</text>
-        <picker mode="date" value="{{foodSalesTemplateStartDate}}" end="{{todayDate}}"
-          bindchange="onFoodSalesTemplateStartChange">
-          <view class="food-tpl-form-input flex-row-items-center">
-            <text>{{foodSalesTemplateStartDate || '请选择'}}</text>
-            <text class="text-secondary">›</text>
-          </view>
-        </picker>
-      </view>
-      <view class="food-tpl-form-item">
-        <text class="food-tpl-form-label">结束日期</text>
-        <picker mode="date" value="{{foodSalesTemplateEndDate}}" start="{{foodSalesTemplateStartDate}}"
-          end="{{todayDate}}" bindchange="onFoodSalesTemplateEndChange">
-          <view class="food-tpl-form-input flex-row-items-center">
-            <text>{{foodSalesTemplateEndDate || '请选择'}}</text>
-            <text class="text-secondary">›</text>
-          </view>
-        </picker>
-      </view>
-    </view>
-    <view class="food-tpl-actions">
-      <view class="food-tpl-btn food-tpl-btn--ghost" bindtap="onCloseFoodSalesTemplateModal">取消</view>
-      <view class="food-tpl-btn food-tpl-btn--primary" bindtap="onConfirmDownloadFoodSales">确认下载</view>
-    </view>
-  </view>
+    <!-- 底部安全区 -->
+    <view class="dcl-bottom-safe"></view>
+  </scroll-view>
 </view>

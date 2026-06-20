@@ -1,0 +1,25 @@
+
+
+.sentence{
+  padding: 60rpx 60rpx 20rpx 60rpx;
+  text-align: center;
+}
+
+
+.tishiView{
+  background: rgb(230, 228, 228);
+}
+
+
+.body{
+  background: #fff;
+  position: relative;
+  margin: 0 auto;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 20rpx 20rpx;
+
+}
+/*  */
+
+@import "/template/billPay/billPay.wxss";

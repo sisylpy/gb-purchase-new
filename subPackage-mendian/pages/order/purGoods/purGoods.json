@@ -1,7 +1,6 @@
 {
   "usingComponents": {
-    "navbar": "/components/navbar/navbar",
+    "back-navbar": "/components/back-navbar/back-navbar",
     "inputOrder": "/components/inputOrder/inputOrder"
-  },
-  "navigationStyle": "custom"
+  }
 }

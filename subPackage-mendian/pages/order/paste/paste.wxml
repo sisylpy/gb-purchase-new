@@ -1,0 +1,172 @@
+<view class="flex flex-column page-bg">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="文字下单" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="new-goods-warning" wx:if="{{newGoodsCount > 0 && saveCount != null}}">
+    <text class="warning-text">您有 {{newGoodsCount}} 个商品未匹配，请点击「查找商品」处理</text>
+  </view>
+
+  <view class="flex-column p-20">
+
+    <block wx:if="{{orderArr.length == 0}}">
+      <view class="input-hint">
+        <text class="hint-title">输入或粘贴订单内容</text>
+        <text class="hint-desc">可直接打字，也可点击手机键盘上的麦克风进行语音录入</text>
+        <text class="hint-example">示例：西兰花10斤，东古一品鲜2瓶，鸡蛋3盘</text>
+      </view>
+
+      <view class="input-area">
+        <textarea
+          class="p-20 sentence {{inputContent !== '' ? 'is-active' : ''}}"
+          value="{{inputContent}}"
+          style="width: {{windowWidth - 80}}rpx; font-size: 40rpx; min-height: {{windowHeight / 3}}rpx; max-height: {{windowHeight - navBarHeight - bottomHeight - 280}}rpx;"
+          bindinput="onInput"
+          maxlength="-1"
+          auto-height="false"
+          placeholder="请输入商品名称、数量和单位，每行一条或用逗号分隔"
+          confirm-type="done"
+          show-confirm-bar="{{false}}"
+        />
+      </view>
+    </block>
+
+    <view class="bottom-bar">
+      <block wx:if="{{orderArr.length == 0}}">
+        <view class="flex-row" style="width: 100%;">
+          <view class="flex-column-center half-row" wx:if="{{inputContent !== ''}}">
+            <view class="circle-btn orange" bindtap="clearSentence">
+              <image src="/images/delete.svg" class="btn-icon" />
+            </view>
+            <text class="bottom-btn-label">清空</text>
+          </view>
+
+          <view class="flex-column-center half-row">
+            <view class="circle-btn {{inputContent !== '' ? 'green' : 'white'}}" bindtap="parseOrder">
+              <image src="/images/zhuanhuan.svg" class="btn-icon" />
+            </view>
+            <text class="bottom-btn-label">识别订单</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view class="flex-row-between" style="width: {{windowWidth - 40}}rpx;" wx:if="{{saveCount == null}}">
+          <view class="flex-column-center half-row">
+            <view class="circle-btn orange" bindtap="clearSentence">
+              <image src="/images/delete.svg" class="btn-icon" />
+            </view>
+            <text class="bottom-btn-label">重新输入</text>
+          </view>
+
+          <view class="flex-column-center half-row">
+            <view class="circle-btn green" bindtap="depPasteSearchGoods">
+              <image src="/images/correct.svg" class="btn-icon" />
+            </view>
+            <text class="bottom-btn-label">匹配商品</text>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <block wx:if="{{saveCount == null}}">
+      <scroll-view scroll-y="true" style="max-height: {{windowHeight - navBarHeight - bottomHeight - 40}}rpx;" wx:if="{{orderArr.length > 0}}" class="table">
+        <view class="p-20 flex-row border-bottom" wx:for="{{orderArr}}" wx:for-index="orderIndex" wx:key="orderIndex">
+          <view class="flex-column">
+            <view class="flex-row-default">
+              <view class="flex-row font-bold" style="width: {{windowWidth / 2 - 40}}rpx;">
+                <text class="mr-10 text-secondary">{{orderIndex + 1}}.</text>
+                <view class="flex-column">
+                  <input class="input" style="width: {{windowWidth / 2 - 120}}rpx;" type="text" bindinput="editOrder" data-type="name" data-index="{{orderIndex}}" value="{{item.gbDoGoodsName}}" />
+                </view>
+              </view>
+              <input class="input p-10 mr-10" type="digit" bindinput="editOrder" data-type="quantity" data-index="{{orderIndex}}" value="{{item.gbDoQuantity}}" style="width: {{windowWidth / 7 - 20}}rpx;" />
+              <input class="input p-10 mr-10" type="text" bindinput="editOrder" data-type="standard" data-index="{{orderIndex}}" value="{{item.gbDoStandard}}" style="width: {{windowWidth / 7}}rpx;" />
+            </view>
+            <view class="flex-row p-10" wx:if="{{item.gbDoAddRemark}}">
+              <text class="margin-l-right text-white">{{orderIndex + 1}}.</text>
+              <text class="mr-10 text-secondary font-sl">备注:</text>
+              <input class="input p-10" type="text" bindinput="editOrder" data-type="remark" data-index="{{orderIndex}}" value="{{item.gbDoRemark}}" />
+            </view>
+          </view>
+
+          <view class="button-container" bindtap="showPasteOperation" data-index="{{orderIndex}}">
+            <image src="/images/points.png" mode="aspectFill" class="icon" />
+          </view>
+        </view>
+        <view style="height: 200rpx;" class="text-secondary font-xs center-content">可修改商品名、数量、单位后点击「匹配商品」</view>
+      </scroll-view>
+    </block>
+
+    <view class="flex-column" wx:else>
+      <view class="flex-row" style="background-color: #eeeeee; padding: 10rpx;" wx:if="{{orderArr.length > 0}}">
+        <text style="width: {{windowWidth / 3}}rpx; margin-left: 60rpx;">商品名称</text>
+        <text style="width: {{windowWidth / 6}}rpx; text-align: center;">数量</text>
+        <text style="width: {{windowWidth / 6}}rpx; text-align: center;">规格</text>
+        <text style="width: {{windowWidth / 6}}rpx; text-align: center;">操作</text>
+      </view>
+      <scroll-view scroll-y="true" style="height: {{windowHeight - navBarHeight - bottomHeight}}rpx;" wx:if="{{orderArr.length > 0}}" class="table">
+        <view class="flex-row-default border-bottom {{item.gbDoStatus == -2 ? 'new-goods-order' : ''}}" wx:for="{{orderArr}}" wx:for-index="orderIndex" wx:key="orderIndex">
+          <view class="flex-row-default p-20">
+            <text class="p-10" style="width: 20rpx;">{{orderIndex + 1}}.</text>
+            <view class="flex-column">
+              <view class="flex-row" style="width: {{windowWidth - 120}}rpx;">
+                <view class="flex-row" style="width: {{windowWidth / 3}}rpx;">
+                  <block wx:if="{{item.gbDoStatus == -2}}">
+                    <view class="flex-row align-center">
+                      <text class="text-danger font-xs">[未匹配]</text>
+                    </view>
+                  </block>
+                  <text>{{item.gbDoGoodsName}}</text>
+                </view>
+                <text style="width: {{windowWidth / 6}}rpx; text-align: center;">{{item.gbDoQuantity}}</text>
+                <text style="width: {{windowWidth / 6}}rpx; text-align: center;">{{item.gbDoStandard}}</text>
+                <view bindtap="toPasteFromGoods" data-order="{{item}}" data-index="{{orderIndex}}" hover-class="hover" class="bg-danger radius-10" style="width: {{windowWidth / 6}}rpx; text-align: center;" wx:if="{{item.gbDoStatus == -2}}">
+                  <view class="font-yuan p-10">查找商品</view>
+                </view>
+              </view>
+              <view class="flex-row p-10" wx:if="{{item.gbDoRemark.length > 0}}">
+                <text class="mr-10 text-secondary font-sl">备注:</text>
+                <text class="font-sl text-danger">{{item.gbDoRemark}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+  </view>
+</view>
+
+<view class='overlay {{showOperationPaste ? "show" : "hide"}}' catchtouchmove="true" catchtap="hideMask">
+  <view class="nnn bg-white font-lg">
+    <view class="center-content border-bottom font-bold">
+      <text class="p-30">{{orderItem.gbDoGoodsName}}</text>
+      <text class="p-30">{{orderItem.gbDoQuantity}}{{orderItem.gbDoStandard}}</text>
+    </view>
+    <view class="flex-column">
+      <view class="flex-row p-30 border-bottom" catchtap="delOrder" hover-class="hover">
+        <image src="/images/ashbin.png" class="icon mr-20"></image>
+        <text>删除订单</text>
+      </view>
+      <view class="flex-row p-30" catchtap="addRemark" hover-class="hover">
+        <image src="/images/edit.png" class="icon mr-20"></image>
+        <text>添加备注</text>
+      </view>
+    </view>
+    <view style="height: 20rpx;"></view>
+  </view>
+</view>
+
+<view class='overlay {{showOperationLinshi ? "show" : ""}}' catchtouchmove="true" catchtap="hideMaskLinshi">
+  <view class="flex-column nnn bg-white font-lg">
+    <view class="flex-row p-30 border-bottom" catchtap="toPasteFromGoods" hover-class="hover">
+      <image src="/images/search-3.png" class="icon mr-20"></image>
+      <text>查找商品</text>
+    </view>
+    <view class="flex-row p-30" catchtap="delApplyPaste" hover-class="hover">
+      <image src="/images/del.png" class="icon mr-20"></image>
+      <text>删除订单</text>
+    </view>
+    <view style="height: 20rpx;"></view>
+  </view>
+</view>

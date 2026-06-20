@@ -27,27 +27,105 @@ Page({
       url: apiUrl.server,
     })
 
+    this._loadMendianInfo();
+  },
+
+  onShow: function () {
+    // 每次显示时重新读取缓存，确保门店名称等是最新的
+    this._loadMendianInfo();
+  },
+
+  _loadMendianInfo: function () {
     var value = wx.getStorageSync('mendianInfo');
     if(value){
       this.setData({
         mendianInfo: value,
         disId: value.gbDepartmentDisId
-        
       })
     }
-   
+    var disInfo  = wx.getStorageSync('disInfo');
+    if(disInfo){
+      this.setData({
+        disInfo: disInfo,
+        mendianList: disInfo.mendianDepartmentList,
+      })
+    }
   },
 
-  toMendian(){
+  // 显示选择分店弹窗
+  showMendianPicker(){
+    this.setData({ showMendianPicker: true })
+  },
+
+  // 隐藏选择分店弹窗
+  hideMendianPicker(){
+    this.setData({ showMendianPicker: false })
+  },
+
+  // 选中门店并缓存
+  selectMendian(e){
+    var item = e.currentTarget.dataset.item;
+    // 已经是当前门店，无需切换
+    if (item.gbDepartmentId === this.data.mendianInfo.gbDepartmentId) {
+      this.hideMendianPicker();
+      return;
+    }
+    wx.setStorageSync('mendianInfo', item);
+    var disInfo = wx.getStorageSync('disInfo');
+    if (disInfo && disInfo.mendianDepartmentList) {
+      for (var i = 0; i < disInfo.mendianDepartmentList.length; i++) {
+        if (disInfo.mendianDepartmentList[i].gbDepartmentId === item.gbDepartmentId) {
+          disInfo.mendianDepartmentList[i] = item;
+          break;
+        }
+      }
+      wx.setStorageSync('disInfo', disInfo);
+    }
+    this.setData({
+      mendianInfo: item,
+      disId: item.gbDepartmentDisId,
+      showMendianPicker: false,
+    })
+    wx.showToast({
+      title: '已选择: ' + item.gbDepartmentName,
+      icon: 'none',
+    })
+  },
+
+  toGroup(){
     wx.navigateTo({
-      url: '/subPackage-mendian/pages/account/userEdit/userEdit',
+      url: '/subPackage-group/pages/account/disEdit/disEdit',
     })
 
   },
 
-  toGoods(){
+
+  toStock: function () {
+    wx.navigateTo({ url: '/subPackage-charts/pages/stock/index/index' });
+  },
+
+
+  toResGoods: function () {
+    wx.navigateTo({ url: '/subPackage-goods/pages/depGoodsIndex/depGoodsIndex' });
+  },
+
+  toFood(){
     wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/index/index',
+      url: '/subPackage-group/pages/food/index/index',
+    })
+  },
+
+  toMendian(){
+    wx.navigateTo({
+      url: '/subPackage-mendian/pages/mendian/index/index',
+    })
+
+  },
+
+
+  toGroupGoods(){
+    wx.navigateTo({
+      url: '/subPackage-group/pages/goods/resGoods/resGoods',
     })
   },
   
@@ -63,7 +141,7 @@ Page({
 toMendainFood(){
 
   wx.navigateTo({
-    url: '../../food/depFoodList/depFoodList?disId=' + this.data.disId,
+    url: '../../management/depFoodList/depFoodList?disId=' + this.data.disId,
   })
 
 },
@@ -90,11 +168,15 @@ toCostGoodsFenxi(){
   },
 
 
-  toStaff(){
-    wx.navigateTo({
-      url: '../staff/staff',
-    })
+  toStaffMeal: function () {
+    wx.navigateTo({ url: '/subPackage-mendian/pages/food/index/index' });
   },
+
+  // toStaff(){
+  //   wx.navigateTo({
+  //     url: '../staff/staff',
+  //   })
+  // },
 
 
 
@@ -116,31 +198,16 @@ toPurchaseGoods(){
 
 
 
-  toReportStock(){
+  toDaily: function () {
     wx.navigateTo({
-      url: '/subPackage-charts/pages/report/reportPage/reportPage',
-    })
+      url: '/subPackage-charts/pages/sales/dailyTurnover/dailyTurnover',
+    });
   },
-
-  toDaily(){
-    wx.navigateTo({
-      url: '../../../../subPackage-charts/pages/sales/dailyTurnover/dailyTurnover',
-    })
-
-  },
-
-
-toPriceFenxi(){
-  wx.navigateTo({
-    url: '/subPackage-mendian/pages/data/priceFenxi/priceFenxi',
-  })
-},
-
 
   /* AI对话 */
-  toAiChat(){
+  toAiChat: function () {
     wx.navigateTo({
-      url: '/pages/storeAiChat/storeAiChat',
+      url: '/subPackage-charts/pages/aiChat/aiChat',
     })
    
   },
@@ -149,6 +216,13 @@ toPriceFenxi(){
   toRestaurantProfile(){
     wx.navigateTo({
       url: '/subPackage-ai/pages/restraunt/restaurantProfile/restaurantProfile',
+    })
+  },
+
+
+  toOrder(){
+    wx.navigateTo({
+      url: '../../order/chefOrder/chefOrder',
     })
   },
 

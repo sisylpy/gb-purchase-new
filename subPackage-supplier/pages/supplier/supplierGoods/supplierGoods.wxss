@@ -1,9 +1,0 @@
-
-
-.dep_goods_url{
-  width: 120rpx;
-  height: 120rpx;
-  object-fit: cover; 
-  border-radius: 20rpx;
-  
-}

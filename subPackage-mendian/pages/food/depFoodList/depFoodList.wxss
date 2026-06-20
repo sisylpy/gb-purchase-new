@@ -3,6 +3,633 @@
 
 @import '../food-common.wxss';
 
+/* ==================== 分类菜品经营列表（dcl = dish category list） ==================== */
+.dcl-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.dcl-scroll {
+  height: 100%;
+}
+
+/* 分类摘要条 */
+.dcl-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 20rpx 24rpx 0;
+  padding: 24rpx 20rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.dcl-summary-cell {
+  width: 33.33%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10rpx 4rpx;
+  box-sizing: border-box;
+}
+
+.dcl-summary-cell--wide {
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 12rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+  gap: 8rpx;
+}
+
+.dcl-summary-cell__label {
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-summary-cell__value {
+  margin-top: 6rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+}
+
+.dcl-summary-cell__value--green {
+  color: #07c160;
+}
+
+.dcl-summary-cell__value--blue {
+  color: #4A90D9;
+}
+
+.dcl-summary-cell__value--warn {
+  color: #f59e0b;
+}
+
+.dcl-summary-cell__period {
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* 角色分布小标签 */
+.dcl-role-mini {
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-left: 10rpx;
+}
+
+.dcl-role-mini--star { color: #4A90D9; }
+.dcl-role-mini--traffic { color: #34C759; }
+.dcl-role-mini--potential { color: #5AC8FA; }
+.dcl-role-mini--watch { color: #BDC1C6; }
+
+.dcl-summary-cell__change {
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dcl-summary-cell__change.is-up {
+  color: #07c160;
+}
+
+.dcl-summary-cell__change.is-down {
+  color: #fa5151;
+}
+
+/* 搜索栏 */
+.dcl-search-bar {
+  display: flex;
+  align-items: center;
+  margin: 20rpx 24rpx 0;
+  padding: 14rpx 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+}
+
+.dcl-search-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.dcl-search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  min-height: 48rpx;
+  line-height: 48rpx;
+}
+
+.dcl-search-clear {
+  flex-shrink: 0;
+  width: 44rpx;
+  height: 44rpx;
+  text-align: center;
+  line-height: 40rpx;
+  font-size: 36rpx;
+  color: #c0c0c0;
+}
+
+/* 角色筛选 */
+.dcl-role-scroll {
+  margin: 16rpx 0 0;
+  padding: 0 24rpx;
+  white-space: nowrap;
+}
+
+.dcl-role-chips {
+  display: inline-flex;
+  gap: 14rpx;
+}
+
+.dcl-role-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #fff;
+  border: 1rpx solid #e8e8e8;
+  white-space: nowrap;
+}
+
+.dcl-role-chip--hover {
+  opacity: 0.8;
+}
+
+.dcl-role-chip--on {
+  font-weight: 600;
+  color: #fff;
+  background: #4A90D9;
+  border-color: #4A90D9;
+}
+
+.dcl-role-chip--star.dcl-role-chip--on {
+  background: #4A90D9;
+  border-color: #4A90D9;
+}
+
+.dcl-role-chip--traffic.dcl-role-chip--on {
+  background: #34C759;
+  border-color: #34C759;
+}
+
+.dcl-role-chip--potential.dcl-role-chip--on {
+  background: #5AC8FA;
+  border-color: #5AC8FA;
+}
+
+.dcl-role-chip--watch.dcl-role-chip--on {
+  background: #BDC1C6;
+  border-color: #BDC1C6;
+}
+
+/* 排序 */
+.dcl-sort-wrap {
+  display: flex;
+  align-items: center;
+  margin: 16rpx 24rpx 0;
+  gap: 16rpx;
+}
+
+.dcl-sort-label {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.dcl-sort-scroll {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.dcl-sort-chips {
+  display: inline-flex;
+  gap: 12rpx;
+}
+
+.dcl-sort-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #fff;
+  border: 1rpx solid #e8e8e8;
+}
+
+.dcl-sort-chip--on {
+  color: #4A90D9;
+  background: #eef4ff;
+  border-color: #bdd6ff;
+  font-weight: 600;
+}
+
+.dcl-sort-chip--hover {
+  opacity: 0.8;
+}
+
+/* 空状态 */
+.dcl-empty {
+  display: flex;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  font-size: 26rpx;
+  color: #bbb;
+}
+
+/* 列表 */
+.dcl-list {
+  padding: 20rpx 24rpx 0;
+}
+
+/* 菜品经营卡片 */
+.dcl-card {
+  margin-bottom: 20rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 顶部：图片 + 头部信息 */
+.dcl-card__top {
+  display: flex;
+  gap: 20rpx;
+}
+
+.dcl-card__img-wrap {
+  flex-shrink: 0;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.dcl-card__img {
+  width: 100%;
+  height: 100%;
+}
+
+.dcl-card__img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+}
+
+.dcl-card__img-ph-icon {
+  font-size: 48rpx;
+}
+
+.dcl-card__head-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dcl-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.dcl-card__name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+/* 角色标签 */
+.dcl-role-tag {
+  flex-shrink: 0;
+  padding: 4rpx 14rpx;
+  border-radius: 6rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
+.dcl-role-tag--star {
+  color: #4A90D9;
+  background: rgba(74, 144, 217, 0.1);
+}
+
+.dcl-role-tag--traffic {
+  color: #34C759;
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.dcl-role-tag--potential {
+  color: #5AC8FA;
+  background: rgba(90, 200, 250, 0.1);
+}
+
+.dcl-role-tag--watch {
+  color: #8e8e93;
+  background: rgba(142, 142, 147, 0.1);
+}
+
+/* 标签 */
+.dcl-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 10rpx;
+}
+
+/* 角色原因 */
+.dcl-card__role-reason {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 售价 + 销量 + 变化 */
+.dcl-card__price-sales {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-card__price {
+  color: #e67e22;
+  font-weight: 600;
+}
+
+.dcl-card__divider {
+  margin: 0 6rpx;
+}
+
+.dcl-card__sales-num {
+  font-weight: 600;
+  color: #333;
+}
+
+.dcl-card__change-tag {
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.dcl-card__change-tag.is-up {
+  color: #07c160;
+}
+
+.dcl-card__change-tag.is-down {
+  color: #fa5151;
+}
+
+/* 核心指标区 */
+.dcl-card__metrics {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: #f9fafb;
+  border-radius: 14rpx;
+}
+
+/* 实际毛利率 + 理论毛利率 并排 */
+.dcl-metrics-dual {
+  display: flex;
+}
+
+.dcl-metrics-dual__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dcl-metrics-dual__col--right {
+  align-items: flex-end;
+}
+
+.dcl-metrics-dual__divider {
+  width: 1rpx;
+  margin: 0 20rpx;
+  align-self: stretch;
+  background: #e8eaef;
+  flex-shrink: 0;
+}
+
+.dcl-metrics-dual__label {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-metrics-dual__val-row {
+  display: flex;
+  align-items: baseline;
+  margin-top: 6rpx;
+}
+
+.dcl-metrics-dual__val-row--r {
+  justify-content: flex-end;
+}
+
+.dcl-metrics-dual__num {
+  font-size: 48rpx;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.dcl-metrics-dual__num--actual {
+  color: #07c160;
+}
+
+.dcl-metrics-dual__num--theory {
+  color: #4A90D9;
+}
+
+.dcl-metrics-dual__pct {
+  margin-left: 4rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #07c160;
+}
+
+.dcl-metrics-dual__pct--theory {
+  color: #4A90D9;
+}
+
+/* 成本三列 */
+.dcl-cost-grid {
+  display: flex;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #eef0f4;
+}
+
+.dcl-cost-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.dcl-cost-cell__label {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+.dcl-cost-cell__value {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.3;
+}
+
+.dcl-cost-cell__value.is-warn {
+  color: #f59e0b;
+}
+
+.dcl-cost-cell__value.is-good {
+  color: #10b981;
+}
+
+/* 实际利润 */
+.dcl-profit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #eef0f4;
+}
+
+.dcl-profit-row__label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.dcl-profit-row__value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* 经营提示条 */
+.dcl-card__hint {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.dcl-card__hint--good {
+  background: rgba(7, 193, 96, 0.06);
+  color: #10b981;
+}
+
+.dcl-card__hint--warn {
+  background: rgba(245, 158, 11, 0.06);
+  color: #d97706;
+}
+
+.dcl-card__hint--info {
+  background: rgba(74, 144, 217, 0.06);
+  color: #3b82f6;
+}
+
+.dcl-card__hint--neutral {
+  background: rgba(107, 114, 128, 0.06);
+  color: #6b7280;
+}
+
+.dcl-card__hint-icon {
+  flex-shrink: 0;
+  margin-right: 10rpx;
+  font-size: 28rpx;
+  align-self: flex-start;
+  margin-top: 2rpx;
+}
+
+.dcl-card__hint-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.dcl-card__hint-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.dcl-card__hint-text {
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.dcl-card__hint-action {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* 底部操作 */
+.dcl-card__actions {
+  display: flex;
+  margin-top: 20rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #f0f0f0;
+  gap: 14rpx;
+}
+
+.dcl-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  padding: 14rpx 10rpx;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #f5f6f8;
+}
+
+.dcl-action-btn--hover {
+  opacity: 0.8;
+}
+
+.dcl-action-btn--primary {
+  color: #fff;
+  background: #4A90D9;
+}
+
+.dcl-action-btn__icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+/* 底部安全区 */
+.dcl-bottom-safe {
+  height: 40rpx;
+}
+
+/* ==================== 原有老板经营视图样式（不变） ==================== */
+
 .dfl-search-top-ico {
   opacity: 0.72;
 }
@@ -1421,5 +2048,70 @@
 }
 
 .dfl-action-btn--green .dfl-action-text {
+  color: #187e6e;
+}
+
+/* ==================== 修改类别名称弹窗 ==================== */
+.rename-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.rename-dialog {
+  width: 600rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  padding: 40rpx 36rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.rename-dialog__title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: center;
+  margin-bottom: 36rpx;
+}
+
+.rename-dialog__input {
+  width: 100%;
+  height: 80rpx;
+  background: #f5f6fa;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  color: #1a1a1a;
+  box-sizing: border-box;
+}
+
+.rename-dialog__btns {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 36rpx;
+  gap: 32rpx;
+}
+
+.rename-dialog__btn {
+  font-size: 30rpx;
+  font-weight: 500;
+  padding: 8rpx 16rpx;
+}
+
+.rename-dialog__btn--cancel {
+  color: #888;
+}
+
+.rename-dialog__btn--confirm {
   color: #187e6e;
 }

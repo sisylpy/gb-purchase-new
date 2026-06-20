@@ -89,9 +89,7 @@ Page({
     return shareObj;
   },
 
-  __checkNumber(e) {
-    console.log("checkckckkckck")
-    var patrn = /^(-)?\d+(\.\d+)?$/;
+  __checkNumber(e) {var patrn = /^(-)?\d+(\.\d+)?$/;
     if (patrn.exec(e.detail.value) == null) {
       return false
     } else {
@@ -108,10 +106,7 @@ Page({
   },
 
   _singleInput(e) {
-    var value = e.currentTarget.dataset.value;
-    console.log("=== _singleInput === value:", value);
-    
-    var purItem = this.data.purArr[this.data.focusIndex];
+    var value = e.currentTarget.dataset.value;var purItem = this.data.purArr[this.data.focusIndex];
     var orderItem = purItem.gbDepartmentOrdersEntities[this.data.orderIndex];
     
     var oldValue = orderItem.gbDoWeight;
@@ -191,40 +186,25 @@ Page({
     }
   },
 
-  _getTotalQuantity() {
-    console.log("=== _getTotalQuantity ===");
-    var arr = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities;
+  _getTotalQuantity() {var arr = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities;
     var temp = 0;
     for (var i = 0; i < arr.length; i++) {
-      var weightValue = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[i].gbDoWeight;
-      console.log("第" + i + "个订单 weightValue:", weightValue, "类型:", typeof weightValue);
-      if (weightValue != null && weightValue !== '' && !isNaN(Number(weightValue))) {
+      var weightValue = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[i].gbDoWeight;if (weightValue != null && weightValue !== '' && !isNaN(Number(weightValue))) {
         temp = temp + Number(weightValue);
       }
     }
-    temp = temp.toFixed(1);
-    console.log("teimpp" + temp)
-    this.setData({
+    temp = temp.toFixed(1);this.setData({
       ["purArr[" + this.data.focusIndex + "].gbDpgBuyQuantity"]: temp,
       ["item.gbDpgBuyQuantity"]: temp
     })
 
-    var price = this.data.purArr[this.data.focusIndex].gbDpgBuyPrice;
-    console.log("gbDpgBuyPrice:", price);
-    if (price != null && price > 0) {
-      console.log("subttototopricepriceprice" + price)
-      var weight = this.data.purArr[this.data.focusIndex].gbDpgBuyQuantity;
-      var subtotal = Number(price) * Number(weight);
-      console.log("subttototo" + subtotal)
-
-      this.setData({
+    var price = this.data.purArr[this.data.focusIndex].gbDpgBuyPrice;if (price != null && price > 0) {var weight = this.data.purArr[this.data.focusIndex].gbDpgBuyQuantity;
+      var subtotal = Number(price) * Number(weight);this.setData({
         ["purArr[" + this.data.focusIndex + "].gbDpgBuySubtotal"]: subtotal.toFixed(1),
         ["item.gbDpgBuySubtotal"]: subtotal.toFixed(1)
       })
       var orderWeight = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[this.data.orderIndex].gbDoWeight;
-      var orderPrice = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[this.data.orderIndex].gbDoPrice;
-      console.log("orderWeight:", orderWeight, "orderPrice:", orderPrice);
-      if (orderPrice != null && orderWeight != null && !isNaN(Number(orderWeight)) && !isNaN(Number(orderPrice))) {
+      var orderPrice = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[this.data.orderIndex].gbDoPrice;if (orderPrice != null && orderWeight != null && !isNaN(Number(orderWeight)) && !isNaN(Number(orderPrice))) {
         var sub = Number(orderWeight) * Number(orderPrice)
         this.setData({
           ["purArr[" + this.data.focusIndex + "].gbDepartmentOrdersEntities[" + this.data.orderIndex + "].gbDoSubtotal"]: sub.toFixed(1),
@@ -237,9 +217,7 @@ Page({
 
   _getOrderSubTotal() {
     var priceValue = this.data.purArr[this.data.focusIndex].gbDpgBuyPrice;
-    var weightValue = this.data.purArr[this.data.focusIndex].gbDpgBuyQuantity;
-    console.log("_getOrderSubTotal priceValue:", priceValue, "weightValue:", weightValue);
-    if (priceValue != null && weightValue != null && !isNaN(Number(weightValue)) && !isNaN(Number(priceValue)) && priceValue > 0) {
+    var weightValue = this.data.purArr[this.data.focusIndex].gbDpgBuyQuantity;if (priceValue != null && weightValue != null && !isNaN(Number(weightValue)) && !isNaN(Number(priceValue)) && priceValue > 0) {
       var subtotalValue = (Number(weightValue) * Number(priceValue)).toFixed(1);
       if (!isNaN(subtotalValue)) {
         this.setData({
@@ -332,9 +310,7 @@ Page({
 
   _getDoWeightScale() {
     var scaleWeight = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[this.data.orderIndex].gbDoScaleWeight;
-    var scale = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[this.data.orderIndex].gbDoDsStandardScale;
-    console.log(scaleWeight);
-    var doWeight = (Number(scaleWeight) * Number(scale)).toFixed(1);
+    var scale = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[this.data.orderIndex].gbDoDsStandardScale;var doWeight = (Number(scaleWeight) * Number(scale)).toFixed(1);
     this.setData({
       ["purArr[" + this.data.focusIndex + "].gbDepartmentOrdersEntities[" + this.data.orderIndex + "].gbDoWeight"]: doWeight,
       ["item.gbDepartmentOrdersEntities[" + this.data.orderIndex + "].gbDoWeight"]: doWeight,
@@ -361,13 +337,9 @@ Page({
       ["item.gbDpgBuyQuantity"]: temp
     })
 
-    var scalePrice = this.data.purArr[this.data.focusIndex].gbDpgBuyScalePrice;
-    console.log("scalrpririir000000000" + scalePrice)
-    if (scalePrice) {
+    var scalePrice = this.data.purArr[this.data.focusIndex].gbDpgBuyScalePrice;if (scalePrice) {
       var orderWeight = this.data.purArr[this.data.focusIndex].gbDepartmentOrdersEntities[this.data.orderIndex].gbDoScaleWeight;
-      var orderSubtotal = (Number(scalePrice) * Number(orderWeight)).toFixed(1);
-      console.log("orderSubtotal" + orderSubtotal)
-      this.setData({
+      var orderSubtotal = (Number(scalePrice) * Number(orderWeight)).toFixed(1);this.setData({
         ["purArr[" + this.data.focusIndex + "].gbDepartmentOrdersEntities[" + this.data.orderIndex + "].gbDoSubtotal"]: orderSubtotal,
         ["item.gbDepartmentOrdersEntities[" + this.data.orderIndex + "].gbDoSubtotal"]: orderSubtotal,
         ["orders.gbDoSubtotal"]: orderSubtotal

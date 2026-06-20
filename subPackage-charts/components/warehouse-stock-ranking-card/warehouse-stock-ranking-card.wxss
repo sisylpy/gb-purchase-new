@@ -99,7 +99,16 @@
 .wsr-td--rank { width: 100rpx; flex-shrink: 0; justify-content: center; }
 .wsr-td--goods { flex: 1; min-width: 0; padding-left: 16rpx; }
 .wsr-td--amount { width: 190rpx; flex-shrink: 0; justify-content: flex-end; }
-.wsr-td--weight { width: 140rpx; flex-shrink: 0; justify-content: flex-end; padding-right: 4rpx; }
+.wsr-td--weight { width: 130rpx; flex-shrink: 0; justify-content: flex-end; padding-right: 4rpx; }
+
+/* 行级「记入工作记录」按钮 */
+.wsr-td--action { width: 56rpx; flex-shrink: 0; justify-content: center; }
+
+.wsr-record-text {
+  font-size: 28rpx;
+  opacity: 0.5;
+  padding: 4rpx 8rpx;
+}
 
 /* ---------- 奖牌徽标（复用 dpcr 样式） ---------- */
 .wsr-medal {

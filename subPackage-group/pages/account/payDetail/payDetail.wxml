@@ -1,0 +1,158 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="支付记录" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+  <view class='navbar'>
+    <block wx:for="{{tabs}}" wx:key="index">
+      <view class="navbar-item {{currentTab == index ? 'bar-item-on':''}}" data-current='{{index}}' bindtap='onTab1Click'>
+        <view class='navbar-title'>{{item.name}}</view>
+      </view>
+    </block>
+    <!-- <view class="navbar-slider" style="left: {{sliderLeft}}rpx; width:{{windowWidth / 12}}rpx; transform: translateX({{sliderOffset}}rpx); -webkit-transform: translateX({{sliderOffset}}rpx);"> -->
+    <!-- </view> -->
+  </view>
+
+  <swiper current="{{currentTab}}" wx:key="currentTab" bindchange="bindChange" style="height: {{windowHeight - navBarHeight - 100}}rpx;">
+    <!-- 1 -->
+    <swiper-item>
+      <scroll-view class="" scroll-y="true" bindscrolltolower="onScrollToLower" style="height: 100%; padding-bottom: env(safe-area-inset-bottom);">
+        <!-- emptyView -->
+        <view class=" {{payDetailArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
+          <view class="font-lg  empty_view">
+            <view class="flex-column center-content">
+              <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
+              <text class="big">没有支付记录</text>
+            </view>
+          </view>
+        </view>
+        <!-- ./emptyView -->
+        <block wx:if="{{payDetailArr.length > 0}}">
+          <view class="flex-column twenty_radius bg-white p-20 mb-10 " wx:for="{{payDetailArr}}">
+            <view class="flex-row p-10">
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">支付时间</text>
+                <text>{{tool.getAttrFullTime(item.gbNdplPayTime)}}</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">剩余点数</text>
+                <text >{{item.gbNdplRestPoints}}点</text>
+              </view>
+            </view>
+            <view class="flex-row p-10 ">
+              <view class="half-row flex-row">
+                <text class="mr-10 text-secondary">支付点数量</text>
+                <text>{{item.gbNdplPaySubtotal}}点</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">供货商</text>                 
+                  <text class="mr-10">{{item.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
+               
+              </view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+    </swiper-item>
+    <!-- 2 -->
+    <swiper-item>
+      <scroll-view class="" scroll-y="true" bindscrolltolower="onScrollToLower" style="height: 100%; padding-bottom: env(safe-area-inset-bottom);">
+        <!-- emptyView -->
+        <view class=" {{payDetailArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
+          <view class="font-lg  empty_view">
+            <view class="flex-column center-content">
+              <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
+              <text class="big">没有支付记录</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- ./emptyView -->
+        <block wx:if="{{payDetailArr.length > 0}}">
+          <view class="flex-column twenty_radius bg-white p-20 mb-10 " wx:for="{{payDetailArr}}">
+            <view class="flex-row p-10">
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">支付时间</text>
+                <text>{{tool.getAttrFullTime(item.gbNdplPayTime)}}</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">剩余点数</text>
+                <text >{{item.gbNdplRestPoints}}点</text>
+              </view>
+            </view>
+            <view class="flex-row p-10 ">
+              <view class="half-row flex-row">
+                <text class="mr-10 text-secondary">支付点数量</text>
+                <text>{{item.gbNdplPaySubtotal}}点</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">部门</text>
+                <block wx:if="{{item.gbDepartmentEntity == null}}">
+                  <text wx:if="{{item.gbDepartmentEntity.fatherDepartmentEntity !== null && item.gbDepartmentEntity.fatherDepartmentEntity.gbDepartmentName !== item.gbDepartmentEntity.gbDepartmentName}}">{{item.gbDepartmentEntity.fatherDepartmentEntity.gbDepartmentName}}.</text>
+                  <text class="mr-10">{{item.gbDepartmentEntity.gbDepartmentName}}</text>
+                </block>
+                <block wx:else="">
+                  <text wx:if="{{item.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentSubAmount > 1 && item.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName !== item.gbDepartmentEntity.gbDepartmentName}}">{{item.gbDepartmentEntity.fatherGbDepartmentEntity.gbDepartmentName}}.</text>
+                  <text class="mr-10">{{item.gbDepartmentEntity.gbDepartmentName}}</text>
+                </block>
+              </view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+    </swiper-item>
+  
+<!-- 3 -->
+<swiper-item>
+      <scroll-view class="" scroll-y="true" bindscrolltolower="onScrollToLower" style="height: 100%; padding-bottom: env(safe-area-inset-bottom);">
+        <!-- emptyView -->
+        <view class=" {{payDetailArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
+          <view class="font-lg  empty_view">
+            <view class="flex-column center-content">
+              <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
+              <text class="big">没有支付记录</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- ./emptyView 678129-->
+        <block wx:if="{{payDetailArr.length > 0}}">
+          <view class="flex-column twenty_radius bg-white p-20 mb-10 " wx:for="{{payDetailArr}}">
+            <view class="flex-row p-10">
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">支付时间</text>
+                <text>{{tool.getAttrFullTime(item.gbNdplPayTime)}}</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">剩余点数</text>
+                <text >{{item.gbNdplRestPoints}}点</text>
+              </view>
+            </view>
+            <view class="flex-row p-10 ">
+              <view class="half-row flex-row">
+                <text class="mr-10 text-secondary">支付点数量</text>
+                <text>{{item.gbNdplPaySubtotal}}点</text>
+              </view>
+              <view class="flex-row half-row">
+                <text class="mr-10 text-secondary">商品名称</text>
+                
+                  <text class="mr-10">{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+               
+               
+              </view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+    </swiper-item>
+
+
+
+
+
+
+  </swiper>
+
+</view>

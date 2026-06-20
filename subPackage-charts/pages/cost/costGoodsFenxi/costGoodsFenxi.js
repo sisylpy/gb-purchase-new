@@ -3,7 +3,7 @@ var globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
 var chartsApi = require('../../../services/api.js');
 var config = require('../../../../config/index.js');
-var echarts = require('../../../ec-canvas/echarts');
+var echarts = require('../../../../ec-canvas/echarts');
 
 var UTIL_BUCKET_COLOR = {
   CRITICAL: '#dc2626',
@@ -20,7 +20,7 @@ Page({
       lazyLoad: false,
     },
     summary: null,
-    utilizationDistribution: null,
+    devianceDistribution: null,
     ingredientsAnalysis: [],
     outboundGoodsRows: [],
     loading: false,
@@ -39,9 +39,10 @@ Page({
     activeSubDepIndex: 0,
     activeSubDepId: '',
     activeSubDepName: '',
-    subDepPickerRange: [],
     ingredientSortBy: 'outbound',
     ingredientSortOrder: 'asc',
+    /** 核销状态筛选：all | verified | unverified | employeeMeal */
+    verificationStatus: 'all',
     expandedDisGoodsId: null,
     /** 仅用于展开/收起后恢复滚动，不用来跟手滚动同步，避免与子高度变化时被重置冲突 */
     ingredientScrollRestoreTop: '',
@@ -83,66 +84,17 @@ Page({
     this._syncDatesFromMyDateStorage();
 
     var mendianInfo = wx.getStorageSync('mendianInfo');
-    if (mendianInfo && mendianInfo.gbDepartmentId) {
-      var patch = this._patchSubDepFromMendian(mendianInfo);
-      this.setData(
-        Object.assign(
-          {
-            mendianInfo: mendianInfo,
-            depFatherId: mendianInfo.gbDepartmentId,
-          },
-          patch
-        )
+    if (mendianInfo) {
+      this.setData({
+          mendianInfo: mendianInfo,
+          depFatherId: mendianInfo.gbDepartmentId,
+        },
       );
     }
 
     this._fetchReport();
   },
 
-  /** 与 depFoodList / foodGoodsFenxi 同源 */
-  _patchSubDepFromMendian: function (mendianInfo) {
-    var subs = mendianInfo && mendianInfo.gbDepartmentEntityList;
-    if (!subs || subs.length < 2) {
-      return {
-        subDepPickerRange: [],
-        activeSubDepIndex: 0,
-        activeSubDepId: '',
-        activeSubDepName: '',
-      };
-    }
-    var range = [{ _all: true, gbDepartmentName: '全部（不按子部门）', gbDepartmentId: '' }].concat(subs);
-    return {
-      subDepPickerRange: range,
-      activeSubDepIndex: 0,
-      activeSubDepId: '',
-      activeSubDepName: '',
-    };
-  },
-
-  onSubDepChange: function (e) {
-    var idx = parseInt(e.detail.value, 10);
-    if (isNaN(idx) || idx < 0) {
-      return;
-    }
-    var range = this.data.subDepPickerRange;
-    if (!range || !range[idx]) {
-      return;
-    }
-    var row = range[idx];
-    var patch = { activeSubDepIndex: idx };
-    if (row._all) {
-      patch.activeSubDepId = '';
-      patch.activeSubDepName = '';
-    } else {
-      var id = row.gbDepartmentId;
-      patch.activeSubDepId = id != null && id !== '' ? id : '';
-      patch.activeSubDepName = row.gbDepartmentName != null ? String(row.gbDepartmentName) : '';
-    }
-    var that = this;
-    this.setData(patch, function () {
-      that._fetchReport();
-    });
-  },
 
   _syncDatesFromMyDateStorage() {
     var myDate = wx.getStorageSync('myDate');
@@ -170,13 +122,13 @@ Page({
   },
 
   _getUtilDonutOption: function () {
-    var dist = this.data.utilizationDistribution;
+    var dist = this.data.devianceDistribution;
     if (!dist || !dist.buckets || !dist.buckets.length) {
       return {
         title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { fontSize: 12 } },
       };
     }
-    var total = dist.totalKindsWithUtilization;
+    var total = dist.totalKindsWithDeviance;
     var buckets = dist.buckets;
     var seriesData = buckets.map(function (b) {
       var lvl = b.level;
@@ -245,7 +197,7 @@ Page({
 
   _initUtilDonutChart: function () {
     var that = this;
-    if (!this.data.utilizationDistribution || !this.data.utilizationDistribution.buckets) {
+    if (!this.data.devianceDistribution || !this.data.devianceDistribution.buckets) {
       if (this._utilDonutChart) {
         try {
           this._utilDonutChart.dispose();
@@ -356,6 +308,7 @@ Page({
       goodsNameSearch: this.data.goodsNameSearch || '',
       page: reqPage,
       pageSize: pageSize,
+      verificationStatus: this.data.verificationStatus || 'all',
     };
     var sid = this.data.activeSubDepId;
     if (sid != null && sid !== '') {
@@ -363,11 +316,14 @@ Page({
     }
     chartsApi.outboundIngredientAnalysis(req)
       .then(function (res) {
+        // console.log('[costGoodsFenxi] outboundIngredientAnalysis 响应数据:', JSON.stringify(res));
+
         if (!isAppend) {
           load.hideLoading();
         }
         var data = (res.result && res.result.data) || {};
-        var rows = data.ingredientsAnalysis || data.list || [];
+        var _rows = data.ingredientsAnalysis || data.list || [];
+        var rows = _rows;
         var sortOrderEcho = data.sortOrder;
         var nextSortOrder =
           sortOrderEcho === 'desc' || sortOrderEcho === 'asc' ? sortOrderEcho : that.data.ingredientSortOrder;
@@ -394,13 +350,13 @@ Page({
 
         var firstId = nextList.length ? nextList[0].disGoodsId : null;
         var summary = data.summary;
-        var utilDist = data.utilizationDistribution;
+        var utilDist = data.devianceDistribution;
         if (isAppend) {
           if (summary == null || summary === undefined) {
             summary = that.data.summary;
           }
           if (utilDist == null || utilDist === undefined) {
-            utilDist = that.data.utilizationDistribution;
+            utilDist = that.data.devianceDistribution;
           }
         } else {
           if (summary === undefined) {
@@ -409,6 +365,15 @@ Page({
           if (utilDist === undefined) {
             utilDist = null;
           }
+        }
+
+        // 计算出库去向分布百分比（仅用于展示）
+        var distPcts = that._computeDistributionPct(summary);
+
+        // 回显后端返回的 verificationStatus
+        var vsEcho = data.verificationStatus;
+        if (vsEcho && vsEcho !== 'all' && vsEcho !== 'verified' && vsEcho !== 'unverified' && vsEcho !== 'employeeMeal') {
+          vsEcho = null;
         }
 
         var emptyHint = '';
@@ -423,13 +388,20 @@ Page({
             loading: false,
             listLoadingMore: false,
             summary: summary,
-            utilizationDistribution: utilDist,
+            devianceDistribution: utilDist,
             ingredientsAnalysis: nextList,
             ingredientListPage: resolvedPage,
             ingredientTotal: totalCount != null ? totalCount : isAppend ? that.data.ingredientTotal : null,
             ingredientHasMore: hasMore,
             expandedDisGoodsId: isAppend ? that.data.expandedDisGoodsId : firstId,
             ingredientSortOrder: nextSortOrder,
+            verificationStatus: vsEcho || that.data.verificationStatus,
+            _distVerifiedPct: distPcts.verified,
+            _distNonVerifiedPct: distPcts.nonVerified,
+            _distMealPct: distPcts.meal,
+            _distVerifiedTxt: distPcts.verifiedText,
+            _distNonVerifiedTxt: distPcts.nonVerifiedText,
+            _distMealTxt: distPcts.mealText,
             emptyHint: emptyHint,
           },
           function () {
@@ -452,7 +424,7 @@ Page({
         if (!isAppend) {
           that.setData({
             summary: null,
-            utilizationDistribution: null,
+            devianceDistribution: null,
             ingredientsAnalysis: [],
             expandedDisGoodsId: null,
             ingredientListPage: 0,
@@ -536,6 +508,46 @@ Page({
     this.setData({ goodsNameSearch: '', goodsNameSearchDraft: '' }, function () {
       this._fetchReport();
     });
+  },
+
+  /** 计算出库去向分布百分比（仅用于前端展示） */
+  _computeDistributionPct: function (summary) {
+    if (!summary) {
+      return { verified: 0, nonVerified: 0, meal: 0, verifiedText: '0%', nonVerifiedText: '0%', mealText: '0%' };
+    }
+    var total = parseFloat(String(summary.totalOutboundAmount || '0'));
+    var verified = parseFloat(String(summary.verifiedTotalAmount || '0'));
+    var nonVerified = parseFloat(String(summary.nonVerifiedTotalAmount || '0'));
+    var meal = parseFloat(String(summary.employeeMealTotalAmount || '0'));
+    if (isNaN(total) || total <= 0) {
+      return { verified: 0, nonVerified: 0, meal: 0, verifiedText: '0%', nonVerifiedText: '0%', mealText: '0%' };
+    }
+    function fmt(v) {
+      var p = Math.round((v / total) * 10000) / 100;
+      return p.toFixed(p === Math.round(p) ? 0 : p < 10 ? 1 : 0) + '%';
+    }
+    return {
+      verified: Math.round((verified / total) * 10000) / 100,
+      nonVerified: Math.round((nonVerified / total) * 10000) / 100,
+      meal: Math.round((meal / total) * 10000) / 100,
+      verifiedText: fmt(verified),
+      nonVerifiedText: fmt(nonVerified),
+      mealText: fmt(meal),
+    };
+  },
+
+  onVerificationFilterChange: function (e) {
+    var status = e.currentTarget.dataset.status;
+    if (!status || status === this.data.verificationStatus) {
+      return;
+    }
+    var that = this;
+    this.setData(
+      { verificationStatus: status },
+      function () {
+        that._fetchReport();
+      }
+    );
   },
 
   onIngredientSort: function (e) {

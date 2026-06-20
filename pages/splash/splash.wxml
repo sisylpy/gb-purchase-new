@@ -7,7 +7,7 @@
 
   <view class="safe">
     <!-- 顶部 Logo / 品牌字，可按需替换 -->
-    <view class="brand" wx:if="{{show.brand}}">京采账本</view>
+    <view class="brand" wx:if="{{show.brand}}">京采市场</view>
 
     <!-- 主语句 -->
     <view class="line1 {{show.l1?'show':''}}">

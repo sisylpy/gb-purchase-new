@@ -185,6 +185,59 @@
   padding: 10rpx 10rpx;
 }
 
+/* 废弃时间弹窗 */
+.fresh-popup {
+  padding: 28rpx 28rpx 0;
+}
+
+.fresh-popup__title {
+  padding: 8rpx 0 24rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.fresh-form__row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.fresh-form__label {
+  width: 80rpx;
+  font-size: 28rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.fresh-form__input {
+  flex: 1;
+  height: 72rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  border: 2rpx solid #e5e5e5;
+  border-radius: 8rpx;
+  background-color: #f8f8f8;
+}
+
+.fresh-form__unit {
+  width: 72rpx;
+  margin-left: 12rpx;
+  font-size: 28rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.fresh-form__hint {
+  display: block;
+  margin-bottom: 8rpx;
+  font-size: 22rpx;
+  color: #999;
+  text-align: center;
+}
+
 /* 废弃时间弹窗底部按钮 */
 .fresh-footer {
   display: flex;
@@ -227,4 +280,46 @@
 
 .fresh-btn-hover {
   opacity: 0.88;
+}
+
+.fresh-setting-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8rpx 0 12rpx;
+}
+
+.fresh-setting-row__info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  font-size: 28rpx;
+}
+
+.fresh-setting-row__value {
+  margin-left: 8rpx;
+  margin-right: 24rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.fresh-setting-row__sep {
+  margin-left: 0;
+}
+
+.fresh-setting-row__btn {
+  flex-shrink: 0;
+  padding: 10rpx 28rpx;
+  font-size: 26rpx;
+  color: #187e6e;
+  background: rgba(24, 126, 110, 0.08);
+  border: 2rpx solid rgba(24, 126, 110, 0.35);
+  border-radius: 8rpx;
+}
+
+.fresh-setting-row__btn--hover {
+  opacity: 0.85;
+  background: rgba(24, 126, 110, 0.14);
 }

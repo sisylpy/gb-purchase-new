@@ -11,7 +11,7 @@ import {
   queryDisGoodsByQuickSearchGb,
   getFoodByFoodId,
   deleteFood,
-} from '../../../services/apiDistributerGbFood'
+} from '../../../../services/apiDistributerGbFood'
 
 Page({
   /**
@@ -207,7 +207,6 @@ Page({
 
     // goods//////////
   getSearchString(e) {
-    console.log(e.detail.value)
     this.setData({
       isSearching: true,
     })
@@ -221,7 +220,6 @@ Page({
       }
 
       queryDisGoodsByQuickSearchGb(data).then(res => {
-        console.log(res)
         if (res.result.code == 0) {
           if (res.result.data.length > 0) {
             this.setData({
@@ -295,9 +293,6 @@ Page({
         var foodName = this.data.foodItem.gbDfFoodName;
         var method = this.data.foodItem.gbDfFoodMethod;
         var price = this.data.foodItem.gbDfFoodPrice;
-        console.log(price);
-        console.log(foodName);
-        console.log(method);
         if(method == null){
               method = ""
         }
@@ -359,7 +354,6 @@ Page({
         method = "";
       }
       saveGbFood(filePathList, foodName, fatherId, disId, price, method, this.data.targetGrossMarginRate, this.data.grossMarginFloatAbs).then(res => {
-        console.log(res)
         if (res.result == '{"code":0}') {
           wx.navigateBack({
             delta: 1,

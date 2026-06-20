@@ -120,17 +120,26 @@
                               </block>
                   </view>
                   <view class="flex-row font-sm" wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
-                    <view class="flex-row">
+                    <view class="flex-row half-row">
                       <text class="gray">规格:</text>
-                      <block wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
-                        <view class="" wx:if="{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">
-                          {{goods.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}
+                      <block wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
+                        <view class="" wx:if="{{goods.gbDgGoodsStandardname !== '斤'}}">
+                          {{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}}
                         </view>
                       </block>
 
                       <block wx:else>
-                        <text class="">{{goods.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+                        <text class="">{{goods.gbDgGoodsStandardname}}</text>
                       </block>
+                    </view>
+                    <view class="flex-row">
+                      <text class="gray">大包装:</text>
+                      <block wx:if="{{goods.gbDgItemsPerCarto !== null}}">
+                        <view class="" >
+                          {{goods.gbDgItemsPerCarton}}{{goods.gbDgGoodsStandardname}}/{{goods.gbDgCartonUnit}}
+                        </view>
+                      </block>
+
                     </view>
                   </view>
 

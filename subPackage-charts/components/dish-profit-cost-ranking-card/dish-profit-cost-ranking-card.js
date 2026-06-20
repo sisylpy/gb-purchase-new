@@ -5,7 +5,7 @@
  * { title, subtitle, payload: { timeLabel, timeDisplayText, metricLabel, rankingType, rows[], summary } }
  *
  * rows[] 字段：
- * rank, dishName, salesQuantity, listPriceRevenue, theoryCostAmount, actualCostAmount, blendedGrossMarginRateOnListPrice
+ * rank, dishName, salesQuantity, actualRevenue, theoryCostAmount, actualCostAmount, blendedGrossMarginRateOnListPrice
  */
 
 /** 金额格式化 */

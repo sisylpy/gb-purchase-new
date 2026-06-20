@@ -1,0 +1,30 @@
+{
+  "component": true,
+  "usingComponents": {
+    "menu-portfolio-quadrant-card": "/subPackage-charts/components/menu-portfolio-quadrant-card/menu-portfolio-quadrant-card",
+    "dish-cost-analysis-card": "/subPackage-charts/components/dish-cost-analysis-card/dish-cost-analysis-card",
+    "dish-sales-single-dish-card": "/subPackage-charts/components/dish-sales-single-dish-card/dish-sales-single-dish-card",
+    "menu-high-sales-low-margin-card": "/subPackage-charts/components/menu-high-sales-low-margin-card/menu-high-sales-low-margin-card",
+    "menu-action-recommendation-card": "/subPackage-charts/components/menu-action-recommendation-card/menu-action-recommendation-card",
+    "dish-profit-prescription-card": "/subPackage-charts/components/dish-profit-prescription-card/dish-profit-prescription-card",
+    "revenue-report-card": "/subPackage-charts/components/revenue-report-card/revenue-report-card",
+    "purchase-check-card": "/subPackage-charts/components/purchase-check-card/purchase-check-card",
+    "purchase-anomaly-card": "/subPackage-charts/components/purchase-anomaly-card/purchase-anomaly-card",
+    "stock-reconcile-card": "/subPackage-charts/components/stock-reconcile-card/stock-reconcile-card",
+    "reorder-reminder-card": "/subPackage-charts/components/reorder-reminder-card/reorder-reminder-card",
+    "purchase-goods-detail-card": "/subPackage-charts/components/purchase-goods-detail-card/purchase-goods-detail-card",
+    "dish-sales-ranking-card": "/subPackage-charts/components/dish-sales-ranking-card/dish-sales-ranking-card",
+    "dish-profit-cost-ranking-card": "/subPackage-charts/components/dish-profit-cost-ranking-card/dish-profit-cost-ranking-card",
+    "dish-ingredient-cover-days-card": "/subPackage-charts/components/dish-ingredient-cover-days-card/dish-ingredient-cover-days-card",
+    "warehouse-inventory-risk-list-card": "/subPackage-charts/components/warehouse-inventory-risk-list-card/warehouse-inventory-risk-list-card",
+    "warehouse-stock-ranking-card": "/subPackage-charts/components/warehouse-stock-ranking-card/warehouse-stock-ranking-card",
+    "goods-supported-dish-cover-card": "/subPackage-charts/components/goods-supported-dish-cover-card/goods-supported-dish-cover-card",
+    "warehouse-near-expiry-risk-card": "/subPackage-charts/components/warehouse-near-expiry-risk-card/warehouse-near-expiry-risk-card",
+    "warehouse-inventory-supervision-card": "/subPackage-charts/components/warehouse-inventory-supervision-card/warehouse-inventory-supervision-card",
+    "warehouse-waste-risk-card": "/subPackage-charts/components/warehouse-waste-risk-card/warehouse-waste-risk-card",
+    "purchase-goods-business-analysis-card": "/subPackage-charts/components/purchase-goods-business-analysis-card/purchase-goods-business-analysis-card",
+    "purchase-ranking-card": "/subPackage-charts/components/purchase-ranking-card/purchase-ranking-card",
+    "purchase-goods-anchor-detail-card": "/subPackage-charts/components/purchase-goods-anchor-detail-card/purchase-goods-anchor-detail-card",
+    "goods-stock-batch-detail-card": "/subPackage-charts/components/goods-stock-batch-detail-card/goods-stock-batch-detail-card"
+  }
+}

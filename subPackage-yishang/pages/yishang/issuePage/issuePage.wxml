@@ -1,0 +1,196 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<back-navbar style="height: {{navBarHeight}}rpx;" title="{{gbDisInfo.gbDistributerName}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+<view class="bg-white">
+
+
+  <view class="" style="margin-top: {{navBarHeight}}rpx;">
+    <view class="section flex-column ">
+      <view class="titleColor"></view>
+      <view class="section_head">
+        <view class="center-content flex-column">
+          <view class="flex-row">
+            <text class="big"> 送货单</text>
+          </view>
+
+          <view class="flex-column" style="margin-left: {{windowWidth/ 2 - 40}}rpx;">
+            <view class="flex-row">
+              <text class="m-10">送货员:</text>
+              <text>{{bill.issueUserEntity.gbDuWxNickName}}</text>
+            </view>
+            <view class="flex-row ">
+              <text class="m-10">单号:</text>
+              <text>{{bill.gbDbTradeNo}}</text>
+            </view>
+
+            <view class="flex-row">
+              <text class="m-10">时间:</text>
+              <text>{{tool.getAttrFullTime(bill.gbDbTime) }}</text>
+            </view>
+          </view>
+
+        </view>
+
+        <view class="flex-row  font-sl fromTitle">
+          <text class="index"></text>
+          <text class="goods_name_title">商品</text>
+          <text class="weight_title">数量</text>
+          <text class="order_price_title">单价(元)</text>
+          <text class="subtotalTitle">小计(元)</text>
+        </view>
+      </view>
+
+
+      <block wx:if="{{bill.gbDbDepId == bill.gbDbDepFatherId}}">
+        <view class="section_body">
+          <view class="flex-column  border-bottom p-20" wx:for="{{bill.gbDepartmentOrdersEntities}}" wx:for-item="orders" wx:key="gbDepartmentOrdersId">
+            <view class="flex-row-between">
+              <view class="flex-row " style="width: {{windowWidth - 60}}rpx;">
+                <text class="">{{index + 1}}.</text>
+                <view class="goods_name flex-row" wx:if="{{orders.gbDistributerGoodsEntity !== null}}">
+                  <text class="brand" wx:if="{{orders.gbDistributerGoodsEntity.gbDgGoodsBrand !== null && orders.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{orders.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
+                  <text class="">{{orders.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+                </view>
+                <view wx:else="" class="goods_name text-danger">商品已删除</view>
+                <view class="weight">{{orders.gbDoWeight}}{{orders.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</view>
+                <view class="order_price">{{orders.gbDoPrice}}</view>
+                <text class="subtotal">{{orders.gbDoSubtotal}}</text>
+
+
+              </view>
+              <!-- <view class="flex-row p-20" wx:if="{{bill.gbDbStatus == 0}}"  bindtap="openOperation"  data-item="{{orders}}" data-index="{{index}}">
+							<image src="../../../../images/points.png" class="icon-md "></image>
+						</view> -->
+            </view>
+
+            <view class="flex-row" wx:if="{{orders.gbDoReturnStatus !== null }}">
+              <text class="white">{{index + 1}}.</text>
+              <view class="half-row">
+                <text class="m-10">退货数量:</text>
+                <text class="{{orders.gbDoReturnStatus == 0 ? 'red' : ''}}">{{orders.gbDoReturnWeight}}{{orders.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+              </view>
+              <view class="flex-row">
+                <text class="m-10">退货金额:</text>
+                <text class="{{orders.gbDoReturnStatus == 0 ? 'red' : ''}}">{{orders.gbDoReturnSubtotal}}</text>
+              </view>
+
+
+            </view>
+          </view>
+
+
+        </view>
+      </block>
+      <block wx:else>
+        <view class="p-20" wx:for="{{applyArr}}" wx:for-item="dep" wx:for-index="depIndex">
+          <view class="">#{{dep.depName}}</view>
+          <view class="flex-column" wx:for="{{dep.depOrders}}" wx:for-item="orders" wx:for-index="index" bindlongpress="openTools" data-item="{{orders}}" data-index="{{index}}" data-depindex="{{depIndex}}">
+            <view class="flex-row-between border-bottom">
+              <view class="flex-row" style="width: {{windowWidth - 60}}rpx;">
+                <text class="index">{{index + 1}}.</text>
+                <view class="flex-row" style="width: {{windowWidth - 160}}rpx;">
+                  <view class="goods_name flex-row" wx:if="{{orders.gbDistributerGoodsEntity !== null}}">
+                    <text class="brand" wx:if="{{orders.gbDistributerGoodsEntity.gbDgGoodsBrand !== null && orders.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{orders.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
+                    <text class="">{{orders.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+                  </view>
+                  <view wx:else="" class="goods_name text-danger">商品已删除</view>
+
+                  <view class="weight">
+                    {{orders.gbDoWeight}}{{orders.gbDistributerGoodsEntity.gbDgGoodsStandardname}}
+                  </view>
+                  <view class="order_price">
+                    {{orders.gbDoPrice}}
+                  </view>
+                  <text class="subtotal">{{orders.gbDoSubtotal}}</text>
+                </view>
+              </view>
+
+              <!-- <view class="flex-row p-20" wx:if="{{bill.gbDbStatus == 0}}" bindtap="openOperation"  data-item="{{orders}}" data-index="{{index}}">
+							<image src="../../../../images/points.png" class="icon-md "></image>
+						</view> -->
+
+
+            </view>
+
+
+
+            <!--  -->
+          </view>
+        </view>
+      </block>
+
+
+      <view class="flex-column p-20 weight_five font-lg" style="margin-bottom: 80rpx;">
+        <view class="section_head flex-row-between  " style="width: {{(windowWidth - 44 ) / 2}}rpx; margin-left: {{(windowWidth - 80 ) / 2}}rpx;">
+          <text>合计:</text>
+          <text class="total ">{{bill.gbDbTotal}}元</text>
+        </view>
+        <view class="section_head flex-row-between  " style="width: {{(windowWidth - 44 ) / 2}}rpx; margin-left: {{(windowWidth - 80 ) / 2}}rpx;" wx:if="{{bill.gbDbUserCouponId !== null}}">
+                    
+                    <text>优惠:</text>
+                  <text class="total ">-{{bill.gbDbUserCouponTotal}}元</text>
+                
+              </view>
+
+              <view class="section_head flex-row-between  " style="width: {{(windowWidth - 44 ) / 2}}rpx; margin-left: {{(windowWidth - 80 ) / 2}}rpx;" wx:if="{{bill.gbDbUserCouponId !== null}}">
+                  
+                  <text>实付款:</text>
+                <text class="total ">{{bill.gbDbPayTotal}}元</text>                
+            </view>
+
+
+        <view class="section_head flex-row-between  " style="width: {{(windowWidth - 44 ) / 2}}rpx; margin-left: {{(windowWidth - 80 ) / 2}}rpx; margin-top: 20rpx;" wx:if="{{haveReturnSubtotal > 0}}">
+          <text>退货合计:</text>
+          <text class="total ">{{haveReturnSubtotal}}元</text>
+        </view>
+
+        <view class="flex-row-between" wx:if="{{toReturnSubtotal > 0}}">
+          <view class="red">退货商品:{{returnCount}}个</view>
+          <view class="section_head" bindtap="toReturnPage">开退货单{{toReturnSubtotal}}</view>
+
+        </view>
+
+
+      </view>
+
+
+    </view>
+
+
+    <view class="titleColor"></view>
+
+  </view>
+</view>
+
+
+
+
+<!-- operation -->
+<view class='overlay {{showOperation ? "show" : ""}}' catchtouchmove='ture' catchtap="hideMask">
+  <view class="flex-column nnn bg-white" wx:if="{{chooseSize}}" animation='{{animationData}}'>
+
+    <view class="p-20 flex-row border-bottom" bindtap="editBill">
+      <image src="../../../../images/edit.png" class="icon mr-20 ml-20"></image>
+      <text class="font-md">修改单据数量</text>
+    </view>
+
+    <view class="p-20 flex-row " bindtap="addReturn">
+      <image src="../../../../images/BusinessIcons_DocPaper-.png" class="icon mr-20 ml-20"></image>
+      <text class="font-md {{item.gbDoReturnStatus == null || item.gbDoReturnStatus == 0 ? '' : 'text-secondary'}}">添加退货</text>
+    </view>
+
+    <view style="height: 20rpx;"></view>
+
+  </view>
+</view>
+
+<!-- ../operation -->
+
+
+
+<editBillOrder show="{{show}}" bindconfirm="confirm" bindcancle="cancle" item="{{item}}" maskHeight="{{maskHeight > windowHeight ? maskHeight : windowHeight}}" scrollViewTop="{{scrollViewTop}}" applyNumber="{{applyNumber}}" applyPrice="{{applyPrice}}" applySubtotal="{{applySubtotal}}" />
+
+
+<addReturnOrder show="{{showReturn}}" bindconfirm="confirmReturn" bindcancle="cancle" item="{{item}}" maskHeight="{{maskHeight > windowHeight ? maskHeight : windowHeight}}" scrollViewTop="{{scrollViewTop}}" applyNumber="{{applyNumber}}" returnSubtotal="{{returnSubtotal}}" />

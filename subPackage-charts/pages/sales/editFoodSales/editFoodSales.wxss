@@ -1,613 +1,573 @@
-.form-card {
-  background-color: #ffffff;
-  border-radius: 12rpx;
+/* ========== 页面基础 ========== */
+.page-food-sales-view {
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.page-body {
   padding: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
 }
 
-.form-title {
-  font-size: 30rpx;
-  color: #333;
-}
-
-.form-item {
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.form-item:last-child {
-  border-bottom: none;
-}
-
-.form-row {
+/* ========== 日期栏 ========== */
+.date-bar {
   display: flex;
   align-items: center;
-}
-
-.form-label {
-  display: block;
-  width: 140rpx;
-  font-size: 26rpx;
-  color: #666;
-  flex-shrink: 0;
-}
-
-.date-row {
-  display: flex;
-  align-items: center;
-  padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  justify-content: space-between;
   margin-bottom: 20rpx;
 }
 
-.date-input-wrapper {
+.date-picker {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.date-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.date-text {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.week-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.arrow-down {
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.5;
+}
+
+.status-tag {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.status-tag--pending {
+  background: #fff7ed;
+  color: #d97706;
+  border: 1rpx solid #fcd34d;
+}
+
+.status-tag--done {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1rpx solid #6ee7b7;
+}
+
+.status-arrow {
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.6;
+}
+
+/* ========== 区块标题 ========== */
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-bar {
+  width: 8rpx;
+  height: 32rpx;
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 4rpx;
+  margin-right: 12rpx;
+}
+
+.section-title {
   flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 70rpx;
-  padding: 0 20rpx;
-  border: 2rpx solid #e0e0e0;
-  border-radius: 12rpx;
-  background: #fafafa;
-  box-sizing: border-box;
-}
-
-.field-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16rpx;
-  width: 100%;
-}
-
-.field-row:last-child {
-  margin-bottom: 0;
-}
-
-.preview-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15rpx 0;
-  border-bottom: 1rpx solid #f5f5f5;
-}
-
-.preview-row:last-child {
-  border-bottom: none;
-}
-
-.save-btn-wrapper {
-  padding: 30rpx 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.save-btn {
-  background-color: #007aff;
-  color: #ffffff;
-  border-radius: 44rpx;
   font-size: 32rpx;
-  padding: 24rpx 0;
-  margin: 0;
-  width: 100%;
-  line-height: 1;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
-.save-btn::after {
-  border: none;
+.section-hint {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
 }
 
-.save-btn:active {
-  background-color: #0066cc;
+.hint-icon {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  border: 1.5rpx solid #999;
+  font-size: 20rpx;
+  color: #999;
+  text-align: center;
+  line-height: 26rpx;
 }
 
-/* ========== 修改模式：与新建区分（琥珀 / 橙色系） ========== */
-.page-add-food-sales--edit {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #fff8f0 0%, #fef3e6 380rpx, #f0f0f2 560rpx);
+.hint-text {
+  font-size: 24rpx;
+  color: #999;
 }
 
-.page-add-food-sales--edit .page-body {
-  background: transparent;
+/* ========== 经营总账网格 ========== */
+.revenue-section {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
 }
 
-.edit-mode-banner {
+.revenue-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.rg-row {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  padding: 20rpx 22rpx;
-  margin-bottom: 20rpx;
   gap: 16rpx;
-  background: linear-gradient(92deg, rgba(217, 119, 6, 0.14) 0%, rgba(251, 191, 36, 0.1) 100%);
-  border: 1rpx solid rgba(180, 83, 9, 0.35);
-  border-radius: 14rpx;
 }
 
-.edit-mode-banner__tag {
+.rg-card {
+  flex: 1;
+  min-width: 0;
+  background: #f8fafc;
+  border-radius: 16rpx;
+  padding: 20rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.rg-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.rg-card__icon {
+  width: 36rpx;
+  height: 36rpx;
   flex-shrink: 0;
+}
+
+.rg-card__label {
   font-size: 24rpx;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1rpx;
-  background: linear-gradient(145deg, #d97706 0%, #b45309 100%);
-  padding: 8rpx 18rpx;
-  border-radius: 10rpx;
+  color: #666;
   line-height: 1.2;
 }
 
-.edit-mode-banner__desc {
-  flex: 1;
-  font-size: 26rpx;
-  line-height: 1.55;
-  color: #92400e;
-  font-weight: 500;
-}
-
-.page-add-food-sales--edit .module-card {
-  background: #fffcfa;
-  border: 1rpx solid rgba(180, 83, 9, 0.2);
-  box-shadow: 0 6rpx 20rpx rgba(180, 83, 9, 0.08);
-}
-
-.page-add-food-sales--edit .module-title {
-  color: #b45309;
-}
-
-.page-add-food-sales--edit .field-label {
-  color: #9a3412;
-  font-weight: 500;
-}
-
-.page-add-food-sales--edit .date-input-wrapper:not(.date-readonly-edit) {
-  background: #fffbf7;
-  border-color: rgba(217, 119, 6, 0.35);
-}
-
-.date-readonly-edit {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  border-style: dashed;
-  box-sizing: border-box;
-}
-
-.date-readonly-edit__main {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #7c2d12;
-}
-
-.date-readonly-edit__hint {
-  flex-shrink: 0;
-  font-size: 24rpx;
-  color: #b45309;
-  font-weight: 500;
-}
-
-.page-add-food-sales--edit .date-readonly-edit {
-  background: #fff7ed;
-  border-color: rgba(180, 83, 9, 0.45);
-}
-
-.page-add-food-sales--edit .food-cat-stripe {
-  background: linear-gradient(90deg, #ffedd5 0%, #fff7ed 100%);
-  border-left-color: #ea580c;
-}
-
-.page-add-food-sales--edit .food-cat-stripe__text {
-  color: #9a3412;
-}
-
-.page-add-food-sales--edit .food-dish-block {
-  background: #fffbf7;
-  border-color: rgba(217, 119, 6, 0.22);
-}
-
-.page-add-food-sales--edit .food-dish-block__name {
-  color: #431407;
-}
-
-.page-add-food-sales--edit .food-dish-block__qty-input {
-  border-color: rgba(217, 119, 6, 0.35);
-  background: #fffdfb;
-}
-
-.page-add-food-sales--edit .dinein-estimate--muted .dinein-estimate__text {
-  color: #a16207;
-}
-
-.page-add-food-sales--edit .dep-readonly {
-  color: #7c2d12;
-}
-
-.page-add-food-sales--edit .module-card--form-fields .field-label {
-  color: #9a3412;
-}
-
-.page-add-food-sales--edit .dinein-estimate__text {
-  color: #b45309;
-}
-
-.page-add-food-sales--edit .daily-revenue-readonly {
-  background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 40%, #fdf8f3 100%);
-  border-color: rgba(234, 88, 12, 0.35);
-}
-
-.page-add-food-sales--edit .daily-revenue-readonly .module-title {
-  color: #c2410c;
-}
-
-.page-add-food-sales--edit .module-card--form-fields .field-input {
-  border-color: rgba(217, 119, 6, 0.28);
-  background: #fffdfb;
-}
-
-.save-btn.save-btn--edit {
-  background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%);
-  color: #fff;
-}
-
-.save-btn.save-btn--edit:active {
-  background: #9a3412;
-}
-
-.food-sales-tool-row {
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 0 !important;
-}
-
-/* 合并模板弹窗（与 food-tpl 同款布局） */
-/* 表格布局 */
-.info-row {
-  display: flex;
-  align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.info-row:last-child {
-  border-bottom: none;
-}
-
-.info-label {
-  width: 200rpx;
-  font-size: 28rpx;
-  color: #666;
-  flex-shrink: 0;
-}
-
-.info-input {
-  flex: 1;
-  font-size: 28rpx;
-  color: #333;
-  text-align: right;
-  padding: 0 10rpx;
-}
-
-.info-unit {
-  width: 60rpx;
-  font-size: 26rpx;
-  color: #999;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.info-divider {
-  height: 1rpx;
-  background: #e0e0e0;
-  margin: 10rpx 0;
-}
-
-/* 模块卡片布局 */
-.module-card {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 24rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
-}
-
-.module-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20rpx;
-}
-
-.module-row {
-  display: flex;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
-}
-
-.module-row:last-child {
-  margin-bottom: 0;
-}
-
-.field-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.field-row:last-child {
-  margin-bottom: 0;
-}
-
-.field-label {
-  width: 140rpx;
-  font-size: 30rpx;
-  color: #666;
-  flex-shrink: 0;
-}
-
-.field-input {
-  flex: 1;
-  height: 70rpx;
-  border: 2rpx solid #e0e0e0;
-  border-radius: 12rpx;
-  padding: 0 20rpx;
-  font-size: 32rpx;
-  color: #333;
-  background: #fafafa;
-  box-sizing: border-box;
-}
-
-.module-card--form-fields .field-row {
-  align-items: center;
-  gap: 16rpx;
-}
-
-.module-card--form-fields .field-label {
-  flex: 1;
-  min-width: 0;
-  width: auto;
-  padding-right: 8rpx;
-  line-height: 1.4;
-}
-
-.module-card--form-fields .field-input {
-  flex: 0 0 220rpx;
-  width: 220rpx;
-  min-width: 200rpx;
-  max-width: 42%;
-  height: 72rpx;
-}
-
-.page-add-food-sales .page-body {
-  padding-bottom: 40rpx;
-}
-
-/* 各大模块之间统一 20rpx 间距（本页未引入全局 mb-20 时仍生效） */
-.page-add-food-sales .mb-20 {
-  margin-bottom: 20rpx;
-}
-
-.page-add-food-sales .food-sales-tool-row {
-  margin-bottom: 20rpx;
-}
-
-.dep-readonly-row {
-  align-items: center;
-}
-
-.dep-readonly {
-  flex: 1;
-  font-size: 28rpx;
-  color: #333;
-  padding: 16rpx 20rpx;
-}
-
-.module-card--food-sales {
-  overflow: hidden;
-}
-
-.food-list-hint {
-  font-size: 30rpx;
-  color: #999;
-  padding: 16rpx 0 24rpx;
-}
-
-.food-sales-scroll {
-  max-height: 55vh;
-  margin-top: 12rpx;
-}
-
-/* 大类：独占一行 */
-.food-cat-stripe {
-  margin-top: 8rpx;
-  margin-bottom: 16rpx;
-  padding: 18rpx 22rpx;
-  background: linear-gradient(90deg, #e8f6ec 0%, #f4fbf6 100%);
-  border-left: 6rpx solid #4a9960;
-  border-radius: 12rpx;
-}
-
-.food-cat-stripe:first-child {
-  margin-top: 0;
-}
-
-.food-cat-stripe__text {
+.rg-card__value {
   font-size: 34rpx;
   font-weight: 700;
-  color: #2d6a45;
-  letter-spacing: 1rpx;
-}
-
-/* 菜品卡片 */
-.food-dish-block {
-  background: #f8faf9;
-  border-radius: 16rpx;
-  padding: 22rpx 24rpx;
-  margin-bottom: 20rpx;
-  border: 1rpx solid #e8eee9;
-}
-
-.food-dish-block--off {
-  opacity: 0.72;
-}
-
-.food-dish-block__title-row {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  margin-bottom: 20rpx;
-}
-
-.food-dish-block__name {
-  flex: 1;
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #1a1a1a;
-  line-height: 1.45;
-}
-
-.food-dish-block__badge {
-  flex-shrink: 0;
-  margin-left: 12rpx;
-  margin-top: 4rpx;
-  font-size: 24rpx;
-  color: #888;
-  border: 1rpx solid #ccc;
-  border-radius: 8rpx;
-  padding: 4rpx 12rpx;
-}
-
-.food-dish-block__meta-row {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: 20rpx;
-}
-
-.food-dish-block__price-col {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8rpx;
-}
-
-.food-dish-block__qty-col {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-}
-
-.food-dish-block__label {
-  font-size: 28rpx;
-  color: #666;
-  font-weight: 500;
-}
-
-.food-dish-block__label--qty {
-  color: #b35900;
-}
-
-.food-dish-block__price {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #c43d1f;
-}
-
-.food-dish-block__qty-input {
-  width: 100%;
-  height: 88rpx;
-  padding: 0 22rpx;
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #a64a00;
-  text-align: center;
-  background: #fff7e8;
-  border: 2rpx solid #e8a54d;
-  border-radius: 14rpx;
-  box-sizing: border-box;
-}
-
-.food-dish-block__qty-placeholder {
-  color: #d4a574;
-  font-size: 30rpx;
-  font-weight: 500;
-}
-
-.dinein-estimate {
-  margin-top: 20rpx;
-  padding-top: 20rpx;
-  border-top: 1rpx solid #eaeaea;
-}
-
-.dinein-estimate__text {
-  font-size: 30rpx;
-  color: #666;
-}
-
-/* 编辑模式：日营收只读块（data.dailyRevenue） */
-.daily-revenue-readonly {
-  background: #f8fafc;
-  border: 1rpx solid #e8ecf0;
-}
-
-.dr-fetch-meta {
-  display: block;
-  font-size: 24rpx;
-  color: #888;
-  margin-bottom: 16rpx;
-}
-
-.dr-no-record {
-  font-size: 26rpx;
-  color: #666;
-  line-height: 1.5;
-}
-
-.dr-body {
-  padding-top: 4rpx;
-}
-
-.dr-row {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 12rpx 0;
-  border-bottom: 1rpx solid #eef2f6;
-  font-size: 26rpx;
-}
-
-.dr-row:last-child {
-  border-bottom: none;
-}
-
-.dr-k {
-  color: #666;
-  flex-shrink: 0;
-  margin-right: 20rpx;
-}
-
-.dr-v {
-  color: #333;
-  font-weight: 500;
-  text-align: right;
-  flex: 1;
-}
-
-.dr-row--notes {
-  flex-direction: column;
-}
-
-.dr-notes {
-  margin-top: 8rpx;
-  color: #333;
-  line-height: 1.45;
+  line-height: 1.3;
   word-break: break-all;
 }
 
-.dinein-estimate--muted .dinein-estimate__text {
-  color: #888;
+.rg-card__unit {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: inherit;
+  margin-left: 2rpx;
+}
+
+.rg-card__value--green { color: #16a34a; }
+.rg-card__value--blue { color: #2563eb; }
+.rg-card__value--orange { color: #ea580c; }
+.rg-card__value--purple { color: #9333ea; }
+
+/* ========== 菜品区域 ========== */
+.dish-section {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.sub-dep-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  margin-bottom: 8rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.sub-dep-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.sub-dep-count {
   font-size: 24rpx;
+  color: #999;
+}
+
+/* ========== 菜品分类标题 ========== */
+.food-category-title {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0 12rpx 8rpx;
+}
+
+.food-category-bar {
+  width: 6rpx;
+  height: 28rpx;
+  background: #22c55e;
+  border-radius: 3rpx;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+}
+
+.food-category-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.dish-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dish-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.dish-row:last-child {
+  border-bottom: none;
+}
+
+.dish-row--empty .dish-name {
+  color: #999;
+}
+
+.dish-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.dish-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+
+.dish-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.dish-tag {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.dish-tag--green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.dish-tag--purple {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.dish-tag--orange {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.dish-tag__label {
+  font-weight: 500;
+}
+
+.dish-tag__value {
+  font-weight: 700;
+}
+
+.dish-sales-amount {
+  font-size: 26rpx;
+  color: #666;
+  margin-left: 8rpx;
+}
+
+.dish-empty-text {
+  font-size: 26rpx;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.dish-action {
+  flex-shrink: 0;
+  margin-left: 20rpx;
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  border: 2rpx solid #22c55e;
+  background: #fff;
+}
+
+.edit-btn__icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.edit-btn__text {
+  font-size: 26rpx;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+/* ========== 空状态 ========== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+
+.empty-image {
+  width: 160rpx;
+  height: 160rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ========== 弹窗 ========== */
+
+.meal-modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1100;
+}
+
+.meal-modal-mask {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.meal-modal-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85vw;
+  max-height: 80vh;
+  padding: 36rpx 32rpx;
+  background: #fff;
+  border-radius: 28rpx;
+  box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  z-index: 1101;
+  overflow-y: auto;
+}
+
+.meal-modal__title {
+  display: block;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 28rpx;
+}
+
+/* 表单项 */
+.meal-form-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.meal-form-item--notes {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.meal-form-label {
+  width: 180rpx;
+  font-size: 28rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.meal-form-input {
+  flex: 1;
+  height: 70rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  color: #333;
+  background: #fafafa;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.meal-form-readonly {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.meal-dish-name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.meal-placeholder { color: #bbb; }
+
+/* 类型行 */
+.meal-type-inline {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.meal-type-picker {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.meal-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rpx 18rpx;
+  background: #e8f5e9;
+  border-radius: 6rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.meal-type-arrow {
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.5;
+}
+
+/* 备注 textarea */
+.meal-textarea {
+  width: 100%;
+  min-height: 100rpx;
+  padding: 14rpx 20rpx;
+  margin-top: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+  background: #fafafa;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  box-sizing: border-box;
+}
+
+.meal-textarea-count {
+  text-align: right;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #ccc;
+}
+
+/* 弹窗按钮 */
+.meal-modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 24rpx;
+  margin-top: 28rpx;
+}
+
+.meal-btn-cancel,
+.meal-btn-confirm {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  border-radius: 42rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+}
+
+.meal-btn-cancel::after,
+.meal-btn-confirm::after { border: none; }
+
+.meal-btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.meal-btn-confirm {
+  background: #4a9960;
+  color: #fff;
+}
+
+/* ========== 营收弹窗分区标题 ========== */
+.rev-section-label {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #333;
+  padding: 8rpx 0 4rpx;
+  margin-top: 12rpx;
+}
+
+/* ========== 总营业额行 ========== */
+.meal-form-item--total {
+  border-bottom: none;
+  margin-top: 12rpx;
+  padding-top: 20rpx;
+}
+
+.meal-form-label--total {
+  font-weight: 700;
+  color: #333;
+}
+
+.meal-total-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #16a34a;
 }

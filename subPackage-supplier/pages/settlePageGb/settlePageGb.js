@@ -1,6 +1,6 @@
 var globalData = getApp().globalData;
 var load = require('../../../lib/load.js');
-var dateUtils = require('../../../utils/dateUtil.js');
+var dateUtils = require('../../../lib/dateUtil.js');
 var apiUrl = require('../../../config/index.js');
 
 var apiDistributer = require('../../../services/apiDistributer.js');
@@ -53,9 +53,7 @@ Page({
       stopDate: this.data.stopDate,
       disId: this.data.gbDisId
     };
-    apiDistributer.disGetGbSupplierBillsWithStatus(data).then(function (res) {
-      console.log(res.result.data);
-      load.hideLoading();
+    apiDistributer.disGetGbSupplierBillsWithStatus(data).then(function (res) {load.hideLoading();
       if (res.result.code == 0) {
         // 初始化每个订单的选中状态
         var arr = res.result.data.map(function (item) {
@@ -219,11 +217,7 @@ Page({
       total: this.data.total, // 总金额
       supplierId: this.data.supplierId, // 供应商ID
       userId: this.data.jrdhUserInfo ? this.data.jrdhUserInfo.nxJrdhUserId : undefined // 用户ID
-    };
-
-    console.log('结算参数:', params);
-
-    depOrder.finishPayPurchaseBatchGb(params).then(function (res) {
+    };depOrder.finishPayPurchaseBatchGb(params).then(function (res) {
       load.hideLoading();
       that.setData({
         isTishi: false,

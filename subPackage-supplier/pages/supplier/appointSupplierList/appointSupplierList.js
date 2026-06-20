@@ -58,9 +58,7 @@ Page({
     gbDisGetAllSuppliers(this.data.disId).then(res => {
       load.showLoading("获取供货商")
       if (res.result.code == 0) {
-        load.hideLoading();
-        console.log("rredd", res.result)
-        this.setData({
+        load.hideLoading();this.setData({
           supplierArr: res.result.data,
         })
       } else {
@@ -74,9 +72,7 @@ Page({
 
 
   choiceSupplier(e) {
-    var supplierItem = e.currentTarget.dataset.item;
-    console.log(e);
-     var goodsItem = wx.getStorageSync('disGoods');
+    var supplierItem = e.currentTarget.dataset.item;var goodsItem = wx.getStorageSync('disGoods');
      var aaa = supplierItem.nxJrdhSupplierId;
      goodsItem.gbDgGbSupplierId = aaa;
      goodsItem.gbDgGoodsType = 21;

@@ -1,5 +1,5 @@
 var load = require('../../../../lib/load.js');
-var aiGoodsAddApi = require('../../../services/aiGoodsAddApi.js');
+var aiGoodsAddApi = require('../../../../services/aiGoodsAddApi.js');
 
 function trimStr(s) {
   if (s == null || s === undefined) return '';
@@ -54,14 +54,10 @@ function preserveUserGoodsFromPage(page) {
 
 /** 联调日志：打印 request 返回的完整结构（含 result 业务体） */
 function logAiGoodsAddApiResponse(tag, res) {
-  console.log('[aiAddGoods]', tag, 'raw res:', res);
   var r = res && res.result;
-  console.log('[aiAddGoods]', tag, 'res.result:', r);
   if (r != null && typeof r === 'object') {
     try {
-      console.log('[aiAddGoods]', tag, 'res.result JSON:', JSON.stringify(r));
     } catch (e) {
-      console.log('[aiAddGoods]', tag, 'JSON.stringify 失败', e);
     }
   }
 }
@@ -593,7 +589,6 @@ Page({
       logAiGoodsAddApiResponse('POST ai/goods-add/analyze', res);
       load.hideLoading();
       var parsed = parseAiResponse(res);
-      console.log('[aiAddGoods] analyze parsed:', parsed);
       var keep = preserveUserGoodsFromPage(that);
       if (!parsed.ok) {
         that.setData(
@@ -611,7 +606,6 @@ Page({
       }
       that._applyAnalyzeData(parsed);
     }).catch(function (err) {
-      console.log('[aiAddGoods] POST ai/goods-add/analyze catch:', err);
       load.hideLoading();
       var keep = preserveUserGoodsFromPage(that);
       that.setData(
@@ -805,7 +799,6 @@ Page({
       logAiGoodsAddApiResponse('POST ai/goods-add/analyze (confirmedGrandNxGoodsId)', res);
       load.hideLoading();
       var parsed = parseAiResponse(res);
-      console.log('[aiAddGoods] analyze(branch) parsed:', parsed);
       var keep = preserveUserGoodsFromPage(that);
       if (!parsed.ok) {
         that.setData(
@@ -823,7 +816,6 @@ Page({
       }
       that._applyAnalyzeData(parsed);
     }).catch(function (err) {
-      console.log('[aiAddGoods] POST ai/goods-add/analyze (branch) catch:', err);
       load.hideLoading();
       var keep = preserveUserGoodsFromPage(that);
       that.setData(
@@ -1080,12 +1072,10 @@ Page({
 
     var that = this;
     load.showLoading(intent === 'ADD_SIBLING_SKU' ? '正在新增目录 SKU…' : '保存中…');
-    console.log('[aiAddGoods] POST ai/goods-add/confirm NX_CATALOG body:', body);
     aiGoodsAddApi.confirm(body).then(function (res) {
       logAiGoodsAddApiResponse('POST ai/goods-add/confirm NX_CATALOG', res);
       load.hideLoading();
       var parsed = parseAiResponse(res);
-      console.log('[aiAddGoods] confirm NX_CATALOG parsed:', parsed);
       var keep = preserveUserGoodsFromPage(that);
       if (!parsed.ok || parsed.flowState !== 'SUCCESS') {
         wx.showToast({ title: parsed.msg || '保存失败', icon: 'none' });
@@ -1108,7 +1098,6 @@ Page({
       }
       that._applySuccess(parsed);
     }).catch(function (err) {
-      console.log('[aiAddGoods] POST ai/goods-add/confirm NX_CATALOG catch:', err);
       load.hideLoading();
       var keep = preserveUserGoodsFromPage(that);
       that.setData(
@@ -1420,12 +1409,10 @@ Page({
     if (note) {
       body.goodsFurtherDescription = note;
     }
-    console.log('[aiAddGoods] POST ai/goods-add/confirm TEMP body:', body);
     aiGoodsAddApi.confirm(body).then(function (res) {
       logAiGoodsAddApiResponse('POST ai/goods-add/confirm TEMP', res);
       load.hideLoading();
       var parsed = parseAiResponse(res);
-      console.log('[aiAddGoods] confirm TEMP parsed:', parsed);
       var keep = preserveUserGoodsFromPage(that);
       if (!parsed.ok || parsed.flowState !== 'SUCCESS') {
         wx.showToast({ title: parsed.msg || '保存失败', icon: 'none' });
@@ -1444,7 +1431,6 @@ Page({
       }
       that._applySuccess(parsed);
     }).catch(function (err) {
-      console.log('[aiAddGoods] POST ai/goods-add/confirm TEMP catch:', err);
       load.hideLoading();
       var keep = preserveUserGoodsFromPage(that);
       that.setData(

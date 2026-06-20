@@ -1,0 +1,13 @@
+{
+  
+  "navigationBarTitleText": "配送商品",
+
+  "usingComponents": {
+    "myDismodal": "/components/myDismodal/myDismodal",
+    "back-navbar": "/components/back-navbar/back-navbar",
+    "addStandard": "/components/addStandard/addStandard" ,
+    "myDismodalNx": "/components/myDismodalNx/myDismodalNx",
+    "delWarnModal": "/components/delWarnModal/delWarnModal"
+
+  }
+}

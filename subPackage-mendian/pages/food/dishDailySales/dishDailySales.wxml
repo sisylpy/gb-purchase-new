@@ -1,0 +1,197 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+<view class="dds-page">
+  <!-- 导航栏 -->
+  <back-navbar title="{{dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;"
+    bindnavbuttontap="onBack"></back-navbar>
+
+  <!-- 日期选择 -->
+  <view class="flex-row-between pl-20 pr-20 border-bottom bg-white">
+    <view class="flex-row">
+      <view class="p-20" bindtap="toDatePageSearch">
+        <image src="/images/calender.png" class="icon"></image>
+      </view>
+      <view class="flex-column pt-10">
+        <view class="font-yuan">{{hanzi}}</view>
+        <view class="flex-row" wx:if="{{startDate == stopDate}}">
+          <view class="small" wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
+        </view>
+        <view class="flex-row" wx:else>
+          <view wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
+          <text class="plr-10">-</text>
+          <view wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 汇总卡片 -->
+  <view class="dds-summary" wx:if="{{summary}}">
+    <view class="dds-summary-grid">
+      <view class="dds-summary-cell">
+        <text class="dds-summary-label">本期总销量</text>
+        <view class="flex-column">
+          <text class="dds-summary-val dds-summary-val--green">¥{{summary.actualRevenue}}</text>
+        <text class="dds-summary-val dds-summary-val--green">{{summary.totalConsumptionPortions || '--'}}<text class="dds-summary-unit">份</text></text>
+        </view>
+      </view>
+
+      <view class="dds-summary-cell">
+        <text class="dds-summary-label">销售</text>
+        <view class="flex-column">
+          <text class="dds-summary-val dds-summary-val--green">¥{{summary.normalSaleAmount}}</text>
+        <text class="dds-summary-val dds-summary-val--green">{{summary.normalSaleQty || '--'}}<text class="dds-summary-unit">份</text></text>
+        </view>
+      </view>
+
+      <view class="dds-summary-cell">
+        <text class="dds-summary-label">折扣</text>
+        <view class="flex-column">
+          <text class="dds-summary-val dds-summary-val--green">¥{{summary.discountGiftAmount}}</text>
+        <text class="dds-summary-val dds-summary-val--green">{{summary.discountGiftQty || '--'}}<text class="dds-summary-unit">份</text></text>
+        </view>
+      </view>
+      <view class="dds-summary-cell">
+        <text class="dds-summary-label">员工餐</text>
+        <view class="flex-column">
+          <text class="dds-summary-val dds-summary-val--blue">¥{{summary.employeeMealCostAmount}}</text>
+        <text class="dds-summary-val dds-summary-val--blue">{{summary.employeeMealPortions || '--'}}<text class="dds-summary-unit">份</text></text>
+        </view>
+      </view>
+     
+    </view>
+  </view>
+
+  <!-- 图表：每日销量趋势 -->
+  <view class="dds-chart-section" wx:if="{{dailyRows.length > 0}}">
+    <view class="dds-chart-header">
+      <text class="dds-chart-title">每日销量趋势</text>
+      <view class="dds-chart-tabs">
+        <view class="dds-chart-tab {{chartTab === 'portions' ? 'dds-chart-tab--on' : ''}}" bindtap="onChartTab" data-tab="portions">
+          <text>销量</text>
+        </view>
+        <view class="dds-chart-tab {{chartTab === 'amount' ? 'dds-chart-tab--on' : ''}}" bindtap="onChartTab" data-tab="amount">
+          <text>销售额</text>
+        </view>
+      </view>
+    </view>
+    <!-- 简易柱状图 -->
+    <view class="dds-chart-bars">
+      <view class="dds-bar-item" wx:for="{{dailyRows}}" wx:for-item="row" wx:key="date">
+        <view class="dds-bar-val-label">{{chartTab === 'amount' ? '¥' : ''}}{{chartTab === 'amount' ? (row.salesAmount || 0) : (row.operatingSalesPortions || 0)}}</view>
+        <view class="dds-bar-col {{row.isAbnormal ? 'dds-bar-col--abnormal' : ''}}"
+          style="height: {{chartTab === 'amount' ? (row._amountBarH || 1) : (row._portionBarH || 1)}}rpx;">
+        </view>
+        <text class="dds-bar-date">{{tool.getDay(row.date || row.salesDate)}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 每日销售明细列表 -->
+  <view class="dds-list-section" wx:if="{{dailyRows.length > 0}}">
+    <view class="dds-list-title">
+      <text>每日销售明细</text>
+    </view>
+
+    <view class="dds-day-card" wx:for="{{dailyRows}}" wx:for-item="row" wx:for-index="dIdx" wx:key="date">
+      <!-- 日期头部 -->
+      <view class="dds-day-head {{row.isAbnormal ? 'dds-day-head--abnormal' : ''}}">
+        <view class="dds-day-head-left">
+          <text class="dds-day-date">{{tool.transferDateString(row.date || row.salesDate)}}</text>
+          <text class="dds-day-total">{{row.operatingSalesPortions || 0}}份</text>
+        </view>
+        <view class="dds-day-head-right">
+          <text class="dds-day-amount">¥{{row.salesAmount || 0}}</text>
+        </view>
+      </view>
+
+      <!-- 五类销量行 -->
+      <view class="dds-types-row">
+        <view class="dds-type-tag dds-type-tag--1">
+          <text class="dds-type-name">正常</text>
+          <text class="dds-type-val">{{row.normalPortions || 0}}</text>
+        </view>
+        <view class="dds-type-tag dds-type-tag--2">
+          <text class="dds-type-name">折扣</text>
+          <text class="dds-type-val">{{row.discountPortions || 0}}</text>
+        </view>
+        <view class="dds-type-tag dds-type-tag--3">
+          <text class="dds-type-name">会员</text>
+          <text class="dds-type-val">{{row.memberPortions || 0}}</text>
+        </view>
+        <view class="dds-type-tag dds-type-tag--4">
+          <text class="dds-type-name">赠送</text>
+          <text class="dds-type-val">{{row.complimentaryPortions || 0}}</text>
+        </view>
+        <view class="dds-type-tag dds-type-tag--5">
+          <text class="dds-type-name">员工餐</text>
+          <text class="dds-type-val">{{row.employeeMealPortions || 0}}</text>
+        </view>
+      </view>
+
+      <!-- 编辑按钮 -->
+      <view class="dds-day-actions">
+        <view class="dds-edit-btn" bindtap="onEditDay" data-index="{{dIdx}}" data-row="{{row}}">
+          <image class="dds-edit-icon" src="/images/MapEditing.png" mode="aspectFit" />
+          <text>编辑销量</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="dds-empty" wx:if="{{!loading && dailyRows.length === 0}}">
+    <text>本期暂无销售记录</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="dds-loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 底部安全区 -->
+  <view class="dds-bottom-safe"></view>
+</view>
+
+<!-- 编辑弹窗 -->
+<view class="dds-overlay" wx:if="{{showEditPopup}}" catchtap="onClosePopup">
+  <view class="dds-popup" catchtap="onPreventClose">
+    <view class="dds-popup-head">
+      <text class="dds-popup-title">编辑 {{editDateLabel}} 销量</text>
+      <view class="dds-popup-close" bindtap="onClosePopup">
+        <text>×</text>
+      </view>
+    </view>
+
+    <scroll-view scroll-y class="dds-popup-body">
+      <view class="dds-edit-item" wx:for="{{editTypes}}" wx:for-item="et" wx:key="type">
+        <text class="dds-edit-type-label">{{et.name}}</text>
+        <view class="dds-edit-fields">
+          <view class="dds-edit-field">
+            <text class="dds-edit-field-hint">单价</text>
+            <view class="dds-edit-field-box {{et.type === 5 ? 'dds-edit-field-box--disabled' : ''}}">
+              <input class="dds-edit-field-input" type="digit" value="{{editForm[et.priceField]}}" bindinput="onEditInput" data-field="{{et.priceField}}" placeholder="¥" disabled="{{et.type === 5}}" />
+              <text class="dds-edit-field-unit">元</text>
+            </view>
+          </view>
+          <view class="dds-edit-field">
+            <text class="dds-edit-field-hint">份数</text>
+            <view class="dds-edit-field-box">
+              <input class="dds-edit-field-input" type="digit" value="{{editForm[et.qtyField]}}" bindinput="onEditInput" data-field="{{et.qtyField}}" placeholder="0" />
+              <text class="dds-edit-field-unit">份</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="dds-popup-foot">
+      <view class="dds-popup-btn dds-popup-btn--cancel" bindtap="onClosePopup">
+        <text>取消</text>
+      </view>
+      <view class="dds-popup-btn dds-popup-btn--confirm" bindtap="onSaveEdit">
+        <text>保存</text>
+      </view>
+    </view>
+  </view>
+</view>

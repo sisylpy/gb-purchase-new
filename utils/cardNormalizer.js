@@ -1,0 +1,355 @@
+/**
+ * 卡片标准化工具 — 复用自 aiChat 的 _resolveDisplayCard / _normalizeCards 逻辑
+ *
+ * 输入：(cards: Array<{ cardType, title, subtitle, chartType, payload }>)
+ * 输出：(Array<{ cardType, cardData }>)
+ *
+ * 用于 aiChat 和 pinDetail 统一卡片解析。
+ */
+
+var workRecordCardTypes = require('./workRecordCardTypes');
+var purchaseRankingCardUtil = require('./purchaseRankingCardUtil');
+
+/**
+ * 解析单个 card：从 card.payload 提取 cardData
+ * card 统一格式：{ cardType, title, subtitle, chartType, payload }
+ * 输出：{ cardType, cardData }
+ */
+function resolveDisplayCard(card) {
+  if (!card || !card.cardType) {
+    console.log('[cardNormalizer] resolveDisplayCard ❌ card 无效或缺少 cardType');
+    return null;
+  }
+  console.log('[cardNormalizer] resolveDisplayCard cardType:', card.cardType, 'card:', JSON.stringify(card));
+  var payload = card.payload || null;
+
+  if (card.cardType === 'MENU_PORTFOLIO_QUADRANT_CARD') {
+    var cats = (payload && Array.isArray(payload.categories)) ? payload.categories : [];
+    if (cats.length === 0) {
+      return {
+        cardType: card.cardType,
+        cardData: {
+          title: card.title || '菜单结构四象限',
+          subtitle: '',
+          totalDishCount: 0,
+          categories: [],
+          emptyReason: card.subtitle || (payload && payload.noDataReason) || '该时间范围内暂无菜品数据，暂不能做菜单结构分析',
+        },
+      };
+    }
+    return {
+      cardType: card.cardType,
+      cardData: {
+        title: card.title || payload.title || '菜单结构四象限',
+        subtitle: card.subtitle || payload.subtitle || '本轮菜单内相对分层（销量与实际利润中位数阈值，非绝对行业标准）',
+        totalDishCount: payload.totalDishCount || 0,
+        categories: cats,
+      },
+    };
+  }
+
+  if (card.cardType === 'DISH_COST_ANALYSIS_CARD') {
+    return { cardType: card.cardType, cardData: payload };
+  }
+
+  if (card.cardType === 'DISH_SALES_CARD') {
+    return { cardType: card.cardType, cardData: payload };
+  }
+
+  if (card.cardType === 'MENU_HIGH_SALES_LOW_MARGIN_CARD') {
+    var isEmpty = payload && payload.status === 'EMPTY';
+    return {
+      cardType: card.cardType,
+      cardData: {
+        title: card.title || payload.title || '畅销低利菜',
+        totalRiskDishCount: payload ? payload.totalRiskDishCount : 0,
+        summary: payload ? payload.summary : '',
+        dishes: payload && Array.isArray(payload.dishes) ? payload.dishes : [],
+        empty: isEmpty,
+      },
+    };
+  }
+
+  if (card.cardType === 'MENU_ACTION_RECOMMENDATION_CARD') {
+    var isEmpty2 = payload && payload.status === 'EMPTY';
+    var aiContent = {
+      mainSummary: payload ? (payload.mainSummary || payload.summary || '') : '',
+      keyFindings: (payload && Array.isArray(payload.keyFindings)) ? payload.keyFindings : [],
+      focusSections: (payload && Array.isArray(payload.focusSections)) ? payload.focusSections : [],
+      nextSteps: (payload && Array.isArray(payload.nextSteps)) ? payload.nextSteps : [],
+      supportingEvidence: (payload && Array.isArray(payload.supportingEvidence)) ? payload.supportingEvidence : [],
+      capabilityBoundaryZh: payload ? (payload.capabilityBoundaryZh || '') : '',
+    };
+    return {
+      cardType: card.cardType,
+      cardData: {
+        title: card.title || (payload && payload.title) || '菜单优化方案',
+        shopName: payload ? (payload.scopeLabel || payload.shopName || '') : '',
+        timeLabel: payload ? (payload.timeLabel || '') : '',
+        aiContent: aiContent,
+        empty: isEmpty2,
+      },
+    };
+  }
+
+  if (card.cardType === 'DISH_PROFIT_PRESCRIPTION_CARD') {
+    var pricing = (payload && payload.pricing && typeof payload.pricing === 'object') ? payload.pricing : null;
+    var margin = (payload && payload.margin && typeof payload.margin === 'object') ? payload.margin : null;
+    var sp = (payload && payload.suggestedPrice && typeof payload.suggestedPrice === 'object') ? payload.suggestedPrice : null;
+    var diagnosis = (payload && payload.diagnosis && typeof payload.diagnosis === 'object') ? payload.diagnosis : null;
+
+    var _getMulti = function () {
+      var args = Array.prototype.slice.call(arguments);
+      var names = args[args.length - 1];
+      for (var ci = 0; ci < args.length - 1; ci++) {
+        var obj = args[ci];
+        if (!obj) continue;
+        for (var ni = 0; ni < names.length; ni++) {
+          var v = obj[names[ni]];
+          if (v !== undefined && v !== null) return v;
+        }
+      }
+      return undefined;
+    };
+
+    var caps = payload && payload.capabilityLimits;
+    var capabilityHints = [];
+    if (caps && typeof caps === 'object' && !Array.isArray(caps)) {
+      if (caps.crossStoreDishRank === 'NOT_IN_P1') capabilityHints.push('暂不支持跨门店菜品排名对比');
+      if (caps.latestPurchasePrice === 'NOT_IN_P1') capabilityHints.push('暂不包含最新采购价');
+      if (caps.externalMarketBenchmark === 'NOT_IN_P1') capabilityHints.push('暂不包含外部市场价格基准');
+    }
+
+    return {
+      cardType: card.cardType,
+      cardData: {
+        title: card.title || (payload && payload.title) || '菜品价格与配方诊断',
+        dishName: payload ? (payload.dishName || '') : '',
+        status: payload ? (payload.status || '') : '',
+        diagnosisSummary: (diagnosis && diagnosis.headlineZh) || (payload && payload.summary) || '',
+        currentPrice: _getMulti(pricing, margin, payload, ['salesUnitPrice', 'listPricePerPortion', 'currentPrice', 'salePrice']),
+        actualCostPerPortion123: _getMulti(margin, pricing, payload, ['actualCostPerPortion123', 'actualCostPerPortion', 'actualCost']),
+        targetGrossMarginRate: _getMulti(sp, margin, payload, ['targetGrossMarginRate', 'grossMarginStandardTarget', 'targetMarginRate']),
+        suggestedPrice: _getMulti(sp, payload, ['suggestedPricePerPortion', 'suggestedPrice', 'advisedPrice']),
+        formulaId: _getMulti(sp, payload, ['formulaId', 'formula']) || '',
+        theoreticalCostPerPortion: _getMulti(margin, payload, ['theoryCostPerPortion', 'theoreticalCostPerPortion']),
+        costGapPerPortion: _getMulti(margin, payload, ['diffCostPerPortion', 'costGapPerPortion', 'costGap']),
+        costGapRate: _getMulti(margin, payload, ['costGapRate', 'gapRate']),
+        ingredientRows: (payload && Array.isArray(payload.ingredientRows)) ? payload.ingredientRows : [],
+        recommendedActions: (payload && Array.isArray(payload.recommendedActions)) ? payload.recommendedActions
+          : (payload && Array.isArray(payload.actions)) ? payload.actions : [],
+        capabilityHints: capabilityHints,
+      },
+    };
+  }
+
+  if (card.cardType === 'PURCHASE_GOODS_DETAIL_CARD') {
+    return {
+      cardType: card.cardType,
+      cardData: Object.assign({
+        title: card.title || '',
+        timeLabel: (payload && payload.timeLabel) || '',
+        reportLabel: card.subtitle || (payload && payload.reportLabel) || '',
+        scopeLabel: (payload && payload.scopeLabel) || '',
+        emptyReason: (payload && payload.emptyReason) || '',
+        totalPurchaseAmount: (payload && payload.totalPurchaseAmount != null) ? payload.totalPurchaseAmount : null,
+        purchaseOrderCount: (payload && payload.purchaseOrderCount != null) ? payload.purchaseOrderCount : 0,
+        status: (payload && payload.status) || 'OK',
+        items: (payload && Array.isArray(payload.items)) ? payload.items : [],
+        warnings: (payload && Array.isArray(payload.warnings)) ? payload.warnings : [],
+      }, payload),
+    };
+  }
+
+  if (card.cardType === 'REVENUE_REPORT_CARD') {
+    return { cardType: card.cardType, cardData: payload };
+  }
+
+  if (card.cardType === 'PURCHASE_CHECK_CARD') {
+    var rawItems = (payload && Array.isArray(payload.unitPriceChangedItems)) ? payload.unitPriceChangedItems : [];
+    var priceItems = rawItems.map(function (item) {
+      return {
+        goodsName: item.goodsName || item.name || '',
+        standardName: item.standardName || '',
+        currentUnitPrice: item.currentUnitPrice || '',
+        previousUnitPrice: item.previousUnitPrice || '',
+        changePercent: item.priceChangePercent || '',
+        reason: item.reason || '',
+      };
+    });
+    return {
+      cardType: card.cardType,
+      cardData: Object.assign({}, payload, {
+        priceAnomalyItems: priceItems,
+        unitPriceChangedItems: rawItems,
+      }),
+    };
+  }
+
+  if (card.cardType === 'STOCK_RECONCILE_CARD') {
+    var rawDiffItems = (payload && Array.isArray(payload.ingredientDiffItems)) ? payload.ingredientDiffItems : [];
+    var diffItems = rawDiffItems.map(function (item) {
+      return {
+        foodName: item.ingredientName || item.foodName || '',
+        theoryCost: item.theoryUsage || item.theoryCost || '',
+        actualCost: item.actualUsage || item.actualCost || '',
+        diffUsage: item.diffUsage || '',
+        diffCostAmount: item.diffCostAmount || '',
+      };
+    });
+    return {
+      cardType: card.cardType,
+      cardData: Object.assign({}, payload, {
+        topDiffItems: diffItems,
+        topDiffItemCount: payload.ingredientDiffItemCount || rawDiffItems.length,
+        ingredientDiffItems: rawDiffItems,
+      }),
+    };
+  }
+
+  if (card.cardType === 'REORDER_REMINDER_CARD') {
+    return { cardType: card.cardType, cardData: payload };
+  }
+
+  if (card.cardType === 'DISH_SALES_RANKING_CARD') {
+    var timeText = (payload && payload.timeDisplayText) || (payload && payload.timeLabel) || '';
+    var baseTitle = card.title || '菜品排行';
+    var combinedTitle = timeText ? timeText + '·' + baseTitle : baseTitle;
+    var metricLabel = (payload && payload.metricLabel) || '';
+    var subtitle = card.subtitle || (metricLabel ? '按' + metricLabel + '排序' : '');
+    return { cardType: card.cardType, cardData: { title: combinedTitle, subtitle: subtitle, payload: payload || {} } };
+  }
+
+  if (card.cardType === 'DISH_PROFIT_COST_RANKING_CARD') {
+    var timeText2 = (payload && payload.timeDisplayText) || (payload && payload.timeLabel) || '';
+    var baseTitle2 = card.title || '菜品成本排行';
+    var combinedTitle2 = timeText2 ? timeText2 + '·' + baseTitle2 : baseTitle2;
+    var metricLabel2 = (payload && payload.metricLabel) || '';
+    var subtitle2 = card.subtitle || (metricLabel2 ? '按' + metricLabel2 + '排序' : '');
+    return { cardType: card.cardType, cardData: { title: combinedTitle2, subtitle: subtitle2, payload: payload || {} } };
+  }
+
+  if (card.cardType === 'DISH_PROFIT_RANKING_CARD') {
+    var timeText3 = (payload && payload.timeDisplayText) || (payload && payload.timeLabel) || '';
+    var baseTitle3 = card.title || '菜品利润排行';
+    var combinedTitle3 = timeText3 ? timeText3 + '·' + baseTitle3 : baseTitle3;
+    var metricLabel3 = (payload && payload.metricLabel) || '';
+    var subtitle3 = card.subtitle || (metricLabel3 ? '按' + metricLabel3 + '排序' : '');
+    return { cardType: card.cardType, cardData: { title: combinedTitle3, subtitle: subtitle3, payload: payload || {} } };
+  }
+
+  if (card.cardType === 'DISH_INGREDIENT_COVER_DAYS_CARD') {
+    var title4 = card.title || (payload ? (payload.dishName || '') + '·配料可支撑天数' : '配料可支撑天数');
+    var subtitle4 = card.subtitle || (payload ? (payload.stockSnapshotLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title4, subtitle: subtitle4 }) };
+  }
+
+  if (card.cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD') {
+    var title5 = card.title || '库存风险关注列表';
+    var subtitle5 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title5, subtitle: subtitle5 }) };
+  }
+
+  if (card.cardType === 'WAREHOUSE_STOCK_RANKING_CARD') {
+    var title6 = card.title || '账面库存排行';
+    var subtitle6 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title6, subtitle: subtitle6 }) };
+  }
+
+  if (card.cardType === 'GOODS_SUPPORTED_DISH_COVER_CARD') {
+    var title7 = card.title || (payload ? (payload.goodsName || '') + '·可支撑菜品' : '原料可支撑菜品');
+    var subtitle7 = card.subtitle || (payload ? (payload.stockSnapshotLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title7, subtitle: subtitle7 }) };
+  }
+
+  if (card.cardType === 'WAREHOUSE_NEAR_EXPIRY_RISK_CARD') {
+    var title8 = card.title || '库存临期/过期风险';
+    var subtitle8 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title8, subtitle: subtitle8 }) };
+  }
+
+  if (card.cardType === 'WAREHOUSE_INVENTORY_SUPERVISION_CARD') {
+    var title9 = card.title || '库存监督/诊断';
+    var subtitle9 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title9, subtitle: subtitle9 }) };
+  }
+
+  if (card.cardType === 'WAREHOUSE_WASTE_RISK_CARD') {
+    var titleWaste = card.title || '鲜品废弃风险';
+    var subtitleWaste = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: titleWaste, subtitle: subtitleWaste }) };
+  }
+
+  if (card.cardType === 'PURCHASE_ANOMALY_CARD') {
+    var anomalyKind = payload ? (payload.anomalyKind || '') : '';
+    var title13 = anomalyKind ? '采购异常 · ' + anomalyKind : (card.title || '采购异常');
+    return {
+      cardType: card.cardType,
+      cardData: {
+        title: title13,
+        subtitle: card.subtitle || '',
+        anomalyKind: anomalyKind,
+        timeLabel: payload ? (payload.timeLabel || '') : '',
+        scopeLabel: payload ? (payload.scopeLabel || '') : '',
+        focusRows: (payload && Array.isArray(payload.focusRows)) ? payload.focusRows : [],
+        secondaryRows: (payload && Array.isArray(payload.secondaryRows)) ? payload.secondaryRows : [],
+      },
+    };
+  }
+
+  if (card.cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD') {
+    var sourceSection = payload && payload.purchaseSourceSection;
+    var goodsName = (sourceSection && sourceSection.goodsName) || (payload && payload.goodsName) || '';
+    var title10 = goodsName ? goodsName + ' · 采购经营分析' : (card.title || '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title10, subtitle: card.subtitle || '' }) };
+  }
+
+  if (card.cardType === 'PURCHASE_GOODS_ANCHOR_DETAIL_CARD') {
+    var summary = payload && payload.summary;
+    var goodsName2 = summary ? summary.goodsName : '';
+    var title11 = goodsName2 ? goodsName2 + ' · 采购明细' : (card.title || '采购商品');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title11 }) };
+  }
+
+  if (card.cardType === 'GOODS_STOCK_BATCH_DETAIL_CARD') {
+    var goodsName3 = payload ? payload.goodsName : '';
+    var title12 = goodsName3 ? goodsName3 + ' · 库存批次' : (card.title || '库存批次');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title12, subtitle: card.subtitle || (payload && payload.stockSnapshotLabel) || '' }) };
+  }
+
+  if (purchaseRankingCardUtil.isPurchaseRankingCardType(card.cardType)) {
+    var rankingData = purchaseRankingCardUtil.resolvePurchaseRankingCardData(card);
+    return {
+      cardType: card.cardType,
+      cardData: rankingData,
+    };
+  }
+
+  return { cardType: card.cardType, cardData: payload };
+}
+
+function normalizeCards(cards) {
+  if (!cards || !Array.isArray(cards)) return null;
+  var out = cards.map(function (card, index) {
+    var resolved = resolveDisplayCard(card);
+    if (resolved) {
+      resolved._cardKey = (resolved.cardType || 'card') + '_' + index;
+      resolved._cardIndex = index;
+      resolved.cardInstanceId = card.cardInstanceId || '';
+      resolved._cardTitle = card.title || '';
+      resolved._supportsWorkRecord = workRecordCardTypes.isWorkRecordCardType(resolved.cardType);
+      resolved._supportsRowWorkRecord = workRecordCardTypes.supportsRowLevelWorkRecord(resolved.cardType);
+      var rankingCfg = purchaseRankingCardUtil.CONFIG[resolved.cardType];
+      resolved._allowsRowRecordUI = !!(rankingCfg && rankingCfg.supportsRowRecord)
+        || resolved.cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD';
+    }
+    return resolved;
+  }).filter(Boolean);
+  console.log('[cardNormalizer] normalizeCards 输出:', JSON.stringify(out));
+  return out;
+}
+
+module.exports = {
+  resolveDisplayCard: resolveDisplayCard,
+  normalizeCards: normalizeCards,
+};

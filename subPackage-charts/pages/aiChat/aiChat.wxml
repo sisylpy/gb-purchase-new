@@ -1,10 +1,11 @@
+
 <!-- Gemini 风格：自定义顶栏 + 主内容 + 底部输入面板 -->
 <view class="gem-page" style="height: {{windowHeight}}px;">
   <!-- 顶栏 -->
   <view class="gem-nav" style="padding-top: {{statusBarHeight + 20}}px;">
    
 
-<navbar title="{{pageTitle || 'Ai助手'}}" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></navbar>
+<back-navbar style="height: {{navBarHeight}}rpx;" title="{{pageTitle || 'Ai助手'}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
      
   </view>
 
@@ -101,7 +102,7 @@
                 <view class="gem-stream-cursor" wx:if="{{item.isLoading}}"></view>
               </view>
 
-              <!-- 业务卡片渲染（统一 cards 驱动，每张卡 cardData 由前端 _resolveDisplayCard 预构建） -->
+              <!-- 业务卡片渲染（cards 经 cardNormalizer 预构建 cardData） -->
               <block wx:if="{{!item.isLoading && item.cards && item.cards.length > 0}}">
                 <!-- 上下文栏：门店 · 时间范围 · 权限说明（轻量辅助信息，优先读 contextSummary.contextBar） -->
                 <view class="gem-ctx-bar" wx:if="{{item.contextSummary && item.contextSummary.contextBar}}">
@@ -111,174 +112,61 @@
                 <view class="gem-answer-preview" wx:if="{{item.answerPreview}}">
                   <text class="gem-answer-preview-text">{{item.answerPreview}}</text>
                 </view>
-                <!-- 菜单结构四象限卡片 -->
-                <menu-portfolio-quadrant-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'MENU_PORTFOLIO_QUADRANT_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 菜品成本分析卡片 -->
-                <dish-cost-analysis-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'DISH_COST_ANALYSIS_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 菜品销售卡片（单菜品） -->
-                <dish-sales-single-dish-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'DISH_SALES_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 畅销低利菜卡片 -->
-                <menu-high-sales-low-margin-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'MENU_HIGH_SALES_LOW_MARGIN_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 菜单优化建议卡片 -->
-                <menu-action-recommendation-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'MENU_ACTION_RECOMMENDATION_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 单菜利润处方卡片 -->
-                <dish-profit-prescription-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'DISH_PROFIT_PRESCRIPTION_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 营业额卡 -->
-                <revenue-report-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'REVENUE_REPORT_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 采购卡 -->
-                <purchase-check-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'PURCHASE_CHECK_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 库存 / 销货核对卡 -->
-                <stock-reconcile-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'STOCK_RECONCILE_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 订货卡 -->
-                <reorder-reminder-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'REORDER_REMINDER_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 原料采购明细卡 -->
-                <purchase-goods-detail-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'PURCHASE_GOODS_DETAIL_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 菜品销量排行卡片 -->
-                <dish-sales-ranking-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'DISH_SALES_RANKING_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 菜品成本/利润排行卡片 -->
-                <dish-profit-cost-ranking-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'DISH_PROFIT_COST_RANKING_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 菜品利润排行卡片（与成本/利润排行卡共用组件） -->
-                <dish-profit-cost-ranking-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'DISH_PROFIT_RANKING_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 菜品配料可支撑天数卡片 -->
-                <dish-ingredient-cover-days-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'DISH_INGREDIENT_COVER_DAYS_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 库存风险关注列表卡片 -->
-                <warehouse-inventory-risk-list-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 库房库存排行卡片 -->
-                <warehouse-stock-ranking-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'WAREHOUSE_STOCK_RANKING_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 原料可支撑菜品覆盖卡片 -->
-                <goods-supported-dish-cover-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'GOODS_SUPPORTED_DISH_COVER_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 库存临期/过期风险卡片 -->
-                <warehouse-near-expiry-risk-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'WAREHOUSE_NEAR_EXPIRY_RISK_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 库存监督/诊断卡片 -->
-                <warehouse-inventory-supervision-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'WAREHOUSE_INVENTORY_SUPERVISION_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
-                <!-- 采购经营分析卡片 -->
-                <purchase-goods-business-analysis-card
-                  wx:for="{{item.cards}}"
-                  wx:for-item="dc"
-                  wx:key="cardType"
-                  wx:if="{{dc.cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD' && dc.cardData}}"
-                  cardData="{{dc.cardData}}"
-                />
+                <!-- 统一循环：每张卡片 + 操作按钮紧挨渲染 -->
+                <block wx:for="{{item.cards}}" wx:for-item="dc" wx:key="_cardKey">
+                  <business-card-renderer
+                    card-type="{{dc.cardType}}"
+                    card-data="{{dc.cardData}}"
+                    readonly="{{!dc._allowsRowRecordUI}}"
+                    scene="chat"
+                    message-id="{{item.id}}"
+                    run-id="{{item.runId}}"
+                    bind:recordWork="onRecordToWorkRecord"
+                  />
+
+                  <!-- 卡级「加入工作记录」（全业务卡统一；不走 work-notes） -->
+                  <view class="gem-card-record-area" wx:if="{{conversationId && item.id && item._realMessageReady}}">
+                    <view
+                      wx:if="{{dc._supportsWorkRecord}}"
+                      class="gem-card-record-btn {{dc._cardRecorded ? 'gem-card-record-btn--done' : ''}}"
+                      hover-class="{{dc._cardRecorded ? '' : 'gem-card-record-btn--hover'}}"
+                      catchtap="{{dc._cardRecorded ? 'onViewWorkRecord' : 'onRecordToWorkRecord'}}"
+                      data-card-type="{{dc.cardType}}"
+                      data-item-key="__CARD__"
+                      data-message-id="{{item.id}}"
+                      data-run-id="{{item.runId}}"
+                    >
+                      <text class="gem-card-record-icon">{{dc._cardRecorded ? '✅' : '📝'}}</text>
+                      <text class="gem-card-record-text">{{dc._cardRecorded ? '查看工作记录' : '加入工作记录'}}</text>
+                    </view>
+                    <view wx:else class="gem-card-record-btn gem-card-record-btn--disabled">
+                      <text class="gem-card-record-icon">📝</text>
+                      <text class="gem-card-record-text">暂不支持加入工作记录</text>
+                    </view>
+                  </view>
+
+                  <!-- 卡级「图钉」操作区 -->
+                  <view class="gem-card-pin-area" wx:if="{{conversationId && item.id && item._realMessageReady}}">
+                    <view class="gem-card-pin-group">
+                      <view
+                        class="gem-card-pin-btn {{dc._cardPinned ? 'gem-card-pin-btn--done' : ''}}"
+                        hover-class="{{dc._cardPinned ? '' : 'gem-card-pin-btn--hover'}}"
+                        catchtap="onCardPinToggle"
+                        data-card-type="{{dc.cardType}}"
+                        data-item-key="__CARD__"
+                        data-message-id="{{item.id}}"
+                        data-run-id="{{item.runId}}"
+                        data-card-instance-id="{{dc.cardInstanceId}}"
+                        data-card-title-raw="{{dc._cardTitle}}"
+                        data-card-index="{{dc._cardIndex}}"
+                        data-card-key="{{dc._cardKey}}"
+                      >
+                        <text class="gem-card-pin-icon">{{dc._cardPinned ? '📍' : '📌'}}</text>
+                        <text class="gem-card-pin-text">{{dc._cardPinned ? '已固定' : '加图钉'}}</text>
+                      </view>
+                    </view>
+                  </view>
+                </block>
               </block>
             </view>
             <!-- 调试 JSON 面板 -->
@@ -320,6 +208,9 @@
           cursor-spacing="16"
           adjust-position="{{true}}"
           disabled="{{isSending}}"
+          focus="{{inputFocus}}"
+          selection-start="{{inputSelectionStart}}"
+          selection-end="{{inputSelectionEnd}}"
           bindinput="onInputChange"
           bindconfirm="onSendTap"
           confirm-type="send"
@@ -353,9 +244,18 @@
         <text class="gem-drawer-head-title">主题与历史</text>
         <view class="gem-drawer-close" catchtap="onDrawerCloseTap">✕</view>
       </view>
-      <view class="gem-new-conv-btn" catchtap="onNewConversationTap">
-        <text class="gem-new-conv-plus">+</text>
-        <text class="gem-new-conv-label">新建对话</text>
+      <!-- 新建对话 + 店长日志 同行按钮 -->
+      <view class="gem-drawer-action-row">
+        <view class="gem-drawer-action-btn gem-drawer-action-btn--new" catchtap="onNewConversationTap">
+          <text class="gem-drawer-action-icon">+</text>
+          <text class="gem-drawer-action-label">新建对话</text>
+        </view>
+        <view  class="gem-drawer-action-btn gem-drawer-action-btn--wr" catchtap="onOpenPinList">
+          <text class="gem-drawer-action-icon">📌</text>
+          <text class="gem-drawer-action-label">图钉</text>
+
+        </view>
+       
       </view>
       <scroll-view
         scroll-y="{{true}}"
@@ -398,7 +298,14 @@
             </view>
           </view>
         </view>
-        <view class="gem-drawer-section-title gem-drawer-section-title--history">历史对话</view>
+        <view class="gem-drawer-section-title gem-drawer-section-title--history1  flex-row-between p-20 ">
+          <text>历史对话</text>
+          <!-- 打开图钉,工作笔记页面 -->
+          <view class="flex-row">
+            <!-- <text class="gem-drawer-pin-entry" bindtap="onOpenPinList">图钉</text> -->
+            <text class="gem-drawer-pin-entry" bindtap="onOpenNoteList">笔记</text>
+          </view>
+        </view>
         <view wx:if="{{conversationHistoryLoading}}" class="gem-drawer-loading">加载中…</view>
         <block wx:else>
           <view
@@ -416,5 +323,102 @@
         </block>
         <view class="gem-drawer-scroll-bottom"></view>
       </scroll-view>
+  </view>
+
+  <!-- 加入店长工作记录 编辑弹窗 -->
+  <view class="gem-wr-dialog-mask" wx:if="{{showWorkRecordDialog}}" catchtap="onCloseWorkRecordDialog"></view>
+  <view class="gem-wr-dialog" wx:if="{{showWorkRecordDialog}}">
+    <view class="gem-wr-dialog-head">
+      <text class="gem-wr-dialog-title">加入店长工作记录</text>
+      <text class="gem-wr-dialog-desc">确认标题与内容后保存</text>
+    </view>
+    <scroll-view scroll-y="{{true}}" class="gem-wr-dialog-scroll">
+      <view class="gem-wr-dialog-body">
+        <view class="gem-wr-dialog-field">
+          <text class="gem-wr-dialog-label">记录标题</text>
+          <input
+            class="gem-wr-dialog-input"
+            type="text"
+            placeholder="请输入记录标题"
+            placeholder-class="gem-wr-dialog-input-ph"
+            value="{{workRecordDialogTitle}}"
+            bindinput="onWorkRecordTitleInput"
+            maxlength="120"
+          />
+        </view>
+        <view class="gem-wr-dialog-field">
+          <text class="gem-wr-dialog-label">主要内容</text>
+          <textarea
+            class="gem-wr-dialog-textarea"
+            placeholder="记录需要跟进的事项…"
+            placeholder-class="gem-wr-dialog-textarea-ph"
+            value="{{workRecordDialogContent}}"
+            bindinput="onWorkRecordContentInput"
+            maxlength="2000"
+            auto-height
+          />
+        </view>
+        <view class="gem-wr-dialog-field" wx:if="{{workRecordDialogCategory}}">
+          <text class="gem-wr-dialog-label">建议分类</text>
+          <text class="gem-wr-dialog-category">{{workRecordDialogCategory}}</text>
+        </view>
+        <view class="gem-wr-dialog-field">
+          <text class="gem-wr-dialog-label">来源卡片预览</text>
+          <view class="gem-wr-dialog-preview">
+            <business-card-renderer
+              card-type="{{workRecordDialogCardType}}"
+              card-data="{{workRecordDialogCardData}}"
+              title="{{workRecordDialogCardTitle}}"
+              subtitle="{{workRecordDialogCardSubtitle}}"
+              readonly="{{true}}"
+              scene="chat"
+            />
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="gem-wr-dialog-foot">
+      <view class="gem-wr-dialog-btn gem-wr-dialog-btn--cancel" catchtap="onCloseWorkRecordDialog">取消</view>
+      <view class="gem-wr-dialog-btn gem-wr-dialog-btn--confirm {{_recordingCard ? 'gem-wr-dialog-btn--disabled' : ''}}" catchtap="{{_recordingCard ? '' : 'onConfirmWorkRecord'}}">保存</view>
+    </view>
+  </view>
+
+  <!-- 添加到工作笔记 弹窗（已停用，保留占位） -->
+  <view class="gem-note-dialog-mask" wx:if="{{showNoteDialog}}" catchtap="onCloseNoteDialog"></view>
+  <view class="gem-note-dialog" wx:if="{{showNoteDialog}}">
+    <view class="gem-note-dialog-head">
+      <text class="gem-note-dialog-title">添加工作笔记</text>
+      <text class="gem-note-dialog-desc">记录店长自己的看法</text>
+    </view>
+    <view class="gem-note-dialog-body">
+      <view class="gem-note-dialog-field">
+        <text class="gem-note-dialog-label">笔记标题</text>
+        <input
+          class="gem-note-dialog-input"
+          type="text"
+          placeholder="请输入笔记标题"
+          placeholder-class="gem-note-dialog-input-ph"
+          value="{{noteDialogTitle}}"
+          bindinput="onNoteTitleInput"
+          maxlength="120"
+        />
+      </view>
+      <view class="gem-note-dialog-field">
+        <text class="gem-note-dialog-label">笔记内容</text>
+        <textarea
+          class="gem-note-dialog-textarea"
+          placeholder="记录你的看法…"
+          placeholder-class="gem-note-dialog-textarea-ph"
+          value="{{noteDialogContent}}"
+          bindinput="onNoteContentInput"
+          maxlength="2000"
+          auto-height
+        />
+      </view>
+    </view>
+    <view class="gem-note-dialog-foot">
+      <view class="gem-note-dialog-btn gem-note-dialog-btn--cancel" catchtap="onCloseNoteDialog">取消</view>
+      <view class="gem-note-dialog-btn gem-note-dialog-btn--confirm {{_notingCard ? 'gem-note-dialog-btn--disabled' : ''}}" catchtap="{{_notingCard ? '' : 'onConfirmAddNote'}}">保存</view>
+    </view>
   </view>
 </view>

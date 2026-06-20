@@ -1,8 +1,8 @@
 var load = require('../../../../lib/load.js');
 var config = require('../../../../config/index.js');
 var dateUtils = require('../../../../lib/dateUtil');
-// var orderApi = require('../../../../services/orderApi');
-var orderApi = require('../../../services/resGoodsAiApi.js');
+var orderApi = require('../../../../services/depOrder.js');
+var stockReduceKind = require('../../../../lib/stockReduceKind.js');
 
 // ========================
 // 本页面使用的所有接口方法（来自 depOrder）
@@ -212,7 +212,6 @@ Page({
 
   /** 确认搜索（点击搜索按钮/回车） */
   getSearchString: function () {
-    console.log("aaa")
     if (this.data.searchString.length > 0) {
       this.setData({ placeHolder: this.data.searchString });
       this._doSearch();
@@ -264,7 +263,6 @@ Page({
 
   /** 执行搜索请求 */
   _doSearch: function () {
-    console.log("dosearrch")
     var that = this;
     var data = {
       disId: this.data.disId,
@@ -503,7 +501,6 @@ Page({
 
     if (e.currentTarget.dataset.depgoods !== null && e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
 
-      console.log(e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length);
       this.setData({
         hasStock: true
       })
@@ -764,7 +761,6 @@ Page({
       standard: e.detail.applyStandardName,
       remark: e.detail.applyRemark,
     };
-    console.log("kakanananna", dg);
     orderApi.updateOrderGbJj(dg).then(function (res) {
       load.showLoading("修改订单");
       if (res.result.code == 0) {
@@ -1082,7 +1078,6 @@ Page({
       stockIsZero: e.detail.stockIsZero,
 
     };
-    console.log(dg);
     load.showLoading("保存订单");
     orderApi.createDepartmentOrderForJj(dg).then(res => {
       load.hideLoading();
@@ -1099,7 +1094,6 @@ Page({
           [data]: res.result.data,
           [dataGoods]: res.result.data.gbDistributerGoodsEntity,
         })
-        console.log("eeeeeee",e.detail.stockIsZero )
         if(e.detail.stockIsZero){
           var dataStock = "depGoodsArrAi[" + this.data.index + "].gbDepartmentGoodsStockEntities";
           this.setData({
@@ -1127,7 +1121,6 @@ Page({
   showStock(e) {
     var item = e.currentTarget.dataset.item;
     item.gbDistributerGoodsEntity = e.currentTarget.dataset.goods.gbDistributerGoodsEntity;
-    console.log("sotscckcckkkkckc", item.gbDgsWasteFullTime)
     var goodsIndex = e.currentTarget.dataset.goodsindex;
     var stockIndex = e.currentTarget.dataset.stockindex;
     if (item.gbDgsWasteFullTime != null && item.gbDgsWasteFullTime != '' && item.gbDgsWasteFullTime != undefined) {
@@ -1168,7 +1161,6 @@ Page({
       })
     }
 
-    console.log("item.gbDgsRestWeight" + item.gbDgsRestWeight);
     this.setData({
       showStock: true,
       item: item,
@@ -1183,13 +1175,11 @@ Page({
   confirmStock(e) {
     var item = e.detail.item;
     var showType = e.detail.showType;
-    console.log("showtypeoeoe", showType);
     if (this.data.transfer !== '1') {
       item.gbDgsReduceWeightUserId = this.data.userInfo.gbDepartmentUserId;
     }
 
-    var kindMap = { 1: 'produce', 2: 'loss', 3: 'return', 4: 'waste' };
-    var kind = kindMap[showType];
+    var kind = stockReduceKind.kindFromShowType(showType);
     if (!kind) {
       return;
     }
@@ -1206,10 +1196,8 @@ Page({
 
     var that = this;
     load.showLoading("保存数据中");
-    console.log(item);
     orderApi.saveDepGoodsStockAdjust(kind, item).then(function (res) {
       load.hideLoading();
-      console.log("sttockresult", res.result.data);
       if (res.result.code != 0) {
         wx.showToast({
           title: res.result.msg,
@@ -1230,7 +1218,6 @@ Page({
         if (src && src.length > 0 && payload.id != null && payload.id !== "") {
           var reason = that.data.reason;
           orderApi.reduceAttachmentSaveWithFile(src, reason, payload.id).then(function (attachRes) {
-            console.log(attachRes);
             if (attachRes.result != '{"code":0}') {
               wx.showToast({
                 title: (attachRes.result && attachRes.result.msg) || "附件上传失败",

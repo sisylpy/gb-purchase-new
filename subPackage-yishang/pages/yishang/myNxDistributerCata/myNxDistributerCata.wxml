@@ -1,0 +1,49 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+
+<!-- <view class="bg-white top_bar_index flex-row border-bottom-shadow"  style=" padding-top: {{navBarHeight}}rpx;">
+  <image src="../../../../images/back.png" class="back_icon" bindtap="toBack"></image>
+    <view class="flex-column">
+      <text class="top_bar_title">供货商品类别</text>
+    </view>  
+</view> -->
+  
+
+<back-navbar style="height: {{navBarHeight}}rpx;" title="管理" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+
+
+<view class="" id="mjltest" style="margin-top: {{navBarHeight}}rpx;">
+
+ <!-- emptyView -->
+ <view class="emptyView {{fatherArr.length == 0  || fatherArr.length == 0? 'is-active' : ''}}"
+		style="height: {{windowHeight - 560}}rpx; text-align:center;">
+		<view class="font-lg  empty_View">
+			<view class="center-content">
+				<image class="empty_image" src="../../../images/file-common.png"></image>
+				<text class="big">暂无供货商商品类别</text>
+				<text class="small darkgray pb-20 pt-20">请在商品中配置供货商配送商品</text>
+			</view>
+		</view>
+	</view>
+				<!-- ./emptyView -->
+  <view class="flex-column bg-white">
+        <view class="flex-column " wx:for="{{fatherArr}}" wx:for-item="great">
+         
+          <view class="flex-column " wx:for="{{great.fatherGoodsEntities}}" wx:for-item="grand">
+            <view class="small gray  border-bottom  pb-20 pt-20 pr-10 pl-10">
+            <text>{{great.gbDfgFatherGoodsName}}. {{grand.gbDfgFatherGoodsName}}</text>
+             </view>
+
+            <view class="flex-row-between pb-20 pt-20 border-bottom font-lg " wx:for="{{grand.fatherGoodsEntities}}" wx:for-item="father" bindtap="toMyNxGoods" data-id="{{father.gbDistributerFatherGoodsId}}" data-name="{{father.gbDfgFatherGoodsName}}" hover-class="hover">
+              <text class="pr-10 pl-10">{{father.gbDfgFatherGoodsName}}</text>
+              <image src="../../../../images/arrow-right-3.png" class="icon"></image>
+            </view>
+          </view>
+
+
+        </view>
+      </view>
+
+</view>

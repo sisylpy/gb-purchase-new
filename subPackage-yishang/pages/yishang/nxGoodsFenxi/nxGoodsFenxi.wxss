@@ -1,0 +1,29 @@
+
+
+
+.left {
+  width: 18vw;
+}
+
+
+
+.dep_left_item{
+  background-color: #eee;
+  padding: 50rpx 20rpx;
+  border-bottom: 1px solid lightgray;
+  text-align: center;
+}
+
+.dep_left_item.left-active{
+  background-color: #FFF;
+}
+
+.left-item {
+  padding: 30rpx 20rpx;
+  background-color: #eee;
+}
+
+.left-active {
+  background-color: #fff;
+  border-left: 6rpx solid #187e6e;
+}

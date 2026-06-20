@@ -1,6 +1,6 @@
 const globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
-import * as echarts from '../../../../../subPackage-charts/ec-canvas/echarts';
+import * as echarts from '../../../../ec-canvas/echarts';
 
 import apiUrl from '../../../../config/index.js'
 
@@ -86,9 +86,7 @@ Page({
     
     // 调用新的统计接口
     return getGbPurGoodsStatistics(data)
-      .then(res => {
-        console.log('统计信息接口返回:', res);
-        if (res.result.code == 0) {
+      .then(res => {if (res.result.code == 0) {
           this.setData({
             supplierItem: res.result.data,
             mapEveryDay: res.result.data.mapEveryDay,
@@ -112,25 +110,8 @@ Page({
   // 获取商品列表
   _getGoodsList() {
     // 防止重复请求
-    if (this.data.isLoading) {
-      console.log('=== 防重复请求：当前正在加载中，跳过本次请求 ===');
-      return;
-    }
-    
-    console.log('=== _getGoodsList 开始 ===');
-    console.log('请求参数:', {
-      purUserId: this.data.purUserId,
-      supplierId: this.data.supplierId,
-      disId: this.data.disId,
-      startDate: this.data.startDate,
-      stopDate: this.data.stopDate,
-      type: this.data.type,
-      page: this.data.currentPage,
-      limit: this.data.limit,
-      greatId: this.data.greatId,
-    });
-    
-    // 设置加载状态
+    if (this.data.isLoading) {return;
+    }// 设置加载状态
     this.setData({
       isLoading: true
     });
@@ -149,40 +130,21 @@ Page({
     
     // 调用新的商品列表接口
     getGbPurGoodsList(data)
-      .then(res => {
-        console.log('=== 商品列表接口返回 ===');
-        console.log('当前页码:', this.data.currentPage);
-        console.log('接口返回数据:', res);
-        load.hideLoading();
+      .then(res => {load.hideLoading();
         if (res.result.code == 0) {
-          const result = res.result.data;
-          console.log('解析后的数据:', result);
-          console.log('商品列表长度:', result.goodsList ? result.goodsList.length : 0);
-          console.log('商品列表内容:', result.goodsList);
-          
-          // 如果是第一页，直接替换数据；否则追加数据
-          if (this.data.currentPage === 1) {
-            console.log('设置第一页数据，商品数量:', result.goodsList ? result.goodsList.length : 0);
-            this.setData({
+          const result = res.result.data;// 如果是第一页，直接替换数据；否则追加数据
+          if (this.data.currentPage === 1) {this.setData({
               arr: result.goodsList || [],
               totalCount: result.totalCount || 0,
               totalPage: result.totalPages || 0
             });
           } else {
-            const newArr = [...this.data.arr, ...(result.goodsList || [])];
-            console.log('追加数据，总商品数量:', newArr.length);
-            
-            this.setData({
+            const newArr = [...this.data.arr, ...(result.goodsList || [])];this.setData({
               arr: newArr,
               totalCount: result.totalCount || 0,
               totalPage: result.totalPages || 0
             });
-          }
-          
-          console.log('setData完成，当前arr长度:', this.data.arr.length);
-          console.log('前5个商品名称:', this.data.arr.slice(0, 5).map(item => item.gbDgGoodsName || item.goodsName));
-          
-          // 初始化图表
+          }// 初始化图表
           if (this.data.arr.length > 0) {
             var arr = this.data.arr;
             for (var i = 0; i < arr.length; i++) {
@@ -205,32 +167,14 @@ Page({
   },
 
   // 上拉加载更多
-  onReachBottom() {
-    console.log('=== onReachBottom 触发 ===');
-    console.log('当前页码:', this.data.currentPage);
-    console.log('总页数:', this.data.totalPage);
-    console.log('当前商品数组长度:', this.data.arr ? this.data.arr.length : 0);
-    console.log('当前商品数组内容:', this.data.arr);
-    console.log('是否正在加载:', this.data.isLoading);
-    
-    // 防止重复请求
-    if (this.data.isLoading) {
-      console.log('=== 防重复请求：当前正在加载中，跳过上拉加载 ===');
-      return;
+  onReachBottom() {// 防止重复请求
+    if (this.data.isLoading) {return;
     }
     
-    if (this.data.currentPage < this.data.totalPage) {
-      console.log('准备加载下一页，页码从', this.data.currentPage, '变为', this.data.currentPage + 1);
-      
-      this.setData({
+    if (this.data.currentPage < this.data.totalPage) {this.setData({
         currentPage: this.data.currentPage + 1
-      });
-      
-      console.log('页码已更新，准备调用 _getGoodsList');
-      this._getGoodsList();
-    } else {
-      console.log('已到最后一页，不再加载');
-    }
+      });this._getGoodsList();
+    } else {}
   },
 
   // 下拉刷新
@@ -244,9 +188,7 @@ Page({
 
   init_top_echarts: function (goods) {
     var id = goods.gbDistributerGoodsId;
-    var that = this;
-    console.log("idididiidi", '#mychartTop' + id)
-    that.echartsComponnet = that.selectComponent('#mychartTop' + id);
+    var that = this;that.echartsComponnet = that.selectComponent('#mychartTop' + id);
 
     that.echartsComponnet.init((canvas, width, height) => {
       // 初始化图表
@@ -269,66 +211,28 @@ Page({
   // 初始化商品成本环形图
   init_goods_cost_chart: function (goods) {
     var id = goods.gbDistributerGoodsId;
-    var that = this;
-    console.log("初始化商品成本环形图，ID:", id);
-    
-    that.goodsCostChartComponent = that.selectComponent('#goodsCostChart' + id);
-    console.log("获取到的商品成本环形图组件:", that.goodsCostChartComponent);
-    
-    if (!that.goodsCostChartComponent) {
+    var that = this;that.goodsCostChartComponent = that.selectComponent('#goodsCostChart' + id);if (!that.goodsCostChartComponent) {
       console.error("❌ 无法获取商品成本环形图组件 #goodsCostChart" + id);
       return;
     }
     
-    that.goodsCostChartComponent.init((canvas, width, height) => {
-      console.log("=== 商品成本环形图组件init回调执行 ===");
-      console.log("canvas:", canvas);
-      console.log("width:", width, "height:", height);
-      
-      // 初始化图表
+    that.goodsCostChartComponent.init((canvas, width, height) => {// 初始化图表
       const Chart = echarts.init(canvas, null, {
         width: width,
         height: height,
         devicePixelRatio: globalData.rpxR
-      });
-      console.log("商品成本环形图ECharts实例创建成功:", Chart);
-      
-      const option = that.getGoodsCostChartOption(goods);
-      console.log("商品成本环形图配置选项:", option);
-      
-      Chart.setOption(option);
-      console.log("✅ 商品成本环形图配置设置成功");
-      
-      // 注意这里一定要返回 chart 实例，否则会影响事件处理等
+      });const option = that.getGoodsCostChartOption(goods);Chart.setOption(option);// 注意这里一定要返回 chart 实例，否则会影响事件处理等
       return Chart;
     });
   },
 
   // 获取商品成本环形图配置
-  getGoodsCostChartOption(goods) {
-    console.log("=== 开始获取商品成本环形图配置 ===");
-    console.log("商品数据:", goods);
-    
-    // 获取5种重量数据
+  getGoodsCostChartOption(goods) {// 获取5种重量数据
     const stockWeight = parseFloat(goods.goodsStockWeightTotalString) || 0;
     const produceWeight = parseFloat(goods.goodsProduceWeightTotalString) || 0;
     const lossWeight = parseFloat(goods.goodsLossWeightTotalString) || 0;
     const wasteWeight = parseFloat(goods.goodsWasteWeightTotalString) || 0;
-    const returnWeight = parseFloat(goods.goodsReturnWeightTotalString) || 0;
-    
-    console.log("解析后的重量数据:");
-    console.log("库存重量:", stockWeight, "原始值:", goods.goodsStockWeightTotalString);
-    console.log("销售重量:", produceWeight, "原始值:", goods.goodsProduceWeightTotalString);
-    console.log("损耗重量:", lossWeight, "原始值:", goods.goodsLossWeightTotalString);
-    console.log("废弃重量:", wasteWeight, "原始值:", goods.goodsWasteWeightTotalString);
-    console.log("退货重量:", returnWeight, "原始值:", goods.goodsReturnWeightTotalString);
-    
-    const totalWeight = stockWeight + produceWeight + lossWeight + wasteWeight + returnWeight;
-    console.log("总重量:", totalWeight);
-    
-    if (totalWeight === 0) {
-      console.log("⚠️ 总重量为0，显示空状态");
-      return {
+    const returnWeight = parseFloat(goods.goodsReturnWeightTotalString) || 0;const totalWeight = stockWeight + produceWeight + lossWeight + wasteWeight + returnWeight;if (totalWeight === 0) {return {
         title: {
           text: '暂无重量数据',
           left: 'center',
@@ -339,10 +243,7 @@ Page({
           }
         }
       };
-    }
-    
-    console.log("✅ 生成商品成本环形图配置");
-    return {
+    }return {
       tooltip: {
         trigger: 'item',
         formatter: function(params) {
@@ -414,11 +315,7 @@ Page({
     };
   },
 
-  getOption(goods) {
-    console.log("goodos", goods);
-    console.log("goods.lisrt", goods.purEveryDay.dayValue);
-  
-    // 指定图表的配置项和数据
+  getOption(goods) {// 指定图表的配置项和数据
     var option = {
       color: ['#187e6e', 'blue', 'red'], // 设置全局颜色，确保与 series 中的颜色一致
       grid: {
@@ -520,10 +417,7 @@ Page({
     return option;
   },
 
-  getOption1(goods) {
-    console.log("goodos", goods);
-    console.log("goods.lisrt", goods.purEveryDay ? goods.purEveryDay.dayValue : []);
-    // 指定图表的配置项和数据
+  getOption1(goods) {// 指定图表的配置项和数据
     var option = {
       color: ['#187e6e'],
       grid: {
@@ -806,18 +700,14 @@ Page({
       supplierId: this.data.supplierId,
       supplierName: this.data.supplierInfo.nxJrdhsSupplierName
     };
-    wx.setStorageSync('selectedSupplier', selectedSupplier);
-    console.log("goods", e.currentTarget.dataset.goods)
-    wx.navigateTo({
+    wx.setStorageSync('selectedSupplier', selectedSupplier);wx.navigateTo({
       url: '../../goods/goodsFenxi/goodsFenxi?id=' + id + '&supplierId=' + this.data.supplierId
       + '&supplierName=' + this.data.supplierInfo.nxJrdhsSupplierName,
     })
   },
 
   toGoods(e){
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
-    console.log("goods",e)
-    wx.navigateTo({
+    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);wx.navigateTo({
       url: '../../goods/disGoodsPage/disGoodsPage?disGoodsId=' + e.currentTarget.dataset.id,
     })
   },
@@ -838,9 +728,7 @@ Page({
     
     if (!that.echartsComponnet) {      
       // 如果组件还没准备好，延迟重试
-      if (!that.data.chartDrawn) {
-        console.log("🔄 组件未准备好，延迟重试...");
-        setTimeout(() => {
+      if (!that.data.chartDrawn) {setTimeout(() => {
           that.init_amount_chart();
         }, 500);
       }
@@ -872,29 +760,12 @@ Page({
   },
 
   // 获取环形饼状图配置
-  getAmountChartOption() {
-    console.log("=== 开始获取环形饼状图配置 ===");
-    
-    // 获取5种金额数据
+  getAmountChartOption() {// 获取5种金额数据
     const stockAmount = parseFloat(this.data.supplierItem?.stockGoodsTotalString) || 0;
     const produceAmount = parseFloat(this.data.supplierItem?.produceGoodsTotalString) || 0;
     const lossAmount = parseFloat(this.data.supplierItem?.lossGoodsTotalString) || 0;
     const wasteAmount = parseFloat(this.data.supplierItem?.wasteGoodsTotalString) || 0;
-    const returnAmount = parseFloat(this.data.supplierItem?.returnGoodsTotalString) || 0;
-    
-    console.log("解析后的金额数据:");
-    console.log("库存金额:", stockAmount, "原始值:", this.data.supplierItem?.stockGoodsTotalString);
-    console.log("销售金额:", produceAmount, "原始值:", this.data.supplierItem?.produceGoodsTotalString);
-    console.log("损耗金额:", lossAmount, "原始值:", this.data.supplierItem?.lossGoodsTotalString);
-    console.log("废弃金额:", wasteAmount, "原始值:", this.data.supplierItem?.wasteGoodsTotalString);
-    console.log("退货金额:", returnAmount, "原始值:", this.data.supplierItem?.returnGoodsTotalString);
-    
-    const totalAmount = stockAmount + produceAmount + lossAmount + wasteAmount + returnAmount;
-    console.log("总金额:", totalAmount);
-    
-    if (totalAmount === 0) {
-      console.log("⚠️ 总金额为0，显示空状态");
-      // 如果没有数据，显示空状态
+    const returnAmount = parseFloat(this.data.supplierItem?.returnGoodsTotalString) || 0;const totalAmount = stockAmount + produceAmount + lossAmount + wasteAmount + returnAmount;if (totalAmount === 0) {// 如果没有数据，显示空状态
       return {
         title: {
           text: '暂无数据',
@@ -906,10 +777,7 @@ Page({
           }
         }
       };
-    }
-    
-    console.log("✅ 生成环形饼状图配置");
-    // 配置环形饼状图
+    }// 配置环形饼状图
     return {
       tooltip: {
         trigger: 'item',
@@ -1093,12 +961,7 @@ Page({
       ]
     };
     
-    chart.setOption(option);
-    
-    console.log('ECharts环形饼状图初始化完成:', {
-      produceAmount, lossAmount, returnAmount, wasteAmount, totalAmount
-    });
-  },
+    chart.setOption(option);},
 
   // 初始化每日进货总额图表
   init_daily_chart: function () {
@@ -1109,56 +972,29 @@ Page({
     if (!that.dailyEchartsComponent) {
       
       // 如果组件还没准备好，延迟重试
-      if (!that.data.dailyChartDrawn) {
-        console.log("🔄 每日进货总额图表组件未准备好，延迟重试...");
-        setTimeout(() => {
+      if (!that.data.dailyChartDrawn) {setTimeout(() => {
           that.init_daily_chart();
         }, 500);
       }
       return;
     }
     
-    that.dailyEchartsComponent.init((canvas, width, height) => {
-      console.log("=== 每日进货总额图表组件init回调执行 ===");
-      console.log("canvas:", canvas);
-      console.log("width:", width, "height:", height);
-      
-      // 初始化图表
+    that.dailyEchartsComponent.init((canvas, width, height) => {// 初始化图表
       const Chart = echarts.init(canvas, null, {
         width: width,
         height: height,
         devicePixelRatio: globalData.rpxR
-      });
-      console.log("每日进货总额ECharts实例创建成功:", Chart);
-      
-      const option = that.getDailyChartOption();
-      console.log("每日进货总额图表配置选项:", option);
-      
-      Chart.setOption(option);
-      console.log("✅ 每日进货总额图表配置设置成功");
-      
-      // 设置图表已绘制状态
+      });const option = that.getDailyChartOption();Chart.setOption(option);// 设置图表已绘制状态
       that.setData({
         dailyChartDrawn: true
-      });
-      console.log("✅ 每日进货总额图表状态已更新: dailyChartDrawn = true");
-      
-      // 注意这里一定要返回 chart 实例，否则会影响事件处理等
+      });// 注意这里一定要返回 chart 实例，否则会影响事件处理等
       return Chart;
     });
   },
 
   // 获取每日进货总额图表配置
-  getDailyChartOption() {
-    console.log("=== 开始获取每日进货总额图表配置 ===");
-    
-    const mapEveryDay = this.data.mapEveryDay || {};
-    console.log("mapEveryDay原始数据:", mapEveryDay);
-    
-    if (!mapEveryDay || !mapEveryDay.dateList || !mapEveryDay.dayValue || 
-        mapEveryDay.dateList.length === 0 || mapEveryDay.dayValue.length === 0) {
-      console.log("⚠️ 没有每日进货数据，显示空状态");
-      return {
+  getDailyChartOption() {const mapEveryDay = this.data.mapEveryDay || {};if (!mapEveryDay || !mapEveryDay.dateList || !mapEveryDay.dayValue || 
+        mapEveryDay.dateList.length === 0 || mapEveryDay.dayValue.length === 0) {return {
         title: {
           text: '暂无每日进货数据',
           left: 'center',
@@ -1173,13 +1009,7 @@ Page({
     
     // 提取日期和金额数据
     const dates = mapEveryDay.dateList || [];
-    const amounts = mapEveryDay.dayValue || [];
-    
-    console.log("解析后的日期数据:", dates);
-    console.log("解析后的金额数据:", amounts);
-    
-    console.log("✅ 生成每日进货总额图表配置");
-    return {
+    const amounts = mapEveryDay.dayValue || [];return {
       // title: {
       //   text: '供货商每日进货总额',
       //   left: 'left', // 改为靠左对齐

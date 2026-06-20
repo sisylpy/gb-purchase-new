@@ -1,7 +1,7 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 var config = require('../../../../config/index.js');
-// var goodsApi = require('../../services/api.js');
+var goodsApi = require('../../../services/api.js');
 
 let itemWidth = 0;
 const viewBarHeight = 70;
@@ -91,7 +91,6 @@ Page({
     load.showLoading("商品搜索中")
     goodsApi.queryDisGoodsByQuickSearchGb(data).then(res => {
       load.hideLoading();
-      console.log(res.result.data);
       if (res.result.code == 0) {
         this.setData({
           disArr: res.result.data,
@@ -116,20 +115,18 @@ Page({
     var id = e.currentTarget.dataset.id;
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
     wx.navigateTo({
-      url: '../goodsOrderList/goodsOrderList?disGoodsId=' + id +'&type=1',
+      url: '/subPackage-goods/pages/goodsOrderList/goodsOrderList?disGoodsId=' + id +'&type=1',
     })
-    // 
   },
   toFenxi(e) {
     var id = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: '../goodsFenxi/goodsFenxi?id=' + id,
+      url: '/subPackage-goods/pages/goodsFenxi/goodsFenxi?id=' + id,
     })
   },
 
   toGoods(e){
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
-    console.log("goods",e)
     wx.navigateTo({
       url: '../disGoodsPage/disGoodsPage?disGoodsId=' + e.currentTarget.dataset.id,
     })
@@ -141,15 +138,14 @@ Page({
     var id = e.currentTarget.dataset.id;
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
     wx.navigateTo({
-      url: '../goodsOrderList/goodsOrderList?disGoodsId=' + id +'&type=1',
+      url: '/subPackage-goods/pages/goodsOrderList/goodsOrderList?disGoodsId=' + id +'&type=1',
     })
-    // 
   },
   
   toStock(e){
     wx.setStorageSync('disGoods', e.currentTarget.dataset.item);
    wx.navigateTo({
-     url: '../stockGoodsList/stockGoodsList?disGoodsId=' + e.currentTarget.dataset.id,
+     url: '/subPackage-goods/pages/stockGoodsList/stockGoodsList?disGoodsId=' + e.currentTarget.dataset.id,
    })
 
  },

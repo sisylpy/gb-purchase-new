@@ -31,13 +31,7 @@ Page({
       this.setData({
         kitchenDepartmentList: []
       })
-    } 
-   
-    console.log("11111111-------------");
-
-    if(searchStockDeps || searchKitchenDeps){
-      console.log("222222-------------");
-      this._getSearchDepIds();
+    }if(searchStockDeps || searchKitchenDeps){this._getSearchDepIds();
     }else{
       this.setData({
         searchDepIds: -1,
@@ -96,9 +90,7 @@ Page({
     load.showLoading("获取数据中");
     getJrdhGoodsOrders(data)
       .then(res => {
-        load.hideLoading();
-        console.log(res.result.data)
-        if (res.result.code == 0) {
+        load.hideLoading();if (res.result.code == 0) {
           this.setData({
             arr: res.result.data
           })

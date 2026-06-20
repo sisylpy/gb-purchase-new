@@ -69,14 +69,16 @@ Page({
       }
     ],
     goodsSupplierId: null,
-    /** 集团用户已进入所选门店采购（用于展示「返回经营看板」） */
-    isGroupPurchaseMode: false,
-    /** 底部弹层：切换门店 */
-    showGroupStoreSheet: false,
-    groupStoreList: [],
-    groupStoreListLoading: false,
-    /** 当前门店部门实体（模板用 mendianInfo.name 与单店/子部门展示） */
+   
     mendianInfo: null,
+
+    // 部门设置弹窗
+    showPage: false,
+    popupAnimation: {},
+    hasSubs: 2,
+    selNumber: 1,
+    gbDepartmentEntities: [],
+    _checkedDepartment: false,  // 首次部门检查标记，只检查一次
   },
 
   // ============================================
@@ -86,33 +88,38 @@ Page({
   onLoad: function (options) {
     var week = dateUtils.getWhatDay(0);
     var date = dateUtils.getOnlyHao(0);
-
+    var windowInfo = wx.getWindowInfo();
+    var globalData = app.globalData;
     this.setData({
+      windowWidth: windowInfo.windowWidth * globalData.rpxR,
+      windowHeight: windowInfo.windowHeight * globalData.rpxR,
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
       week: week,
       date: date,
       url: requestUtil.getServerUrl(),
     });
 
+    
 
+   
+    
     var userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
-      var depInfo = wx.getStorageSync('mendianInfo');
-      this.setData({
-        userInfo: userInfo,
-        depId: depInfo.gbDepartmentId,
-        mendianInfo: depInfo,
-      });
-      if (userInfo.gbDuAdmin == 1) {
+      var admin = userInfo.gbDuAdmin;
+      if (admin != 0 && admin != 11) {
+        var orderDepInfo = wx.getStorageSync('orderDepInfo') || wx.getStorageSync('mendianInfo');
+        if (orderDepInfo) {
+          wx.setStorageSync('orderDepInfo', orderDepInfo);
+        }
         wx.redirectTo({
-          url: '../../subPackage-ai/pages/ai/chefOrderDep/chefOrderDep',
+          url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
         });
-      } 
-      if ( userInfo.gbDuAdmin == 0) {
-        wx.reLaunch({
-          url: '/subPackage-group/pages/homePage/homePage',
+      } else {
+        var depInfo = wx.getStorageSync('mendianInfo');
+        this.setData({
+          userInfo: userInfo,
+          mendianInfo: depInfo,
         });
-      
-        return;
       }
     } else {
       this._userLogin();
@@ -122,17 +129,31 @@ Page({
   },
 
   onShow: function () {
-    var windowInfo = wx.getWindowInfo();
-    var globalData = app.globalData;
-    this.setData({
-      windowWidth: windowInfo.windowWidth * globalData.rpxR,
-      windowHeight: windowInfo.windowHeight * globalData.rpxR,
-      navBarHeight: globalData.navBarHeight * globalData.rpxR,
-    });
+   
+    var disInfo  = wx.getStorageSync('disInfo');
+    var mendianInfo  = wx.getStorageSync('mendianInfo');
+    var newDepId = mendianInfo ? mendianInfo.gbDepartmentId : null;
+    var depChanged = this.data.depId && newDepId && this.data.depId !== newDepId;
 
+    if(mendianInfo){
+      this.setData({
+        mendianInfo: mendianInfo,
+        depId: newDepId,
+      })
+    }
+
+    if(disInfo){
+      this.setData({
+        disInfo: disInfo
+      })
+    }
+    
     wx.removeStorageSync('selArr');
 
     if (this.data.depId && this.data.mendianInfo) {
+      if (depChanged) {
+        this.setData({ purArr: [], batchArr: [], selectedArr: [] });
+      }
       if (this.data.tab1Index == 0) {
         this._getInitData();
       } else {
@@ -160,11 +181,11 @@ Page({
             [wxOrderCountData]: res.result.data.wxAmount,
             disInfo: res.result.data.disInfo,
           })
-         
-         
+          wx.setStorageSync('disInfo', res.result.data.disInfo);
+          // this._checkIfShowPage();
         } else {
           load.hideLoading()
-          this.setData({ purArr: [] });
+          this.setData({ purArr: [] });r
           wx.showToast({ title: res.result.msg, icon: 'none' });
           this.setData({ purArr: [] });
         }
@@ -252,24 +273,22 @@ Page({
 
                 wx.setStorageSync('mendianInfo', res.result.data.depInfo);
                 var admin = res.result.data.depUserInfo.gbDuAdmin;
-                if ( admin == 0) {
-                  wx.reLaunch({
-                    url: '/subPackage-group/pages/homePage/homePage',
-                  });
-                
-                  return;
-                }
-                if (admin == 1  || admin == 11 ) {
+               
+                if ( admin == 0 || admin == 11 ) {
                   this.setData({
                     disInfo: res.result.data.disInfro,
                     userInfo: res.result.data.depUserInfo,
                     depId: res.result.data.depInfo.gbDepartmentId,
                     mendianInfo: res.result.data.depInfo,
                   });
+                  // this._checkIfShowPage();
 
                   this._getInitData();
                 } else {
-                  wx.setStorageSync('orderDepInfo', res.result.data.depInfo);
+                  wx.setStorageSync('disInfo', res.result.data.disInfo);
+                  wx.setStorageSync('userInfo', res.result.data.depUserInfo);
+                  wx.setStorageSync('mendianInfo', res.result.data.depInfo);
+                  wx.setStorageSync('orderDepInfo', res.result.data.orderDepInfo);
                   wx.redirectTo({
                     url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
                   });
@@ -664,97 +683,69 @@ Page({
     });
   },
 
-  // ============================================
-  // 八、门店设置
-  // ============================================
-
-  showPopup: function () {
-    var animation = wx.createAnimation({
-      duration: 1300,
-      timingFunction: 'ease-in-out',
-    });
-    animation.translateY(0).step();
-    this.setData({ popupAnimation: animation.export() });
-  },
-
-
-
-  bindKeyInput: function (e) {
-    this.setData({ 'disInfo.gbDistributerName': e.detail.value });
-  },
-
-  radioChange: function (e) {
-    var value = parseInt(e.detail.value, 10);
+  /** 批次操作菜单 */
+  onBatchMenuTap: function (e) {
+    var batch = e.currentTarget.dataset.batch;
+    var bIndex = e.currentTarget.dataset.bindex;
     this.setData({
-      hasSubs: value,
-      selNumber: value === 2 ? 1 : 0,
-      gbDepartmentEntities: value === 2 ? [{ gbDepartmentName: '' }] : [],
+      currentBatch: batch,
+      currentBIndex: bIndex,
     });
-  },
-
-  handleDepartmentNumber: function (e) {
-    var num = parseInt(e.detail.value, 10);
-    if (num > 0) {
-      var departments = Array(num).fill('').map(function () {
-        return { gbDepartmentName: '' };
-      });
-      this.setData({
-        selNumber: num,
-        gbDepartmentEntities: departments,
-      });
-    }
-  },
-
-  getDepartmentName: function (e) {
-    var index = e.currentTarget.dataset.index;
-    var value = e.detail.value;
-    var departments = this.data.gbDepartmentEntities;
-    departments[index].gbDepartmentName = value;
-    this.setData({ gbDepartmentEntities: departments });
-  },
-
-  toSave: function () {
-    if (!this.data.disInfo.gbDistributerName) {
-      wx.showToast({ title: '请输入门店名称', icon: 'none' });
-      return;
-    }
-    if (this.data.hasSubs === 2 && this.data.selNumber > 0) {
-      var incomplete = this.data.gbDepartmentEntities.some(function (item) {
-        return !item.gbDepartmentName;
-      });
-      if (incomplete) {
-        wx.showToast({ title: '请填写所有部门名称', icon: 'none' });
-        return;
-      }
-    }
-
-    var mendian = this.data.mendianInfo;
-    mendian.gbDepartmentEntityList = this.data.gbDepartmentEntities;
     var that = this;
-    depOrderApi.purUserSaveMendain(mendian).then(function (res) {
-      if (res.result.code == 0) {
-        var firstMendian = mendianRowWithDisplayName(
-          res.result.data.mendianDepartmentList[0] || null
-        );
-        that.setData({
-          disInfo: res.result.data,
-          mendianInfo: firstMendian,
-        });
-        wx.setStorageSync('disInfo', res.result.data);
-        wx.setStorageSync('mendianInfo', firstMendian);
-        that._getInitData();
-        that.hidePopup();
-      }
+    wx.showActionSheet({
+      itemList: ['删除订单批次', '录入单价/数量'],
+      success: function (res) {
+        if (res.tapIndex === 0) {
+          that.deleteGbBatch();
+        } else if (res.tapIndex === 1) {
+          that.toGbOrderInput();
+        }
+      },
     });
   },
+
+  /** 删除整个订货批次 */
+  deleteGbBatch: function () {
+    var that = this;
+    var batch = this.data.currentBatch;
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除整个订单批次吗？删除后不可恢复。',
+      showCancel: true,
+      confirmText: '确认删除',
+      cancelText: '取消',
+      confirmColor: '#e64340',
+      success: function (res) {
+        if (res.confirm) {
+          load.showLoading('删除中');
+          depOrderApi.deleteDisPurBatchGb(batch.gbDistributerPurchaseBatchId)
+            .then(function (res) {
+              load.hideLoading();
+              if (res.result.code == 0) {
+                wx.showToast({ title: '已删除', icon: 'success' });
+                that._initBatchData();
+              } else {
+                wx.showToast({ title: res.result.msg || '删除失败', icon: 'none' });
+              }
+            });
+        }
+      },
+    });
+  },
+
+  /** 跳转录入单价/数量页面 */
+  toGbOrderInput: function () {
+    var batch = this.data.currentBatch;
+    var retName = this.data.disInfo ? this.data.disInfo.gbDistributerName : '';
+    wx.navigateTo({
+      url: '/subPackage-supplier/pages/gbOrderInput/gbOrderInput?batchId=' + batch.gbDistributerPurchaseBatchId + '&retName=' + retName,
+    });
+  },
+
 
   // ============================================
   // 九、页面跳转
   // ============================================
-
-  toStock: function () {
-    wx.navigateTo({ url: '../../subPackage-charts/pages/stock/index/index' });
-  },
 
   toFinishPurGoods: function (e) {
     var arr = this._getPurSelArr();
@@ -778,120 +769,33 @@ Page({
     wx.navigateTo({ url: '/subPackage-mendian/pages/management/homePage/homePage?disId=' + this.data.disId });
   },
 
-  /** 集团用户：打开门店列表弹层 */
-  onOpenGroupStoreSheet: function () {
-    console.log('[index.groupStore] onOpenGroupStoreSheet 进入', {
-      disId: this.data.disId,
-      depId: this.data.depId,
-      isGroupPurchaseMode: this.data.isGroupPurchaseMode,
-    });
-    if (!this.data.disId) {
-      wx.showToast({ title: '缺少分销商信息', icon: 'none' });
-      return;
-    }
-    var that = this;
-    this.setData({
-      showGroupStoreSheet: true,
-      groupStoreListLoading: true,
-      groupStoreList: [],
-    });
-    console.log('[index.groupStore] 请求 getDisDepartmentGbMendianJing disId=', this.data.disId);
-    depOrderApi
-      .getDisDepartmentGbMendianJing(this.data.disId)
-      .then(function (res) {
-        var list = [];
-        if (res.result && res.result.code == 0) {
-          list = res.result.data || [];
-        } else if (res.result && res.result.msg) {
-          wx.showToast({ title: res.result.msg, icon: 'none' });
-        }
-        console.log('[index.groupStore] 门店列表返回', {
-          code: res.result && res.result.code,
-          msg: res.result && res.result.msg,
-          count: Array.isArray(list) ? list.length : 0,
-        });
-        that.setData({
-          groupStoreList: list,
-          groupStoreListLoading: false,
-        });
-      })
-      .catch(function (err) {
-        console.warn('[index.groupStore] getDisDepartmentGbMendianJing 失败', err);
-        that.setData({ groupStoreList: [], groupStoreListLoading: false });
-        wx.showToast({ title: '门店列表加载失败', icon: 'none' });
-      });
+  toWork(){
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/workRecord/workRecord',
+    })
   },
 
-  onCloseGroupStoreSheet: function () {
-    this.setData({ showGroupStoreSheet: false });
+  toStoreAnnounce(){
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/storeAnnouncement/storeAnnouncement?boardType=MANAGER_DAILY_BOARD',
+    })
   },
+
+
 
   noopForSheet: function () {},
 
-  /** 在弹层中选择门店并刷新当前 Tab 数据 */
-  onSelectGroupStoreItem: function (e) {
-    var deptId = e.currentTarget.dataset.deptid;
-    var list = this.data.groupStoreList || [];
-    var item = null;
-    for (var i = 0; i < list.length; i++) {
-      if (String(list[i].gbDepartmentId) === String(deptId)) {
-        item = list[i];
-        break;
-      }
-    }
-    if (!item) {
-      console.warn('[index.groupStore] onSelectGroupStoreItem 未匹配行 deptId=', deptId);
-      return;
-    }
-    console.log('[index.groupStore] 选中门店', {
-      gbDepartmentId: item.gbDepartmentId,
-      gbDepartmentName: item.gbDepartmentName || item.gbDepartmentPrintName,
-    });
-    purchaseContext.setGroupSelectedStoreDepartment(item);
-    var itemNorm = mendianRowWithDisplayName(item);
-    var that = this;
-    this.setData(
-      {
-        depId: item.gbDepartmentId,
-        mendianInfo: itemNorm,
-        showGroupStoreSheet: false,
-        isGroupPurchaseMode: true,
-      },
-      function () {
-        console.log('[index.groupStore] setData 完成，刷新数据 tab1Index=', that.data.tab1Index);
-        if (that.data.tab1Index == 0) {
-          that._getInitData();
-        } else {
-          that._initBatchData();
-        }
-      }
-    );
-  },
 
-  /** 集团代门店采购时返回经营看板，并清除所选门店缓存 */
-  toGroupAiChatBoard: function () {
-    this.setData({ showGroupStoreSheet: false });
-    purchaseContext.clearGroupStorePurchaseContext();
-    wx.reLaunch({
-      url: '/subPackage-ai/pages/chat/groupAiChat/groupAiChat',
-    });
-  },
 
   toPay: function () {
     wx.navigateTo({ url: '../../subPackage/pages/account/payPage/payPage?type=0' });
   },
 
  
-  toEditUser: function () {
-    // wx.navigateTo({ url: '../myDashboard/myDashboard' });
+  onNavTap: function () {
     wx.navigateTo({
       url: '/subPackage-charts/pages/aiChat/aiChat?advisorId=1',
     })
-  },
-
-  toResGoods: function () {
-    console.log(("ddhdhhhdhe"))
-    wx.navigateTo({ url: '../../subPackage-goods/pages/depGoodsIndex/depGoodsIndex' });
   },
 
   // ============================================
@@ -985,6 +889,136 @@ Page({
 
   closeGoods: function () {
     this.setData({ showGoods: false });
+  },
+
+  // ============================================
+  // 十一、门店部门设置
+  // ============================================
+
+  /** 准备弹窗初始数据 */
+  _preparePopupData: function () {
+    var disInfo = this.data.disInfo || wx.getStorageSync('disInfo') || {};
+    var mendianInfo = this.data.mendianInfo || wx.getStorageSync('mendianInfo') || {};
+    var hasSubs = mendianInfo.gbDepartmentSubAmount > 0 ? 2 : 1;
+    var selNumber = mendianInfo.gbDepartmentSubAmount || 1;
+    var gbDepartmentEntities = (mendianInfo.gbDepartmentEntityList && mendianInfo.gbDepartmentEntityList.length > 0)
+      ? mendianInfo.gbDepartmentEntityList.map(function (item) { return { gbDepartmentName: item.gbDepartmentName || '' }; })
+      : [{ gbDepartmentName: disInfo.gbDistributerName || '' }];
+
+    this.setData({
+      hasSubs: hasSubs,
+      selNumber: selNumber,
+      gbDepartmentEntities: gbDepartmentEntities,
+      disInfo: disInfo,
+    });
+  },
+
+  _checkIfShowPage() {
+    // 只检查一次，避免每次数据加载重复判断
+    if (this.data._checkedDepartment) return;
+    this.data._checkedDepartment = true;
+
+    if (this.data.disInfo.mendianDepartmentList[0].gbDepartmentEntityList.length == 0) {
+      this.setData({
+        showPage: true,
+        mendianInfo:this.data.disInfo.mendianDepartmentList[0],
+        gbDepartmentEntities: [{
+          gbDepartmentName: this.data.disInfo.gbDistributerName
+        }],
+      })
+
+      this.showPopup();
+
+    }
+  },
+
+  showPopup() {
+    var animation = wx.createAnimation({
+      duration: 1300,
+      timingFunction: 'ease-in-out',
+    });
+    animation.translateY(0).step();
+    this.setData({
+      popupAnimation: animation.export(),
+    });
+  },
+
+  // 隐藏弹出层
+  hidePopup() {
+    this.setData({
+      showPage: false
+    });
+  },
+
+  // 绑定门店名称输入
+  bindKeyInput(e) {
+    this.setData({
+      'mendianInfo.gbDepartmentName': e.detail.value,
+    });
+  },
+
+  // 处理部门数量输入
+  handleDepartmentNumber(e) {
+    const num = parseInt(e.detail.value, 10);
+    if (num > 0) {
+      var departments = Array(num).fill('').map(function () {
+        return { gbDepartmentName: '' };
+      });
+      this.setData({
+        selNumber: num,
+        gbDepartmentEntities: departments,
+      });
+    }
+  },
+
+  // 更新部门名称
+  getDepartmentName(e) {
+    const index = e.currentTarget.dataset.index;
+    const value = e.detail.value;
+    const departments = this.data.gbDepartmentEntities;
+    departments[index].gbDepartmentName = value;
+    this.setData({
+      gbDepartmentEntities: departments,
+    });
+  },
+
+
+  // 保存设置
+  toSave() {
+    if (!this.data.disInfo.gbDistributerName) {
+      wx.showToast({
+        title: '请输入门店名称',
+        icon: 'none'
+      });
+      return;
+    }
+    if (this.data.hasSubs === 2 && this.data.selNumber > 0) {
+      const incomplete = this.data.gbDepartmentEntities.some(
+        (item) => !item.gbDepartmentName
+      );
+      if (incomplete) {
+        wx.showToast({
+          title: '请填写所有部门名称',
+          icon: 'none'
+        });
+        return;
+      }
+    }
+
+    var mendian = this.data.mendianInfo;
+    mendian.gbDepartmentEntityList = this.data.gbDepartmentEntities;
+    console.log(mendian);
+    depOrderApi.purUserSaveMendain(mendian).then(res => {
+      if (res.result.code == 0) {
+        this.setData({
+          disInfo: res.result.data,
+        })
+        wx.setStorageSync('disInfo', res.result.data);
+        wx.setStorageSync('mendianInfo', res.result.data.mendianDepartmentList[0]);
+        this._getInitData();
+        this.hidePopup();
+      }
+    })
   },
 
 

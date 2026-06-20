@@ -1,0 +1,82 @@
+<view class="pin-page">
+  <!-- 自定义导航栏 -->
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="我的图钉" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <!-- 主内容区 -->
+  <scroll-view
+    scroll-y="{{true}}"
+    class="pin-scroll"
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="onScrollToLower"
+    lower-threshold="100"
+     style="margin-top: {{navBarHeight + 20}}rpx;"
+  >
+    <!-- 加载中 -->
+    <view class="pin-loading" wx:if="{{loading}}">
+      <text class="pin-loading-text">加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="pin-empty" wx:elif="{{!loading && pins.length === 0}}">
+      <image class="pin-empty-img" src="/images/xiuxi.png" mode="aspectFit"></image>
+      <text class="pin-empty-text">暂无图钉</text>
+      <text class="pin-empty-sub">在对话中对消息添加图钉，可在此集中查看</text>
+    </view>
+
+    <!-- 图钉列表 -->
+    <block wx:elif="{{pins.length > 0}}">
+      <view
+        class="pin-card"
+        wx:for="{{pins}}"
+        wx:key="pinId"
+        catchtap="onViewPin"
+        data-pin-id="{{item.pinId}}"
+        data-conversation-id="{{item.conversationId}}"
+      >
+        <!-- 卡片头部 -->
+        <view class="pin-card-header">
+          <text class="pin-card-icon">📌</text>
+          <text class="pin-card-title">{{item._displayTitle}}</text>
+          <view
+            class="pin-card-more"
+            catchtap="onMoreTap"
+            data-pin-id="{{item.pinId}}"
+            data-conversation-id="{{item.conversationId}}"
+          >
+            <text class="pin-card-more-icon">···</text>
+          </view>
+        </view>
+
+        <!-- 卡片数量标识 -->
+        <view class="pin-card-badge" wx:if="{{item.cardCount}}">
+          <text class="pin-card-badge-text">{{item.cardCount}} 张业务卡片</text>
+        </view>
+
+        <!-- 预览内容 -->
+        <view class="pin-card-preview" wx:if="{{item.preview}}">
+          <text class="pin-card-preview-text">{{item.preview}}</text>
+        </view>
+
+        <!-- 底部：时间 -->
+        <view class="pin-card-footer">
+          <text class="pin-card-time">{{item._timeLabel}}</text>
+        </view>
+      </view>
+
+      <!-- 加载更多 -->
+      <view class="pin-loadmore" wx:if="{{loadingMore}}">
+        <text class="pin-loadmore-text">加载中...</text>
+      </view>
+
+      <!-- 没有更多 -->
+      <view class="pin-loadmore" wx:elif="{{!hasMore && total > 0}}">
+        <text class="pin-loadmore-text">— 共 {{total}} 条 —</text>
+      </view>
+
+      <!-- 底部留白 -->
+      <view class="pin-scroll-spacer"></view>
+    </block>
+  </scroll-view>
+</view>

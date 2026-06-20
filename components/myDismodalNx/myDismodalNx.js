@@ -82,19 +82,27 @@ Component({
     showInput: false,
     showOuterPack: false,
     outerPackStandard: "",
+    outerPackLabel: "",
   },
 
   methods: {
 
     _updateOuterPackChip(nxGoods) {
       if (!nxGoods || typeof nxGoods !== "object") {
-        this.setData({ showOuterPack: false, outerPackStandard: "" });
+        this.setData({ showOuterPack: false, outerPackStandard: "", outerPackLabel: "" });
         return;
       }
-      const name = nxGoods.nxGoodsCartonUnit != null ? String(nxGoods.nxGoodsCartonUnit).trim() : "";
+      const unit = nxGoods.nxGoodsCartonUnit != null ? String(nxGoods.nxGoodsCartonUnit).trim() : "";
+      const ipc = nxGoods.nxGoodsItemsPerCarton;
+      const std = nxGoods.nxGoodsStandardname != null ? String(nxGoods.nxGoodsStandardname).trim() : "";
+      var label = unit;
+      if (unit && ipc != null && ipc !== "" && String(ipc) !== "null") {
+        label = String(ipc) + std + "*" + unit;
+      }
       this.setData({
-        outerPackStandard: name,
-        showOuterPack: !!name,
+        outerPackStandard: unit,
+        outerPackLabel: label,
+        showOuterPack: !!unit,
       });
     },
 

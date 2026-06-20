@@ -1,7 +1,0 @@
-{
-  "navigationBarTitleText": "采购分析",
-  "usingComponents": {
-    "back-navbar": "/components/back-navbar/back-navbar",
-    "ec-canvas": "/ec-canvas/ec-canvas"
-  }
-}

@@ -61,8 +61,7 @@
             </view>
           </view>
 
-          <view class="cat-card__right">
-            <!-- 环形图 -->
+          <!-- <view class="cat-card__right">
             <view class="cat-card__pie-wrap">
               <view class="cat-card__pie" style="background: {{cat.pieStyle || '#f0f0f0'}};">
                 <view class="cat-card__pie-hole">
@@ -72,14 +71,13 @@
               </view>
             </view>
 
-            <!-- 图例 -->
             <view class="cat-card__legend">
               <view class="legend-item" wx:for="{{cat.legendList}}" wx:for-item="leg" wx:key="name">
                 <view class="legend-dot" style="background: {{leg.color}};"></view>
                 <text class="legend-name">{{leg.name}} {{leg.count}} ({{leg.ratio}}%)</text>
               </view>
             </view>
-          </view>
+          </view> -->
         </view>
 
         <!-- 三列指标 -->

@@ -1,7 +1,7 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 import apiUrl from '../../../../config/index.js';
-import { menuFoodBusinessDetail } from '../../../services/apiDistributerFood';
+import { menuFoodBusinessDetail } from '../../../../services/apiDistributerFood';
 
 // ===== 工具函数 =====
 
@@ -191,13 +191,6 @@ Page({
         }
         var d = r.data || {};
         // 🔍 打印完整响应，方便核对真实字段名
-        console.log('[foodBusinessDetail] ===== API 完整响应 =====');
-        console.log('[foodBusinessDetail] data:', JSON.stringify(d, null, 2));
-        console.log('[foodBusinessDetail] data.dish:', JSON.stringify(d.dish, null, 2));
-        console.log('[foodBusinessDetail] data.ingredientCostRows:', JSON.stringify(d.ingredientCostRows, null, 2));
-        console.log('[foodBusinessDetail] data.period:', JSON.stringify(d.period, null, 2));
-        console.log('[foodBusinessDetail] data.weekdaySalesDistribution:', JSON.stringify(d.weekdaySalesDistribution, null, 2));
-        console.log('[foodBusinessDetail] data.weekdayPeak:', JSON.stringify(d.weekdayPeak, null, 2));
         that._processDetail(d);
         that.setData({ loading: false, errMsg: '' });
       })
@@ -378,11 +371,6 @@ Page({
         var sn = _toNum(shareRate);
         if (!isNaN(sn)) shareStr = sn.toFixed(1) + '%';
       }
-
-      console.log('[foodBusinessDetail] 配料行 [' + idx + ']:', {
-        原始字段: JSON.stringify(r),
-        映射结果: { name, quantity, unitPrice, costAmount, shareRate: shareStr },
-      });
 
       return {
         name: name,

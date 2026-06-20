@@ -1,7 +1,7 @@
 <view class="flex flex-column height-100">
 
 
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="管理" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{mendianInfo.gbDepartmentName}}管理" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
 
   <view class="flex-column pt-10  font-sl">
@@ -9,17 +9,38 @@
 
     <view class="flex-row-wrap bg-white pt-20 pb-20">
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toMendian" hover-class="hover">
+      <view class="quarter-row pt-20 pb-20" bindtap="showMendianPicker" wx:if="{{mendianList.length > 1}}" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/house-things-.png" class="icon" />
+          <text>选择分店</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toGroup" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/house-things-.png" class="icon" />
+          <text>公司管理</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toMendian" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/home-2.png" class="icon" />
           <text>门店管理</text>
         </view>
       </view>
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toStaff" hover-class="hover">
+      <view class="quarter-row pt-20 pb-20" bindtap="toStaffMeal" hover-class="hover">
         <view class="flex-column center-content">
-          <image src="/images/user-group-2.png" class="icon" />
-          <text>管理用户</text>
+          <image src="/images/dish.png" class="icon" />
+          <text>菜品管理</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toDaily" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/price-audit.png" class="icon" />
+          <text>营业额</text>
         </view>
       </view>
 
@@ -29,6 +50,20 @@
           <text>供货商</text>
         </view>
       </view>
+
+     
+
+      
+
+      
+      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toStaff" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/user-group-2.png" class="icon" />
+          <text>管理用户</text>
+        </view>
+      </view> -->
+
+    
      
       <!-- <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
         <view class="flex-column center-content">
@@ -36,23 +71,15 @@
           <text>菜单</text>
         </view>
       </view> -->
-      
-      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toFood" hover-class="hover">
+
+    
+      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toGroupGoods" hover-class="hover">
         <view class="flex-column center-content">
-          <image src="/images/gongyingshang.png" class="icon" />
-          <text>优惠卷</text>
+          <image src="/images/orderlisto.png" class="icon" />
+          <text>商品管理</text>
         </view>
       </view> -->
       
-      <view class="quarter-row pt-20 pb-20" bindtap="toDaily" hover-class="hover">
-        <view class="flex-column center-content">
-          <image src="/images/gongyingshang.png" class="icon" />
-          <text>营业额</text>
-        </view>
-      </view>
-
-     
-    
      
 
       <view class="quarter-row pt-20 pb-20" bindtap="toPurchaseDate" hover-class="hover">
@@ -78,47 +105,81 @@
       </view>
 
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toReportStock" hover-class="hover">
+      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toReportStock" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/home/stock0.png" class="icon" />
           <text>报表</text>
         </view>
-      </view>
+      </view> -->
 
+      
+
+
+     
 
       <view class="quarter-row pt-20 pb-20" bindtap="toMendainFood" hover-class="hover">
         <view class="flex-column center-content">
-          <image src="/images/gongyingshang.png" class="icon" />
+          <image src="/images/basesalesintegralSpecial.png" class="icon" />
           <text>菜品经营</text>
         </view>
       </view>
 
       <view class="quarter-row pt-20 pb-20" bindtap="toFoodGoodsFenxi" hover-class="hover">
         <view class="flex-column center-content">
-          <image src="/images/home/cost2.png" class="icon" />
+          <image src="/images/seo-marketing-business-graph-network.png" class="icon" />
           <text>菜品分析</text>
         </view>
       </view>
 
       <view class="quarter-row pt-20 pb-20" bindtap="toCostGoodsFenxi" hover-class="hover">
         <view class="flex-column center-content">
-          <image src="/images/home/cost2.png" class="icon" />
+          <image src="/images/bingzhuangtu.png" class="icon" />
           <text>配料分析</text>
         </view>
       </view>
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toAiChat" hover-class="hover">
+
+    
+
+
+      
+
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toStock" hover-class="hover">
         <view class="flex-column center-content">
-          <image src="/images/chat_record.png" class="icon" />
-          <text>AI助理</text>
+          <image src="/images/orderlisto.png" class="icon" />
+          <text>库存</text>
         </view>
       </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toResGoods" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/orderlisto.png" class="icon" />
+          <text>门店商品</text>
+        </view>
+      </view>
+
+
+
 
      
 
     </view>
 
 
+  </view>
+
+
+  <!-- 选择分店弹窗 -->
+  <view class="overlay {{showMendianPicker ? 'show' : ''}}" catchtap="hideMendianPicker">
+    <view class="popup bg-white" style="width: {{windowWidth / 3 * 2}}rpx;" catchtap="">
+      <view class="p-20 font-md text-center border-bottom" style="font-weight: 500;">选择分店</view>
+      <view class="flex-row border-bottom p-30" wx:for="{{mendianList}}" wx:key="gbDepartmentId" wx:for-item="mendian" bindtap="selectMendian" data-item="{{mendian}}" hover-class="hover">
+        <text class="flex-1">{{mendian.gbDepartmentName}}</text>
+        <text class="current-tag" wx:if="{{mendian.gbDepartmentId === mendianInfo.gbDepartmentId}}">当前</text>
+      </view>
+      <view class="p-20 text-center text-secondary font-sm" bindtap="hideMendianPicker">取消</view>
+    </view>
   </view>
 
 </view>

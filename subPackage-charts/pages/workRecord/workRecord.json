@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "我的工作记录",
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar",
+    "business-card-renderer": "/components/businessCardRenderer/businessCardRenderer"
+  }
+}

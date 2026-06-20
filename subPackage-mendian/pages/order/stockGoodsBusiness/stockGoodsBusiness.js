@@ -1,7 +1,8 @@
 var load = require('../../../../lib/load.js');
-var dateUtils = require('../../../../utils/dateUtil');
+var dateUtils = require('../../../../lib/dateUtil');
 var config = require('../../../../config/index.js');
-var stockApi = require('../../../services/stockGoodsBusinessApi.js');
+var stockApi = require('../../../../services/depOrder.js');
+var stockReduceKind = require('../../../../lib/stockReduceKind.js');
 
 Page({
 
@@ -198,7 +199,6 @@ Page({
       })
     }
 
-    console.log("item.gbDgsRestWeight" + item.gbDgsRestWeight);
     this.setData({
       showStock: true,
       index: e.currentTarget.dataset.index,
@@ -215,8 +215,7 @@ Page({
       item.gbDgsReduceWeightUserId = this.data.userInfo.gbDepartmentUserId;
     }
 
-    var kindMap = { 1: 'produce', 2: 'loss', 3: 'return', 4: 'waste' };
-    var kind = kindMap[showType];
+    var kind = stockReduceKind.kindFromShowType(showType);
     if (!kind) {
       if (showType == 5) {
         // 星级 + 附件流程见 confirmStar / confirmStar1
@@ -234,7 +233,6 @@ Page({
 
     var that = this;
     load.showLoading("保存数据中");
-    console.log(item);
     stockApi.saveDepGoodsStockAdjust(kind, item).then(function (res) {
       load.hideLoading();
       if (res.result.code != 0) {
@@ -261,7 +259,6 @@ Page({
         var userName = that.data.reason;
         if (src && src.length > 0 && reduceId != null && reduceId !== '') {
           load.showLoading("保存数据中");
-          console.log("filelellee", src, "userName", userName, "idididiid", reduceId);
           stockApi.reduceAttachmentSaveWithFile(src, userName, reduceId).then(function (attachRes) {
             load.hideLoading();
             if (attachRes.result == '{"code":0}') {
@@ -290,11 +287,8 @@ Page({
     var userId = this.data.userInfo.gbDepartmentUserId;
     var stars = e.detail.item.gbDgsStars;
      load.showLoading("保存数据中")
-     console.log("stars", stars)
     stockApi.reduceAttachmentSaveWithFileStar(src, reason, id,stars, userId).then((res) => {
-      console.log(res);
       load.hideLoading();
-      console.log("resres", res.result)
       if (res.result == '{"code":0}') {
         that.setData({
           showStar: false
@@ -354,10 +348,8 @@ Page({
         var src = that.data.src;
          load.showLoading("保存数据中")
         stockApi.reduceAttachmentSaveWithFileStar(src, reason, id, stars, that.data.userInfo.gbDepartmentUserId).then((res) => {
-          console.log(res);
           load.hideLoading();
           if (res.result.code == 0) {
-            console.log("that",that);
             that._getInitData();
           } else {
             load.hideLoading();
@@ -425,7 +417,6 @@ Page({
         update: true // 同时设置更新标记
       });
       
-      console.log('成功更新上一个页面的 depGoodsArrAi[' + goodsIndex + ']:', resData);
       return true;
       
     } catch (error) {
@@ -435,7 +426,6 @@ Page({
   },
 
   updateStars(e) {
-    console.log(e);
     var data = {
       id: this.data.item.gbDepartmentGoodsStockId,
       stars: e.detail.gbDgsStars,
@@ -446,7 +436,6 @@ Page({
         var updateSuccess = this.updatePrevPageDepGoodsArrAi(res.result.data);
         
         if (updateSuccess) {
-          console.log('成功更新上一个页面数据');
         } else {
           console.warn('更新上一个页面数据失败');
         }
@@ -472,7 +461,6 @@ Page({
 
   deleteReduce(e) {
 
-    console.log(e)
     var id = e.currentTarget.dataset.id;
 
     stockApi.deleteReduceItem(id)
@@ -483,7 +471,6 @@ Page({
           var updateSuccess = this.updatePrevPageDepGoodsArrAi(res.result.data);
           
           if (updateSuccess) {
-            console.log('成功更新上一个页面数据');
           } else {
             console.warn('更新上一个页面数据失败');
           }

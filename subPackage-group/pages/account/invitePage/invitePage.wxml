@@ -1,0 +1,25 @@
+
+
+<!-- bar -->
+<view class="whiteBack top_bar flex-row " style="padding-top: {{statusBarHeight}}rpx;">
+    <image src="../../images/back.png" class="back_icon" bindtap="toBack"></image>
+    <text class="top_bar_title">注册</text>
+  </view>
+  <!--  top -->
+
+
+
+ <view class="" style="padding-left: 40rpx; padding-right: 40rpx;">  
+ 
+  <canvas canvas-id="positionPoster" style="width: {{windowWidth - 80}}rpx; height: {{windowHeight - 500}}rpx; margin: 0; padding: 0; top: 40rpx; background-color:#fff" ></canvas>
+
+  <canvas id='qrcode' type="2d"  style="width: {{windowWidth / 4}}rpx;height: {{windowWidth / 4}}rpx;margin-left: 100rpx; top: -2010rpx; z-index: -1000; "></canvas>
+ 
+  
+<!-- v-if="isCanvas" -->
+  
+</view>
+
+ <view class="with-padding" style="bottom: 40rpx; ">
+  <button class="mainButton1" bindtap="share" style=" width: {{windowWidth - 100}}rpx;"> 转发微信客户,邀请注册</button>
+ </view>

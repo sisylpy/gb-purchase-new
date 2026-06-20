@@ -1,4 +1,4 @@
-var dateUtils = require('../../../utils/dateUtil');
+var dateUtils = require('../../../lib/dateUtil.js');
 var goodsApi = require('../../services/api.js');
 
 const globalData = getApp().globalData;
@@ -123,9 +123,7 @@ Page({
     load.showLoading("获取商品信息")
     goodsApi.gbDisGetGoodsDetail(this.data.disGoodsId).then(res => {
       load.hideLoading();
-      if (res.result.code == 0) {
-        console.log(res.result.data);
-        this.setData({
+      if (res.result.code == 0) {this.setData({
           goods: res.result.data.goodsInfo,
         })
       } else {
@@ -390,9 +388,7 @@ Page({
       }
       //如果是配送
       if (toDep.gbDepartmentType == 4) {
-        var kitchenTemp = this.data.disInfo.kitchenDepartmentList;
-        console.log(kitchenTemp)
-        for (var i = 0; i < kitchenTemp.length; i++) {
+        var kitchenTemp = this.data.disInfo.kitchenDepartmentList;for (var i = 0; i < kitchenTemp.length; i++) {
           var id = kitchenTemp[i].gbDepartmentId;
           if (toDepId == id) {
             kitchenTemp[i].isSelected = true;
@@ -416,9 +412,7 @@ Page({
       //如果是配送
       if (toDep.gbDepartmentType == 5) {
         var nxDistributerListTemp = this.data.nxDistributerList;
-        if (nxDistributerListTemp.length > 0) {
-          console.log(nxDistributerListTemp)
-          var nxDisId = this.data.nxDisId;
+        if (nxDistributerListTemp.length > 0) {var nxDisId = this.data.nxDisId;
 
           for (var i = 0; i < nxDistributerListTemp.length; i++) {
             var id = nxDistributerListTemp[i].nxDgdNxDistributerId;
@@ -452,9 +446,7 @@ Page({
     }
   },
 
-  _getNoToDepartmentSetDeps() {
-    console.log("_getNoToDepartmentSetDeps_getNoToDepartmentSetDeps")
-    var disInfo = this.data.disInfo;
+  _getNoToDepartmentSetDeps() {var disInfo = this.data.disInfo;
     var purTemp = disInfo.mendianDepartmentList;
     var stockTemp = disInfo.stockDepartmentList;
     var kitchenTemp = disInfo.kitchenDepartmentList;
@@ -476,9 +468,7 @@ Page({
     }
 
     if (stockTemp.length > 0) {
-      for (var i = 0; i < stockTemp.length; i++) {
-        console.log(stockTemp[i])
-        if (i == 0) {
+      for (var i = 0; i < stockTemp.length; i++) {if (i == 0) {
           stockTemp[i].isSelected = true;
         } else {
           stockTemp[i].isSelected = false;
@@ -530,9 +520,7 @@ Page({
   },
 
 
-  getComGoodsContent(e) {
-    console.log(e.currentTarget.dataset.type)
-    if (e.currentTarget.dataset.type == 0 && e.detail.value.length > 0) {
+  getComGoodsContent(e) {if (e.currentTarget.dataset.type == 0 && e.detail.value.length > 0) {
       var name = "goods.gbDgGoodsName";
       this.setData({
         [name]: e.detail.value
@@ -591,14 +579,9 @@ Page({
     }
     if (e.currentTarget.dataset.type == 6) {
       var sellingPrice = "goods.gbDgSellingPrice";
-      if (e.detail.value.length > 0) {
-        console.log(this.data.goods);
-        this.setData({
+      if (e.detail.value.length > 0) {this.setData({
           [sellingPrice]: e.detail.value
-        })
-        console.log(this.data.goods);
-
-      } else {
+        })} else {
         this.setData({
           [sellingPrice]: ""
         })
@@ -644,11 +627,7 @@ Page({
 
   },
 
-  radioChange(e) {
-    console.log(e);
-    var type = e.detail.value;
-    console.log(type);
-    var typeData = "goods.gbDgGoodsType";
+  radioChange(e) {var type = e.detail.value;var typeData = "goods.gbDgGoodsType";
     this.setData({
       [typeData]: type
     })
@@ -760,8 +739,7 @@ Page({
       goods.gbDgNxDistributerId = this.data.nxDisId;
       goods.gbDgNxDistributerGoodsId = this.data.nxGoodsId;
       goods.gbDgGbSupplierId = this.data.supplierId;
-      load.showLoading("保存商品")
-      console.log(goods)
+      load.showLoading("保存商品");
       goodsApi.disUpdateDisGoodsGb(goods).then(res => {
         load.hideLoading();
         if (res.result.code == 0) {
@@ -794,22 +772,15 @@ Page({
   },
 
 
-  _ifCanSave() {
-    console.log("ifCanseve")
-    var goodsName = this.data.goods.gbDgGoodsName;
+  _ifCanSave() {var goodsName = this.data.goods.gbDgGoodsName;
     var standard = this.data.goods.gbDgGoodsStandardname;
     var type = this.data.goods.gbDgGoodsType;
     if (goodsName.length > 0 && standard.length > 0) {
-      if (type == 21) {
-        console.log("221212111211212112", this.data.goods.gbDgGbSupplierId)
-        if (this.data.goods.gbDgGbSupplierId == -1 || this.data.goods.gbDgGbSupplierId == null) {
+      if (type == 21) {if (this.data.goods.gbDgGbSupplierId == -1 || this.data.goods.gbDgGbSupplierId == null) {
           this.setData({
             canSave: false
           })
-        }
-        console.log("221212111211212112", this.data.canSave)
-
-      } else if (type == 5) {
+        }} else if (type == 5) {
 
         if (this.data.goods.gbDgNxDistributerId == -1) {
           this.setData({

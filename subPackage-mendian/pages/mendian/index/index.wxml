@@ -1,61 +1,166 @@
-<!-- bb -->
-<view class="flex flex-column ">
+<!-- 门店管理 - 美化版 -->
+<view class="flex flex-column">
 
   <back-navbar style="height: {{navBarHeight}}rpx;" title="门店管理" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
-
-  <view class="flex-row-between p-20">
-      <text class="p-20 font-md" style="width: {{windowWidth - 200}}rpx;">部门列表</text>
-      <view class="mainBack_new_btn"  bindtap="addSub" data-id="{{dep.gbDepartmentId}}">+        
+  <!-- ========== 当前门店信息 ========== -->
+    <view class="flex-row-between p-20">
+      <view class="flex-row">
+        <text class="header-title">当前门店:</text>
+        <text class="store-name">{{depInfo.gbDepartmentName}}</text>
+      </view>
+      <view class="store-name-row" bindtap="showEditStoreName">
+        <image src="/images/edit.png" class="store-edit-icon" mode="aspectFit" />
+        <text class="store-edit-text">修改</text>
       </view>
     </view>
-   
-  
-        <view class="flex-column font-xl border-bottom mb-30 bg-white" wx:for="{{depArr}}" wx:for-item="sub" wx:key="gbDepartmentId">
-          <view class="flex-row-between p-20">
-            <view class="flex-row">
-              <view class="text-secondary mr-20">部门:</view>
-              <view>{{sub.gbDepartmentName}}</view>
-             
-            </view>
-            <view class="button-container-white" bind:tap="editDepartment" data-item="{{sub}}">
-              <image src="/images/edit-2.png" mode="aspectFill" class="icon" />
-            </view>
-          </view>
 
-          <view class="flex-column p-20">
-            <view class="flex-row-between">
-              <text class=" text-secondary" style="width: {{windowWidth - 200}}rpx;">部门下单用户:</text>
+  <!-- ========== 管理用户区域 ========== -->
+  <view class="section-card" wx:if="{{depUsers.length > 0}}">
+    <view class="card-header">
+      <view class="header-left">
+        <!-- <image src="/images/user-group.png" class="header-icon" mode="aspectFit" /> -->
+        <text class="header-title">管理员</text>
+        <text class="badge-count1">负责采购订货</text>
+      </view>
+      <button class="action-btn invite-btn" open-type="share" data-share-type="admin">
+        <text class="btn-icon">+</text><text>邀请管理员</text>
+      </button>
+    </view>
 
-              <!-- <button class="big mainBack_new_btn " open-type="share" data-index="{{index}}" data-father-index="{{depIndex}}">
-                +
-              </button> -->
+    <!-- 用户列表 -->
+    <view class="user-list">
+      <view class="user-item" wx:for="{{depUsers}}" wx:for-item="user" wx:key="gbDepartmentUserId"
+            bindtap="openUserMenu" data-item="{{user}}">
+        <image src="{{url + user.gbDuWxAvartraUrl}}" mode="aspectFill" class="user-avatar" lazy-load />
+        <view class="user-info">
+          <text class="user-name">{{user.gbDuWxNickName}}</text>
+        </view>
+        <image src="/images/points.png" class="icon" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
 
+  <!-- ========== 子部门列表 ========== -->
+  <view class="section-card">
+    <view class="card-header">
+      <view class="header-left">
+        <image src="/images/home-2.png" class="header-icon" mode="aspectFit" />
+        <text class="header-title">门店部门</text>
+        <!-- <text class="badge-count">{{subDepartments.length}}</text> -->
+      </view>
+      <view class="action-btn add-btn" bindtap="addSub" data-id="{{depId}}">
+        <text class="btn-icon">+</text><text>添加部门</text>
+      </view>
+    </view>
 
-            </view>
+    <!-- 下单用户邀请区域（门店级别） -->
+    <view class="invite-order-section" wx:if="{{subDepartments.length > 0}}">
+      <view class="sub-users-header">
+        <text class="sub-users-label">下单用户</text>
+        <button class="mini-share-btn" open-type="share" data-share-type="orderUser">
+          <text class="btn-icon">+</text> 邀请下单员
+        </button>
+      </view>
+    </view>
 
-            <view class="flex-row-wrap mb-20 mt-20">
-              <view class="flex-column-center p-10 mr-30 " wx:for="{{sub.gbDepartmentUserEntities}}" wx:for-item="subUser" wx:key="gbDepartmentUserId">
-                <image src="{{url + subUser.gbDuWxAvartraUrl}}" mode="aspectFill" class="itemPic mr-20" />
-                <text class="font-sl">{{subUser.gbDuWxNickName}}</text>
+    <!-- 子部门卡片 -->
+    <view class="sub-dep-item" wx:for="{{subDepartments}}" wx:for-item="sub" wx:key="gbDepartmentId">
+      <!-- 部门标题行 -->
+      <view class="sub-dep-header">
+        <view class="sub-dep-tag flex-column-center">
+          <image src="/images/home-2.png" class="header-icon" mode="aspectFit" />
+        </view>
+        <text class="sub-dep-name">{{sub.gbDepartmentName}}</text>
+        <view class="edit-dot1" catch:tap="editDepartment" data-item="{{sub}}">
+        <image src="/images/edit.png" mode="aspectFill" class="icon" />
+        </view>
+      </view>
 
-              </view>
-            </view>
-            
+      <!-- 部门用户 -->
+      <view class="sub-dep-body">
+        <view class="sub-user-list" wx:if="{{sub.gbDepartmentUserEntities.length > 0}}">
+          <view class="sub-user-item" wx:for="{{sub.gbDepartmentUserEntities}}" wx:for-item="subUser" wx:key="gbDepartmentUserId">
+            <image src="{{url + subUser.gbDuWxAvartraUrl}}" mode="aspectFill" class="sub-user-avatar" lazy-load />
+            <text class="sub-user-name">{{subUser.gbDuWxNickName}}</text>
           </view>
         </view>
+        <view class="empty-tip" wx:else>
+          暂无用户
+        </view>
+      </view>
+    </view>
 
-</view>
-
-<!-- <view class="flex-row" style="position: absolute; bottom: 20rpx; background-color: rgb(228, 228, 228); width: {{windowWidth - 40}}rpx; padding: 20rpx 20rpx;">
-
-
-  <view class="center-content flex-column">
-    <button class=" apply_btn_green" open-type="share" data-type="pur">
-      邀请采购员注册
-    </button>
+    <!-- 空状态（无子部门时也显示邀请下单员入口） -->
+    <view class="empty-section" wx:if="{{subDepartments.length == 0}}">
+      <image src="/images/empty-box.png" class="empty-img" mode="aspectFit" />
+      <text class="empty-text">暂无子部门</text>
+      <text class="empty-hint">点击上方「添加部门」创建</text>
+    </view>
   </view>
 
 
+  <!-- 底部安全距离 -->
+  <view style="height: 60rpx;"></view>
 
-</view> -->
+</view>
+
+
+
+<!-- ========== 用户操作菜单蒙版 ========== -->
+
+<!-- 修改门店名称弹窗 -->
+<view class="overlay {{showEditNameModal ? 'show' : ''}}" catchtouchmove="true" catchtap="hideEditNameModal">
+  <view class="edit-name-modal" catchtap="preventBubble">
+    <text class="edit-name-title">修改门店名称</text>
+    <input class="edit-name-input" value="{{editStoreName}}" bindinput="onStoreNameInput" placeholder="请输入门店名称" maxlength="20" focus="{{showEditNameModal}}" />
+    <view class="edit-name-btns">
+      <view class="edit-name-btn cancel-btn" catchtap="hideEditNameModal">取消</view>
+      <view class="edit-name-btn confirm-btn" catchtap="saveStoreName">保存</view>
+    </view>
+  </view>
+</view>
+
+<view class='overlay {{showUserMenu ? "show" : ""}}' catchtouchmove='ture' catchtap="hideUserMenu">
+  <view class="flex-column nnn bg-white user-menu-panel">
+    <view class="menu-panel-header">
+      <text class="menu-panel-title">操作</text>
+      <view class="menu-close-line"></view>
+    </view>
+
+    <view class="user-menu-item" catch:tap="toPurUserDetail">
+      <view class="menu-item-icon-wrap menu-icon-blue">
+        <image src="/images/user-group.png" class="header-icon" mode="aspectFit" />
+      </view>
+      <view class="menu-item-text">
+        <text class="menu-item-title">采购明细</text>
+        <!-- <text class="menu-item-desc">查看每日采购明细</text> -->
+      </view>
+      <image src="/images/arrow-right-gray.png" class="arrow-sm" mode="aspectFit" />
+    </view>
+
+    <view class="user-menu-item" catch:tap="toPurUserFenxi">
+      <view class="menu-item-icon-wrap menu-icon-green">
+        <image src="/images/user-group.png" class="header-icon" mode="aspectFit" />
+      </view>
+      <view class="menu-item-text">
+        <text class="menu-item-title">采购分析</text>
+        <!-- <text class="menu-item-desc">查看采购数据统计</text> -->
+      </view>
+      <image src="/images/arrow-right-gray.png" class="arrow-sm" mode="aspectFit" />
+    </view>
+
+    <view class="user-menu-item" catch:tap="editUser">
+      <view class="menu-item-icon-wrap menu-icon-orange">
+        <image src="/images/user-group.png" class="header-icon" mode="aspectFit" />
+      </view>
+      <view class="menu-item-text">
+        <text class="menu-item-title">修改用户信息</text>
+        <!-- <text class="menu-item-desc">编辑昵称、头像等</text> -->
+      </view>
+      <image src="/images/arrow-right-gray.png" class="arrow-sm" mode="aspectFit" />
+    </view>
+
+    <view style="height: 40rpx;"></view>
+  </view>
+</view>

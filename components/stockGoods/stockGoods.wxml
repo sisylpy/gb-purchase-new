@@ -1,210 +1,281 @@
 <wxs src="../../utils/fn.wxs" module="tool" />
 
+<view
+  class="sg-mask {{keyboardOffset > 0 ? 'sg-mask--keyboard' : ''}}"
+  wx:if="{{show}}"
+  catchtouchmove="true"
+  style="padding-bottom: {{keyboardOffset}}px;"
+>
+  <view class="sg-panel" catchtap="stopTap">
+    <view class="sg-head">
+      <text class="sg-head__title">处理库存批次</text>
+      <view class="sg-head__close" bindtap="cancle" hover-class="sg-head__close--hover">×</view>
+    </view>
 
-<view class='ccc' wx:if='{{show}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
-  <view class='body bg-white flex-column' style=" margin-top:{{scrollViewTop + windowHeight/3}}rpx; z-index: 9999999999; ">
-
-    <view class="flex-column">
-      <view class="flex-row-between" style="background-color: #187e6e; color: #fff;">
-        <view class='flex-row goodsTitle'>
-          <text class="margin-l-right p-20">{{depGoods.gbDdgDepGoodsName}}</text>
-          <block wx:if="{{depGoods.gbDgGoodsStandardWeight !== 'null' && depGoods.gbDgGoodsStandardWeight.length > 0}}">
-            <text wx:if="{{depGoods.gbDdgShowStandardName !== '斤'}}">({{depGoods.gbDdgShowStandardName}}/{{depGoods.gbDgGoodsStandardWeight}})</text>
-          </block>
-          <block wx:else>
-            <text>({{depGoods.gbDdgShowStandardName}})</text>
-          </block>
+    <scroll-view scroll-y class="sg-body" enhanced show-scrollbar="{{false}}">
+      <!-- 商品信息 -->
+      <view class="sg-product">
+        <image
+          class="sg-product__img"
+          src="{{goodsImg ? (goodsImg.indexOf('http') === 0 ? goodsImg : goodsImg) : '/images/logo.jpg'}}"
+          mode="aspectFill"
+        />
+        <view class="sg-product__info">
+          <text class="sg-product__name">{{depGoods.gbDdgDepGoodsName}}</text>
+          <text class="sg-product__meta">采购包装：{{stockPackLabel}}</text>
+          <text class="sg-product__meta sg-product__meta--stock">当前库存：{{stockRestLabel}}</text>
         </view>
       </view>
-    </view>
 
-    <view class="flex-row p-10" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
-      <view class="flex-row half-row">
-        <text class="margin-l-right">入库:</text>
-        <text class="">{{tool.getAttrFullTime(item.gbDgsFullTime)}} </text>
-      </view>
-      <view class="flex-row half-row">
-        <text class="margin-l-right">数量:</text>
-        <text class="">{{consultItem.gbDgsWeight}}{{depGoods.gbDdgShowStandardName}}</text>
-      </view>
-    </view>
-
-    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx;">
-      <view class="flex-row half-row">
-        <text class="margin-l-right">销售:</text>
-        <text class="">{{item.gbDgsProduceWeight}}{{depGoods.gbDdgShowStandardName}}</text>
-      </view>
-      <view class="flex-row half-row">
-        <text class="margin-l-right">损耗:</text>
-        <text class="lossBack">{{item.gbDgsLossWeight}}{{depGoods.gbDdgShowStandardName}}</text>
-      </view>
-    </view>
-
-    <view class="flex-row" style="background-color: #187e6e; color: #fff; padding-left: 20rpx; {{item.gbDistributerGoodsEntity.gbDgControlFresh == 0 ? 'padding-bottom: 20rpx;' :''}}">
-
-      <view class="flex-row half-row">
-        <text class="margin-l-right">退货:</text>
-        <text class="">{{item.gbDgsReturnWeight}}{{depGoods.gbDdgShowStandardName}}</text>
-      </view>
-      <view class="flex-row half-row">
-        <text class="margin-l-right">剩余:</text>
-        <text class="">{{item.gbDgsRestWeight}}{{depGoods.gbDdgShowStandardName}}</text>
+      <view class="sg-batch-bar">
+        <text class="sg-batch-bar__item">批次：{{stockBatchIndex + 1}}</text>
+        <text class="sg-batch-bar__item">入库：{{tool.getAttrFullTime(consultItem.gbDgsFullTime)}}</text>
+        <text class="sg-batch-bar__item" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}">供应商：{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
       </view>
 
-    </view>
-
-    <view class="flex-row" wx:if="{{item.gbDgControlFresh == 1}}" style="background-color: #187e6e; color: #fff;padding-left: 20rpx; padding-bottom: 20rpx;">
-      <view class="flex-row half-row">
-        <text class="margin-l-right">保鲜时长:</text>
-        <text class="">{{consultItem.gbDgFreshWasteHour}}小时</text>
-      </view>
-
-      <view class="flex-row half-row">
-        <text class="margin-l-right">废弃:</text>
-        <text class="">{{tool.getAttrFullTime(consultItem.gbDgsWasteFullTime)}} </text>
-      </view>
-    </view>
-
-    <view class='flex-column '>
-      <radio-group class="radio-group flex-row-between " bindchange="radioChange">
-        <!-- <label class="radio">
-          <radio value="5" checked="{{showType == 5}}" />新鲜度
-        </label> -->
-        <label class="radio" wx:if="{{item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== ''}}">
-          <radio value="4" checked="{{showType == 4}}" />废弃
-        </label>
-
-        <label class="radio">
-          <radio value="2" checked="{{showType == 2}}" />损耗
-        </label>
-        <label class="radio">
-          <radio value="3" checked="{{showType == 3}}" />退货
-        </label>
-        <label class="radio">
-          <radio value="1" checked="{{showType == 1}}" />库存
-        </label>
-
-      </radio-group>
-      <!--  -->
-      <view class="flex-column p-20">
-        <view class="flex-column" wx:if="{{showType == 1}}">
-          <view class="flex-row  p-20 ">
-            <text class="margin-l-right">库存数量:</text>
-            <view class="out margin-l-right">
-              <input class="mainColor orderInput" type="digit" value="{{resWeight}}" bindinput="getProduceWeight" bindfocus="costFocus" />
-            </view>
-            <text>{{depGoods.gbDdgShowStandardName}}</text>
-          </view>
-          <view class="flex-row p-20">
-            <text class="margin-l-right">销售数量:</text>
-            <text class="mainColor">{{item.gbDgsMyProduceWeight}}{{depGoods.gbDdgShowStandardName}}</text>
-          </view>
+      <!-- 处理方式 -->
+      <view class="sg-tabs">
+        <view
+          class="sg-tab {{showType == '1' ? 'sg-tab--active' : ''}}"
+          data-type="1"
+          bindtap="onTabSelect"
+        >
+          <text>正常使用</text>
+          <text class="sg-tab__check" wx:if="{{showType == '1'}}">✓</text>
         </view>
+        <view
+          class="sg-tab {{showType == '2' ? 'sg-tab--active' : ''}}"
+          data-type="2"
+          bindtap="onTabSelect"
+        >
+          <text>损耗</text>
+          <text class="sg-tab__check" wx:if="{{showType == '2'}}">✓</text>
+        </view>
+        <view
+          class="sg-tab {{showType == '3' ? 'sg-tab--active' : ''}}"
+          data-type="3"
+          bindtap="onTabSelect"
+        >
+          <text>退货</text>
+          <text class="sg-tab__check" wx:if="{{showType == '3'}}">✓</text>
+        </view>
+        <view
+          class="sg-tab {{showType == '6' ? 'sg-tab--active' : ''}}"
+          data-type="6"
+          bindtap="onTabSelect"
+        >
+          <text>员工餐</text>
+          <text class="sg-tab__check" wx:if="{{showType == '6'}}">✓</text>
+        </view>
+        <view
+          class="sg-tab {{showType == '4' ? 'sg-tab--active' : ''}}"
+          wx:if="{{item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== ''}}"
+          data-type="4"
+          bindtap="onTabSelect"
+        >
+          <text>废弃</text>
+          <text class="sg-tab__check" wx:if="{{showType == '4'}}">✓</text>
+        </view>
+      </view>
 
-        <view class="flex-column" wx:if="{{showType == 2}}">
-          <view class="flex-column  p-20 ">
-            <view class="flex-row p-20">
-              <text class="margin-l-right">损耗数量:</text>
-              <view class="out">
-                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyLossWeight == '-1' ? '' :item.gbDgsMyLossWeight }}" bindinput="getLossWeight" />
-              </view>
-              <text>{{depGoods.gbDdgShowStandardName}}</text>
+      <!-- 正常使用：盘点后剩余量 -->
+      <block wx:if="{{showType == '1'}}">
+        <view class="sg-section-head">
+          <text class="sg-section-head__title">盘点后剩余量</text>
+          <text class="sg-section-head__tag">只填剩余，不用自己算消耗</text>
+        </view>
+        <text class="sg-hint">请输入称重后的剩余数量，系统自动计算本次使用量</text>
+
+        <view class="sg-input-row">
+          <input
+            class="sg-input-row__input"
+            type="digit"
+            value="{{inputAmountMin}}"
+            bindinput="onAmountInput"
+            bindfocus="onInputFocus"
+            bindblur="onInputBlur"
+            placeholder="请输入剩余量"
+            placeholder-style="color:#bbb;font-size:28rpx;"
+            hold-keyboard="{{true}}"
+            adjust-position="{{false}}"
+            cursor-spacing="120"
+          />
+          <picker
+            wx:if="{{canPickUnit}}"
+            mode="selector"
+            range="{{minUnitOptions}}"
+            value="{{stockMinUnitIndex}}"
+            bindchange="onMinUnitChange"
+          >
+            <view class="sg-input-row__unit sg-input-row__unit--pick">
+              <text>{{stockMinUnit}}</text>
+              <text class="sg-input-row__arrow">▾</text>
             </view>
-
-            <view class="flex-row p-20" style="height: 90rpx;">
-              <text class="margin-l-right">照片:</text>
-              <view class="flex-column" style="margin-left: 10rpx;">
-
-                <image class='class_img' src="{{src.length > 0 ? src: '../../images/Photo.png' }}" bindtap='choiceImg'></image>
-                <view wx:if="{{src.length > 0}}" bindtap="delPic" style="margin-left: 100rpx;margin-top: -90rpx;">
-                  <image src="../../images/del.png" mode="aspectFill" class="icon" />
-                </view>
-              </view>
-            </view>
-
-            <view class="flex-row  p-20">
-              <text class="margin-l-right">说明:</text>
-              <view class="out">
-                <input class="mainColor orderInput" value="{{reason}}" bindinput="getLossReason" />
-              </view>
-            </view>
+          </picker>
+          <view class="sg-input-row__unit" wx:else>
+            <text>{{packUnit}}</text>
           </view>
         </view>
+        <text class="sg-equiv" wx:if="{{equivPackText}}">{{equivPackText}}</text>
 
-        <view class="flex-column" wx:if="{{showType == 3}}">
-
-          <view class="flex-column p-20">
-            <view class="flex-row" wx:if="{{item.returnReduceEntity !== null}}">
-              <text>{{item.returnReduceEntity.gbDgsrWeight}}</text>
-
-            </view>
-            <view class="flex-row" wx:else>
-              <text class="margin-l-right">数量:</text>
-              <view class="out margin-l-right">
-                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyReturnWeight == '-1' ? '' :item.gbDgsMyReturnWeight }}" bindinput="getReturnWeight" />
-              </view>
-              <text>{{depGoods.gbDdgShowStandardName}}</text>
-
-            </view>
-
+        <view class="sg-compare" wx:if="{{inputAmountMin && useMinUnit}}">
+          <view class="sg-compare__cell">
+            <text class="sg-compare__label">盘点前</text>
+            <text class="sg-compare__val">{{restMin}}{{stockMinUnit}}</text>
           </view>
-
-          <view class="flex-row p-20" style="height: 90rpx;">
-              <text class="margin-l-right">照片:</text>
-              <view class="flex-column" style="margin-left: 10rpx;">
-
-                <image class='class_img' src="{{src.length > 0 ? src: '../../images/Photo.png' }}" bindtap='choiceImg'></image>
-                <view wx:if="{{src.length > 0}}" bindtap="delPic" style="margin-left: 100rpx;margin-top: -90rpx;">
-                  <image src="../../images/del.png" mode="aspectFill" class="icon" />
-                </view>
-              </view>
-            </view>
-
-            <view class="flex-row  p-20">
-              <text class="margin-l-right">说明:</text>
-              <view class="out">
-                <input class="mainColor orderInput" value="{{reason}}" bindinput="getLossReason" />
-              </view>
-            </view>
+          <text class="sg-compare__arrow">→</text>
+          <view class="sg-compare__cell sg-compare__cell--after">
+            <text class="sg-compare__label">盘点后</text>
+            <text class="sg-compare__val">{{inputAmountMin}}{{stockMinUnit}}</text>
+          </view>
         </view>
 
-        <view class="flex-column" wx:if="{{showType == 4}}">
-          <block wx:if="{{canWaste}}">
-
-            <view class="flex-row p-20">
-              <text class="margin-l-right">废弃数量:</text>
-              <view class="out">
-                <input class="mainColor orderInput" type="digit" value="{{item.gbDgsMyWasteWeight == '-1' ? '' :item.gbDgsMyWasteWeight }}" bindinput="getWasteWeight" bindfocus="costFocusWaste" />
-              </view>
-              <text>{{depGoods.gbDdgShowStandardName}}</text>
-            </view>
-
-            <view class="flex-row p-20">
-              <text class="margin-l-right">销售数量:</text>
-              <view class="">
-                <text class="mainColor">{{item.gbDgsMyProduceWeight == '-1' ? '0' :item.gbDgsMyProduceWeight}}</text>
-              </view>
-              <text>{{depGoods.gbDdgShowStandardName}}</text>
-            </view>
-          </block>
-          <block wx:else>
-            <view>还有{{resultTime}}个小时</view>
-          </block>
+        <view class="sg-calc" wx:if="{{calcUseMin}}">
+          <view class="sg-calc__title">
+            <text>系统自动计算</text>
+            <text class="sg-calc__i">ⓘ</text>
+          </view>
+          <view class="sg-calc__row">
+            <text class="sg-calc__label">本次实际使用量</text>
+            <text class="sg-calc__val sg-calc__val--warn">{{calcUseMin}}</text>
+          </view>
+          <view class="sg-calc__row">
+            <text class="sg-calc__label">扣减后库存</text>
+            <text class="sg-calc__val sg-calc__val--ok">{{calcRestPack}} {{calcRestMin}}</text>
+          </view>
         </view>
-      </view>
 
+        <view class="sg-tip-banner">
+          <text class="sg-tip-banner__icon">💡</text>
+          <text>只填写称重后的剩余量，系统自动计算使用量和扣减后库存</text>
+        </view>
+      </block>
+
+      <!-- 损耗 / 退货 / 员工餐 / 废弃：直接录入本次数量 -->
+      <block wx:if="{{showType == '2' || showType == '3' || showType == '6' || (showType == '4' && canWaste)}}">
+        <view class="sg-section-head">
+          <text class="sg-section-head__title">
+            {{showType == '2' ? '本次损耗量' : (showType == '3' ? '本次退货量' : (showType == '6' ? '本次员工餐用量' : '本次废弃量'))}}
+          </text>
+        </view>
+        <text class="sg-hint">请输入本次{{showType == '2' ? '损耗' : (showType == '3' ? '退货' : (showType == '6' ? '员工餐' : '废弃'))}}的实际数量，系统将自动扣减库存</text>
+
+        <view class="sg-input-row">
+          <input
+            class="sg-input-row__input"
+            type="digit"
+            value="{{inputAmountMin}}"
+            bindinput="onAmountInput"
+            bindfocus="onInputFocus"
+            bindblur="onInputBlur"
+            placeholder="请输入数量"
+            placeholder-style="color:#bbb;font-size:28rpx;"
+            hold-keyboard="{{true}}"
+            adjust-position="{{false}}"
+            cursor-spacing="120"
+          />
+          <picker
+            wx:if="{{canPickUnit}}"
+            mode="selector"
+            range="{{minUnitOptions}}"
+            value="{{stockMinUnitIndex}}"
+            bindchange="onMinUnitChange"
+          >
+            <view class="sg-input-row__unit sg-input-row__unit--pick">
+              <text>{{stockMinUnit}}</text>
+              <text class="sg-input-row__arrow">▾</text>
+            </view>
+          </picker>
+          <view class="sg-input-row__unit" wx:else>
+            <text>{{packUnit}}</text>
+          </view>
+        </view>
+        <text class="sg-equiv" wx:if="{{equivPackText}}">💡 {{equivPackText}}</text>
+
+        <view class="sg-calc" wx:if="{{calcRestPack}}">
+          <view class="sg-calc__row">
+            <text class="sg-calc__label">扣减后库存（系统自动计算）</text>
+            <text class="sg-calc__val sg-calc__val--ok">{{calcRestPack}} {{calcRestMin}}</text>
+          </view>
+        </view>
+
+        <!-- 损耗：原因+说明（其他时） / 照片 -->
+        <block wx:if="{{showType == '2'}}">
+          <view class="sg-reason-block">
+            <view class="sg-reason-title">损耗原因</view>
+            <view class="sg-reason-tags">
+              <view
+                wx:for="{{lossReasons}}"
+                wx:key="*this"
+                class="sg-reason-tag {{lossReasonIndex == index ? 'sg-reason-tag--active' : ''}}"
+                data-index="{{index}}"
+                bindtap="onLossReasonTap"
+              >{{item}}</view>
+            </view>
+            <view class="sg-note-row" wx:if="{{lossReasonIndex == 3}}">
+              <text class="sg-note-row__label">说明</text>
+              <input
+                class="sg-note-row__input"
+                value="{{reason}}"
+                bindinput="getLossReason"
+                placeholder="请填写说明"
+              />
+            </view>
+          </view>
+          <view class="sg-photo-row">
+            <text class="sg-photo-row__label">照片</text>
+            <view class="sg-photo-row__box">
+              <image
+                class="sg-photo-row__img"
+                src="{{src.length > 0 ? src : '../../images/Photo.png'}}"
+                bindtap="choiceImg"
+                mode="aspectFill"
+              />
+              <view wx:if="{{src.length > 0}}" class="sg-photo-row__del" bindtap="delPic">
+                <image src="../../images/del.png" mode="aspectFill" class="sg-photo-row__del-icon" />
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <!-- 退货：照片 + 说明 -->
+        <block wx:if="{{showType == '3' && !item.returnReduceEntity}}">
+          <view class="sg-photo-row">
+            <text class="sg-photo-row__label">照片</text>
+            <view class="sg-photo-row__box">
+              <image
+                class="sg-photo-row__img"
+                src="{{src.length > 0 ? src : '../../images/Photo.png'}}"
+                bindtap="choiceImg"
+                mode="aspectFill"
+              />
+              <view wx:if="{{src.length > 0}}" class="sg-photo-row__del" bindtap="delPic">
+                <image src="../../images/del.png" mode="aspectFill" class="sg-photo-row__del-icon" />
+              </view>
+            </view>
+          </view>
+          <view class="sg-note-row">
+            <text class="sg-note-row__label">说明</text>
+            <input class="sg-note-row__input" value="{{reason}}" bindinput="getLossReason" placeholder="选填" />
+          </view>
+        </block>
+        <view wx:if="{{showType == '3' && item.returnReduceEntity !== null}}" class="sg-hint">
+          已存在退货记录：{{item.returnReduceEntity.gbDgsrWeight}}
+        </view>
+      </block>
+
+      <block wx:if="{{showType == '4' && !canWaste}}">
+        <view class="sg-waste-wait">未到废弃时间，还需等待约 {{resultTime}} 小时</view>
+      </block>
+    </scroll-view>
+
+    <view class="sg-footer">
+      <view class="sg-footer__btn sg-footer__btn--cancel" bindtap="cancle" hover-class="sg-footer__btn--hover">取消</view>
+      <view
+        class="sg-footer__btn sg-footer__btn--confirm {{canSure ? '' : 'sg-footer__btn--disabled'}}"
+        catchtap="confirm"
+        hover-class="sg-footer__btn--hover"
+      >确认保存</view>
     </view>
-
-    <view class="flex-row  p-20 margin-top">
-      <view class='btn'>
-        <text class="cancleBtn" bindtap="cancle" hover-class="hover">取消</text>
-      </view>
-      <view class='btn'>
-        <text class="sureBtn {{canSure ? 'is-active' : ''}}" catchtap='confirm' hover-class="hover">确定</text>
-      </view>
-
-    </view>
-
   </view>
-
 </view>

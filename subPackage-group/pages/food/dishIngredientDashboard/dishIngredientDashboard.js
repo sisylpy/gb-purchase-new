@@ -1,6 +1,6 @@
 const globalData = getApp().globalData;
 import apiUrl from '../../../../config/index.js';
-import { dishIngredientDashboard as fetchDishIngredientDashboard } from '../../../services/apiDistributerFood';
+import { dishIngredientDashboard as fetchDishIngredientDashboard } from '../../../../services/apiDistributerFood';
 var load = require('../../../../lib/load.js');
 
 var _pageEcharts = null;
@@ -67,21 +67,21 @@ function utilLabelFromLevel(level) {
   return '';
 }
 
-/** 当前行制作率所属档位（优先接口 utilization，否则按 utilizationRate 推算） */
+/** 当前行偏差率所属档位（优先接口 deviance，否则按 devianceRate 推算） */
 function utilCurrentBandForRow(item) {
   if (!item) {
     return { label: '', hasData: false };
   }
-  if (item.utilization) {
-    if (item.utilization.labelZh) {
-      return { label: String(item.utilization.labelZh), hasData: true };
+  if (item.deviance) {
+    if (item.deviance.labelZh) {
+      return { label: String(item.deviance.labelZh), hasData: true };
     }
-    var fromLevel = utilLabelFromLevel(item.utilization.level);
+    var fromLevel = utilLabelFromLevel(item.deviance.level);
     if (fromLevel) {
       return { label: fromLevel, hasData: true };
     }
   }
-  var lv = utilLevelFromRateStr(item.utilizationRate);
+  var lv = utilLevelFromRateStr(item.devianceRate);
   var lab = utilLabelFromLevel(lv);
   if (lab) {
     return { label: lab, hasData: true };
@@ -95,7 +95,7 @@ function utilCurrentBandForRow(item) {
  */
 function usageTipFourLevelsLines() {
   return [
-    '分档标准（看「制作率」百分数落在哪一段）：',
+    '分档标准（看「偏差率」百分数落在哪一段）：',
     '偏低：不到 90%',
     '正常：90% 到 110%（含 90、也含 110）',
     '偏高：比 110% 高，一直到 120%（含 120%）',
@@ -113,7 +113,6 @@ function enrichIngredientRowsWithCostShare(rows) {
   for (var i = 0; i < list.length; i++) {
     sum += num(list[i] && list[i].actualCostPerPortion);
   }
-  console.log('[dishIngredientDashboard][costShare] 分母 sum = Σ actualCostPerPortion =', sum, '行数:', list.length);
   if (sum === 0 && list.length) {
     console.warn(
       '[dishIngredientDashboard][costShare] sum 为 0：请核对接口每行是否带 actualCostPerPortion。首行:',
@@ -129,14 +128,6 @@ function enrichIngredientRowsWithCostShare(rows) {
       r.costShareBarPct = pct.toFixed(2);
     } else {
       r.costShareBarPct = '0.00';
-    }
-    if (j < 6) {
-      console.log('[dishIngredientDashboard][costShare] 行', j, r.gbDgGoodsName, {
-        actualCostPerPortion: r.actualCostPerPortion,
-        parsed: a,
-        'pct(%)': r.costShareBarPct,
-        公式: sum > 0 ? a + ' / ' + sum + ' * 100' : 'sum=0',
-      });
     }
   }
   return list;
@@ -298,7 +289,7 @@ Page({
   /** 表头：用量偏差列说明 */
   onTapUsageDeviationColumnHelp: function () {
     var lines = [
-      '这一列里，「制作率」百分数落在下面哪一段，就是哪一档。',
+      '这一列里，「偏差率」百分数落在下面哪一段，就是哪一档。',
       '和配方差太多时会标「异常」。',
       '',
     ].concat(usageTipFourLevelsLines());
@@ -319,18 +310,18 @@ Page({
     }
     var band = utilCurrentBandForRow(item);
     var rateStr =
-      item.utilizationRate != null && String(item.utilizationRate).trim() !== ''
-        ? String(item.utilizationRate).trim()
+      item.devianceRate != null && String(item.devianceRate).trim() !== ''
+        ? String(item.devianceRate).trim()
         : '';
 
     var lines = [];
     if (band.hasData && band.label) {
       lines.push('【当前这一档】' + band.label);
     } else {
-      lines.push('【当前这一档】暂无（没有制作率百分数可对）');
+      lines.push('【当前这一档】暂无（没有偏差率百分数可对）');
     }
     if (rateStr !== '') {
-      lines.push('本行制作率：' + rateStr + '%');
+      lines.push('本行偏差率：' + rateStr + '%');
     }
     lines.push('');
     lines = lines.concat(usageTipFourLevelsLines());
@@ -351,7 +342,6 @@ Page({
       .then(function (res) {
         load.hideLoading();
         // 调试：查看接口原样（真机/开发者工具 Console，调完可删）
-        console.log('[dishIngredientDashboard] fetch 原始 res', res);
         var r = res && res.result;
         if (!r || (r.code !== 0 && r.code !== '0')) {
           console.warn('[dishIngredientDashboard] 非成功 r', r);
@@ -362,7 +352,6 @@ Page({
           return;
         }
         var d = r.data || {};
-        console.log('[dishIngredientDashboard] 业务体 r.data', d);
         var raw = d.ingredientRows || [];
         enrichIngredientRowsWithCostShare(raw);
         var costStruct = d.costStructure || null;
@@ -503,18 +492,12 @@ Page({
     var that = this;
     var segs = this.data.costStructure && this.data.costStructure.segments;
     var trend = this.data.costTrend;
-    console.log('[dishIngredientDashboard][charts] 准备初始化', {
-      segs: segs && segs.length,
-      trendPoints: trend && trend.points ? trend.points.length : 0,
-      hasTrend: !!trend,
-    });
 
     var runLineOnce = function (label) {
       if (that._lineChart) {
         return;
       }
       if (!trend || !trend.points || !trend.points.length) {
-        console.log('[dishIngredientDashboard][line] 跳过: 无 costTrend.points', label);
         return;
       }
       var lineComp = that.selectComponent('#dga_line');
@@ -527,11 +510,6 @@ Page({
         return;
       }
       var opt = that._lineOption(trend);
-      console.log('[dishIngredientDashboard][line] option', label, {
-        categories: opt && opt.xAxis && opt.xAxis.data,
-        data: opt && opt.series && opt.series[0] && opt.series[0].data,
-        y: opt && opt.yAxis,
-      });
       try {
         lineComp.init(function (canvas, width, height, dpr) {
           if (!width || !height) {
@@ -554,7 +532,6 @@ Page({
           } catch (rz) {
             console.warn('[dishIngredientDashboard][line] resize', rz);
           }
-          console.log('[dishIngredientDashboard][line] OK', label, { w: width, h: height });
           return ch;
         });
       } catch (err) {
@@ -608,7 +585,6 @@ Page({
 
 
   toDatePage() {
-    console.log("dddfd")
     this.setData({
       update: true
     })

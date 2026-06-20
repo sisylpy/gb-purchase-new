@@ -1,0 +1,80 @@
+<wxs src="../../../../utils/fn.wxs" module="tool" />
+
+
+<view class="flex flex-column ">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="京京送货" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="flex-column">
+
+
+    <block wx:if="{{accountBillArr.length > 0}}">
+      <view class="flex-row-default p-20 border-bottom ">
+        <image style="width: 220rpx; height: 140rpx; margin-right: 20rpx; border-radius: 5rpx;" src="{{url + nxDisInfo.nxDistributerImg}}"></image>
+
+        <view class="flex-row-between" style="width: {{windowWidth - 280}}rpx; ">
+          <view class="flex-column" style="width: {{windowWidth - 280}}rpx; ">
+            <text class="font-lg ">{{nxDisInfo.nxDistributerName}}</text>
+            <view class="flex-row-default small">
+              <text class="gray small">{{nxDisInfo.nxDistributerAddress}}</text>
+            </view>
+            <view>
+              <view class="flex-row mt-10 ">
+                <image src="/images/call-2.png" mode="aspectFill" class="icon mr-20" />
+                <text class="font-bold text-main" bind:tap="toPhone" data-phone="{{nxDisInfo.nxDistributerPhone}}">{{nxDisInfo.nxDistributerPhone}}</text>
+              </view>
+            </view>
+
+          </view>
+
+        </view>
+      </view>
+      <view class="flex-column" wx:for="{{accountBillArr}}" wx:for-item="month" wx:for-index="index" wx:key="month">
+        <view wx:if="{{month.arr.length > 0}}">
+          <view class="flex-column border-bottom p-20">
+            <text class="font-lg">{{month.month}}月</text>
+
+          </view>
+
+          <!-- -->
+          <view class="flex-row-between p-20 border-bottom bg-white" wx:for="{{month.arr}}" wx:for-item="item" style="width: {{windowWidth - 40}}rpx; " hover-class="hover" bindtap="openAccountBill" data-id="{{item.nxDbGbDepartmentBillId}}" data-item="{{item}}" data-dep="{{item.gbDepartmentEntity}}" wx:key="nxDepartmentBillId" data-depid="{{item.nxDbGbDepFatherId}}">
+            <view class="flex-column">
+              <view class="flex-row " wx:if="{{item.nxDbGbDepId !== item.nxDbGbDepFatherId}}">
+                <text>部门:</text>
+                <text>{{item.gbDepartmentEntity.gbDepartmentName}}</text>
+              </view>
+              <view class="flex-row">
+                <text class="mr-10">日期:</text>
+                <text class="mr-20">{{tool.getAttrDate(item.nxDbDate)}}</text>
+                <text>{{item.nxDbDay}}</text>
+              </view>
+              <view class="flex-row font-xs text-secondary">
+                <text>单号:</text>
+                <text>{{item.nxDbTradeNo}}</text>
+              </view>
+
+            </view>
+
+            <view class="flex-row with-mr-20">
+              <view class="flex-column">
+                <view class="flex-row">
+                  <text class="big ">{{item.nxDbTotal}}</text>
+                  <text class="small">元</text>
+                  <text class="text-warning" wx:if="{{item.nxDbTotal < 0}}">（退货）</text>
+                </view>
+                <text wx:if="{{item.nxDbStatus == 0}}" class=" font-xs text-danger">未结账</text>
+                <!-- <text wx:elif="{{item.nxDbStatus == 1}}" class="font-xs text-secondary">已结账</text> -->
+              </view>
+              <view>
+                <image src="../../../../images/arrow-right-3.png" class="icon-md plr-20"></image>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+  </view>
+
+
+</view>

@@ -186,31 +186,32 @@
     </view>
 
     <scroll-view scroll-y class="raw-add-modal__scroll" catchtouchmove="stopMove">
-      <!-- 搜索 -->
-      <view class="raw-add-modal__search">
-        <image class="raw-add-modal__search-icon" src="/images/search-3.png" mode="aspectFit" />
-        <input
-          class="raw-add-modal__search-input"
-          placeholder="搜索商品名称、简拼或全拼"
-          placeholder-style="color: #999; font-size: 28rpx;"
-          adjust-position="{{false}}"
-          hold-keyboard="{{true}}"
-          confirm-type="{{searchKeyword ? 'search' : 'done'}}"
-          confirm-hold="{{true}}"
-          bindinput="onSearchKeywordInput"
-          bindconfirm="onSearchConfirm"
-          value="{{searchKeyword}}"
-        />
-        <view
-          wx:if="{{searchKeyword}}"
-          class="raw-add-modal__search-clear"
-          bindtap="clearSearchKeyword"
-          hover-class="raw-add-modal__search-clear--hover"
-        >×</view>
-      </view>
+      <!-- 搜索（仅添加原料；编辑时不允许换商品） -->
+      <block wx:if="{{modalType != 'edit'}}">
+        <view class="raw-add-modal__search">
+          <image class="raw-add-modal__search-icon" src="/images/search-3.png" mode="aspectFit" />
+          <input
+            class="raw-add-modal__search-input"
+            placeholder="搜索商品名称、简拼或全拼"
+            placeholder-style="color: #999; font-size: 28rpx;"
+            adjust-position="{{false}}"
+            hold-keyboard="{{true}}"
+            confirm-type="{{searchKeyword ? 'search' : 'done'}}"
+            confirm-hold="{{true}}"
+            bindinput="onSearchKeywordInput"
+            bindconfirm="onSearchConfirm"
+            value="{{searchKeyword}}"
+          />
+          <view
+            wx:if="{{searchKeyword}}"
+            class="raw-add-modal__search-clear"
+            bindtap="clearSearchKeyword"
+            hover-class="raw-add-modal__search-clear--hover"
+          >×</view>
+        </view>
 
-      <!-- 搜索结果 -->
-      <view class="food-search-modal__scroll-wrap searchPart {{isSearching ? 'is-active' : ''}}" wx:if="{{isSearching}}">
+        <!-- 搜索结果 -->
+        <view class="food-search-modal__scroll-wrap searchPart {{isSearching ? 'is-active' : ''}}" wx:if="{{isSearching}}">
         <scroll-view
           scroll-y
           class="searchList is-active"
@@ -250,7 +251,8 @@
             >选择</view>
           </view>
         </scroll-view>
-      </view>
+        </view>
+      </block>
 
       <!-- 已选商品 + 用量配置 -->
       <block wx:if="{{modalGoods && !isSearching}}">
@@ -310,7 +312,8 @@
               </view>
             </picker>
           </view>
-          <text class="raw-add-modal__hint">支持使用：g / ml / 张 / 个等；按斤买、按个用时请填「1斤=几个」</text>
+          <text class="raw-add-modal__hint" wx:if="{{modalBulkWeightPack}}">大包装（如 {{modalPackLabel}}）默认按「斤」计用量；也可改选 g，系统按 1斤=500g 换算</text>
+          <text class="raw-add-modal__hint" wx:else>支持使用：g / ml / 张 / 个等；按斤买、按个用时请填「1斤=几个」</text>
           <view class="raw-add-modal__row raw-add-modal__row--conversion" wx:if="{{modalPackUnit && modalMinUnit !== modalPackUnit}}">
             <text class="raw-add-modal__label">换算关系<text class="raw-add-modal__required" wx:if="{{modalConversionRequired}}">*</text></text>
             <view class="raw-add-modal__conversion-col">
@@ -353,7 +356,7 @@
           <view class="raw-add-modal__summary-demo">{{modalDemoText}}</view>
           <view class="raw-add-modal__summary-tip">
             <text class="raw-add-modal__summary-tip-i">i</text>
-            <text>支持大包装按最小单位自动折算成本</text>
+            <text>{{modalBulkWeightPack ? '大包装按斤录入，成本按 1袋规格自动折算' : '支持大包装按最小单位自动折算成本'}}</text>
           </view>
         </view>
 

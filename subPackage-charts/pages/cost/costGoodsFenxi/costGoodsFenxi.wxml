@@ -26,21 +26,7 @@
         </view>
       </view>
     </view>
-
-    <picker
-      wx:if="{{subDepPickerRange.length > 1}}"
-      mode="selector"
-      range="{{subDepPickerRange}}"
-      range-key="gbDepartmentName"
-      value="{{activeSubDepIndex}}"
-      bindchange="onSubDepChange"
-    >
-      <view class="flex-row p-20">
-        <image src="/images/search-3.png" class="icon mr-20 cog-search-top-ico"></image>
-        <text class="small">{{activeSubDepName ? activeSubDepName : '子部门'}}</text>
-      </view>
-    </picker>
-
+   
     <view class="flex-row p-20" bindtap="onToggleSearchBar">
       <image src="/images/search-3.png" class="icon mr-20 cog-search-top-ico {{goodsNameSearch ? 'cog-search-top-ico--on' : ''}}"></image>
     </view>
@@ -72,75 +58,96 @@
     bindscrolltolower="onIngredientScrollToLower"
     lower-threshold="100"
   >
-    <view class="cog-sum-row" wx:if="{{summary}}">
+    <view class="cog-sum-row" wx:if="{{summary && !goodsNameSearch}}">
+      <!-- 出库总额 -->
       <view class="cog-sum-card cog-sum-card--blue">
         <view class="cog-sum-card-hd">
           <view class="cog-sum-icon">￥</view>
-          <text class="cog-sum-card-title">出库总金额</text>
+          <text class="cog-sum-card-title">出库总额</text>
         </view>
-        <text class="cog-sum-card-val">¥ {{summary.totalOutboundAmount}}</text>
-        <text class="cog-sum-card-foot cog-sum-card-foot--muted">本期所选日期范围</text>
+        <text class="cog-sum-card-val">¥{{summary.totalOutboundAmount || '0.00'}}</text>
+        <text class="cog-sum-card-foot">员工餐 ¥{{summary.employeeMealTotalAmount || '0.00'}}<text wx:if="{{summary.employeeMealTotalAmount}}" class="cog-sum-foot-info">ⓘ</text></text>
       </view>
-      <view class="cog-sum-card cog-sum-card--orange">
+
+      <!-- 核销总额 -->
+      <view class="cog-sum-card cog-sum-card--green">
         <view class="cog-sum-card-hd">
-          <view class="cog-sum-icon">%</view>
-          <text class="cog-sum-card-title">平均利用率</text>
+          <view class="cog-sum-icon cog-sum-icon--check">✓</view>
+          <text class="cog-sum-card-title">核销总额</text>
         </view>
-        <view class="cog-sum-val-row">
-          <text class="cog-sum-card-val">{{summary.averageUtilizationRate}}</text>
-          <text class="cog-sum-card-suf">%</text>
-          <view class="cog-sum-pill" wx:if="{{summary.averageUtilizationRate}}">
-            <text class="{{utilLv.textClassFromRate(summary.averageUtilizationRate)}}">{{utilLv.labelZhFromRate(summary.averageUtilizationRate)}}</text>
+        <text class="cog-sum-card-val">¥{{summary.verifiedTotalAmount || '0.00'}}</text>
+        <view class="cog-sum-sub-row">
+          <view class="cog-sum-sub-item">
+            <text class="cog-sum-sub-cap">制作毛利率</text>
+            <text class="cog-sum-sub-val">{{summary.verifiedGrossMarginRate != null ? summary.verifiedGrossMarginRate : '--'}}%</text>
+          </view>
+          <view class="cog-sum-sub-item">
+            <text class="cog-sum-sub-cap">较理论</text>
+            <text class="cog-sum-sub-val cog-sum-sub-dev">{{summary.verifiedTheoryDeviationAmount != null ? num.formatSigned(summary.verifiedTheoryDeviationAmount) : '--'}}</text>
           </view>
         </view>
-        <text class="cog-sum-card-foot cog-sum-card-foot--muted">按区间原料利用率汇总</text>
       </view>
 
-      <view class="cog-sum-card cog-sum-card--abnormal">
+      <!-- 非核销总额 -->
+      <view class="cog-sum-card cog-sum-card--red">
         <view class="cog-sum-card-hd">
-          <view class="cog-sum-icon cog-sum-icon--bell">!</view>
-          <text class="cog-sum-card-title">异常菜品</text>
+          <view class="cog-sum-icon cog-sum-icon--cross">✕</view>
+          <text class="cog-sum-card-title">非核销总额</text>
         </view>
-        <text class="cog-sum-card-val cog-sum-card-val--abnormal">{{summary.abnormalIngredientCount || 0}}<text class="cog-sum-card-ing-unit"> 道</text></text>
-        <view class="cog-sum-card-foot cog-abnormal-foot">
-          <text class="cog-abnormal-foot-muted">较上月</text>
-          <block wx:if="{{num.signKind(summary.abnormalIngredientMomDelta) == 'zero' || num.signKind(summary.abnormalIngredientMomDelta) == 'na'}}">
-            <text class="cog-abnormal-foot-flat"> 持平</text>
-          </block>
-          <block wx:else>
-            <text class="cog-abnormal-foot-delta {{num.momDeltaClassIng(summary.abnormalIngredientMomDelta)}}"> {{num.momArrowIng(summary.abnormalIngredientMomDelta)}} {{num.momAbsKinds(summary.abnormalIngredientMomDelta)}}</text>
-          </block>
-        </view>
-      </view>
-
-    </view>
-
-
-    <view class="cog-util-dist" wx:if="{{utilizationDistribution && utilizationDistribution.buckets && utilizationDistribution.buckets.length}}">
-      <view class="cog-util-dist-title">利用率分布（共{{utilizationDistribution.totalKindsWithUtilization}}种配料）</view>
-      <view class="cog-util-dist-body">
-        <view class="cog-util-dist-chart">
-          <ec-canvas id="utilDonut" canvas-id="utilDonut" ec="{{ ecUtil }}" class="cog-util-ec"></ec-canvas>
-        </view>
-        <view class="cog-util-dist-legend">
-          <view class="cog-util-legend-row" wx:for="{{utilizationDistribution.buckets}}" wx:key="index">
-            <view class="cog-util-legend-dot cog-util-legend-dot--{{item.level}}"></view>
-            <view class="cog-util-legend-mid">
-              <text class="cog-util-legend-name">{{item.labelZh}}</text>
-              <text class="cog-util-legend-range">{{item.rangeZh}}</text>
-            </view>
-            <view class="cog-util-legend-right">
-              <text class="cog-util-legend-count">{{item.count}} 种</text>
-              <text class="cog-util-legend-pct">{{item.percentOfKinds}}</text>
-            </view>
-          </view>
+        <text class="cog-sum-card-val">¥{{summary.nonVerifiedTotalAmount || '0.00'}}</text>
+        <view class="cog-sum-card-foot">
+          <text>不含员工餐</text>
+          <text wx:if="{{summary.nonVerifiedDishCount != null}}"> · 未核销菜品 {{summary.nonVerifiedDishCount}} 道</text>
         </view>
       </view>
     </view>
 
-    <view class="cog-empty" wx:if="{{!ingredientsAnalysis.length && !loading}}">{{emptyHint || '暂无原料分析数据'}}</view>
+    <!-- 出库去向分布 -->
+    <view class="cog-dist-block" wx:if="{{summary && !goodsNameSearch}}">
+      <view class="cog-dist-hd">
+        <text class="cog-dist-title">出库去向分布</text>
+      </view>
+      <view class="cog-dist-bar-wrap">
+        <view class="cog-dist-bar">
+          <view class="cog-dist-seg cog-dist-seg--verified" style="width: {{_distVerifiedPct}}%"></view>
+          <view class="cog-dist-seg cog-dist-seg--nonverified" style="width: {{_distNonVerifiedPct}}%"></view>
+          <view class="cog-dist-seg cog-dist-seg--meal" style="width: {{_distMealPct}}%"></view>
+        </view>
+      </view>
+      <view class="cog-dist-legend">
+        <view class="cog-dist-leg-row">
+          <text class="cog-dist-dot cog-dist-dot--verified"></text>
+          <text class="cog-dist-leg-lab">核销</text>
+          <text class="cog-dist-leg-val">¥{{summary.verifiedTotalAmount || '0.00'}}</text>
+          <text class="cog-dist-leg-pct">({{_distVerifiedTxt}})</text>
+        </view>
+        <view class="cog-dist-leg-row">
+          <text class="cog-dist-dot cog-dist-dot--nonverified"></text>
+          <text class="cog-dist-leg-lab">未核销</text>
+          <text class="cog-dist-leg-val">¥{{summary.nonVerifiedTotalAmount || '0.00'}}</text>
+          <text class="cog-dist-leg-pct">({{_distNonVerifiedTxt}})</text>
+        </view>
+        <view class="cog-dist-leg-row">
+          <text class="cog-dist-dot cog-dist-dot--meal"></text>
+          <text class="cog-dist-leg-lab">员工餐</text>
+          <text class="cog-dist-leg-val">¥{{summary.employeeMealTotalAmount || '0.00'}}</text>
+          <text class="cog-dist-leg-pct">({{_distMealTxt}})</text>
+        </view>
+      </view>
+    </view>
 
-    <view class="cog-sort-wrap">
+    <!-- 核销状态筛选栏（搜索时隐藏） -->
+    <view class="cog-vfilter-wrap" wx:if="{{!goodsNameSearch}}">
+      <text class="cog-vfilter-label">筛选模式</text>
+      <view class="cog-vfilter-chips">
+        <view class="cog-vfilter-chip {{verificationStatus === 'all' ? 'is-on' : ''}}" bindtap="onVerificationFilterChange" data-status="all">全部</view>
+        <view class="cog-vfilter-chip {{verificationStatus === 'verified' ? 'is-on' : ''}}" bindtap="onVerificationFilterChange" data-status="verified">已核销</view>
+        <view class="cog-vfilter-chip {{verificationStatus === 'unverified' ? 'is-on' : ''}}" bindtap="onVerificationFilterChange" data-status="unverified">未核销</view>
+        <view class="cog-vfilter-chip {{verificationStatus === 'employeeMeal' ? 'is-on' : ''}}" bindtap="onVerificationFilterChange" data-status="employeeMeal">员工餐</view>
+      </view>
+    </view>
+
+    <view class="cog-sort-wrap" wx:if="{{ingredientsAnalysis.length && !goodsNameSearch}}">
       <view class="cog-sort-left">
         <view class="cog-sort-arrows">
           <text class="cog-sort-arrow cog-sort-arrow--up {{ingredientSortOrder === 'asc' ? 'is-on' : ''}}">↑</text>
@@ -151,72 +158,96 @@
       <scroll-view scroll-x class="cog-sort-scroll" show-scrollbar="{{false}}">
         <view class="cog-sort-chips">
           <view class="cog-sort-chip cog-sort-chip--outbound {{ingredientSortBy === 'outbound' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="outbound">
-            <text class="cog-sort-chip-ico">￥</text>
             <text>出库金额</text>
           </view>
-          <view class="cog-sort-chip cog-sort-chip--util {{ingredientSortBy === 'util' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="util">
-            <text class="cog-sort-chip-ico">%</text>
-            <text>制作率</text>
+          <view class="cog-sort-chip cog-sort-chip--deviance {{ingredientSortBy === 'deviance' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="deviance">
+            <text>偏差率</text>
           </view>
-          <view class="cog-sort-chip cog-sort-chip--wasteloss {{ingredientSortBy === 'wasteloss' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="wasteloss">
-            <text class="cog-sort-chip-ico">◇</text>
-            <text>损耗损失</text>
+          <view class="cog-sort-chip cog-sort-chip--devianceAmount {{ingredientSortBy === 'devianceAmount' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="devianceAmount">
+            <text>偏差金额</text>
+            <text class="cog-sort-chip-arrow" wx:if="{{ingredientSortBy === 'devianceAmount'}}">{{ingredientSortOrder === 'asc' ? '↑' : '↓'}}</text>
           </view>
         </view>
       </scroll-view>
-      <!-- <view class="cog-sort-filter" bindtap="onIngredientFilter">
-        <text class="cog-sort-filter-ico">⏷</text>
-        <text>筛选</text>
-      </view> -->
     </view>
+
+    <view class="cog-empty" wx:if="{{!ingredientsAnalysis.length && !loading}}">{{emptyHint || '暂无原料分析数据'}}</view>
 
     <view class="cog-ing-list">
       <view class="cog-ing-card" wx:for="{{ingredientsAnalysis}}" wx:for-item="goods" wx:key="disGoodsId">
-        <view class="cog-ing-main flex-row">
+        <!-- 卡片头：图片 + 名称 + 规格 -->
+        <view class="cog-ing-hd flex-row">
           <image class="cog-ing-thumb"
             src="{{(url + goods.gbDgGoodsFileImg || '/images/logo.jpg')}}" mode="aspectFill" />
-          <view class="cog-ing-body flex-1 min-w-0">
-            <view class="cog-ing-title-row flex-row-between">
+          <view class="cog-ing-hd-body flex-1 min-w-0">
+            <view class="flex-row-between">
               <text class="cog-ing-name">{{goods.gbDgGoodsName}}</text>
-              <view class="cog-ing-util flex-row flex-row-items-center">
-                <text class="cog-ing-util-lab">制作率</text>
-                <text class="cog-ing-util-num">{{goods.utilizationRate}}</text>
-                <text class="cog-ing-util-pct">%</text>
-                <view class="cog-ing-pill" wx:if="{{goods.utilization || goods.utilizationRate}}">
-                  <text class="{{goods.utilization ? utilLv.textClass(goods.utilization.level) : utilLv.textClassFromRate(goods.utilizationRate)}}">{{goods.utilization ? goods.utilization.labelZh : utilLv.labelZhFromRate(goods.utilizationRate)}}</text>
-                </view>
-              </view>
             </view>
-
-            <view class="cog-stat-row">
-              <view class="cog-stat-cell">
-                <text class="cog-stat-cap">理论用量</text>
-                <text class="cog-stat-val">{{goods.theoryUsage}}</text>
-                <text class="cog-stat-unit">{{goods.gbDgGoodsStandardname}}</text>
-              </view>
-              <view class="cog-stat-cell">
-                <text class="cog-stat-cap">实际出库</text>
-                <text class="cog-stat-val">{{goods.actualUsage}}</text>
-                <text class="cog-stat-unit">{{goods.gbDgGoodsStandardname}}</text>
-              </view>
-              <view class="cog-stat-cell">
-                <text class="cog-stat-cap">差异</text>
-                <text class="cog-stat-val {{num.diffClass(goods.diffUsage)}}">{{num.formatSigned(goods.diffUsage)}}</text>
-                <text class="cog-stat-unit">{{goods.gbDgGoodsStandardname}}</text>
-              </view>
-              <view class="cog-stat-cell {{num.costCellExtra(goods.diffCostAmount)}}">
-                <text class="cog-stat-cap">成本差异</text>
-                <text class="cog-stat-val {{num.diffClass(goods.diffCostAmount)}}">{{num.formatSigned(goods.diffCostAmount)}}</text>
-                <text class="cog-stat-unit">元</text>
-              </view>
-            </view>
+            <text class="cog-ing-spec">{{goods.gbDgGoodsStandardname || '--'}} · ¥{{goods.unitPrice != null ? goods.unitPrice : '0.00'}}</text>
           </view>
         </view>
 
+<!-- 3种排序 -->
+<view class="cog-ing-stat4-row">
+          <view class="cog-stat4-cell cog-stat4--outbound">
+         <text class="cog-stat4-cap">出库金额</text>
+         <text>¥{{goods.outboundTotalAmount}}</text>
+         </view>
+         <view class="cog-stat4-cell cog-stat4--outbound">
+         <text class="cog-stat4-cap">偏差率</text>
+         <text>{{goods.devianceRate}}%</text>
+         </view>
+         <view class="cog-stat4-cell cog-stat4--outbound">
+          <text  class="cog-stat4-cap">偏差金额</text>
+          <text>¥{{goods.diffCostAmount}}</text>
+         </view>
+         
+         
+        </view>
+
+        <!-- 四格去向：出库 / 核销 / 未核销 / 员工餐（金额 + 数量） -->
+        <view class="cog-ing-stat4-row">
+          <view class="cog-stat4-cell cog-stat4--outbound">
+            <text class="cog-stat4-cap">出库</text>
+            <text class="cog-stat4-valcog-stat4-val ">{{goods.outboundTotalQty}} {{goods.gbDgGoodsStandardname}}</text>
+            <text class="cog-stat4-sub">¥{{goods.outboundTotalAmount}}</text>
+          </view>
+          <view class="cog-stat4-cell cog-stat4--verified">
+            <text class="cog-stat4-cap">核销</text>
+            <text class="cog-stat4-val">¥{{goods.verifiedAmount != null ? goods.verifiedAmount : '0.00'}}</text>
+            <text class="cog-stat4-sub">{{goods.verifiedQty || '0.00'}} {{goods.gbDgGoodsStandardname}}</text>
+          </view>
+          <view class="cog-stat4-cell cog-stat4--nonverified">
+            <text class="cog-stat4-cap">未核销</text>
+            <text class="cog-stat4-val">¥{{goods.nonVerifiedAmount != null ? goods.nonVerifiedAmount : '0.00'}}</text>
+            <text class="cog-stat4-sub">{{goods.nonVerifiedQty}} {{goods.gbDgGoodsStandardname}}</text>
+          </view>
+          <view class="cog-stat4-cell cog-stat4--meal">
+            <text class="cog-stat4-cap">员工餐</text>
+            <text class="cog-stat4-val">¥{{goods.employeeMealAmount != null ? goods.employeeMealAmount : '0.00'}}</text>
+            <text class="cog-stat4-sub">{{goods.employeeMealQty || '0.00'}} {{goods.gbDgGoodsStandardname}}</text>
+          </view>
+        </view>
+        
+
+        <!-- <view class="flex-row p-20">
+         <view class="flex-column half-row">
+         <text>废弃</text>
+         <text>{{goods.wasteAmount}}</text>
+         <text>{{goods.wasteQty}} {{goods.gbDgGoodsStandardname}}</text>
+         </view>
+         <view class="flex-column">
+          <text>损耗</text>
+          <text>¥{{goods.lossAmount}}</text>
+          <text>{{goods.lossQty}} {{goods.gbDgGoodsStandardname}}</text>
+         </view>
+        </view> -->
+
+        <!-- 关联菜品明细 -->
         <view class="cog-sub-hd" bindtap="onToggleIngredientExpand" data-id="{{goods.disGoodsId}}">
           <view class="cog-sub-hd-left">
             <view class="cog-sub-bar"></view>
-            <text class="cog-sub-title">关联菜品明细</text>
+            <text class="cog-sub-title">关联菜品 ({{(goods.supportedDishes && goods.supportedDishes.length) || 0}})</text>
           </view>
           <text class="cog-sub-arrow">{{expandedDisGoodsId == goods.disGoodsId ? '⌃' : '⌄'}}</text>
         </view>

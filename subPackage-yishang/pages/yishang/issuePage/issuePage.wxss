@@ -1,0 +1,133 @@
+/* pages/storeApplys/storeApplys.wxss */
+
+page{
+  background: rgb(235, 235, 235);
+}
+
+.depName{
+  font-size: 42rpx;
+  font-weight: 500;
+
+}
+.titleColor{
+  height: 40rpx;
+  background-color: #458a92;
+}
+.confirmBtn{
+  border-radius: 80rpx;
+  border: 1px solid #458a92;
+  font-size: 30rpx;
+  padding: 10rpx 20rpx;
+  margin-top: 80rpx;
+  margin-bottom: 80rpx;
+}
+.section_head{
+  /* position: fixed;
+  top: 0;
+  left: 0; */
+  background: rgb(240, 240, 240);
+  /* width: 100%; */
+  /* z-index: 9999; */
+}
+.section_body {
+  /* border: 1px solid rgba(236, 235, 235, 0.507); */
+  /* background: red; */
+  border-radius: 4rpx;
+  /* margin-top: 300rpx; */
+}
+.fromTitle{
+  background-color: #458a92;
+  color: #fff;
+}
+.index{
+  width: 6%;
+}
+.goods_name_title{
+  width: 30%;
+}
+.order_price_title{
+  width: 20%;
+}
+.weight_title{
+  width: 15%;
+}
+.goods_name {
+  width: 34%;
+  /* background: yellow; */
+}
+
+
+.order_price {
+  width: 20%;
+  /* background: green; */
+  /* text-align: center; */
+}
+
+.weight {
+  width: 20%;
+  /* text-align: center; */
+  /* background: gold; */
+}
+
+.subtotalTitle {
+  width: 20%;
+  /* background: yellow; */
+  /* text-align: center; */
+}
+
+.subtotal {
+  width: 20%;
+  /* background: yellow; */
+  /* text-align: right; */
+}
+
+
+
+
+
+.btn {
+  height: 60rpx;
+  width: 170rpx;
+  background: rgb(68, 108, 170);
+  padding: 10rpx 20rpx;
+  color: #fff;
+  border-radius: 5rpx;
+}
+
+.bottom_btn{
+
+  background: #2d5a5f;
+  color: #fff;
+}
+.input{
+  /* border: 1px solid lightgray; */
+  border-radius: 10rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  /* padding: 5rpx 10rpx; */
+}
+
+.total{
+  text-align: right;
+  
+}
+
+
+.sentence{
+  padding: 60rpx 60rpx 20rpx 60rpx;
+  text-align: center;
+
+
+}
+
+.tishiView{
+  background: rgb(230, 228, 228);
+}
+
+.confirm_btn{
+  background-color: rgba(27, 140, 192, 0.3);
+  /* padding: 20rpx 0; */
+  /* margin: 20rpx 20rpx; */
+  border-radius: 10rpx;
+  
+}

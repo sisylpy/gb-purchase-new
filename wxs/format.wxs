@@ -891,6 +891,24 @@ function marginRateStringForCell(s) {
   return s + '%';
 }
 
+/** 订货弹窗：批发商规格展示，有系数时如 2斤*箱 */
+function dsStandardLabel(standard, baseStandardName) {
+  if (!standard || !standard.gbDsStandardName) {
+    return '';
+  }
+  var name = standard.gbDsStandardName;
+  var scale = standard.gbDsStandardScale;
+  var base = baseStandardName != null ? baseStandardName + '' : '';
+  var scaleStr = scale != null ? scale + '' : '';
+  if (scaleStr && scaleStr !== 'null' && scaleStr !== '-1') {
+    var n = +scale;
+    if (!isNaN(n) && n > 0) {
+      return scaleStr + base + '*' + name;
+    }
+  }
+  return name;
+}
+
 module.exports = {
   getGongli:getGongli,
   getPercent: getPercent,
@@ -937,6 +955,7 @@ module.exports = {
   scaleBaseForecastCellIsMoney: scaleBaseForecastCellIsMoney,
   analysisRowDisplay: analysisRowDisplay,
   analysisTrendClass: analysisTrendClass,
-  marginRateStringForCell: marginRateStringForCell
+  marginRateStringForCell: marginRateStringForCell,
+  dsStandardLabel: dsStandardLabel
 
 }

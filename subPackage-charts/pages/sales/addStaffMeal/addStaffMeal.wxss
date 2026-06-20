@@ -1,0 +1,436 @@
+/* ==================== 页面基础 ==================== */
+
+.page-add-staff-meal .page-body { padding-bottom: 60rpx; }
+.page-add-staff-meal .mb-20 { margin-bottom: 20rpx; }
+
+/* ==================== 模块卡片 ==================== */
+
+.module-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+/* ==================== 日期/部门选择 ==================== */
+
+.field-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  width: 100%;
+}
+
+.field-row:last-child { margin-bottom: 0; }
+
+.field-label {
+  width: 140rpx;
+  font-size: 30rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.date-row {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 20rpx;
+}
+
+.date-input-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70rpx;
+  padding: 0 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  background: #fafafa;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.dep-readonly-row { align-items: center; }
+
+.dep-readonly {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  padding: 16rpx 20rpx;
+}
+
+/* ==================== 销售类型标签 ==================== */
+
+.type-tag-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.type-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 24rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+}
+
+.type-tag--staff {
+  background: #e8f5e9;
+}
+
+.type-tag__label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.type-tag__hint {
+  margin-left: 16rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* ==================== 菜品列表区 ==================== */
+
+.module-card--food-list {
+  overflow: hidden;
+}
+
+.food-list-hint {
+  display: block;
+  text-align: center;
+  padding: 60rpx 0;
+  font-size: 28rpx;
+  color: #bbb;
+}
+
+/* ---------- 分类头部 ---------- */
+
+.food-parent-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 22rpx 20rpx;
+  margin-bottom: 4rpx;
+  background: linear-gradient(90deg, #e8f6ec 0%, #f4fbf6 100%);
+  border-left: 6rpx solid #4a9960;
+  border-radius: 12rpx;
+}
+
+.food-parent-header--hover { opacity: 0.85; }
+
+.food-parent-header__name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2d6a45;
+}
+
+.food-parent-header__count {
+  margin-left: 8rpx;
+  font-size: 24rpx;
+  color: #7a9e7e;
+}
+
+.food-parent-header__arrow {
+  margin-left: auto;
+  font-size: 24rpx;
+  color: #4a9960;
+  transition: transform 0.2s ease;
+}
+
+.food-parent-header__arrow.is-open {
+  transform: rotate(180deg);
+}
+
+/* ---------- 子级菜品区 ---------- */
+
+.food-parent-body {
+  padding: 8rpx 0 8rpx 0;
+}
+
+/* ---------- 菜品卡片 ---------- */
+
+.dish-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8faf9;
+  border-radius: 16rpx;
+  padding: 20rpx 22rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid #e8eee9;
+  transition: background 0.15s;
+}
+
+.dish-card--hover {
+  background: #eef5ef;
+}
+
+.dish-card--off {
+  opacity: 0.6;
+}
+
+.dish-card:last-child { margin-bottom: 0; }
+
+.dish-card__info {
+  flex: 1;
+  min-width: 0;
+  padding-right: 16rpx;
+}
+
+.dish-card__name-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 6rpx;
+}
+
+.dish-card__name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dish-card__badge {
+  flex-shrink: 0;
+  margin-left: 10rpx;
+  font-size: 22rpx;
+  color: #999;
+  border: 1rpx solid #ccc;
+  border-radius: 6rpx;
+  padding: 2rpx 10rpx;
+}
+
+.dish-card__price {
+  display: block;
+  font-size: 26rpx;
+  color: #c43d1f;
+  font-weight: 500;
+  margin-bottom: 4rpx;
+}
+
+/* 已添加员工餐信息 */
+.dish-card__meal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 6rpx;
+}
+
+.dish-card__meal-qty {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 4rpx 14rpx;
+  border-radius: 6rpx;
+}
+
+.dish-card__meal-price {
+  margin-left: 10rpx;
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* ---------- 菜品卡片右侧操作 ---------- */
+
+.dish-card__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.dish-btn {
+  padding: 10rpx 22rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.dish-btn--tap {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.dish-btn--del {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+/* ==================== 弹窗 ==================== */
+
+.meal-modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1100;
+}
+
+.meal-modal-mask {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.meal-modal-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 80vh;
+  padding: 36rpx 32rpx;
+  padding-bottom: calc(36rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-radius: 28rpx 28rpx 0 0;
+  box-shadow: 0 -8rpx 40rpx rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  z-index: 1101;
+}
+
+.meal-modal__title {
+  display: block;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 28rpx;
+}
+
+/* 表单项 */
+.meal-form-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.meal-form-item--notes {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.meal-form-label {
+  width: 180rpx;
+  font-size: 28rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.meal-form-input {
+  flex: 1;
+  height: 70rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  color: #333;
+  background: #fafafa;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.meal-form-readonly {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.meal-dish-name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.meal-placeholder { color: #bbb; }
+
+/* 类型行 */
+.meal-type-inline {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.meal-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rpx 18rpx;
+  background: #e8f5e9;
+  border-radius: 6rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+/* 备注 textarea */
+.meal-textarea {
+  width: 100%;
+  min-height: 100rpx;
+  padding: 14rpx 20rpx;
+  margin-top: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+  background: #fafafa;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  box-sizing: border-box;
+}
+
+.meal-textarea-count {
+  text-align: right;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #ccc;
+}
+
+/* 弹窗按钮 */
+.meal-modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 24rpx;
+  margin-top: 28rpx;
+}
+
+.meal-btn-cancel,
+.meal-btn-confirm {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  border-radius: 42rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+}
+
+.meal-btn-cancel::after,
+.meal-btn-confirm::after { border: none; }
+
+.meal-btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.meal-btn-confirm {
+  background: #4a9960;
+  color: #fff;
+}

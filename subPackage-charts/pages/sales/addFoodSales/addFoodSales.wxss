@@ -450,25 +450,54 @@
   margin-top: 12rpx;
 }
 
-/* 大类：独占一行 */
-.food-cat-stripe {
-  margin-top: 8rpx;
-  margin-bottom: 16rpx;
-  padding: 18rpx 22rpx;
+/* 父级分类手风琴头部 */
+.food-parent-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 24rpx 22rpx;
+  margin-bottom: 4rpx;
   background: linear-gradient(90deg, #e8f6ec 0%, #f4fbf6 100%);
   border-left: 6rpx solid #4a9960;
   border-radius: 12rpx;
 }
 
-.food-cat-stripe:first-child {
+.food-parent-header:first-child {
   margin-top: 0;
 }
 
-.food-cat-stripe__text {
+.food-parent-header--hover {
+  opacity: 0.85;
+}
+
+.food-parent-header__name {
   font-size: 34rpx;
   font-weight: 700;
   color: #2d6a45;
   letter-spacing: 1rpx;
+}
+
+.food-parent-header__count {
+  margin-left: 10rpx;
+  font-size: 24rpx;
+  color: #7a9e7e;
+  font-weight: 500;
+}
+
+.food-parent-header__arrow {
+  margin-left: auto;
+  font-size: 26rpx;
+  color: #4a9960;
+  transition: transform 0.2s ease;
+}
+
+.food-parent-header__arrow.is-open {
+  transform: rotate(180deg);
+}
+
+/* 子级菜品容器 */
+.food-parent-body {
+  padding: 8rpx 0 16rpx 0;
 }
 
 /* 菜品卡片 */

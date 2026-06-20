@@ -1,25 +1,6 @@
 {
   "usingComponents": {
-    "navbar": "/components/navbar/navbar",
-    "menu-portfolio-quadrant-card": "/subPackage-charts/components/menu-portfolio-quadrant-card/menu-portfolio-quadrant-card",
-    "dish-cost-analysis-card": "/components/dish-cost-analysis-card/dish-cost-analysis-card",
-    "dish-sales-single-dish-card": "/components/dish-sales-single-dish-card/dish-sales-single-dish-card",
-    "menu-high-sales-low-margin-card": "/components/menu-high-sales-low-margin-card/menu-high-sales-low-margin-card",
-    "menu-action-recommendation-card": "/components/menu-action-recommendation-card/menu-action-recommendation-card",
-    "dish-profit-prescription-card": "/components/dish-profit-prescription-card/dish-profit-prescription-card",
-    "revenue-report-card": "/components/revenue-report-card/revenue-report-card",
-    "purchase-check-card": "/components/purchase-check-card/purchase-check-card",
-    "stock-reconcile-card": "/components/stock-reconcile-card/stock-reconcile-card",
-    "reorder-reminder-card": "/components/reorder-reminder-card/reorder-reminder-card",
-    "purchase-goods-detail-card": "/components/purchase-goods-detail-card/purchase-goods-detail-card",
-    "dish-sales-ranking-card": "/subPackage-charts/components/dish-sales-ranking-card/dish-sales-ranking-card",
-    "dish-profit-cost-ranking-card": "/subPackage-charts/components/dish-profit-cost-ranking-card/dish-profit-cost-ranking-card",
-    "dish-ingredient-cover-days-card": "/subPackage-charts/components/dish-ingredient-cover-days-card/dish-ingredient-cover-days-card",
-    "warehouse-inventory-risk-list-card": "/subPackage-charts/components/warehouse-inventory-risk-list-card/warehouse-inventory-risk-list-card",
-    "warehouse-stock-ranking-card": "/subPackage-charts/components/warehouse-stock-ranking-card/warehouse-stock-ranking-card",
-    "goods-supported-dish-cover-card": "/subPackage-charts/components/goods-supported-dish-cover-card/goods-supported-dish-cover-card",
-    "warehouse-near-expiry-risk-card": "/subPackage-charts/components/warehouse-near-expiry-risk-card/warehouse-near-expiry-risk-card",
-    "warehouse-inventory-supervision-card": "/subPackage-charts/components/warehouse-inventory-supervision-card/warehouse-inventory-supervision-card",
-    "purchase-goods-business-analysis-card": "/components/purchase-goods-business-analysis-card/purchase-goods-business-analysis-card"
+    "back-navbar": "/components/back-navbar/back-navbar",
+    "business-card-renderer": "/components/businessCardRenderer/businessCardRenderer"
   }
 }

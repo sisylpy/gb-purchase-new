@@ -2,11 +2,11 @@ const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
 import apiUrl from '../../../../config/index.js'
 
-const { getSubDepartmentsGb } = require('../../../services/mendian.js');
+const { getSubDepartmentsGb } = require('../../../../services/mendian.js');
 const {
   gbPurchaserRegitsteWithFile,
-  gbLogin,
-} = require('../../../services/apiDistributerGbUser.js');
+  gbSubDepUserLogin,
+} = require('../../../../services/apiDistributerGbUser.js');
 
 Page({
 
@@ -21,7 +21,6 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    console.log(options)
     // 遍历 options，找到包含 `?` 的键并提取 query
     let queryString = '';
     for (const key in options) {
@@ -42,11 +41,10 @@ Page({
 
     
     // 设置页面数据
-    console.log('解析后的参数:', params);
     this.setData({
       disId: params.disId || '',
       depFatherId: params.depFatherId || '',
-      depId: params.depId || '', // 添加 depId 参数
+      depId: params.depId || '', // 兼容旧链接传 depId 的情况
     });
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
@@ -57,53 +55,35 @@ Page({
       nickName: "",
       depFatherId: options.depFatherId,
       disId: options.disId,
-      depId: options.depId, // 添加 depId 参数
-      admin: 1,
+      depId: options.depId || '', // 兼容旧链接
+      admin: options.admin,
       avatarUrl: "/images/user.png",
       canRegister: false,
     })
 
-    load.showLoading("获取子部门")
-    getSubDepartmentsGb(this.data.depFatherId).then(res => {
-      console.log("fdfa")
-      if (res.result.code == 0) {
-        load.hideLoading();
-        
-        // 根据传入的 depId 自动选择对应的部门
-        let defaultDeptIndex = 0;
-        let defaultDeptName = res.result.data[0].gbDepartmentName;
-        let defaultDeptId = res.result.data[0].gbDepartmentId;
-        
-        console.log('当前 depId:', this.data.depId);
-        console.log('子部门列表:', res.result.data);
-        
-        if (this.data.depId) {
-          // 查找匹配的部门
-          const targetDept = res.result.data.find(item => item.gbDepartmentId == this.data.depId);
-          console.log('找到的目标部门:', targetDept);
-          if (targetDept) {
-            defaultDeptName = targetDept.gbDepartmentName;
-            defaultDeptId = targetDept.gbDepartmentId;
-            // 找到匹配部门的索引
-            defaultDeptIndex = res.result.data.findIndex(item => item.gbDepartmentId == this.data.depId);
-            console.log('自动选择部门:', defaultDeptName, 'ID:', defaultDeptId);
-          }
+    // 只有传了 depId 才不需要请求子部门列表
+    if (this.data.depId) {
+      this._aaa();
+    } else {
+      load.showLoading("获取子部门")
+      getSubDepartmentsGb(this.data.depFatherId).then(res => {
+        if (res.result.code == 0) {
+          load.hideLoading();
+          
+          this.setData({
+            subDepArr: res.result.data,
+            selDepartmentName: res.result.data[0].gbDepartmentName,
+            depId: res.result.data[0].gbDepartmentId,
+          })
+        } else {
+          wx.showToast({
+            title: '获取部门失败',
+          })
         }
-        
-        this.setData({
-          subDepArr: res.result.data,
-          selDepartmentName: defaultDeptName,
-          nxDuDepartmentId: defaultDeptId,
-        })
-      } else {
-        wx.showToast({
-          title: '获取部门失败',
-        })
-      }
-    })
+      })
 
-    this._aaa();
-    // this._userLogin();
+      this._aaa();
+    }
   },
 
   
@@ -119,7 +99,6 @@ Page({
   _aaa() {
     wx.login({
       success: (res) => {
-        console.log(res);
         this.setData({
           code: res.code
         })
@@ -152,7 +131,7 @@ Page({
     this.setData({
       selDepartmentName: name,
       showDepartment: false,
-      nxDuDepartmentId: id,
+      depId: id,
     })
 
   },
@@ -164,15 +143,18 @@ Page({
 
 //swiper one before
 _userLogin() {
-  console.log("_userLogin")
   wx.login({
     success: (resLogin) => {
-      gbLogin(resLogin.code)
+      gbSubDepUserLogin(resLogin.code)
         .then((res) => {
           if (res.result.code !== -1) {
-          
+            wx.setStorageSync('disInfo', res.result.data.disInfo);
+            wx.setStorageSync('userInfo', res.result.data.depUserInfo);
+            wx.setStorageSync('mendianInfo', res.result.data.depInfo);
+
+            wx.setStorageSync('orderDepInfo', res.result.data.orderDepInfo);
             wx.redirectTo({
-              url: '/subPackage-ai/pages/ai/chefOrderDep/chefOrderDep',
+              url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
             })
             //跳转到首页
           } else {
@@ -198,7 +180,6 @@ onNicknameInput(e) {
   this.setData({
     nickName: value
   });
-  console.log('实时昵称:', value);
   this._checkRegister();
 },
 
@@ -255,14 +236,12 @@ save(e) {
           var gbDisId = this.data.disId;
           var code = this.data.code;
           var depFatherId = this.data.depFatherId;
-          var depId = this.data.nxDuDepartmentId;
+          var depId = this.data.depId;
           var gbDisId = this.data.disId;
           var admin = this.data.admin;
           load.showLoading("保存修改内容")
-          console.log(avatarUrl, userName, code, admin, gbDisId, depFatherId, depId)
           gbPurchaserRegitsteWithFile(avatarUrl, userName, code, admin, gbDisId, depFatherId, depId).then((res) => {
             load.hideLoading();
-            console.log(res);
             const jsonObject = JSON.parse(res.result);
             if (jsonObject.code === 0) {
 
