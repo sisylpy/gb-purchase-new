@@ -49,9 +49,20 @@
       <text class="summary-notice" wx:if="{{notice}}">{{notice}}</text>
     </view>
 
-    <view class="confirm-btn {{confirming ? 'is-loading' : ''}}" bindtap="onConfirmCheckout">
-      {{confirming ? '提交中...' : '确认结算并生成采购单'}}
+    <view class="confirm-btn {{confirming || paying ? 'is-loading' : ''}}" bindtap="onConfirmCheckout">
+      {{paying ? (paymentStatusText || '支付处理中...') : (confirming ? '提交中...' : ('微信支付 ¥' + payAmount))}}
     </view>
-    <text class="confirm-hint">确认后将生成 bill，商品从购物车移除；真实微信支付本轮不做</text>
+    <text class="confirm-hint">支付成功后生成采购单；未知价商品后续称重可能补款</text>
+
+    <view class="dev-mock-btn" wx:if="{{isDev}}" bindtap="onMockConfirmCheckout">
+      [DEV] Mock checkoutConfirm
+    </view>
   </block>
+
+  <view class="pay-overlay" wx:if="{{paying}}">
+    <view class="pay-overlay-card">
+      <text class="pay-overlay-title">支付处理中</text>
+      <text class="pay-overlay-desc">{{paymentStatusText || '正在确认支付结果，请稍候...'}}</text>
+    </view>
+  </view>
 </view>

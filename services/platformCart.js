@@ -88,12 +88,46 @@ function checkoutPreview(orderIds) {
   });
 }
 
-/** 结算确认：生成 bill，购物车行转正式 */
+/** 结算确认：生成 bill，购物车行转正式（本地 mock 联调） */
 function checkoutConfirm(payload) {
   console.log('[platformCartApi] POST cart/checkout/confirm', payload);
   return requestUtil.post('platform/customer/cart/checkout/confirm', payload, Object.assign({
     showLoading: true,
     loadingText: '提交结算...'
+  }, NX_OPTS)).then(function (res) {
+    return parseBody(res);
+  });
+}
+
+/** 结算支付：PENDING + 微信 JSAPI prepay（生产主链） */
+function checkoutPay(payload) {
+  console.log('[platformCartApi] POST cart/checkout/pay', payload);
+  return requestUtil.post('platform/customer/cart/checkout/pay', payload, Object.assign({
+    showLoading: true,
+    loadingText: '创建支付...'
+  }, NX_OPTS)).then(function (res) {
+    var body = parseBody(res);
+    console.log('[platformCartApi] checkoutPay response', body);
+    return body;
+  });
+}
+
+/** 查询 checkout 支付状态（支付成功后轮询 billId） */
+function queryPaymentStatus(payload) {
+  var req = Object.assign({}, buildCartBaseParams(), payload || {});
+  console.log('[platformCartApi] POST cart/checkout/payment/status', req);
+  return requestUtil.post('platform/customer/cart/checkout/payment/status', req, NX_OPTS).then(function (res) {
+    return parseBody(res);
+  });
+}
+
+/** 取消 PENDING 支付（用户取消 wx.requestPayment） */
+function cancelPayment(payload) {
+  var req = Object.assign({}, buildCartBaseParams(), payload || {});
+  console.log('[platformCartApi] POST cart/checkout/payment/cancel', req);
+  return requestUtil.post('platform/customer/cart/checkout/payment/cancel', req, Object.assign({
+    showLoading: true,
+    loadingText: '取消支付...'
   }, NX_OPTS)).then(function (res) {
     return parseBody(res);
   });
@@ -124,6 +158,9 @@ module.exports = {
   submitBySupplier: submitBySupplier,
   checkoutPreview: checkoutPreview,
   checkoutConfirm: checkoutConfirm,
+  checkoutPay: checkoutPay,
+  queryPaymentStatus: queryPaymentStatus,
+  cancelPayment: cancelPayment,
   payFirst: payFirst,
   paySupplement: paySupplement,
   parseBody: parseBody,

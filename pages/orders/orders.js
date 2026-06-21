@@ -27,6 +27,8 @@ Page({
     pendingPriceItemCount: 0,
     payAmount: '0.00',
     checkoutNotice: '',
+    hasPaymentProcessing: false,
+    checkoutBlocked: false,
     /** 正式订货 */
     platformLines: [],
     formalEmpty: true,
@@ -113,13 +115,10 @@ Page({
         return;
       }
       var rawLines = body.data.lines || [];
-      var allIds = rawLines.map(function (l) { return l.nxOrderId; });
       var prevSelected = (that.data.selectedIds || []).filter(function (id) {
-        return allIds.indexOf(id) >= 0;
+        return rawLines.some(function (l) { return l.nxOrderId === id; });
       });
-      var selectedIds = prevSelected.length ? prevSelected : allIds;
-      var selectAll = selectedIds.length === allIds.length && allIds.length > 0;
-      that._applyCartView(rawLines, selectedIds, selectAll);
+      that._applyCartView(rawLines, prevSelected.length ? prevSelected : null, null);
       that.setData({ loading: false });
       platformCart.updateTabBadge(body.data.lineCount != null ? body.data.lineCount : rawLines.length);
       that._refreshCartSummary();
@@ -145,19 +144,43 @@ Page({
     });
   },
 
+  _isLineCheckoutSelectable: function (line) {
+    return line && line.editable !== false && !line.paymentProcessing;
+  },
+
+  _filterSelectableIds: function (ids) {
+    var that = this;
+    return (ids || []).filter(function (id) {
+      return that._isLineCheckoutSelectable(that._findCartLine(id));
+    });
+  },
+
   _applyCartView: function (rawLines, selectedIds, selectAll) {
     var split = platformCart.splitCartLines(rawLines);
-    var ids = selectedIds || rawLines.map(function (l) { return l.nxOrderId; });
+    var formatted = rawLines.map(platformCart.formatCartLine);
+    var selectableIds = formatted.filter(this._isLineCheckoutSelectable.bind(this))
+      .map(function (l) { return l.nxOrderId; });
+    var ids = (selectedIds || []).filter(function (id) {
+      return selectableIds.indexOf(id) >= 0;
+    });
+    if (!ids.length && selectableIds.length) {
+      ids = selectableIds.slice();
+    }
     var all = selectAll != null
       ? selectAll
-      : (ids.length === rawLines.length && rawLines.length > 0);
+      : (ids.length === selectableIds.length && selectableIds.length > 0);
+    var hasPaymentProcessing = formatted.some(function (line) {
+      return line.paymentProcessing;
+    });
     this.setData({
-      cartLines: rawLines.map(platformCart.formatCartLine),
+      cartLines: formatted,
       confirmedLines: this._markSelected(split.confirmedLines, ids),
       pendingPriceLines: this._markSelected(split.pendingPriceLines, ids),
       selectedIds: ids,
       selectAll: all,
-      empty: rawLines.length === 0
+      empty: rawLines.length === 0,
+      hasPaymentProcessing: hasPaymentProcessing,
+      checkoutBlocked: ids.length === 0 && hasPaymentProcessing
     });
   },
 
@@ -239,8 +262,9 @@ Page({
   },
 
   onToggleSelectAll: function () {
+    var selectable = this.data.cartLines.filter(this._isLineCheckoutSelectable.bind(this));
     var selectAll = !this.data.selectAll;
-    var ids = selectAll ? this.data.cartLines.map(function (l) { return l.nxOrderId; }) : [];
+    var ids = selectAll ? selectable.map(function (l) { return l.nxOrderId; }) : [];
     this.setData({
       selectAll: selectAll,
       selectedIds: ids,
@@ -252,6 +276,11 @@ Page({
 
   onToggleLine: function (e) {
     var id = Number(e.currentTarget.dataset.id);
+    var line = this._findCartLine(id);
+    if (line && (line.paymentProcessing || line.editable === false)) {
+      wx.showToast({ title: line.paymentProcessingMessage || '支付处理中', icon: 'none' });
+      return;
+    }
     var ids = this.data.selectedIds.slice();
     var idx = ids.indexOf(id);
     if (idx >= 0) {
@@ -259,7 +288,8 @@ Page({
     } else {
       ids.push(id);
     }
-    var all = ids.length === this.data.cartLines.length && this.data.cartLines.length > 0;
+    var all = ids.length === this.data.cartLines.filter(this._isLineCheckoutSelectable.bind(this)).length
+      && ids.length > 0;
     this.setData({
       selectedIds: ids,
       selectAll: all,
@@ -270,9 +300,13 @@ Page({
   },
 
   onGoCheckout: function () {
-    var ids = this.data.selectedIds;
+    var ids = this._filterSelectableIds(this.data.selectedIds);
     if (!ids.length) {
-      wx.showToast({ title: '请选择要结算的商品', icon: 'none' });
+      if (this.data.hasPaymentProcessing) {
+        wx.showToast({ title: '部分商品支付处理中，请稍候', icon: 'none' });
+      } else {
+        wx.showToast({ title: '请选择要结算的商品', icon: 'none' });
+      }
       return;
     }
     wx.navigateTo({
@@ -280,10 +314,41 @@ Page({
     });
   },
 
+  onCallSupplier: function (e) {
+    var phone = e.currentTarget.dataset.phone;
+    if (!phone) return;
+    wx.makePhoneCall({ phoneNumber: String(phone).replace(/\s/g, '') });
+  },
+
+  onCartLineMenu: function (e) {
+    var id = Number(e.currentTarget.dataset.id);
+    var line = this._findCartLine(id);
+    if (!line) return;
+    if (line.paymentProcessing || line.editable === false) {
+      wx.showToast({ title: line.paymentProcessingMessage || '支付处理中', icon: 'none' });
+      return;
+    }
+    var that = this;
+    wx.showActionSheet({
+      itemList: ['修改数量', '删除'],
+      success: function (res) {
+        if (res.tapIndex === 0) {
+          that.onEditCartLine({ currentTarget: { dataset: { id: id } } });
+        } else if (res.tapIndex === 1) {
+          that.onDeleteCartLine({ currentTarget: { dataset: { id: id } } });
+        }
+      }
+    });
+  },
+
   onEditCartLine: function (e) {
     var id = Number(e.currentTarget.dataset.id);
     var line = this._findCartLine(id);
     if (!line) return;
+    if (line.paymentProcessing || line.editable === false) {
+      wx.showToast({ title: line.paymentProcessingMessage || '支付处理中', icon: 'none' });
+      return;
+    }
     this.setData({
       show: true,
       editApply: true,

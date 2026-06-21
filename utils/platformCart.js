@@ -49,7 +49,8 @@ function getBuyerContext() {
     gbDistributerId: disInfo.gbDistributerId || null,
     gbDepartmentId: gbDepartmentId,
     gbDepartmentFatherId: gbDepartmentFatherId,
-    gbOrderUserId: userInfo.gbDepartmentUserId || null
+    gbOrderUserId: userInfo.gbDepartmentUserId || null,
+    openId: userInfo.gbDuWxOpenId || ''
   };
 }
 
@@ -374,20 +375,83 @@ function refreshTabBadgeFromServer() {
 }
 
 /** 格式化 cart/lines/list 行，供页面展示 */
-function formatCartLine(raw) {
+var apiUrl = require('../config/index');
+
+function encodePathJoin(base, rel) {
+  var r = rel == null ? '' : String(rel).replace(/^\s+|\s+$/g, '');
+  if (r === '' || r === 'goodsImage/logo.jpg' || r === '/goodsImage/logo.jpg') return '';
+  if (/^https?:\/\//i.test(r)) return r;
+  var b = String(base || '').replace(/\/+$/, '');
+  if (b === '') return r;
+  var p = r.replace(/^\/+/, '');
+  var parts = p.split('/');
+  var enc = [];
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i] !== '') enc.push(encodeURIComponent(parts[i]));
+  }
+  return b + '/' + enc.join('/');
+}
+
+function formatPhoneDisplay(phone) {
+  if (!phone) return '';
+  var s = String(phone).replace(/\D/g, '');
+  if (s.length === 11) {
+    return s.slice(0, 3) + ' ' + s.slice(3, 7) + ' ' + s.slice(7);
+  }
+  return String(phone);
+}
+
+function formatUnitPriceText(unitPrice, pricingStandard) {
+  if (unitPrice == null || unitPrice === '') return '';
+  var n = Number(unitPrice);
+  var priceStr = isNaN(n) ? String(unitPrice) : n.toFixed(2);
+  return '¥' + priceStr + '/' + (pricingStandard || '');
+}
+
+function formatCartLine(raw, imageBase) {
+  var base = imageBase || apiUrl.nxServer || '';
   var confirmed = raw.priceConfirmStatus === 'CONFIRMED';
+  var hasSupplier = raw.hasSupplierSelected === true || raw.nxDistributerGoodsId != null;
+  var supplierRaw = raw.supplier || null;
+  var supplier = null;
+  if (supplierRaw) {
+    supplier = {
+      nxDistributerId: supplierRaw.nxDistributerId,
+      supplierName: supplierRaw.supplierName || '',
+      supplierLogo: supplierRaw.supplierLogo
+        ? encodePathJoin(base, supplierRaw.supplierLogo)
+        : '',
+      supplierAddress: supplierRaw.supplierAddress || '',
+      supplierPhone: supplierRaw.supplierPhone || '',
+      supplierPhoneDisplay: formatPhoneDisplay(supplierRaw.supplierPhone)
+    };
+  }
+  var goodsImage = raw.goodsImage
+    ? encodePathJoin(base, raw.goodsImage)
+    : '/images/logo.jpg';
   return {
     nxOrderId: raw.nxOrderId,
     gbOrderId: raw.gbOrderId,
     nxGoodsId: raw.nxGoodsId,
     nxDistributerId: raw.nxDistributerId,
     nxDistributerGoodsId: raw.nxDistributerGoodsId,
-    goodsName: raw.goodsName || '',
+    goodsName: raw.goodsName || '商品',
+    goodsImage: goodsImage,
     quantity: raw.quantity || '',
     standard: raw.standard || '',
+    remark: raw.remark || '',
     priceConfirmStatus: raw.priceConfirmStatus || 'PENDING',
+    unitPrice: raw.unitPrice,
+    pricingStandard: raw.pricingStandard || raw.standard,
+    unitPriceText: formatUnitPriceText(raw.unitPrice, raw.pricingStandard || raw.standard),
     lineSubtotal: raw.lineSubtotal,
-    hasSupplier: raw.nxDistributerGoodsId != null,
+    hasSupplier: hasSupplier,
+    supplier: supplier,
+    editable: raw.editable !== false,
+    paymentLocked: raw.paymentLocked === true || raw.paymentProcessing === true,
+    paymentProcessing: raw.paymentProcessing === true,
+    paymentProcessingMessage: raw.paymentProcessingMessage
+      || (raw.paymentProcessing ? '支付处理中' : ''),
     subtotalText: confirmed && raw.lineSubtotal ? ('¥' + raw.lineSubtotal) : '待确认',
     priceHint: confirmed ? ('小计 ¥' + raw.lineSubtotal) : '价格待称重确认'
   };

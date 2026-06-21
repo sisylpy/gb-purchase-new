@@ -151,3 +151,47 @@
   color: #999;
   line-height: 1.5;
 }
+
+.dev-mock-btn {
+  margin-top: 24rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #bbb;
+  text-decoration: underline;
+}
+
+.pay-overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.pay-overlay-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 48rpx 56rpx;
+  text-align: center;
+  max-width: 560rpx;
+}
+
+.pay-overlay-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.pay-overlay-desc {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.5;
+}

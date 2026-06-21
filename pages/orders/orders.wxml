@@ -28,55 +28,91 @@
       </view>
 
       <block wx:else>
-        <view class="section-block" wx:if="{{confirmedLines.length}}">
-          <view class="section-head">
+        <view class="cart-pay-banner" wx:if="{{hasPaymentProcessing}}">
+          <text>部分商品正在支付处理中，暂不可修改或再次结算</text>
+        </view>
+
+        <view class="section-block cart-section" wx:if="{{confirmedLines.length}}">
+          <view class="section-head section-head-divider">
             <text class="section-title">已知价格商品</text>
-            <text class="section-count">{{confirmedLines.length}}项</text>
+            <text class="section-count">{{confirmedLines.length}} 项</text>
           </view>
-          <view class="cart-line-row" wx:for="{{confirmedLines}}" wx:key="nxOrderId">
-            <view class="cart-check {{item.selected ? 'checked' : ''}}" data-id="{{item.nxOrderId}}" bindtap="onToggleLine">
-              <text wx:if="{{item.selected}}">✓</text>
-            </view>
-            <view class="cart-line-body">
-              <view class="line-name">{{item.goodsName}}</view>
-              <view class="line-meta">
-                <text class="line-qty">{{item.quantity}}{{item.standard}}</text>
-                <text class="line-tag confirmed">已知价</text>
-                <text class="line-tag supplier" wx:if="{{item.hasSupplier}}">已选批发商</text>
+          <view class="cart-item-card {{item.paymentProcessing ? 'is-payment-locked' : ''}}" wx:for="{{confirmedLines}}" wx:key="nxOrderId">
+            <view class="cart-item-top">
+              <view class="cart-check {{item.selected ? 'checked' : ''}} {{item.paymentProcessing ? 'disabled' : ''}}" data-id="{{item.nxOrderId}}" catchtap="onToggleLine">
+                <text wx:if="{{item.selected}}">✓</text>
               </view>
+              <image class="cart-goods-img" src="{{item.goodsImage}}" mode="aspectFill" />
+              <view class="cart-goods-info">
+                <view class="cart-goods-head">
+                  <text class="cart-goods-name">{{item.goodsName}}</text>
+                  <text class="cart-menu-btn" wx:if="{{!item.paymentProcessing && item.editable !== false}}" data-id="{{item.nxOrderId}}" catchtap="onCartLineMenu">···</text>
+                </view>
+                <view class="cart-qty-row">
+                  <text class="cart-qty">{{item.quantity}}{{item.standard}}</text>
+                  <text class="cart-tag cart-tag-pay" wx:if="{{item.paymentProcessing}}">{{item.paymentProcessingMessage || '支付处理中'}}</text>
+                  <text class="cart-tag cart-tag-confirmed" wx:else>已知价</text>
+                  <text class="cart-tag cart-tag-supplier" wx:if="{{item.hasSupplier}}">已选批发商</text>
+                </view>
+                <text class="cart-unit-price" wx:if="{{item.unitPriceText}}">单价：{{item.unitPriceText}}</text>
+              </view>
+              <text class="cart-subtotal">{{item.subtotalText}}</text>
             </view>
-            <view class="line-right">
-              <text class="line-subtotal">{{item.subtotalText}}</text>
-              <view class="cart-line-actions">
-                <text class="cart-action" data-id="{{item.nxOrderId}}" catchtap="onEditCartLine">修改</text>
-                <text class="cart-action danger" data-id="{{item.nxOrderId}}" catchtap="onDeleteCartLine">删除</text>
+            <view class="cart-supplier-card" wx:if="{{item.supplier}}">
+              <image class="cart-supplier-logo" src="{{item.supplier.supplierLogo || '/images/logo.jpg'}}" mode="aspectFill" />
+              <view class="cart-supplier-info">
+                <view class="cart-supplier-name-row">
+                  <text class="cart-supplier-name">{{item.supplier.supplierName}}</text>
+                  <image class="cart-supplier-verified" src="/images/correct.svg" mode="aspectFit" />
+                </view>
+                <text class="cart-supplier-addr" wx:if="{{item.supplier.supplierAddress}}">{{item.supplier.supplierAddress}}</text>
+              </view>
+              <view class="cart-supplier-phone" wx:if="{{item.supplier.supplierPhone}}" data-phone="{{item.supplier.supplierPhone}}" catchtap="onCallSupplier">
+                <view class="cart-phone-icon">☎</view>
+                <text class="cart-phone-num">{{item.supplier.supplierPhoneDisplay}}</text>
               </view>
             </view>
           </view>
         </view>
 
-        <view class="section-block" wx:if="{{pendingPriceLines.length}}">
-          <view class="section-head">
+        <view class="section-block cart-section" wx:if="{{pendingPriceLines.length}}">
+          <view class="section-head section-head-divider">
             <text class="section-title">未知价格商品</text>
-            <text class="section-count">{{pendingPriceLines.length}}项</text>
+            <text class="section-count">{{pendingPriceLines.length}} 项</text>
           </view>
-          <view class="cart-line-row" wx:for="{{pendingPriceLines}}" wx:key="nxOrderId">
-            <view class="cart-check {{item.selected ? 'checked' : ''}}" data-id="{{item.nxOrderId}}" bindtap="onToggleLine">
-              <text wx:if="{{item.selected}}">✓</text>
-            </view>
-            <view class="cart-line-body">
-              <view class="line-name">{{item.goodsName}}</view>
-              <view class="line-meta">
-                <text class="line-qty">{{item.quantity}}{{item.standard}}</text>
-                <text class="line-tag pending">待称重确认</text>
-                <text class="line-tag supplier" wx:if="{{!item.hasSupplier}}">待分配批发商</text>
+          <view class="cart-item-card {{item.paymentProcessing ? 'is-payment-locked' : ''}}" wx:for="{{pendingPriceLines}}" wx:key="nxOrderId">
+            <view class="cart-item-top">
+              <view class="cart-check {{item.selected ? 'checked' : ''}} {{item.paymentProcessing ? 'disabled' : ''}}" data-id="{{item.nxOrderId}}" catchtap="onToggleLine">
+                <text wx:if="{{item.selected}}">✓</text>
               </view>
+              <image class="cart-goods-img" src="{{item.goodsImage}}" mode="aspectFill" />
+              <view class="cart-goods-info">
+                <view class="cart-goods-head">
+                  <text class="cart-goods-name">{{item.goodsName}}</text>
+                  <text class="cart-menu-btn" wx:if="{{!item.paymentProcessing && item.editable !== false}}" data-id="{{item.nxOrderId}}" catchtap="onCartLineMenu">···</text>
+                </view>
+                <view class="cart-qty-row">
+                  <text class="cart-qty">{{item.quantity}}{{item.standard}}</text>
+                  <text class="cart-tag cart-tag-pay" wx:if="{{item.paymentProcessing}}">{{item.paymentProcessingMessage || '支付处理中'}}</text>
+                  <text class="cart-tag cart-tag-pending" wx:else>待称重确认</text>
+                  <text class="cart-tag cart-tag-wait" wx:if="{{!item.hasSupplier}}">待分配批发商</text>
+                </view>
+                <text class="cart-unit-price pending-hint">价格待称重确认 · 不计入本次支付</text>
+              </view>
+              <text class="cart-subtotal pending">待确认</text>
             </view>
-            <view class="line-right">
-              <text class="line-subtotal pending">待确认</text>
-              <view class="cart-line-actions">
-                <text class="cart-action" data-id="{{item.nxOrderId}}" catchtap="onEditCartLine">修改</text>
-                <text class="cart-action danger" data-id="{{item.nxOrderId}}" catchtap="onDeleteCartLine">删除</text>
+            <view class="cart-supplier-card" wx:if="{{item.supplier}}">
+              <image class="cart-supplier-logo" src="{{item.supplier.supplierLogo || '/images/logo.jpg'}}" mode="aspectFill" />
+              <view class="cart-supplier-info">
+                <view class="cart-supplier-name-row">
+                  <text class="cart-supplier-name">{{item.supplier.supplierName}}</text>
+                  <image class="cart-supplier-verified" src="/images/correct.svg" mode="aspectFit" />
+                </view>
+                <text class="cart-supplier-addr" wx:if="{{item.supplier.supplierAddress}}">{{item.supplier.supplierAddress}}</text>
+              </view>
+              <view class="cart-supplier-phone" wx:if="{{item.supplier.supplierPhone}}" data-phone="{{item.supplier.supplierPhone}}" catchtap="onCallSupplier">
+                <view class="cart-phone-icon">☎</view>
+                <text class="cart-phone-num">{{item.supplier.supplierPhoneDisplay}}</text>
               </view>
             </view>
           </view>
@@ -108,7 +144,7 @@
         </view>
         <text class="checkout-notice" wx:if="{{checkoutNotice}}">{{checkoutNotice}}</text>
       </view>
-      <view class="checkout-btn {{selectedIds.length ? '' : 'disabled'}}" bindtap="onGoCheckout">去结算</view>
+      <view class="checkout-btn {{selectedIds.length && !checkoutBlocked ? '' : 'disabled'}}" bindtap="onGoCheckout">去结算</view>
     </view>
   </block>
 

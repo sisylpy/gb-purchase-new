@@ -39,6 +39,14 @@ function buildBillPendingView(bill) {
     ? bill.pendingPriceItemCount
     : (bill.pendingItemCount || 0);
   var supplement = Number(bill.supplementDue || 0);
+  var payState = bill.billPayState || bill.payStatus || '';
+  if (payState === BILL_PAY.AWAIT_FIRST_PAY) {
+    var due = bill.payAmount || bill.knownTotal || bill.knownPayAmount || '0.00';
+    return {
+      statusText: '待支付 ¥' + due,
+      pendingNotice: '该采购单尚未完成首付，会阻塞新的购物车结算。本地测试可先清理该 bill，或后续接入 bill/payFirst 微信支付。'
+    };
+  }
   return {
     statusText: supplement > 0 ? '待补款' : '已知价已支付',
     pendingNotice: pending > 0

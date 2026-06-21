@@ -1,5 +1,5 @@
 /**
- * 采购单详情（checkoutConfirm 已含已知价支付，此处仅展示状态；补款另走 paySupplement）
+ * 采购单详情（checkoutPay 成功后展示；补款另走 paySupplement）
  */
 var platformCart = require('../../utils/platformCart');
 var platformCartApi = require('../../services/platformCart');
@@ -51,8 +51,9 @@ Page({
       billId: info.billId || info.outstandingBillId,
       billPayState: info.billPayState || info.payStatus,
       payPhase: info.payPhase,
+      payAmount: info.payAmount,
       knownTotal: info.knownTotal || info.knownPayAmount || info.payAmount || '0.00',
-      paidTotal: info.paidTotal != null ? info.paidTotal : (info.knownTotal || info.payAmount || '0.00'),
+      paidTotal: info.paidTotal != null ? info.paidTotal : '0.00',
       supplementDue: supplementDue,
       supplierName: info.supplierName,
       pendingPriceItemCount: info.pendingPriceItemCount || info.pendingItemCount || 0,

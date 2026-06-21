@@ -30,6 +30,32 @@
   padding-bottom: 280rpx;
 }
 
+.cart-pay-banner {
+  margin: 0 24rpx 16rpx;
+  padding: 20rpx 24rpx;
+  background: #fff7e6;
+  border: 1rpx solid #ffe7ba;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  color: #d48806;
+  line-height: 1.5;
+}
+
+.cart-item-card.is-payment-locked {
+  opacity: 0.92;
+}
+
+.cart-check.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.cart-tag-pay {
+  background: #fff7e6;
+  color: #d48806;
+  border: 1rpx solid #ffd591;
+}
+
 .cart-bottom-spacer {
   height: 280rpx;
 }
@@ -59,16 +85,21 @@
 }
 
 .cart-check {
-  width: 40rpx;
-  height: 40rpx;
+  width: 36rpx;
+  height: 36rpx;
   border-radius: 50%;
-  border: 2rpx solid #ccc;
+  border: 2rpx solid #d0d0d0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #fff;
   flex-shrink: 0;
+  margin-top: 42rpx;
+}
+
+.checkout-select-all .cart-check {
+  margin-top: 0;
 }
 
 .cart-check.checked {
@@ -207,32 +238,242 @@
 .section-block {
   margin: 20rpx 24rpx 0;
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.cart-section {
+  padding-bottom: 8rpx;
 }
 
 .section-block .section-head {
-  padding-left: 24rpx;
-  padding-right: 24rpx;
+  padding: 24rpx 28rpx 20rpx;
+}
+
+.section-head-divider {
+  border-bottom: 1rpx solid #f0f0f0;
 }
 
 .section-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8rpx 8rpx 16rpx;
 }
 
 .section-title {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 700;
-  color: #333;
+  color: #1a1a1a;
 }
 
 .section-count {
+  font-size: 26rpx;
+  color: #187e6e;
+  font-weight: 500;
+}
+
+/* ---- 购物车商品卡片 ---- */
+.cart-item-card {
+  padding: 24rpx 28rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.cart-item-card:last-child {
+  border-bottom: none;
+}
+
+.cart-item-top {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cart-goods-img {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  background: #f5f5f5;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.cart-goods-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
+  padding-right: 12rpx;
+}
+
+.cart-goods-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+
+.cart-goods-name {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.cart-menu-btn {
+  flex-shrink: 0;
+  font-size: 36rpx;
+  color: #bbb;
+  line-height: 1;
+  letter-spacing: 2rpx;
+  padding: 0 4rpx;
+}
+
+.cart-qty-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+
+.cart-qty {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.cart-tag {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  line-height: 1.2;
+}
+
+.cart-tag-confirmed {
+  background: #e8f5f2;
+  color: #187e6e;
+}
+
+.cart-tag-supplier {
+  background: #eef5ff;
+  color: #409eff;
+}
+
+.cart-tag-pending {
+  background: #fff3e0;
+  color: #e6a23c;
+}
+
+.cart-tag-wait {
+  background: #f5f5f5;
+  color: #888;
+}
+
+.cart-unit-price {
+  display: block;
+  margin-top: 10rpx;
   font-size: 24rpx;
   color: #999;
+}
+
+.cart-unit-price.pending-hint {
+  color: #e6a23c;
+  font-size: 22rpx;
+}
+
+.cart-subtotal {
+  flex-shrink: 0;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #187e6e;
+  line-height: 1.2;
+  margin-left: 8rpx;
+  padding-top: 4rpx;
+}
+
+.cart-subtotal.pending {
+  font-size: 28rpx;
+  color: #ccc;
+  font-weight: 500;
+}
+
+/* ---- 批发商信息卡片 ---- */
+.cart-supplier-card {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: #f8faf9;
+  border: 1rpx solid #e8ecea;
+  border-radius: 16rpx;
+  gap: 16rpx;
+}
+
+.cart-supplier-logo {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #fff;
+  flex-shrink: 0;
+  border: 1rpx solid #eee;
+}
+
+.cart-supplier-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-supplier-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.cart-supplier-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.cart-supplier-verified {
+  width: 28rpx;
+  height: 28rpx;
+  flex-shrink: 0;
+}
+
+.cart-supplier-addr {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.cart-supplier-phone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6rpx;
+}
+
+.cart-phone-icon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #187e6e;
+  color: #fff;
+  font-size: 24rpx;
+  line-height: 48rpx;
+  text-align: center;
+}
+
+.cart-phone-num {
+  font-size: 20rpx;
+  color: #666;
+  white-space: nowrap;
 }
 
 .platform-line {
