@@ -1279,7 +1279,7 @@ Page({
     } else if (goods.nxGoodsFile) {
       imageUrl = this.data.url + goods.nxGoodsFile;
     } else {
-      imageUrl = '/images/logo.jpg';
+      imageUrl = '/images/logo.png';
     }
     this.setData({
       showImageModal: true,

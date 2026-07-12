@@ -33,7 +33,8 @@ var dateUtils = require('../../lib/dateUtil.js');
 ├── subPackage-charts/     # 统计子包
 ├── subPackage-goods/      # 商品子包
 ├── subPackage-mendian/    # 门店子包
-└── subPackage-supplier/   # 供应商子包
+└── subPackage-jrdh/        # 供货商端（接单/称重/结算）
+    └── subPackage-mendian/pages/supplier/  # 餐馆管供货商
 ```
 
 ## 路径引用规范

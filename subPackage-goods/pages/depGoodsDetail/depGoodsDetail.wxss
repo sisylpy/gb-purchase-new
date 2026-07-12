@@ -1,5 +1,107 @@
 page {
   background: #f5f5f5;
+  height: 100%;
+}
+
+.page-wrap {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.page-body {
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.page-bottom-spacer {
+  height: 140rpx;
+}
+
+.page-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 32rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1rpx solid #eee;
+  z-index: 10;
+}
+
+.page-footer .saveBtn {
+  width: 100%;
+  margin-left: 0;
+  line-height: 92rpx;
+  height: 92rpx;
+  font-size: 36rpx;
+}
+
+.card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 28rpx 32rpx;
+  font-size: 32rpx;
+}
+
+.card--mt {
+  margin-top: 16rpx;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 14rpx 0;
+}
+
+.info-row--name {
+  padding-top: 8rpx;
+  padding-bottom: 20rpx;
+}
+
+.info-row--half {
+  flex-wrap: wrap;
+}
+
+.label {
+  flex-shrink: 0;
+  margin-right: 16rpx;
+  line-height: 50rpx;
+  font-size: 32rpx;
+}
+
+.goods-name {
+  flex: 1;
+  line-height: 50rpx;
+  font-size: 36rpx;
+  word-break: break-all;
+}
+
+.info-value {
+  flex: 1;
+  line-height: 50rpx;
+  font-size: 32rpx;
+}
+
+.pack-spec-tag {
+  margin-left: 12rpx;
+  font-size: 30rpx;
+  color: #888;
+  line-height: 50rpx;
+}
+
+.pack-spec-text {
+  color: #666;
+}
+
+.half-col {
+  width: 50%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10rpx 0;
+  box-sizing: border-box;
 }
 
 .half-row {
@@ -13,6 +115,89 @@ page {
   white-space: nowrap;
 }
 
+.section-block {
+  padding: 24rpx 0 8rpx;
+  margin-top: 8rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.section-label {
+  display: block;
+  margin-bottom: 20rpx;
+  line-height: 48rpx;
+  font-size: 32rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 32rpx;
+  margin-bottom: 8rpx;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.radio {
+  font-size: 34rpx;
+  margin-right: 32rpx;
+  margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+}
+
+.radio radio {
+  margin-right: 10rpx;
+  transform: scale(1);
+}
+
+.action-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 96rpx;
+  padding: 20rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.action-row-main {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+}
+
+.action-label {
+  flex-shrink: 0;
+  margin-right: 16rpx;
+  font-size: 32rpx;
+}
+
+.action-value {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 8rpx;
+  border-bottom: 1rpx solid #15b5bb;
+  line-height: 52rpx;
+  font-size: 34rpx;
+  color: #333;
+}
+
+.switch-row {
+  min-height: 108rpx;
+  padding: 28rpx 0;
+  align-items: center;
+  font-size: 32rpx;
+}
+
+.card-footer-inner {
+  padding: 24rpx 32rpx;
+}
+
 .inputAddGoods {
   border-bottom: 1px solid rgb(233, 231, 231);
   width: 100%;
@@ -23,12 +208,14 @@ page {
 
 .saveBtn {
   width: 80%;
-  line-height: 80rpx;
+  line-height: 88rpx;
+  height: 88rpx;
   background: rgb(86, 87, 87);
   color: #fff;
   margin-left: 10%;
   border-radius: 10rpx;
   text-align: center;
+  font-size: 36rpx;
 }
 
 .saveBtn.is-active {
@@ -48,50 +235,6 @@ page {
 .mainBack {
   background: #f5f5f5;
   border-radius: 16rpx 16rpx 0 0;
-}
-
-/* 废弃时间弹窗底部按钮 */
-.fresh-footer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 24rpx;
-  padding: 8rpx 28rpx 36rpx;
-  box-sizing: border-box;
-}
-
-.fresh-btn {
-  flex: 1;
-  box-sizing: border-box;
-  padding: 24rpx 20rpx;
-  font-size: 30rpx;
-  font-weight: 500;
-  text-align: center;
-  line-height: 1.35;
-  border-radius: 12rpx;
-}
-
-.fresh-btn--cancel {
-  color: #425042;
-  background: #f1f3f2;
-  border: 2rpx solid #dfe3e1;
-}
-
-.fresh-btn--confirm {
-  color: #9aa29a;
-  background: #e8ebea;
-  border: 2rpx solid #d5dad7;
-}
-
-.fresh-btn--confirm.is-active {
-  color: #ffffff;
-  background: linear-gradient(145deg, #1a8a78 0%, #187e6e 45%, #146b5c 100%);
-  border-color: #146b5c;
-  box-shadow: 0 6rpx 16rpx rgba(24, 126, 110, 0.28);
-}
-
-.fresh-btn-hover {
-  opacity: 0.88;
 }
 
 .red {
@@ -132,7 +275,7 @@ page {
 
 .store-sheet-cancel {
   color: #999;
-  font-size: 28rpx;
+  font-size: 32rpx;
 }
 
 .store-list {
@@ -144,7 +287,7 @@ page {
 .store-item {
   padding: 28rpx 0;
   border-bottom: 1px solid #f0f0f0;
-  font-size: 30rpx;
+  font-size: 34rpx;
 }
 
 .store-item-hover {

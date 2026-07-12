@@ -1,0 +1,253 @@
+// 公共基础层：与 subPackage-jrdh/utils/orderGoodsFmt.wxs 共享的纯函数已抽至 /wxs/orderGoodsFmt.base.wxs
+var base = require('../wxs/orderGoodsFmt.base.wxs');
+
+// 复用公共基础层函数，避免重复实现
+var isValid = base.isValid;
+var isPositiveNum = base.isPositiveNum;
+var hasText = base.hasText;
+var smallPackSpec = base.smallPackSpec;
+var cartonPackSpec = base.cartonPackSpec;
+var packSpec = base.packSpec;
+var resolveOrderQty = base.resolveOrderQty;
+var orderQtyLabel = base.orderQtyLabel;
+var hasOrderStandardScale = base.hasOrderStandardScale;
+var formatQtyNum = base.formatQtyNum;
+var isScalePurGoods = base.isScalePurGoods;
+var purGoodsScaleUnit = base.purGoodsScaleUnit;
+var purGoodsScaleFactor = base.purGoodsScaleFactor;
+var buildPurItem = base.buildPurItem;
+var resolveOrderScalePrice = base.resolveOrderScalePrice;
+var resolveOrderScaleQty = base.resolveOrderScaleQty;
+var orderUnitPriceForCompare = base.orderUnitPriceForCompare;
+var isOrderPriceHigh = base.isOrderPriceHigh;
+
+function purGoodsOutQty(item) {
+  if (!item) {
+    return '';
+  }
+  if (!isScalePurGoods(item)) {
+    if (isPositiveNum(item.gbDpgBuyQuantity)) {
+      var baseUnit = item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsStandardname : '';
+      return item.gbDpgBuyQuantity + baseUnit;
+    }
+    return '';
+  }
+  var scaleUnit = purGoodsScaleUnit(item);
+  if (isPositiveNum(item.gbDpgBuyScaleQuantity)) {
+    return item.gbDpgBuyScaleQuantity + scaleUnit;
+  }
+  var orders = item.gbDepartmentOrdersEntities || [];
+  var totalScale = 0;
+  var hasScaleWeight = false;
+  for (var i = 0; i < orders.length; i++) {
+    if (isPositiveNum(orders[i].gbDoScaleWeight)) {
+      totalScale = totalScale + parseFloat(orders[i].gbDoScaleWeight);
+      hasScaleWeight = true;
+    }
+  }
+  if (hasScaleWeight) {
+    return formatQtyNum(totalScale) + scaleUnit;
+  }
+  var factor = purGoodsScaleFactor(item);
+  if (isPositiveNum(item.gbDpgBuyQuantity) && factor > 0) {
+    return formatQtyNum(parseFloat(item.gbDpgBuyQuantity) / factor) + scaleUnit;
+  }
+  return '';
+}
+
+function hasPurGoodsOutQty(item) {
+  return hasText(purGoodsOutQty(item));
+}
+
+function orderOutQty(orders, item) {
+  if (!orders) {
+    return '';
+  }
+  if (hasOrderStandardScale(orders)) {
+    var scaleUnit = orders.gbDoStandard || purGoodsScaleUnit(item);
+    if (isPositiveNum(orders.gbDoScaleWeight)) {
+      return orders.gbDoScaleWeight + scaleUnit;
+    }
+    if (isPositiveNum(orders.gbDoWeight)) {
+      var factor = parseFloat(orders.gbDoDsStandardScale);
+      if (factor > 0) {
+        return formatQtyNum(parseFloat(orders.gbDoWeight) / factor) + scaleUnit;
+      }
+    }
+    return '';
+  }
+  if (isPositiveNum(orders.gbDoWeight)) {
+    var unit = item && item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsStandardname : '';
+    return orders.gbDoWeight + unit;
+  }
+  return '';
+}
+
+function hasOrderOutQty(orders, item) {
+  return hasText(orderOutQty(orders, item));
+}
+
+function purRowOutQty(pur, goods) {
+  var item = buildPurItem(pur, goods);
+  return item ? purGoodsOutQty(item) : '';
+}
+
+function hasPurRowOutQty(pur, goods) {
+  return hasText(purRowOutQty(pur, goods));
+}
+
+function singleOrderOutQty(order) {
+  if (!order) {
+    return '';
+  }
+  var item = {
+    gbDpgStandard: order.gbDoStandard,
+    gbDistributerGoodsEntity: order.gbDistributerGoodsEntity,
+  };
+  return orderOutQty(order, item);
+}
+
+function hasSingleOrderOutQty(order) {
+  return hasText(singleOrderOutQty(order));
+}
+
+function orderOutPriceLabel(orders, item) {
+  if (!orders) {
+    return '';
+  }
+  if (hasOrderStandardScale(orders)) {
+    var scalePrice = resolveOrderScalePrice(orders, item);
+    if (isPositiveNum(scalePrice)) {
+      var unit = orders.gbDoStandard || purGoodsScaleUnit(item);
+      return scalePrice + '元/' + unit;
+    }
+    return '';
+  }
+  if (isPositiveNum(orders.gbDoPrice)) {
+    var baseUnit = item && item.gbDistributerGoodsEntity
+      ? item.gbDistributerGoodsEntity.gbDgGoodsStandardname
+      : '';
+    return orders.gbDoPrice + '元/' + baseUnit;
+  }
+  return '';
+}
+
+function hasOrderOutPrice(orders, item) {
+  return hasText(orderOutPriceLabel(orders, item));
+}
+
+/** 订单行小计（大包装：箱价×箱数） */
+function orderOutSubtotal(orders, item) {
+  if (!orders) {
+    return '';
+  }
+  // 箱规：小计 = 箱价 × 箱数，避免 gbDoPrice(8.3) × gbDoWeight(24) 舍入成 199.x
+  if (hasOrderStandardScale(orders)) {
+    var scalePrice = resolveOrderScalePrice(orders, item);
+    var scaleQty = resolveOrderScaleQty(orders);
+    if (isPositiveNum(scalePrice) && isPositiveNum(scaleQty)) {
+      return (parseFloat(scalePrice) * parseFloat(scaleQty)).toFixed(1);
+    }
+  }
+  if (isPositiveNum(orders.gbDoSubtotal)) {
+    return orders.gbDoSubtotal;
+  }
+  if (isPositiveNum(orders.gbDoPrice) && isPositiveNum(orders.gbDoWeight)) {
+    return (parseFloat(orders.gbDoPrice) * parseFloat(orders.gbDoWeight)).toFixed(1);
+  }
+  return '';
+}
+
+function hasOrderOutSubtotal(orders, item) {
+  return hasText(orderOutSubtotal(orders, item));
+}
+
+/** 供货商是否已通过小程序提交批次 */
+function isSupplierInvolved(batch) {
+  if (!batch) {
+    return false;
+  }
+  var sellOpenId = batch.gbDpbSellUserOpenId;
+  return sellOpenId != null && sellOpenId !== '';
+}
+
+/** 订单行是否已有出库数量/单价/小计 */
+function hasOrderOutMeta(order, item) {
+  return hasOrderOutQty(order, item) || hasOrderOutPrice(order, item) || hasOrderOutSubtotal(order, item);
+}
+
+/**
+ * 首页订货列表：是否展示订单出库数量/单价/小计。
+ * 采购员代采或 OCR 录入：有出库数据即显示；供货商批次：待收货(status>1)后显示。
+ */
+function shouldShowOrderOutMeta(batch, order, item) {
+  if (isSupplierInvolved(batch)) {
+    var status = parseFloat(batch.gbDpbStatus);
+    return !isNaN(status) && status > 1;
+  }
+  return hasOrderOutMeta(order, item);
+}
+
+/** 门店代采订单（gbDoGoodsType == 6） */
+function isStoreProxyOrder(order) {
+  return order && order.gbDoGoodsType == 6;
+}
+
+/** 代采门店名称，用于订单行前展示 */
+function proxyStoreName(order, storeList) {
+  if (!isStoreProxyOrder(order)) {
+    return '';
+  }
+  if (hasText(order.gbDoToDepartmentName)) {
+    return order.gbDoToDepartmentName + '';
+  }
+  var depId = order.gbDoToDepartmentId;
+  if (!depId || !storeList || !storeList.length) {
+    return '';
+  }
+  for (var i = 0; i < storeList.length; i++) {
+    var store = storeList[i];
+    if (store && store.gbDepartmentId == depId && hasText(store.gbDepartmentName)) {
+      return store.gbDepartmentName + '';
+    }
+  }
+  return '';
+}
+
+/** 代采门店标签文案，如「一店待采」 */
+function proxyStoreLabel(order, storeList) {
+  var name = proxyStoreName(order, storeList);
+  if (!name) {
+    return '';
+  }
+  return name + '待采';
+}
+
+module.exports = {
+  isValid: isValid,
+  isPositiveNum: isPositiveNum,
+  hasText: hasText,
+  smallPackSpec: smallPackSpec,
+  cartonPackSpec: cartonPackSpec,
+  packSpec: packSpec,
+  orderQtyLabel: orderQtyLabel,
+  purGoodsOutQty: purGoodsOutQty,
+  hasPurGoodsOutQty: hasPurGoodsOutQty,
+  orderOutQty: orderOutQty,
+  hasOrderOutQty: hasOrderOutQty,
+  purRowOutQty: purRowOutQty,
+  hasPurRowOutQty: hasPurRowOutQty,
+  singleOrderOutQty: singleOrderOutQty,
+  hasSingleOrderOutQty: hasSingleOrderOutQty,
+  orderOutPriceLabel: orderOutPriceLabel,
+  hasOrderOutPrice: hasOrderOutPrice,
+  orderOutSubtotal: orderOutSubtotal,
+  hasOrderOutSubtotal: hasOrderOutSubtotal,
+  isOrderPriceHigh: isOrderPriceHigh,
+  isSupplierInvolved: isSupplierInvolved,
+  hasOrderOutMeta: hasOrderOutMeta,
+  shouldShowOrderOutMeta: shouldShowOrderOutMeta,
+  isStoreProxyOrder: isStoreProxyOrder,
+  proxyStoreName: proxyStoreName,
+  proxyStoreLabel: proxyStoreLabel,
+};

@@ -1,0 +1,171 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="../../utils/orderGoodsFmt.wxs" module="fmt" />
+
+<template name="deptOrderTable">
+  <view class="dept-order-table-wrap {{extraClass}}">
+    <view class="dept-order-table-title">
+      <image src="/images/wd-applet-total-spend-ytd.png" class="dept-order-table-title-icon" mode="aspectFit" />
+      <text>门店订货明细</text>
+    </view>
+    <view class="dept-order-table">
+      <view class="dept-order-table-head">
+        <text class="dept-col dept-col-name">门店</text>
+        <text class="dept-col dept-col-qty">数量</text>
+        <text class="dept-col dept-col-price">单价</text>
+        <text class="dept-col dept-col-sub">小计</text>
+      </view>
+      <view
+        class="dept-order-table-row {{orderIndex + 1 == deptOrders.length ? 'is-last' : ''}}"
+        wx:for="{{deptOrders}}"
+        wx:for-item="orders"
+        wx:for-index="orderIndex"
+        wx:key="gbDepartmentOrdersId"
+      >
+        <view class="dept-col dept-col-name">
+          <block wx:if="{{orders.gbDoParentDepartmentName}}">
+            <text>{{orders.gbDoParentDepartmentName}} · {{orders.gbDoOrderDepartmentName}}</text>
+          </block>
+          <block wx:else>
+            <text>{{orders.gbDoOrderDepartmentName}}</text>
+          </block>
+        </view>
+        <view class="dept-col dept-col-qty">
+          <text wx:if="{{fmt.hasOrderQtyDisplay(orders, purItem)}}">{{fmt.orderQtyDisplay(orders, purItem)}}</text>
+          <text wx:else class="text-danger">-</text>
+        </view>
+        <view class="dept-col dept-col-price">
+          <text wx:if="{{fmt.hasOrderOutPrice(orders, purItem)}}">{{fmt.orderOutPriceLabel(orders, purItem)}}</text>
+          <text wx:else class="text-danger">-</text>
+        </view>
+        <view class="dept-col dept-col-sub">
+          <text wx:if="{{fmt.isPositiveNum(orders.gbDoSubtotal)}}">¥{{orders.gbDoSubtotal}}</text>
+          <text wx:else class="text-danger">-</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<view class="flex-column">
+
+  <view class="flex-column">
+      <view class="top_img_fixed"
+        style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+        <view class="flex-row" bindtap="toBack">
+          <view class=" flex-column-center">
+            <image src="../../../images/back-2.png" class="back_icon"></image>
+          </view>
+          <text class="">输入单价</text>
+        </view>
+      </view>
+      <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
+    </view>
+
+  <view class="section">
+    <view class="maodian flex-row" style="margin-top: {{statusBarHeight}}rpx;">
+      <view class="flex-row" wx:for="{{batch.gbDPGEntities}}" wx:for-index="firIndex">
+        <text id="NAV{{firIndex}}" style="width:{{windowWidth / (batch.gbDPGEntities.length)}}rpx;" wx:key="firIndex">
+        </text>
+      </view>
+    </view>
+
+    <view class="section_body" style="top:{{statusBarHeight + 110}}rpx">
+      <scroll-view class="tui-city-scroll-y p-20" scroll-y="true" scroll-into-view="NAV{{focusGoodsIndex}}{{focusOrderIndex}}" scroll-with-animation="true">
+        <view class="input_item {{item.gbDpgStatus >= 2 ? 'bg-white' : 'bg-light'}} {{index == focusGoodsIndex ? 'is-active' : ''}}" wx:for="{{batch.gbDPGEntities}}" wx:key="gbDistributerPurchaseGoodsId" wx:for-index="index" id="NAV{{index}}">
+          <view class="flex-column input-goods-card" style="width: {{windowWidth - 40}}rpx;">
+            <view class="flex-row-wrap input-goods-title">
+              <text class="goods-index">{{index + 1}}.</text>
+              <text class="goods-name-text">{{item.gbDistributerGoodsName}}</text>
+              <text class="font-md gray pack-spec" wx:if="{{fmt.hasGoodsDetailLabel(item.gbDistributerGoodsEntity)}}">{{fmt.goodsDetailLabel(item.gbDistributerGoodsEntity)}}</text>
+              <text class="font-md gray pack-spec" wx:if="{{fmt.hasTitlePackSpec(item.gbDistributerGoodsEntity)}}">{{fmt.titlePackSpec(item.gbDistributerGoodsEntity)}}</text>
+            </view>
+            <view class="input-detail-block">
+              <view class="flex-row input-price-row font-lg" bindtap="changeFocusIndex" data-index="{{index}}">
+                <text class="mr-10">今日单价:</text>
+                <block wx:if="{{fmt.useCartonPrice(item)}}">
+                  <view class="inputTotal flex-row mr-10" style="width:{{(windowWidth - 240)/2}}rpx;">
+                    <text class="input_number" wx:if="{{item.gbDpgBuyScalePrice !== null && item.gbDpgBuyScalePrice !== '0.0' && item.gbDpgBuyScalePrice !== undefined}}">{{item.gbDpgBuyScalePrice}}</text>
+                    <view class='analog_cursor {{index == focusGoodsIndex ? "is-active" : "" }}'></view>
+                  </view>
+                  <text>元/{{fmt.cartonPriceUnit(item)}}</text>
+                </block>
+                <block wx:else>
+                  <view class="inputTotal flex-row mr-10" style="width:{{(windowWidth - 240)/2}}rpx;">
+                    <text class="input_number" wx:if="{{item.gbDpgBuyPrice !== null && item.gbDpgBuyPrice !== '0.0' && item.gbDpgBuyPrice !== undefined}}">{{item.gbDpgBuyPrice}}</text>
+                    <view class='analog_cursor {{index == focusGoodsIndex ? "is-active" : "" }}'></view>
+                  </view>
+                  <text>元/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+                </block>
+              </view>
+
+              <block wx:if="{{item.gbDepartmentOrdersEntities.length > 0}}">
+                <template
+                  is="deptOrderTable"
+                  data="{{deptOrders: item.gbDepartmentOrdersEntities, purItem: item, extraClass: 'dept-order-table-lg'}}"
+                />
+              </block>
+
+              <view class="flex-row-reverse input-total-row font-md">
+                <text class="font-bold">{{item.gbDpgBuySubtotal !== null && item.gbDpgBuySubtotal !== '0.0' && item.gbDpgBuySubtotal !== undefined ? item.gbDpgBuySubtotal : ' '}}元</text>
+                <text>总小计:</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="bottom_place" style="height:{{!lastInput ? windowHeight : 160}}rpx;"></view>
+      </scroll-view>
+    </view>
+  </view>
+</view>
+
+<view class='customize_key_board  flex-row {{lastInput ? "hidden" : ""}}'>
+
+  <view class="input_number_part">
+    <view class="num_container flex-column-center " style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="7"> 7</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="8"> 8</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="9"> 9</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="4"> 4</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="5"> 5</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="6"> 6</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="1"> 1</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="2"> 2</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="3"> 3</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="del"> X</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="0"> 0</view>
+    </view>
+    <view class="num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth}}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="num" hover-class="numHover" style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value=".">.</view>
+    </view>
+  </view>
+
+  <view class="flex-column">
+    <view class="double_num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth }}rpx; line-height:{{numContainerWidth}}rpx;">
+      <view class="double_num " style="width:{{numWidth}}rpx; height:{{numWidth}}rpx; line-height:{{numWidth}}rpx;" bindtap="inputValue" data-value="close" hover-class="numHover">关闭</view>
+    </view>
+
+    <view class="double_num_container flex-column-center" style="width:{{numContainerWidth}}rpx; height:{{numContainerWidth * 3 + 40 }}rpx; line-height:{{numContainerWidth * 3 + 40 }}rpx;">
+      <view class="double_num1 save_double_btn" style="width:{{numWidth}}rpx; height:{{numWidth * 3 + 70}}rpx; line-height:{{numWidth * 3 + 70}}rpx;" bindtap="inputValue" data-value="next" hover-class="numHover">保存</view>
+    </view>
+  </view>
+</view>

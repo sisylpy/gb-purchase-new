@@ -1,0 +1,67 @@
+
+
+  <view class="flex flex-column">
+  <customer-navbar  style="height: {{navBarHeight}}rpx;" title="京采账本" avatar="/images/logo.png" button-text="设置" bindnavbuttontap="toEditUser"></customer-navbar>
+
+
+
+  <view class="flex-column center-content" style="margin-top: 40rpx;">
+
+<!-- <image src="{{url + 'uploadImage/imPurchase/say.png'}}" mode="aspectFill" class="p-30"/> -->
+<view class="flex-row p-30 font-lg">
+  🎉 恭喜你！成功邀请好友注册！
+</view>
+<view class="flex-row p-10 font-lg-2">
+  💎 你的邀请获得了 1000 点奖励！
+</view>
+<view class="flex-row p-10 font-lg-2">
+  等待好友注册成功奖励已发放至你的账户，快去查看吧！💰
+</view>
+<view class="flex-row p-10 font-lg-2">
+  继续邀请好友，更多奖励等着你！😊
+</view>
+
+<button style="width: {{windowWidth - 140}}rpx; background-color: #ee4502; line-height: 100rpx; height: 100rpx; margin-top: 100rpx; color: #fff; font-weight: 500;" class="font-md" open-type="share">继续邀请好友</button>
+
+</view>
+
+
+
+
+
+
+
+</view> 
+
+
+<!-- 供货商注册 -->
+<view class="overlay1 popup-mask {{isSellRegiste ? 'show' : 'hide'}}">
+  <view class="popup1 popup-container p-30">
+    <view class="">
+      <view class="">
+        <view class="center-content flex-column">
+          <text class="font-lg p-30">注册接单用户信息</text>
+        </view>
+        <view class="flex-row">
+          <text>用户头像</text>
+          <button class="avatar-wrapper" style="width: {{windowWidth - 220}}rpx;" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+            <image class="avatar" src="{{avatarUrl}}"></image>
+          </button>
+        </view>
+        <view class="flex-row">
+          <text class="mr-20">用户昵称</text>
+          <mp-form bindsubmit="formSubmit">
+            <mp-cells>
+              <mp-cell title="昵称">
+                <input type="nickname" bindinput="onNicknameInput" class="weui-input" placeholder="" />
+              </mp-cell>
+            </mp-cells>
+          </mp-form>
+        </view>
+      </view>
+    </view>
+    <view class="p-20 mt-30">
+      <button bindtap="save" class="register-btn {{canRegister ? 'is-active' : ''}}">注册</button>
+    </view>
+  </view>
+</view>

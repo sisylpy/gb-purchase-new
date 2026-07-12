@@ -1,5 +1,5 @@
 
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 
 <view class="flex flex-column">

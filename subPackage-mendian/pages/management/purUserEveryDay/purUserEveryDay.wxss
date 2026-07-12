@@ -72,6 +72,20 @@
   filter: brightness(0) saturate(100%) invert(60%) sepia(96%) saturate(1352%) hue-rotate(140deg) brightness(97%) contrast(89%);
 }
 
+/* 退货总额图标 */
+.return-total-icon {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 87, 34, 0.1) 100%);
+  border: 1rpx solid rgba(255, 152, 0, 0.2);
+}
+
+.return-total-icon .stats-icon-image {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(90%) saturate(1200%) hue-rotate(360deg) brightness(98%) contrast(92%);
+}
+
+.return-value {
+  color: #FF5722;
+}
+
 /* 统计内容 */
 .stats-content {
   display: flex;
@@ -86,7 +100,7 @@
 }
 
 .stats-value {
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: 700;
   color: #333;
   line-height: 1.2;
@@ -97,7 +111,8 @@
   width: 2rpx;
   height: 60rpx;
   background: linear-gradient(180deg, transparent 0%, #e0e0e0 50%, transparent 100%);
-  margin: 0 20rpx;
+  margin: 0 12rpx;
+  flex-shrink: 0;
 }
 
 /* 悬停效果 */

@@ -3,7 +3,7 @@
  * 使用 CommonJS 统一模块规范
  */
 
-var ENTRY_PAGE = '/pages/home/home';
+var ENTRY_PAGE = '/pages/index/index';
 
 Page({
   data: {

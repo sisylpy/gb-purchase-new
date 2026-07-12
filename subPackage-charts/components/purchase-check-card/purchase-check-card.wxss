@@ -15,13 +15,7 @@
   display: flex;
   align-items: center;
   gap: 12rpx;
-  margin-bottom: 20rpx;
-}
-
-.biz-header-right {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
+  margin-bottom: 16rpx;
 }
 
 .biz-icon-wrap {
@@ -56,9 +50,10 @@
   font-size: 22rpx;
   color: #1a73e8;
   background: #e8f0fe;
-  padding: 2rpx 12rpx;
+  padding: 4rpx 14rpx;
   border-radius: 999rpx;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .biz-scope-name {

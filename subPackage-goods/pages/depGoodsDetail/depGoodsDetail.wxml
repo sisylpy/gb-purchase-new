@@ -1,117 +1,109 @@
-<view class="flex flex-column">
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="部门商品" 
+<wxs module="packFmt" src="../../utils/packSpecFmt.wxs"></wxs>
+
+<view class="page-wrap flex flex-column">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="修改部门商品" 
     avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
-  <!-- 商品信息卡片 -->
-  <view class="flex-row-between bg-white" style="width:{{windowWidth}}rpx;">
-    <view class="flex-column p-20 font-md" style="width:{{windowWidth - 100}}rpx;">
-      
-      <!-- 基本信息：商品名 + 规格 -->
-      <view class="flex-row p-10">
-        <view class="half-row">
-          <text class="text-secondary flex-shrink-0 mr-10">商品:</text>
-            <text class="font-bold">{{depGoods.gbDdgDepGoodsName}}</text>
-        </view>
-        <view class="half-row">
-          <text class="text-secondary flex-shrink-0 mr-10">规格:</text>
-            <text class="">{{depGoods.gbDdgDepGoodsStandardname}}</text>
-          
-        </view>
+  <view class="page-body">
+    <!-- 商品信息卡片 -->
+    <view class="card bg-white">
+      <!-- 商品名称单独一行 -->
+      <view class="info-row info-row--name">
+        <text class="text-secondary label">商品:</text>
+        <text class="font-bold goods-name">{{depGoods.gbDdgDepGoodsName}}</text>
       </view>
 
-      <!-- 口味 + 单位重量 -->
-      <view class="flex-row-default p-10">
-        <view class="flex-row half-row">
-          <text class="text-secondary flex-shrink-0 mr-10">口味:</text>
-            <text class="shrink_change" wx:if="{{depGoods.gbDdgDepGoodsDetail !== null && depGoods.gbDdgDepGoodsDetail.length > 0}}">{{depGoods.gbDdgDepGoodsDetail}}</text>
-          
-        </view>
-        <view class="half-row">
-          <text class="text-secondary flex-shrink-0 mr-10">单位重量:</text>
-            <text class="pt-20 pb-20 shrink_change" wx:if="{{depGoods.gbDdgGoodsStandardWeight !== null && depGoods.gbDdgGoodsStandardWeight.length > 0}}">{{depGoods.gbDdgGoodsStandardWeight}}</text>
-       
-        </view>
+      <!-- 订货单位 -->
+      <view class="info-row">
+        <text class="text-secondary label">单位:</text>
+        <text class="info-value">{{depGoods.gbDdgDepGoodsStandardname}}</text>
       </view>
 
-    
-
-
-
-      <!-- 部门采购方式（覆盖批发商基础类型） -->
-      <view class="flex-column p-10 mb-20">
-        <view class="flex-column">
-          <text class="text-secondary flex-shrink-0 mr-10">部门采购方式:</text>
-            <radio-group class="radio-group" bindchange="radioDepTypeChange">
-              <label class="radio" wx:for="{{items}}" wx:key="name" style="font-size: 28rpx;margin-right: 10rpx;">
-                <radio value="{{item.name}}" checked="{{depGoods.gbDdgGoodsType == item.name ? 'true' : ''}}" style="margin-right: 4rpx;" />{{item.value}}
-              </label>
-            </radio-group>
-        </view>
+      <!-- 规格重量，如 500ml/瓶 -->
+      <view class="info-row" wx:if="{{packFmt.specWeight(depGoods)}}">
+        <text class="text-secondary label">规格重量:</text>
+        <text class="info-value">{{packFmt.specWeight(depGoods)}}</text>
       </view>
 
-      <!-- 代采门店 选择的门店 fatherId = depGoods.gbDdgGbDepartmentId -->
-      <view class="flex-row-between pt-20 pb-20" wx:if="{{depGoods.gbDdgGoodsType == 6}}" bind:tap="showStoreSelector" hover-class="hover">
-        <view class="flex-row">
-          <text class="mr-10 text-secondary">代采门店:</text>
-          <text class="border-bottom" style="width: {{windowWidth - 500}}rpx;border-bottom: 1px solid #15b5bb; height: 50rpx;">{{selectedStoreName || '请选择代采门店'}}</text>
+      <!-- 大包装，如 500ml*24瓶/箱 -->
+      <view class="info-row" wx:if="{{packFmt.cartonSpec(depGoods)}}">
+        <text class="text-secondary label">大包装:</text>
+        <text class="info-value pack-spec-text">{{packFmt.cartonSpec(depGoods)}}</text>
+      </view>
+
+      <!-- 口味 -->
+      <view class="info-row" wx:if="{{depGoods.gbDdgDepGoodsDetail}}">
+        <text class="text-secondary label">口味:</text>
+        <text class="info-value">{{depGoods.gbDdgDepGoodsDetail}}</text>
+      </view>
+
+      <!-- 部门采购方式 -->
+      <view class="section-block">
+        <text class="text-secondary section-label">部门采购方式:</text>
+        <radio-group class="radio-group" bindchange="radioDepTypeChange">
+          <label class="radio" wx:for="{{items}}" wx:key="name">
+            <radio value="{{item.name}}" checked="{{depGoods.gbDdgGoodsType == item.name ? 'true' : ''}}" />{{item.value}}
+          </label>
+        </radio-group>
+      </view>
+
+      <!-- 代采门店 -->
+      <view class="action-row" wx:if="{{canStoreProxyPurchase && depGoods.gbDdgGoodsType == 6}}" bind:tap="showStoreSelector" hover-class="hover">
+        <view class="action-row-main">
+          <text class="text-secondary action-label">代采门店:</text>
+          <text class="action-value">{{selectedStoreName || '请选择代采门店'}}</text>
         </view>
         <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
       </view>
 
-      <!-- 自动订货供货商（仅自动订货类型） -->
-      <view class="flex-row-between pt-20 pb-20" wx:if="{{depGoods.gbDdgGoodsType == 21}}" bind:tap="toSupplier" hover-class="hover">
-        <view class="flex-row">
-          <text class="mr-10 text-secondary">自动订货供货商:</text>
-          <text class="border-bottom" style="width: {{windowWidth - 500}}rpx;border-bottom: 1px solid #15b5bb; height: 50rpx;">{{goods.gbDistributerAppointSupplierEntity.nxJrdhsSupplierName}}</text>
+      <!-- 自动订货供货商 -->
+      <view class="action-row" wx:if="{{depGoods.gbDdgGoodsType == 21}}" bind:tap="toSupplier" hover-class="hover">
+        <view class="action-row-main">
+          <text class="text-secondary action-label">自动订货供货商:</text>
+          <text class="action-value">{{depGoods.gbDepAppointSupplierEntity.nxJrdhsSupplierName || '请选择供货商'}}</text>
         </view>
         <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
       </view>
-
-      <!-- 保存配置按钮 -->
-      <view class="saveBtn is-active" wx:if="{{depConfigChanged}}" bindtap="saveDepConfig">保存配置</view>
-
     </view>
 
-    
-  </view>
+    <!-- 保存按钮（编辑模式） -->
+    <view class="card-footer-inner" wx:if="{{showEdit}}">
+      <view class="saveBtn {{canSave ? 'is-active' : ''}}" bindtap="updateComGoods">保存</view>
+    </view>
 
-  <!-- 保存按钮（编辑模式） -->
-  <view class="p-20" wx:if="{{showEdit}}">
-    <view class="saveBtn {{canSave ? 'is-active' : ''}}" bindtap="updateComGoods">保存</view>
-  </view>
-
-  <!-- 管理区域 -->
-  <view class="flex-column" id="management">
-   
-
-    <!-- 停止订货（批发商级） -->
-    <view class="bg-white p-20 border-bottom flex-column">
-      <text class="text-secondary font-md">商品下架</text>
-     
-      <view class="flex-row-between pt-20 pb-20">
-        <text class="text-secondary flex-shrink-0 mr-10">停止订货(部门)</text>
+    <!-- 管理区域 -->
+    <view class="card bg-white card--mt">
+      <text class="text-secondary section-title">商品下架</text>
+      <view class="switch-row flex-row-between">
+        <text class="text-secondary">停止订货(部门)</text>
         <switch checked="{{depGoods.gbDdgDepGoodsPullOff == 1 ? 'checked' : ''}}" bindchange="switchDepPullOff" />
       </view>
     </view>
 
-    
+    <view class="page-bottom-spacer" wx:if="{{depConfigChanged}}"></view>
   </view>
+
+  <!-- 保存配置按钮固定底部 -->
+  <view class="page-footer" wx:if="{{depConfigChanged}}">
+    <view class="saveBtn is-active" bindtap="saveDepConfig">保存配置</view>
+  </view>
+</view>
 
 <!-- 代采门店选择弹窗 -->
 <view class="store-mask" wx:if="{{showStorePicker}}" bindtap="hideStoreSelector">
   <view class="store-sheet" catchtap="">
     <view class="store-sheet-header">
-      <text class="font-md font-bold">选择代采门店</text>
+      <text class="font-md text-secondary">选择代采门店</text>
       <text class="store-sheet-cancel" bindtap="hideStoreSelector">取消</text>
     </view>
-    <scroll-view scroll-y class="store-list">
-      <view wx:for="{{storeList}}" wx:key="gbDepartmentId" class="store-item" bindtap="onSelectStore" data-id="{{item.gbDepartmentId}}" data-name="{{item.gbDepartmentName}}" hover-class="store-item-hover">
-        <text>{{item.gbDepartmentName}}</text>
+    <scroll-view scroll-y class="store-list mb-15">
+      <view wx:for="{{storeList}}" wx:key="gbDepartmentId" class="flex-row-between p-20" bindtap="onSelectStore" data-id="{{item.gbDepartmentId}}" data-name="{{item.gbDepartmentName}}" hover-class="store-item-hover" style="width: {{windowWidth - 60}}rpx; ">
+        <text class="font-lg">{{item.gbDepartmentName}}</text>
+        <image wx:if="{{item.isSelected}}" src="/images/correct.png" mode="aspectFill" class="icon"/>
       </view>
       <view wx:if="{{storeList.length == 0}}" class="store-item">
         <text class="text-secondary">暂无可选门店</text>
       </view>
     </scroll-view>
   </view>
-</view>
 </view>

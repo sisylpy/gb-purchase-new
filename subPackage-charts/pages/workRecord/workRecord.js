@@ -6,7 +6,7 @@
  * - 流水记录：只展示原始记录，无分类标签
  *
  * 交互：
- * - 按"今天/昨天/具体日期"分组，同一天按时间升序（早在上，新在下）
+ * - 按"今天/昨天/具体日期"分组，日期与同一天内记录均按时间倒序（新在上，旧在下）
  * - 底部输入栏支持键盘自适应
  * - 下拉刷新 + 分页加载
  */
@@ -271,10 +271,7 @@ Page({
           that._prefetchSourceCardsForRecords(allRecords);
         });
 
-        // 首次加载完成后滚动到底部（最新记录）
-        if (!isLoadMore && grouped.length > 0) {
-          that._scrollToBottom();
-        }
+        // 倒序排列时最新记录在顶部，无需滚动
       })
       .catch(function (err) {
         console.error('[工作记录] 获取记录列表失败', err);
@@ -293,7 +290,14 @@ Page({
     var rawContent = raw.rawContent || raw.content || raw.message || raw.gbWorkRecordRawContent || '';
     var polishedContent = raw.polishedContent || raw.gbWorkRecordPolishedContent || '';
     var title = raw.title || raw.gbWorkRecordTitle || raw.gbWrTitle || '';
-    var createdAt = raw.createdAt || raw.createTime || raw.gbWorkRecordCreateTime || '';
+    var createdAt =
+      raw.recordedAt ||
+      raw.gbWrRecordedAt ||
+      raw.createdAt ||
+      raw.createTime ||
+      raw.gbWorkRecordCreateTime ||
+      raw.gbWrCreatedAt ||
+      '';
     var status = raw.aiStatus || raw.status || raw.gbWorkRecordStatus || 'SUCCESS';
 
     // 分类ID（后端直接返回）
@@ -400,13 +404,21 @@ Page({
   // ========== 时间解析 ==========
 
   _parseTime: function (timeStrOrDate) {
-    var date;
+    var date = null;
     if (timeStrOrDate instanceof Date) {
       date = timeStrOrDate;
-    } else {
-      date = timeStrOrDate ? new Date(String(timeStrOrDate).replace(/-/g, '/')) : new Date();
+    } else if (typeof timeStrOrDate === 'number' && isFinite(timeStrOrDate)) {
+      date = new Date(timeStrOrDate);
+    } else if (timeStrOrDate !== null && timeStrOrDate !== undefined && timeStrOrDate !== '') {
+      var str = String(timeStrOrDate).trim();
+      if (/^\d+$/.test(str)) {
+        date = new Date(parseInt(str, 10));
+      } else {
+        date = new Date(str.replace(/-/g, '/').replace('T', ' ').split('.')[0]);
+      }
     }
-    if (isNaN(date.getTime())) {
+    if (!date || isNaN(date.getTime())) {
+      console.warn('[工作记录] 无法解析时间，使用当前时刻:', timeStrOrDate);
       date = new Date();
     }
 
@@ -447,8 +459,10 @@ Page({
       map[d].push(record);
     });
 
-    // 提取日期键并排序（升序，旧日期在上）
-    var dates = Object.keys(map).sort();
+    // 提取日期键并排序（降序，最新日期在上）
+    var dates = Object.keys(map).sort(function (a, b) {
+      return b.localeCompare(a);
+    });
 
     // 构建分组数组
     var groups = dates.map(function (date) {
@@ -473,7 +487,9 @@ Page({
       return {
         dateKey: date,
         dateLabel: dateLabel,
-        records: map[date],
+        records: map[date].sort(function (a, b) {
+          return (b.timestamp || 0) - (a.timestamp || 0);
+        }),
       };
     });
 
@@ -607,8 +623,8 @@ Page({
           groupedRecords: grouped,
         });
 
-        // 滚动到新记录
-        that._scrollToBottom();
+        // 新记录排在最前，滚动到顶部
+        that._scrollToRecord(newRecord.id);
 
         wx.showToast({ title: '记录成功', icon: 'success', duration: 1200 });
       })
@@ -672,38 +688,16 @@ Page({
       });
   },
 
-  // ========== 滚动到底部 ==========
+  // ========== 滚动到指定记录 ==========
 
-  _scrollToBottom: function () {
+  _scrollToRecord: function (recordId) {
+    if (!recordId) return;
     var that = this;
-    var groups = that.data.groupedRecords;
-    if (!groups || !groups.length) return;
-
-    var lastGroup = groups[groups.length - 1];
-    var lastRecords = lastGroup.records;
-    if (!lastRecords || !lastRecords.length) return;
-
-    var lastRecord = lastRecords[lastRecords.length - 1];
-    var viewId = 'record-' + lastRecord.id;
-
-    // 由于 wx:key 不直接支持动态 id 作为 scroll-into-view，
-    // 这里通过设置 scrollIntoView 触发滚动（模板中未使用 id 列表滚动，可后续增强）
-    // 当前方案：简单设置一个标记触发滚动到底部
+    var viewId = 'record-' + recordId;
     that.setData({ scrollIntoView: viewId });
-
-    // 备用方案：延迟后通过 scrollTop 滚动
     setTimeout(function () {
-      var query = wx.createSelectorQuery();
-      query.select('.wr-scroll').boundingClientRect();
-      query.select('.wr-scroll').scrollOffset();
-      query.exec(function (res) {
-        var scrollRes = res[1];
-        if (scrollRes && scrollRes.scrollHeight) {
-          // 小程序 scroll-view 不支持直接设置 scrollTop 到最大值
-          // 但 adjust-position 已处理键盘场景
-        }
-      });
-    }, 100);
+      that.setData({ scrollIntoView: '' });
+    }, 300);
   },
 
   // ========== 返回上一页 ==========

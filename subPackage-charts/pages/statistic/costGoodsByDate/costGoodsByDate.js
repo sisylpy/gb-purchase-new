@@ -4,6 +4,21 @@ var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
 
+var COST_TAB_DEFS = [
+  { index: 0, type: 'sales', title: '售出成本', row: 'top', icon: '/images/money.png', iconClass: 'sales-icon', totalField: 'salesTotal', countField: 'produceCount' },
+  { index: 1, type: 'loss', title: '损耗成本', row: 'top', icon: '/images/warn.png', iconClass: 'loss-icon', totalField: 'lossTotal', countField: 'lossCount' },
+  { index: 2, type: 'waste', title: '废弃成本', row: 'top', icon: '/images/delete.png', iconClass: 'waste-icon', totalField: 'wasteTotal', countField: 'wasteCount' },
+  { index: 3, type: 'return', title: '退货成本', row: 'bottom', icon: '/images/warn.png', iconClass: 'return-icon', totalField: 'returnTotal', countField: 'returnCount' },
+  { index: 4, type: 'employeeMeal', title: '员工餐成本', row: 'bottom', icon: '/images/qiandaizi.png', iconClass: 'employee-meal-icon', totalField: 'employeeMealTotal', countField: 'employeeMealCount' },
+];
+
+var TYPE_TO_TAB_INDEX = {
+  sales: 0,
+  loss: 1,
+  waste: 2,
+  return: 3,
+  employeeMeal: 4,
+};
 
 Page({
 
@@ -16,7 +31,7 @@ Page({
     // 详细计算过程
     const totalHeight = windowInfo.windowHeight * globalData.rpxR;
     const navBarHeight = globalData.navBarHeight * globalData.rpxR;
-    const topAreaHeight = 200; // 200rpx为顶部区域、搜索区域、筛选区域和间距的预估高度
+    const topAreaHeight = 100;
     const scrollViewHeight = totalHeight - navBarHeight - topAreaHeight;
 
     // 滚动状态下的高度计算（隐藏日期选择行后）
@@ -76,74 +91,96 @@ Page({
    * 页面的初始数据
    */
   data: {
-    update: false, // 默认值
-    tabs: ["1", "2", "3"],
+    update: false,
     tab1Index: 0,
-    itemIndex: 0,
-    scrollViewHeight: 600, // 默认滚动视图高度
-    
-    // 分页相关字段
+    type: 'sales',
+    scrollViewHeight: 600,
+    costTabCards: [],
     totalPage: 0,
     totalCount: 0,
     limit: 10,
     currentPage: 1,
     isLoading: false,
-  
-    // 展开状态控制
-    expandedRows: {}, // 控制展开状态的对象
+    expandedRows: {},
     employeeMealTotal: 0,
     employeeMealCount: 0,
+    returnTotal: 0,
+    returnCount: 0,
+    produceArr: [],
+    salesTotal: 0,
+    lossTotal: 0,
+    wasteTotal: 0,
+    produceCount: 0,
+    lossCount: 0,
+    wasteCount: 0,
   },
 
   /**
    * 生命周期函数--监听页面加载disId=2&startDate=2025-09-01&stopDate=2025-09-01&dateType=month&fenxiType=costEcharts&searchDepId=-1&value=9999.5&allCostTotal=9999.5&id=-1&type=sales&hanzi=星期一
    */
+  _decodeQueryParam(value) {
+    if (value === undefined || value === null || value === '') {
+      return '';
+    }
+    try {
+      return decodeURIComponent(String(value));
+    } catch (e) {
+      return String(value);
+    }
+  },
+
+  /** 顶部支出总额：售出 + 损耗 + 废弃 + 员工餐，不含退货 */
+  _calcHeaderExpenseTotal(stats) {
+    var sales = parseFloat(stats.salesTotal) || 0;
+    var loss = parseFloat(stats.lossTotal) || 0;
+    var waste = parseFloat(stats.wasteTotal) || 0;
+    var employeeMeal = parseFloat(stats.employeeMealTotal) || 0;
+    return Math.round((sales + loss + waste + employeeMeal) * 100) / 100;
+  },
+
   onLoad: function (options) {
+    var type = options.type || 'sales';
+    var tabIndex = TYPE_TO_TAB_INDEX[type];
+    if (tabIndex === undefined) {
+      tabIndex = 0;
+      type = 'sales';
+    }
+
     this.setData({
-      name: options.name,
+      name: this._decodeQueryParam(options.name),
       disId: options.disId,
       greatId: options.id,
       startDate: options.startDate,
       stopDate: options.stopDate,
-      hanzi: options.hanzi,
+      hanzi: this._decodeQueryParam(options.hanzi),
       dateType: options.dateType,
       allCostTotal: options.allCostTotal,
       value: options.value,
-      type: options.type,
+      type: type,
+      tab1Index: tabIndex,
       fenxiType: options.fenxiType,
       searchDepId: options.searchDepId,
       url: apiUrl.server,
-    })
+    });
 
-
-    if (this.data.type == 'sales') {
-      this.setData({
-        tab1Index: 0,
-        itemIndex: 0,
-      })
-    }
-    if (this.data.type == 'loss') {
-      this.setData({
-        tab1Index: 1,
-        itemIndex: 1,
-      })
-    }
-    if (this.data.type == 'waste') {
-      this.setData({
-        tab1Index: 2,
-        itemIndex: 2,
-      })
-    }
-    if (this.data.type == 'employeeMeal') {
-      this.setData({
-        tab1Index: 3,
-        itemIndex: 3,
-      })
-    }
-   
-
+    this._syncCostTabCards();
     this._getGoodsCostStatistics();
+  },
 
+  _syncCostTabCards() {
+    var cards = COST_TAB_DEFS.map(function (def) {
+      return {
+        index: def.index,
+        type: def.type,
+        title: def.title,
+        row: def.row,
+        icon: def.icon,
+        iconClass: def.iconClass,
+        total: this.data[def.totalField] || 0,
+        count: this.data[def.countField] || 0,
+      };
+    }.bind(this));
+    this.setData({ costTabCards: cards });
   },
 
 
@@ -165,21 +202,20 @@ Page({
         if (res.result.code == 0) {
 
           this.setData({
-
-            value: res.result.data.allTotal,
-
+            value: this._calcHeaderExpenseTotal(res.result.data),
             salesTotal: res.result.data.salesTotal,
             lossTotal: res.result.data.lossTotal,
             wasteTotal: res.result.data.wasteTotal,
+            returnTotal: res.result.data.returnTotal || 0,
             employeeMealTotal: res.result.data.employeeMealTotal || 0,
             produceCount: res.result.data.produceCount,
             lossCount: res.result.data.lossCount,
             wasteCount: res.result.data.wasteCount,
+            returnCount: res.result.data.returnCount || 0,
             employeeMealCount: res.result.data.employeeMealCount || 0,
-
           });
 
-
+          this._syncCostTabCards();
           this._getInitData();
 
 
@@ -280,57 +316,26 @@ Page({
    * tabItme点击
    */
   onTab1Click(event) {
-    let index = event.currentTarget.dataset.index;
+    var index = parseInt(event.currentTarget.dataset.index, 10);
+    var type = event.currentTarget.dataset.type;
+    if (index === this.data.tab1Index && type === this.data.type) {
+      return;
+    }
+    this._switchTab(index, type);
+  },
 
+  _switchTab(index, type) {
     this.setData({
       tab1Index: index,
-      itemIndex: index,
-      type: event.currentTarget.dataset.type,
-      // 重置分页相关状态
+      type: type,
       currentPage: 1,
       totalPage: 0,
       totalCount: 0,
       isLoading: false,
-      // 重置商品数据
       produceArr: [],
-      // 重置当前标签页的初始化状态
-    }, () => {
+      expandedRows: {},
     });
-
     this._getInitData();
-
-
-    // 延迟检查 swiper-item 位置
-    setTimeout(() => {
-      this.checkSwiperItemPosition();
-    }, 500);
-  },
-
-  /**
-   * swiper切换完成事件 - 统一处理标签页切换逻辑
-   */
-  animationfinish(event) {
-    const currentIndex = event.detail.current;
-    const typeMap = ['sales', 'loss', 'waste', 'employeeMeal'];
-    const currentType = typeMap[currentIndex];
-
-
-    // 一次性更新所有状态
-    this.setData({
-      tab1Index: currentIndex,
-      itemIndex: currentIndex,
-      type: currentType,
-      currentPage: 1, // 重置分页
-      // 重置当前标签页的初始化状态
-    }, () => {
-      this._getInitData();
-
-
-      // 延迟检查 swiper-item 位置
-      setTimeout(() => {
-        this.checkSwiperItemPosition();
-      }, 500);
-    });
   },
 
   // 滚动监听事件
@@ -368,58 +373,9 @@ Page({
 
   // 导航栏按钮点击事件
   onNavTabClick(event) {
-    const {
-      index,
-      type
-    } = event.detail;
-
-    // 调用原有的标签页点击方法
-    this.onTab1Click({
-      currentTarget: {
-        dataset: {
-          index: index,
-          type: type
-        }
-      }
-    });
-  },
-
-  // 检查 swiper-item 位置信息
-  checkSwiperItemPosition() {
-
-    // 查询 swiper 容器
-    const swiperQuery = wx.createSelectorQuery().in(this);
-    swiperQuery.select('.swiper-box').boundingClientRect();
-
-    // 查询所有 swiper-item
-    const swiperItemQuery = wx.createSelectorQuery().in(this);
-    swiperItemQuery.selectAll('swiper-item').boundingClientRect();
-
-    // 查询当前激活的 swiper-item
-    const currentSwiperItemQuery = wx.createSelectorQuery().in(this);
-    currentSwiperItemQuery.select(`swiper-item:nth-child(${this.data.tab1Index + 1})`).boundingClientRect();
-
-    // 查询第二个 swiper-item 的具体位置
-    const secondSwiperItemQuery = wx.createSelectorQuery().in(this);
-    secondSwiperItemQuery.select('swiper-item:nth-child(2)').boundingClientRect();
-
-    // 执行查询
-    swiperQuery.exec((swiperRes) => {
-    });
-
-    swiperItemQuery.exec((itemsRes) => {
-      itemsRes.forEach((item, index) => {
-      });
-    });
-
-    currentSwiperItemQuery.exec((currentRes) => {
-    });
-
-    secondSwiperItemQuery.exec((secondRes) => {
-      if (secondRes[0]) {
-      }
-    });
-
+    var index = parseInt(event.detail.index, 10);
+    var type = event.detail.type;
+    this._switchTab(index, type);
   },
 
 

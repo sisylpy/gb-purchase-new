@@ -49,7 +49,7 @@
             <view class="flex-row-default  border-bottom middle p-20 bg-white" wx:for="{{depGoodsArrAi}}" wx:key="gbDepartmentDisGoodsId" wx:for-item="goods" wx:for-index="depGoodsIndex">
 
               <view class="img-wrapper">
-                    <image bindtap="showImageModal" data-goods="{{goods}}" src="{{goods.gbDisGoodsFile !== null ? url + goods.gbDisGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="dep_goods_url mr-20" />
+                    <image bindtap="showImageModal" data-goods="{{goods}}" src="{{goods.gbDisGoodsFile !== null ? url + goods.gbDisGoodsFile : '/images/logo.png'}}" mode="aspectFill" class="dep_goods_url mr-20" />
                   </view>
 
 
@@ -169,7 +169,7 @@
 
               <view class="flex-row-default  product-item p-10">
                   <view class="flex-row-default">
-                    <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons.nxGoodsFile !== null ? url + sons.nxGoodsFile : '/images/logo.jpg'}}" mode="aspectFill" class="goods_item mr-20" />
+                    <image bindtap="showImageModal" data-goods="{{sons}}" src="{{sons.nxGoodsFile !== null ? url + sons.nxGoodsFile : '/images/logo.png'}}" mode="aspectFill" class="goods_item mr-20" />
                     <view class="flex-row-default">
                       <view class="flex-column" style="width: {{windowWidth - 320}}rpx;  ">
                         <view class="flex-row middle">
@@ -241,7 +241,6 @@
 
     <view class="flex-column center-content" style="margin-top: 40rpx;" wx:if="{{disSearchArr.length == 0}}">
       <view class="flex-row gray p-20">
-        <image class="icon margin-right" src="../../../images/a-Nothappy.png"></image>
         <text class="">没有搜索到商品</text>
       </view>
 

@@ -1,13 +1,6 @@
 /**
- * 每日公告牌
- *
- * API：
- * - getDailyBoard({ userId, departmentId, distributerId, boardType, asOfDate?, page?, pageSize? })
- *   GET /store-announcements/daily-board
- *
- * boardType：
- * - MANAGER_DAILY_BOARD：管理人员公告牌（门店库存 + 采购价格影响）
- * - ORDER_STAFF_DAILY_BOARD：订货人员公告牌（当前部门库存）
+ * 店内公告牌：人工公告 + 今日采购价格影响
+ * 统一按时间倒序展示（最新在上）
  */
 
 var api = require('../../services/api');
@@ -22,19 +15,23 @@ var SKIPPED_REASON_LABELS = {
   UNIT_CONVERSION_UNSUPPORTED: '单位暂不支持换算',
 };
 
-var WASTE_RISK_TIER_LABELS = {
-  high: '高风险',
-  medium: '中风险',
-  low: '低风险',
-  waste_due: '已到废弃时间',
-  waste_warning: '废弃预警',
+var NOTE_TYPE_LABELS = {
+  MANUAL: '手动记录',
+  FROM_RUN: 'AI 建议',
+  FROM_PIN: '图钉升级',
+  FROM_SELECTION: '选中文本',
+  FROM_MESSAGE: '消息记录',
 };
 
-var STORAGE_REMINDER_TIER = {
-  exceeded: '已超期',
-  warning: '即将到期',
-  normal: '正常',
+var NOTE_TYPE_COLORS = {
+  MANUAL: { bg: '#f0f4ff', color: '#4a6cf7' },
+  FROM_RUN: { bg: '#e8f5e9', color: '#2e7d32' },
+  FROM_PIN: { bg: '#fff3e0', color: '#e65100' },
+  FROM_SELECTION: { bg: '#f3e5f5', color: '#7b1fa2' },
+  FROM_MESSAGE: { bg: '#e3f2fd', color: '#1565c0' },
 };
+
+var DEFAULT_CATEGORY_STYLE = { bg: '#e8f5e9', color: '#2e7d32', icon: '•' };
 
 Page({
   data: {
@@ -42,75 +39,51 @@ Page({
     emptyReason: '',
     boardType: '',
     isManager: false,
-
-    // 头部
     storeName: '',
     scopeHeaderLabel: '',
-    asOfDate: '',
-    dateLabel: '',
-    recentDates: [],
-
-    // 摘要统计
     summary: {
       noteCount: 0,
-      inventoryAlertCount: 0,
       priceChangedGoodsCount: 0,
       affectedDishCount: 0,
     },
-
-    // 公告列表
-    notes: [],
-
-    // 库存卡片
-    inventoryCards: [],
-
-    // 采购价格影响卡
-    purchasePriceCard: null,
-
-    // 页面状态
+    feedItems: [],
     navBarHeight: 0,
     showRecipeDebug: false,
   },
 
   onLoad: function (options) {
     var boardType = options.boardType || 'MANAGER_DAILY_BOARD';
-    var isManager = boardType === 'MANAGER_DAILY_BOARD';
-    var asOfDate = options.asOfDate || '';
-
     this.setData({
       boardType: boardType,
-      isManager: isManager,
-      asOfDate: asOfDate,
+      isManager: boardType === 'MANAGER_DAILY_BOARD',
       navBarHeight: getApp().globalData.navBarHeight || 88,
     });
-
-    this._loadBoard(asOfDate);
+    this._loadBoard();
   },
 
-  onShow: function () {},
-
   onPullDownRefresh: function () {
-    this._loadBoard(this.data.asOfDate);
+    this._loadBoard();
     wx.stopPullDownRefresh();
   },
 
-  // 切换日期
-  onDateTap: function (e) {
-    var date = e.currentTarget.dataset.date;
-    if (!date || date === this.data.asOfDate) return;
-    this.setData({ asOfDate: date });
-    this._loadBoard(date);
+  onRetry: function () {
+    this._loadBoard();
   },
 
-  // ========== 加载公告牌 ==========
+  onToggleRecipeDebug: function () {
+    this.setData({ showRecipeDebug: !this.data.showRecipeDebug });
+  },
 
-  _loadBoard: function (asOfDate) {
+  toBack: function () {
+    wx.navigateBack({ delta: 1 });
+  },
+
+  _loadBoard: function () {
     var that = this;
     var userInfo = wx.getStorageSync('userInfo') || {};
     var userId = userInfo.gbDepartmentUserId;
 
     if (!userId) {
-      console.warn('[公告牌] 跳过：无 userId');
       that.setData({ loading: false, emptyReason: '未登录' });
       return;
     }
@@ -128,7 +101,7 @@ Page({
     } else {
       var depInfo = wx.getStorageSync('orderDepInfo');
       if (!depInfo) {
-        var mendianInfo = wx.getStorageSync('mendianInfo');
+        mendianInfo = wx.getStorageSync('mendianInfo');
         if (!mendianInfo) {
           that.setData({ loading: false, emptyReason: '部门信息缺失' });
           return;
@@ -144,115 +117,82 @@ Page({
 
     that.setData({ loading: true });
 
-    var params = {
+    var catParams = { userId: userId };
+    if (distributerId) catParams.distributerId = distributerId;
+
+    var catPromise = api.getWorkRecordCategories(catParams).catch(function () {
+      return { result: { data: [] } };
+    });
+
+    var boardPromise = api.getDailyBoard({
       userId: userId,
       departmentId: departmentId,
       distributerId: distributerId,
       boardType: that.data.boardType,
       page: 1,
       pageSize: PAGE_SIZE,
-    };
+    });
 
-    if (asOfDate) {
-      params.asOfDate = asOfDate;
-    }
-
-    api.getDailyBoard(params)
-      .then(function (res) {
+    Promise.all([catPromise, boardPromise])
+      .then(function (results) {
+        var categoryByName = _buildCategoryByName(results[0]);
+        var res = results[1];
         var result = (res && res.result) || res || {};
         var data = result.data || result;
-
-        console.log('========== [公告牌] 接口返回 ==========');
-        console.log('[公告牌] storeName:', data.storeName);
-        console.log('[公告牌] scopeHeaderLabel:', data.scopeHeaderLabel);
-        console.log('[公告牌] summary:', JSON.stringify(data.summary));
-        console.log('[公告牌] dateHeader:', JSON.stringify(data.dateHeader));
-        console.log('[公告牌] sections:', JSON.stringify(data.sections));
-        console.log('[公告牌] cards[]:', JSON.stringify(data.cards));
-        console.log('========== [公告牌] 打印完毕 ==========');
 
         if (!data) {
           that.setData({ loading: false, emptyReason: '暂无数据' });
           return;
         }
 
-        // 空状态
-        if (data.inventoryEmptyReason) {
-          that.setData({
-            loading: false,
-            storeName: data.storeName || '',
-            scopeHeaderLabel: data.scopeHeaderLabel || (data.storeName + ' · ' + (data.inventoryScopeLabel || '')),
-            asOfDate: data.asOfDate || '',
-            dateLabel: _getDateLabel(data.dateHeader),
-            recentDates: (data.dateHeader && data.dateHeader.recentDates) || [],
-            emptyReason: data.inventoryEmptyReason,
-          });
-          return;
-        }
-
-        // —— 头部信息 ——
-        var dateLabel = _getDateLabel(data.dateHeader);
-
-        // —— 摘要 ——
-        var sum = data.summary || {};
-        var summary = {
-          noteCount: sum.managerNoteCount || 0,
-          inventoryAlertCount: sum.inventoryAlertCount || 0,
-          priceChangedGoodsCount: sum.purchasePriceChangedGoodsCount || 0,
-          affectedDishCount: sum.purchasePriceAffectedDishCount || 0,
-        };
-
-        // —— 公告列表（优先从 sections，回退到顶层） ——
         var rawNotes = [];
         if (data.sections && data.sections.managerNotes && data.sections.managerNotes.items) {
           rawNotes = data.sections.managerNotes.items;
         } else if (data.managerNotes) {
           rawNotes = data.managerNotes;
         }
-        var notes = _mapNotes(rawNotes);
 
-        // —— 卡片列表 ——
-        var cards = data.cards || [];
-        var inventoryCards = [];
-        var purchasePriceCard = null;
+        var feedItems = [];
+        var i;
 
-        for (var i = 0; i < cards.length; i++) {
-          var card = cards[i];
-          var cardType = card.cardType || '';
-          if (cardType === 'MANAGER_PURCHASE_PRICE_IMPACT_CARD') {
-            purchasePriceCard = _mapPurchasePriceCard(card);
-          } else {
-            inventoryCards.push(_mapInventoryCard(card, i));
-          }
+        for (i = 0; i < rawNotes.length; i++) {
+          var mapped = _mapNoteItem(rawNotes[i], i, categoryByName);
+          if (mapped) feedItems.push(mapped);
         }
 
-        // —— 如果没有独立的采购卡，从 summary 构造简单摘要 ——
-        if (!purchasePriceCard && summary.priceChangedGoodsCount > 0) {
-          purchasePriceCard = {
-            _summaryOnly: true,
-            title: '采购单价波动',
-            priceChangedGoodsCount: summary.priceChangedGoodsCount,
-            affectedDishCount: summary.affectedDishCount,
-            goodsRows: [],
-            affectedDishes: [],
-            recipeDebug: [],
-            hasGoodsRows: false,
-            hasAffectedDishes: false,
-            hasRecipeDebug: false,
-          };
+        if (that.data.isManager) {
+          var purchaseCard = _extractPurchaseCard(data);
+          var purchaseItem = _mapPurchaseFeedItem(purchaseCard, data.asOfDate);
+          if (purchaseItem) feedItems.push(purchaseItem);
         }
+
+        feedItems.sort(function (a, b) {
+          return (b._sortTs || 0) - (a._sortTs || 0);
+        });
+
+        if (feedItems.length === 0) {
+          that.setData({
+            loading: false,
+            storeName: data.storeName || '',
+            scopeHeaderLabel: data.scopeHeaderLabel || data.storeName || '',
+            feedItems: [],
+            summary: { noteCount: 0, priceChangedGoodsCount: 0, affectedDishCount: 0 },
+            emptyReason: (data.emptyState && data.emptyState.message) || '暂无公告',
+          });
+          return;
+        }
+
+        var apiSummary = data.summary || {};
+        var summary = _buildSummary(feedItems, apiSummary);
 
         that.setData({
           loading: false,
+          emptyReason: '',
           storeName: data.storeName || '',
-          scopeHeaderLabel: data.scopeHeaderLabel || (data.storeName + ' · ' + (data.inventoryScopeLabel || '')),
-          asOfDate: data.asOfDate || '',
-          dateLabel: dateLabel,
-          recentDates: (data.dateHeader && data.dateHeader.recentDates) || [],
+          scopeHeaderLabel: data.scopeHeaderLabel || data.storeName || '',
           summary: summary,
-          notes: notes,
-          inventoryCards: inventoryCards,
-          purchasePriceCard: purchasePriceCard,
+          feedItems: feedItems,
+          showRecipeDebug: false,
         });
       })
       .catch(function (err) {
@@ -261,204 +201,178 @@ Page({
         wx.showToast({ title: '加载失败', icon: 'none' });
       });
   },
-
-  // ========== 展开/折叠 recipeDebug ==========
-
-  onToggleRecipeDebug: function () {
-    this.setData({ showRecipeDebug: !this.data.showRecipeDebug });
-  },
-
-  // ========== 返回 ==========
-
-  toBack: function () {
-    wx.navigateBack({ delta: 1 });
-  },
 });
 
-// ========== 公告映射 ==========
-
-function _mapNotes(notes) {
-  if (!notes || !notes.length) return [];
-  return notes.map(function (note) {
-    var type = note.announcementType || note.sourceType || 'TEXT';
-    var content = note.textContent || '';
-    var oldCards = null;
-    var sourceCard = note.sourceCard || null;
-
-    // sourceCard：工作记录推送等场景，按 cardType + payload 渲染
-    if (!sourceCard && note.cardSnapshotJson) {
-      try {
-        var snap = typeof note.cardSnapshotJson === 'string'
-          ? JSON.parse(note.cardSnapshotJson)
-          : note.cardSnapshotJson;
-        if (snap && snap.cardType) {
-          sourceCard = snap;
-        }
-      } catch (e) {
-        sourceCard = null;
-      }
+function _extractPurchaseCard(data) {
+  var cards = data.cards || [];
+  var i;
+  for (i = 0; i < cards.length; i++) {
+    if ((cards[i].cardType || '') === 'MANAGER_PURCHASE_PRICE_IMPACT_CARD') {
+      return cards[i];
     }
-
-    // 尝试解析旧数据 cardsSnapshotJson（仅标题列表兼容）
-    if (note.cardsSnapshotJson) {
-      try {
-        oldCards = typeof note.cardsSnapshotJson === 'string'
-          ? JSON.parse(note.cardsSnapshotJson)
-          : note.cardsSnapshotJson;
-      } catch (e) {
-        oldCards = null;
-      }
-    }
-
-    // 单卡快照（无 cardType 时作旧列表）
-    if (!sourceCard && note.cardSnapshotJson) {
-      try {
-        var singleSnap = typeof note.cardSnapshotJson === 'string'
-          ? JSON.parse(note.cardSnapshotJson)
-          : note.cardSnapshotJson;
-        if (singleSnap && !singleSnap.cardType) {
-          oldCards = Array.isArray(singleSnap) ? singleSnap : [singleSnap];
-        }
-      } catch (e) {}
-    }
-
-    var isAi = type === 'AI_MESSAGE';
-    var hasOldCards = Array.isArray(oldCards) && oldCards.length > 0;
-    var hasSourceCard = !!(sourceCard && sourceCard.cardType);
-
+  }
+  var section = data.sections && data.sections.purchasePriceImpact;
+  if (section && section.payload) {
     return {
-      title: note.title || (isAi ? '智能消息' : '公告'),
-      textContent: content,
-      publisherName: note.publisherName || '',
-      publishedAt: _fmtTime(note.publishedAt || note.createdAt || ''),
-      sourceType: note.sourceType || '',
-      _isAi: isAi,
-      _hasOldCards: hasOldCards && !hasSourceCard,
-      _oldCards: oldCards,
-      _hasSourceCard: hasSourceCard,
-      _sourceCardType: hasSourceCard ? sourceCard.cardType : '',
-      _sourceCardPayload: hasSourceCard ? (sourceCard.payload || sourceCard.cardPayload || {}) : null,
-      _sourceCardTitle: hasSourceCard ? (sourceCard.title || sourceCard.cardTitle || '') : '',
-      _sourceCardSubtitle: hasSourceCard ? (sourceCard.subtitle || sourceCard.cardSubtitle || '') : '',
-      _sourceItemKey: hasSourceCard ? (sourceCard.sourceItemKey || '') : '',
+      cardType: 'MANAGER_PURCHASE_PRICE_IMPACT_CARD',
+      payload: section.payload,
+    };
+  }
+  return null;
+}
+
+function _buildCategoryByName(catRes) {
+  var result = (catRes && catRes.result) || catRes || {};
+  var list = result.data || result || [];
+  var map = {};
+  (Array.isArray(list) ? list : []).forEach(function (item) {
+    var name = (item.name || item.categoryName || '').trim();
+    if (!name) return;
+    map[name] = {
+      name: name,
+      code: item.id || item.categoryId || item.code || '',
+      icon: item.icon || item.emoji || DEFAULT_CATEGORY_STYLE.icon,
+      bg: item.bgColor || item.backgroundColor || DEFAULT_CATEGORY_STYLE.bg,
+      color: item.color || item.textColor || DEFAULT_CATEGORY_STYLE.color,
     };
   });
+  return map;
 }
 
-// ========== 库存卡片映射 ==========
+function _resolveCategoryMeta(title, categoryByName) {
+  if (!title || !categoryByName) return null;
+  return categoryByName[title.trim()] || null;
+}
 
-function _mapInventoryCard(card, index) {
-  var cardType = card.cardType || '';
-  var payload = card.payload || {};
-  var riskItems = payload.riskItems || [];
-
-  var base = {
-    cardInstanceId: card.cardInstanceId || '',
-    cardKey: card.cardKey || '',
-    cardIndex: index,
-    cardType: cardType,
-    title: card.title || payload.cardTitle || '',
-    subtitle: card.subtitle || '',
-    scopeLabel: payload.scopeLabel || '',
-    _type: '',
+function _resolveNoteTypeMeta(note, isAi) {
+  var noteType = note.noteType || (isAi ? 'FROM_RUN' : 'MANUAL');
+  var colors = NOTE_TYPE_COLORS[noteType] || NOTE_TYPE_COLORS.MANUAL;
+  return {
+    noteTypeLabel: NOTE_TYPE_LABELS[noteType] || NOTE_TYPE_LABELS.MANUAL,
+    noteTypeBg: colors.bg,
+    noteTypeColor: colors.color,
   };
+}
 
-  if (cardType === 'WAREHOUSE_WASTE_RISK_CARD') {
-    base._type = 'waste';
-    base.summary = payload.summary || {};
-    base.wasteItems = (payload.wasteItems || []).map(function (item) {
-      var tier = item.wasteRiskTier || '';
-      return {
-        goodsName: item.goodsName || '',
-        restWeight: item.restWeight != null ? item.restWeight : '',
-        weightUnit: item.weightUnit || '',
-        stockInDate: _fmtDate(item.stockInDate),
-        wasteDeadlineTime: _fmtDate(item.wasteDeadlineTime),
-        wasteRiskTier: tier,
-        wasteRiskLabel: WASTE_RISK_TIER_LABELS[tier] || tier,
-        hoursUntilWaste: item.hoursUntilWaste != null ? item.hoursUntilWaste : '',
-        isOverdue: item.isWasteOverdue || tier === 'waste_due',
-        minuteLabel: _fmtWasteTime(item.minutesUntilWaste, item.hoursUntilWaste),
-      };
-    });
-    base.wasteCount = base.wasteItems.length;
-  } else if (cardType === 'WAREHOUSE_NEAR_EXPIRY_RISK_CARD') {
-    base._type = 'storage';
-    base.storageDaysLabel = payload.storageDaysLabel || '分类存放天数';
-    base.cardSemantic = payload.cardSemantic || '';
-    base.reminderSource = payload.reminderSource || '';
-    base.summary = payload.summary || {};
-    base.nearExpiryItems = riskItems.map(function (item) {
-      var tier = item.storageReminderTier || '';
-      return {
-        goodsName: item.goodsName || '',
-        restWeight: item.restWeight != null ? item.restWeight : '',
-        weightUnit: item.weightUnit || '',
-        stockInDate: _fmtDate(item.stockInDate),
-        storageDaysLabel: item.storageDaysLabel || '',
-        storageDueDate: _fmtDate(item.storageDueDate),
-        daysUntilStorageDue: item.daysUntilStorageDue != null ? item.daysUntilStorageDue : '',
-        storageReminderTier: tier,
-        storageReminderLabel: STORAGE_REMINDER_TIER[tier] || tier,
-        reminderSource: item.reminderSource || '',
-        storageDays: item.storageDays != null ? item.storageDays : '',
-      };
-    });
-    base.nearExpiryCount = base.nearExpiryItems.length;
-  } else {
-    // WAREHOUSE_INVENTORY_RISK_LIST_CARD
-    var sectionTitle = payload.sectionTitle || payload.sectionId || '';
-    base._type = 'inventory';
-    base.sectionTitle = sectionTitle;
-    base.riskType = payload.riskType || '';
-    base.rowCount = payload.rowCount || 0;
-    base.summary = payload.summary || {};
-    base.timeLabel = payload.timeLabel || payload.stockSnapshotLabel || '';
-    base.riskItems = riskItems.map(function (item) {
-      var rt = item.riskType || payload.riskType || '';
-      var label = '';
-      if (rt === 'SLOW_MOVING' || rt === 'OVERSTOCK_SLOW_MOVING') label = '慢动销';
-      else if (rt === 'OVERSTOCK') label = '库存积压';
-      else if (rt === 'SHORTAGE_WITHIN_WEEK') label = '一周内需关注';
-      else label = rt;
+function _mapNoteItem(note, index, categoryByName) {
+  if (!note) return null;
 
-      return {
-        goodsName: item.goodsName || '',
-        riskTypeLabel: label || sectionTitle,
-        restWeight: item.restWeight != null ? item.restWeight : '',
-        weightUnit: item.weightUnit || '',
-        supportDays: item.supportDays != null ? item.supportDays : '',
-        dailyOutboundWeight: item.dailyOutboundWeight != null ? item.dailyOutboundWeight : '',
-        periodOutboundWeight: item.periodOutboundWeight != null ? item.periodOutboundWeight : '',
-      };
-    });
-    base.itemCount = base.riskItems.length;
+  var type = note.announcementType || note.sourceType || 'TEXT';
+  var rawTime = note.publishedAt || note.createdAt || '';
+  var sortTs = _parseTs(rawTime);
+  var sourceCard = note.sourceCard || null;
+
+  if (!sourceCard && note.cardSnapshotJson) {
+    try {
+      var snap = typeof note.cardSnapshotJson === 'string'
+        ? JSON.parse(note.cardSnapshotJson)
+        : note.cardSnapshotJson;
+      if (snap && snap.cardType) sourceCard = snap;
+    } catch (e) {}
   }
 
-  return base;
+  var oldCards = null;
+  if (note.cardsSnapshotJson) {
+    try {
+      oldCards = typeof note.cardsSnapshotJson === 'string'
+        ? JSON.parse(note.cardsSnapshotJson)
+        : note.cardsSnapshotJson;
+    } catch (e) {}
+  }
+
+  var isAi = type === 'AI_MESSAGE';
+  var hasSourceCard = !!(sourceCard && sourceCard.cardType);
+  var hasOldCards = Array.isArray(oldCards) && oldCards.length > 0;
+
+  var sourceType = note.sourceType || '';
+  var isWorkNote = sourceType === 'WORK_NOTE';
+  var isWorkRecord = sourceType === 'WORK_RECORD';
+  var title = note.title || (isAi ? '智能消息' : '公告');
+  var category = _resolveCategoryMeta(title, categoryByName);
+  var displayTitle = title;
+  var showTitle = true;
+
+  if (category && title.trim() === category.name) {
+    showTitle = false;
+  }
+
+  var noteTypeMeta = isWorkNote ? _resolveNoteTypeMeta(note, isAi) : {};
+  var categoryName = category ? category.name : (isWorkRecord ? title : '');
+  var categoryBg = category ? category.bg : DEFAULT_CATEGORY_STYLE.bg;
+  var categoryColor = category ? category.color : DEFAULT_CATEGORY_STYLE.color;
+  var categoryIcon = category ? category.icon : DEFAULT_CATEGORY_STYLE.icon;
+
+  if (isWorkRecord && category) {
+    showTitle = false;
+  }
+
+  return {
+    _type: 'note',
+    _key: 'note-' + (note.announcementId || index),
+    _sortTs: sortTs,
+    timeLabel: _fmtTime(rawTime),
+    title: title,
+    displayTitle: displayTitle,
+    _showTitle: showTitle,
+    textContent: note.textContent || '',
+    publisherName: note.publisherName || '',
+    publishedAt: _fmtTime(rawTime),
+    sourceType: sourceType,
+    categoryName: categoryName,
+    categoryBg: categoryBg,
+    categoryColor: categoryColor,
+    categoryIcon: categoryIcon,
+    categoryCode: category ? category.code : '',
+    noteTypeLabel: noteTypeMeta.noteTypeLabel || '',
+    noteTypeBg: noteTypeMeta.noteTypeBg || '',
+    noteTypeColor: noteTypeMeta.noteTypeColor || '',
+    _isAi: isAi,
+    _isWorkNote: isWorkNote,
+    _useWorkNoteStyle: isWorkNote,
+    _useWorkRecordStyle: isWorkRecord,
+    _hasSourceCard: hasSourceCard,
+    _sourceCardType: hasSourceCard ? sourceCard.cardType : '',
+    _sourceCardPayload: hasSourceCard ? (sourceCard.payload || sourceCard.cardPayload || {}) : null,
+    _sourceCardTitle: hasSourceCard ? (sourceCard.title || sourceCard.cardTitle || '') : '',
+    _sourceCardSubtitle: hasSourceCard ? (sourceCard.subtitle || sourceCard.cardSubtitle || '') : '',
+    _sourceItemKey: hasSourceCard ? (sourceCard.sourceItemKey || '') : '',
+    _hasOldCards: hasOldCards && !hasSourceCard,
+    _oldCards: oldCards,
+  };
 }
 
-// ========== 采购价格影响卡映射 ==========
+function _mapPurchaseFeedItem(card, asOfDate) {
+  if (!card) return null;
 
-function _mapPurchasePriceCard(card) {
   var payload = card.payload || {};
+  var goodsRows = payload.goodsRows || [];
+  var affectedDishes = payload.affectedDishes || [];
+  var priceChanged = payload.priceChangedGoodsCount || goodsRows.length || 0;
 
-  var goodsRows = (payload.goodsRows || []).map(function (row) {
+  if (priceChanged <= 0 && affectedDishes.length === 0) {
+    return null;
+  }
+
+  var purchaseDate = asOfDate || payload.purchaseDate || '';
+  var sortTs = _parseTs(purchaseDate + 'T23:59:59');
+
+  var mappedGoods = goodsRows.map(function (row) {
+    var delta = row.unitPriceDelta;
+    var deltaNum = delta != null ? Number(delta) : NaN;
     return {
       goodsName: row.goodsName || '',
       currentUnitPrice: row.currentUnitPrice != null ? row.currentUnitPrice : '',
       previousUnitPrice: row.previousUnitPrice != null ? row.previousUnitPrice : '',
       unit: row.unit || '斤',
-      unitPriceDelta: _fmtDelta(row.unitPriceDelta),
-      unitPriceDeltaRaw: row.unitPriceDelta,
+      unitPriceDelta: _fmtDelta(delta),
+      unitPriceDeltaRaw: deltaNum,
       unitPriceDeltaRate: _fmtRate(row.unitPriceDeltaRate),
-      unitPriceDeltaRateRaw: row.unitPriceDeltaRate,
       purchaserName: row.purchaserName || '',
-      purchaseDate: _fmtDate(row.purchaseDate),
+      purchaseDate: _fmtDate(row.purchaseDate || purchaseDate),
     };
   });
 
-  var affectedDishes = (payload.affectedDishes || []).map(function (dish) {
+  var mappedDishes = affectedDishes.map(function (dish) {
     return {
       dishName: dish.dishName || '',
       dishPrice: dish.dishPrice != null ? dish.dishPrice : '',
@@ -489,41 +403,73 @@ function _mapPurchasePriceCard(card) {
     };
   });
 
+  var hasGoodsRows = mappedGoods.length > 0;
+  var hasAffectedDishes = mappedDishes.length > 0;
+  var highImpactDishCount = payload.highImpactDishCount || 0;
+
   return {
-    _summaryOnly: false,
-    cardInstanceId: card.cardInstanceId || '',
-    title: card.title || '采购单价波动与菜品毛利影响',
-    subtitle: card.subtitle || '',
-    priceChangedGoodsCount: payload.priceChangedGoodsCount || goodsRows.length,
-    affectedDishCount: payload.affectedDishCount || affectedDishes.length,
-    highImpactDishCount: payload.highImpactDishCount || 0,
-    goodsRows: goodsRows,
-    affectedDishes: affectedDishes,
+    _type: 'purchase',
+    _key: 'purchase-' + (purchaseDate || 'today'),
+    _sortTs: sortTs,
+    timeLabel: _fmtDate(purchaseDate),
+    title: '采购价格影响',
+    priceChangedGoodsCount: priceChanged,
+    affectedDishCount: payload.affectedDishCount || mappedDishes.length,
+    highImpactDishCount: highImpactDishCount,
+    _summaryOnly: !hasGoodsRows && !hasAffectedDishes && priceChanged > 0,
+    goodsRows: mappedGoods,
+    affectedDishes: mappedDishes,
     recipeDebug: recipeDebug,
-    hasGoodsRows: goodsRows.length > 0,
-    hasAffectedDishes: affectedDishes.length > 0,
+    hasGoodsRows: hasGoodsRows,
+    hasAffectedDishes: hasAffectedDishes,
     hasRecipeDebug: recipeDebug.length > 0,
   };
 }
 
-// ========== 工具函数 ==========
+function _buildSummary(feedItems, apiSummary) {
+  var noteCount = 0;
+  var priceChanged = 0;
+  var affectedDishes = 0;
+  var i;
 
-function _getDateLabel(dateHeader) {
-  if (!dateHeader) return '今天 · 今日数据';
-  var full = dateHeader.fullTitleLabel || '';
-  if (full) return full;
-  var parts = [];
-  if (dateHeader.relativeDayLabel) parts.push(dateHeader.relativeDayLabel);
-  parts.push(dateHeader.monthDayLabel || '');
-  if (dateHeader.weekdayLabel) parts.push(dateHeader.weekdayLabel);
-  return parts.join(' · ') || dateHeader.asOfDate || '';
+  for (i = 0; i < feedItems.length; i++) {
+    var item = feedItems[i];
+    if (item._type === 'note') noteCount++;
+    if (item._type === 'purchase') {
+      priceChanged = item.priceChangedGoodsCount || priceChanged;
+      affectedDishes = item.affectedDishCount || affectedDishes;
+    }
+  }
+
+  if (apiSummary) {
+    if (apiSummary.managerNoteCount != null) noteCount = apiSummary.managerNoteCount;
+    if (apiSummary.purchasePriceChangedGoodsCount != null) {
+      priceChanged = apiSummary.purchasePriceChangedGoodsCount;
+    }
+    if (apiSummary.purchasePriceAffectedDishCount != null) {
+      affectedDishes = apiSummary.purchasePriceAffectedDishCount;
+    }
+  }
+
+  return {
+    noteCount: noteCount,
+    priceChangedGoodsCount: priceChanged,
+    affectedDishCount: affectedDishes,
+  };
+}
+
+function _parseTs(dateStr) {
+  if (!dateStr) return 0;
+  var d;
+  try { d = new Date(dateStr); } catch (e) { return 0; }
+  var ts = d.getTime();
+  return isNaN(ts) ? 0 : ts;
 }
 
 function _fmtDate(dateStr) {
   if (!dateStr) return '';
   if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
-  var d;
-  try { d = new Date(dateStr); } catch (e) { return dateStr; }
+  var d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   var M = d.getMonth() + 1;
   var day = d.getDate();
@@ -532,8 +478,7 @@ function _fmtDate(dateStr) {
 
 function _fmtTime(dateStr) {
   if (!dateStr) return '';
-  var d;
-  try { d = new Date(dateStr); } catch (e) { return dateStr; }
+  var d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
 
   var now = new Date();
@@ -544,8 +489,9 @@ function _fmtTime(dateStr) {
   var m = d.getMinutes();
   var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
 
-  var isToday = y === now.getFullYear() && M === now.getMonth() + 1 && day === now.getDate();
-  if (isToday) return '今天 ' + pad(h) + ':' + pad(m);
+  if (y === now.getFullYear() && M === now.getMonth() + 1 && day === now.getDate()) {
+    return '今天 ' + pad(h) + ':' + pad(m);
+  }
 
   var yesterday = new Date(now.getTime() - 86400000);
   if (y === yesterday.getFullYear() && M === yesterday.getMonth() + 1 && day === yesterday.getDate()) {
@@ -574,16 +520,4 @@ function _fmtCostImpact(val) {
   var num = Number(val);
   if (isNaN(num)) return val;
   return (num >= 0 ? '+' : '') + num.toFixed(3) + '元';
-}
-
-function _fmtWasteTime(minutes, hours) {
-  if (minutes != null && minutes < 0) {
-    var m = Math.abs(minutes);
-    if (m < 60) return '已超 ' + Math.round(m) + ' 分钟';
-    var h = Math.floor(m / 60);
-    var rm = Math.round(m % 60);
-    if (rm === 0) return '已超 ' + h + ' 小时';
-    return '已超 ' + h + ' 小时 ' + rm + ' 分钟';
-  }
-  return '';
 }

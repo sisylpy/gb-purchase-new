@@ -711,3 +711,20 @@ show-btn {
   border-radius: 20rpx;
   padding: 10rpx 20rpx;
 }
+
+.add-goods-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200rpx;
+  height: 70rpx;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+  background-color: #187e6e;
+  border-radius: 20rpx;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+}

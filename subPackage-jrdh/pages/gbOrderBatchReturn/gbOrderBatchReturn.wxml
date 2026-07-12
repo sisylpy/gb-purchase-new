@@ -1,0 +1,107 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+
+<view class="flex flex-column page-root" style="height: {{windowHeight}}rpx;" wx:if="{{batch && !billCancle}}">
+  <order-batch-header
+    retName="{{retName}}"
+    statusBarHeight="{{statusBarHeight}}"
+    variant="default"
+    titleSuffix="退货"
+    bind:back="toBack"
+  />
+
+  <view class="page-wrap">
+    <view class="page-inner">
+      <view class="body body-return">
+        <order-participants batch="{{batch}}" url="{{url}}" todayDate="{{todayDate}}" />
+
+        <view class="flex-column form_body form_body-return" style="width: {{windowWidth - 40}}rpx;">
+          <order-goods-list
+            mode="seller_edit"
+            styleVariant="dashed"
+            bizType="return"
+            batch="{{batch}}"
+            batchStatus="{{batchStatus}}"
+            windowWidth="{{windowWidth}}"
+            fillHeight="{{true}}"
+          />
+        </view>
+
+        <view class="return-summary">
+          <view class="return-summary-row">
+            <view class="return-summary-item">
+              <text class="return-summary-label">退货商品</text>
+              <text class="return-summary-value">{{batch.gbDPGEntities.length}}个</text>
+            </view>
+            <view class="return-summary-item">
+              <text class="return-summary-label">退货时间</text>
+              <text class="return-summary-value">{{batch.gbDpbTime || '--'}}</text>
+            </view>
+          </view>
+          <view class="return-summary-total">
+            <text class="return-summary-total-label">退货总额</text>
+            <text class="return-summary-total-value">¥{{returnTotal}}</text>
+          </view>
+        </view>
+
+        <view class="return-action-bar" wx:if="{{batchStatus == 0}}">
+          <view class="btn_container return-btn-wrap">
+            <view class="save_btn save_btn_return" bindtap="showShareTishi" hover-class="numHover">收到退货</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="overlay {{billCancle ? 'show' : 'hide'}}" bind:tap="toCancleBack">
+  <view class="cancel-modal-container" style="top: {{windowHeight * 0.4}}rpx;" catchtap="">
+    <view class="cancel-icon-container">
+      <image src="/images/warn.png" class="cancel-icon" />
+    </view>
+    <view class="cancel-content">
+      <view class="cancel-title">提示</view>
+      <view class="cancel-message">本次退货已取消</view>
+    </view>
+  </view>
+</view>
+
+<view class="overlay {{isTishi ? 'show' : 'hide'}}">
+  <view class="modal-container" style="width:{{windowWidth - 60}}rpx;">
+    <view class="modal-icon-container" style="width:{{windowWidth/4}}rpx; height:{{windowWidth/4}}rpx; margin-top:-{{windowWidth/8 + 15}}rpx;">
+      <view class="modal-icon-bg" style="width:{{windowWidth/4}}rpx; height:{{windowWidth/4}}rpx;">
+        <image src="../../../images/aixin.png" class="modal-icon" style="width:{{windowWidth/4 - 60}}rpx; height:{{windowWidth/4 - 60}}rpx;" />
+      </view>
+    </view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">完成退货</text>
+        <text class="modal-subtitle">确认收到客户退货商品</text>
+      </view>
+      <view class="payment-section">
+        <view class="payment-label">
+          <text class="payment-text">退款方式</text>
+        </view>
+        <view class="payment-options">
+          <radio-group class="radio-group" bindchange="radioChange">
+            <label class="radio-option">
+              <radio value="0" checked="{{batch.gbDpbPayType == 0}}" />
+              <text class="radio-text">退款已付</text>
+            </label>
+            <label class="radio-option">
+              <radio value="1" checked="{{batch.gbDpbPayType == 1}}" />
+              <text class="radio-text">退款未付</text>
+            </label>
+          </radio-group>
+        </view>
+      </view>
+      <view class="modal-actions">
+        <view class="action-btn secondary-btn" bindtap="cancelCostBatch" hover-class="btn-hover">
+          <text class="btn-text">再等等</text>
+        </view>
+        <view class="action-btn return-modal-btn {{batch.gbDpbPayType !== null ? '' : 'disabled-btn'}}" bindtap="saveTuihuo" hover-class="btn-hover">
+          <text class="btn-text">退货完成</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

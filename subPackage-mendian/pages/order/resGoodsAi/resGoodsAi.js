@@ -390,7 +390,7 @@ Page({
         rel = ent.gbDgGoodsFile || ent.gbDgGoodsFileImg || ent.gbDgGoodsFileLarge || '';
       }
     }
-    var imageUrl = rel ? encodePathJoin(this.data.url, rel) : '/images/logo.jpg';
+    var imageUrl = rel ? encodePathJoin(this.data.url, rel) : '/images/logo.png';
 
     this.setData({
       showImageModal: true,

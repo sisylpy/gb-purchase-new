@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 <wxs module="num" src="/wxs/signedNumber.wxs" />
 
 <view class="flex flex-column">
@@ -224,7 +224,7 @@
             <text class="warning-icon">⚠️</text>
             <text>警告信息 ({{aiAnalysis.warnings.length}}条)</text>
           </view>
-          <image src="../../../../images/arrow-down.png" class="toggle-icon {{warningsExpanded ? 'expanded' : 'collapsed'}}" mode="aspectFit"></image>
+          <image src="../../..//images/arrow-down.svg" class="toggle-icon {{warningsExpanded ? 'expanded' : 'collapsed'}}" mode="aspectFit"></image>
         </view>
         <view class="warnings-content {{warningsExpanded ? 'expanded' : 'collapsed'}}">
           <view class="warning-item" wx:for="{{aiAnalysis.warnings}}" wx:key="index">
@@ -240,7 +240,7 @@
             <text class="suggestion-icon">💡</text>
             <text>智能建议 ({{aiAnalysis.suggestions.length}}条)</text>
           </view>
-          <image src="../../../../images/arrow-down.png" class="toggle-icon {{suggestionsExpanded ? 'expanded' : 'collapsed'}}" mode="aspectFit"></image>
+          <image src="../../..//images/arrow-down.svg" class="toggle-icon {{suggestionsExpanded ? 'expanded' : 'collapsed'}}" mode="aspectFit"></image>
         </view>
         <view class="suggestions-content {{suggestionsExpanded ? 'expanded' : 'collapsed'}}">
           <view class="suggestion-item" wx:for="{{aiAnalysis.suggestions}}" wx:key="index">

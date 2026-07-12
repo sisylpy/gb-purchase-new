@@ -14,7 +14,8 @@ Page({
       url: apiUrl.server,
       date: options.date,
       value: options.value,
-      purUserId: options.purUserId
+      purUserId: options.purUserId,
+      purName: options.purName
     });
 
     var purUserItem = wx.getStorageSync('purUserItem');

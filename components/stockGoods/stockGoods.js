@@ -97,7 +97,7 @@ Component({
         stockMinUnit: displayUnit,
         stockMinUnitIndex: idx,
         goodsImg: img,
-        inputAmountMin: '',
+        inputAmountMin: String(this.data.showType) === '1' ? this._normalUseDefaultInput() : '',
         equivPackText: '',
         calcUseMin: '',
         calcRestPack: '',
@@ -105,6 +105,8 @@ Component({
       }, () => {
         if (String(this.data.showType) === '4' && this.data.canWaste) {
           this._maybePrefillWasteAmount(true);
+        } else if (String(this.data.showType) === '1') {
+          this._maybePrefillNormalUseAmount(true);
         } else {
           this._recalcByShowType();
         }
@@ -117,6 +119,17 @@ Component({
         return stockUnit.formatDisplayAmount(ctx.restMin, ctx.minUnit);
       }
       return stockUnit.trimAmount(ctx.restPack, 4);
+    },
+
+    /** 正常使用（盘点后剩余量）默认填 0，表示默认全部用完 */
+    _normalUseDefaultInput() {
+      return '0';
+    },
+
+    _maybePrefillNormalUseAmount(force) {
+      if (String(this.data.showType) !== '1') return;
+      if (!force && this.data.inputAmountMin) return;
+      this.setData({ inputAmountMin: this._normalUseDefaultInput() }, () => this._recalcNormalUse());
     },
 
     _maybePrefillWasteAmount(force) {
@@ -175,7 +188,8 @@ Component({
           ? ('折合：' + stockUnit.trimAmount(remainPack, 4) + ctx.packUnit)
           : '',
         calcUseMin: ctx.useMin
-          ? (stockUnit.formatDisplayAmount(useMin, ctx.minUnit) + ctx.minUnit)
+          ? (stockUnit.formatDisplayAmount(useMin, ctx.minUnit) + ctx.minUnit
+            + ' ≈ ' + stockUnit.trimAmount(usePack, 4) + ctx.packUnit)
           : (myProduce + ctx.packUnit),
         calcRestPack: stockUnit.trimAmount(remainPack, 4) + ctx.packUnit,
         calcRestMin: ctx.useMin
@@ -280,7 +294,7 @@ Component({
       var item = this.data.item || {};
       var patch = {
         showType: typeStr,
-        inputAmountMin: '',
+        inputAmountMin: typeStr === '1' ? this._normalUseDefaultInput() : '',
         equivPackText: '',
         calcUseMin: '',
         calcRestPack: '',
@@ -302,6 +316,8 @@ Component({
       this.setData(patch, () => {
         if (typeStr === '4' && this.data.canWaste) {
           this._maybePrefillWasteAmount(true);
+        } else if (typeStr === '1') {
+          this._maybePrefillNormalUseAmount(true);
         }
       });
     },

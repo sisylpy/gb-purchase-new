@@ -1,0 +1,152 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs module="page">
+module.exports.isReadOnly = function (status) {
+  return status === 'all' || status === 'havePayed';
+};
+</wxs>
+<import src='../../../template/billPay/billPay.wxml' />
+
+<view class="flex flex-column">
+
+  <view class="flex-column">
+      <view class="top_img_fixed"
+        style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+        <view class="flex-row" bindtap="toBack">
+          <view class=" flex-column-center">
+            <image src="../../../images/back-2.png" class="back_icon"></image>
+          </view>
+          <text class="">{{pageTitle}}</text>
+        </view>
+      </view>
+      <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 90}}rpx;"></image>
+    </view>
+  <!-- <view class="flex-column">
+    <view class="top_img_fixed flex-row" style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+      <image src="../../../images/back-2.png" class="back_icon" bindtap="toBack"></image>
+      <text class="top_bar_title">{{pageTitle}}</text>
+    </view>
+    <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 90}}rpx;"></image>
+  </view> -->
+
+  <view class="flex-column p-20">
+    <!-- 供货商统计信息卡片 -->
+
+    <view class="flex-column {{arr.length == 0 ? 'show' : 'hide'}}" style="height: {{windowHeight /3}}rpx;">
+      <view class="flex-column center-content" style="margin-top: 200rpx;">
+        <image class="empty_image" src="/images/xiuxi.png"></image>
+        <text class="p-30">暂无微信好友完成订单</text>
+      </view>
+    </view>
+
+    <!-- 全选功能栏 -->
+    <view class="select-all-bar" wx:if="{{arr.length > 0 && !page.isReadOnly(status)}}">
+      <view class="select-all-content">
+        <view class="select-all-checkbox">
+          <switch type="checkbox" checked="{{isAllSelected}}" bindchange="selectAllBills" />
+        </view>
+        <view class="select-all-text">
+          <text class="select-all-label">全选</text>
+          <text class="select-count">已选择 {{selectedCount}} 个订单</text>
+        </view>
+      </view>
+      <view class="select-all-actions">
+        <view class="clear-selection-btn" bindtap="clearAllSelection" wx:if="{{selectedCount > 0}}">
+          <text class="clear-text">清空</text>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view scroll-y="true" style="height: {{scrollListHeight}}rpx;">
+      <view
+        class="bill-item {{item.isSelect ? 'bill-item-selected' : ''}} {{page.isReadOnly(status) ? 'bill-item-readonly' : ''}}"
+        wx:for="{{arr}}"
+        wx:for-item="item"
+        wx:for-index="index"
+        wx:key="gbDistributerPurchaseBatchId"
+        bindtap="openBatchDetail"
+        data-item="{{item}}"
+        hover-class="{{page.isReadOnly(status) ? 'bill-item-hover' : ''}}"
+      >
+
+        <!-- 选择框 -->
+        <view class="bill-checkbox" wx:if="{{!page.isReadOnly(status)}}">
+          <switch type="checkbox" checked="{{item.isSelect}}" bindchange="selectBill" data-index="{{index}}" />
+        </view>
+
+        <!-- 订单内容 -->
+        <view class="bill-content">
+          <!-- 订单头部信息 -->
+          <view class="bill-header">
+            <view class="bill-number">{{index + 1}}</view>
+            <view class="bill-date-section">
+              <view class="bill-date">{{item.gbDpbDate}}</view>
+              <view class="bill-week">{{item.gbDpbPurchaseWeek}}</view>
+              <!-- 全部订单：展示各状态 -->
+              <block wx:if="{{status === 'all'}}">
+                <view class="status-badge status-unread" wx:if="{{item.gbDpbStatus == -1}}">未读</view>
+                <view class="status-badge status-preparing" wx:elif="{{item.gbDpbStatus == 0 || item.gbDpbStatus == 1}}">备货中</view>
+                <view class="status-badge status-pending" wx:elif="{{item.gbDpbStatus == 2}}">待收货</view>
+                <view class="status-badge status-unpaid" wx:elif="{{item.gbDpbStatus == 3}}">未付款</view>
+                <view class="status-badge status-settled" wx:elif="{{item.gbDpbStatus == 4}}">付款完成</view>
+              </block>
+              <!-- 已结账款 -->
+              <block wx:elif="{{status === 'havePayed'}}">
+                <view class="status-badge status-settled" wx:if="{{item.gbDpbStatus == 4}}">付款完成</view>
+                <view class="status-badge status-settled" wx:elif="{{item.gbDpbPurchaseType == 9}}">退货已结</view>
+              </block>
+            </view>
+          </view>
+
+          <!-- 订单金额和类型 -->
+          <view class="bill-amount-section flex-column">
+            <view class="bill-amount">{{item.gbDpbSubtotal}}元</view>
+            <text class="bill-type-text tag-return" wx:if="{{item.gbDpbPurchaseType == 9}}">退货单</text>
+            <text class="bill-type-text tag-auto" wx:elif="{{item.gbDpbPurchaseType == 21}}">自动订货</text>
+            <text class="bill-type-text tag-purchase" wx:else="">采购员订货</text>
+          </view>
+
+          <image wx:if="{{page.isReadOnly(status)}}" src="../../../images/arrow-right-3.png" class="bill-arrow" mode="aspectFill" />
+        </view>
+
+      </view>
+
+      <view class="text-secondary center-content font-sm" style="height: 200rpx;">没有数据了!</view>
+    </scroll-view>
+
+  </view>
+</view>
+
+<!-- 结账确认弹窗 -->
+<view class="modal-overlay {{isTishi ? 'modal-show' : 'modal-hide'}}" bindtap="closeMask">
+  <view class="modal-container" catchtap="">
+    <!-- 弹窗头部 -->
+    <view class="modal-header">
+      <view class="modal-icon">
+        <image src="../../../images/aixin.png" class="modal-icon-img"></image>
+      </view>
+      <view class="modal-title">结账确认</view>
+    </view>
+
+    <!-- 弹窗内容 -->
+    <view class="modal-content">
+      <view class="modal-message">
+        <text class="modal-text-primary">客户已完成付款</text>
+        <text class="modal-text-warning">结账确认以后，订单状态不可修改！</text>
+      </view>
+    </view>
+
+    <!-- 弹窗按钮 -->
+    <view class="modal-actions">
+      <view class="modal-btn modal-btn-cancel" bindtap="cancleSettle">
+        <text class="modal-btn-text">取消</text>
+      </view>
+      <view class="modal-btn modal-btn-confirm" bindtap="settleAccount">
+        <text class="modal-btn-text">确定结账</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<block wx:if="{{!page.isReadOnly(status)}}">
+  <template is="billPay" data='{{selAmount:selAmount, total: total}}'></template>
+</block>

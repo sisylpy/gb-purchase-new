@@ -74,6 +74,11 @@ Component({
     nxGoods: function (nxGoods) {
       this._updateOuterPackChip(nxGoods);
     },
+    show: function (show) {
+      if (show) {
+        this._syncApplyFieldsFromProps();
+      }
+    },
   },
 
   data: {
@@ -103,6 +108,16 @@ Component({
         outerPackStandard: unit,
         outerPackLabel: label,
         showOuterPack: !!unit,
+      });
+    },
+
+    _syncApplyFieldsFromProps() {
+      const applyNumber = this.properties.applyNumber;
+      const hasNumber = applyNumber !== '' && applyNumber != null && Number(applyNumber) > 0;
+      this.setData({
+        applyNumber: applyNumber != null && applyNumber !== '' ? String(applyNumber) : '',
+        applyRemark: this.properties.applyRemark || '',
+        canSave: this.properties.canSave || hasNumber,
       });
     },
 

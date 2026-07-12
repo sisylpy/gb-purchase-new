@@ -1,63 +1,64 @@
+<view class="flex flex-column page">
+
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{selDepartmentName}}" 
+  avatar="{{url + 'uploadImage/imPurchase/jczb.png'}}" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class='p-20  with-lr-margin' bind:tap="{{showDepartment ? 'hideNumber' : ''}}">
+    <view class="flex-column-center mb-15">
+      <image class="" wx:if="{{url.length > 0}}" src="{{url + 'uploadImage/imPurchase/dinghuo.png'}}"
+        style="height: {{windowHeight / 7}}rpx; width: {{windowHeight / 7}}rpx; border-radius: 50%;" />
+      <text class="font-lg font-bold mt-30">邀请您加入餐厅订货团队</text>
+      <text class="font-sd text-secondary">您可以为餐厅快速提交采购订单</text>
+    </view>
 
 
-<view class="flex flex-column">
-
-<back-navbar style="height: {{navBarHeight}}rpx;" title="注册下单小程序" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
-
-
-
-  <view class='p-20 with-margin-top with-lr-margin' style='height: {{windowHeight - 340}}rpx; background:white;'  bind:tap="{{showDepartment ? 'hideNumber' : ''}}">
-   
-
-    <view class='type p-20' wx:if="{{subDepArr.length > 0}}">
-      <view class="p-10 pb-10" style="font-size: 34rpx;font-weight: 500;">选择你所在的部门</view>
-      <view class="flex-row" >
+    <view class='flex-row p-20' wx:if="{{subDepArr.length > 1}}">
+      <view class="p-10 pb-10" >选择工作部门</view>
+      <view class="flex-row">
         <view class="flex-column">
-          <input class="numInput" style="width:{{windowWidth/2}}rpx; font-size: 40rpx;  height: 90rpx; line-height: 90rpx;padding-left: 20rpx; " disabled="true" value="{{selDepartmentName}}" catchtap="showDepartment"></input>
+          <input class="numInput"
+            style="width:{{windowWidth/2}}rpx; font-size: 40rpx;  height: 90rpx; line-height: 90rpx;padding-left: 20rpx; "
+            disabled="true" value="{{selDepartmentName}}" catchtap="showDepartment"></input>
         </view>
         <view class="nabla trigle" catchtap="showDepartment"></view>
       </view>
       <view class="result {{showDepartment ? 'is-active' : ''}}" style="width: {{windowWidth/2 + 20}}rpx; ">
-        <view style="width:{{windowWidth/2 - 20}}rpx;" class="flex-column result-row" wx:for="{{subDepArr}}" wx:for-item="item" hover-class="hover" catchtap="selDepartment" data-id="{{item.gbDepartmentId}}" data-name="{{item.gbDepartmentName}}" wx:key="gbDepartmentId" hover-class="hover">
+        <view style="width:{{windowWidth/2 - 20}}rpx;" class="flex-column result-row" wx:for="{{subDepArr}}"
+          wx:for-item="item" hover-class="hover" catchtap="selDepartment" data-id="{{item.gbDepartmentId}}"
+          data-name="{{item.gbDepartmentName}}" wx:key="gbDepartmentId" hover-class="hover">
           {{item.gbDepartmentName}}
         </view>
       </view>
     </view>
 
-    <view class="flex-row form-item">
+    <view class="flex-row p-20 " >
 
-<text class="form-label">微信头像</text>
-<button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-  <image class="avatar" src="{{avatarUrl}}"></image>
-</button>
-</view>
-<view class="flex-row  form-item">
-<text class="mr-20 form-label">微信昵称</text>
-<mp-form bindsubmit="formSubmit">
-  <mp-cells>
-    <mp-cell title="昵称">
-      <input type="nickname" bindinput="onNicknameInput" class="form-input" placeholder="微信昵称" />
-    </mp-cell>
-  </mp-cells>
-</mp-form>
-</view>
+      <text class="form-label ">微信头像</text>
+      <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <image class="avatar" src="{{avatarUrl}}"></image>
+      </button>
+    </view>
+    <view class="flex-row p-20">
+      <text class="mr-20 form-label">微信昵称</text>
+      <mp-form bindsubmit="formSubmit">
+        <mp-cells>
+          <mp-cell title="昵称">
+            <input type="nickname" bindinput="onNicknameInput" class="form-input" placeholder="微信昵称" />
+          </mp-cell>
+        </mp-cells>
+      </mp-form>
+    </view>
 
-<view class="submit-section">
-<button bindtap="save" class="submit-btn {{canRegister  ? 'is-active' : ''}}">注册</button>
-</view>
+    <view class="submit-section">
+      <button bindtap="save" class="submit-btn {{canRegister  ? 'is-active' : ''}}">注册</button>
+    </view>
 
-
-
-
-    <view class='log_btn flex-column-center'>
-      <view class="mainColor"  style="margin-top: 40rpx;" bind:tap="_userLogin">登陆</view>
+    <view class='flex-column-center mt-30'  bind:tap="_userLogin">
+     
+      
+      <view class="flex-row" style="color: #ff7200;" > <text class="text-secondary">已有账号?</text>登陆</view>
     </view>
 
 
   </view>
 </view>
-
-
-
-
-

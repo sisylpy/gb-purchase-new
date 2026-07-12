@@ -1,4 +1,4 @@
-<wxs src="../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 <view
   class="sg-mask {{keyboardOffset > 0 ? 'sg-mask--keyboard' : ''}}"
@@ -17,7 +17,7 @@
       <view class="sg-product">
         <image
           class="sg-product__img"
-          src="{{goodsImg ? (goodsImg.indexOf('http') === 0 ? goodsImg : goodsImg) : '/images/logo.jpg'}}"
+          src="{{goodsImg ? (goodsImg.indexOf('http') === 0 ? goodsImg : goodsImg) : '/images/logo.png'}}"
           mode="aspectFill"
         />
         <view class="sg-product__info">
@@ -28,9 +28,9 @@
       </view>
 
       <view class="sg-batch-bar">
-        <text class="sg-batch-bar__item">批次：{{stockBatchIndex + 1}}</text>
-        <text class="sg-batch-bar__item">入库：{{tool.getAttrFullTime(consultItem.gbDgsFullTime)}}</text>
-        <text class="sg-batch-bar__item" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}">供应商：{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
+        <text class="sg-batch-bar__item half-row">入库：{{tool.getAttrFullTime(consultItem.gbDgsFullTime)}}</text>
+        <text class="sg-batch-bar__item">入库数量：{{consultItem.gbDgsWeight}}{{consultItem.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+        
       </view>
 
       <!-- 处理方式 -->

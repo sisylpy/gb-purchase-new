@@ -1,7 +1,7 @@
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 <wxs module="utilLv" src="/wxs/utilizationLevel.wxs" />
-<wxs src="../../../../utils/fn.wxs" module="tool" />
-<wxs src="./dga.wxs" module="dga" />
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="/wxs/dga.wxs" module="dga" />
 <view class="dga-page">
   <back-navbar
     style="height: {{navBarHeight}}rpx;"
@@ -174,7 +174,7 @@
             <view class="dia-ing-status {{ing.consumptionDeviation > 0 ? 'dia-ing-status--warn' : 'dia-ing-status--ok'}}">
               <text>{{ing.consumptionDeviation > 0 ? '重点检查' : (ing.consumptionDeviation < 0 ? '略偏高' : '正常')}}</text>
             </view>
-            <image class="dia-arrow {{auditExpandedList[aIdx] ? 'dia-arrow--up' : ''}}" src="/images/arrow-down.png" mode="aspectFit" />
+            <image class="dia-arrow {{auditExpandedList[aIdx] ? 'dia-arrow--up' : ''}}" src="/images/arrow-down.svg" mode="aspectFit" />
           </view>
           <view>
             <view class="dia-core-metrics1 flex-row-around p-20">

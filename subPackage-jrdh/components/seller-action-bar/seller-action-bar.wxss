@@ -1,0 +1,8 @@
+.seller-action-bar {
+  box-sizing: border-box;
+}
+
+.seller-action-bar-inner {
+  padding: 20rpx;
+  box-sizing: border-box;
+}

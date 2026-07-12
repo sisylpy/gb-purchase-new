@@ -1,0 +1,164 @@
+<!-- 采购员待读：仅展示订货数量 -->
+<wxs src="../../utils/orderGoodsFmt.wxs" module="fmt" />
+
+<template name="deptOrderTable">
+  <view class="dept-order-table-wrap {{extraClass}}" >
+    <view class="dept-order-table-title">
+      <image src="/images/wd-applet-total-spend-ytd.png" class="dept-order-table-title-icon" mode="aspectFit" />
+      <text>门店订货明细</text>
+    </view>
+    <view class="dept-order-table">
+      <view class="dept-order-table-head">
+        <text class="dept-col dept-col-name">门店</text>
+        <text class="dept-col dept-col-qty">数量</text>
+        <text class="dept-col dept-col-price">单价</text>
+        <text class="dept-col dept-col-sub">小计</text>
+      </view>
+      <view
+        class="dept-order-table-row {{orderIndex + 1 == deptOrders.length ? 'is-last' : ''}}"
+        wx:for="{{deptOrders}}"
+        wx:for-item="orders"
+        wx:for-index="orderIndex"
+        wx:key="gbDepartmentOrdersId"
+      >
+        <view class="dept-col dept-col-name">
+          <block wx:if="{{orders.gbDoParentDepartmentName}}">
+            <text>{{orders.gbDoParentDepartmentName}} · {{orders.gbDoOrderDepartmentName}}</text>
+          </block>
+          <block wx:else>
+            <text>{{orders.gbDoOrderDepartmentName}}</text>
+          </block>
+        </view>
+        <view class="dept-col dept-col-qty">
+          <text wx:if="{{fmt.hasOrderQtyDisplay(orders, purItem)}}">{{fmt.orderQtyDisplay(orders, purItem)}}</text>
+          <text wx:else class="text-danger">-</text>
+        </view>
+        <view class="dept-col dept-col-price">
+          <text wx:if="{{fmt.hasOrderOutPrice(orders, purItem)}}">{{fmt.orderOutPriceLabel(orders, purItem)}}</text>
+          <text wx:else class="text-danger">-</text>
+        </view>
+        <view class="dept-col dept-col-sub">
+          <text wx:if="{{fmt.isPositiveNum(orders.gbDoSubtotal)}}">¥{{orders.gbDoSubtotal}}</text>
+          <text wx:else class="text-danger">-</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<view class="goods-list-root {{fillHeight ? '' : 'goods-list-auto'}}">
+<scroll-view
+  wx:if="{{mode === 'simple'}}"
+  class="tui-city-scroll-y"
+  scroll-y="{{true}}"
+>
+  <view class="flex-column p-10" wx:for="{{batch.gbDPGEntities}}" wx:key="gbDistributerPurchaseGoodsId" wx:for-index="index">
+    <view class="flex-row-default border-bottom  font-lg" style="background-color: red;">
+      <text class="mr-10">{{index + 1}}.</text>
+      <view class="flex-column">
+        <view class="flex-row-between" style="width:{{windowWidth - 140}}rpx;">
+          <view class="flex-row-wrap">
+            <text class="mr-20">{{item.gbDistributerGoodsName}}</text>
+            <text class="font-md gray pack-spec" wx:if="{{fmt.hasTitlePackSpec(item.gbDistributerGoodsEntity)}}">{{fmt.titlePackSpec(item.gbDistributerGoodsEntity)}}</text>
+          </view>
+        </view>
+        <view
+          class="flex-row pt-20 pb-20 border-bottom {{orderIndex == item.gbDepartmentOrdersEntities.length - 1 ? 'is-last' : ''}} font-md"
+          wx:for="{{item.gbDepartmentOrdersEntities}}"
+          wx:for-item="orders"
+          wx:for-index="orderIndex"
+          wx:key="gbDepartmentOrdersId"
+          style="width:{{windowWidth - 40}}rpx;"
+        >
+          <view class="flex-row">
+            <block wx:if="{{orders.gbDoParentDepartmentName}}">
+              <text class="mr-10">{{orders.gbDoParentDepartmentName}}.</text>
+              <text class="mr-10">{{orders.gbDoOrderDepartmentName}}</text>
+            </block>
+            <block wx:else>
+              <text class="mr-10">{{orders.gbDoOrderDepartmentName}}</text>
+            </block>
+            <text class="mainColor">{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
+            <block wx:if="{{fmt.hasOrderScaleSpecLabel(orders, item)}}">
+              <text class="font-md">{{fmt.orderScaleSpecLabel(orders, item)}}</text>
+            </block>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</scroll-view>
+
+<!-- 已报价/已完成：部门明细含单价数量小计 -->
+<scroll-view
+  wx:elif="{{mode === 'priced'}}"
+  class="tui-city-scroll-y"
+  scroll-y="{{true}}"
+>
+  <view
+    class="flex-column font-lg {{styleVariant === 'dashed' ? 'with-dashed-bottom with-s-padding' : 'border-bottom p-10'}} {{batchStatus == 3 ? 'priced-item-done' : ''}}"
+    style="width:{{batchStatus == 3 ? windowWidth - 40 : (styleVariant === 'dashed' ? windowWidth - 60 : windowWidth - 40)}}rpx;"
+    wx:for="{{batch.gbDPGEntities}}"
+    wx:key="gbDistributerPurchaseGoodsId"
+    wx:for-index="index"
+  >
+    <view class="flex-row-wrap priced-goods-name">
+      <text class="mr-10 goods-index-num">{{index + 1}}.</text>
+      <text class="mr-20 goods-name-text">{{item.gbDistributerGoodsName}}</text>
+      <text class="font-md gray" wx:if="{{fmt.hasGoodsDetailLabel(item.gbDistributerGoodsEntity)}}">{{fmt.goodsDetailLabel(item.gbDistributerGoodsEntity)}}</text>
+      <text class="font-md gray pack-spec" wx:if="{{fmt.hasTitlePackSpec(item.gbDistributerGoodsEntity)}}">{{fmt.titlePackSpec(item.gbDistributerGoodsEntity)}}</text>
+    </view>
+    <block wx:if="{{item.gbDepartmentOrdersEntities.length > 0}}">
+      <template
+        is="deptOrderTable"
+        data="{{deptOrders: item.gbDepartmentOrdersEntities, purItem: item, extraClass: 'dept-order-table-lg'}}"
+      />
+    </block>
+  </view>
+</scroll-view>
+
+<!-- 供货商编辑：商品级录入 -->
+<scroll-view
+  wx:elif="{{mode === 'seller_edit'}}"
+  class="tui-city-scroll-y"
+  scroll-y="{{true}}"
+  scroll-into-view="NAV{{focusIndex}}"
+  scroll-with-animation="{{true}}"
+>
+  <view
+    class="seller-goods-card border-bottom {{bizType === 'return' ? 'return-goods-row' : (item.gbDpgStatus >= 2 ? 'bg-white' : 'bg-light')}}"
+    wx:for="{{batch.gbDPGEntities}}"
+    wx:key="gbDistributerPurchaseGoodsId"
+    wx:for-index="index"
+    id="NAV{{index}}"
+  >
+    <view class="flex-row-between seller-goods-title-row">
+      <view class="flex-row-wrap seller-goods-name">
+        <text class="goods-index">{{index + 1}}.</text>
+        <text class="goods-name-text">{{item.gbDistributerGoodsName}}</text>
+        <text class="font-md gray" wx:if="{{fmt.hasGoodsDetailLabel(item.gbDistributerGoodsEntity)}}">{{fmt.goodsDetailLabel(item.gbDistributerGoodsEntity)}}</text>
+        <text class="font-md gray pack-spec" wx:if="{{fmt.hasTitlePackSpec(item.gbDistributerGoodsEntity)}}">{{fmt.titlePackSpec(item.gbDistributerGoodsEntity)}}</text>
+        <block wx:if="{{item.gbDpgStandard !== item.gbDistributerGoodsEntity.gbDgGoodsStandardname && item.gbDpgBuyScale !== '-1' && !fmt.hasCartonPackSpec(item.gbDistributerGoodsEntity)}}">
+          <text class="mr-10"> ({{item.gbDpgStandard}})</text>
+        </block>
+      </view>
+      <view class="seller-title-actions">
+        <view wx:if="{{item.gbDpgIsCheck}}" class="seller-check-icon">
+          <image src="/images/selected-2.png" mode="aspectFill" class="icon" />
+        </view>
+        <view class="button-container-white seller-op-btn" bind:tap="onShowOperation" data-index="{{index}}" wx:if="{{batch.gbDpbStatus < 1 && batch.gbDpbPurchaseType != 9}}">
+          <image src="/images/points.png" mode="aspectFill" class="icon" />
+        </view>
+      </view>
+    </view>
+
+    <block wx:if="{{item.gbDepartmentOrdersEntities.length > 0}}" >
+      <template
+        is="deptOrderTable"
+        data="{{deptOrders: item.gbDepartmentOrdersEntities, purItem: item, extraClass: 'dept-order-table-lg'}}"
+      />
+    </block>
+  </view>
+  <view style="height: 100rpx;"></view>
+</scroll-view>
+</view>

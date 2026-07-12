@@ -335,11 +335,12 @@ export const deleteFood = (data) => {
 
 
 
-/** 根据 foodId 获取菜品配料列表 */
-export const getFoodGoodsList = (foodId) => {
+/** 根据 foodId 获取菜品配料列表；days 为库存均价统计天数，默认 30 */
+export const getFoodGoodsList = (foodId, days) => {
+  var effectiveDays = days != null && days > 0 ? days : 30;
   return new Promise((resolve, reject) => {
     wx.request({
-      url: apiUrl.apiUrl + 'gbdistributerfoodgoods/getFoodGoodsList/' + foodId,
+      url: apiUrl.apiUrl + 'gbdistributerfoodgoods/getFoodGoodsList/' + foodId + '?days=' + effectiveDays,
       method: 'GET',
       success: (res) => {
         resolve({ result: res.data })

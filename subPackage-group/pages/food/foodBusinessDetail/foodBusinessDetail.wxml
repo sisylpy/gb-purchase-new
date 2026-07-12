@@ -8,6 +8,18 @@
     bindnavbuttontap="toBack"
   />
 
+  <!-- 顶部日期选择 -->
+  <view class="fbd-date-bar">
+    <view class="fbd-date-bar__left" bindtap="toDatePageSearch">
+      <image src="/images/calender.png" class="fbd-date-bar__icon" mode="aspectFit" />
+      <view class="fbd-date-bar__info">
+        <text class="fbd-date-bar__hanzi">{{hanzi || '本月'}}</text>
+        <text class="fbd-date-bar__range" wx:if="{{startDate === stopDate}}">{{startDate}}</text>
+        <text class="fbd-date-bar__range" wx:else>{{startDate}} - {{stopDate}}</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 加载/错误 -->
   <view class="fbd-state" wx:if="{{loading}}">
     <text class="fbd-state__txt">加载中…</text>

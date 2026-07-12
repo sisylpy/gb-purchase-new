@@ -1,4 +1,5 @@
 <wxs src="../../wxs/format.wxs" module="tool" />
+<wxs src="../../utils/orderGoodsFmt.wxs" module="fmt" />
 
 <view class="flex flex-column">
 
@@ -38,16 +39,7 @@
           <image src="../../images/pingjunjia.png" class="icon"></image>
           <text class="font-sl">公告</text>
         </view>
-       
-        <!-- <view class="flex-column center-content p-20 mr-10" bindtap="toStock" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
-          <image src="../../images/goods.png" class="icon"></image>
-          <text class="font-sl">库存</text>
-        </view> -->
-
-        <!-- <view class="flex-column center-content p-20 mr-10" bindtap="toStaffMeal" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
-          <image src="../../images/dish.png" class="icon"></image>
-          <text class="font-sl">菜品</text>
-        </view> -->
+      
 
         <view class="flex-column center-content p-20 mr-10" bindtap="toAiOrders" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
           <image src="../../images/edit-2.png" class="icon"></image>
@@ -89,12 +81,7 @@
                         <view class="flex-row-wrap">
                           <text class="brand" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsBrand !== null && item.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                           <text>{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
-                          <block wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
-                            <view class="text-secondary mr-10 ">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</view>
-                          </block>
-                          <block wx:else>
-                            <text class="text-secondary mr-10 ">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
-                          </block>
+                          <text class="font-md gray pack-spec" wx:if="{{fmt.packSpec(item.gbDistributerGoodsEntity)}}">{{fmt.packSpec(item.gbDistributerGoodsEntity)}}</text>
                           <text class="flex-row font-sl text-secondary" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
                         </view>
                       </view>
@@ -130,12 +117,7 @@
                       <view class="flex-row">
                         <text class="brand" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsBrand !== null && item.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                         <text class="mr-20">{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
-                        <block wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
-                          <view class="text-secondary mr-10 ">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</view>
-                        </block>
-                        <block wx:else>
-                          <text class="text-secondary mr-10 ">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
-                        </block>
+                        <text class="font-md gray pack-spec" wx:if="{{fmt.packSpec(item.gbDistributerGoodsEntity)}}">{{fmt.packSpec(item.gbDistributerGoodsEntity)}}</text>
                         <text wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
                       </view>
                       <view class="flex-column" style="width:{{windowWidth - 160}}rpx;">
@@ -167,12 +149,7 @@
                       <view class="flex-row">
                         <text class="brand" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsBrand !== null && item.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                         <text class="mr-20">{{item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
-                        <block wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}">
-                          <view class="text-secondary mr-10 ">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</view>
-                        </block>
-                        <block wx:else>
-                          <text class="text-secondary mr-10 ">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
-                        </block>
+                        <text class="font-md gray pack-spec" wx:if="{{fmt.packSpec(item.gbDistributerGoodsEntity)}}">{{fmt.packSpec(item.gbDistributerGoodsEntity)}}</text>
                         <text wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
                       </view>
                       <view class="flex-row ">
@@ -214,27 +191,35 @@
               <view class="flex-stretch">
                 <view class="vline"></view>
                 <view class="body bg-white" style="width:{{windowWidth - 60}}rpx; margin-left: 10rpx; ">
-                  <view class="flex-row p-10 font-sl border-bottom" style="width: {{windowWidth - 80}}rpx; background-color: beige;">
-                    <view class="flex-column center-content third-row">
+                  <view class="flex-row p-10 font-sl border-bottom batch-header-row" style="width: {{windowWidth - 80}}rpx; ">
+                    <view class="flex-column center-content batch-header-col" >
                       <image src="{{url + batch.nxJrdhPurEntity.gbDuWxAvartraUrl}}" class="face_img"></image>
                       <view><text>{{batch.nxJrdhPurEntity.gbDuWxNickName}}</text></view>
                     </view>
-                    <view class="flex-column center-content third-row" style="background-color: aqua;">
+                    <view class="flex-column center-content batch-header-col" >
                       <view class="flex-row text-danger" wx:if="{{batch.gbDpbPurchaseType == 9}}"><text>{{batch.gbDpbPurchaseType == 9 ? '退货' : ''}}</text></view>
-                      <view wx:else="">
-                      <image src="/images/-report_forms.png" mode="aspectFill" class="icon" />
+                      <view wx:elif="{{batch.gbDpbStatus < 2 && batch.gbDpbPurchaseType != 9}}" class="button-container-white" hover-class="hover" bindtap="onReceiptOcrTap" data-batch="{{batch}}" data-bindex="{{bIndex}}">
+                        <image src="/images/Photo.png" mode="aspectFill" class="icon" />
                       </view>
                     </view>
                     
-                    <view class="flex-row-between third-row" style="background-color: #ffbc65;">
-                      <view class="flex-column center-content ">
-                      <block wx:if="{{batch.nxJrdhSellerEntity !== null}}"><image src="{{url + batch.nxJrdhSellerEntity.nxJrdhWxAvartraUrl}}" class="face_img"></image></block>
-                      <block wx:else><image src="../../images/user.png" class="face_img"></image></block>
-                      <view class="font-sl flex-row" wx:if="{{batch.nxJrdhSellerEntity !== null}}">{{batch.nxJrdhSellerEntity.nxJrdhWxNickName}}</view>
-                      <view class="font-sl text-danger" wx:else>卖家未读</view>
+                    <view class="flex-row-between batch-header-col batch-seller-col" >
+                      <view class="flex-column center-content batch-seller-info">
+                      <block wx:if="{{batch.gbDpbStatus == -1}}">
+                        <image src="../../images/user.png" class="face_img"></image>
+                        <view class="font-sl text-danger">卖家未读</view>
+                      </block>
+                      <block wx:elif="{{batch.nxJrdhSellerEntity !== null}}">
+                        <image src="{{url + batch.nxJrdhSellerEntity.nxJrdhWxAvartraUrl}}" class="face_img"></image>
+                        <view class="font-sl flex-row">{{batch.nxJrdhSellerEntity.nxJrdhWxNickName}}</view>
+                      </block>
+                      <block wx:else>
+                        <image src="../../images/user.png" class="face_img"></image>
+                        <view class="font-sl text-danger">卖家未读</view>
+                      </block>
                     </view>
 
-                    <view class="button-container-white" hover-class="hover" bindtap="onBatchMenuTap" data-batch="{{batch}}" data-bindex="{{bIndex}}">
+                    <view class="button-container-white batch-menu-btn" hover-class="hover" bindtap="onBatchMenuTap" data-batch="{{batch}}" data-bindex="{{bIndex}}">
                       <image src="/images/points.png" mode="aspectFill" class="icon" />
                     </view>
                     </view>
@@ -249,8 +234,7 @@
                             <view class="flex-row">
                               <text class="brand" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsBrand !== null && item.gbDistributerGoodsEntity.gbDgGoodsBrand.length > 0}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                               <text class="font-lg mr-10">{{item.gbDistributerGoodsName}}</text>
-                              <block wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null' && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight.length > 0}}"><text class=" text-secondary">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text></block>
-                              <block wx:else><text class=" text-secondary">({{item.gbDgGoodsStandardname}})</text></block>
+                              <text class="font-md gray pack-spec" wx:if="{{fmt.packSpec(item.gbDistributerGoodsEntity)}}">{{fmt.packSpec(item.gbDistributerGoodsEntity)}}</text>
                               <block wx:if="{{mendianInfo && mendianInfo.gbDepartmentSubAmount == 1}}">
                                 <view class="flex-row mr-10 font-lg">
                                   <text class="ml-20">{{item.gbDepartmentOrdersEntities[0].gbDoQuantity}}{{item.gbDepartmentOrdersEntities[0].gbDoStandard}}</text>
@@ -282,10 +266,10 @@
                                 <block wx:if="{{item.gbDpgStatus == 2 && batch.gbDpbStatus == 1}}"><text class="ml-20 text-success font-sl">出货中</text></block>
                               </view>
                             </block>
-                            <view class="flex-row" wx:if="{{batch.gbDpbStatus > 1}}" style="width:{{(windowWidth - 140)}}rpx;">
-                              <view class="third-row flex-row"><text class="text-secondary flex-shrink-0">数量:</text><text wx:if="{{order.gbDoWeight !== null && order.gbDoWeight !== '0.0'}}">{{order.gbDoWeight}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
-                              <view class="flex-row third-row"><text class="text-secondary flex-shrink-0">单价:</text><text class="{{order.gbDoPrice > item.nxGoodsPriceEntity.nxGpHighestPrice ? 'text-danger' : ''}}">{{order.gbDoPrice}}元</text></view>
-                              <view class="third-row"><text class="text-secondary flex-shrink-0">小计:</text><text wx:if="{{order.gbDoSubtotal !== null}}">{{order.gbDoSubtotal}}元</text></view>
+                            <view class="flex-row" wx:if="{{fmt.shouldShowOrderOutMeta(batch, order, item)}}" style="width:{{(windowWidth - 140)}}rpx;">
+                              <view class="third-row flex-row"><text class="text-secondary flex-shrink-0">数量:</text><text wx:if="{{fmt.hasOrderOutQty(order, item)}}">{{fmt.orderOutQty(order, item)}}</text></view>
+                              <view class="flex-row third-row"><text class="text-secondary flex-shrink-0">单价:</text><text class="{{fmt.isOrderPriceHigh(order, item) ? 'text-danger' : ''}}" wx:if="{{fmt.hasOrderOutPrice(order, item)}}">{{fmt.orderOutPriceLabel(order, item)}}</text><text wx:else class="text-danger">-</text></view>
+                              <view class="third-row"><text class="text-secondary flex-shrink-0">小计:</text><text wx:if="{{fmt.hasOrderOutSubtotal(order, item)}}">{{fmt.orderOutSubtotal(order, item)}}元</text><text wx:else class="text-danger">-</text></view>
                             </view>
                           </view>
                         </view>
@@ -322,7 +306,7 @@
 <view class="overlay {{showOperation ? 'show' : 'hide'}}" catchtouchmove="ture" catchtap="hideMask">
   <view class="nnn bg-white font-lg">
     <view class="flex-column-center border-bottom font-bold pt-20 pb-20">
-      <view class="flex-row"><text class="mr-10">{{editPurGoods.gbDistributerGoodsName}}</text><text class="text-secondary font-sl">({{editPurGoods.gbDgGoodsStandardname}})</text></view>
+      <view class="flex-row"><text class="mr-10">{{editPurGoods.gbDistributerGoodsName}}</text><text class="font-md gray pack-spec" wx:if="{{fmt.packSpec(editPurGoods.gbDistributerGoodsEntity)}}">{{fmt.packSpec(editPurGoods.gbDistributerGoodsEntity)}}</text><text wx:elif="{{editPurGoods.gbDgGoodsStandardname}}" class="text-secondary font-sl">({{editPurGoods.gbDgGoodsStandardname}})</text></view>
     </view>
     <view class="flex-column">
       <view class="flex-row p-30 border-bottom" catchtap="cancelGbBatchItem" hover-class="hover">
@@ -341,7 +325,6 @@
         </view>
       </block>
       <view class="flex-row p-30" hover-class="hover" wx:else="">
-        <image src="/images/wroo.png" class="icon mr-20"></image>
         <text class="text-secondary">暂无供货商</text>
       </view>
     </view>
@@ -363,7 +346,7 @@
     <view class="flex-row" style="width: {{windowWidth - 160}}rpx;">
       <view class="bg-warning mr-30 radius-20 third-row p-20" bindtap="toFinishPurGoods">自采完成</view>
       <view class="bg-success mr-30 radius-20 third-row p-10"><button open-type="share">微信订货</button></view>
-      <view class="bg-primary mr-30 radius-20 third-row p-20 " bindtap="toOrderApp">供货商</view>
+      <view class="bg-primary mr-30 radius-20 third-row p-20 text-white" bindtap="toOrderApp">供货商</view>
     </view>
   </view>
 </view>
@@ -386,11 +369,12 @@
 
 <!-- 流量不足弹窗 -->
 <view class="overlay {{disInfo.gbDistributerBuyQuantity < 1 ? 'show' : 'hide'}}">
-  <view class="popup flex-column-center">
+  <view class="popup flex-column-center pb-20">
     <view class="flex-row text-center mt-30 mb-30">
       <image src="../../images/warn.png" mode="aspectFill" class="icon mr-10"/>
       <text>没有点数啦！</text>
     </view>
+    <view style="height: 200rpx;"></view>
     <view class="center-content twenty_radius p-20" style="width: {{windowWidth - 100}}rpx; background-color: #ffbc65; line-height: 60rpx; border-radius: 10rpx;" bindtap="toPay">
       <view class="font-lg">购买流量</view>
     </view>
@@ -422,7 +406,7 @@
 <view wx:if="{{showPage}}" class="popup-container font-lg" animation="{{popupAnimation}}">
   <view class="popup-header">
     <text class="popup-title">设置门店的部门</text>
-    <image src="/images/close-icon.png" class="close-icon" bindtap="hidePopup" />
+    <text class="close-icon" bindtap="hidePopup">✕</text>
   </view>
 
   <view class="popup-content">

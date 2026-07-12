@@ -1,3 +1,5 @@
+<wxs src="../../../../utils/orderGoodsFmt.wxs" module="fmt" />
+
 <view class="flex flex-column">
 
 
@@ -10,7 +12,6 @@
 
       <view wx:if="{{showSkeleton}}" class="ai-loading">
         <view animation="{{fadeAnimation}}" class="ai-bubble">
-          <image src="/images/CE.png" class="ai-icon" />
           <text class="loading-text">分析订货习惯中{{dots}}</text>
         </view>
       </view>
@@ -37,6 +38,7 @@
         <view class="flex-column font-lg customer-ai-detail">
           <view class="customer-ai-title-row">
             <text class="font-lg-2 customer-ai-wrap-text customer-ai-title-name">{{item.gbDdgDepGoodsName}}</text>
+            <text class="font-md gray pack-spec" wx:if="{{item.gbDistributerGoodsEntity && fmt.packSpec(item.gbDistributerGoodsEntity)}}">{{fmt.packSpec(item.gbDistributerGoodsEntity)}}</text>
             <text wx:if="{{item.aiShouldRemindToday === 'true'}}" class="font-sl customer-ai-remind-chip">今日提醒</text>
           </view>
           <view class="customer-ai-line font-sl mt-6" wx:if="{{item.aiRemindReasonText}}" style="color:#666;">

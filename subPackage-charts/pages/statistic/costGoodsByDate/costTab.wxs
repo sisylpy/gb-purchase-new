@@ -1,0 +1,30 @@
+function lineLabel(tabIndex) {
+  if (tabIndex == 0) return '售出';
+  if (tabIndex == 1) return '损耗';
+  if (tabIndex == 2) return '废弃';
+  if (tabIndex == 3) return '退货';
+  return '员工餐';
+}
+
+function lineAmount(tabIndex, item) {
+  if (!item) return '0';
+  if (tabIndex == 0) return item.goodsProduceTotal;
+  if (tabIndex == 1) return item.goodsLossTotal;
+  if (tabIndex == 2) return item.goodsWasteTotal;
+  if (tabIndex == 3) return item.goodsReturnTotal;
+  return item.goodsEmployeeMealTotal;
+}
+
+function lineTypeClass(tabIndex) {
+  if (tabIndex == 0) return 'sales-type';
+  if (tabIndex == 1) return 'loss-type';
+  if (tabIndex == 2) return 'waste-type';
+  if (tabIndex == 3) return 'return-type';
+  return 'employee-meal-type';
+}
+
+module.exports = {
+  lineLabel: lineLabel,
+  lineAmount: lineAmount,
+  lineTypeClass: lineTypeClass
+};

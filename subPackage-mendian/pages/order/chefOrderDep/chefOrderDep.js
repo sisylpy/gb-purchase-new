@@ -19,7 +19,7 @@ Page({
     showPage: false,
     popupAnimation: {},
 
-    avatarUrl: '/images/User2.png',
+    avatarUrl: '/images/user.png',
     userName: '',
     nameError: '',
     isFormValid: false,
@@ -93,6 +93,7 @@ Page({
     if(disInfo){
       this.setData({
         disInfo: disInfo,
+        mendianStoreList: disInfo.mendianDepartmentList || [],
       })
     }
     var mendianInfo = wx.getStorageSync('mendianInfo');

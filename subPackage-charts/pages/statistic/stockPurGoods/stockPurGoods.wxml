@@ -1,5 +1,5 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
-<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="../../../../utils/orderGoodsFmt.wxs" module="fmt" />
 
 
 <view class="flex flex-column">
@@ -47,30 +47,42 @@
     <view class="flex-column  bg-white ">
 
       <!-- 商品详情卡片 -->
-      <view class="flex-column border-bottom p-20" wx:for-item="goods" wx:key="gbDistributerGoodsId" wx:for="{{arr}}">
+      <view class="flex-column border-bottom p-20" wx:for-item="goods" wx:for-index="goodsIndex" wx:key="gbDistributerGoodsId" wx:for="{{arr}}" id="goods-container-{{goodsIndex}}">
 
         <!-- 商品信息头部 -->
-        <view class="flex-row-default mb-20">
-          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="url mr-20" />
-          <view class="flex-column" >
-            <text class="font-sm">第{{index + 1}}名/共{{totalCount}}个</text>
-            <view class="flex-row mb-10">
-              <text class="font-bold mr-10">{{goods.gbDgGoodsName}}</text>
-              <block wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
-                <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})</text>
-              </block>
-              <block wx:else>
-                <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardname}})</text>
-              </block>
+        <view class="flex-row-between" bind:tap="showList" data-index="{{goodsIndex}}">
+          <view class="flex-row-default mb-20">
+            <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="url mr-20" />
+            <view class="flex-column">
+              <text class="font-sm">第{{goodsIndex + 1}}名/共{{totalCount}}个</text>
+              <view class="flex-row mb-10">
+                <text class="font-bold mr-10">{{goods.gbDgGoodsName}}</text>
+                <block wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
+                  <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})</text>
+                </block>
+                <block wx:else>
+                  <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardname}})</text>
+                </block>
+              </view>
+            </view>
+          </view>
+
+          <view class="goods-price-section">
+            <view class="price-container">
+              <text class="price-label">库存</text>
+              <text class="price-value">¥{{goods.goodsStockTotal || goods.goodsStockTotalString || 0}}</text>
+            </view>
+            <view class="arrow-container {{goods.showPurchaseList ? 'expanded' : 'collapsed'}}">
+              <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
             </view>
           </view>
         </view>
 
-        <view class="flex-column purchase-row-container">
-          <view class="flex-column mt-20" wx:for="{{goods.wastePurGoodsEntities}}" wx:for-item="pur" wx:for-index="purIndex" catch:tap="showDetail" data-goods-index="{{index}}" data-pur-index="{{purIndex}}">
-          
-              <!-- 采购批次默认显示 - 蓝色主题 -->
-              <view class="flex-row purchase-row purchase-row-active {{pur.expanded ? 'purchase-row-active' : ''}}">
+        <!-- 采购批次列表 - 默认隐藏，点击商品行后显示 -->
+        <view class="flex-column purchase-row-container expandable-content {{goods.showPurchaseList ? 'expanded' : ''}}">
+          <view class="flex-column mt-20" wx:for="{{goods.wastePurGoodsEntities}}" wx:for-item="pur" wx:for-index="purIndex" catch:tap="showDetail" data-goods-index="{{goodsIndex}}" data-pur-index="{{purIndex}}">
+
+            <view class="flex-row purchase-row {{pur.expanded ? 'purchase-row-active' : ''}}">
 
                 <!-- 左侧时间 -->
                 <view class="flex-row mr-20">
@@ -87,7 +99,7 @@
                 <!-- 中间采购信息 -->
                 <view class="flex-column" style="flex: 1;">
                   <view class="flex-row-between">
-                    <text class="font-bold">{{pur.gbDpgBuyQuantity}}({{goods.gbDgGoodsStandardname}})</text>
+                    <text class="font-bold">{{fmt.purRowOutQty(pur, goods)}}</text>
                     <text class="purchase-info-value-amount mr-20">{{pur.gbDpgBuySubtotal}}元</text>
                   </view>
                   <view class="flex-row-between mt-5">
@@ -108,9 +120,9 @@
                 </view>
 
               </view>
-      
-              <!-- 库存详细信息 - 蓝色主题 wx:if="{{pur.expanded}}" -->
-              <view  class="purchase-info-card expandable-content expanded">
+
+            <!-- 库存详细信息 - 点击采购批次后显示 -->
+            <view wx:if="{{pur.expanded}}" class="purchase-info-card expandable-content expanded">
 
               
 

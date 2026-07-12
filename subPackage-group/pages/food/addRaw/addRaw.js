@@ -10,12 +10,14 @@ import {
   quickSearchDisGoodsForFoodIngredient,
   getFoodGoodsList,
   updateGrossMargin,
+  getFoodByFoodId,
 } from '../../../../services/apiDistributerGbFood'
 
 var stockUnit = require('../../../../lib/stockUnitConvert.js');
 var MIN_UNIT_OPTIONS = stockUnit.MIN_UNIT_OPTIONS;
 var COUNT_MIN_UNITS = ['个', '只', '张', '枚', '条', '根', '颗'];
 var QUICK_DOSAGE_PRESETS = [5, 10, 15];
+var COST_DAYS_OPTIONS = [7, 30, 65, 90];
 /** 规格≥该斤数且包装为袋/箱等 → 默认用「斤」而非 g（如 50斤/袋） */
 var BULK_WEIGHT_JIN_THRESHOLD = 10;
 /** 规格≥该克数且为大包装 → 同上 */
@@ -759,6 +761,8 @@ Page({
     modalBulkWeightPack: false,
     modalCanCalcCost: false,
     modalQuickTags: [],
+    costDays: 30,
+    costDaysLabel: '近30天',
   },
 
 
@@ -800,10 +804,38 @@ Page({
         disId: value.gbDistributerId,
       })
     }
+    this.setData({ _hasLoaded: true });
+  },
+
+  onShow: function () {
+    var foodId = this.data.foodId;
+    if (foodId && this.data._hasLoaded) {
+      // 从编辑页返回时刷新菜品数据
+      this._refreshFoodItem(foodId);
+    }
   },
 
   onReady() {
     this._tryDrawDonut();
+  },
+
+  _refreshFoodItem(foodId) {
+    var that = this;
+    getFoodByFoodId(foodId).then(function (res) {
+      if (res.result.code == 0) {
+        var foodItem = res.result.data;
+        // 字段映射：后端返回 gbDfFoodPrice，页面使用 salePrice
+        if (foodItem && typeof foodItem.gbDfFoodPrice !== 'undefined') {
+          foodItem.salePrice = foodItem.gbDfFoodPrice;
+        }
+        that.setData({
+          foodItem: foodItem,
+        }, function () {
+          // 售价变动后重新计算毛利
+          that._processRawArr(that.data.rawArr || []);
+        });
+      }
+    });
   },
 
   /** 已选配料时弹窗上移，避免表单变长后底部被挡 */
@@ -831,7 +863,7 @@ Page({
     if (opts.showLoading !== false) {
       load.showLoading(opts.loadingText || '加载配料');
     }
-    getFoodGoodsList(foodId).then(function (res) {
+    getFoodGoodsList(foodId, this.data.costDays).then(function (res) {
       if (opts.showLoading !== false) {
         load.hideLoading();
       }
@@ -876,7 +908,7 @@ Page({
       return;
     }
     load.showLoading('刷新配料');
-    getFoodGoodsList(foodId).then(function (res) {
+    getFoodGoodsList(foodId, this.data.costDays).then(function (res) {
 
       load.hideLoading();
       if (res.result.code == 0) {
@@ -1155,7 +1187,7 @@ Page({
     var img = goods.gbDgNxFatherImg || goods.gbDgGoodsFile || goods.gbDgGoodsFileImg;
     var modalGoodsImg = img
       ? (String(img).indexOf('http') === 0 ? img : (this.data.url + img))
-      : (this.data.url + '/images/logo.jpg');
+      : (this.data.url + '/images/logo.png');
     this.setData({
       modalGoods: goods,
       modalGoodsImg: modalGoodsImg,
@@ -1303,7 +1335,15 @@ Page({
   },
 
   toChangePrice() {
-    wx.showToast({ title: '请在菜品编辑页修改售价', icon: 'none' });
+    var foodItem = this.data.foodItem;
+    var foodId = foodItem.gbDistributerFoodId || foodItem.foodId || '';
+    if (!foodId) {
+      wx.showToast({ title: '缺少菜品ID', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: '../addFood/addFood?type=edit&foodId=' + foodId,
+    });
   },
 
   showProfitHint() {
@@ -1314,6 +1354,50 @@ Page({
     var foodId = this.data.foodId;
     if (foodId) {
       this._fetchFoodGoods(foodId);
+    }
+  },
+
+  onPickCostDays() {
+    var that = this;
+    var itemList = COST_DAYS_OPTIONS.map(function (d) {
+      return '近' + d + '天';
+    }).concat(['自定义天数']);
+    wx.showActionSheet({
+      itemList: itemList,
+      success: function (res) {
+        var idx = res.tapIndex;
+        if (idx < 0) return;
+        if (idx < COST_DAYS_OPTIONS.length) {
+          that._applyCostDays(COST_DAYS_OPTIONS[idx]);
+          return;
+        }
+        wx.showModal({
+          title: '自定义统计天数',
+          editable: true,
+          placeholderText: '请输入 1-365',
+          success: function (modalRes) {
+            if (!modalRes.confirm) return;
+            var n = parseInt(String(modalRes.content || '').trim(), 10);
+            if (isNaN(n) || n <= 0 || n > 365) {
+              wx.showToast({ title: '请输入 1-365 的整数', icon: 'none' });
+              return;
+            }
+            that._applyCostDays(n);
+          },
+        });
+      },
+    });
+  },
+
+  _applyCostDays(days) {
+    if (!days || days <= 0) return;
+    this.setData({
+      costDays: days,
+      costDaysLabel: '近' + days + '天',
+    });
+    var foodId = this.data.foodId;
+    if (foodId) {
+      this._fetchFoodGoods(foodId, { loadingText: '刷新成本' });
     }
   },
 

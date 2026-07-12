@@ -96,6 +96,7 @@ Page({
     });
     return params;
   },
+
   _aaa() {
     wx.login({
       success: (res) => {
@@ -148,14 +149,21 @@ _userLogin() {
       gbSubDepUserLogin(resLogin.code)
         .then((res) => {
           if (res.result.code !== -1) {
-            wx.setStorageSync('disInfo', res.result.data.disInfo);
-            wx.setStorageSync('userInfo', res.result.data.depUserInfo);
-            wx.setStorageSync('mendianInfo', res.result.data.depInfo);
-
-            wx.setStorageSync('orderDepInfo', res.result.data.orderDepInfo);
-            wx.redirectTo({
-              url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
-            })
+            if(res.result.data.depUserInfo.gbDuAdmin == 111){
+              wx.redirectTo({
+                url: '/pages/index/index',
+              })
+            }else{
+              wx.setStorageSync('disInfo', res.result.data.disInfo);
+              wx.setStorageSync('userInfo', res.result.data.depUserInfo);
+              wx.setStorageSync('mendianInfo', res.result.data.depInfo);
+  
+              wx.setStorageSync('orderDepInfo', res.result.data.orderDepInfo);
+              wx.redirectTo({
+                url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
+              })
+            }
+           
             //跳转到首页
           } else {
             this._aaa();

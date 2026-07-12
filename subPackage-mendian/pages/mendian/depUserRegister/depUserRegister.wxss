@@ -1,7 +1,7 @@
 /* miniprogram/pages/signe1/enterprisetype.wxss */
 
 page {
-  background: #f6f6f6;
+  background: #ffffff;
   /* display: block; */
   
 }
@@ -10,7 +10,6 @@ page {
   height: 120rpx;
   font-size: 40rpx;
   background: #fff;
-  /* display: block; */
   padding-top: 20rpx;
 }
 
@@ -127,34 +126,25 @@ button.addBtn{
 
 
 
-.form-item {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  margin-bottom: 20rpx;
-  padding: 20rpx;
-  border-radius: 10rpx;
-}
 .form-label {
   width: 160rpx;
   font-size: 32rpx;
   color: #333;
 }
 .form-input {
-  flex: 1;
-  margin-left: 10rpx;
+  /* flex: 1; */
+  /* margin-left: 10rpx; */
   font-size: 34rpx;
   border-bottom: 1px solid gray;
   padding: 5rpx 10rpx;
-  /* color: #666; */
 }
 
 .avatar-preview-wrap {
-  margin-top: 20rpx;
+  /* margin-top: 20rpx; */
   font-size: 34rpx;
   color: #666;
-  display: flex;
-  align-items: center;
+  /* display: flex; */
+  /* align-items: center; */
 }
 .avatar-preview {
   width: 100rpx;
@@ -168,7 +158,7 @@ button.addBtn{
 /* 提交按钮 */
 .submit-section {
   margin-top: 40rpx;
-  padding: 0 40rpx;
+  padding: 20rpx 40rpx;
 }
 
 .submit-btn.is-active{
@@ -177,11 +167,12 @@ button.addBtn{
 }
 .submit-btn {
   width: 100%;
-  background-color: #72706f;
+  background-color: #a7a7a7;
   color: #fff;
   font-size: 34rpx;
   padding: 10rpx;
   border-radius: 12rpx;
+  line-height: 70rpx;
   border: none; /* 如果需要去掉默认边框 */
   text-align: center; /* 文字居中 */
   box-sizing: border-box; /* 确保内边距不会影响宽度 */
@@ -189,14 +180,6 @@ button.addBtn{
 
 
 
-
-.avatar-wrapper {
-  padding: 0;
-  width: 56px !important;
-  border-radius: 8px;
-  margin-top: 40px;
-  margin-bottom: 40px;
-}
 
 .avatar {
   display: block;

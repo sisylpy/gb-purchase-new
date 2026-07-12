@@ -1,5 +1,5 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
-<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="../../../../utils/orderGoodsFmt.wxs" module="fmt" />
 
 
 <view class="flex flex-column">
@@ -91,7 +91,7 @@
             <!-- 商品信息头部 -->
             <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
               <view class="flex-row-default mb-20">
-                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
+                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="goods-image mr-20" />
                 <view class="flex-column">
                   <text class="font-sm">第{{index + 1}}名/共{{totalCount}}个</text>
                   <view class="flex-row mb-10">
@@ -146,7 +146,7 @@
                   <!-- 中间采购信息 -->
                   <view class="flex-column" style="flex: 1;">
                     <view class="flex-row-between">
-                      <text class="font-bold">{{pur.gbDpgBuyQuantity}}{{goods.gbDgGoodsStandardname}}</text>
+                      <text class="font-bold">{{fmt.purRowOutQty(pur, goods)}}</text>
                       <text class="purchase-info-value-amount mr-20">{{pur.gbDpgBuySubtotal}}元</text>
                     </view>
                     <view class="flex-row-between mt-5">
@@ -294,7 +294,7 @@
             <!-- 商品信息头部 -->
             <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
               <view class="flex-row-default mb-20">
-                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
+                <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="goods-image mr-20" />
                 <view class="flex-column">
                   <text class="font-sm">第{{index + 1}}名/共{{totalCount}}个</text>
                   <view class="flex-row mb-10">
@@ -349,7 +349,7 @@
                   <!-- 中间采购信息 -->
                   <view class="flex-column" style="flex: 1;">
                     <view class="flex-row-between">
-                      <text class="font-bold">{{pur.gbDpgBuyQuantity}}{{goods.gbDgGoodsStandardname}}</text>
+                      <text class="font-bold">{{fmt.purRowOutQty(pur, goods)}}</text>
                       <text class="purchase-info-value-amount mr-20">{{pur.gbDpgBuySubtotal}}元</text>
                     </view>
                     <view class="flex-row-between mt-5">

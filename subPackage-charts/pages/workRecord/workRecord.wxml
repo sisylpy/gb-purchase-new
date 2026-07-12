@@ -51,7 +51,7 @@
           <block wx:for="{{group.records}}" wx:for-item="record" wx:key="id">
             <!-- AI整理视图 -->
             <block>
-              <view class="wr-card">
+              <view class="wr-card" id="record-{{record.id}}">
                 <!-- 列表抬头：displayTitle 优先，否则沿用分类标签 -->
                 <view class="wr-card-header">
                   <text class="wr-card-title" wx:if="{{record.title}}">{{record.displayTitle || record.title}}</text>

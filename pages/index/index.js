@@ -26,6 +26,7 @@ var requestUtil = require('../../lib/request');
 var depOrderApi = require('../../services/depOrder');
 var pagesApi = require('../services/pages');
 var purchaseContext = require('../../lib/purchaseContext');
+var batchBuyerInput = require('../../lib/batchBuyerInput');
 
 
 // --- 本页面用到的所有 API 接口 ---
@@ -100,13 +101,10 @@ Page({
     });
 
     
-
-   
-    
     var userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
       var admin = userInfo.gbDuAdmin;
-      if (admin != 0 && admin != 11) {
+      if (admin ==  12) {
         var orderDepInfo = wx.getStorageSync('orderDepInfo') || wx.getStorageSync('mendianInfo');
         if (orderDepInfo) {
           wx.setStorageSync('orderDepInfo', orderDepInfo);
@@ -295,7 +293,7 @@ Page({
                 }
               } else {
                 wx.redirectTo({
-                  url: '/subPackage-supplier/pages/jinriListWithLogin/jinriListWithLogin',
+                  url: '/subPackage-jrdh/pages/jinriListWithLogin/jinriListWithLogin',
                 });
               }
             } else {
@@ -627,19 +625,30 @@ Page({
     this.setData({
       showReturn: true,
       returnItem: e.currentTarget.dataset.item,
-      returnOrders: e.currentTarget.dataset.item.gbDistributerGoodsEntity.gbDepartmentOrdersEntities[0],
+      returnOrders: e.currentTarget.dataset.item.gbDepartmentOrdersEntities[0],
     });
   },
 
   /** 确认退货 */
   confirmReturn: function () {
     var item = this.data.returnItem;
-    item.gbDpgPurUserId = this.data.userInfo.gbDepartmentUserId;
+    if (!item || !item.gbDistributerPurchaseGoodsId) {
+      wx.showToast({ title: '退货数据无效', icon: 'none' });
+      return;
+    }
     var that = this;
-    depOrderApi.puraserReturnPurGoods(item).then(function (res) {
+    depOrderApi.puraserReturnPurGoods({
+      gbDistributerPurchaseGoodsId: item.gbDistributerPurchaseGoodsId,
+      gbDpgPurUserId: this.data.userInfo.gbDepartmentUserId,
+    }).then(function (res) {
       if (res.result.code == 0) {
+        that.setData({ showReturn: false });
         that._getInitData();
+      } else {
+        wx.showToast({ title: res.result.msg || '操作失败', icon: 'none' });
       }
+    }).catch(function () {
+      wx.showToast({ title: '请求失败', icon: 'none' });
     });
   },
 
@@ -673,7 +682,7 @@ Page({
           });
           resolve({
             title: "订货商品",
-            path: 'subPackage-supplier/pages/gbOrderBatch/gbOrderBatch?batchId=' + batchId + '&retName=' + retName + '&disId=' + that.data.disInfo.gbDistributerId + '&fromBuyer=1&depId=' + depId + '&buyUserId=' + userId,
+            path: 'subPackage-jrdh/pages/gbOrderBatch/gbOrderBatch?batchId=' + batchId + '&retName=' + retName + '&disId=' + that.data.disInfo.gbDistributerId + '&fromBuyer=1&depId=' + depId + '&buyUserId=' + userId,
             imageUrl: that.data.url + '/userImage/say.png',
           });
         } else {
@@ -692,14 +701,63 @@ Page({
       currentBIndex: bIndex,
     });
     var that = this;
+    var itemList;
+    if (batchBuyerInput.needsBuyerUnlockBatch(batch)) {
+      itemList = ['修改这个批次'];
+    } else if (batchBuyerInput.isSupplierInvolved(batch) && Number(batch.gbDpbStatus) >= 2) {
+      wx.showToast({ title: '供货商已提交，无法修改', icon: 'none' });
+      return;
+    } else if (Number(batch.gbDpbStatus) >= 3) {
+      wx.showToast({ title: '该批次已收货，无法修改', icon: 'none' });
+      return;
+    } else {
+      itemList = ['删除全部订货', '录入采购单'];
+    }
     wx.showActionSheet({
-      itemList: ['删除订单批次', '录入单价/数量'],
+      itemList: itemList,
       success: function (res) {
+        if (batchBuyerInput.needsBuyerUnlockBatch(that.data.currentBatch)) {
+          if (res.tapIndex === 0) {
+            that.unlockBuyerProxyBatch();
+          }
+          return;
+        }
         if (res.tapIndex === 0) {
           that.deleteGbBatch();
         } else if (res.tapIndex === 1) {
           that.toGbOrderInput();
         }
+      },
+    });
+  },
+
+  /** 采购员代录入已提交：解锁批次回到未提交（status 2 → 0） */
+  unlockBuyerProxyBatch: function () {
+    var that = this;
+    var batch = this.data.currentBatch;
+    if (!batch || !batchBuyerInput.needsBuyerUnlockBatch(batch)) {
+      return;
+    }
+    wx.showModal({
+      title: '修改这个批次',
+      content: '解锁后可重新录入单价/数量，或删除本批次。',
+      confirmText: '解锁',
+      cancelText: '取消',
+      success: function (res) {
+        if (!res.confirm) {
+          return;
+        }
+        load.showLoading('解锁中');
+        depOrderApi.supplierEditBatchGb(batch.gbDistributerPurchaseBatchId)
+          .then(function (res) {
+            load.hideLoading();
+            if (res.result.code == 0) {
+              wx.showToast({ title: '已解锁，可继续修改', icon: 'success' });
+              that._initBatchData();
+            } else {
+              wx.showToast({ title: res.result.msg || '解锁失败', icon: 'none' });
+            }
+          });
       },
     });
   },
@@ -733,12 +791,154 @@ Page({
     });
   },
 
-  /** 跳转录入单价/数量页面 */
+  /** 跳转录入单价/数量页面（采购员代供货商录入） */
   toGbOrderInput: function () {
     var batch = this.data.currentBatch;
+    if (!batch) {
+      return;
+    }
+    if (!batchBuyerInput.canBuyerProxyEditBatch(batch)) {
+      wx.showToast({
+        title: batchBuyerInput.needsBuyerUnlockBatch(batch)
+          ? '请先点「修改这个批次」解锁'
+          : (batch.gbDpbStatus >= 3 ? '该批次已收货，无法修改' : '供货商已提交，无法代录'),
+        icon: 'none',
+      });
+      return;
+    }
     var retName = this.data.disInfo ? this.data.disInfo.gbDistributerName : '';
+    var disId = this.data.disInfo ? this.data.disInfo.gbDistributerId : '';
+    var depId = this.data.depId || (this.data.mendianInfo ? this.data.mendianInfo.gbDepartmentId : '');
+    var buyUserId = this.data.userInfo ? this.data.userInfo.gbDepartmentUserId : '';
+    wx.setStorageSync('gbOrderBatchBuyerInput', 1);
     wx.navigateTo({
-      url: '/subPackage-supplier/pages/gbOrderInput/gbOrderInput?batchId=' + batch.gbDistributerPurchaseBatchId + '&retName=' + retName,
+      url: '/subPackage-jrdh/pages/gbOrderBatch/gbOrderBatch?batchId=' + batch.gbDistributerPurchaseBatchId
+        + '&retName=' + encodeURIComponent(retName)
+        + '&disId=' + disId
+        + '&depId=' + depId
+        + '&buyUserId=' + buyUserId
+        + '&fromBuyer=1'
+        + '&buyerInput=1',
+    });
+  },
+
+  /** 拍摄平台电子收据，OCR 匹配本批次订货并写入，再进入录入页 */
+  onReceiptOcrTap: function (e) {
+    var batch = e.currentTarget.dataset.batch;
+    var bIndex = e.currentTarget.dataset.bindex;
+    if (!batch) {
+      return;
+    }
+    this.setData({
+      currentBatch: batch,
+      currentBIndex: bIndex,
+    });
+    console.log('[ReceiptOcr] tap batchId=', batch.gbDistributerPurchaseBatchId,
+      'status=', batch.gbDpbStatus, 'goodsCount=', (batch.gbDPGEntities || []).length);
+    if (!batchBuyerInput.canBuyerProxyEditBatch(batch)) {
+      wx.showToast({
+        title: batchBuyerInput.needsBuyerUnlockBatch(batch)
+          ? '请先点「修改这个批次」解锁'
+          : '当前批次不可识别',
+        icon: 'none',
+      });
+      return;
+    }
+    var that = this;
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['camera', 'album'],
+      success: function (res) {
+        var file = res.tempFiles && res.tempFiles[0];
+        if (!file || !file.tempFilePath) {
+          console.warn('[ReceiptOcr] chooseMedia no file');
+          return;
+        }
+        console.log('[ReceiptOcr] image selected path=', file.tempFilePath, 'size=', file.size,
+          'wxSize=', file.width, 'x', file.height);
+        var batchRef = batch;
+        wx.getImageInfo({
+          src: file.tempFilePath,
+          success: function (imgInfo) {
+            var imgW = imgInfo.width || file.width || 0;
+            var imgH = imgInfo.height || file.height || 0;
+            var photoOrientation = imgW >= imgH ? 'landscape' : 'portrait';
+            console.log('[ReceiptOcr] imageInfo', imgW, 'x', imgH, 'photoOrientation=', photoOrientation);
+            that._uploadReceiptOcrImage(batchRef, file.tempFilePath, {
+              photoOrientation: photoOrientation,
+              imageWidth: imgW,
+              imageHeight: imgH,
+            });
+          },
+          fail: function () {
+            var imgW = file.width || 0;
+            var imgH = file.height || 0;
+            var photoOrientation = imgW >= imgH ? 'landscape' : 'portrait';
+            console.warn('[ReceiptOcr] getImageInfo fail, fallback wxSize', imgW, 'x', imgH);
+            that._uploadReceiptOcrImage(batchRef, file.tempFilePath, {
+              photoOrientation: photoOrientation,
+              imageWidth: imgW,
+              imageHeight: imgH,
+            });
+          },
+        });
+      },
+      fail: function (err) {
+        console.warn('[ReceiptOcr] chooseMedia cancel/fail', err);
+      },
+    });
+  },
+
+  /** 读取图片并上传 OCR 识别 */
+  _uploadReceiptOcrImage: function (batch, filePath, meta) {
+    var that = this;
+    var fs = wx.getFileSystemManager();
+    var readStart = Date.now();
+    fs.readFile({
+      filePath: filePath,
+      encoding: 'base64',
+      success: function (readRes) {
+        var base64Len = readRes.data ? readRes.data.length : 0;
+        console.log('[ReceiptOcr] readFile ok base64Len=', base64Len, 'readMs=', Date.now() - readStart,
+          'orientation=', meta.photoOrientation);
+        var apiStart = Date.now();
+        depOrderApi.matchPurchaseBatchReceipt({
+          batchId: batch.gbDistributerPurchaseBatchId,
+          imageBase64: readRes.data,
+          photoOrientation: meta.photoOrientation,
+          imageWidth: meta.imageWidth,
+          imageHeight: meta.imageHeight,
+        }).then(function (apiRes) {
+          console.log('[ReceiptOcr] api response ms=', Date.now() - apiStart, 'result=', apiRes.result);
+          if (apiRes.result.code == 0) {
+            var data = apiRes.result.data || {};
+            var matched = data.matchedCount != null ? data.matchedCount : 0;
+            var skipped = data.skippedCount != null ? data.skippedCount : 0;
+            console.log('[ReceiptOcr] success matched=', matched, 'skipped=', skipped,
+              'matchSource=', data.matchSource);
+            wx.showToast({
+              title: '已匹配' + matched + '条，' + skipped + '条待录入',
+              icon: 'none',
+              duration: 2500,
+            });
+            that.toGbOrderInput();
+          } else {
+            console.warn('[ReceiptOcr] api error code=', apiRes.result.code, 'msg=', apiRes.result.msg);
+            wx.showToast({
+              title: apiRes.result.msg || '识别失败',
+              icon: 'none',
+            });
+          }
+        }).catch(function (err) {
+          console.error('[ReceiptOcr] api fail ms=', Date.now() - apiStart, err);
+          wx.showToast({ title: '识别失败，请重试', icon: 'none' });
+        });
+      },
+      fail: function (err) {
+        console.error('[ReceiptOcr] readFile fail', err);
+        wx.showToast({ title: '读取图片失败', icon: 'none' });
+      },
     });
   },
 
@@ -758,7 +958,7 @@ Page({
   toOrderApp: function (e) {
     var arr = this._getPurSelArr();
     wx.setStorageSync('selArr', arr);
-    wx.navigateTo({ url: '/subPackage-supplier/pages/supplier/supplierOrder/supplierOrder' });
+    wx.navigateTo({ url: '/subPackage-mendian/pages/supplier/supplierOrder/supplierOrder' });
   },
 
   toAiOrders: function () {
@@ -788,7 +988,7 @@ Page({
 
 
   toPay: function () {
-    wx.navigateTo({ url: '../../subPackage/pages/account/payPage/payPage?type=0' });
+    wx.navigateTo({ url: '/subPackage-group/pages/account/payPage/payPage?type=0' });
   },
 
  

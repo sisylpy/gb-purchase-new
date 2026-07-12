@@ -1,3 +1,4 @@
+var navbarGeom = require('../../lib/navbarGeom');
 
 Component({
   properties: {
@@ -7,7 +8,7 @@ Component({
     },
     avatar: {
       type: String,
-      value: '/images/avatar.png'
+      value: '/images/user.png'
     },
     buttonText: {
       type: String,
@@ -27,24 +28,7 @@ Component({
   lifetimes: {
     attached() {
       const app = getApp();
-       var windowWidth = app.globalData.windowWidth;
-       var menuButtonInfo = app.globalData.menuButtonInfo;
-       var statusBarHeight = app.globalData.statusBarHeight;
-       const navBarContentHeight = menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2;
-       const navBarHeight = statusBarHeight + navBarContentHeight;
-       const rightWidth = windowWidth - menuButtonInfo.left; // 右侧宽度
-       const leftWidth = rightWidth; // 左侧宽度与右侧相同
-
-      this.setData({
-        statusBarHeight: app.globalData.statusBarHeight,
-        navBarContentHeight: app.globalData.navBarContentHeight,
-        // navBarHeight: app.globalData.navBarHeight,
-        menuButtonInfo: app.globalData.menuButtonInfo,
-        leftWidth: leftWidth,
-        navBarHeight: navBarHeight,
-        rightWidth: rightWidth,
-
-      });
+      this.setData(navbarGeom.calcSimpleNavBar(app.globalData));
     }
   },
 
@@ -54,4 +38,3 @@ Component({
     }
   }
 });
-

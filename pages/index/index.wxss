@@ -188,6 +188,31 @@ page {
   width: 30%;
   text-align: center;
 }
+
+.batch-header-row {
+  box-sizing: border-box;
+}
+
+.batch-header-col {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.batch-seller-col {
+  align-items: center;
+  padding-right: 4rpx;
+}
+
+.batch-seller-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.batch-menu-btn {
+  flex-shrink: 0;
+  margin-left: 8rpx;
+}
 /*  */
 
 
@@ -1047,4 +1072,10 @@ button::after { border: none; }
 
 .group-store-sheet-close-hover {
   background: rgba(24, 126, 110, 0.08);
+}
+
+.pack-spec {
+  color: #888;
+  font-size: 28rpx;
+  margin-left: 6rpx;
 }

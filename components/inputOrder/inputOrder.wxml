@@ -16,6 +16,7 @@
 				<block wx:else>
 					<text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
 				</block>
+				<text wx:if="{{cartonInput && item.gbDpgStandard && item.gbDpgBuyScale > 0}}" class="brand">({{item.gbDpgBuyScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{item.gbDpgStandard}})</text>
 			</view>
 		</view>
 
@@ -29,12 +30,12 @@
 				</view>
 
 				<view class="row-between p-20">
-					<block wx:if="{{item.gbDpgBuyScale !== null && item.gbDpgBuyScale > 0}}">
+					<block wx:if="{{cartonInput}}">
 						<text class="mr-10">单价:</text>
 						<view class="flex-row">
 							<view class="input-view" style="width: {{windowWidth / 3}}rpx; margin-right: 10rpx;">
 									<input class='input' type='digit' value="{{item.gbDpgBuyScalePrice}}" 
-										bindinput="getPurchasePriceScale" bindblur="_checkPrice" focus="{{foucusPrice}}"
+										bindinput="getPurchasePriceScale" bindblur="_checkPrice" focus="{{focusPrice}}"
 										hold-keyboard='true'></input>
 								</view>
 							<view class="flex-column">
@@ -48,7 +49,7 @@
 						<view class="flex-row">
 							<view class="input-view" style="width: {{windowWidth / 3}}rpx; margin-right: 10rpx; ">
 								<input class='input' placeholder-style="font-size: 30rpx" type='digit' value="{{item.gbDpgBuyPrice}}" 
-									bindinput="getPurchasePrice" bindblur="_checkPrice" focus="{{foucusPrice}}"
+									bindinput="getPurchasePrice" bindblur="_checkPrice" focus="{{focusPrice}}"
 									hold-keyboard='true'></input>
 							</view>
 							<text>元/{{priceUnitSuffix ? priceUnitSuffix : item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
@@ -80,7 +81,7 @@
 				</view>
 
 				<view class="flex-row p-20">
-					<text class="mr-10" style="width: 100rpx; font-size: 32rpx;">订单:{{ord.displayCount(item, orderListCount)}}条</text>
+					<text class="mr-10" style="width: 100rpx; font-size: 32rpx;">订单:</text>
 					<scroll-view scroll-y="true" class="flex-column"
 						style="max-height: {{windowHeight / 3}}rpx; width: {{windowWidth - 180}}rpx;">
 						<view class="flex-column" wx:for="{{ord.list(item)}}" wx:key="gbDepartmentOrdersId"
@@ -104,31 +105,24 @@
 
 								<view class="row-between with-tbl-padding">
 									<text class="margin-right" style="width: 100rpx;">数量:</text>
-
-									<block wx:if="{{scaleInput}}">
+									<block wx:if="{{cartonInput}}">
 										<view class="flex-row" style="padding-right: 10rpx;">
-											<view class="flex-row">
-												<view class="input-view" style="margin-right: 10rpx;">
-													<input class="input" type="digit" adjust-position="true"
-														value="{{orders.gbDoScaleWeight == null || orders.gbDoScaleWeight == '0.0' ? '' : orders.gbDoScaleWeight}}"
-														bindinput="getScaleWeight" data-index="{{orderIndex}}"
-														focus="{{orderIndex == 0 && foucusWeight}}"
-														style="width: {{windowWidth / 8}}rpx;" />
-												</view>
-												<text>{{item.gbDpgStandard}}</text>
+											<view class="input-view" style="margin-right: 10rpx;">
+												<input class="input" type="digit" adjust-position="true"
+													value="{{orders.gbDoScaleWeight == null || orders.gbDoScaleWeight == '0.0' ? '' : orders.gbDoScaleWeight}}"
+													bindinput="getScaleWeight" focus="{{orderIndex == 0 && focusWeight}}" data-index="{{orderIndex}}" style="width: {{windowWidth / 4}}rpx;" />
 											</view>
+											<text>{{item.gbDpgStandard}}</text>
 										</view>
 									</block>
-
 									<block wx:else>
 										<view class="flex-row" style="padding-right: 10rpx;">
 											<view class="input-view" style="margin-right: 10rpx;">
 												<input class="input" type="digit" adjust-position="true"
 													value="{{orders.gbDoWeight == null || orders.gbDoWeight == '0.0' ? '' : orders.gbDoWeight}}"
-													bindinput="getOrderWeight" focus="{{orderIndex == 0 && foucusWeight}}" data-index="{{orderIndex}}" style="width: {{windowWidth / 4}}rpx;" />
+													bindinput="getOrderWeight" focus="{{orderIndex == 0 && focusWeight}}" data-index="{{orderIndex}}" style="width: {{windowWidth / 4}}rpx;" />
 											</view>
-											<text wx:if="{{orders.gbDoStandard && item.gbDistributerGoodsEntity.gbDgGoodsStandardname && orders.gbDoStandard != item.gbDistributerGoodsEntity.gbDgGoodsStandardname && orders.gbDoDsStandardScale && orders.gbDoDsStandardScale != '-1'}}">{{orders.gbDoStandard}}</text>
-											<text wx:else="">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+											<text>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
 										</view>
 									</block>
 								</view>

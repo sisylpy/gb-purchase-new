@@ -1,4 +1,5 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="../../../../utils/orderGoodsFmt.wxs" module="fmt" />
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 <view class="flex flex-column">
@@ -32,7 +33,7 @@
             <view class="production-container" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
               <view class="flex-column p-20 border-bottom {{expandedRows[stockIndex + '_' + stockIndex + '_0'] ? 'production-row-expanded' : 'production-row-collapsed'}}" style="width: {{windowWidth - 260}}rpx;" bind:tap="showOne" data-index="0" data-item-index="{{stockIndex}}" data-day-index="{{stockIndex}}">
                 <view class="flex-row-default">
-                  <image src="{{(url + stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="empty_image mr-20" />
+                  <image src="{{(url + stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="empty_image mr-20" />
                   <view class="flex-column">
                     <view class="flex-row font-lg">{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsName}}</view>
                     <view class="flex-row-between p-10 bg-light radius-10" style="width: {{windowWidth - 400}}rpx;">
@@ -80,7 +81,7 @@
                 <view class="flex-row align-center mb-15 border-bottom p-10"><text class="font-sm">采购信息</text></view>
                 <view class="flex-row-between border-bottom p-10" style="width: {{windowWidth - 280}}rpx;"><text class="text-secondary mr-10">采购时间:</text><text>{{stock.purchaseGoodsEntity.gbDpgStockFinishDate}}</text></view>
                 <view class="flex-row-between border-bottom p-10" style="width: {{windowWidth - 280}}rpx;"><text class="text-secondary mr-10">单价:</text><text>{{stock.purchaseGoodsEntity.gbDpgBuyPrice}}元/{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
-                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">数量</text><text>{{stock.purchaseGoodsEntity.gbDpgBuyQuantity}}{{stock.purchaseGoodsEntity.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text></view>
+                <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">数量</text><text>{{fmt.purRowOutQty(stock.purchaseGoodsEntity, stock.purchaseGoodsEntity.gbDistributerGoodsEntity)}}</text></view>
                 <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">采购金额</text><text>{{stock.purchaseGoodsEntity.gbDpgBuySubtotal}}元</text></view>
                 <block wx:if="{{stock.purchaseGoodsEntity.purchaseDepartmentUser !== null}}">
                   <view class="flex-row-between border-bottom p-10"><text class="text-secondary mr-10">采购员</text><text>{{stock.purchaseGoodsEntity.purchaseDepartmentUser.gbDuWxNickName}}</text></view>

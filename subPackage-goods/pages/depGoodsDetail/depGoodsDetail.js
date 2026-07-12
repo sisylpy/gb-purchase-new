@@ -25,9 +25,9 @@ Page({
     standardScale: '-1',
     depGoodsName: '',
     depGoodsId: '',
+    canStoreProxyPurchase: false,
     items: [
       { name: '1', value: '自采' },
-      { name: '6', value: '门店代采' },
       { name: '21', value: '自动订货' }
     ],
     baseTypeItems: [
@@ -74,15 +74,36 @@ Page({
     var disInfo = wx.getStorageSync('disInfo');
     if (disInfo) {
       this.setData({ disInfo: disInfo });
+      this._refreshDepTypeItems();
     }
 
     var mendianInfo = wx.getStorageSync('mendianInfo');
     if (mendianInfo) {
       this.setData({
         mendianInfo: mendianInfo,
-        gbDepId: mendianInfo.gbDepartmentId || ''
+        gbDepId: mendianInfo.gbDepartmentId
       });
     }
+  },
+
+  _normalizeDepGoodsPackFields(depGoods) {
+    if (!depGoods) {
+      return depGoods;
+    }
+    var dis = depGoods.gbDistributerGoodsEntity;
+    if (!dis) {
+      return depGoods;
+    }
+    if (!this._hasText(depGoods.gbDgGoodsStandardWeight) && this._hasText(dis.gbDgGoodsStandardWeight)) {
+      depGoods.gbDgGoodsStandardWeight = dis.gbDgGoodsStandardWeight;
+    }
+    if (!this._hasText(depGoods.gbDgCartonUnit) && this._hasText(dis.gbDgCartonUnit)) {
+      depGoods.gbDgCartonUnit = dis.gbDgCartonUnit;
+    }
+    if (!this._hasText(depGoods.gbDgItemsPerCarton) && this._hasText(dis.gbDgItemsPerCarton)) {
+      depGoods.gbDgItemsPerCarton = dis.gbDgItemsPerCarton;
+    }
+    return depGoods;
   },
 
   _getDepGoodsDetail() {
@@ -90,13 +111,12 @@ Page({
     goodsApi.getDepGoodsDetail(this.data.depGoodsId).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
-        var depGoods = res.result.data;
+        var depGoods = this._normalizeDepGoodsPackFields(res.result.data);
         var goods = depGoods.gbDistributerGoodsEntity || {};
         var selectedStoreName = depGoods.gbDdgGoodsType == 6 ? (depGoods.gbDdgGbDepartmentName || '') : '';
         this.setData({
           depGoods: depGoods,
           goods: goods,
-          gbDepId: depGoods.gbDepartmentId || goods.gbDgGbDepartmentId || this.data.gbDepId || '',
           selectedStoreName: selectedStoreName,
         });
         this._computeStoreInfo();
@@ -107,6 +127,10 @@ Page({
       load.hideLoading();
       wx.showToast({ title: '获取商品信息失败', icon: 'none' });
     });
+  },
+
+  _hasText(value) {
+    return value !== null && value !== undefined && value !== '' && value !== 'null';
   },
 
   // ========== 编辑模式切换 ==========
@@ -459,20 +483,50 @@ Page({
 
   // ========== 自动订货供货商 ==========
   toSupplier() {
+    wx.setStorageSync('depGoods', this.data.depGoods);
     wx.navigateTo({
       url: '../appointSupplierList/appointSupplierList?purDepId=' + this.data.gbDepId,
     })
   },
 
   // ========== 代采门店选择 ==========
+  /** 单门店企业不展示「门店代采」采购方式 */
+  _refreshDepTypeItems() {
+    var disInfo = this.data.disInfo;
+    var canStoreProxy = !!(disInfo && disInfo.mendianDepartmentList
+      && disInfo.mendianDepartmentList.length > 1);
+    var items = [
+      { name: '1', value: '自采' },
+      { name: '21', value: '自动订货' }
+    ];
+    if (canStoreProxy) {
+      items.splice(1, 0, { name: '6', value: '门店代采' });
+    }
+    this.setData({
+      canStoreProxyPurchase: canStoreProxy,
+      items: items,
+    });
+  },
+
   /** 根据 disInfo.mendianDepartmentList 过滤出可选门店（排除自己） */
   _computeStoreInfo() {
+    this._refreshDepTypeItems();
     var disInfo = this.data.disInfo;
     var gbDepId = this.data.gbDepId;
     if (!disInfo || !disInfo.mendianDepartmentList) return;
 
+    // 获取当前已选中的代采门店ID
+    var selectedStoreId = this.data.depGoods && this.data.depGoods.gbDdgGbDepartmentId;
+
     var storeList = disInfo.mendianDepartmentList.filter(function (store) {
       return store.gbDepartmentId != gbDepId;
+    }).map(function (store) {
+      if (selectedStoreId && store.gbDepartmentId == selectedStoreId) {
+        store.isSelected = true;
+      } else {
+        store.isSelected = false;
+      }
+      return store;
     });
 
     this.setData({ storeList: storeList });
@@ -510,7 +564,13 @@ Page({
     goodsApi.updateDepGoods(this.data.depGoods).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
-        this.setData({ depGoods: res.result.data, depConfigChanged: false });
+        var depGoods = this._normalizeDepGoodsPackFields(res.result.data);
+        var goods = depGoods.gbDistributerGoodsEntity || {};
+        this.setData({
+          depGoods: depGoods,
+          goods: goods,
+          depConfigChanged: false,
+        });
         wx.showToast({ title: '保存成功' });
       } else {
         wx.showToast({ title: res.result.msg, icon: 'none' });

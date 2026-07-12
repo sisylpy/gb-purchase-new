@@ -42,31 +42,6 @@ Page({
     this.setData({ fabMainAnimation: anim.export() });
   },
 
-  onLoad(options) {
-    var globalData = getApp().globalData;
-    var userInfo = wx.getStorageSync('userInfo');
-    if (userInfo) {
-      this.setData({
-        userInfo: userInfo,
-        disId: userInfo.gbDuDistributerId
-      });
-
-      var mendianInfo = wx.getStorageSync('mendianInfo');
-      if (mendianInfo) {
-        this.setData({
-          mendianInfo: mendianInfo,
-          depFatherId: mendianInfo.gbDepartmentId,
-          depId: mendianInfo.gbDepartmentEntityList[0].gbDepartmentId,
-          depHasSubs: mendianInfo.gbDepartmentSubAmount,
-          orderDepList: mendianInfo.gbDepartmentEntityList,
-        });
-        
-      }
-    }
-
-    this._initData();
-  },
-
   onShow() {
     var globalData = getApp().globalData;
     this.setData({
@@ -77,12 +52,32 @@ Page({
       todayDate: dateUtils.getArriveDateString(0),
     });
 
+    // 每次进入页面都基于最新缓存读取用户信息 / 门店信息
+    var userInfo = wx.getStorageSync('userInfo');
+    this.setData({
+      userInfo: userInfo,
+      disId: userInfo.gbDuDistributerId
+    });
+
+    var mendianInfo = wx.getStorageSync('mendianInfo');
+    var disInfo = wx.getStorageSync('disInfo');
+    this.setData({
+      mendianInfo: mendianInfo,
+      depFatherId: mendianInfo.gbDepartmentId,
+      depId: mendianInfo.gbDepartmentId,
+      depHasSubs: mendianInfo.gbDepartmentSubAmount,
+      orderDepList: mendianInfo.gbDepartmentEntityList,
+      mendianStoreList: (disInfo && disInfo.mendianDepartmentList) || [],
+    });
+
     var needImmediateRefresh = wx.getStorageSync('needRefreshOrderData');
     if (needImmediateRefresh) {
       wx.removeStorageSync('needRefreshOrderData');
       this._refreshData();
       return;
     }
+
+    this._initData();
   },
 
   // ========================

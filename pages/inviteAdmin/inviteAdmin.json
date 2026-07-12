@@ -1,6 +1,6 @@
 {
   "usingComponents": {
-    "customer-navbar": "/components/custom-navbar/custom-navbar"
+    "customer-navbar": "/components/back-navbar/back-navbar"
 
   }
 }

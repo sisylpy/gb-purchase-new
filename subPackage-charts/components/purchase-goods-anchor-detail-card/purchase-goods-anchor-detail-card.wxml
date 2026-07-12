@@ -48,11 +48,11 @@
     <view class="biz-lines-section">
       <view class="biz-lines-section-title">采购明细</view>
       <view class="biz-line-row" wx:for="{{_lines}}" wx:key="purchaseGoodsId" wx:for-item="line">
-        <!-- 头部：日期 + 来源标签 + 采购人 -->
+        <!-- 头部：日期 + 采购方式标签 + 供货商/采购人 -->
         <view class="biz-line-head">
           <text class="biz-line-date">{{line.purchaseDate}}</text>
           <text class="biz-line-source-tag" wx:if="{{line._sourceTag}}">{{line._sourceTag}}</text>
-          <text class="biz-line-purchaser" wx:if="{{line.purchaserName}}">采购人：{{line.purchaserName}}</text>
+          <text class="biz-line-purchaser" wx:if="{{line._rightValue}}">{{line._rightLabel}}：{{line._rightValue}}</text>
         </view>
 
         <!-- 内容：数量 × 单价 = 金额 -->

@@ -2,27 +2,27 @@
 
 <!-- 商品列表 -->
 <scroll-view scroll-y class="page-content">
-  <view class="goods-list">
+  <view class="goods-list mt-30">
     <view class="goods-card" wx:for="{{displayPurArr}}" wx:key="gbDistributerPurchaseGoodsId" wx:for-index="index">
-      <view class="goods-header">
-        <view class="goods-index">{{index + 1}}.</view>
+      <view class="goods-header ">
+        <view class="goods-name">{{index + 1}}.</view>
         <view class="goods-info">
           <text class="goods-brand" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsBrand}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
           <text class="goods-name">{{item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsName : ''}}</text>
-          <text class="goods-standard">({{item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsStandardname : ''}})</text>
           <text class="goods-detail" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsDetail && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
-          <text class="goods-weight" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null'}}">
-            <text wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname !== '斤'}}">({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
-            <text wx:else>{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+          <text class="" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null'}}">
+            <text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+          
           </text>
+          <text class=""  wx:else="">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
         </view>
       </view>
 
       <view class="order-list">
         <view class="order-item" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:key="gbDepartmentOrdersId" wx:for-item="orders" wx:if="{{orders.isNotice}}">
           <block wx:if="{{subDepAmount == 1}}">
-            <view class="order-quantity">
-              <text class="mr-10" style="color: #999; font-size: 34rpx;">订货:</text>
+            <view class="flex-row p-20 font-md">
+              <text class="mr-10" >订货:</text>
               <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
               <text wx:if="{{orders.gbDoDsStandardScale && orders.gbDoDsStandardScale !== '-1'}}" class="text-secondary font-sl">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
             </view>
@@ -49,4 +49,4 @@
   </view>
 </scroll-view>
 
-<inputOrder show="{{show}}" bindconfirm="confirm" bindcancle="cancle" bindfinish="markGbPurGoodsFinish" item="{{item}}" orderListCount="{{orderListCount}}" maskHeight="{{maskHeight > windowHeight ? maskHeight : windowHeight}}" scrollViewTop="{{scrollViewTop}}" scaleInput="{{scaleInput}}" foucusWeight="{{foucusWeight}}" foucusPrice="{{foucusPrice}}" canSave="{{canSave}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" disInfo="{{disInfo}}" />
+<inputOrder show="{{show}}" bindconfirm="confirm" bindcancle="cancle" bindfinish="markGbPurGoodsFinish" item="{{item}}" orderListCount="{{orderListCount}}" maskHeight="{{maskHeight > windowHeight ? maskHeight : windowHeight}}" scrollViewTop="{{scrollViewTop}}" scaleInput="{{scaleInput}}" cartonInput="{{cartonInput}}" foucusWeight="{{foucusWeight}}" foucusPrice="{{foucusPrice}}" canSave="{{canSave}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" disInfo="{{disInfo}}" />

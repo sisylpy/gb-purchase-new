@@ -145,118 +145,127 @@
   color: #05c0a7 !important;
 }
 
-/* 成本统计卡片容器 */
-.cost-stats-container {
-  display: flex;
-  flex-direction: row;
-  gap: 10rpx;
+/* 成本统计看板 - 上3下2布局 */
+.cost-stats-board {
   padding: 20rpx;
-  background-color: #f8f9fa;
-  width: 100%;
+  background-color: #f5f6f7;
   box-sizing: border-box;
-  transition: all 0.3s ease-in-out;
 }
 
-/* 隐藏日期选择行 */
-.hidden {
-  display: none !important;
+.cost-stats-row {
+  display: flex;
+  gap: 16rpx;
+  box-sizing: border-box;
 }
 
+.cost-stats-row--top {
+  margin-bottom: 16rpx;
+}
 
-/* 成本卡片基础样式 */
-.cost-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 20rpx;
-  padding: 25rpx 15rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+.cost-stats-row--top .cost-stat-card {
+  flex: 1;
+  min-width: 0;
+}
+
+.cost-stats-row--bottom .cost-stat-card {
+  flex: 1;
+  min-width: 0;
+}
+
+.cost-stat-card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
   border: 2rpx solid transparent;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  flex: 1;
-  min-width: 0;
-  max-width: calc(25% - 7rpx);
   box-sizing: border-box;
-  cursor: pointer;
-  user-select: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* 收缩状态的成本卡片 */
-.cost-card.collapsed {
-  padding: 10rpx 15rpx;
-  border-radius: 20rpx;
-  width: auto;
-  height: auto;
-  min-width: 0;
-  max-width: none;
+.cost-stat-card--top {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  flex: 1;
-  margin: 0 5rpx;
-}
-
-.cost-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6rpx;
-  background: linear-gradient(90deg, #e9ecef 0%, #e9ecef 100%);
-  transition: all 0.3s ease;
-}
-
-/* 激活状态的卡片样式 */
-.cost-card-active {
-  border-color: #05c0a7;
-  box-shadow: 0 8rpx 30rpx rgba(5, 192, 167, 0.2);
-  transform: translateY(-4rpx);
-}
-
-.cost-card-active::before {
-  background: linear-gradient(90deg, #05c0a7 0%, #048a7a 100%);
-}
-
-/* 卡片头部 */
-.cost-card-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 15rpx;
   text-align: center;
 }
 
-/* 图标样式 */
-.cost-icon {
-  width: 50rpx;
-  height: 50rpx;
+.cost-stat-card--bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24rpx 20rpx;
+}
+
+.cost-stat-card--active {
+  border-color: #07c160;
+  background-color: rgba(7, 193, 96, 0.06);
+  box-shadow: 0 4rpx 16rpx rgba(7, 193, 96, 0.12);
+}
+
+.cost-stat-card--hover {
+  opacity: 0.92;
+}
+
+.cost-stat-card-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.cost-stat-icon {
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10rpx;
-  position: relative;
-  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
-/* 收缩状态下的图标 */
-.cost-card.collapsed .cost-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-bottom: 5rpx;
+.cost-stat-card--top .cost-stat-icon {
+  margin-bottom: 12rpx;
 }
 
-/* 收缩状态下的文字 */
-.cost-title-collapsed {
-  font-size: 20rpx;
+.cost-stat-card-head .cost-stat-icon {
+  margin-right: 12rpx;
+  margin-bottom: 0;
+}
+
+.cost-stat-icon-img {
+  width: 30rpx;
+  height: 30rpx;
+  filter: brightness(0) invert(1);
+}
+
+.cost-stat-title {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #333333;
+  line-height: 1.3;
+}
+
+.cost-stat-title--inline {
+  font-size: 26rpx;
   font-weight: 600;
-  color: #333;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.cost-stat-amount {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #07c160;
+  line-height: 1.2;
+  margin-bottom: 6rpx;
+}
+
+.cost-stat-card--bottom .cost-stat-amount {
+  padding-left: 0;
+}
+
+.cost-stat-count {
+  font-size: 22rpx;
+  color: #999999;
+  line-height: 1.3;
 }
 
 .sales-icon {
@@ -271,109 +280,40 @@
   background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
 }
 
+.return-icon {
+  background: linear-gradient(135deg, #f5576c 0%, #e84393 100%);
+}
+
 .employee-meal-icon {
   background: linear-gradient(135deg, #ff9500 0%, #e67e22 100%);
 }
 
-.icon-image {
-  width: 28rpx;
-  height: 28rpx;
-  filter: brightness(0) invert(1);
-  transition: all 0.3s ease;
-}
-
-/* 收缩状态下的图标图片 */
-.cost-card.collapsed .icon-image {
-  width: 24rpx;
-  height: 24rpx;
-}
-
-/* 卡片标题 */
-.cost-title {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 10rpx;
-  white-space: nowrap;
+.page-root {
+  height: 100vh;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-/* 金额显示 */
-.cost-amount {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #05c0a7;
-  margin-bottom: 12rpx;
-  text-shadow: 0 2rpx 4rpx rgba(5, 192, 167, 0.1);
-  text-align: center;
-  /* white-space: nowrap; */
-  /* overflow: hidden; */
-  /* text-overflow: ellipsis; */
+.page-scroll {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* 详细信息区域 */
-.cost-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 8rpx;
-  gap: 5rpx;
+.goods-list {
+  background-color: #ffffff;
 }
 
-.cost-subtitle {
-  font-size: 18rpx;
-  color: #666;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.empty-block {
+  padding: 80rpx 0;
 }
 
-.cost-percentage {
-  font-size: 22rpx;
-  font-weight: 600;
-  color: #05c0a7;
-  background: rgba(5, 192, 167, 0.1);
-  padding: 4rpx 8rpx;
-  border-radius: 10rpx;
-  white-space: nowrap;
+.pagination-bar {
+  padding-bottom: 40rpx;
 }
 
-/* 总计金额 */
-.cost-total {
-  font-size: 18rpx;
-  color: #999;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 悬停效果 */
-.cost-card:active {
-  transform: scale(0.98);
-}
-
-/* 响应式调整 */
-@media (max-width: 750rpx) {
-  .cost-card {
-    padding: 25rpx;
-  }
-  
-  .cost-amount {
-    font-size: 42rpx;
-  }
-  
-  .cost-icon {
-    width: 50rpx;
-    height: 50rpx;
-  }
-  
-  .icon-image {
-    width: 28rpx;
-    height: 28rpx;
-  }
+/* 隐藏日期选择行 */
+.hidden {
+  display: none !important;
 }
 
 /* 筛选容器样式 */
@@ -487,30 +427,9 @@
 }
 
 
-/* swiper容器样式 */
-.swiper-box {
-  width: 100%;
-  height: calc(100vh - 300rpx); /* 动态高度，减去导航栏等固定高度 */
-  display: block;
-  overflow: visible;
-}
-
-/* 滚动状态下的swiper高度调整 */
-.swiper-box.collapsed {
-  height: calc(100vh - 200rpx); /* 滚动时减少100rpx高度 */
-}
-
-/* swiper-item样式 */
-swiper-item {
-  height: 100%;
-  overflow: visible;
-}
-
 /* scroll-view 样式 */
 scroll-view {
-  height: 100%;
   overflow-y: auto;
-  flex: 1;
 }
 
 /* 商品列表项样式 */

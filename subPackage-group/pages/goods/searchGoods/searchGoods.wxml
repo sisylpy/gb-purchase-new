@@ -27,7 +27,7 @@
       <view class="flex-row-default  goods-item-dep p-20 border-bottom" id="{{goods.viewId}}">
         <view class="img-wrapper">
           <image bindtap="showDialogBtnDep" data-item="{{goods}}"
-            src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ? url + goods.gbDgNxFatherImg : '/images/logo.jpg'}}"
+            src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ? url + goods.gbDgNxFatherImg : '/images/logo.png'}}"
             mode="aspectFill" class="dep_goods_url mr-20" />
         </view>
           <view class="flex-column" style="width: {{windowWidth - 360}}rpx;">

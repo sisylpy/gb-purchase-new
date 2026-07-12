@@ -240,7 +240,7 @@ Page({
     wx.setStorageSync('purUserItem', item);
     var dateRange = dateUtils.getDateRange('thisMonth');
     wx.navigateTo({
-      url: '/subPackage-supplier/pages/supplier/purUserFenxi/purUserFenxi?purUserId=' + item.gbDepartmentUserId
+      url: '/subPackage-mendian/pages/supplier/purUserFenxi/purUserFenxi?purUserId=' + item.gbDepartmentUserId
         + '&type=0&supplierId=-1&startDate=' + dateRange.startDate + '&stopDate=' + dateRange.stopDate
         + '&dateType=thisMonth',
     })

@@ -1,0 +1,5 @@
+.pack-spec {
+  color: #888;
+  font-size: 28rpx;
+  margin-left: 6rpx;
+}

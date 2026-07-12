@@ -1049,13 +1049,6 @@ var getPinDetail = function (pinId, userId) {
 // 集团门店部门
 // ============================================================
 
-/**
- * 获取分销商下门店（京）列表
- * GET gbdepartment/getDisDepartmentGbMendianJing/{disId}
- */
-var getDisDepartmentGbMendianJing = function (disId) {
-  return request.get('gbdepartment/getDisDepartmentGbMendianJing/' + disId);
-};
 
 // ============================================================
 // 门店库存按时间段分类统计
@@ -1279,8 +1272,6 @@ module.exports = {
   getDailyTurnover: getDailyTurnover,
   // 智能体详情（统一顾问详情，含推荐问题 questionTopics）
   getAdvisorDetail: getAdvisorDetail,
-  // 集团门店部门列表
-  getDisDepartmentGbMendianJing: getDisDepartmentGbMendianJing,
   // 成本分析 - 菜品配料分析
   getGbIngredientAnalysis: getGbIngredientAnalysis,
   outboundIngredientAnalysis: outboundIngredientAnalysis,

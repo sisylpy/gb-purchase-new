@@ -1,0 +1,21 @@
+<view class="flex-column">
+  <view
+    class="top_img_fixed flex-row"
+    style="width: 100%; height: {{variant === 'pending' ? 70 + statusBarHeight : 110}}rpx; line-height: {{variant === 'pending' ? 70 + statusBarHeight : 110}}rpx; padding-top: {{variant === 'pending' ? statusBarHeight + 20 : statusBarHeight}}rpx;"
+  >
+    <view class="{{variant === 'pending' ? 'plr-20 flex-row' : 'flex-row'}}" bindtap="onBack">
+      <view wx:if="{{variant !== 'pending'}}" class="flex-column-center mr-20 margin-left">
+        <image src="../../../images/back-2.png" class="{{variant === 'pending' ? 'icon' : 'back_icon'}}" mode="aspectFill" />
+      </view>
+      <image wx:else src="../../../images/back-2.png" mode="aspectFill" class="icon" />
+      <view wx:if="{{variant === 'default' && titleSuffix === ''}}" class="flex-column">
+        <text class="top_bar_title">{{retName}}</text>
+      </view>
+      <text wx:else>{{retName}}{{titleSuffix}}</text>
+    </view>
+  </view>
+  <image
+    src="../../../images/top.png"
+    style="width: 100%; height: {{variant === 'pending' ? 90 + statusBarHeight : 70 + statusBarHeight}}rpx;"
+  />
+</view>

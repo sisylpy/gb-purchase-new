@@ -1,0 +1,29 @@
+
+
+<view class="flex-column">
+      <view class="top_img_fixed"
+        style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+        <view class="flex-row" bindtap="toBack">
+          <view class=" flex-column-center">
+            <image src="../../../images/back-2.png" class="back_icon"></image>
+          </view>
+          <text class="">修改用户</text>
+        </view>
+      </view>
+      <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
+    </view>
+
+
+<view class="flex-column font-lg">
+  <view class="p-20 p-20 flex-column ">
+    <view class="text-secondary">用户头像</view>
+    <image class='class_img' src='{{src}}' bindtap='choiceImg'></image>
+  </view>
+
+  <view class="p-20 flex-column ">
+    <view class="text-secondary">用户名</view>
+    <input class="group_input normal" value="{{jrdhUserInfo.nxJrdhWxNickName}}" bindinput="getUserName"> </input>
+  </view>
+
+  <view class="saveBtn {{canSave ? 'is-active' : ''}}" bindtap="{{canSave ? 'save' : ''}}">保存</view>
+</view>

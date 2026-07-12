@@ -1,0 +1,135 @@
+<view class="containerIndex">
+
+  <view class="flex-column">
+    <view class="top_img_fixed flex-row" style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx;">
+      <view class="p-20 mt-30" bindtap="toggleMenu">
+        <image src="../../../images/list.png" mode="aspectFill" class="icon" />
+      </view>
+    </view>
+    <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 90}}rpx;"></image>
+  </view>
+
+  <view class="side-menu" animation="{{menuAnimationData}}" style="width: {{windowWidth * 0.8}}rpx; left: -{{sideMenuWidth * rpxR}}rpx; background-color: #05668d; color: #fff;" bindtouchstart="sideMenuTouchStart" bindtouchmove="sideMenuTouchMove" bindtouchend="sideMenuTouchEnd">
+    <view class="p-30" style="margin-top: {{statusBarHeight + 10}}rpx;" bind:tap="toEditUserGb">
+      <image src="{{url + jrdhUserInfo.nxJrdhWxAvartraUrl}}" mode="aspectFill" class="face_img" />
+    </view>
+    <view class="flex-column">
+      <view class="text-white p-20">客户列表</view>
+      <scroll-view scroll-y="true" style="height: {{windowHeight - statusBarHeight - 340}}rpx;">
+        <view wx:for="{{customerArr}}" wx:for-item="item" wx:for-index="index" class="flex-column" bind:tap="supplierSelGb" data-index="{{index}}">
+          <view class="flex-row-between border-bottom p-20 {{index == showIndex ? 'selBack' : ''}}">
+            <view class="flex-column">
+              <view class="flex-row p-20">
+                <text class="big">{{item.gbDistributerEntity.gbDistributerName}}</text>
+              </view>
+            </view>
+            <image wx:if="{{index == showIndex}}" src="/images/correct.png" mode="aspectFill" class="icon" />
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <scroll-view scroll-y="true" class="main" style="margin-top: {{statusBarHeight + 100}}rpx; height: {{windowHeight - statusBarHeight - 100}}rpx;" animation="{{mainAnimationData}}" refresher-enabled="{{true}}" refresher-triggered="{{refresherTriggered}}" bindrefresherrefresh="onRefresh" refresher-threshold="{{100}}" refresher-default-style="{{false}}" refresher-background="#f7f7f7">
+
+    <view slot="refresher" class="custom-refresher">
+      <view class="refresher-content">
+        <text class="refresh-text">{{refresherTriggered ? '正在刷新...' : '下拉刷新'}}</text>
+      </view>
+    </view>
+
+    <view class="content">
+      <view class="flex-column">
+
+        <view class="flex-row big_full_padding" wx:if="{{gbDisInfo !== null}}">
+          <image src="{{url + supplierInfo.gbPurUserEntity.gbDuWxAvartraUrl}}" mode="aspectFill" style="border-radius: 50%; width: {{windowWidth / 8}}rpx; height: {{windowWidth / 8}}rpx;" />
+          <view class="flex-column">
+            <view class="p-20 font-lg five-weight">{{gbDisInfo.gbDistributerName}}</view>
+            <view class="p-10 status-unpaid font-sl text-center radius-20" bind:tap="requestSubscribeMessage">订阅通知</view>
+          </view>
+        </view>
+
+        <view class="month-section" wx:for="{{arr}}" wx:for-item="month" wx:for-index="index">
+          <view class="month-container" wx:if="{{month.arr.length > 0}}">
+            <view class="month-summary-card">
+              <view class="month-header">
+                <view class="month-title">{{month.month}}月账单汇总</view>
+                <view class="month-icon">📊</view>
+              </view>
+
+              <view class="supplier-stats">
+                <view class="supplier-stat-item" catch:tap="toSupplierDetail" data-type="all" data-month="{{month.month}}">
+                  <text class="supplier-stat-label">全部订单</text>
+                  <text class="supplier-stat-count">{{month.itemData.billCount}}单</text>
+                  <text class="supplier-stat-value stat-value-primary">¥{{month.itemData.billTotal}}</text>
+                </view>
+                <view class="supplier-stat-item" catch:tap="toSupplierDetail" data-type="allUnPay" data-month="{{month.month}}">
+                  <text class="supplier-stat-label">未结账</text>
+                  <text class="supplier-stat-count">{{month.itemData.actBillCount}}单</text>
+                  <text class="supplier-stat-value stat-value-primary">¥{{month.itemData.actPayTotal}}</text>
+                </view>
+              </view>
+
+              <view class="payment-detail">
+                <view class="payment-item" catch:tap="toSupplierDetail" data-type="havePayed" data-month="{{month.month}}">
+                  <text class="payment-label">已结账款</text>
+                  <text class="supplier-stat-count">{{month.itemData.havePayCount}}单</text>
+                  <text class="payment-value payment-success">¥{{month.itemData.havePayTotal}}</text>
+                </view>
+                <view class="payment-item" catch:tap="toSupplierDetail" data-type="unPayBills" data-month="{{month.month}}">
+                  <text class="payment-label">未结订单</text>
+                  <text class="supplier-stat-count">{{month.itemData.unPayCount}}单</text>
+                  <text class="payment-value stat-value-primary">¥{{month.itemData.unPayTotal}}</text>
+                </view>
+                <view class="payment-item" wx:if="{{month.itemData.returnBillCount > 0}}" catch:tap="toSupplierDetail" data-type="unPayReturnBills" data-month="{{month.month}}">
+                  <text class="payment-label">退货单</text>
+                  <text class="payment-count payment-danger">{{month.itemData.returnBillCount}}单</text>
+                  <text class="payment-value payment-danger">¥{{month.itemData.returnPayTotal}}</text>
+                </view>
+              </view>
+            </view>
+
+            <view class="supplier-bills-container" wx:if="{{gbDisInfo !== null}}">
+              <view class="supplier-bill-item" wx:for="{{month.arr}}" wx:for-item="item" wx:key="gbDpbId" hover-class="supplier-bill-hover" bindtap="supplierOpenBatchDetailGb" data-item="{{item}}">
+                <view class="bill-type-section">
+                  <view class="bill-type-tag">
+                    <text class="bill-type-text tag-return" wx:if="{{item.gbDpbPurchaseType == 9}}">退货单</text>
+                    <text class="bill-type-text tag-auto" wx:elif="{{item.gbDpbPurchaseType == 21}}">自动订货</text>
+                    <text class="bill-type-text tag-purchase" wx:else>采购员订货</text>
+                  </view>
+                  <view class="bill-arrow-section">
+                    <image src="../../../../images/arrow-right-3.png" class="bill-arrow-icon"></image>
+                  </view>
+                </view>
+
+                <view class="bill-main-info">
+                  <view class="bill-date-section">
+                    <text class="bill-date-text">{{item.gbDpbDate}}</text>
+                    <text class="bill-weekday-text">{{item.gbDpbPurchaseWeek}}</text>
+                  </view>
+                  <view class="bill-right-section">
+                    <view class="bill-amount-section" wx:if="{{item.gbDpbSubtotal > 0}}">
+                      <text class="bill-amount-value">¥{{item.gbDpbSubtotal}}</text>
+                      <text class="bill-amount-label">订货金额</text>
+                    </view>
+                    <view class="bill-status-section">
+                      <view class="status-badge status-unread" wx:if="{{item.gbDpbStatus == -1}}">未读</view>
+                      <view class="status-badge status-preparing" wx:elif="{{item.gbDpbStatus == 0 || item.gbDpbStatus == 1}}">备货中</view>
+                      <view class="status-badge status-pending" wx:elif="{{item.gbDpbStatus == 2}}">待收货</view>
+                      <view class="status-badge status-unpaid" wx:elif="{{item.gbDpbStatus == 3}}">未付款</view>
+                      <view class="status-badge status-settled" wx:elif="{{item.gbDpbStatus == 4}}">付款完成</view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="text-secondary font-sl p-20" style="text-align:center; height: 200rpx; line-height: 200rpx;">显示最近3个月的账单</view>
+      </view>
+    </view>
+  </scroll-view>
+</view>
+
+<view wx:if="{{menuOpen}}" class="overlay" style="width: {{windowWidth}}rpx; height: {{windowHeight}}rpx;" bindtap="toggleMenu"></view>

@@ -1,4 +1,5 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="../../../../utils/orderGoodsFmt.wxs" module="fmt" />
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 
@@ -78,17 +79,13 @@
           <!-- 商品信息头部 -->
           <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
             <view class="flex-row-default mb-20">
-              <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
+              <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="goods-image mr-20" />
               <view class="flex-column">
                 <text class="font-sm">第{{index + 1}}名/共{{totalCount}}个</text>
                 <view class="flex-row mb-10">
                   <text class="font-bold mr-10">{{goods.gbDgGoodsName}}</text>
-                  <block wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">
-                    <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardWeight}}/{{goods.gbDgGoodsStandardname}})</text>
-                  </block>
-                  <block wx:else>
-                    <text class="text-secondary font-sl">({{goods.gbDgGoodsStandardname}})</text>
-                  </block>
+                  <text wx:if="{{goods.gbDgGoodsDetail !== null && goods.gbDgGoodsDetail.length > 0 && goods.gbDgGoodsDetail !== 'null'}}" class="text-secondary font-sl">({{goods.gbDgGoodsDetail}})</text>
+                  <text class="font-md gray pack-spec" wx:if="{{fmt.packSpec(goods)}}">{{fmt.packSpec(goods)}}</text>
                 </view>
 
               </view>
@@ -133,7 +130,7 @@
                 <!-- 中间采购信息 -->
                 <view class="flex-column" style="flex: 1;">
                   <view class="flex-row-between">
-                    <text class="font-bold">{{pur.gbDpgBuyQuantity}}{{goods.gbDgGoodsStandardname}}</text>
+                    <text class="font-bold">{{fmt.purRowOutQty(pur, goods)}}</text>
                     <text class="purchase-info-value-amount mr-20">{{pur.gbDpgBuySubtotal}}元</text>
                   </view>
                   <view class="flex-row-between mt-5">

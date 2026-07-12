@@ -2,11 +2,12 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
 var apiUrl = require('../../../../config/index.js');
 var apiDistributer = require('../../../../services/apiDistributer');
+var getDepUsersByFatherIdGb = require('../../../../services/mendian').getDepUsersByFatherIdGb;
 
 // ========================
 // 本页面使用的接口方法（来自 apiDistributer）
 // ========================
-// apiDistributer.getDepUsersByFatherIdGb(data)  POST  gbdistributerpurchasegoods/getDepUsersByFatherIdGb  获取群用户列表
+// getDepUsersByFatherIdGb(data) [services/mendian]  POST  gbdepartment/getDepUsersByFatherIdGb  获取群用户列表
 // apiDistributer.deleteDepUser(id)              GET   gbdepartmentuser/deleteDepUser/{id}                 删除用户
 // ========================
 
@@ -89,7 +90,7 @@ Page({
       stopDate: this.data.stopDate,
       depId: this.data.depFatherId
     };
-    apiDistributer.getDepUsersByFatherIdGb(data).then(function (res) {
+    getDepUsersByFatherIdGb(data).then(function (res) {
       if (res.result.code == 0) {
         _this.setData({
           userArr: res.result.data,
@@ -192,7 +193,7 @@ Page({
     });
     wx.setStorageSync('purUserItem', this.data.purUserItem);
     wx.navigateTo({
-      url: '/subPackage-supplier/pages/supplier/purUserFenxi/purUserFenxi?purUserId=' + this.data.purUserItem.gbDepartmentUserId
+      url: '/subPackage-mendian/pages/supplier/purUserFenxi/purUserFenxi?purUserId=' + this.data.purUserItem.gbDepartmentUserId
         + '&type=0&supplierId=-1&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate
         + '&dateType=' + this.data.dateType,
     });

@@ -359,7 +359,6 @@ function getRestTime(startTime, endTime){
     // 计算剩余时间（毫秒）：过期时间 - 当前时间
     var thisResult = endTimeDown - startTimeDown;
     thisResult = Math.floor(thisResult / 1000 / 60 / 60);
-    console.log("resusus", thisResult)
     return thisResult;
   }
   return 0;
@@ -543,12 +542,6 @@ function getDateRange(rangeType) {
       var daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek; // 如果今天是周日，则不需要调整
       var thisWeekEnd = getDate(today.getTime() + daysToSunday * 24 * 60 * 60 * 1000);
       stopDate = formatDate(thisWeekEnd);
-      
-      console.log('=== thisWeek 日期计算 (utils/fn.wxs) ===');
-      console.log('今天:', formatDate(today), '星期', dayOfWeek);
-      console.log('本周一:', startDate);
-      console.log('本周日:', stopDate);
-      console.log('=====================================');
       break;
       
     case 'lastWeek':
@@ -601,14 +594,6 @@ function getDateRange(rangeType) {
       startDate = formatDate(lastMonthToday);
       
       stopDate = formatDate(today);
-      
-      // 打印日志验证
-      console.log('=== lastThirtyDays 日期计算 ===');
-      console.log('今天日期:', formatDate(today));
-      console.log('上个月今天:', formatDate(lastMonthToday));
-      console.log('开始日期:', startDate);
-      console.log('结束日期:', stopDate);
-      console.log('===============================');
       break;
       
     default:
@@ -909,6 +894,295 @@ function dsStandardLabel(standard, baseStandardName) {
   return name;
 }
 
+// ===== 以下函数原分散于历史 wxs，已统一并入本文件作为唯一逻辑源 =====
+
+function trimStrForNum(v) {
+  if (v === undefined || v === null) {
+    return '';
+  }
+  var s = '' + v;
+  var start = 0;
+  var end = s.length - 1;
+  var ws = ' \n\r\t';
+  while (start <= end && ws.indexOf(s.charAt(start)) >= 0) {
+    start++;
+  }
+  while (end >= start && ws.indexOf(s.charAt(end)) >= 0) {
+    end--;
+  }
+  return start > end ? '' : s.substring(start, end + 1);
+}
+
+function _marginLevel(ins) {
+  if (!ins) {
+    return 'UNKNOWN';
+  }
+  var level = ins.grossMarginLevel;
+  if (level === undefined || level === null || level === '') {
+    return 'UNKNOWN';
+  }
+  return '' + level;
+}
+
+function getWasteRemainHours(wasteFullTime, nowTime) {
+  var hours = getRestTime(wasteFullTime, nowTime);
+  return hours < 0 ? -hours : 0;
+}
+
+function isSupplierMatch(supplierId, selectedSupplierIds) {
+  if (!supplierId || !selectedSupplierIds || selectedSupplierIds === -1) {
+    return false;
+  }
+  var supplierIdArray = selectedSupplierIds.toString().split(',');
+  for (var i = 0; i < supplierIdArray.length; i++) {
+    if (supplierIdArray[i] == supplierId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isPurchaseUserMatch(purchaseUserId, selectedPurchaseUserIds) {
+  if (!purchaseUserId || !selectedPurchaseUserIds || selectedPurchaseUserIds === -1) {
+    return false;
+  }
+  var purchaseUserIdArray = selectedPurchaseUserIds.toString().split(',');
+  for (var i = 0; i < purchaseUserIdArray.length; i++) {
+    if (purchaseUserIdArray[i] == purchaseUserId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getDay(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  var day = dateString.substring(8, 10);
+  if (day.charAt(0) === '0') {
+    day = day.charAt(1);
+  }
+  return day;
+}
+
+function getMonth(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  var month = dateString.substring(5, 7);
+  if (month.charAt(0) === '0') {
+    month = month.charAt(1);
+  }
+  return month;
+}
+
+function getWeekDayName(weekday) {
+  if (weekday === undefined || weekday === null) {
+    return '';
+  }
+  var weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return weekDays[weekday] || '';
+}
+
+function pricePerPortion(totalAmount, soldPortions) {
+  if (totalAmount === undefined || totalAmount === null || soldPortions === undefined || soldPortions === null) {
+    return '—';
+  }
+  var sa = trimStrForNum(totalAmount);
+  var sp = trimStrForNum(soldPortions);
+  if (sa === '' || sp === '') {
+    return '—';
+  }
+  var t = parseFloat(sa);
+  var p = parseFloat(sp);
+  if (t !== t || p !== p || !(p > 0)) {
+    return '—';
+  }
+  var per = t / p;
+  return per.toFixed(2);
+}
+
+function marginPerformanceHint(actualGrossStr) {
+  if (actualGrossStr == null) {
+    return '';
+  }
+  var s = trimStrForNum(actualGrossStr);
+  if (s === '') {
+    return '';
+  }
+  var n = parseFloat(s);
+  if (n !== n) {
+    return '持续优化成本与毛利';
+  }
+  if (n >= 50) {
+    return '表现优秀，继续保持！';
+  }
+  if (n >= 30) {
+    return '表现良好，可继续优化';
+  }
+  if (n >= 0) {
+    return '建议关注成本与售价';
+  }
+  return '建议核查经营数据';
+}
+
+function marginStandardMetaLine(ins) {
+  if (!ins) {
+    return '';
+  }
+  var T = ins.grossMarginStandardTarget;
+  var F = ins.grossMarginStandardFloatAbs;
+  var lo = ins.grossMarginStandardBandLower;
+  var hi = ins.grossMarginStandardBandUpper;
+  var hasT = T !== undefined && T !== null && trimStrForNum(T) !== '';
+  var hasF = F !== undefined && F !== null && trimStrForNum(F) !== '';
+  var hasLo = lo !== undefined && lo !== null && trimStrForNum(lo) !== '';
+  var hasHi = hi !== undefined && hi !== null && trimStrForNum(hi) !== '';
+  if (!hasT && !hasF && !(hasLo && hasHi)) {
+    return '';
+  }
+  var parts = [];
+  if (hasT) {
+    parts.push('目标 ' + trimStrForNum(T) + '%');
+  }
+  if (hasF) {
+    parts.push('浮动 ±' + trimStrForNum(F) + '%');
+  }
+  if (hasLo && hasHi) {
+    parts.push('标准范围 ' + trimStrForNum(lo) + '%～' + trimStrForNum(hi) + '%');
+  }
+  if (parts.length === 0) {
+    return '';
+  }
+  return parts.join(' · ');
+}
+
+function marginStandardHint(ins) {
+  if (!ins) {
+    return '';
+  }
+  var level = _marginLevel(ins);
+  if (level === 'UNKNOWN') {
+    return '无对照标准';
+  }
+  if (level === 'IN_BAND') {
+    return '在目标区间内';
+  }
+  if (level === 'BELOW') {
+    return '低于目标区间';
+  }
+  if (level === 'ABOVE') {
+    return '高于目标区间';
+  }
+  return '';
+}
+
+function marginStandardShowBlock(ins) {
+  if (!ins) {
+    return '';
+  }
+  var m = marginStandardMetaLine(ins);
+  var h = marginStandardHint(ins);
+  return (m !== '' || h !== '') ? '1' : '';
+}
+
+function marginStandardHintMod(ins) {
+  var level = _marginLevel(ins);
+  if (level === 'IN_BAND') {
+    return 'dfl-blend-hero__hint--ok';
+  }
+  if (level === 'BELOW') {
+    return 'dfl-blend-hero__hint--warn';
+  }
+  if (level === 'ABOVE') {
+    return 'dfl-blend-hero__hint--good';
+  }
+  return 'dfl-blend-hero__hint--muted';
+}
+
+function marginStandardHintModDga(ins) {
+  var level = _marginLevel(ins);
+  if (level === 'IN_BAND') {
+    return 'dga-hero__margin--ok';
+  }
+  if (level === 'BELOW') {
+    return 'dga-hero__margin--warn';
+  }
+  if (level === 'ABOVE') {
+    return 'dga-hero__margin--good';
+  }
+  return 'dga-hero__margin--muted';
+}
+
+function calcActualProfit(actualRevenue, actualCostTotalAmount123) {
+  var rev = parseFloat(actualRevenue);
+  var cost = parseFloat(actualCostTotalAmount123);
+  if (rev !== rev || cost !== cost) {
+    return '—';
+  }
+  var profit = rev - cost;
+  return profit.toFixed(2);
+}
+
+function perPortionDisplay(standardWeight, recipeUsagePerPortion, unit, portionAmount, portionUnit) {
+  if (standardWeight != null && standardWeight !== '' && standardWeight !== undefined) {
+    var s = '' + recipeUsagePerPortion;
+    var dot = s.indexOf('.');
+    if (dot >= 0) {
+      var decimals = s.substring(dot + 1);
+      if (decimals.length > 2) {
+        for (var i = 2; i < decimals.length; i++) {
+          if (decimals.charAt(i) !== '0') {
+            if (portionAmount != null && portionAmount !== '' && portionUnit) {
+              return portionAmount + portionUnit + '';
+            }
+            return recipeUsagePerPortion + unit + '';
+          }
+        }
+      }
+    }
+  }
+  return recipeUsagePerPortion + unit + '';
+}
+
+function perPortionDeviation(recipeUsagePerPortion, actualPerPortion, unit) {
+  if (recipeUsagePerPortion == null || actualPerPortion == null || recipeUsagePerPortion === '' || actualPerPortion === '') {
+    return '--';
+  }
+  var dev = recipeUsagePerPortion - actualPerPortion;
+  dev = Math.round(dev * 100) / 100;
+  var str = '' + dev;
+  var dot = str.indexOf('.');
+  if (dot < 0) str = str + '.00';
+  else if (str.length - dot === 2) str = str + '0';
+  if (dev > 0) return '+' + str + unit + '/份';
+  return str + unit + '/份';
+}
+
+function remainingAfterOutbound(remainingBeforeOutbound, quantity) {
+  if (remainingBeforeOutbound == null || quantity == null || remainingBeforeOutbound === '' || quantity === '') {
+    return '--';
+  }
+  var r = parseFloat(remainingBeforeOutbound) - parseFloat(quantity);
+  r = Math.round(r * 100) / 100;
+  return '' + r;
+}
+
+function transferDateTimeShort(datetime){
+  if (datetime == null || datetime === '' || datetime === undefined) return '';
+  var month = datetime.substring(5, 7);
+  var day = datetime.substring(8, 10);
+  var time = datetime.length >= 16 ? datetime.substring(11, 16) : '';
+  if (month.charAt(0) === '0') month = month.charAt(1);
+  if (day.charAt(0) === '0') day = day.charAt(1);
+  var result = month + '月' + day + '日';
+  if (time !== '') result = result + ' ' + time;
+  return result;
+}
+
+// ===== 独有函数并入结束 =====
+
 module.exports = {
   getGongli:getGongli,
   getPercent: getPercent,
@@ -956,6 +1230,24 @@ module.exports = {
   analysisRowDisplay: analysisRowDisplay,
   analysisTrendClass: analysisTrendClass,
   marginRateStringForCell: marginRateStringForCell,
-  dsStandardLabel: dsStandardLabel
+  dsStandardLabel: dsStandardLabel,
+  getWasteRemainHours: getWasteRemainHours,
+  isSupplierMatch: isSupplierMatch,
+  isPurchaseUserMatch: isPurchaseUserMatch,
+  getDay: getDay,
+  getMonth: getMonth,
+  getWeekDayName: getWeekDayName,
+  pricePerPortion: pricePerPortion,
+  marginPerformanceHint: marginPerformanceHint,
+  marginStandardMetaLine: marginStandardMetaLine,
+  marginStandardHint: marginStandardHint,
+  marginStandardShowBlock: marginStandardShowBlock,
+  marginStandardHintMod: marginStandardHintMod,
+  marginStandardHintModDga: marginStandardHintModDga,
+  calcActualProfit: calcActualProfit,
+  perPortionDisplay: perPortionDisplay,
+  perPortionDeviation: perPortionDeviation,
+  remainingAfterOutbound: remainingAfterOutbound,
+  transferDateTimeShort: transferDateTimeShort
 
 }

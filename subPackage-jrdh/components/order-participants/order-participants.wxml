@@ -1,0 +1,29 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+
+<view class="flex-row" style="margin-top: 20rpx; padding-bottom: 20rpx;">
+  <view class="flex-column-center third-row">
+    <image
+      wx:if="{{batch.nxJrdhPurEntity.gbDuWxAvartraUrl.length > 0}}"
+      src="{{url + batch.nxJrdhPurEntity.gbDuWxAvartraUrl}}"
+      class="face_img"
+    />
+    <view class="font-sl username">{{tool.getAttrName(batch.nxJrdhPurEntity.gbDuWxNickName)}}</view>
+  </view>
+
+  <view class="flex-column-center third-row">
+    <view class="font-md flex-row">
+      <text class="mr-20">{{todayDate}}</text>
+    </view>
+  </view>
+
+  <view class="flex-column-center third-row">
+    <image
+      src="{{batch.nxJrdhSellerEntity !== null ? url + batch.nxJrdhSellerEntity.nxJrdhWxAvartraUrl : '../../../images/user.png'}}"
+      class="face_img"
+    />
+    <view class="font-sl username">
+      <text wx:if="{{batch.nxJrdhSellerEntity !== null}}">{{tool.getAttrName(batch.nxJrdhSellerEntity.nxJrdhWxNickName)}}</text>
+      <text class="text-danger" wx:else>卖家未读</text>
+    </view>
+  </view>
+</view>

@@ -38,7 +38,7 @@
  
   <swiper-item>
       <view class="swiper-item-content">
-        <image class="" wx:if="{{url.length > 0}}" src="{{url + '/uploadImage/imPurchase/wxdinghuo.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;"/>
+        <image class="" wx:if="{{url.length > 0}}" src="{{url + 'uploadImage/imPurchase/wxdinghuo.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;"/>
         <text class="feature-title">供货商</text>
         <text class="feature-desc" >将订单转发给微信好友，让他们接收订货需求。</text>
       </view>
@@ -47,29 +47,18 @@
     <!-- 功能1：自我采购 -->
     <swiper-item >
       <view class="swiper-item-content">
-        <image class="" wx:if="{{url.length > 0}}" src="{{url + '/uploadImage/imPurchase/zicai.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%; " />
+        <image class="" wx:if="{{url.length > 0}}" src="{{url + 'uploadImage/imPurchase/zicai.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%; " />
         <text class="feature-title">自采</text>
         <text class="feature-desc">一键完成外出采购的订单。</text>
       </view>
     </swiper-item>
 
-   
-    
-
-    <!-- 功能3：指定配送商 -->
-    <!-- <swiper-item>
-      <view class="swiper-item-content">
-        <image class=""  wx:if="{{url.length > 0}}"  src="{{url + '/uploadImage/imPurchase/appSupplier.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;" />
-        <text class="feature-title">指定配送商</text>
-        <text class="feature-desc " >与合作的配送商对接，订单自动发送到配送商小程序。</text>
-      </view>
-    </swiper-item> -->
     <swiper-item>
       <view class="swiper-item-content invite-chef-content">
-        <image class=""  wx:if="{{url.length > 0}}"  src="{{url + '/uploadImage/imPurchase/dinghuo.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;" />
+        <image class=""  wx:if="{{url.length > 0}}"  src="{{url + 'uploadImage/imPurchase/dinghuo.png'}}" style="height: {{windowHeight * 0.5 - 300}}rpx; width: 100%;" />
         <text class="feature-title">邀请后厨订货</text>
         <text class="feature-desc">
-          让后厨人员只下单功能，自行下单给您。
+          让后厨人员自行下单给您。
         </text>
       </view>
     </swiper-item>

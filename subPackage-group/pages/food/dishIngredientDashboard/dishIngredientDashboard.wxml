@@ -1,7 +1,7 @@
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 <wxs module="utilLv" src="/wxs/utilizationLevel.wxs" />
-<wxs src="../../../../utils/fn.wxs" module="tool" />
-<wxs src="./dga.wxs" module="dga" />
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="/wxs/dga.wxs" module="dga" />
 <view class="dga-page">
   <back-navbar
     style="height: {{navBarHeight}}rpx;"
@@ -166,7 +166,7 @@
             <view class="dga-tbl__cell dga-td dga-td--ing">
               <image
                 class="dga-ico"
-                src="{{(url + item.gbDgGoodsFileImg || '/images/logo.jpg')}}"
+                src="{{(url + item.gbDgGoodsFileImg || '/images/logo.png')}}"
                 mode="aspectFill"
               />
               <view class="dga-ing-name">

@@ -514,6 +514,51 @@
   background-color: #e3f2fd;
   border-radius: 25rpx;
   text-align: center;
+  padding: 4rpx 16rpx;
+}
+
+.tag-return {
+  background: #ffe5e5;
+  color: #f5576c;
+  font-weight: 600;
+}
+
+.return-text {
+  color: #f5576c !important;
+}
+
+.return-value {
+  color: #f5576c !important;
+}
+
+.price-container-return {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+  border-color: rgba(245, 87, 108, 0.2);
+  box-shadow: 0 2rpx 8rpx rgba(245, 87, 108, 0.08);
+}
+
+.purchase-row-return::before {
+  background: linear-gradient(180deg, #ffe5e5 0%, #ffe5e5 100%);
+}
+
+.purchase-row-return-active {
+  border-color: #f5576c !important;
+}
+
+.purchase-row-return-active::before {
+  background: linear-gradient(180deg, #f5576c 0%, #e53935 100%);
+}
+
+.purchase-row-return .flex-column-center {
+  background: rgba(245, 87, 108, 0.1);
+}
+
+.purchase-row-return-active .flex-column-center {
+  background: rgba(245, 87, 108, 0.2);
+}
+
+.purchase-info-card-return {
+  border-color: #f5576c !important;
 }
 
 /* 采购批次行容器 */

@@ -11,10 +11,13 @@ const {
   createDepartmentOrderWithNewDepDisGoods,
   createDepartmentOrderFromNxGoodsImport,
   deleteOrderGb,
+  gbDisSaveStandard,
+  gbDisDeleteStandard,
+  saveNxStandard,
 } = require('../../../../services/depOrder');
 import pasteDepListCache from '../../../../lib/pasteDepListCache';
 
-const { removeOrderFromPasteDepList, isSameOrder } = pasteDepListCache;
+const { isSameOrder } = pasteDepListCache;
 
 const SAVE_ORDER_API = {
   createDepartmentOrderForJj,
@@ -46,6 +49,7 @@ Page({
     }],
     isSearching: true,
     searchResult: false,
+    searchString: '',
     placeHolder: "输入商品名称或拼音字母、首字母",
 
     itemDis: "",
@@ -67,6 +71,10 @@ Page({
     item: {},
     itemDis: "",
     nxGoods: {},
+    showPopupWarn: false,
+    popupType: '',
+    warnContent: '',
+    disStandardId: '',
   },
 
 
@@ -89,30 +97,33 @@ Page({
 
   
 
-    var value = wx.getStorageSync('applyItem');
-    if (value) {
-      this.setData({
-        disId: value.gbDoDistributerId,
-        applyItem: value,
-        depId: value.gbDoDepartmentId,
-        searchString:value.gbDoGoodsName,
-        depFatherId: value.gbDoDepartmentFatherId
-      })
+    if (options.from === 'paste') {
+      wx.setStorageSync('editDepApplyFrom', 'paste');
     }
+    var value = wx.getStorageSync('applyItem');
+    var initialSearch = value && value.gbDoGoodsName ? String(value.gbDoGoodsName) : '';
 
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       url: apiUrl.server,
-      from: options.from,
-      orderPasteIndex: options.orderPasteIndex
-    })
-
-    
-    this.clueOffsetSearch();
-    this.getSearchString();
-    
+      from: options.from || wx.getStorageSync('editDepApplyFrom') || '',
+      orderPasteIndex: options.orderPasteIndex,
+      disId: value ? value.gbDoDistributerId : undefined,
+      applyItem: value || null,
+      depId: value ? value.gbDoDepartmentId : undefined,
+      depFatherId: value ? value.gbDoDepartmentFatherId : undefined,
+      searchString: initialSearch,
+      placeHolder: initialSearch || this.data.placeHolder,
+      applyNumber: value && value.gbDoQuantity != null && value.gbDoQuantity !== ''
+        ? String(value.gbDoQuantity)
+        : '',
+      applyRemark: value && value.gbDoRemark ? value.gbDoRemark : '',
+    }, () => {
+      this.clueOffsetSearch();
+      this.getSearchString();
+    });
 
   },
 
@@ -208,19 +219,138 @@ Page({
     })
   },
 
+  _getOrderApplyDefaults() {
+    const applyItem = this.data.applyItem || {};
+    const quantity = applyItem.gbDoQuantity;
+    return {
+      applyNumber: quantity != null && quantity !== '' ? String(quantity) : '',
+      applyRemark: applyItem.gbDoRemark || '',
+      applyStandardName: applyItem.gbDoStandard || '',
+    };
+  },
+
+  _isPasteTempApplyItem(applyItem) {
+    const item = applyItem || this.data.applyItem;
+    return !!(item && item.gbDepartmentOrdersId && Number(item.gbDoStatus) === -2);
+  },
+
+  confirmStandard: function (e) {
+    var goodsId;
+    if (this.data.depGoods) {
+      goodsId = this.data.depGoods.gbDdgDisGoodsId;
+    } else if (this.data.itemDis) {
+      goodsId = this.data.itemDis.gbDistributerGoodsId;
+    }
+
+    if (!goodsId) {
+      wx.showToast({ title: '商品信息缺失，无法保存规格', icon: 'none' });
+      return;
+    }
+
+    var data = {
+      gbDsDisGoodsId: goodsId,
+      gbDsStandardName: e.detail.newStandardName,
+    };
+
+    gbDisSaveStandard(data).then(function (res) {
+      if (res.result.code == 0) {
+        var standardArr = (this.data.itemDis && this.data.itemDis.gbDistributerStandardEntities || []).slice();
+        standardArr.push(res.result.data);
+        this.setData({
+          'itemDis.gbDistributerStandardEntities': standardArr,
+          applyStandardName: res.result.data.gbDsStandardName,
+        });
+      } else {
+        wx.showToast({ title: res.result.msg, icon: 'none' });
+      }
+    }.bind(this));
+  },
+
+  confirmStandardNx: function (e) {
+    if (!this.data.nxGoods || !this.data.nxGoods.nxGoodsId) {
+      wx.showToast({ title: '商品信息缺失，无法保存规格', icon: 'none' });
+      return;
+    }
+
+    var data = {
+      nxSGoodsId: this.data.nxGoods.nxGoodsId,
+      nxStandardName: e.detail.newStandardName,
+    };
+
+    saveNxStandard(data).then(function (res) {
+      if (res.result.code == 0) {
+        var standardArr = (this.data.nxGoods.nxGoodsStandardEntities || []).slice();
+        standardArr.push(res.result.data);
+        this.setData({
+          'nxGoods.nxGoodsStandardEntities': standardArr,
+          applyStandardName: res.result.data.nxStandardName,
+        });
+      } else {
+        wx.showToast({ title: res.result.msg, icon: 'none' });
+      }
+    }.bind(this));
+  },
+
+  delStandard: function (e) {
+    this.setData({
+      warnContent: e.detail.standardName,
+      popupType: 'deleteSpec',
+      showPopupWarn: true,
+      disStandardId: e.detail.id,
+    });
+  },
+
+  deleteStandardApi: function () {
+    var that = this;
+    gbDisDeleteStandard(this.data.disStandardId).then(function (res) {
+      if (res.result.code == 0) {
+        var standardArr = res.result.data.gbDistributerStandardEntities || [];
+        that.setData({
+          'itemDis.gbDistributerStandardEntities': standardArr,
+          popupType: '',
+          showPopupWarn: false,
+          disStandardId: '',
+        });
+      } else {
+        wx.showToast({ title: res.result.msg, icon: 'none' });
+      }
+    });
+  },
+
+  confirmWarn: function () {
+    if (this.data.popupType === 'deleteSpec') {
+      this.deleteStandardApi();
+    }
+  },
+
+  onClosePopup: function () {
+    this.setData({
+      warnContent: '',
+      popupType: '',
+      showPopupWarn: false,
+      disStandardId: '',
+    });
+  },
+
 
 
   // 
   applyGoodsDep(e) {
     var depGoods = e.currentTarget.dataset.depgoods;
+    var disGoods = e.currentTarget.dataset.disgoods;
+    var defaults = this._getOrderApplyDefaults();
+    if (disGoods && !disGoods.gbDistributerStandardEntities) {
+      disGoods.gbDistributerStandardEntities = [];
+    }
     this.setData({
       index: e.currentTarget.dataset.index,
-      itemDis: e.currentTarget.dataset.disgoods,
-      depGoods: e.currentTarget.dataset.depgoods,
+      itemDis: disGoods,
+      depGoods: depGoods,
       show: true,
-      applyStandardName: depGoods.gbDdgOrderStandard,
-      applyRemark: depGoods.gbDdgOrderRemark,
-      canSave: true,
+      applyStandardName: depGoods.gbDdgOrderStandard || defaults.applyStandardName,
+      applyRemark: depGoods.gbDdgOrderRemark || defaults.applyRemark,
+      applyNumber: defaults.applyNumber,
+      canSave: !!defaults.applyNumber,
       placeHolder: this.data.searchString,
     })
     if (e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
@@ -236,43 +366,54 @@ Page({
   },
 
   applyGoods(e) {
-    var applyItem = this.data.applyItem;
-    this.setData({
+    var defaults = this._getOrderApplyDefaults();
+    var disGoods = e.currentTarget.dataset.disgoods;
+    var nxGoods = e.currentTarget.dataset.nxgoods;
+    if (disGoods && !disGoods.gbDistributerStandardEntities) {
+      disGoods.gbDistributerStandardEntities = [];
+    }
+    if (nxGoods && !nxGoods.nxGoodsStandardEntities) {
+      nxGoods.nxGoodsStandardEntities = [];
+    }
+
+    var basePatch = {
       placeHolder: this.data.searchString,
       index: e.currentTarget.dataset.index,
-      itemDis: e.currentTarget.dataset.disgoods,
-      nxGoods: e.currentTarget.dataset.nxgoods,
+      itemDis: disGoods,
+      nxGoods: nxGoods,
       depGoods: e.currentTarget.dataset.depgoods,
-      canSave: true,
-
-      applyStandardName: applyItem.gbDoStandard,
-      itemDis: e.currentTarget.dataset.disgoods,
+      applyNumber: defaults.applyNumber,
+      applyRemark: defaults.applyRemark,
       searchString: this.data.placeHolder,
-      applyNumber: applyItem.gbDoQuantity,
-      applyRemark: applyItem.gbDoRemark,
-    })
-    
-    if (e.currentTarget.dataset.disgoods == null) {
+      canSave: !!defaults.applyNumber,
+    };
+
+    if (disGoods == null) {
+      this.setData(Object.assign({}, basePatch, {
+        showNx: true,
+        applyStandardName: nxGoods.nxGoodsStandardname,
+      }));
+    } else if (disGoods.gbDgPullOff == 1) {
+      wx.showToast({
+        title: '停止订货',
+        icon: 'none'
+      });
+      return;
+    } else {
+      this.setData(Object.assign({}, basePatch, {
+        show: true,
+        applyStandardName: disGoods.gbDgGoodsStandardname || defaults.applyStandardName,
+      }));
+    }
+
+    if (e.currentTarget.dataset.depgoods !== null && e.currentTarget.dataset.depgoods.gbDepartmentGoodsStockEntities.length > 0) {
       this.setData({
-        showNx: true,      
-        applyStandardName: e.currentTarget.dataset.nxgoods.nxGoodsStandardname,
+        hasStock: true
       })
     } else {
-      
-
-      if(e.currentTarget.dataset.disgoods.gbDgPullOff  == 1){
-        wx.showToast({
-          title: '停止订货',
-          icon: 'none'
-        })
-    
-      }else{
-        this.setData({
-          show: true,
-          applyStandardName: e.currentTarget.dataset.disgoods.gbDgGoodsStandardname,
-          
-        })
-      }
+      this.setData({
+        hasStock: false
+      })
     }
 
   },
@@ -355,6 +496,10 @@ Page({
       stockIsZero: e.detail.stockIsZero,
     };
 
+    if (this._isPasteTempApplyItem()) {
+      dg.gbDepartmentOrdersId = this.data.applyItem.gbDepartmentOrdersId;
+    }
+
     if (this.data.itemDis == null) {
       this._saveOrderToBackend(dg, 'createDepartmentOrderFromNxGoodsImport');
     } else if (this.data.depGoods == null) {
@@ -376,7 +521,11 @@ Page({
       if (res.result.code == 0) {
         this.setData({ orderItem: res.result.data });
         wx.setStorageSync('needRefreshOrderData', true);
-        this._delApplyItem();
+        if (this.data.from === 'paste' || this._isPasteTempApplyItem()) {
+          this._finishPasteApplyItem(res.result.data);
+        } else {
+          this._delApplyItem();
+        }
       } else {
         wx.showToast({
           title: (res.result && res.result.msg) || '订单保存失败',
@@ -389,55 +538,60 @@ Page({
   },
 
 
-  _clearPasteDepListCache() {
-    return removeOrderFromPasteDepList({
-      depId: this.data.depId,
-      orderId: this.data.applyItem && this.data.applyItem.gbDepartmentOrdersId,
-      applyItem: this.data.applyItem,
-    });
+  _finishPasteApplyItem(savedOrder) {
+    wx.removeStorageSync('editDepApplyFrom');
+    this._syncPastePageAfterMatch(savedOrder);
+    wx.navigateBack({ delta: 1 });
   },
 
-  _syncPastePageAfterMatch() {
+  _mergeSavedOrderIntoList(orderArr, savedOrder) {
+    const applyItem = this.data.applyItem;
+    if (!applyItem) return orderArr || [];
+
+    const next = (orderArr || []).slice();
+    const matchedOrder = Object.assign({}, applyItem, savedOrder || {}, {
+      gbDoStatus: savedOrder && savedOrder.gbDoStatus != null ? savedOrder.gbDoStatus : 0,
+    });
+
+    const index = Number(this.data.orderPasteIndex);
+    if (index >= 0 && index < next.length && isSameOrder(next[index], applyItem)) {
+      next[index] = matchedOrder;
+      return next;
+    }
+
+    const foundIndex = next.findIndex(o => isSameOrder(o, applyItem));
+    if (foundIndex >= 0) {
+      next[foundIndex] = matchedOrder;
+    }
+    return next;
+  },
+
+  _syncPastePageAfterMatch(savedOrder) {
     const applyItem = this.data.applyItem;
     if (!applyItem) return;
 
-    const pasteDepList = this._clearPasteDepListCache();
     const pages = getCurrentPages();
     const pastePage = pages.find(p => (p.route || '').indexOf('order/paste/paste') !== -1);
 
-    const syncPage = (page, orderArr) => {
-      const updates = { orderArr, pasteDepList };
-      if (orderArr.length === 0) {
-        updates.saveCount = null;
-        updates.pasteDepIndex = -1;
+    const syncPage = (page) => {
+      const orderArr = this._mergeSavedOrderIntoList(page.data.orderArr, savedOrder);
+      page.setData({ pasteDepList: page.data.pasteDepList });
+      if (typeof page._afterOrderListChanged === 'function') {
+        page._afterOrderListChanged(orderArr, page.data.orderSubmitted);
+        return;
       }
-      page.setData(updates);
-      if (typeof page._updateNewGoodsCount === 'function') {
-        page._updateNewGoodsCount(orderArr);
-      }
-      if (typeof page._updateHasUnsavedOrders === 'function') {
-        page._updateHasUnsavedOrders(orderArr);
-      }
-      if (orderArr.length > 0 && typeof page._saveToStorage === 'function') {
-        page._saveToStorage(orderArr);
-      }
+      page.setData({ orderArr });
     };
 
     if (pastePage) {
-      const orderArr = (pastePage.data.orderArr || []).filter(o => !isSameOrder(o, applyItem));
-      syncPage(pastePage, orderArr);
+      syncPage(pastePage);
       return;
     }
 
     if (this.data.from === 'paste') {
       const prevPage = pages[pages.length - 2];
       if (!prevPage) return;
-      const index = Number(this.data.orderPasteIndex);
-      const orderArr = (prevPage.data.orderArr || []).slice();
-      if (index >= 0 && index < orderArr.length) {
-        orderArr.splice(index, 1);
-      }
-      syncPage(prevPage, orderArr);
+      syncPage(prevPage);
     }
   },
 
@@ -446,8 +600,6 @@ Page({
 
     deleteOrderGb(id).then(res => {
       if (res.result.code != 0) return;
-
-      this._syncPastePageAfterMatch();
 
       wx.setStorageSync('needRefreshOrderData', true);
       wx.navigateBack({ delta: 1 });
@@ -471,11 +623,26 @@ Page({
 
 
   toAddGoods() {
-    
-    wx.navigateTo({
-      url: '../disAddGoods/disAddGoods?goodsName=' + this.data.placeHolder,
-    })
+    const applyItem = this.data.applyItem || {};
+    const goodsName = (this.data.searchString || applyItem.gbDoGoodsName || this.data.placeHolder || '').trim();
+    if (!goodsName) {
+      wx.showToast({ title: '请先输入商品名称', icon: 'none' });
+      return;
+    }
 
+    let url = '../disAddGoods/disAddGoods?goodsName=' + goodsName;
+    const standard = applyItem.gbDoStandard;
+    if (standard) {
+      url += '&standard=' + standard;
+    }
+    if (this.data.depId) {
+      url += '&depId=' + this.data.depId;
+    }
+    if (this.data.depFatherId) {
+      url += '&depFatherId=' + this.data.depFatherId;
+    }
+
+    wx.navigateTo({ url });
   },
 
 
@@ -499,7 +666,7 @@ Page({
 
 
   delSearch() {
-    var str = this.data.searchString;
+    var str = this.data.searchString || '';
     if (str.length > 0) {
       this.setData({
         searchString: str.slice(0, -1),
@@ -528,15 +695,16 @@ Page({
   },
 
   getSearchString(e) {
-   
-    if (this.data.searchString.length > 0) {
+    const searchString = (this.data.searchString || '').trim();
+
+    if (searchString.length > 0) {
       this.setData({
-        placeHolder: this.data.searchString,
+        placeHolder: searchString,
        
       })
       var data = {
         disId: this.data.disId,
-        searchStr: this.data.searchString,
+        searchStr: searchString,
         depId: this.data.depId
       }
       load.showLoading("搜索商品中...")
@@ -684,20 +852,6 @@ Page({
    onUnload(){
     // wx.removeStorageSync('applyItem');
    },
-
-
-  toAddGoods(e){
-    this.setData({
-      applyNumber: this.data.applyItem.gbDoQuantity,
-      canSave: true,
-      gbDoPrintStandard: this.data.applyItem.gbDoStandard,
-    })
-    wx.navigateTo({
-      url: '../pasteAddGoods/pasteAddGoods?name=' + this.data.applyItem.gbDoGoodsName + 
-      '&standard=' + this.data.applyItem.gbDoStandard + '&depFatherId=' + this.data.depFatherId
-       + '&depId=' + this.data.depId ,
-    })
-  },
 
 })
 

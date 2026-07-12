@@ -38,6 +38,38 @@
         </view>
       </view>
 
+      <view class="food-form-row flex-row-items-center">
+        <text class="food-form-label">目标毛利率</text>
+        <view class="flex-row-items-center flex-1" style="min-width: 0;">
+          <input
+            class="numberInput"
+            style="width: {{windowWidth / 2}}rpx;"
+            placeholder-style="color: #999; font-size: 26rpx;"
+            placeholder="请输入"
+            type="digit"
+            value="{{type == 'edit' && foodItem ? foodItem.gbDfTargetGrossMarginRate || '' : targetGrossMarginRate}}"
+            bindblur="getTargetGrossMarginRate"
+          />
+          <text class="ml-sm text-secondary" style="flex-shrink: 0;">%</text>
+        </view>
+      </view>
+
+      <view class="food-form-row flex-row-items-center">
+        <text class="food-form-label">浮动百分点</text>
+        <view class="flex-row-items-center flex-1" style="min-width: 0;">
+          <input
+            class="numberInput"
+            style="width: {{windowWidth / 2}}rpx;"
+            placeholder-style="color: #999; font-size: 26rpx;"
+            placeholder="请输入"
+            type="digit"
+            value="{{type == 'edit' && foodItem ? foodItem.gbDfGrossMarginFloatAbs || '' : grossMarginFloatAbs}}"
+            bindblur="getGrossMarginFloatAbs"
+          />
+          <text class="ml-sm text-secondary" style="flex-shrink: 0;">%</text>
+        </view>
+      </view>
+
       <view class="food-form-row food-form-row--multiline">
         <text class="food-form-label" style="padding-top: 8rpx;">菜品图片</text>
         <image

@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 
 <view class="flex flex-column">
@@ -56,43 +56,97 @@
 
   <view class="flex-column">
     <view class="flex-column  " wx:if="{{arr.length > 0}}">
-      <view class="flex-column p-20 mb-20 mt-30  bg-white" style=" padding-bottom: 40rpx;">
-        <view class="flex-row-between p-20">
-          <view class="flex-column">
-            <view>
-              <view class="font-sl text-secondary">采购总额</view>
-              <view class="font-lg font-bold" style="color: #007aff;">{{allTotal}}元</view>
-            </view>
-            <view class="font-md">
-              <view class="font-sl text-secondary">平均</view>
-              <view class="font-lg font-bold" style="color: #007aff;">{{purchasePerDay}}元/天</view>
-            </view>
-          </view>
-
-          <view class="flex-column">
-            <view class="flex-column">
-              <view class="font-sl text-secondary">成本金额</view>
-              <view class="font-lg font-bold" style="color: #05c0a7;">{{costTotal}}元</view>
-              <view class="font-sl font-bold text-secondary" >本期:{{costTotalPer}}元</view>
-            </view>
-            <view class="flex-column font-md" style="margin-top: 12rpx;">
-              <view class="flex-row-between">
-                <view class="font-sl text-secondary">员工餐</view>
-                <view class="font-sl font-bold" style="color: #ff9500;">{{employeeMealCostTotal}}元</view>
+      <view class="summary-section">
+        <view class="summary-card">
+          <view class="summary-card-body">
+            <!-- 采购 -->
+            <view class="summary-col summary-col--purchase">
+              <view class="summary-col-header">
+                <view class="summary-col-icon summary-col-icon--purchase">
+                  <image src="../../../../images/gouwuche.png" class="summary-col-icon-img" mode="aspectFit"></image>
+                </view>
+                <text class="summary-col-title summary-col-title--purchase">采购</text>
+              </view>
+              <view class="summary-col-rows">
+                <view class="summary-row summary-row--avg">
+                  <text class="summary-row-label">平均采购</text>
+                  <text class="summary-row-value summary-row-value--purchase">{{purchasePerDay}}元/天</text>
+                </view>
+                <view class="summary-row summary-row--tap" bindtap="toSummaryPurchase" data-kind="zicai" hover-class="summary-row--hover">
+                  <text class="summary-row-label">自采总额</text>
+                  <view class="summary-row-right">
+                    <text class="summary-row-value summary-row-value--purchase">{{zicaiTotal}}元</text>
+                    <image src="/images/arrow-right-3.png" class="summary-row-arrow" mode="aspectFit"></image>
+                  </view>
+                </view>
+                <view class="summary-row summary-row--tap" bindtap="toSummaryPurchase" data-kind="dinghuo" hover-class="summary-row--hover">
+                  <text class="summary-row-label">供货商订货总额</text>
+                  <view class="summary-row-right">
+                    <text class="summary-row-value summary-row-value--purchase">{{dinghuoTotal}}元</text>
+                    <image src="/images/arrow-right-3.png" class="summary-row-arrow" mode="aspectFit"></image>
+                  </view>
+                </view>
+                <view class="summary-row summary-row--tap summary-row--last" bindtap="toSummaryPurchase" data-kind="stock" hover-class="summary-row--hover">
+                  <text class="summary-row-label">库存总额</text>
+                  <view class="summary-row-right">
+                    <text class="summary-row-value summary-row-value--purchase">{{restStockTotal}}元</text>
+                    <image src="/images/arrow-right-3.png" class="summary-row-arrow" mode="aspectFit"></image>
+                  </view>
+                </view>
               </view>
             </view>
-            <view class="flex-column font-md">
-              <view class="font-sl text-secondary">平均</view>
-              <view class="font-lg font-bold" style="color: #05c0a7;">{{costPerDay}}元/天</view>
+
+            <view class="summary-col-divider"></view>
+
+            <!-- 支出 -->
+            <view class="summary-col summary-col--cost">
+              <view class="summary-col-header">
+                <view class="summary-col-icon summary-col-icon--cost">
+                  <image src="../../../../images/qiandaizi.png" class="summary-col-icon-img" mode="aspectFit"></image>
+                </view>
+                <text class="summary-col-title summary-col-title--cost">支出</text>
+              </view>
+              <view class="summary-col-rows">
+                <view class="summary-row summary-row--avg">
+                  <text class="summary-row-label">平均支出</text>
+                  <text class="summary-row-value summary-row-value--cost">{{costPerDay}}元/天</text>
+                </view>
+                <view class="summary-row summary-row--tap" bindtap="toSummaryCost" data-kind="sales" hover-class="summary-row--hover">
+                  <text class="summary-row-label">制作总额</text>
+                  <view class="summary-row-right">
+                    <text class="summary-row-value summary-row-value--cost">{{saleCostTotal}}元</text>
+                    <image src="/images/arrow-right-3.png" class="summary-row-arrow" mode="aspectFit"></image>
+                  </view>
+                </view>
+                <view class="summary-row summary-row--tap" bindtap="toSummaryCost" data-kind="loss" hover-class="summary-row--hover">
+                  <text class="summary-row-label">损耗废弃总额</text>
+                  <view class="summary-row-right">
+                    <text class="summary-row-value summary-row-value--cost">{{lossWasteTotal}}元</text>
+                    <image src="/images/arrow-right-3.png" class="summary-row-arrow" mode="aspectFit"></image>
+                  </view>
+                </view>
+                <view class="summary-row summary-row--tap" bindtap="toSummaryCost" data-kind="return" hover-class="summary-row--hover">
+                  <text class="summary-row-label">退货总额</text>
+                  <view class="summary-row-right">
+                    <text class="summary-row-value summary-row-value--return">{{returnCostTotal}}元</text>
+                    <image src="/images/arrow-right-3.png" class="summary-row-arrow" mode="aspectFit"></image>
+                  </view>
+                </view>
+                <view class="summary-row summary-row--tap summary-row--last" bindtap="toSummaryCost" data-kind="employeeMeal" hover-class="summary-row--hover">
+                  <text class="summary-row-label">员工餐</text>
+                  <view class="summary-row-right">
+                    <text class="summary-row-value summary-row-value--meal">{{employeeMealCostTotal}}元</text>
+                    <image src="/images/arrow-right-3.png" class="summary-row-arrow" mode="aspectFit"></image>
+                  </view>
+                </view>
+              </view>
             </view>
           </view>
-
         </view>
 
-        <view class="flex-column" style="height: 400rpx; margin-top: 20rpx;">
-          <ec-canvas id="dailyChart" canvas-id="dailyChart" ec="{{ ecDaily }}" style="width: 100%; height: 100%;"></ec-canvas>
+        <view class="summary-chart-wrap">
+          <ec-canvas id="dailyChart" canvas-id="dailyChart" ec="{{ ecDaily }}" class="summary-chart"></ec-canvas>
         </view>
-
       </view>
 
 
@@ -105,80 +159,88 @@
           </view>
 
           <!-- 主要内容：左右两列 -->
-          <view class="flex-row-between" style="flex: 1; gap: 20rpx;" wx:if="{{item.allStock > 0 || item.costTotal  > 0}}">
+          <view class="daily-cards-row" wx:if="{{item.allStock > 0 || item.costTotal  > 0}}">
 
             <!-- 左侧：采购列 -->
-            <view class="flex-column" style="flex: 1;">
-              <!-- 采购卡片 -->
-              <view class="flex-column p-20" style="background-color: white; border-radius: 8rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);" bindtap="toPurGoodsFenxi" data-item="{{item}}"  hover-class="hover">
-               
-                <!-- 图标 + 标题 -->
-                <view class="flex-row align-center mb-15">
-                  <image src="../../../../images/gouwuche.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                  <text class="font-md font-bold" >采购</text>
-                </view>
-
-                <!-- 采购数据 -->
-                <view class="flex-column">
-                  <view class="flex-row-between mb-8">
-                    <text class="font-sl text-secondary">自采:</text>
-                    <text class="font-sl">{{item.zicai}}元</text>
+            <view class="daily-col">
+              <view class="daily-purchase-card" bindtap="toPurGoodsFenxi" data-item="{{item}}" hover-class="hover">
+                <view class="daily-purchase-body">
+                  <view class="daily-purchase-section">
+                    <view class="daily-purchase-header">
+                      <image src="../../../../images/gouwuche.png" class="daily-purchase-icon" mode="aspectFit"></image>
+                      <text class="daily-purchase-title">采购</text>
+                    </view>
+                    <view class="daily-purchase-rows">
+                      <view class="daily-purchase-row">
+                        <text class="daily-purchase-label">自采:</text>
+                        <text class="daily-purchase-value">{{item.zicai}}元</text>
+                      </view>
+                      <view class="daily-purchase-row">
+                        <text class="daily-purchase-label">订货:</text>
+                        <text class="daily-purchase-value">{{item.dinghuo}}元</text>
+                      </view>
+                    </view>
                   </view>
-                  <view class="flex-row-between mb-8">
-                    <text class="font-sl text-secondary">订货:</text>
-                    <text class="font-sl">{{item.dinghuo}}元</text>
-                  </view>
-                </view>
 
-                <!-- 图标 + 标题 -->
-                <view class="flex-row align-center mb-15">
-                  <image src="../../../../images/kucun.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                  <text class="font-md font-bold" >库存</text>
-                </view>
-
-                <!-- 库存数据 -->
-                <view class="flex-column">
-                  <view class="flex-row-between mb-8">
-                    <text class="font-sl text-secondary">库存:</text>
-                    <text class="font-sl">{{item.restStock}}元</text>
+                  <view class="daily-purchase-section">
+                    <view class="daily-purchase-header">
+                      <image src="../../../../images/kucun.png" class="daily-purchase-icon" mode="aspectFit"></image>
+                      <text class="daily-purchase-title">库存</text>
+                    </view>
+                    <view class="daily-purchase-rows">
+                      <view class="daily-purchase-row">
+                        <text class="daily-purchase-label">库存:</text>
+                        <text class="daily-purchase-value">{{item.restStock}}元</text>
+                      </view>
+                    </view>
                   </view>
                 </view>
-
               </view>
             </view>
 
             <!-- 右侧：支出列 -->
-            <view class="flex-column" style="flex: 1;">
-              <!-- 支出卡片 -->
-              <view class="flex-column p-20" style="background-color: white; border-radius: 8rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);" bind:tap="toFenxiDate" data-index="{{index}}" hover-class="hover">
-                <!-- 图标 + 标题 -->
-                <view class="flex-row align-center mb-15">
-                  <image src="../../../../images/qiandaizi.png" style="width: 32rpx; height: 32rpx; margin-right: 8rpx;"></image>
-                  <text class="font-md font-bold" >支出</text>
+            <view class="flex-column daily-col">
+              <view class="daily-cost-card" bind:tap="toFenxiDate" data-index="{{index}}" hover-class="hover">
+                <view class="daily-cost-header">
+                  <view class="daily-cost-header-icon">
+                    <view class="daily-cost-icon-wrap">
+                      <image src="../../../../images/qiandaizi.png" class="daily-cost-icon-img" mode="aspectFit"></image>
+                    </view>
+                    <view class="daily-cost-underline"></view>
+                  </view>
+                  <text class="daily-cost-title">支出</text>
                 </view>
 
-                <!-- 支出数据 -->
-                <view class="flex-column">
-                  <view class="flex-row-between mb-8">
-                    <text class="font-sl text-secondary">销售:</text>
-                    <text class="font-sl" >{{item.saleCostTotal}}元</text>
+                <view class="daily-cost-grid">
+                  <view class="daily-cost-grid-row">
+                    <view class="daily-cost-cell">
+                      <text class="daily-cost-cell-label">销售</text>
+                      <text class="daily-cost-cell-value">{{item.saleCostTotal}}元</text>
+                    </view>
+                    <view class="daily-cost-cell">
+                      <text class="daily-cost-cell-label">损耗</text>
+                      <text class="daily-cost-cell-value">{{item.lossCostTotal}}元</text>
+                    </view>
+                    <view class="daily-cost-cell daily-cost-cell--last">
+                      <text class="daily-cost-cell-label">废弃</text>
+                      <text class="daily-cost-cell-value">{{item.wasteTotal}}元</text>
+                    </view>
                   </view>
-                  <view class="flex-row-between mb-8">
-                    <text class="font-sl text-secondary">损耗:</text>
-                    <text class="font-sl">{{item.lossCostTotal}}元</text>
+                  <view class="daily-cost-grid-row">
+                    <view class="daily-cost-cell daily-cost-cell--half">
+                      <text class="daily-cost-cell-label">退货</text>
+                      <text class="daily-cost-cell-value">{{item.returnCostTotal}}元</text>
+                    </view>
+                    <view class="daily-cost-cell daily-cost-cell--half daily-cost-cell--last">
+                      <text class="daily-cost-cell-label">员工餐</text>
+                      <text class="daily-cost-cell-value">{{item.employeeMealCostTotal}}元</text>
+                    </view>
                   </view>
-                  <view class="flex-row-between mb-8">
-                    <text class="font-sl text-secondary">废弃:</text>
-                    <text class="font-sl">{{item.wasteTotal}}元</text>
-                  </view>
-                  <view class="flex-row-between mb-8">
-                    <text class="font-sl text-secondary">员工餐:</text>
-                    <text class="font-sl">{{item.employeeMealCostTotal}}元</text>
-                  </view>
-                  <view class="flex-row-between">
-                    <text class="font-md font-bold">合计:</text>
-                    <text class="font-md font-bold" >{{item.costTotal}}元</text>
-                  </view>
+                </view>
+
+                <view class="daily-cost-footer">
+                  <text class="daily-cost-footer-label">合计:</text>
+                  <text class="daily-cost-footer-value">{{item.costTotal}}元</text>
                 </view>
               </view>
             </view>

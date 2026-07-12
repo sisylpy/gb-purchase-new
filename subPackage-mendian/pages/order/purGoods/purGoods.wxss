@@ -53,10 +53,6 @@
   margin-right: 12rpx;
 }
 
-.goods-standard {
-  font-size: 28rpx;
-  color: #999;
-}
 
 .goods-detail {
   font-size: 28rpx;

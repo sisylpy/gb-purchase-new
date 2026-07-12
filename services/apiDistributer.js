@@ -10,18 +10,6 @@ var requestUtil = require('../lib/request');
 // ========================
 
 /**
- * 获取群用户列表
- * POST gbdistributerpurchasegoods/getDepUsersByFatherIdGb
- */
-var getDepUsersByFatherIdGb = function (data) {
-  return requestUtil.post('gbdepartment/getDepUsersByFatherIdGb', {
-    startDate: data.startDate,
-    stopDate: data.stopDate,
-    depId: data.depId
-  }, { useUrlParams: true });
-};
-
-/**
  * 删除用户
  * GET gbdepartmentuser/deleteDepUser/{id}
  */
@@ -62,25 +50,6 @@ var jjPurchaserUserUpdateWithFile = function (filePathList, userName, userId) {
       }
     });
   });
-};
-
-/**
- * 获取采购商品信息（含价格）
- * POST gbdistributerpurchasegoods/purUserGetPurGoodsInfo
- */
-var purUserGetPurGoodsInfo = function (data) {
-  return requestUtil.post('gbdistributerpurchasegoods/purUserGetPurGoodsInfo', {
-    purUserId: data.purUserId,
-    disGoodsId: data.disGoodsId,
-  }, { useUrlParams: true });
-};
-
-/**
- * 完成采购商品入库
- * POST gbdistributerpurchasegoods/finishPurGoodsToStock
- */
-var finishPurGoodsToStock = function (data) {
-  return requestUtil.post('gbdistributerpurchasegoods/finishPurGoodsToStock', data);
 };
 
 /**
@@ -150,12 +119,6 @@ var getGbCostGoodsStatistics = function (data) {
   }, { useUrlParams: true });
 };
 
-// ===== supplierOrder 页面需要的 API =====
-
-var depGetAllSupplier = function (data) {
-  return requestUtil.get('nxjrdhsupplier/depGetAllSupplier/' + data);
-};
-
 // ===== settlePageGb 页面需要的 API =====
 
 /**
@@ -183,18 +146,14 @@ var getDisPurchaseGoodsBatchDetail = function (id) {
 };
 
 module.exports = {
-  getDepUsersByFatherIdGb: getDepUsersByFatherIdGb,
   deleteDepUser: deleteDepUser,
   updateJjPurchaserUser: updateJjPurchaserUser,
   jjPurchaserUserUpdateWithFile: jjPurchaserUserUpdateWithFile,
-  purUserGetPurGoodsInfo: purUserGetPurGoodsInfo,
-  finishPurGoodsToStock: finishPurGoodsToStock,
   getPurUserDate: getPurUserDate,
   getPurchaseUserGoods: getPurchaseUserGoods,
   getGbPurGoodsStatisticsForDis: getGbPurGoodsStatisticsForDis,
   getGbPurGoodsDetailList: getGbPurGoodsDetailList,
   getGbCostGoodsStatistics: getGbCostGoodsStatistics,
-  depGetAllSupplier: depGetAllSupplier,
   // settlePageGb 需要的 API
   disGetGbSupplierBillsWithStatus: disGetGbSupplierBillsWithStatus,
   // myPurchaseDetail 需要的 API

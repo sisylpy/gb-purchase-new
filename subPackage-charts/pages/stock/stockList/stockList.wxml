@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 <view class="flex flex-column">
@@ -31,7 +31,7 @@
 
         <view class="flex-row-between" catch:tap="showList" data-index="{{stockIndex}}">
           <view class="flex-row-default">
-            <image src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image" />
+            <image src="{{(url + goods.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="goods-image" />
             <view class="goods-details">
               <text class="flex-row font-sl">第{{stockIndex + 1}}/{{oneDay.arr.length}}个</text>
               <text class="goods-name">{{goods.gbDgGoodsName}}</text>

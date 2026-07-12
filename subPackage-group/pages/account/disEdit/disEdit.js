@@ -12,8 +12,6 @@ Page({
 
 
   onShow(){
-
-
     // 推荐直接用新API
     let windowInfo = wx.getWindowInfo();
     let globalData = getApp().globalData;
@@ -24,13 +22,35 @@ Page({
       statusBarHeight: globalData.statusBarHeight * globalData.rpxR,
     });
 
-    getDisInfo(this.data.disInfo.gbDistributerId).then(res =>{
-      if(res.result.code == 0){
-        this.setData({
-          disInfo: res.result.data,
-        })
+    var needRefresh = wx.getStorageSync('needRefreshDisPoints');
+    this._refreshDisInfo(needRefresh ? 4 : 0);
+    if (needRefresh) {
+      wx.removeStorageSync('needRefreshDisPoints');
+    }
+  },
+
+  _refreshDisInfo(retryLeft) {
+    var disInfo = this.data.disInfo || wx.getStorageSync('disInfo');
+    var disId = disInfo && disInfo.gbDistributerId;
+    if (!disId) {
+      return;
+    }
+    var prevQty = disInfo.gbDistributerBuyQuantity;
+    getDisInfo(disId).then(res => {
+      if (res.result.code != 0) {
+        return;
       }
-    })
+      this.setData({
+        disInfo: res.result.data,
+      });
+      wx.setStorageSync('disInfo', res.result.data);
+      if (retryLeft > 0
+          && res.result.data.gbDistributerBuyQuantity === prevQty) {
+        setTimeout(() => {
+          this._refreshDisInfo(retryLeft - 1);
+        }, 1500);
+      }
+    });
   },
   
 
@@ -395,7 +415,7 @@ getName(e){
       success: (res) => {
         if (res.confirm) {
           // wx.navigateTo({ url: '/pages/settings/index' });
-          // wx.openSetting(); // 打开微信设置页
+          // wx.openSetting(); // 打开微信设置页subPackage-group/pages/account/disEdit/disEdit
 
         }
       },

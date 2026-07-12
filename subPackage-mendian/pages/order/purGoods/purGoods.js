@@ -2,6 +2,7 @@ var globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
 var purGoodsApi = require('../../../../services/purGoodsApi.js');
 var priceUtil = require('../../../../lib/purchasePriceUtil.js');
+var orderGoodsScale = require('../../../../lib/orderGoodsScale.js');
 
 /** 用户选中的待采订单：兼容接口返回 true / 1 */
 function isNoticeSelected(order) {
@@ -20,6 +21,19 @@ function logPurInput(msg, payload) {
   }
 }
 
+function parseHistoryPrices(raw) {
+  if (raw != null && typeof raw === "object") {
+    return {
+      base: priceUtil.normalizePurchasePrice(raw.buyPrice),
+      scale: priceUtil.normalizePurchasePrice(raw.buyScalePrice),
+    };
+  }
+  return {
+    base: priceUtil.normalizePurchasePrice(raw),
+    scale: "",
+  };
+}
+
 Page({
   data: {
     orderListCount: -1,
@@ -28,6 +42,7 @@ Page({
     foucusWeight: false,
     /** 外包装：走 inputOrder 大包装单价 + gbDoScaleWeight 录入 */
     scaleInput: false,
+    cartonInput: false,
     show: false,
     item: null,
     fullItem: null,
@@ -170,88 +185,89 @@ Page({
     var orderListCount = orderArr.length;
     logPurInput('orderArr 用于弹层/询价', { length: orderArr.length, orderListCount: orderListCount });
     var goodsStandard = displayItem.gbDistributerGoodsEntity ? displayItem.gbDistributerGoodsEntity.gbDgGoodsStandardname : "";
-
-    function rowIsOuterPack(row) {
-      var scale = row.gbDoDsStandardScale;
-      var scaleNum = Number(scale);
-      return scale != null && scale !== "" && String(scale) !== "-1" && !isNaN(scaleNum) && scaleNum > 0 && row.gbDoStandard && row.gbDoStandard !== goodsStandard;
-    }
-
-    var needScalePack = orderArr.length > 0 && orderArr.every(rowIsOuterPack);
-    var scalePackMeta = null;
-    if (needScalePack) {
-      var r0 = orderArr[0];
-      scalePackMeta = {
-        scale: Number(r0.gbDoDsStandardScale),
-        standard: r0.gbDoStandard,
-      };
-    }
-    logPurInput('分支', { needScalePack: needScalePack, goodsStandard: goodsStandard, scalePackMeta: scalePackMeta });
+    var needScalePack = orderGoodsScale.isScalePurGoods(displayItem);
+    logPurInput('分支', { needScalePack: needScalePack, goodsStandard: goodsStandard });
 
     var data = {
-      purUserId: this.data.userId,
       disGoodsId: fullItem.gbDpgDisGoodsId,
+      purDepId: this.data.depId,
     };
 
     var that = this;
     purGoodsApi.purUserGetPurGoodsInfo(data).then(function (res) {
       logPurInput('purUserGetPurGoodsInfo 返回', { code: res.result && res.result.code, data: res.result && res.result.data });
-      var basePriceStr = priceUtil.normalizePurchasePrice(res.result.data);
-      var hasHistoryPrice = priceUtil.hasValidPurchasePrice(basePriceStr);
+      var prices = parseHistoryPrices(res.result.data);
+      var basePriceStr = prices.base;
+      var scalePriceFromHistory = prices.scale;
+      var hasHistoryPrice =
+        priceUtil.hasValidPurchasePrice(basePriceStr) ||
+        priceUtil.hasValidPurchasePrice(scalePriceFromHistory);
       logPurInput('purUserGetPurGoodsInfo 解析单价', {
         raw: res.result.data,
-        normalized: basePriceStr,
+        basePriceStr: basePriceStr,
+        scalePriceFromHistory: scalePriceFromHistory,
         hasHistoryPrice: hasHistoryPrice,
       });
 
       if (res.result.code == 0) {
-        if (needScalePack && scalePackMeta) {
-          var sn = scalePackMeta.scale;
-          displayItem.gbDpgBuyScale = String(sn);
-          displayItem.gbDpgStandard = scalePackMeta.standard;
-          displayItem.gbDpgBuyPrice = basePriceStr;
-          displayItem.gbDpgBuyScalePrice = hasHistoryPrice
-            ? (Number(basePriceStr) * sn).toFixed(2)
-            : "";
+        if (needScalePack) {
+          var factor = orderGoodsScale.setupScalePackFields(displayItem, orderArr);
+          var cartonInput = orderGoodsScale.isCartonOrderInput(displayItem, orderArr);
+          var scalePriceStr = "";
+          if (cartonInput) {
+            if (priceUtil.hasValidPurchasePrice(scalePriceFromHistory)) {
+              scalePriceStr = scalePriceFromHistory;
+            } else if (priceUtil.hasValidPurchasePrice(basePriceStr) && factor > 0) {
+              scalePriceStr = orderGoodsScale.formatScalePriceFromBasePrice(basePriceStr, factor);
+            }
+            displayItem.gbDpgBuyScalePrice = scalePriceStr;
+            displayItem.gbDpgBuyPrice = priceUtil.hasValidPurchasePrice(basePriceStr) ? basePriceStr : "";
+          } else {
+            displayItem.gbDpgBuyScalePrice = "";
+            displayItem.gbDpgBuyPrice = priceUtil.hasValidPurchasePrice(basePriceStr) ? basePriceStr : "";
+          }
 
           var arrList = [];
           var buySubtotal = 0;
           var scaleQtyTotal = 0;
+          var baseQtyTotal = 0;
           for (var i = 0; i < orderArr.length; i++) {
             var order = orderArr[i];
-            order.gbDoPrice = basePriceStr;
-            order.gbDoScalePrice = displayItem.gbDpgBuyScalePrice;
-            order.gbDoScaleWeight = String(order.gbDoQuantity);
-            order.gbDoWeight = String(Number(order.gbDoQuantity) * sn);
-            if (hasHistoryPrice) {
-              var subOne = (
-                Number(order.gbDoScaleWeight) * Number(order.gbDoScalePrice)
-              ).toFixed(1);
-              order.gbDoSubtotal = subOne;
-              buySubtotal = Number(buySubtotal) + Number(subOne);
+            if (cartonInput && priceUtil.hasValidPurchasePrice(scalePriceStr)) {
+              orderGoodsScale.applyScalePriceToOrderFields(order, displayItem, scalePriceStr);
+            } else if (!cartonInput && priceUtil.hasValidPurchasePrice(basePriceStr)) {
+              order.gbDoPrice = basePriceStr;
+              order.gbDoSubtotal = "";
             } else {
               order.gbDoSubtotal = "";
             }
             arrList.push(order);
-            scaleQtyTotal = Number(scaleQtyTotal) + Number(order.gbDoScaleWeight);
+            if (orderGoodsScale.isPositive(order.gbDoSubtotal)) {
+              buySubtotal = Number(buySubtotal) + Number(order.gbDoSubtotal);
+            }
+            scaleQtyTotal = Number(scaleQtyTotal) + (Number(order.gbDoScaleWeight) || 0);
+            baseQtyTotal = Number(baseQtyTotal) + (Number(order.gbDoWeight) || 0);
           }
           displayItem.gbDepartmentOrdersEntities = arrList;
           if (displayItem.gbDistributerGoodsEntity) {
             displayItem.gbDistributerGoodsEntity.gbDepartmentOrdersEntities = arrList;
           }
-          displayItem.gbDpgBuyScaleQuantity = String(scaleQtyTotal);
-          displayItem.gbDpgBuySubtotal = hasHistoryPrice ? buySubtotal.toFixed(1) : "";
-          displayItem.gbDpgBuyQuantity = String(Number(scaleQtyTotal) * sn);
+          displayItem.gbDpgBuyScaleQuantity = scaleQtyTotal ? String(scaleQtyTotal) : "";
+          displayItem.gbDpgBuyQuantity = baseQtyTotal
+            ? String(baseQtyTotal)
+            : (scaleQtyTotal && factor > 0 ? String(Number(scaleQtyTotal) * factor) : "");
+          displayItem.gbDpgBuySubtotal = buySubtotal > 0 ? buySubtotal.toFixed(1) : "";
 
           that.setData({
             item: displayItem,
             fullItem: fullItem,
             orderListCount: arrList.length,
             show: true,
-            scaleInput: true,
+            scaleInput: false,
+            cartonInput: cartonInput,
             foucusWeight: hasHistoryPrice,
             foucusPrice: !hasHistoryPrice,
-            canSave: hasHistoryPrice,
+            canSave: buySubtotal > 0,
             windowHeight: that.data.windowHeight,
           });
         } else {
@@ -267,25 +283,26 @@ Page({
             var dpgStd = displayItem.gbDpgStandard;
             for (var j = 0; j < orderArr.length; j++) {
               var row = orderArr[j];
-              var scaleNum = Number(row.gbDoDsStandardScale);
-              var isOuterPack = rowIsOuterPack(row);
+              var isScaleOrder = orderGoodsScale.hasOrderStandardScale(row);
               var matchBaseUnit = row.gbDoStandard == goodsStandard;
               var matchPurchaseUnit =
                 dpgStd != null &&
                 dpgStd !== "" &&
                 String(row.gbDoStandard) === String(dpgStd);
-              if (matchBaseUnit || isOuterPack || matchPurchaseUnit) {
+              if (matchBaseUnit || isScaleOrder || matchPurchaseUnit) {
                 var ord = row;
-                ord.gbDoPrice = basePriceStr;
-                ord.gbDoWeight = ord.gbDoQuantity;
-                if (hasHistoryPrice) {
-                  ord.gbDoSubtotal = isOuterPack
-                    ? (
-                        Number(ord.gbDoQuantity) *
-                        Number(basePriceStr) *
-                        scaleNum
-                      ).toFixed(1)
-                    : (Number(ord.gbDoQuantity) * Number(basePriceStr)).toFixed(1);
+                if (hasHistoryPrice && isScaleOrder) {
+                  var orderScalePrice = orderGoodsScale.formatScalePriceFromBasePrice(
+                    basePriceStr,
+                    row.gbDoDsStandardScale
+                  );
+                  orderGoodsScale.applyScalePriceToOrderFields(ord, displayItem, orderScalePrice);
+                  buySubtotal = Number(buySubtotal) + Number(ord.gbDoSubtotal || 0);
+                  readyCount += 1;
+                } else if (hasHistoryPrice) {
+                  ord.gbDoPrice = basePriceStr;
+                  ord.gbDoWeight = ord.gbDoQuantity;
+                  ord.gbDoSubtotal = (Number(ord.gbDoQuantity) * Number(basePriceStr)).toFixed(1);
                   buySubtotal = Number(buySubtotal) + Number(ord.gbDoSubtotal);
                   readyCount += 1;
                 } else {
@@ -310,6 +327,7 @@ Page({
             orderListCount: cnt2,
             show: true,
             scaleInput: false,
+            cartonInput: false,
             foucusWeight: hasHistoryPrice,
             foucusPrice: !hasHistoryPrice,
             canSave: hasHistoryPrice && readyCount > 0,
@@ -317,9 +335,8 @@ Page({
           });
         }
       } else {
-        if (needScalePack && scalePackMeta) {
-          displayItem.gbDpgBuyScale = String(scalePackMeta.scale);
-          displayItem.gbDpgStandard = scalePackMeta.standard;
+        if (needScalePack) {
+          orderGoodsScale.setupScalePackFields(displayItem, orderArr);
         } else {
           displayItem.gbDpgBuyScale = 0;
           displayItem.gbDpgBuyScaleQuantity = "";
@@ -332,7 +349,8 @@ Page({
           fullItem: fullItem,
           orderListCount: orderListCount,
           show: true,
-          scaleInput: !!(needScalePack && scalePackMeta),
+          scaleInput: false,
+          cartonInput: false,
           foucusWeight: false,
           foucusPrice: true,
           canSave: false,
@@ -423,6 +441,7 @@ Page({
       item: null,
       orderListCount: -1,
       scaleInput: false,
+      cartonInput: false,
       foucusWeight: false,
       foucusPrice: false,
     });

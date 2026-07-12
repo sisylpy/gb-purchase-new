@@ -440,7 +440,7 @@ Page({
 
   toSupplier(){
     wx.navigateTo({
-      url: '/subPackage-supplier/pages/supplier/index/index',
+      url: '/subPackage-mendian/pages/supplier/index/index',
     })
   },
 

@@ -1,10 +1,29 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="../../../../utils/orderGoodsFmt.wxs" module="fmt" />
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+<wxs module="purFmt">
+  function isReturn(pur) {
+    return pur && pur.gbDpgPurchaseType == 9;
+  }
+  function goodsHasOnlyReturn(goods) {
+    if (!goods || !goods.wastePurGoodsEntities || goods.wastePurGoodsEntities.length === 0) {
+      return false;
+    }
+    for (var i = 0; i < goods.wastePurGoodsEntities.length; i++) {
+      if (goods.wastePurGoodsEntities[i].gbDpgPurchaseType != 9) {
+        return false;
+      }
+    }
+    return true;
+  }
+  module.exports.isReturn = isReturn;
+  module.exports.goodsHasOnlyReturn = goodsHasOnlyReturn;
+</wxs>
 
 
 <view class="flex flex-column">
 
-  <back-navbar title="{{date}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="{{purName}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
   <!-- 商品详情卡片 -->
   <view class="flex-column  bg-white">
@@ -20,26 +39,14 @@
       
       <!-- 订单信息内容 -->
       <view class="order-info-content">
-        <!-- 供货商信息 -->
-        <view class="order-info-item">
-          <view class="order-info-label">
-            <text class="label-text">采购员</text>
-          </view>
-          <view class="order-info-value">
-            <view class="supplier-info">
-              <text class="supplier-name">{{purUserItem.gbDuWxNickName}}</text>
-              <image src="{{url + purUserItem.gbDuWxAvartraUrl}}" mode="aspectFill" class="supplier-avatar" />
-            </view>
-          </view>
-        </view>
-
+       
         <!-- 订货方式 -->
         <view class="order-info-item">
           <view class="order-info-label">
             <text class="label-text">采购方式</text>
           </view>
           <view class="order-info-value">
-            <text class="bill-type-text tag-return">自采</text>
+            <text class="bill-type-text">自采</text>
           </view>
         </view>
 
@@ -72,7 +79,7 @@
       <!-- 商品信息头部 -->
       <view class="flex-row-between" bind:tap="showList" data-index="{{index}}">
         <view class="flex-row-default mb-20">
-          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-image mr-20" />
+          <image bindtap="showDialogBtn" data-item="{{goods}}" src="{{(url + goods.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="goods-image mr-20" />
           <view class="flex-column">
             <text class="font-sm">第{{index + 1}}名/共{{arr.length}}个</text>
             <view class="flex-row mb-10">
@@ -89,9 +96,9 @@
 
         <!-- 右侧总计和按钮 -->
         <view class="goods-price-section">
-          <view class="price-container">
-            <text class="price-label">采购</text>
-            <text class="price-value">¥{{goods.gbDgSellingPrice}}</text>
+          <view class="price-container {{purFmt.goodsHasOnlyReturn(goods) ? 'price-container-return' : ''}}">
+            <text class="price-label {{purFmt.goodsHasOnlyReturn(goods) ? 'return-text' : ''}}">{{purFmt.goodsHasOnlyReturn(goods) ? '退货' : '采购'}}</text>
+            <text class="price-value {{purFmt.goodsHasOnlyReturn(goods) ? 'return-value' : ''}}">¥{{goods.gbDgSellingPrice}}</text>
           </view>
           <view class="arrow-container {{goods.showPurchaseList ? 'expanded' : 'collapsed'}}">
             <image src="/images/arrow-right-3.png" mode="aspectFill" class="arrow-icon" style="width: 24rpx; height: 24rpx;" />
@@ -104,14 +111,17 @@
 
         <view class="flex-column " wx:for="{{goods.wastePurGoodsEntities}}" wx:for-item="pur" wx:for-index="purIndex" catch:tap="showDetail" data-goods-index="{{index}}" data-pur-index="{{purIndex}}">
 
-          <!-- 采购批次默认显示 - 蓝色主题 -->
-          <view class="flex-row purchase-row {{pur.expanded ? 'purchase-row-active' : ''}}">
+          <!-- 采购/退货批次默认显示 -->
+          <view class="flex-row purchase-row {{pur.expanded ? 'purchase-row-active' : ''}} {{purFmt.isReturn(pur) ? 'purchase-row-return' : ''}} {{pur.expanded && purFmt.isReturn(pur) ? 'purchase-row-return-active' : ''}}">
 
             <!-- 左侧时间 -->
             <view class="flex-row mr-20">
               <view class="flex-column">
                 <view class="font-md flex-row">{{tool.transferDateString(pur.gbDpgStockFinishDate)}}</view>
-                <block wx:if="{{pur.purchaseDepartmentUser !== null}}">
+                <block wx:if="{{purFmt.isReturn(pur)}}">
+                  <text class="purchase-type tag-return">退货</text>
+                </block>
+                <block wx:elif="{{pur.purchaseDepartmentUser !== null}}">
                   <text class="purchase-type">自采</text>
                 </block>
                 <block wx:else="">
@@ -120,11 +130,11 @@
               </view>
             </view>
 
-            <!-- 中间采购信息 -->
+            <!-- 中间采购/退货信息 -->
             <view class="flex-column" style="flex: 1;">
               <view class="flex-row-between">
-                <text class="font-bold">{{pur.gbDpgBuyQuantity}}{{goods.gbDgGoodsStandardname}}</text>
-                <text class="purchase-info-value-amount mr-20">{{pur.gbDpgBuySubtotal}}元</text>
+                <text class="font-bold {{purFmt.isReturn(pur) ? 'return-text' : ''}}">{{fmt.purRowOutQty(pur, goods)}}</text>
+                <text class="purchase-info-value-amount mr-20 {{purFmt.isReturn(pur) ? 'return-value' : ''}}">{{pur.gbDpgBuySubtotal}}元</text>
               </view>
               <view class="flex-row-between mt-5">
                 <text class="purchase-date">{{pur.gbDpgBuyPrice}}元/{{goods.gbDgGoodsStandardname}}</text>
@@ -144,8 +154,8 @@
 
           </view>
 
-          <!-- 采购详细信息 - 蓝色主题 -->
-          <view wx:if="{{pur.expanded}}" class="purchase-info-card expandable-content expanded">
+          <!-- 采购/退货详细信息 -->
+          <view wx:if="{{pur.expanded}}" class="purchase-info-card expandable-content expanded {{purFmt.isReturn(pur) ? 'purchase-info-card-return' : ''}}">
 
             <!-- 库存详细信息 -->
             <view class="purchase-detail-section" wx:for="{{pur.gbDepartmentGoodsStockEntities}}" wx:for-item="stock">

@@ -703,7 +703,7 @@ Page({
 
   toSupplier() {
     wx.navigateTo({
-      url: '/subPackage-supplier/pages/supplier/appointSupplierList/appointSupplierList',
+      url: '/subPackage-mendian/pages/supplier/appointSupplierList/appointSupplierList',
     })
   },
 

@@ -508,6 +508,62 @@ show-btn {
   background: rgba(0,0,0,0.3);
   z-index: 1000;
 }
+
+.header-bar {
+  height: 120rpx;
+  align-items: center;
+}
+
+.header-type {
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+}
+
+.header-type-icon {
+  margin-left: 12rpx;
+  flex-shrink: 0;
+}
+
+.filter-container {
+  background-color: #f8f9fa;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #e9ecef;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20rpx;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  background-color: #05c0a7;
+  color: white;
+  padding: 10rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 28rpx;
+}
+
+.filter-text {
+  margin-right: 10rpx;
+}
+
+.filter-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.delete-icon {
+  width: 20rpx;
+  height: 20rpx;
+}
 .sticky-bar {
   position: sticky;
   top: 44px; /* 顶部导航栏高度，如有自定义导航栏请调整 */

@@ -1,11 +1,11 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 
 <view class="flex-column height-100 ">
 
   <back-navbar style="height: {{navBarHeight}}rpx;" title="查找商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
-  <view class="flex-column" style="margin-top: {{navBarHeight}}rpx;">
+  <view class="flex-column">
     <view class="flex-column p-20 font-lg bg-white">
 
       <view class="flex-row">
@@ -21,7 +21,7 @@
       <view class="searchInput flex-row">
         <input class="" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" style="width:{{windowWidth - 60}}rpx;line-height: 60rpx; height: 60rpx; " placeholder-class="holderClass" bindinput="getString" confirm-type='search' ></input>
         <view class="" style=" position: absolute; right: 40rpx; z-index: 99999; " bindtap="delSearch" hover-class="hover" wx:if="{{searchString.length > 0}}">
-          <image src="/images/del.png" class="icon pt-20"></image>
+          <image src="/images/del.png" class="icon"></image>
         </view>
       </view>
     </view>
@@ -123,9 +123,7 @@
               </view>
 
               <view class="flex-column center-content" style="margin-top: 100rpx;">
-                <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
-                  <text>添加新商品</text>
-                </view>
+                <view class="add-goods-btn" catchtap="toAddGoods">添加新商品</view>
               </view>
 
             </scroll-view>
@@ -196,9 +194,7 @@
               </view>
 
               <view class="flex-column center-content" style="margin-top: 100rpx;">
-                <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
-                  <text>添加新商品</text>
-                </view>
+                <view class="add-goods-btn" catchtap="toAddGoods">添加新商品</view>
               </view>
 
             </scroll-view>
@@ -213,14 +209,11 @@
 
       <view class="flex-column center-content" style="margin-top: 40rpx;" wx:if="{{disSearchArr.length == 0}}">
         <view class="flex-row gray p-20">
-          <image class="icon margin-right" src="../../images/a-Nothappy.png"></image>
           <text class="">没有搜索到商品</text>
         </view>
 
         <view class="flex-column center-content" style="margin-top: 100rpx;">
-          <view class="" catchtap="toAddGoods" style="width: 200rpx;height: 70rpx;line-height: 70rpx; background-color: #187e6e; border-radius: 20rpx;text-align: center;  padding: 10rpx 20rpx; color: #fff; font-size: 32rpx; font-weight: 500;">
-            <text>添加新商品</text>
-          </view>
+          <view class="add-goods-btn" catchtap="toAddGoods">添加新商品</view>
         </view>
 
       </view>

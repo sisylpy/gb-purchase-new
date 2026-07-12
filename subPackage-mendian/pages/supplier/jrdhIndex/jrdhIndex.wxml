@@ -1,0 +1,120 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+<import src='../../../../template/jrdhFenxi/jrdhFenxi.wxml' />
+
+
+<!-- <view class="flex-row top_bar bg-white border-bottom" style=" padding-top: {{navBarHeight}}rpx; ">
+  <image src="../../../../images/back.png" class="back_icon" bindtap="toBack"></image>
+  <view class="flex-column  ">
+    <text class="top_bar_title_up">账单管理</text>
+  </view>
+</view> -->
+
+
+<back-navbar title="供货商" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+<!--  top -->
+<view class=" flex-row-between pr-10 pl-10 border-bottom-shadow bg-white">
+  <view class="flex-row">
+    <view class="p-20" bindtap="toDatePage">
+      <image src="../../../../images/calender.png" class="icon"></image>
+    </view>
+    <view class="flex-column">
+      <view class="flex-row" wx:if="{{startDate == stopDate}}">
+        <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+      </view>
+      <view class="flex-row" wx:else>
+        <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
+        <text class="p-10">-</text>
+        <view class=" small" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="flex-row p-20" bindtap="toFilter">
+    <image src="{{searchDepIds !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
+  </view>
+</view>
+
+
+
+<block wx:if="{{searchDepList.length == 0}}">
+  <view class="flex-column ">
+
+    <scroll-view scroll-y style="height:{{windowHeight - 200 - navBarHeight}}rpx; margin-top: 10rpx;" wx:if="{{total > 0}}">
+
+      <view class="flex-column">
+
+        <template is="jrdhFenxi" data="{{ outArr:outArr,windowWidth:windowWidth, windowHeight: windowHeight,total:total, navBarHeight:navBarHeight}}"></template>
+      </view>
+    </scroll-view>
+
+
+
+  </view>
+
+</block>
+
+
+<block wx:else="">
+
+  <block wx:if="{{searchDepList.length == 1}}">
+    <view class="flex-row border-bottom">
+      <scroll-view scroll-x="true" show-scrollbar="false" enhanced="true" class="nav_dep" scroll-with-animation="{{true}}" scroll-left="{{leftWidthDep}}" style="width: {{windowWidth - 40 }}rpx; ">
+        <text id="dep_fixed" data-id="-1" class="dep_item  {{itemIndexDep == 0 ? 'is-active' : ''}}" data-index='0' data-total="{{whichTotalDep}}" bindtap="onTab1ClickDep" data-item="all">{{resultDepList[0].gbDepartmentName}}({{resultDepList[0].depCostGoodsTotalString}}元)</text>
+
+      </scroll-view>
+    </view>
+
+    <view class="flex-column ">
+
+      <scroll-view scroll-y style="height:{{windowHeight - 200 - navBarHeight}}rpx; margin-top: 10rpx;" wx:if="{{total > 0}}">
+
+        <view class="flex-column">
+
+          <template is="jrdhFenxi" data="{{ outArr:outArr,windowWidth:windowWidth, windowHeight: windowHeight,total:total, navBarHeight:navBarHeight}}"></template>
+        </view>
+      </scroll-view>
+
+
+
+    </view>
+
+
+
+  </block>
+
+  <block wx:else="">
+
+
+    <view class="flex-row border-bottom">
+      <scroll-view scroll-x="true" show-scrollbar="false" enhanced="true" class="nav_dep" scroll-with-animation="{{true}}" scroll-left="{{leftWidthDep}}" style="width: {{windowWidth - 40 }}rpx; ">
+        <text id="dep_fixed" data-id="-1" class="dep_item  {{itemIndexDep == 0 ? 'is-active' : ''}}" data-index='0' data-total="{{whichTotalDep}}" bindtap="onTab1ClickDep" data-item="all">{{resultDepList.length}}个门店 ({{}}元)</text>
+        <text id="dep_{{dep.gbDepartmentId}}" class="dep_item {{itemIndexDep == depIndex + 1 ? 'is-active' : ''}}" data-index='{{depIndex + 1}}' bindtap="onTab1ClickDep" data-item="{{dep}}" data-id="{{dep.gbDepartmentId}}" wx:for="{{resultDepList}}" wx:for-item="dep" wx:for-index="depIndex" data-name="{{dep.gbDepartmentName}}">{{dep.gbDepartmentName}} ({{dep.depCostGoodsTotalString}}元)</text>
+      </scroll-view>
+    </view>
+
+    <swiper duration="300" bindanimationfinish="animationfinishDep" current="{{itemIndexDep}}" style="height: {{windowHeight - 280 - navBarHeight}}rpx; ">
+
+      <!-- all Dep -->
+      <swiper-item style="height: {{windowHeight - 280 - navBarHeight}}rpx; ">
+
+        <view class="flex-column ">
+
+          <scroll-view scroll-y style="height:{{windowHeight - 200 - navBarHeight}}rpx; margin-top: 10rpx;" >
+            <view class="flex-column" wx:if="{{total > 0}}">
+              <template is="jrdhFenxi" data="{{ outArr:outArr,windowWidth:windowWidth, windowHeight: windowHeight,total:total, navBarHeight:navBarHeight}}"></template>
+            </view>
+            <view class="empty_View center-content">
+        <image class="empty_image_2" src="../../../../images/file-empty.png"></image>
+        <text class="font-lg">暂无账单</text>
+      </view>
+          </scroll-view>
+
+        </view>
+      </swiper-item>
+
+    </swiper>
+
+
+  </block>
+
+</block>

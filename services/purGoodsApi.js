@@ -14,8 +14,8 @@ var purUserGetPurGoodsInfo = function (data) {
   return request.post(
     'gbdistributerpurchasegoods/purUserGetPurGoodsInfo',
     {
-      purUserId: data.purUserId,
-      disGoodsId: data.disGoodsId,
+      disGoodsId: data.disGoodsId,  
+      purDepId: data.purDepId,
     },
     { useUrlParams: true }
   );

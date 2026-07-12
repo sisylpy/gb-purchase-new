@@ -13,7 +13,7 @@
         <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
     </view>
 
-    <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toGroupGoods">
+    <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toGroupGoods" wx:if="{{disInfo.mendianDepartmentList.length > 1}}">
       <view class="flex-row">
         <image src="/images/home/stock0.png" class="icon mr-20" />
         <text>商品管理</text>

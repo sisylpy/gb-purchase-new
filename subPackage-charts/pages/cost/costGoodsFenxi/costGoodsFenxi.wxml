@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 <wxs module="utilLv" src="/wxs/utilizationLevel.wxs" />
 <wxs module="num" src="/wxs/signedNumber.wxs" />
@@ -178,7 +178,7 @@
         <!-- 卡片头：图片 + 名称 + 规格 -->
         <view class="cog-ing-hd flex-row">
           <image class="cog-ing-thumb"
-            src="{{(url + goods.gbDgGoodsFileImg || '/images/logo.jpg')}}" mode="aspectFill" />
+            src="{{(url + goods.gbDgGoodsFileImg || '/images/logo.png')}}" mode="aspectFill" />
           <view class="cog-ing-hd-body flex-1 min-w-0">
             <view class="flex-row-between">
               <text class="cog-ing-name">{{goods.gbDgGoodsName}}</text>

@@ -39,7 +39,13 @@ Page({
       purUserId: options.purUserId,
       startDate: options.startDate,
       stopDate: options.stopDate,
-      dateType: options.dateType
+      dateType: options.dateType,
+      purUser: {
+        itemData: {
+          billTotal: 0,
+          returnPayTotal: 0
+        }
+      }
     });
 
     var purUserItem = wx.getStorageSync('purUserItem');
@@ -66,9 +72,14 @@ Page({
       .then(function (res) {
         if (res.result.code == 0) {
           load.hideLoading();
+          var zicaiArr = res.result.data.zicaiArr || [];
+          for (var i = 0; i < zicaiArr.length; i++) {
+            var day = zicaiArr[i];
+            day.dayTotal = (parseFloat(day.zicai) || 0) + (parseFloat(day.dinghuo) || 0);
+          }
           _this.setData({
             purUser: res.result.data,
-            zicaiArr: res.result.data.zicaiArr
+            zicaiArr: zicaiArr
           });
         } else {
           load.hideLoading();
@@ -89,10 +100,14 @@ Page({
   },
 
   toDetail: function (e) {
-    var day = e.currentTarget.dataset.item.day;
-    var value = e.currentTarget.dataset.item.zicai;
+    var item = e.currentTarget.dataset.item;
+    var day = item.day;
+    var zicai = parseFloat(item.zicai) || 0;
+    var dinghuo = parseFloat(item.dinghuo) || 0;
+    var tuihuo = parseFloat(item.tuihuo) || 0;
+    var value = (zicai + dinghuo - tuihuo).toFixed(2);
     wx.navigateTo({
-      url: '../purUserDayDeatil/purUserDayDeatil?date=' + day + '&value=' + value + '&purUserId=' + this.data.purUserId,
+      url: '../purUserDayDeatil/purUserDayDeatil?date=' + day + '&value=' + value + '&purUserId=' + this.data.purUserId +'&purName=' + this.data.purUser.gbDuWxNickName ,
     });
   },
 

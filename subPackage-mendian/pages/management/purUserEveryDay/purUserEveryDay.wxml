@@ -1,9 +1,9 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 
 <view class="flex flex-column">
 
-  <back-navbar title="{{purUserItem.gbDuWxNickName}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="{{purUser.gbDuWxNickName}}" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
   <!--  top -->
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
@@ -36,16 +36,28 @@
         <text class="stats-value">{{zicaiArr.length}}天</text>
       </view>
     </view>
-    
+
     <view class="stats-divider"></view>
-    
+
     <view class="stats-item">
       <view class="stats-icon purchase-total-icon">
         <image src="/images/money.png" class="stats-icon-image"></image>
       </view>
       <view class="stats-content">
         <text class="stats-label">采购总额</text>
-        <text class="stats-value">{{purUserItem.itemData.billTotal}}元</text>
+        <text class="stats-value">{{purUser.itemData.billTotal}}元</text>
+      </view>
+    </view>
+
+    <view class="stats-divider"></view>
+
+    <view class="stats-item">
+      <view class="stats-icon return-total-icon">
+        <image src="/images/money.png" class="stats-icon-image"></image>
+      </view>
+      <view class="stats-content">
+        <text class="stats-label">退货总额</text>
+        <text class="stats-value return-value">{{purUser.itemData.returnPayTotal}}元</text>
       </view>
     </view>
   </view>
@@ -64,8 +76,15 @@
         <!-- 右侧金额信息和按钮 -->
         <view class="purchase-day-right">
           <view class="purchase-day-info">
-            <text class="purchase-day-amount">{{item.zicai}}元</text>
-            <text class="purchase-day-label">采购总额</text>
+            <block wx:if="{{item.tuihuo > 0 && item.dayTotal == 0}}">
+              <text class="purchase-day-amount">-{{item.tuihuo}}元</text>
+              <text class="purchase-day-label">退货</text>
+            </block>
+            <block wx:else>
+              <text class="purchase-day-amount">{{item.dayTotal}}元</text>
+              <text class="purchase-day-label" wx:if="{{item.tuihuo > 0}}">含退货 {{item.tuihuo}}元</text>
+              <text class="purchase-day-label" wx:else>采购总额</text>
+            </block>
           </view>
           <!-- 进入下一页按钮 -->
           <view class="purchase-day-button">

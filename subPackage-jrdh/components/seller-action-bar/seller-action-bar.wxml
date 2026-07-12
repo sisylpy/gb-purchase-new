@@ -1,0 +1,55 @@
+<view class="seller-action-bar">
+  <view class="seller-action-bar-inner">
+    <!-- 编辑中：拣货 / 录价 / 完成 -->
+    <block wx:if="{{variant === 'tools'}}">
+      <view class="flex-row">
+        <view class="flex-column-center" style="width: {{btnThirdWidth}}rpx;">
+          <view class="btn_container" style="width: {{btnThirdWidth - 20}}rpx; height: 100rpx;">
+            <view class="flex-column-center btn_item_gray" style="width: {{btnThirdWidth - 40}}rpx; height: 80rpx; line-height: 80rpx;" hover-class="numHover" bindtap="onWeight">拣货称重</view>
+          </view>
+        </view>
+        <view class="flex-column-center" style="width: {{btnThirdWidth}}rpx;">
+          <view class="btn_container" style="width: {{btnThirdWidth - 20}}rpx; height: 100rpx;">
+            <view class="flex-column-center btn_item_gray" style="width: {{btnThirdWidth - 40}}rpx; height: 80rpx; line-height: 80rpx;" hover-class="numHover" bindtap="onPrice">录入单价</view>
+          </view>
+        </view>
+        <view class="flex-column-center" style="width: {{btnThirdWidth}}rpx;">
+          <view class="btn_container" style="width: {{btnThirdWidth - 20}}rpx; height: 100rpx;">
+            <view class="save_btn" style="width: {{btnThirdWidth - 40}}rpx; line-height: 80rpx; height: 80rpx;" bindtap="onFinish" hover-class="numHover">完成订货</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 已提交、可修改 -->
+    <block wx:elif="{{variant === 'edit'}}">
+      <view class="flex-row">
+        <view class="flex-column-center" style="width: {{windowWidth - 40}}rpx;">
+          <view class="btn_container" style="width: {{windowWidth - 60}}rpx; height: 100rpx;">
+            <view class="flex-column-center btn_item_gray" style="width: {{windowWidth - 80}}rpx; height: 80rpx; line-height: 80rpx;" hover-class="numHover" bindtap="onEdit">修改订单</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 待采购员确认 -->
+    <block wx:elif="{{variant === 'confirm'}}">
+      <view class="flex-row-between">
+        <view class="flex-row">
+          <view class="btn_container" style="width:{{windowWidth / 4}}rpx; line-height: 100rpx; height: 100rpx;">
+            <view class="btn_item" style="width:{{windowWidth / 4 - 20}}rpx; line-height: 80rpx; height: 80rpx;" bindtap="onEdit" hover-class="numHover">修改订单</view>
+          </view>
+        </view>
+        <view class="flex-row">
+          <view class="flex-row mr-30">
+            <text class="text-danger">({{batch.gbDpbPayType == 0 ? '现金' : '记账'}}支付)</text>
+          </view>
+          <view class="flex-row">
+            <text class="mr-10">总计:</text>
+            <text class="big mainColor">¥{{batch.gbDpbSubtotal}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

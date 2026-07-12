@@ -62,7 +62,7 @@ var cancleTuihuoByPurGoodsId = function (id) {
 // ===== chefOrder 页面需要的 API =====
 
 var updateOrderGbJj = function (data, options) {
-  return requestUtil.post('gbdepartmentorders/updateOrderGbJj', data, options);
+  return requestUtil.post('gbdepartmentorders/updateOrderGbJj', data, Object.assign({ useUrlParams: true }, options));
 };
 
 var updateOrderGbJjSx = function (data) {
@@ -215,17 +215,11 @@ var disGetDepGoodsCataGb = function (data) {
 };
 
 
-var disGetDepGoodsCataGbWithSupplier = function (data) {
-  return requestUtil.post('gbdepartmentdisgoods/disGetDepGoodsCataGbWithSupplier', data, { useUrlParams: true });
-};
 
 var disGetDepGoodsGbPage = function (data) {
   return requestUtil.post('gbdepartmentdisgoods/disGetDepGoodsGbPage', data, { useUrlParams: true });
 };
 
-var disGetDepGoodsGbPageWithSupplier = function (data) {
-  return requestUtil.post('gbdepartmentdisgoods/disGetDepGoodsGbPageWithSupplier', data, { useUrlParams: true });
-};
 
 var getPurchaseGoodsGbWithTabCountWithNxDisId = function (data) {
   return requestUtil.post('gbdistributerpurchasegoods/getPurchaseGoodsGbWithTabCountWithNxDisId', data, { useUrlParams: true });
@@ -235,17 +229,9 @@ var saveGbDisGoodsLinshi = function (data) {
   return requestUtil.post('gbdistributergoods/saveGbDisGoodsLinshi', data, { useUrlParams: true });
 };
 
-var saveLinshiGoodsGb = function (filePathList, goodsName, standard, detail, disId, toDepId, depId) {
-  return requestUtil.uploadFile(
-    'gbdistributergoods/saveLinshiGoodsGb',
-    filePathList[0],
-    'file',
-    { goodsName, standard, detail, disId, toDepId, depId }
-  );
-};
 
 var depPasteSearchGoods = function (data) {
-  return requestUtil.post('gbdepartmentorders/depPasteSearchGoods', data, { useUrlParams: true });
+  return requestUtil.post('gbdepartmentorders/depPasteSearchGoods', data);
 };
 
 var reduceAttachmentSaveWithFileStar = function (filePathList, userName, id, stars, userId) {
@@ -280,7 +266,7 @@ var getDisPurchaseGoodsBatchGb = function (data) {
 };
 
 var supplierDeleteDisPurBatchGbItem = function (data) {
-  return requestUtil.get('gbdistributerpurchasebatch/supplierDeleteDisPurBatchGbItem/' + data);
+  return requestUtil.get('gbdistributerpurchasebatch/deleteDisPurBatchGbItem/' + data);
 };
 
 var supplierInitWeightPurItem = function (data) {
@@ -359,10 +345,26 @@ var sellerDistributerPurchaseBatchsGb = function (data) {
   return requestUtil.post('gbdistributerpurchasebatch/sellerDistributerPurchaseBatchsGb', data, { useUrlParams: true });
 };
 
+var disGetJrdhBills = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/disGetJrdhBills', data, { useUrlParams: true });
+};
+
+var getEveryGoodsJrdh = function (data) {
+  return requestUtil.post('gbdistributerpurchasegoods/getEveryGoodsJrdh', data, { useUrlParams: true });
+};
+
 // ===== gbOrderInput 页面需要的 API =====
 
 var sellerUpdatePurGoods = function (data) {
   return requestUtil.post('gbdistributerpurchasegoods/sellerUpdatePurGoods', data);
+};
+
+/** 收据 OCR：匹配本批次订货并写入单价/数量 */
+var matchPurchaseBatchReceipt = function (data) {
+  return requestUtil.post('ocr/matchPurchaseBatchReceipt', data, {
+    showLoading: true,
+    loadingText: '识别收据中…',
+  });
 };
 
 // ===== settlePageGb 页面需要的 API =====
@@ -381,13 +383,6 @@ var finishPayPurchaseBatchGb = function (data) {
   }, { useUrlParams: true });
 };
 
-/**
- * 集团下门店部门列表（与 mendian 服务同源）
- * GET gbdepartment/getDisDepartmentGbMendianJing/{disId}
- */
-var getDisDepartmentGbMendianJing = function (disId) {
-  return requestUtil.get('gbdepartment/getDisDepartmentGbMendianJing/' + disId);
-};
 
 var saveDepGoodsStockAdjust = function (kind, stock) {
   return requestUtil.post('gbdepartmentdisgoods/saveDepGoodsStockAdjust', {
@@ -397,13 +392,16 @@ var saveDepGoodsStockAdjust = function (kind, stock) {
 };
 
 var getDepGoodsBusiness = function (data) {
+  var params = { depGoodsId: data.depGoodsId };
+  if (data.startDate && data.startDate !== 'undefined' && data.startDate !== 'null') {
+    params.startDate = data.startDate;
+  }
+  if (data.stopDate && data.stopDate !== 'undefined' && data.stopDate !== 'null') {
+    params.stopDate = data.stopDate;
+  }
   return requestUtil.post(
     'gbdepartmentgoodsstock/getDepGoodsBusiness',
-    {
-      depGoodsId: data.depGoodsId,
-      startDate: data.startDate,
-      stopDate: data.stopDate,
-    },
+    params,
     { useUrlParams: true }
   );
 };
@@ -481,12 +479,9 @@ module.exports = {
   queryDepDisGoodsByQuickSearchJj: queryDepDisGoodsByQuickSearchJj,
   depGetDepGoodsGb: depGetDepGoodsGb,
   disGetDepGoodsCataGb: disGetDepGoodsCataGb,
-  disGetDepGoodsCataGbWithSupplier: disGetDepGoodsCataGbWithSupplier,
   disGetDepGoodsGbPage: disGetDepGoodsGbPage,
-  disGetDepGoodsGbPageWithSupplier: disGetDepGoodsGbPageWithSupplier,
   getPurchaseGoodsGbWithTabCountWithNxDisId: getPurchaseGoodsGbWithTabCountWithNxDisId,
   saveGbDisGoodsLinshi: saveGbDisGoodsLinshi,
-  saveLinshiGoodsGb: saveLinshiGoodsGb,
   depPasteSearchGoods: depPasteSearchGoods,
   reduceAttachmentSaveWithFileStar: reduceAttachmentSaveWithFileStar,
   getNxDisGoodsIdsByGreatId: getNxDisGoodsIdsByGreatId,
@@ -513,12 +508,13 @@ module.exports = {
   // jinriListWithLogin 需要的 API
   indexJrdhUserLoginJj: indexJrdhUserLoginJj,
   sellerDistributerPurchaseBatchsGb: sellerDistributerPurchaseBatchsGb,
+  disGetJrdhBills: disGetJrdhBills,
+  getEveryGoodsJrdh: getEveryGoodsJrdh,
   // gbOrderInput 需要的 API
   sellerUpdatePurGoods: sellerUpdatePurGoods,
+  matchPurchaseBatchReceipt: matchPurchaseBatchReceipt,
   // settlePageGb 需要的 API
   finishPayPurchaseBatchGb: finishPayPurchaseBatchGb,
-  /** 集团门店列表（首页切换门店） */
-  getDisDepartmentGbMendianJing: getDisDepartmentGbMendianJing,
   saveDepGoodsStockAdjust: saveDepGoodsStockAdjust,
   getDepGoodsBusiness: getDepGoodsBusiness,
   deleteReduceItem: deleteReduceItem,

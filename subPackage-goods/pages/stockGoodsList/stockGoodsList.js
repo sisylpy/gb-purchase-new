@@ -154,7 +154,8 @@ Page({
     load.showLoading("获取数据中")
     getDisGoodsBusiness(data)
       .then(res => {
-        load.hideLoading();if (res.result.code == 0) {
+        load.hideLoading();
+        if (res.result.code == 0) {
           this.setData({
             stockArr: res.result.data,
             update: false,
@@ -176,7 +177,8 @@ Page({
   // 自动滚动到目标库存批次
   _scrollToTargetStock() {
     const targetStockId = this.data.targetStockId;
-    if (!targetStockId) return;// 延迟执行，确保DOM渲染完成
+    if (!targetStockId) return;
+    // 延迟执行，确保DOM渲染完成
     setTimeout(() => {
       // 查找目标库存批次在数组中的索引
       const stockArr = this.data.stockArr;
@@ -189,8 +191,10 @@ Page({
         }
       }
       
-      if (targetIndex === -1) {return;
-      }// 设置选中状态
+      if (targetIndex === -1) {
+        return;
+      }
+      // 设置选中状态
       this.setData({
         selectedStockIndex: targetIndex
       });
@@ -202,10 +206,12 @@ Page({
         if (res[0]) {
           const rect = res[0];
           // 修复滚动计算：使用 rect.top 减去导航栏高度和偏移量
-          const scrollTop = Math.max(0, rect.top - this.data.navBarHeight - 20); // 20px 的偏移量wx.pageScrollTo({
+          const scrollTop = Math.max(0, rect.top - this.data.navBarHeight - 20); // 20px 的偏移量
+          wx.pageScrollTo({
             scrollTop: scrollTop,
             duration: 500
-          });} else {}
+          });
+        } else {}
       });
     }, 300);
   },
@@ -231,7 +237,8 @@ Page({
   }, 
 
   
-  showStock(e){var item = e.currentTarget.dataset.item;
+  showStock(e) {
+    var item = e.currentTarget.dataset.item;
      if (!item) {
        console.error("item 数据为空!");
        return;
@@ -239,8 +246,11 @@ Page({
      
      item.gbDistributerGoodsEntity = this.data.disGoods;
      var mendianInfo = wx.getStorageSync('mendianInfo');
-     var depList = mendianInfo ? mendianInfo.gbDepartmentEntityList : [];// 设置初始showType
-     var initialShowType = (depList.length > 1) ? 6 : 1;// 处理废弃时间逻辑if (item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== '') {
+     var depList = mendianInfo ? mendianInfo.gbDepartmentEntityList : [];
+     // 设置初始showType
+     var initialShowType = (depList.length > 1) ? 6 : 1;
+     // 处理废弃时间逻辑
+     if (item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== '') {
         var endTime = item.gbDgsWasteFullTime;
         var startTime = this.data.nowTime;
         var endTimeFormat = endTime.replace(/-/g, '/') //所有的- 都替换成/
@@ -248,16 +258,19 @@ Page({
         var startTimeFormat = startTime.replace(/-/g, '/') //所有的- 都替换成/
         var startTimeDown = Date.parse(new Date(startTimeFormat));
         var thisResult = Number(endTimeDown) - Number(startTimeDown);
-        thisResult = Math.floor(thisResult / 1000 / 60 / 60);if (thisResult < 0) { // 超过废弃时间
+        thisResult = Math.floor(thisResult / 1000 / 60 / 60);
+        if (thisResult < 0) { // 超过废弃时间
           var restWeight = item.gbDgsRestWeight;
           item.gbDgsMyWasteWeight = restWeight;
-          item.gbDgsMyProduceWeight = "0";this.setData({
+          item.gbDgsMyProduceWeight = "0";
+          this.setData({
             canWaste: true,
             canSure: true,
             showType: 4,
           })
         } else {
-          item.gbDgsMyProduceWeight = item.gbDgsRestWeight;this.setData({
+          item.gbDgsMyProduceWeight = item.gbDgsRestWeight;
+          this.setData({
             canWaste: false,
             resultTime: thisResult,
             canSure: true,
@@ -265,12 +278,15 @@ Page({
           })
         }
       } else {
-        item.gbDgsMyProduceWeight = item.gbDgsRestWeight;this.setData({
+        item.gbDgsMyProduceWeight = item.gbDgsRestWeight;
+        this.setData({
           canWaste: false,
           canSure: true,
           showType: initialShowType
         })
-      }// 修复数据传递问题：使用stockItem而不是itemitem.gbDistributerGoodsEntity = this.data.disGoods;
+      }
+      // 修复数据传递问题：使用stockItem而不是item
+      item.gbDistributerGoodsEntity = this.data.disGoods;
       this.setData({
         showStock: true,
         stockItem: item,  // 修复：使用stockItem
@@ -278,13 +294,15 @@ Page({
         consultItem: JSON.parse(JSON.stringify(item)),
         depGoods: e.currentTarget.dataset.goods,
         depList: depList
-      });},
+      });
+  },
     
 
 
     confirmStock(e) {
       var item = e.detail.item;
-      var showType = e.detail.showType;if (this.data.transfer !== '1') {
+      var showType = e.detail.showType;
+      if (this.data.transfer !== '1') {
         item.gbDgsReduceWeightUserId = this.data.userInfo.gbDepartmentUserId;
       }
       if (showType == 1) {
@@ -305,7 +323,8 @@ Page({
   
         saveDepLossGoodsStock(item)
           .then(res => {
-            load.hideLoading();if (res.result.code == 0) {
+            load.hideLoading();
+        if (res.result.code == 0) {
               
               this._getInitData();
   
@@ -313,7 +332,9 @@ Page({
               var that = this;
               var src = that.data.src;
               var reason = that.data.reason;
-              var id = res.result.data.gbDepartmentGoodsStockReduceId;reduceAttachmentSaveWithFile(src, reason, id).then((res) => {if (res.result == '{"code":0}') {
+              var id = res.result.data.gbDepartmentGoodsStockReduceId;
+              reduceAttachmentSaveWithFile(src, reason, id).then((res) => {
+                if (res.result == '{"code":0}') {
                 
                  
                 } else {
@@ -331,10 +352,12 @@ Page({
       } else if (showType == 3) {
         if (this.data.transfer !== '1') {
           item.gbDgsReturnUserId = this.data.userInfo.gbDepartmentUserId;
-        }load.showLoading("保存数据中")
+        }
+        load.showLoading("保存数据中")
         saveDepReturnGoodsStock(item)
           .then(res => {
-            load.hideLoading();if (res.result.code == 0) {
+            load.hideLoading();
+            if (res.result.code == 0) {
               this._getInitData();
             }else{
               wx.showToast({
@@ -344,7 +367,8 @@ Page({
             }
           })
       } else if (showType == 4) {
-        load.showLoading("保存数据中");saveDepWasteGoodsStock(item)
+        load.showLoading("保存数据中");
+        saveDepWasteGoodsStock(item)
           .then(res => {
             load.hideLoading();
             if (res.result.code == 0) {

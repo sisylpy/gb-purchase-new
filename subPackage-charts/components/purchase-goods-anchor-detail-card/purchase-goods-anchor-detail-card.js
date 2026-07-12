@@ -27,11 +27,23 @@ Component({
       var lines = [];
       for (var i = 0; i < rawLines.length; i++) {
         var it = rawLines[i];
+        var sourceTag = '';
+        var rightLabel = '采购人';
+        var rightValue = it.purchaserName || '';
+        if (it.supplierDisplayStatus === 'SELF_PURCHASE') {
+          sourceTag = '自采';
+        } else if (it.supplierName) {
+          sourceTag = '供货商';
+          rightLabel = '供货商';
+          rightValue = it.supplierName;
+        }
         lines.push(Object.assign({}, it, {
           _qtyDisplay: (it.quantity != null ? it.quantity : '') + (it.unit || ''),
           _priceDisplay: it.unitPrice != null ? Number(it.unitPrice).toFixed(2) : '0.00',
           _amountDisplay: it.amount != null ? Number(it.amount).toFixed(2) : '0.00',
-          _sourceTag: it.supplierDisplayStatus === 'SELF_PURCHASE' ? '自采' : (it.supplierDisplayStatus || ''),
+          _sourceTag: sourceTag,
+          _rightLabel: rightLabel,
+          _rightValue: rightValue,
         }));
       }
 

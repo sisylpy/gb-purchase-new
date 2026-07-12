@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 <view  class="dcl-page1 flex-column flex">
  
@@ -65,8 +65,7 @@
         </view>
 
         <!-- 核心指标区 -->
-        <view class="dcl-card__metrics">
-          <!-- 实际毛利率 + 理论毛利率 并排 -->
+        <!-- <view class="dcl-card__metrics">
           <view class="dcl-metrics-dual">
             <view class="dcl-metrics-dual__col">
               <text class="dcl-metrics-dual__label">理论成本</text>
@@ -84,7 +83,7 @@
             </view>
           </view>
 
-        </view>
+        </view> -->
 
 
         <!-- 底部操作 -->

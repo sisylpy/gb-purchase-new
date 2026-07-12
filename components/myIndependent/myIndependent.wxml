@@ -10,7 +10,7 @@
 
 		<view class="modal-content">
 
-     <image style="height: {{windowHeight / 3}}rpx;width: {{windowWidth - 280}}rpx;"  mode="widthFix"  src="{{(url + item.gbDgNxFatherImgLarge || '/images/logo.jpg')}}" mode=""/>
+     <image style="height: {{windowHeight / 3}}rpx;width: {{windowWidth - 280}}rpx;"  mode="widthFix"  src="{{(url + item.gbDgNxFatherImgLarge || '/images/logo.png')}}" mode=""/>
 
 		</view>
 

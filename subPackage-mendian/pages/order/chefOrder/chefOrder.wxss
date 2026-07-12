@@ -333,3 +333,9 @@ button::after {
   font-size: 28rpx;
   padding: 40rpx 0;
 }
+
+.pack-spec {
+  color: #888;
+  font-size: 28rpx;
+  margin-left: 6rpx;
+}

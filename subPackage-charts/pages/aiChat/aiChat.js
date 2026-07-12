@@ -17,6 +17,7 @@ var aiChatHelpers = require('../../utils/aiChatHelpers');
 var workRecordCardTypes = require('../../utils/workRecordCardTypes');
 var workRecordDraftUtil = require('../../utils/workRecordDraftUtil');
 
+
 var MENU_OPERATION_ADVISOR_ID = aiChatHelpers.MENU_OPERATION_ADVISOR_ID;
 var extractSuggestedTopicsPayload = aiChatHelpers.extractSuggestedTopicsPayload;
 var normalizeSuggestedTopic = aiChatHelpers.normalizeSuggestedTopic;
@@ -32,6 +33,8 @@ Page({
     departmentId: 0,
     userId: 0,
     userInitial: '?',
+    heroTitle: '你好，我是AI助手',
+    heroSubtitle: '可以帮你看经营、库存、采购，还能直接回答问题',
     greetLine1: '你好',
     conversationId: null,
     isLoading: true,
@@ -114,6 +117,8 @@ Page({
       initial = nick.length === 1 ? nick : nick.charAt(nick.length - 1);
     }
     var greetLine1 = nick ? nick + '，你好' : '你好';
+    var heroTitle = '你好，我是AI助手';
+    var heroSubtitle = '可以帮你看经营、库存、采购，还能直接回答问题';
 
     // 从 URL 参数解析 advisorId 与 pageTitle（菜单经营顾问等固定入口传入）
     var advisorId = null;
@@ -126,6 +131,10 @@ Page({
     // 菜单模式下调整问候语
     if (advisorId === MENU_OPERATION_ADVISOR_ID) {
       greetLine1 = '菜单经营顾问';
+      heroTitle = '你好，我是菜单经营顾问';
+      heroSubtitle = '可以帮你看菜单整体经营、菜品销量与毛利情况';
+    } else if (pageTitle) {
+      heroTitle = '你好，我是' + pageTitle;
     }
 
     var sys = wx.getSystemInfoSync();
@@ -133,10 +142,13 @@ Page({
     var drawerPad = sb + 44;
     var drawerHeadApprox = 52;
     that.setData({
+      url: getApp().globalData.server || config.server,
       departmentId: departmentId,
       userId: userId,
       userInitial: initial,
       greetLine1: greetLine1,
+      heroTitle: heroTitle,
+      heroSubtitle: heroSubtitle,
       windowHeight: sys.windowHeight,
       statusBarHeight: sb,
       drawerPaddingTop: drawerPad,

@@ -7,8 +7,6 @@ var stockReduceKind = require('../../../../lib/stockReduceKind.js');
 Page({
 
   onShow() {
-
-     // 推荐直接用新API
      let windowInfo = wx.getWindowInfo();
      let globalData = getApp().globalData;
      this.setData({
@@ -17,26 +15,30 @@ Page({
        navBarHeight: globalData.navBarHeight * globalData.rpxR,
      });
 
+     // 仅从选日期页返回时启用时间筛选；不读全局 myDate，避免再次进入仍带上次时间
+     if (this.data.update) {
+       this.setData({
+         update: false,
+         dateFilterActive: true,
+       }, () => this._getInitData());
+       return;
+     }
 
-     var myDate = wx.getStorageSync('myDate');
-      if(myDate){
-        this.setData({
-          startDate: dateUtils.getDateRange(myDate.name).startDate,
-          stopDate: dateUtils.getDateRange(myDate.name).stopDate,
-          dateType: myDate.dateType,
-        })
-      }else{
-        this.setData({
-          dateType: 'month',
-          startDate: dateUtils.getFirstDateInMonth(),
-          stopDate: dateUtils.getArriveDate(0),
-        })
-      }
-    this._getInitData();
-
+     if (!this._loadedOnce) {
+       this._loadedOnce = true;
+       this._getInitData();
+     }
   },
 
   data: {
+    dateFilterActive: false,
+    startDate: '',
+    stopDate: '',
+    hanzi: '',
+    goodsName: '',
+    goodsUnit: '',
+    navTitle: '',
+    
     consultItem: {
       type: Object,
       value: ""
@@ -65,7 +67,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
+    this._loadedOnce = false;
 
     this.setData({
       url: config.server,
@@ -75,9 +77,13 @@ Page({
       standard: options.standard,
       value: options.value,
       today: dateUtils.getArriveDate(0),
-     
       nowTime: dateUtils.getNowTime(),
-
+      dateFilterActive: false,
+      startDate: '',
+      stopDate: '',
+      dateType: '',
+      hanzi: '',
+      update: false,
     })
 
     var userValue = wx.getStorageSync('userInfo');
@@ -90,10 +96,9 @@ Page({
 
     var disGoods = wx.getStorageSync('disGoods');
     if (disGoods) {
-      this.setData({
-        depGoods: disGoods,
-        disGoods: disGoods.gbDistributerGoodsEntity,
-      })
+      this._applyGoodsMeta(disGoods, options);
+    } else {
+      this._applyGoodsMeta(null, options);
     }
 
     var disInfo = wx.getStorageSync('disInfo');
@@ -113,11 +118,58 @@ Page({
   },
 
 
+  _applyGoodsMeta(depGoods, options) {
+    options = options || {};
+    depGoods = depGoods || {};
+    var disGoodsEntity = depGoods.gbDistributerGoodsEntity || {};
+    var goodsName = depGoods.gbDdgDepGoodsName
+      || disGoodsEntity.gbDgGoodsName
+      || options.name
+      || '';
+    var goodsUnit = disGoodsEntity.gbDgGoodsStandardname
+      || options.standard
+      || '';
+    var navTitle = goodsUnit ? (goodsName + ' ' + goodsUnit) : goodsName;
+    this.setData({
+      depGoods: depGoods,
+      disGoods: disGoodsEntity,
+      goodsName: goodsName,
+      goodsUnit: goodsUnit,
+      navTitle: navTitle,
+    });
+  },
+
+  _syncGoodsMetaFromStockList(list) {
+    if (!list || !list.length) return;
+    var patch = {};
+    var first = list[0];
+    if (!this.data.goodsUnit && first.goodsStandardName) {
+      patch.goodsUnit = first.goodsStandardName;
+    }
+    if (!this.data.goodsName && first.goodsName) {
+      patch.goodsName = first.goodsName;
+    }
+    if (patch.goodsUnit || patch.goodsName) {
+      var name = patch.goodsName || this.data.goodsName;
+      var unit = patch.goodsUnit || this.data.goodsUnit;
+      patch.navTitle = unit ? (name + ' ' + unit) : name;
+      this.setData(patch);
+    }
+  },
+
   _getInitData() {
     var data = {
       depGoodsId: this.data.depGoodsId,
-      startDate: this.data.startDate,
-      stopDate: this.data.stopDate,
+    };
+    if (this.data.dateFilterActive) {
+      var startDate = this.data.startDate;
+      var stopDate = this.data.stopDate;
+      if (startDate && startDate !== 'undefined') {
+        data.startDate = startDate;
+      }
+      if (stopDate && stopDate !== 'undefined') {
+        data.stopDate = stopDate;
+      }
     }
     load.showLoading("获取数据中")
     stockApi.getDepGoodsBusiness(data)
@@ -125,8 +177,10 @@ Page({
         load.hideLoading();
 
         if (res.result.code == 0) {
+          var stockArr = this._enrichStockArr(res.result.data);
+          this._syncGoodsMetaFromStockList(stockArr);
           this.setData({
-            stockArr: res.result.data,
+            stockArr: stockArr,
           })
 
         } else {
@@ -135,6 +189,25 @@ Page({
           })
         }
       })
+  },
+
+  _filterReducesByType(reduces, type) {
+    var typeStr = String(type);
+    return (reduces || []).filter(function (r) {
+      return String(r.gbDgsrType) === typeStr;
+    });
+  },
+
+  _enrichStockArr(list) {
+    return (list || []).map(function (item) {
+      var reduces = item.goodsStockReduceEntityList || [];
+      item._produceList = this._filterReducesByType(reduces, 1);
+      item._wasteList = this._filterReducesByType(reduces, 2);
+      item._lossList = this._filterReducesByType(reduces, 3);
+      item._returnList = this._filterReducesByType(reduces, 4);
+      item._mealList = this._filterReducesByType(reduces, 6);
+      return item;
+    }.bind(this));
   },
 
   changeStar(e){
@@ -151,11 +224,17 @@ Page({
     })
   },
 
-  toDate(){
+  toDatePage() {
     wx.navigateTo({
-      url: '../stockGoodsBusinessDate/stockGoodsBusinessDate?depGoodsId=' + this.data.depGoodsId,
-    })
-  }, 
+      url: '/pages/common/selectDate/selectDate?startDate=' + (this.data.startDate || '')
+        + '&stopDate=' + (this.data.stopDate || '')
+        + '&dateType=' + (this.data.dateType || ''),
+    });
+  },
+
+  toDate() {
+    this.toDatePage();
+  },
 
   // stock
   showStock(e) {

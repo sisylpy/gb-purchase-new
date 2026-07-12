@@ -10,7 +10,7 @@
 
   <text class="" wx:if="{{goodsType == '99'}}">全部商品</text>
   <text class="" wx:elif="{{goodsType == '21'}}">自动订货</text>
-  <text class="" wx:elif="{{goodsType == '2'}}">自采商品</text>
+  <text class="" wx:elif="{{goodsType == '1'}}">自采商品</text>
   <text class="" wx:elif="{{goodsType == '101'}}">保鲜控制</text>
   <text class="" wx:elif="{{goodsType == '102'}}">停止送货</text>
 
@@ -46,7 +46,7 @@
           <view class="left-item {{selectedSub == index ? 'left-active' : ''}}" wx:for="{{disGoodsCataArr}}" wx:key="gbDistributerFatherGoodsId" id="left-cat-{{grand.gbDistributerFatherGoodsId}}" wx:for-item="grand" bindtap="leftMenuClickDep" data-index="{{index}}" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}">
             <view class="flex-column-center">
               <!-- <view class="picView ">
-                <image src="{{grand.gbDfgFatherGoodsImg != null && grand.gbDfgFatherGoodsImg !== '' ? url + grand.gbDfgFatherGoodsImg  : '/images/logo.jpg'}}" mode="aspectFill" class="url" />
+                <image src="{{grand.gbDfgFatherGoodsImg != null && grand.gbDfgFatherGoodsImg !== '' ? url + grand.gbDfgFatherGoodsImg  : '/images/logo.png'}}" mode="aspectFill" class="url" />
               </view> -->
               <view class="extremeSmall text_center">
                 <text>{{grand.gbDfgFatherGoodsName}}</text>
@@ -95,7 +95,7 @@
                 <!-- <image
                   bindtap="showDialogBtnDep"
                   data-item="{{goods}}"
-                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ?  url+ goods.gbDgNxFatherImg : '/images/logo.jpg'}}"
+                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ?  url+ goods.gbDgNxFatherImg : '/images/logo.png'}}"
                   mode="aspectFill"
                   class="logoimg"
                   data-raw-path="{{goods.gbDgNxFatherImg}}"
@@ -256,9 +256,9 @@
       <text class="mr-20 ml-20 {{goodsType == '21' ? 'mainColor' : ''}} ">自动订货</text>
     </view>
 
-    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="2">
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="1">
       <image src="../../../../images/gouwuche-4.png" class="icon mr-20 ml-20"></image>
-      <text class="mr-20 ml-20 {{goodsType == '2' ? 'mainColor' : ''}} ">采购商品</text>
+      <text class="mr-20 ml-20 {{goodsType == '1' ? 'mainColor' : ''}} ">采购商品</text>
     </view>
     <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="101">
       <image src="../../../../images/toxicwaste.png" class="icon mr-20 ml-20"></image>

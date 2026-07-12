@@ -1,4 +1,5 @@
 var priceUtil = require("../../lib/purchasePriceUtil.js");
+var orderGoodsScale = require("../../lib/orderGoodsScale.js");
 
 Component({
   properties: {
@@ -9,6 +10,7 @@ Component({
     windowHeight: { type: Number, value: "" },
     windowWidth: { type: Number, value: "" },
     scaleInput: { type: Boolean, value: false },
+    cartonInput: { type: Boolean, value: false },
     scrollViewTop: { type: Number, value: "" },
     foucusWeight: { type: Boolean, value: false },
     foucusPrice: { type: Boolean, value: false },
@@ -21,11 +23,30 @@ Component({
     isClosing: false,
     priceUnitSuffix: "",
     subDepAmount: 0,
+    focusPrice: false,
+    focusWeight: false,
   },
 
   observers: {
     item: function (item) {
       this._refreshPriceUnitSuffix(item);
+    },
+    show: function (show) {
+      if (!show) {
+        this.setData({ focusPrice: false, focusWeight: false });
+        return;
+      }
+      var item = this.data.item || this.properties.item;
+      console.log("[inputOrder] 弹窗显示", item);
+      console.log("[inputOrder] 订单明细", this._getOrders());
+      this.setData({
+        focusPrice: !!this.properties.foucusPrice,
+        focusWeight: !!this.properties.foucusWeight,
+      });
+      var that = this;
+      setTimeout(function () {
+        that.setData({ focusPrice: false, focusWeight: false });
+      }, 400);
     },
   },
 
@@ -174,36 +195,51 @@ Component({
     },
 
     _recalcScaleSubtotals: function () {
-      var scalePrice = Number(this.data.item.gbDpgBuyScalePrice);
+      var scalePrice = this.data.item.gbDpgBuyScalePrice;
+      var item = this.data.item;
+      var factor = Number(item.gbDpgBuyScale);
       var arr = this._getOrders();
       var patch = {};
       var scaleQtyTotal = 0;
       var baseQtyTotal = 0;
       var buyTotal = 0;
 
+      if (orderGoodsScale.isPositive(scalePrice) && factor > 0) {
+        patch["item.gbDpgBuyPrice"] = orderGoodsScale.formatConvertedUnitPrice(scalePrice, factor);
+      }
+
       for (var i = 0; i < arr.length; i++) {
         var sw = arr[i].gbDoScaleWeight;
         var bw = arr[i].gbDoWeight;
         scaleQtyTotal += Number(sw) || 0;
         baseQtyTotal += Number(bw) || 0;
-        if (!isNaN(scalePrice) && scalePrice > 0 && sw != null && sw !== "") {
-          var sub = (Number(sw) * scalePrice).toFixed(1);
-          patch[this._getOrderKey(i, "gbDoSubtotal")] = sub;
-          buyTotal += Number(sub);
+        if (orderGoodsScale.isPositive(scalePrice) && sw != null && sw !== "") {
+          var applied = orderGoodsScale.applyScalePriceToOrder(arr[i], item, scalePrice);
+          if (applied) {
+            patch[this._getOrderKey(i, "gbDoScalePrice")] = applied.gbDoScalePrice;
+            patch[this._getOrderKey(i, "gbDoPrice")] = applied.gbDoPrice;
+            patch[this._getOrderKey(i, "gbDoSubtotal")] = applied.gbDoSubtotal || "";
+            if (applied.gbDoScaleWeight) {
+              patch[this._getOrderKey(i, "gbDoScaleWeight")] = applied.gbDoScaleWeight;
+            }
+            if (applied.gbDoWeight) {
+              patch[this._getOrderKey(i, "gbDoWeight")] = applied.gbDoWeight;
+            }
+            buyTotal += Number(applied.gbDoSubtotal) || 0;
+          }
         }
       }
 
       patch["item.gbDpgBuyScaleQuantity"] = scaleQtyTotal || "";
       patch["item.gbDpgBuyQuantity"] = baseQtyTotal || "";
       patch["item.gbDpgBuySubtotal"] =
-        !isNaN(scalePrice) && scalePrice > 0 && scaleQtyTotal > 0
+        orderGoodsScale.isPositive(scalePrice) && scaleQtyTotal > 0
           ? buyTotal.toFixed(1)
           : "";
       patch["canSave"] =
         patch["item.gbDpgBuySubtotal"] !== "" && Number(patch["item.gbDpgBuySubtotal"]) > 0;
 
       this.setData(patch);
-      this._syncOrderPrices();
     },
 
     _recalcBuyTotal: function () {
@@ -312,8 +348,8 @@ Component({
     },
 
     _validateBeforeConfirm: function () {
-      var scalePack = this._isScalePackMode();
-      if (scalePack) {
+      var cartonInput = this.properties.cartonInput;
+      if (cartonInput) {
         if (!priceUtil.hasValidPurchasePrice(this.data.item.gbDpgBuyScalePrice)) {
           wx.showToast({ title: "请填写大包装单价", icon: "none" });
           return false;
@@ -330,12 +366,11 @@ Component({
       }
 
       var orderArr = this._getOrders();
-      var useScaleQty = this.data.scaleInput || scalePack;
       for (var j = 0; j < orderArr.length; j++) {
         if (!orderArr[j].hasChoice) {
           continue;
         }
-        if (useScaleQty) {
+        if (cartonInput) {
           var sw = orderArr[j].gbDoScaleWeight;
           if (sw == null || sw === "" || String(sw).length === 0) {
             wx.showToast({ title: "订单数量不能为空", icon: "none" });
@@ -375,7 +410,9 @@ Component({
 
       var scale = Number(this.data.item.gbDpgBuyScale);
       var basePrice =
-        !scale || isNaN(scale) ? "" : (Number(value) / scale).toFixed(2);
+        !scale || isNaN(scale)
+          ? ""
+          : orderGoodsScale.formatConvertedUnitPrice(value, scale);
 
       this.setData(
         {

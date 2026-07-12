@@ -8,6 +8,10 @@
       <view class="status-left">
         <view class="status-dot"></view>
         <text class="status-text">实时测算中</text>
+        <view class="status-days" bindtap="onPickCostDays" hover-class="status-days--hover">
+          <text>{{costDaysLabel}}</text>
+          <text class="status-days-arrow">▾</text>
+        </view>
       </view>
       <view class="status-right" bindtap="toChangePrice" hover-class="status-right--hover">
         <text>更换售价</text>

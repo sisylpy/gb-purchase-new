@@ -10,6 +10,40 @@ page {
   min-height: 100vh;
 }
 
+/* ===== 顶部日期选择栏 ===== */
+.fbd-date-bar {
+  background: #fff;
+  border-bottom: 1rpx solid #e8eaef;
+  padding: 16rpx 24rpx;
+}
+
+.fbd-date-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.fbd-date-bar__icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.fbd-date-bar__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.fbd-date-bar__hanzi {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.fbd-date-bar__range {
+  font-size: 22rpx;
+  color: #64748b;
+}
+
 .fbd-scroll {
   flex: 1;
   min-height: 0;

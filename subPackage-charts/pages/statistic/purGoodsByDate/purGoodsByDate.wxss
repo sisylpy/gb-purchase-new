@@ -851,3 +851,9 @@
   background: #e0e0e0;
   margin: 0 8rpx;
 }
+
+.pack-spec {
+  color: #888;
+  font-size: 28rpx;
+  margin-left: 6rpx;
+}

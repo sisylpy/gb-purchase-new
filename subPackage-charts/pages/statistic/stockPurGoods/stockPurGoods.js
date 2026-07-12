@@ -80,6 +80,18 @@ Page({
 
 
 
+  // 规范化商品列表：默认折叠采购批次与库存详情
+  _normalizeGoodsList(goodsList) {
+    return (goodsList || []).map(function (goods) {
+      return Object.assign({}, goods, {
+        showPurchaseList: false,
+        wastePurGoodsEntities: (goods.wastePurGoodsEntities || []).map(function (pur) {
+          return Object.assign({}, pur, { expanded: false });
+        }),
+      });
+    });
+  },
+
   // 获取商品列表
   _getGoodsList() {
     // 设置加载状态
@@ -109,33 +121,15 @@ Page({
 
           // 如果是第一页，直接替换数据；否则追加数据
           if (this.data.currentPage === 1) {
-            // 为每个采购记录添加展开状态
-            const goodsList = (result.goodsList || []).map(goods => ({
-              ...goods,
-              wastePurGoodsEntities: goods.wastePurGoodsEntities.map(pur => ({
-                ...pur,
-                expanded: false
-              }))
-            }));
-
             this.setData({
-              arr: result.goodsList,
+              arr: this._normalizeGoodsList(result.goodsList),
               restSubtotal: result.restSubtotal,
               totalCount: result.totalCount || 0,
               totalPage: result.totalPages || 0
             });
           } else {
-            // // 为新增的采购记录添加展开状态
-            // const newGoodsList = (result.goodsList || []).map(goods => ({
-            //   ...goods,
-            //   wastePurGoodsEntities: goods.wastePurGoodsEntities.map(pur => ({
-            //     ...pur,
-            //     expanded: false
-            //   }))
-            // }));
-
             this.setData({
-              arr: [...this.data.arr, ...newGoodsList],
+              arr: this.data.arr.concat(this._normalizeGoodsList(result.goodsList)),
               totalCount: result.totalCount || 0,
               totalPage: result.totalPages || 0
             });
@@ -498,25 +492,19 @@ Page({
   },
 
   showDetail(e) {
-    const goodsIndex = e.currentTarget.dataset.goodsIndex;
-    const purIndex = e.currentTarget.dataset.purIndex;
+    var goodsIndex = e.currentTarget.dataset.goodsIndex;
+    var purIndex = e.currentTarget.dataset.purIndex;
+    var newArr = this.data.arr.slice();
+    newArr[goodsIndex].wastePurGoodsEntities[purIndex].expanded =
+      !newArr[goodsIndex].wastePurGoodsEntities[purIndex].expanded;
+    this.setData({ arr: newArr });
+  },
 
-    console.log('=== showDetail 点击事件 ===');
-    console.log('商品索引:', goodsIndex);
-    console.log('采购索引:', purIndex);
-
-    // 创建新的数组，避免直接修改原数据
-    const newArr = [...this.data.arr];
-
-    // 切换指定采购记录的展开状态
-    newArr[goodsIndex].wastePurGoodsEntities[purIndex].expanded = !newArr[goodsIndex].wastePurGoodsEntities[purIndex].expanded;
-
-    console.log('展开状态:', newArr[goodsIndex].wastePurGoodsEntities[purIndex].expanded);
-
-    // 更新数据
-    this.setData({
-      arr: newArr
-    });
+  showList(e) {
+    var goodsIndex = e.currentTarget.dataset.index;
+    var newArr = this.data.arr.slice();
+    newArr[goodsIndex].showPurchaseList = !newArr[goodsIndex].showPurchaseList;
+    this.setData({ arr: newArr });
   },
 
 

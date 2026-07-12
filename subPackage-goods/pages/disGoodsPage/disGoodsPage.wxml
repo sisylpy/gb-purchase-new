@@ -1,4 +1,4 @@
-<wxs src="/utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 <view class="flex flex-column">
   <back-navbar style="height: {{navBarHeight}}rpx;" title="商品设置" 

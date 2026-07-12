@@ -1,0 +1,264 @@
+// 公共基础层：utils/orderGoodsFmt.wxs 与 subPackage-jrdh/utils/orderGoodsFmt.wxs 共享的纯函数
+// 抽离标准：函数体完全一致，且不依赖任何分叉函数（purGoodsOutQty / orderOutQty 等差异化实现）。
+// 分叉函数及其 has* 包装仍各自保留在对应文件中，以避免基础层作用域无法解析差异实现。
+
+function isValid(value) {
+  if (value === null || value === undefined || value === '') {
+    return false;
+  }
+  var s = value + '';
+  if (s === 'null' || s === 'undefined') {
+    return false;
+  }
+  return true;
+}
+
+function isPositiveNum(value) {
+  if (!isValid(value)) {
+    return false;
+  }
+  var n = parseFloat(value);
+  return !isNaN(n) && n > 0;
+}
+
+function hasText(value) {
+  return isValid(value);
+}
+
+function smallPackSpec(goods) {
+  if (!goods) {
+    return '';
+  }
+  var weight = goods.gbDgGoodsStandardWeight;
+  var unit = goods.gbDgGoodsStandardname;
+  if (!hasText(unit)) {
+    return '';
+  }
+  if (hasText(weight) && unit !== '斤') {
+    return '(' + weight + '/' + unit + ')';
+  }
+  return '';
+}
+
+function cartonPackSpec(goods) {
+  if (!goods) {
+    return '';
+  }
+  var weight = goods.gbDgGoodsStandardWeight;
+  var count = goods.gbDgItemsPerCarton;
+  var unit = goods.gbDgGoodsStandardname;
+  var carton = goods.gbDgCartonUnit;
+  if (!hasText(carton) || !hasText(count)) {
+    return '';
+  }
+  var inner = '';
+  if (hasText(weight) && unit !== '斤') {
+    inner = weight + '*' + count + unit;
+  } else if (hasText(unit)) {
+    inner = count + unit;
+  } else {
+    inner = count + '';
+  }
+  return '(' + inner + ')(' + carton + ')';
+}
+
+function packSpec(goods) {
+  var carton = cartonPackSpec(goods);
+  if (carton) {
+    return carton;
+  }
+  return smallPackSpec(goods);
+}
+
+function hasOrderStandardScale(order) {
+  if (!order || order.gbDoDsStandardScale === null || order.gbDoDsStandardScale === undefined) {
+    return false;
+  }
+  var scale = order.gbDoDsStandardScale + '';
+  if (scale === '' || scale === '-1') {
+    return false;
+  }
+  var n = parseFloat(scale);
+  return !isNaN(n) && n > 0;
+}
+
+function formatQtyNum(n) {
+  if (n === Math.floor(n)) {
+    return n + '';
+  }
+  return n.toFixed(1);
+}
+
+function isScalePurGoods(item) {
+  if (!item) {
+    return false;
+  }
+  if (item.gbDpgBuyScale !== null && item.gbDpgBuyScale !== '-1' && parseFloat(item.gbDpgBuyScale) > 0) {
+    return true;
+  }
+  if (item.gbDpgStandard && item.gbDistributerGoodsEntity &&
+      item.gbDpgStandard !== item.gbDistributerGoodsEntity.gbDgGoodsStandardname &&
+      isPositiveNum(item.gbDpgBuyScale)) {
+    return true;
+  }
+  var orders = item.gbDepartmentOrdersEntities;
+  if (orders && orders.length) {
+    for (var i = 0; i < orders.length; i++) {
+      if (hasOrderStandardScale(orders[i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function purGoodsScaleUnit(item) {
+  if (item && hasText(item.gbDpgStandard)) {
+    return item.gbDpgStandard;
+  }
+  var orders = item && item.gbDepartmentOrdersEntities ? item.gbDepartmentOrdersEntities : [];
+  for (var i = 0; i < orders.length; i++) {
+    if (hasText(orders[i].gbDoStandard)) {
+      return orders[i].gbDoStandard;
+    }
+  }
+  return '';
+}
+
+function purGoodsScaleFactor(item) {
+  var orders = item && item.gbDepartmentOrdersEntities ? item.gbDepartmentOrdersEntities : [];
+  for (var i = 0; i < orders.length; i++) {
+    if (hasOrderStandardScale(orders[i])) {
+      return parseFloat(orders[i].gbDoDsStandardScale);
+    }
+  }
+  if (item && item.gbDpgBuyScale !== null && item.gbDpgBuyScale !== '-1') {
+    var s = parseFloat(item.gbDpgBuyScale);
+    if (!isNaN(s) && s > 0) {
+      return s;
+    }
+  }
+  return 0;
+}
+
+function resolveOrderQty(item) {
+  if (!item) {
+    return '';
+  }
+  if (isPositiveNum(item.gbDpgQuantity)) {
+    return formatQtyNum(parseFloat(item.gbDpgQuantity));
+  }
+  var orders = item.gbDepartmentOrdersEntities || [];
+  var total = 0;
+  var hasQty = false;
+  for (var i = 0; i < orders.length; i++) {
+    if (isPositiveNum(orders[i].gbDoQuantity)) {
+      total += parseFloat(orders[i].gbDoQuantity);
+      hasQty = true;
+    }
+  }
+  if (!hasQty) {
+    return '';
+  }
+  return formatQtyNum(total);
+}
+
+function orderQtyLabel(item) {
+  if (!item) {
+    return '';
+  }
+  var qty = resolveOrderQty(item);
+  if (!hasText(qty)) {
+    return '';
+  }
+  if (hasText(item.gbDpgStandard)) {
+    return '订:' + qty + item.gbDpgStandard;
+  }
+  var goods = item.gbDistributerGoodsEntity;
+  if (goods && hasText(goods.gbDgCartonUnit)) {
+    return '订:' + qty + goods.gbDgCartonUnit;
+  }
+  if (goods && hasText(goods.gbDgGoodsStandardname)) {
+    return '订:' + qty + goods.gbDgGoodsStandardname;
+  }
+  return '订:' + qty;
+}
+
+function buildPurItem(pur, goods) {
+  if (!pur) {
+    return null;
+  }
+  return {
+    gbDpgBuyScale: pur.gbDpgBuyScale,
+    gbDpgStandard: pur.gbDpgStandard,
+    gbDpgBuyScaleQuantity: pur.gbDpgBuyScaleQuantity,
+    gbDpgBuyQuantity: pur.gbDpgBuyQuantity,
+    gbDistributerGoodsEntity: goods || pur.gbDistributerGoodsEntity,
+    gbDepartmentOrdersEntities: pur.gbDepartmentOrdersEntities || [],
+  };
+}
+
+function resolveOrderScalePrice(orders, item) {
+  if (isPositiveNum(orders.gbDoScalePrice)) {
+    return orders.gbDoScalePrice;
+  }
+  if (item && isPositiveNum(item.gbDpgBuyScalePrice)) {
+    return item.gbDpgBuyScalePrice;
+  }
+  return '';
+}
+
+function resolveOrderScaleQty(orders) {
+  if (isPositiveNum(orders.gbDoScaleWeight)) {
+    return orders.gbDoScaleWeight;
+  }
+  if (hasOrderStandardScale(orders) && isPositiveNum(orders.gbDoWeight)) {
+    var factor = parseFloat(orders.gbDoDsStandardScale);
+    if (factor > 0) {
+      return formatQtyNum(parseFloat(orders.gbDoWeight) / factor);
+    }
+  }
+  return '';
+}
+
+function orderUnitPriceForCompare(orders, item) {
+  if (isPositiveNum(orders.gbDoPrice)) {
+    return parseFloat(orders.gbDoPrice);
+  }
+  if (hasOrderStandardScale(orders)) {
+    var scalePrice = resolveOrderScalePrice(orders, item);
+    var factor = parseFloat(orders.gbDoDsStandardScale);
+    if (isPositiveNum(scalePrice) && factor > 0) {
+      return parseFloat(scalePrice) / factor;
+    }
+  }
+  return 0;
+}
+
+function isOrderPriceHigh(orders, item) {
+  if (!item || !item.nxGoodsPriceEntity || !isPositiveNum(item.nxGoodsPriceEntity.nxGpHighestPrice)) {
+    return false;
+  }
+  return orderUnitPriceForCompare(orders, item) > parseFloat(item.nxGoodsPriceEntity.nxGpHighestPrice);
+}
+
+module.exports = {
+  isValid: isValid,
+  isPositiveNum: isPositiveNum,
+  hasText: hasText,
+  smallPackSpec: smallPackSpec,
+  cartonPackSpec: cartonPackSpec,
+  packSpec: packSpec,
+  hasOrderStandardScale: hasOrderStandardScale,
+  formatQtyNum: formatQtyNum,
+  isScalePurGoods: isScalePurGoods,
+  purGoodsScaleUnit: purGoodsScaleUnit,
+  purGoodsScaleFactor: purGoodsScaleFactor,
+  resolveOrderQty: resolveOrderQty,
+  orderQtyLabel: orderQtyLabel,
+  buildPurItem: buildPurItem,
+  resolveOrderScalePrice: resolveOrderScalePrice,
+  resolveOrderScaleQty: resolveOrderScaleQty,
+  orderUnitPriceForCompare: orderUnitPriceForCompare,
+  isOrderPriceHigh: isOrderPriceHigh,
+};

@@ -1,4 +1,4 @@
-<wxs src="../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 <wxs module="num" src="/wxs/signedNumber.wxs" />
 
 <view class="flex flex-column">

@@ -22,8 +22,8 @@ Page({
     canSave: false,
     imgChanged: false,
     isSelectImg: false,
-    targetGrossMarginRate: '60',
-    grossMarginFloatAbs: '3',
+    targetGrossMarginRate: '',
+    grossMarginFloatAbs: '',
   },
 
 
@@ -169,6 +169,32 @@ Page({
     }
     this._checkCanSave();
 
+  },
+
+  getTargetGrossMarginRate(e) {
+    var v = e.detail.value;
+    if (this.data.type == 'edit') {
+      this.setData({
+        'foodItem.gbDfTargetGrossMarginRate': v,
+      });
+    } else {
+      this.setData({
+        targetGrossMarginRate: v,
+      });
+    }
+  },
+
+  getGrossMarginFloatAbs(e) {
+    var v = e.detail.value;
+    if (this.data.type == 'edit') {
+      this.setData({
+        'foodItem.gbDfGrossMarginFloatAbs': v,
+      });
+    } else {
+      this.setData({
+        grossMarginFloatAbs: v,
+      });
+    }
   },
 
     _checkCanSave(){

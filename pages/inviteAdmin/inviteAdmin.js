@@ -1,10 +1,10 @@
 const globalData = getApp().globalData;
 var load = require('../../lib/load.js');
-var apiUrl = require('../../config/index.js');
 const {
   gbPurchaserRegitsteWithFile,
   gbLogin,
 } = require('../../services/apiDistributerGbUser.js');
+var requestUtil = require('../../lib/request');
 
 Page({
 
@@ -36,7 +36,7 @@ Page({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      url: apiUrl.server,
+      url: requestUtil.getServerUrl(),
       disId: options.disId,
       depName: options.depName,
       depFatherId: options.depFatherId,

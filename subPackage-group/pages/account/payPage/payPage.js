@@ -464,16 +464,13 @@ Page({
             paySign: map.paySign,
 
             success: function (resPay) {
-
               wx.showToast({
                 title: '充值成功',
-
-              })
+              });
+              wx.setStorageSync('needRefreshDisPoints', true);
               wx.navigateBack({
                 delta: 1
               });
-
-
             },
             fail: function (res) {
 

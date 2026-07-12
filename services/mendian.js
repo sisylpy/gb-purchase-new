@@ -24,14 +24,6 @@ var getDepUsersByFatherIdGb = function (data) {
   return requestUtil.post('gbdepartment/getDepUsersByFatherIdGb', reqData, { useUrlParams: true });
 };
 
-/**
- * 获取分销商下门店（京）列表
- * GET gbdepartment/getDisDepartmentGbMendianJing/{disId}
- * @param {string|number} disId 分销商 ID
- */
-var getDisDepartmentGbMendianJing = function (disId) {
-  return requestUtil.get('gbdepartment/getDisDepartmentGbMendianJing/' + disId);
-};
 
 /**
  * 更新部门/分组名称等
@@ -90,7 +82,6 @@ var getStoreDetailGb = function (depId) {
 
 module.exports = {
   getDepUsersByFatherIdGb: getDepUsersByFatherIdGb,
-  getDisDepartmentGbMendianJing: getDisDepartmentGbMendianJing,
   updateGroupNameGb: updateGroupNameGb,
   deleteDepartment: deleteDepartment,
   saveSubDepartment: saveSubDepartment,

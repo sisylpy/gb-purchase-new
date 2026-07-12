@@ -67,7 +67,7 @@
       <view class="flex-column bg-white p-20 mt-20">
         <text class="text-center text-secondary mb-15">商品大图</text>
         <view class="flex-column center-content">
-          <image class='goods_item_lg' wx:if="{{src.length > 0}}" src="{{src.length > 0 ? src : '/images/photo.png' }}"></image>
+          <image class='goods_item_lg' wx:if="{{src.length > 0}}" src="{{src.length > 0 ? src : '/images/Photo.png' }}"></image>
           <image class='goods_item_lg' wx:else="" src="/images/Photo.png" bind:tap="choiceImg"></image>
           <view wx:if="{{src.length > 0}}" bindtap="delPic" style="margin-left: 180rpx;margin-top: -200rpx;">
             <image src="../../../images/del.png" mode="aspectFill" class="icon" />

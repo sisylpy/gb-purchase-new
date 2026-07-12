@@ -10,7 +10,7 @@
         <image
         
           class="dual-avatar"
-          src="{{avatar}}"
+          src="/images/jj.png"
           mode="aspectFill"
         />
        

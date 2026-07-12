@@ -2,6 +2,7 @@ var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 import apiUrl from '../../../../config/index.js';
 import { menuFoodBusinessDetail } from '../../../../services/apiDistributerFood';
+var dateUtils = require('../../../../lib/dateUtil.js');
 
 // ===== 工具函数 =====
 
@@ -53,6 +54,13 @@ Page({
     navBarHeight: 0,
     loading: true,
     errMsg: '',
+
+    // ===== 日期选择 =====
+    startDate: '',
+    stopDate: '',
+    hanzi: '',
+    dateType: 'month',
+    update: false,
 
     // ===== 列表页传入字段（详情接口不返回） =====
     foodId: '',
@@ -157,7 +165,52 @@ Page({
       this.setData({ loading: false, errMsg: '缺少菜品ID' });
       return;
     }
+    this._syncDatesFromMyDateStorage();
     this._fetchDetail();
+  },
+
+  onShow() {
+    if (this.data.update) {
+      this._syncDatesFromMyDateStorage();
+      this.setData({ update: false });
+      this._fetchDetail();
+    }
+  },
+
+  /** 跳转到日期选择页面 */
+  toDatePageSearch() {
+    this.setData({ update: true });
+    wx.navigateTo({
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate +
+        '&stopDate=' + this.data.stopDate +
+        '&dateType=' + (this.data.dateType || 'month'),
+    });
+  },
+
+  /** 同步日期选择器存储的日期到页面数据 */
+  _syncDatesFromMyDateStorage() {
+    var myDate = wx.getStorageSync('myDate');
+    if (myDate) {
+      var dateRange;
+      if (myDate.name === 'custom') {
+        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
+      } else {
+        dateRange = dateUtils.getDateRange(myDate.name);
+      }
+      this.setData({
+        startDate: dateRange.startDate,
+        stopDate: dateRange.stopDate,
+        hanzi: myDate.hanzi || dateRange.name,
+      });
+    } else {
+      var today = dateUtils.getArriveDate(0);
+      var firstDay = today.substring(0, 8) + '01';
+      this.setData({
+        startDate: firstDay,
+        stopDate: today,
+        hanzi: '本月',
+      });
+    }
   },
 
   toBack() {
@@ -175,12 +228,22 @@ Page({
   _fetchDetail() {
     var that = this;
     load.showLoading('加载中');
+
+    // 根据 startDate / stopDate 动态计算 days
+    var start = this.data.startDate;
+    var stop = this.data.stopDate;
+    var days = 30; // 默认
+    if (start && stop) {
+      var diff = new Date(stop.replace(/-/g, '/')).getTime() - new Date(start.replace(/-/g, '/')).getTime();
+      days = Math.round(diff / (1000 * 60 * 60 * 24)) + 1;
+    }
+
     menuFoodBusinessDetail({
       distributerId: this.data.distributerId,
       scopeMode: this.data.scopeMode,
       departmentId: this.data.departmentId,
       foodId: this.data.foodId,
-      days: 30,
+      days: days,
     })
       .then(function (res) {
         load.hideLoading();

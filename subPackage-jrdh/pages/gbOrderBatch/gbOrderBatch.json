@@ -1,0 +1,10 @@
+{
+  "usingComponents": {
+    "delWarnModal": "/components/delWarnModal/delWarnModal",
+    "order-batch-header": "../../components/order-batch-header/order-batch-header",
+    "order-participants": "../../components/order-participants/order-participants",
+    "order-goods-list": "../../components/order-goods-list/order-goods-list",
+    "order-batch-footer": "../../components/order-batch-footer/order-batch-footer",
+    "seller-action-bar": "../../components/seller-action-bar/seller-action-bar"
+  }
+}

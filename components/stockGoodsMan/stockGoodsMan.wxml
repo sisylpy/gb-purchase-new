@@ -1,4 +1,4 @@
-<wxs src="../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 <view class='ccc' wx:if='{{show}}' catchtouchmove='ture' style="height:{{windowHeight}}rpx;">
   <view class='body bg-white flex-column' style="margin-top:{{scrollViewTop + windowHeight/3}}rpx; z-index: 999999999;">

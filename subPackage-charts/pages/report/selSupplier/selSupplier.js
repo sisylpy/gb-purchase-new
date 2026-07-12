@@ -2,7 +2,7 @@
 var load = require('../../../../lib/load.js');
 var config = require('../../../../config/index.js');
 var chartsApi = require('../../../services/api.js');
-var apiDistributer = require('../../../../services/apiDistributer.js');
+var getDepUsersByFatherIdGb = require('../../../../services/mendian').getDepUsersByFatherIdGb;
 
 Page({
 
@@ -76,7 +76,7 @@ Page({
       stopDate: this.data.stopDate,
       depId: userInfo.gbDuDepartmentId,
     };
-    apiDistributer.getDepUsersByFatherIdGb(data).then(res => {
+    getDepUsersByFatherIdGb(data).then(res => {
       if (res.result.code == 0) {
         const userArr = (res.result.data || []).map(user => ({
           ...user,

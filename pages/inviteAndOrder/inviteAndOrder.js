@@ -2,6 +2,7 @@
 
 const app = getApp()
 const globalData = getApp().globalData;
+var requestUtil = require('../../lib/request');
 
 Page({
 
@@ -31,7 +32,7 @@ Page({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      url: apiUrl.server,  
+      url: requestUtil.getServerUrl(),
     })
     var disInfo = wx.getStorageSync('disInfo');
     if(disInfo){

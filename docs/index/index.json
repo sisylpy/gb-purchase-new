@@ -1,9 +1,0 @@
-{
-  "usingComponents": {
-    "customer-navbar": "/components/custom-navbar/custom-navbar",
-    "returnType": "/components/returnType/returnType"
-
-  },
-  "enablePullDownRefresh": true
-  
-}

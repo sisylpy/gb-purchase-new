@@ -234,8 +234,8 @@
 }
 
 .daily-card__weekday {
-  font-size: 22rpx;
-  color: #999;
+  font-size: 26rpx;
+  color: #302f2f;
 }
 
 .daily-card__weather {

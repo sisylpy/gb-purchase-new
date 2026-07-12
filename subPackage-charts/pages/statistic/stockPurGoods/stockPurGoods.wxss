@@ -18,6 +18,67 @@
   font-weight: 700;
 }
 
+/* 商品行右侧库存金额 */
+.goods-price-section {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e6f0ff 100%);
+  padding: 12rpx 20rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(74, 144, 226, 0.1);
+  box-shadow: 0 2rpx 8rpx rgba(74, 144, 226, 0.05);
+}
+
+.price-label {
+  font-size: 20rpx;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 4rpx;
+}
+
+.price-value {
+  font-size: 28rpx;
+  color: #4A90E2;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.arrow-container {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+.arrow-container.expanded {
+  background: rgba(74, 144, 226, 0.2);
+  border-color: rgba(74, 144, 226, 0.3);
+}
+
+.arrow-container .arrow-icon {
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrow-container.expanded .arrow-icon {
+  transform: rotate(90deg);
+}
+
+.arrow-container.collapsed .arrow-icon {
+  transform: rotate(0deg);
+}
+
 /* ============ 采购页面专用样式 - 蓝色主题 ============ */
 
 /* 采购批次行容器 */

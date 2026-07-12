@@ -1,249 +1,292 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
+<view class="sgb-page flex flex-column">
+  <back-navbar
+    style="height: {{navBarHeight}}rpx;"
+    title="{{navTitle || goodsName}}"
+    avatar="/images/back-gray.png"
+    button-text="设置"
+    bindnavbuttontap="toBack"
+  />
 
-
-<view class="flex flex-column ">
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{depGoods.gbDdgDepGoodsName}} {{disGoods.gbDgGoodsStandardname}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
-
-  <!--  top -->
-  <view class=" flex-row-between pl-20 pr-20  bg-white border-bottom ">
-    <view class="flex-row">
-      <view class="p-20" bindtap="toDatePage">
-        <image src="/images/calender.png" class="icon"></image>
-      </view>
-      <view class="flex-column">
-        <view class="flex-row" wx:if="{{startDate == stopDate}}">
-          <view class=" font-sl"> {{tool.transferDateString(startDate)}}</view>
-        </view>
-        <view class="flex-row" wx:else>
-          <view class=" font-sl" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
-          <text class="p-10">-</text>
-          <view class=" font-sl" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
-        </view>
+  <view class="sgb-filter">
+    <view class="sgb-filter__left" bindtap="toDatePage">
+      <image src="/images/calender.png" class="sgb-filter__icon" mode="aspectFit" />
+      <view class="sgb-filter__text">
+        <text wx:if="{{dateFilterActive && startDate == stopDate}}">{{tool.transferDateString(startDate)}}</text>
+        <text wx:elif="{{dateFilterActive}}">{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text>
+        <text wx:else class="sgb-filter__hint">有库存批次</text>
       </view>
     </view>
-    <text></text>
-    <view class="flex-row p-20" bindtap="toDate">
-      <image src="/images/search-3.png" class="icon mr-20"></image>
+    <view class="sgb-filter__search" bindtap="toDate">
+      <image src="/images/search-3.png" class="sgb-filter__icon" mode="aspectFit" />
     </view>
   </view>
 
+  <scroll-view
+    scroll-y
+    class="sgb-scroll"
+    style="height: {{windowHeight - navBarHeight - 88}}rpx;"
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view wx:if="{{stockArr.length == 0}}" class="sgb-empty">
+      <image class="sgb-empty__img" src="/images/cart-Empty.png" mode="aspectFill" />
+      <text class="sgb-empty__text">暂无库存批次</text>
+    </view>
 
-  <view class="p-10 ">
+    <view class="sgb-list" wx:else>
+      <view class="sgb-card" wx:for="{{stockArr}}" wx:key="gbDepartmentGoodsStockId">
+        <view class="sgb-card__head">
+          <view class="sgb-card__title">
+            <text class="sgb-card__title-label">入库批次</text>
+            <text class="sgb-card__title-date">{{tool.getAttrDateString(item.gbDgsDate)}}</text>
+          </view>
+          <view class="sgb-card__tag" wx:if="{{item.nxJrdhSupplierEntity}}">
+            订货 · {{item.nxJrdhSupplierEntity.nxJrdhsSupplierName}}
+          </view>
+          <view class="sgb-card__tag" wx:else>自采 · {{mendianName}}</view>
+        </view>
 
+        <view class="sgb-grid">
+          <view class="sgb-grid__cell">
+            <text class="sgb-grid__label">单价 (元/{{goodsUnit}})</text>
+            <text class="sgb-grid__val">{{item.gbDgsPrice}}元/{{goodsUnit}}</text>
+          </view>
+          <view class="sgb-grid__cell">
+            <text class="sgb-grid__label">进货 ({{goodsUnit}})</text>
+            <text class="sgb-grid__val">{{item.gbDgsWeight}}{{goodsUnit}}</text>
+          </view>
+          <view class="sgb-grid__cell">
+            <text class="sgb-grid__label">金额 (元)</text>
+            <text class="sgb-grid__val">{{item.gbDgsSubtotal}}元</text>
+          </view>
+          <view class="sgb-grid__cell">
+            <text class="sgb-grid__label">库存 ({{goodsUnit}})</text>
+            <text class="sgb-grid__val {{item.gbDgsRestWeight > 0 ? 'sgb-grid__val--active' : ''}}">{{item.gbDgsRestWeight}}{{goodsUnit}}</text>
+          </view>
+        </view>
 
-    <view class=" {{stockArr.length == 0  ? 'show' : 'hide'}}" style="height: {{windowHeight - 260 - navBarHeight}}rpx; text-align:center;">
-      <view class="normal  empty_view">
-        <view class="flex-column-center">
-          <image class="empty_image" src="/images/cart-Empty.png"></image>
-          <text class="big">暂时无订购商品</text>
+        <view
+          class="sgb-waste-tip"
+          wx:if="{{item.gbDgsWasteFullTime !== null && item.gbDgsWasteFullTime !== ''}}"
+        >
+          <text>废弃剩余 {{tool.getRestTime(item.gbDgsWasteFullTime, nowTime)}} 小时</text>
+          <text class="sgb-waste-tip__time">{{tool.getAttrFullTime(item.gbDgsWasteFullTime)}}</text>
+        </view>
+
+        <view class="sgb-section">
+          <view class="sgb-section__title">
+            <view class="sgb-section__bar"></view>
+            <text>本批次去向</text>
+          </view>
+
+          <view class="sgb-outcome">
+            <view class="sgb-outcome__row">
+              <view class="sgb-outcome__label">
+                <view class="sgb-outcome__dot sgb-outcome__dot--sale"></view>
+                <text>销售</text>
+              </view>
+              <view class="sgb-outcome__content">
+                <block wx:if="{{item._produceList.length > 0}}">
+                  <view
+                    class="sgb-pill-wrap"
+                    wx:for="{{item._produceList}}"
+                    wx:for-item="reduce"
+                    wx:key="gbDepartmentGoodsStockReduceId"
+                  >
+                    <view class="sgb-pill sgb-pill--sale">
+                      <text>{{tool.getAttrDateString(reduce.gbDgsrDate)}} {{reduce.gbDgsrWeight}}{{goodsUnit}}</text>
+                    </view>
+                    <view
+                      wx:if="{{today == reduce.gbDgsrDate}}"
+                      class="sgb-pill__del"
+                      bindtap="deleteReduce"
+                      data-id="{{reduce.gbDepartmentGoodsStockReduceId}}"
+                      data-date="{{reduce.gbDgsrDate}}"
+                      hover-class="sgb-pill__del--hover"
+                    >
+                      <image class="sgb-pill__del-icon" src="/images/delok.png" mode="aspectFill" />
+                    </view>
+                  </view>
+                </block>
+                <text wx:else class="sgb-outcome__empty">暂无</text>
+              </view>
+            </view>
+
+            <view class="sgb-outcome__row">
+              <view class="sgb-outcome__label">
+                <view class="sgb-outcome__dot sgb-outcome__dot--loss"></view>
+                <text>损耗</text>
+              </view>
+              <view class="sgb-outcome__content">
+                <block wx:if="{{item._lossList.length > 0}}">
+                  <view
+                    class="sgb-pill-wrap"
+                    wx:for="{{item._lossList}}"
+                    wx:for-item="reduce"
+                    wx:key="gbDepartmentGoodsStockReduceId"
+                  >
+                    <view class="sgb-pill sgb-pill--loss">
+                      <text>{{tool.getAttrDateString(reduce.gbDgsrDate)}} {{reduce.gbDgsrWeight}}{{goodsUnit}}</text>
+                    </view>
+                    <view
+                      wx:if="{{today == reduce.gbDgsrDate}}"
+                      class="sgb-pill__del"
+                      bindtap="deleteReduce"
+                      data-id="{{reduce.gbDepartmentGoodsStockReduceId}}"
+                      data-date="{{reduce.gbDgsrDate}}"
+                      hover-class="sgb-pill__del--hover"
+                    >
+                      <image class="sgb-pill__del-icon" src="/images/delok.png" mode="aspectFill" />
+                    </view>
+                  </view>
+                </block>
+                <text wx:else class="sgb-outcome__empty">暂无</text>
+              </view>
+            </view>
+
+            <view class="sgb-outcome__row">
+              <view class="sgb-outcome__label">
+                <view class="sgb-outcome__dot sgb-outcome__dot--waste"></view>
+                <text>废弃</text>
+              </view>
+              <view class="sgb-outcome__content">
+                <block wx:if="{{item._wasteList.length > 0}}">
+                  <view
+                    class="sgb-pill-wrap"
+                    wx:for="{{item._wasteList}}"
+                    wx:for-item="reduce"
+                    wx:key="gbDepartmentGoodsStockReduceId"
+                  >
+                    <view class="sgb-pill sgb-pill--waste">
+                      <text>{{tool.getAttrDateString(reduce.gbDgsrDate)}} {{reduce.gbDgsrWeight}}{{goodsUnit}}</text>
+                    </view>
+                    <view
+                      wx:if="{{today == reduce.gbDgsrDate}}"
+                      class="sgb-pill__del"
+                      bindtap="deleteReduce"
+                      data-id="{{reduce.gbDepartmentGoodsStockReduceId}}"
+                      data-date="{{reduce.gbDgsrDate}}"
+                      hover-class="sgb-pill__del--hover"
+                    >
+                      <image class="sgb-pill__del-icon" src="/images/delok.png" mode="aspectFill" />
+                    </view>
+                  </view>
+                </block>
+                <text wx:else class="sgb-outcome__empty">暂无</text>
+              </view>
+            </view>
+
+            <view class="sgb-outcome__row">
+              <view class="sgb-outcome__label">
+                <view class="sgb-outcome__dot sgb-outcome__dot--meal"></view>
+                <text>员工餐</text>
+              </view>
+              <view class="sgb-outcome__content">
+                <block wx:if="{{item._mealList.length > 0}}">
+                  <view
+                    class="sgb-pill-wrap"
+                    wx:for="{{item._mealList}}"
+                    wx:for-item="reduce"
+                    wx:key="gbDepartmentGoodsStockReduceId"
+                  >
+                    <view class="sgb-pill sgb-pill--meal">
+                      <text>{{tool.getAttrDateString(reduce.gbDgsrDate)}} {{reduce.gbDgsEmployeeMealWeight || reduce.gbDgsrWeight}}{{goodsUnit}}</text>
+                    </view>
+                    <view
+                      wx:if="{{today == reduce.gbDgsrDate}}"
+                      class="sgb-pill__del"
+                      bindtap="deleteReduce"
+                      data-id="{{reduce.gbDepartmentGoodsStockReduceId}}"
+                      data-date="{{reduce.gbDgsrDate}}"
+                      hover-class="sgb-pill__del--hover"
+                    >
+                      <image class="sgb-pill__del-icon" src="/images/delok.png" mode="aspectFill" />
+                    </view>
+                  </view>
+                </block>
+                <text wx:else class="sgb-outcome__empty">暂无</text>
+              </view>
+            </view>
+
+            <view class="sgb-outcome__row sgb-outcome__row--last">
+              <view class="sgb-outcome__label">
+                <view class="sgb-outcome__dot sgb-outcome__dot--return"></view>
+                <text>退货</text>
+              </view>
+              <view class="sgb-outcome__content">
+                <block wx:if="{{item._returnList.length > 0}}">
+                  <view
+                    class="sgb-pill-wrap"
+                    wx:for="{{item._returnList}}"
+                    wx:for-item="reduce"
+                    wx:key="gbDepartmentGoodsStockReduceId"
+                  >
+                    <view class="sgb-pill sgb-pill--return">
+                      <text>{{tool.getAttrDateString(reduce.gbDgsrDate)}} {{reduce.gbDgsrWeight}}{{goodsUnit}}</text>
+                    </view>
+                    <view
+                      wx:if="{{reduce.gbDgsrStatus == '-1'}}"
+                      class="sgb-pill__del"
+                      bindtap="deleteReduce"
+                      data-id="{{reduce.gbDepartmentGoodsStockReduceId}}"
+                      data-date="{{reduce.gbDgsrDate}}"
+                      hover-class="sgb-pill__del--hover"
+                    >
+                      <image class="sgb-pill__del-icon" src="/images/delok.png" mode="aspectFill" />
+                    </view>
+                  </view>
+                </block>
+                <text wx:else class="sgb-outcome__empty">暂无</text>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
     </view>
 
-    <view class="flex-column p-10">
-
-      <view class="flex-column font-lg radius-10 border bg-white mb-30" wx:for="{{stockArr}}">
-
-        <view class="flex-column" style="background-color: #ececec;">
-          <view class="flex-row p-20 border-bottom">
-            <view class="flex-row half-row ">
-              <text class="mr-10">时间:</text>
-              <text class="">{{tool.getAttrDateString(item.gbDgsDate)}}</text>
-            </view>
-
-            <view class="flex-row half-row" wx:if="{{item.nxJrdhSupplierEntity}}">
-              <text class="mr-10">订货商:</text>
-              <text class="">{{item.nxJrdhSupplierEntity.nxJrdhsSupplierName}}</text>
-            </view>
-
-            <view class="flex-row half-row" wx:else>
-              <text class="mr-10">自采:</text>
-              <text class="">{{mendianName}}</text>
-            </view>
-          </view>
-
-          <view class="flex-row  p-20 border-bottom">
-            <view class="flex-row half-row ">
-              <text class="mr-10">单价:</text>
-              <text>{{item.gbDgsPrice}}元/{{disGoods.gbDgGoodsStandardname}}</text>
-            </view>
-            <view class="flex-row half-row ">
-              <text class="mr-10">进货:</text>
-              <text>{{item.gbDgsWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-            </view>
-           
-
-          </view>
-          <view class="flex-row  p-20 border-bottom">
-
-            <view class="flex-row half-row ">
-              <text class="mr-10">金额:</text>
-              <text>{{item.gbDgsSubtotal}}元</text>
-            </view>
-            <view class="flex-row half-row ">
-              <text class="mr-10">库存:</text>
-              <text>{{item.gbDgsRestWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-            </view>
-
-          </view>
-
-          <block wx:if="{{item.gbDgsWasteFullTime !== null  && item.gbDgsWasteFullTime !== ''}}">
-            <view class="flex-row p-20 border-bottom">
-              <view class="flex-row half-row">
-                <text class="mr-10">废弃剩余: </text>
-                <text class="{{tool.getRestTime(item.gbDgsWasteFullTime, nowTime) < 0 ? 'text-danger' :''}}">{{tool.getRestTime(item.gbDgsWasteFullTime, nowTime)}}小时</text>
-              </view>
-              <view class="flex-row half-row">
-                <text class="mr-10">废弃时间: </text>
-                <text>{{tool.getAttrFullTime(item.gbDgsWasteFullTime)}}</text>
-              </view>
-            </view>
-          </block>
-
-          <!-- <view class="flex-row  p-20 border-bottom">
-
-            <view class="flex-row  ">
-              <text class="mr-10 flex-shrink-0">新鲜度:</text>
-              <image wx:for="{{item.gbDgsStars}}" src="/images/starGreen.png" mode="aspectFill" class="icon-sm mr-30" />
-           
-            </view>
-
-          </view> -->
-        </view>
-
-        <view class="flex-column font-md p-10" style="width: {{windowWidth - 40}}rpx; ; ">
-        
-          <view class="flex-row-default p-20 ">
-            <view class="flex-row flex-shrink-0 mr-20">
-              <text class="line_father icon mr-10"></text>
-              <text class="">销售</text>
-            </view>
-
-            <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
-              <view class="mr-20 flex-row mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == '1'}}">
-                <view class="flex-row line_father_item  mr-20">
-                  <text class="mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                  <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
-                  <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
-                </view>
-              </view>
-            </view>
-
-          </view>
-
-          <view class="flex-row-default p-20 ">
-
-            <view class="flex-row flex-shrink-0 mr-20">
-              <text class="line_father_loss icon mr-10"></text>
-              <text class="">损耗</text>
-            </view>
-
-
-            <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
-              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 3}}">
-                <view class="flex-row line_father_item  mr-20">
-                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                  <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
-                  <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
-                </view>
-              </view>
-            </view>
-          </view>
-
-
-          <view class="flex-row-default p-20 ">
-
-            <view class="flex-row flex-shrink-0 mr-20">
-              <text class="line_father_waste icon mr-10"></text>
-              <text class="">废弃</text>
-            </view>
-
-
-            <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
-              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 2}}">
-                <view class="flex-row line_father_item  mr-20">
-                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                  <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
-                  <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
-                </view>
-              </view>
-            </view>
-
-          </view>
-
-
-          <view class="flex-row-default p-20 ">
-
-            <view class="flex-row flex-shrink-0 mr-20">
-              <text class="line_father_employee_meal icon mr-10"></text>
-              <text class="">员工餐</text>
-            </view>
-
-            <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
-              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 6 || reduce.gbDgsrType == '6'}}">
-                <view class="flex-row line_father_item  mr-20">
-                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                  <text>{{reduce.gbDgsrEmployeeMealWeight || reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-                <view class="flex-row p-10" wx:if="{{today == reduce.gbDgsrDate}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
-                  <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
-                </view>
-              </view>
-            </view>
-
-          </view>
-
-
-          <view class="flex-row-default p-20 ">
-
-            <view class="flex-row flex-shrink-0 mr-20">
-              <text class="line_father_return icon mr-10"></text>
-              <text class="">退货</text>
-            </view>
-
-            <view class="flex-row-wrap font-sl" style="width: {{windowWidth - 200}}rpx;">
-              <view class="mr-20 flex-row  mb-20" wx:for="{{item.goodsStockReduceEntityList}}" wx:for-item="reduce" wx:if="{{reduce.gbDgsrType == 4}}">
-                <view class="flex-row line_father_item  mr-20">
-                  <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
-                  <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
-                </view>
-                <view class="flex-row p-10" wx:if="{{reduce.gbDgsrStatus == '-1' }}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
-                  <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
-                </view>
-              </view>
-            </view>
-
-          </view>
-
-        </view>
-
-        <!-- <view class="p-20" wx:if="{{item.gbDgsRestWeight > 0}}">
-       
-          <view class="save-btn" bindtap="showStock"  wx:key="gbDepartmentDisGoodsId" hover-class="clickStock" data-item="{{item}}" data-index="{{index}}">修改库存</view>
-        </view> -->
-
-      </view>
-
-    </view>
-
-
-  </view>
-
-
+    <view class="sgb-scroll__foot"></view>
+  </scroll-view>
 </view>
 
+<stockGoods
+  show="{{showStock}}"
+  bindconfirm="confirmStock"
+  bindupdateStars="updateStars"
+  item="{{item}}"
+  disGoods="{{disGoods}}"
+  bindcancle="cancle"
+  windowHeight="{{windowHeight}}"
+  windowWidth="{{windowWidth}}"
+  consultItem="{{item}}"
+  nowTime="{{nowTime}}"
+  src="{{src}}"
+  reason="{{reason}}"
+  canWaste="{{canWaste}}"
+  canSure="{{canSure}}"
+  showType="{{showType}}"
+  resultTime="{{resultTime}}"
+  url="{{url}}"
+/>
 
-
-
-
-<stockGoods show="{{showStock}}" bindconfirm="confirmStock" bindupdateStars="updateStars" item="{{item}}" disGoods="{{disGoods}}" bindcancle="cancle" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" nowTime="{{nowTime}}" src="{{src}}" reason="{{reason}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" url="{{url}}" />
-
-
-<stockStar show="{{showStar}}" bindconfirm="confirmStar" bindupdateStars="updateStars" binddelAttem="delAttem" item="{{item}}" disGoods="{{disGoods}}" bindcancle="cancle" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" consultItem="{{item}}" nowTime="{{nowTime}}" src="{{src}}" reason="{{reason}}" canWaste="{{canWaste}}" canSure="{{canSure}}" showType="{{showType}}" resultTime="{{resultTime}}" url="{{url}}" />
+<stockStar
+  show="{{showStar}}"
+  bindconfirm="confirmStar"
+  bindupdateStars="updateStars"
+  binddelAttem="delAttem"
+  item="{{item}}"
+  disGoods="{{disGoods}}"
+  bindcancle="cancle"
+  windowHeight="{{windowHeight}}"
+  windowWidth="{{windowWidth}}"
+  consultItem="{{item}}"
+  nowTime="{{nowTime}}"
+  src="{{src}}"
+  reason="{{reason}}"
+  canWaste="{{canWaste}}"
+  canSure="{{canSure}}"
+  showType="{{showType}}"
+  resultTime="{{resultTime}}"
+  url="{{url}}"
+/>

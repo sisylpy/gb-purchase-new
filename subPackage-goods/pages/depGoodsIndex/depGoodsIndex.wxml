@@ -4,26 +4,36 @@
 
   <search-navbar style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack" bindtoSearchGoods="beginSearch"></search-navbar>
 
-  <view class="flex flex-row-between  bg-white" style="height:120rpx; ">
+  <view class="flex flex-row-between bg-white header-bar">
 
-<view class="flex flex-row p-20 mainColor">
+    <view class="flex flex-row p-20 mainColor header-type" bindtap="openOperation" hover-class="hover">
+      <text wx:if="{{goodsType == '99'}}">全部商品</text>
+      <text wx:elif="{{goodsType == '21'}}">自动订货</text>
+      <text wx:elif="{{goodsType == '1'}}">自采商品</text>
+      <text wx:elif="{{goodsType == '101'}}">保鲜控制</text>
+      <text wx:elif="{{goodsType == '102'}}">停止送货</text>
+      <image src="../../../images/filter.png" class="icon header-type-icon"></image>
+    </view>
 
-  <text class="" wx:if="{{goodsType == '99'}}">全部商品</text>
-  <text class="" wx:elif="{{goodsType == '21'}}">自动订货</text>
-  <text class="" wx:elif="{{goodsType == '2'}}">自采商品</text>
-  <text class="" wx:elif="{{goodsType == '101'}}">保鲜控制</text>
-  <text class="" wx:elif="{{goodsType == '102'}}">停止送货</text>
+    <view class="p-10" wx:if="{{hasMultiSubDep}}">
+      <view class="button-container-white" hover-class="button-hover" bindtap="openSubDepFilter">
+        <image src="{{activeSubDepId ? '../../../images/filter.png' : '../../../images/filter-3-fill.png'}}" class="icon"></image>
+      </view>
+    </view>
 
-</view>
-
-
-<view class="p-10">
-  <view class="button-container-white" hover-class="button-hover" bindtap="openOperation" >
-    <image src="../../../images/filter.png" class="icon"></image>
   </view>
-</view>
 
-</view>
+  <!-- 已选子部门 -->
+  <view class="filter-container" wx:if="{{activeSubDepId && activeSubDepName}}">
+    <view class="filter-row">
+      <view class="filter-chip">
+        <text class="filter-text">部门: {{activeSubDepName}}</text>
+        <view class="filter-delete" catchtap="clearSubDepFilter">
+          <image src="/images/del-2.png" mode="aspectFill" class="delete-icon"></image>
+        </view>
+      </view>
+    </view>
+  </view>
 
   <view class="flex-column mt-30">
     <!-- empty -->
@@ -46,7 +56,7 @@
           <view class="left-item {{selectedSub == index ? 'left-active' : ''}}" wx:for="{{disGoodsCataArr}}" wx:key="gbDistributerFatherGoodsId" id="left-cat-{{grand.gbDistributerFatherGoodsId}}" wx:for-item="grand" bindtap="leftMenuClickDep" data-index="{{index}}" data-id="{{grand.gbDistributerFatherGoodsId}}" data-name="{{grand.gbDfgFatherGoodsName}}">
             <view class="flex-column-center">
               <!-- <view class="picView ">
-                <image src="{{grand.gbDfgFatherGoodsImg != null && grand.gbDfgFatherGoodsImg !== '' ? url + grand.gbDfgFatherGoodsImg  : '/images/logo.jpg'}}" mode="aspectFill" class="url" />
+                <image src="{{grand.gbDfgFatherGoodsImg != null && grand.gbDfgFatherGoodsImg !== '' ? url + grand.gbDfgFatherGoodsImg  : '/images/logo.png'}}" mode="aspectFill" class="url" />
               </view> -->
               <view class="extremeSmall text_center">
                 <text>{{grand.gbDfgFatherGoodsName}}</text>
@@ -95,7 +105,7 @@
                 <!-- <image
                   bindtap="showDialogBtnDep"
                   data-item="{{goods}}"
-                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ?  url+ goods.gbDgNxFatherImg : '/images/logo.jpg'}}"
+                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ?  url+ goods.gbDgNxFatherImg : '/images/logo.png'}}"
                   mode="aspectFill"
                   class="logoimg"
                   data-raw-path="{{goods.gbDgNxFatherImg}}"
@@ -247,9 +257,9 @@
       <text class="mr-20 ml-20 {{goodsType == '21' ? 'mainColor' : ''}} ">自动订货</text>
     </view>
 
-    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="2">
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="1">
       <image src="../../../images/gouwuche-4.png" class="icon mr-20 ml-20"></image>
-      <text class="mr-20 ml-20 {{goodsType == '2' ? 'mainColor' : ''}} ">采购商品</text>
+      <text class="mr-20 ml-20 {{goodsType == '1' ? 'mainColor' : ''}} ">采购商品</text>
     </view>
     <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="101">
       <image src="../../../images/toxicwaste.png" class="icon mr-20 ml-20"></image>
@@ -258,6 +268,23 @@
     <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="102">
       <image src="../../../images/warn.png" class="icon mr-20 ml-20"></image>
       <text class="mr-20 ml-20 {{goodsType == '102' ? 'mainColor' : ''}} ">停止订货</text>
+    </view>
+
+    <view style="height: 20rpx;"></view>
+
+  </view>
+</view>
+
+<!-- 子部门筛选 -->
+<view class='overlay {{showSubDepFilter ? "show" : ""}}' catchtouchmove='true' catchtap="hideSubDepMask">
+  <view class="flex-column nnn bg-white font-lg" wx:if="{{chooseSubDepSize}}" animation='{{animationSubDepData}}' catchtap="stopScroll">
+
+    <view class="flex-row p-30 border-bottom" bindtap="onSubDepTap" data-id="" data-name="">
+      <text class="mr-20 ml-20 {{activeSubDepId == '' ? 'mainColor' : ''}}">全部部门</text>
+    </view>
+
+    <view class="flex-row p-30 border-bottom" wx:for="{{subDepList}}" wx:key="gbDepartmentId" bindtap="onSubDepTap" data-id="{{item.gbDepartmentId}}" data-name="{{item.gbDepartmentName}}">
+      <text class="mr-20 ml-20 {{activeSubDepId == item.gbDepartmentId ? 'mainColor' : ''}}">{{item.gbDepartmentName}}</text>
     </view>
 
     <view style="height: 20rpx;"></view>

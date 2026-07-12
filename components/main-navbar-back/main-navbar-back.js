@@ -1,3 +1,5 @@
+var navbarGeom = require('../../lib/navbarGeom');
+
 Component({
   properties: {
     title: {
@@ -6,7 +8,7 @@ Component({
     },
     avatar: {
       type: String,
-      value: '/images/avatar.png'
+      value: '/images/user.png'
     },
     buttonText: {
       type: String,
@@ -32,31 +34,11 @@ Component({
   lifetimes: {
     attached() {
       const app = getApp();
-       var windowWidth = app.globalData.windowWidth;
-       var menuButtonInfo = app.globalData.menuButtonInfo;
-       const navBarContentHeight = menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight) * 2;
-       var statusBarHeight = app.globalData.statusBarHeight;
-       const navBarHeight = statusBarHeight + navBarContentHeight;
-
-       
-       const rightWidth = windowWidth - menuButtonInfo.left;
-       const leftWidth = rightWidth;
-
-      this.setData({
-        statusBarHeight: app.globalData.statusBarHeight,
-        navBarContentHeight: app.globalData.navBarContentHeight,
-        navBarHeight: app.globalData.navBarHeight,
-        menuButtonInfo: app.globalData.menuButtonInfo,
-        leftWidth: leftWidth,
-        navBarHeight: navBarHeight,
-        rightWidth: rightWidth
-
-      });
-      console.log("leeeee", leftWidth , "rihgll==", rightWidth)
-
+      this.setData(navbarGeom.calcSimpleNavBar(app.globalData));
+      console.log("leeeee", this.data.leftWidth, "rihgll==", this.data.rightWidth)
     }
   },
-  
+
   methods: {
     onNavButtonTapBack() {
       this.triggerEvent('navbuttontap');
@@ -69,16 +51,16 @@ Component({
       console.log('[main-navbar] 点击了遮罩层，关闭菜单');
       this.setData({ showSwitchMenu: false });
     },
-    
+
     onSortByTime() {
       console.log('[main-navbar] 点击了按时间');
-      this.setData({ showSwitchMenu: false ,currentType: "time"});
-     
+      this.setData({ showSwitchMenu: false, currentType: "time" });
+
       this.triggerEvent('sortby', { type: 'time' });
     },
     onSortByCategory() {
       console.log('[main-navbar] 点击了按类别');
-      this.setData({ showSwitchMenu: false ,currentType: "category"});
+      this.setData({ showSwitchMenu: false, currentType: "category" });
 
       this.triggerEvent('sortby', { type: 'category' });
     },
@@ -90,7 +72,7 @@ Component({
       console.log('[main-navbar] 输入框内容变化:', value);
       this.setData({ isSearching: !!value });
       this.triggerEvent('searchinput', { value });
-      
+
       if (!value) {
         wx.hideKeyboard();
       }
@@ -112,7 +94,7 @@ Component({
     },
   },
   observers: {
-    'searchValue': function(value) {
+    'searchValue': function (value) {
       if (value !== undefined) {
         this.setData({ isSearching: !!value });
       }

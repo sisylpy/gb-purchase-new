@@ -56,7 +56,14 @@ Page({
     subcatScrollIntoViewDep: '', // 二级分类横向滚动位置
     scrollIntoViewDep: '', // 商品列表滚动位置
 
-
+    // 子部门筛选（门店下有多个子部门时展示）
+    hasMultiSubDep: false,
+    subDepList: [],
+    activeSubDepId: '',
+    activeSubDepName: '',
+    showSubDepFilter: false,
+    chooseSubDepSize: false,
+    animationSubDepData: {},
 
   },
 
@@ -75,9 +82,14 @@ Page({
     // }
     var mendianInfo = wx.getStorageSync('mendianInfo');
     if (mendianInfo) {
+      var subDepList = mendianInfo.gbDepartmentEntityList || [];
+      var hasMultiSubDep = subDepList.length > 1;
       this.setData({
         mendianInfo: mendianInfo,
-        depFatherId: mendianInfo.gbDepartmentId
+        depFatherId: mendianInfo.gbDepartmentId,
+        subDepList: subDepList,
+        hasMultiSubDep: hasMultiSubDep,
+        activeSubDepId: '',
       })
     }
 
@@ -88,12 +100,56 @@ Page({
   },
 
 
-  _getInitDataDep() {
-    load.showLoading("获取分类");
+  _buildQueryParams: function () {
     var data = {
       depFatherId: this.data.depFatherId,
       goodsType: this.data.goodsType
+    };
+    if (this.data.activeSubDepId) {
+      data.depId = this.data.activeSubDepId;
     }
+    return data;
+  },
+
+  onSubDepTap: function (e) {
+    var depId = e.currentTarget.dataset.id || '';
+    var depName = e.currentTarget.dataset.name || '';
+    if (String(depId) === String(this.data.activeSubDepId)) {
+      this.hideSubDepMask();
+      return;
+    }
+    this.setData({
+      activeSubDepId: depId,
+      activeSubDepName: depName,
+      currentPage: 1,
+      depGoodsArr: [],
+      selectedSub: 0,
+      showAllSubCatDep: false,
+    }, function () {
+      this.hideSubDepMask();
+      this._getInitDataDep();
+    }.bind(this));
+  },
+
+  clearSubDepFilter: function () {
+    if (!this.data.activeSubDepId) {
+      return;
+    }
+    this.setData({
+      activeSubDepId: '',
+      activeSubDepName: '',
+      currentPage: 1,
+      depGoodsArr: [],
+      selectedSub: 0,
+      showAllSubCatDep: false,
+    }, function () {
+      this._getInitDataDep();
+    }.bind(this));
+  },
+
+  _getInitDataDep() {
+    load.showLoading("获取分类");
+    var data = this._buildQueryParams();
     goodsApi.storeGetDepGoodsCataGb(data).then(function(res) {
       load.hideLoading();
       if (res.result.code === 0 && res.result.data.cataArr.length > 0) {
@@ -129,12 +185,10 @@ _getInitDataPageDep(isRefresh, callback) {
   });
   load.showLoading("加载商品…");
 
-  goodsApi.storeGetDepGoodsGbPage({
-    limit: this.data.limit,
-    page: this.data.currentPage,
-    depFatherId: this.data.depFatherId,
-    goodsType: this.data.goodsType
-  }).then(function(res) {
+  var pageParams = this._buildQueryParams();
+  pageParams.limit = this.data.limit;
+  pageParams.page = this.data.currentPage;
+  goodsApi.storeGetDepGoodsGbPage(pageParams).then(function(res) {
     load.hideLoading();
     this.setData({
       isLoading: false
@@ -287,12 +341,10 @@ _getInitDataPageDep(isRefresh, callback) {
       isLoading: true
     });
     load.showLoading("加载商品");
-    goodsApi.storeGetDepGoodsGbPage({
-      depFatherId: this.data.depFatherId,
-      limit: this.data.limit,
-      page: page,
-      goodsType: this.data.goodsType
-    }).then(function(res) {
+    var pageParams = this._buildQueryParams();
+    pageParams.limit = this.data.limit;
+    pageParams.page = page;
+    goodsApi.storeGetDepGoodsGbPage(pageParams).then(function(res) {
       this.setData({
         isLoading: false
       });
@@ -694,6 +746,57 @@ _getInitDataPageDep(isRefresh, callback) {
    
     this.chooseSezi();
 
+  },
+
+  openSubDepFilter() {
+    this.setData({
+      showSubDepFilter: true,
+    });
+    this.chooseSubDepSezi();
+  },
+
+  chooseSubDepSezi() {
+    var that = this;
+    var animation = wx.createAnimation({
+      duration: 100,
+      timingFunction: 'linear'
+    });
+    that.subDepAnimation = animation;
+    animation.translateY(200).step();
+    that.setData({
+      animationSubDepData: animation.export(),
+      chooseSubDepSize: true
+    });
+    setTimeout(function () {
+      animation.translateY(0).step();
+      that.setData({
+        animationSubDepData: animation.export()
+      });
+    }, 20);
+  },
+
+  hideSubDepMask() {
+    if (!this.data.showSubDepFilter) {
+      return;
+    }
+    var that = this;
+    var animation = wx.createAnimation({
+      duration: 200,
+      timingFunction: 'linear'
+    });
+    that.subDepAnimation = animation;
+    animation.translateY(200).step();
+    that.setData({
+      animationSubDepData: animation.export()
+    });
+    setTimeout(function () {
+      animation.translateY(200).step();
+      that.setData({
+        animationSubDepData: animation.export(),
+        chooseSubDepSize: false,
+        showSubDepFilter: false
+      });
+    }, 200);
   },
 
   chooseSezi: function (e) {

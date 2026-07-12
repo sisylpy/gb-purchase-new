@@ -1,0 +1,126 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+<wxs src="../../utils/orderGoodsFmt.wxs" module="fmt" />
+
+
+<!-- top -->
+<view class="flex-column">
+  <view class="top_img_fixed flex-row" style="width: 100%; height: 110rpx; line-height: 110rpx; padding-top: {{statusBarHeight}}rpx; ">
+    <view class="flex-column with-lr-padding">
+      <image src="../../../../images/back-2.png" class="back_icon" bindtap="toBack"></image>
+    </view>
+    <text>{{retName}}</text>
+  </view>
+  <image src="../../../images/top.png" style="width: 100%; height: {{statusBarHeight + 110}}rpx;"></image>
+</view>
+
+<view style="padding-left:10rpx; padding-right: 10rpx;margin-top: 10rpx;">
+  <view class="body " style="height:{{windowHeight - bottomHeight - statusBarHeight}}rpx; ">
+    <view class="flex-row with-tb-padding with-dashed-bottom">
+      <view class="flex-column-center third-row">
+        <image src="{{url + batch.nxJrdhPurEntity.gbDuWxAvartraUrl}}" class="face_img"></image>
+        <view class="font-sl username">{{tool.getAttrName(batch.nxJrdhPurEntity.gbDuWxNickName)}}</view>
+      </view>
+      <view class="flex-column-center third-row">
+      </view>
+      <view class=" flex-column-center third-row">
+        <block wx:if="{{batch.nxJrdhSellerEntity !== null}}">
+          <image src="{{batch.nxJrdhSellerEntity.nxJrdhUrlChange == 1  ? url + batch.nxJrdhSellerEntity.nxJrdhWxAvartraUrl : batch.nxJrdhSellerEntity.nxJrdhWxAvartraUrl}}" class="face_img"> </image>
+        </block>
+        <block wx:else>
+          <image src="../../../../images/user.png" class="face_img"> </image>
+        </block>
+        <view class="font-sl username">{{tool.getAttrName(batch.nxJrdhSellerEntity.nxJrdhWxNickName)}}</view>
+      </view>
+    </view>
+
+    <scroll-view class="tui-city-scroll-y " scroll-y="true" style="height: {{windowHeight - formHeight - headerHeight}}rpx;">
+      <view class="flex-column  font-lg bg-white" wx:for="{{batch.gbDPGEntities}}" wx:key="gbDistributerPurchaseGoodsId">
+        <view class=" flex-column p-10 ">
+          <view class="flex-row">
+            <text class="mr-10">{{index + 1}}.</text>
+            <text class="mr-10">{{item.gbDistributerGoodsName || item.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+            <text class="font-md gray" wx:if="{{item.gbDistributerGoodsEntity.gbDgGoodsDetail.length > 0 && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">({{item.gbDistributerGoodsEntity.gbDgGoodsDetail}})</text>
+            <text class="font-md gray pack-spec" wx:if="{{fmt.packSpec(item.gbDistributerGoodsEntity)}}">{{fmt.packSpec(item.gbDistributerGoodsEntity)}}</text>
+            <text>{{item.gbDpgQuantity}}{{item.gbDpgStandard || item.gbDistributerGoodsEntity.gbDgCartonUnit || item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+          </view>
+          <view class="flex-row font-sl" style="width: {{windowWidth - 60}}rpx;" wx:if="{{item.gbDpgStatus > 1}}">
+            <text class="mr-10 empty">{{index + 1}}.</text>
+            <view class=" third-row">
+              <text class="mr-10">单价:</text>
+              <block wx:if="{{item.gbDpgBuyScale !== null && item.gbDpgBuyScale > 0 && fmt.isPositiveNum(item.gbDpgBuyScalePrice)}}">
+                <text class="mainColor">{{item.gbDpgBuyScalePrice}}元/{{item.gbDpgStandard}}</text>
+              </block>
+              <block wx:else>
+                <text class="mainColor">{{item.gbDpgBuyPrice}}元/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+              </block>
+            </view>
+            <view class=" third-row">
+              <text class="mr-10">数量:</text>
+              <text class="mainColor" wx:if="{{fmt.hasPurGoodsOutQty(item)}}">{{fmt.purGoodsOutQty(item)}}</text>
+            </view>
+            <view class=" third-row">
+              <text class="mr-10">小计:</text>
+              <text class="mainColor">{{item.gbDpgBuySubtotal}}元</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 带订单显示 -->
+        <view class="flex-row middle" wx:if="{{item.gbDpgPurchaseType == 1 || item.gbDpgPurchaseType == 2}}" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:for-item="orders" wx:for-index="orderIndex">
+          <text class="mr-10 empty">{{index + 1}}.</text>
+          <view class="flex-column  with-tbl-padding border-bottom  " style="width: {{windowWidth - 100}}rpx;">
+            <block wx:if="{{orders.nxRestrauntEntity !== null}}">
+              <text class="mr-10">{{orders.nxRestrauntEntity.nxRestrauntAttrName}}</text>
+            </block>
+            <block wx:else>
+              <view class="flex-row-wrap">
+                <block wx:if="{{orders.gbDoParentDepartmentName}}">
+                  <text>{{orders.gbDoParentDepartmentName}}.</text>
+                  <text class="mr-10">{{orders.gbDoOrderDepartmentName}}</text>
+                </block>
+                <block wx:else>
+                  <text class="mr-10">{{orders.gbDoOrderDepartmentName}}</text>
+                </block>
+              </view>
+            </block>
+            <view class=" flex-row">
+              <view class="flex-row third-row">
+                <text class="mr-10">订:</text>
+                <text class="">{{orders.gbDoQuantity}}{{orders.gbDoStandard}} </text>
+              </view>
+              <view class="flex-row third-row">
+                <text class="mr-10">数量:</text>
+                <text wx:if="{{fmt.hasOrderOutQty(orders, item)}}">{{fmt.orderOutQty(orders, item)}}</text>
+              </view>
+              <view class="flex-row third-row">
+                <text class="mr-10">¥</text>
+                <text class="">{{orders.gbDoSubtotal}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="flex-column  darkGray p-20">
+      <view class="flex-row">
+        <view class="flex-row half-row font-sl">
+          <text class="mr-10">订货商品:</text>
+          <text>{{batch.gbDPGEntities.length}}个</text>
+        </view>
+        <view class="flex-row half-row font-sl">
+          <text class="mr-10">时间:</text>
+          <text>{{tool.getAttrDate(batch.gbDpbDate)}} {{batch.gbDpbTime}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="flex-row-between p-20" style="margin-top: 40rpx;">
+    <view></view>
+    <view class="flex-row big mainColor " >
+      <text class="mr-10">总计:</text>
+      <text >¥{{batch.gbDpbSubtotal !== null ? batch.gbDpbSubtotal : '0'}}</text>
+    </view>
+  </view>
+</view>

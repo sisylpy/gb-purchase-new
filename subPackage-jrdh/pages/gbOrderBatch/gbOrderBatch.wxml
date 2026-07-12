@@ -1,0 +1,211 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+
+<view class="flex flex-column" wx:if="{{batch}}">
+
+  <!-- 采购员视图 -->
+  <block wx:if="{{viewMode === 'buyer_pending' || viewMode === 'buyer_detail'}}">
+    <order-batch-header
+      retName="{{retName}}"
+      statusBarHeight="{{statusBarHeight}}"
+      variant="{{viewMode === 'buyer_pending' ? 'pending' : 'default'}}"
+      titleSuffix="{{viewMode === 'buyer_pending' ? '.订货单' : ''}}"
+      bind:back="onBuyerBack"
+    />
+    <view class="batch-body-wrap {{isCompletedView ? 'batch-body-wrap-done' : ''}}" style="padding-left: 20rpx; padding-right: 20rpx; margin-top: 10rpx;">
+      <view class="body" style="height:{{isCompletedView ? bodyHeightCompleted : (viewMode === 'buyer_pending' ? bodyHeightPending : bodyHeight)}}rpx;">
+        <order-participants batch="{{batch}}" url="{{url}}" todayDate="{{todayDate}}" />
+        <view class="flex-column form_body">
+          <order-goods-list
+            mode="{{viewMode === 'buyer_pending' ? 'simple' : 'priced'}}"
+            styleVariant="dashed"
+            batch="{{batch}}"
+            batchStatus="{{batchStatus}}"
+            windowWidth="{{windowWidth}}"
+            scrollHeight="{{viewMode === 'buyer_pending' ? scrollHeightPending : scrollHeightDefault}}"
+            fillHeight="{{true}}"
+          />
+        </view>
+        <view class="batch-footer-slot">
+          <order-batch-footer
+            viewMode="{{viewMode}}"
+            batch="{{batch}}"
+            batchStatus="{{batchStatus}}"
+            todayDate="{{todayDate}}"
+            orderTime="{{orderTime}}"
+          />
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 供货商视图 -->
+  <block wx:elif="{{viewMode === 'seller_edit' || viewMode === 'seller_confirm' || viewMode === 'seller_done'}}">
+    <order-batch-header
+      retName="{{retName}}"
+      statusBarHeight="{{statusBarHeight}}"
+      variant="default"
+      bind:back="onSellerBack"
+    />
+    <view class="batch-body-wrap batch-body-wrap-seller {{isCompletedView ? 'batch-body-wrap-done' : ''}}" style="padding-left: {{viewMode === 'seller_edit' ? 10 : 20}}rpx; padding-right: {{viewMode === 'seller_edit' ? 10 : 20}}rpx; margin-top: 10rpx;">
+      <view class="body" style="height:{{isCompletedView ? bodyHeightCompleted : bodyHeight}}rpx;">
+        <order-participants batch="{{batch}}" url="{{url}}" todayDate="{{todayDate}}" />
+        <view
+          class="flex-column form_body"
+          style="{{viewMode === 'seller_edit' ? 'width: ' + (windowWidth - 40) + 'rpx;' : ''}}"
+        >
+          <order-goods-list
+            mode="{{viewMode === 'seller_edit' ? 'seller_edit' : 'priced'}}"
+            styleVariant="{{viewMode === 'seller_confirm' ? 'plain' : 'dashed'}}"
+            batch="{{batch}}"
+            batchStatus="{{batchStatus}}"
+            windowWidth="{{windowWidth}}"
+            scrollHeight="{{viewMode === 'seller_edit' ? scrollHeightSeller : scrollHeightDefault}}"
+            fillHeight="{{true}}"
+            focusIndex="{{focusIndex}}"
+            bind:showoperation="showOperation"
+          />
+        </view>
+        <view class="batch-footer-slot">
+          <order-batch-footer
+            viewMode="{{viewMode === 'seller_edit' && batch.gbDpbStatus == 3 ? 'seller_edit_done' : viewMode}}"
+            batch="{{batch}}"
+            batchStatus="{{batchStatus}}"
+            waitWeightCount="{{waitWeightCount}}"
+          />
+        </view>
+      </view>
+
+      <block wx:if="{{viewMode === 'seller_edit'}}">
+        <seller-action-bar
+          wx:if="{{batch.gbDpbStatus < 2 || buyerCanReEdit}}"
+          variant="tools"
+          batch="{{batch}}"
+          windowWidth="{{windowWidth}}"
+          btnThirdWidth="{{btnThirdWidth}}"
+          bind:weight="toWeight"
+          bind:price="showPrice"
+          bind:finish="showShareTishi"
+        />
+        <seller-action-bar
+          wx:elif="{{batch.gbDpbStatus == 2}}"
+          variant="edit"
+          batch="{{batch}}"
+          windowWidth="{{windowWidth}}"
+          bind:edit="toEditOrders"
+        />
+      </block>
+      <seller-action-bar
+        wx:if="{{viewMode === 'seller_confirm'}}"
+        variant="confirm"
+        batch="{{batch}}"
+        windowWidth="{{windowWidth}}"
+        bind:edit="toEditOrders"
+      />
+    </view>
+  </block>
+
+</view>
+
+<!-- 订货已取消 -->
+<view class="overlay {{billCancle ? 'show' : 'hide'}}" bind:tap="toCancleBack">
+  <view class="cancel-modal-container" style="top: {{windowHeight * 0.4}}rpx;" catchtap="">
+    <view class="cancel-icon-container">
+      <image src="/images/warn.png" class="cancel-icon" />
+    </view>
+    <view class="cancel-content">
+      <view class="cancel-title">提示</view>
+      <view class="cancel-message">本次订货已取消</view>
+    </view>
+  </view>
+</view>
+
+<!-- 完成备货弹窗 -->
+<view class="overlay {{isTishi ? 'show' : 'hide'}}">
+  <view class="modal-container" style="width:{{windowWidth - 60}}rpx;">
+    <view class="modal-icon-container" style="width:{{windowWidth/4}}rpx; height:{{windowWidth/4}}rpx; margin-top:-{{windowWidth/8 + 15}}rpx;">
+      <view class="modal-icon-bg" style="width:{{windowWidth/4}}rpx; height:{{windowWidth/4}}rpx;">
+        <image src="../../../images/aixin.png" class="modal-icon" style="width:{{windowWidth/4 - 60}}rpx; height:{{windowWidth/4 - 60}}rpx;" />
+      </view>
+    </view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">🎉 完成备货</text>
+        <text class="modal-subtitle">订单已准备就绪，将保存到客户账单页面</text>
+      </view>
+      <view class="payment-section">
+        <view class="payment-label">
+          <text class="payment-text">💰 付款方式</text>
+        </view>
+        <view class="payment-options">
+          <radio-group class="radio-group" bindchange="radioChange">
+            <label class="radio-option">
+              <radio value="0" checked="{{batch.gbDpbPayType == 0}}" />
+              <text class="radio-text">账款已付</text>
+            </label>
+            <label class="radio-option">
+              <radio value="1" checked="{{batch.gbDpbPayType == 1}}" />
+              <text class="radio-text">货款未付</text>
+            </label>
+          </radio-group>
+        </view>
+      </view>
+      <view class="modal-actions">
+        <view class="action-btn secondary-btn" bindtap="cancelCostBatch" hover-class="btn-hover">
+          <text class="btn-text">⏳ 再等等</text>
+        </view>
+        <view class="action-btn {{batch.gbDpbPayType !== null ? 'primary-btn' : 'disabled-btn'}}" bindtap="sendSucess" hover-class="btn-hover">
+          <text class="btn-text">🚀 备货完成</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 供货商注册 -->
+<view class="overlay1 popup-mask {{isSellRegiste ? 'show' : 'hide'}}">
+  <view class="popup1 popup-container p-30">
+    <view class="">
+      <view class="">
+        <view class="center-content flex-column">
+          <text class="font-lg p-30">注册接单用户信息</text>
+        </view>
+        <view class="flex-row">
+          <text>用户头像</text>
+          <button class="avatar-wrapper" style="width: {{windowWidth - 220}}rpx;" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+            <image class="avatar" src="{{avatarUrl}}"></image>
+          </button>
+        </view>
+        <view class="flex-row">
+          <text class="mr-20">用户昵称</text>
+          <mp-form bindsubmit="formSubmit">
+            <mp-cells>
+              <mp-cell title="昵称">
+                <input type="nickname" bindinput="onNicknameInput" class="weui-input" placeholder="" />
+              </mp-cell>
+            </mp-cells>
+          </mp-form>
+        </view>
+      </view>
+    </view>
+    <view class="p-20 mt-30">
+      <button bindtap="save" class="register-btn {{canRegister ? 'is-active' : ''}}">注册</button>
+    </view>
+  </view>
+</view>
+
+<delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />
+
+<!-- 商品操作菜单 -->
+<view class='overlay {{showOperation ? "show" : ""}}' catchtouchmove='ture' catchtap="hideMask">
+  <view class="flex-column nnn bg-white font-lg">
+    <view class="flex-row p-30" catchtap="againWeight" hover-class="hover">
+      <image src="/images/icon_stock.png" class="icon mr-20"></image>
+      <text class="{{editPurGoods.gbDpgStatus < 2 ? 'text-secondary' :''}}">重新拣货称重</text>
+    </view>
+    <view class="flex-row p-30 border-bottom" catchtap="canclePurGoods" hover-class="hover">
+      <image src="/images/del.png" class="icon mr-20"></image>
+      <text>删除订货商品</text>
+    </view>
+    <view style="height: 20rpx;"></view>
+  </view>
+</view>

@@ -122,6 +122,16 @@ textarea {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  box-sizing: border-box;
+}
+
+.paste-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx;
+  box-sizing: border-box;
+  min-height: 0;
 }
 
 .bottom-btns {
@@ -150,7 +160,7 @@ textarea {
   margin-top: -70rpx;
   border-radius: 50%;
   background: rgba(92,36,117,0.15);
-  animation: pulse 1.2s infinite;
+  animation: pulse-breath 1.2s infinite;
   pointer-events: none; /* 关键：不拦截点击 */
   z-index: 1;
 }
@@ -160,6 +170,8 @@ textarea {
   100% { transform: scale(1); opacity: 0.7; }
 }
 .circle-btn {
+  position: relative;
+  z-index: 2;
   width: 120rpx;
   height: 120rpx;
   border-radius: 60rpx;
@@ -187,49 +199,281 @@ textarea {
   flex-direction: column;
 }
 
-.input-hint {
-  margin-bottom: 20rpx;
-  padding: 20rpx 24rpx;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 16rpx;
-  border: 1rpx solid #e8f5f1;
+/* 解析后订单列表 */
+.order-list-scroll {
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.hint-title {
-  display: block;
-  font-size: 32rpx;
+.order-list-card {
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  border: 1rpx solid #e3ebe8;
+}
+
+.order-list-head {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: linear-gradient(180deg, #f3faf8 0%, #edf6f3 100%);
+  border-bottom: 1rpx solid #dce8e4;
+}
+
+.order-list-head-index,
+.order-list-head-name,
+.order-list-head-qty,
+.order-list-head-unit,
+.order-list-head-op {
+  font-size: 28rpx;
   font-weight: 600;
   color: #147062;
-  margin-bottom: 8rpx;
 }
 
-.hint-desc,
-.hint-example {
-  display: block;
-  font-size: 26rpx;
-  color: #666;
+.order-list-head-index {
+  width: 48rpx;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.order-list-head-name {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+
+.order-list-head-qty {
+  width: 112rpx;
+  flex-shrink: 0;
+  text-align: center;
+  margin-right: 12rpx;
+}
+
+.order-list-head-unit {
+  width: 96rpx;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.order-list-head-op {
+  width: 96rpx;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  text-align: center;
+}
+
+.order-list-item {
+  border-bottom: 1rpx solid #f0f3f2;
+}
+
+.order-list-item:last-child {
+  border-bottom: none;
+}
+
+.order-list-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  min-height: 104rpx;
+  box-sizing: border-box;
+}
+
+.order-list-index {
+  width: 48rpx;
+  flex-shrink: 0;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #8aa39c;
+  text-align: center;
+  line-height: 1;
+}
+
+.order-list-input {
+  font-size: 38rpx;
+  font-weight: 500;
+  color: #1a1a1a;
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 16rpx;
+  background: #f8fbf9;
+  border: 1rpx solid #d8e5e0;
+  border-radius: 14rpx;
+  box-sizing: border-box;
+}
+
+.order-list-input-name {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+
+.order-list-input-qty {
+  width: 112rpx;
+  flex-shrink: 0;
+  text-align: center;
+  margin-right: 12rpx;
+}
+
+.order-list-input-unit {
+  width: 96rpx;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.order-list-more {
+  width: 64rpx;
+  height: 64rpx;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef3f1;
+  border-radius: 50%;
+}
+
+.order-list-more-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.order-list-remark {
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx 20rpx 72rpx;
+}
+
+.order-list-remark-label {
+  flex-shrink: 0;
+  margin-right: 16rpx;
+  font-size: 28rpx;
+  color: #888;
+}
+
+.order-list-input-remark {
+  flex: 1;
+  min-width: 0;
+  font-size: 32rpx;
+}
+
+.order-list-tip {
+  padding: 24rpx 8rpx 8rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #999;
   line-height: 1.6;
 }
 
-.hint-example {
-  margin-top: 8rpx;
-  color: #999;
+.order-list-tip--saved {
+  padding: 24rpx 8rpx 8rpx;
+}
+
+/* 匹配保存后的只读列表 */
+.order-list-row--saved {
+  min-height: 112rpx;
+}
+
+.order-list-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38rpx;
+  font-weight: 500;
+  color: #1a1a1a;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.order-list-cell-name {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.order-list-name {
+  font-size: 38rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  word-break: break-all;
+}
+
+.order-list-badge {
+  display: inline-block;
+  margin-bottom: 6rpx;
+  padding: 4rpx 12rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #e65100;
+  background: #fff3e0;
+  border-radius: 8rpx;
+}
+
+.order-list-cell-qty {
+  width: 112rpx;
+  flex-shrink: 0;
+  margin-right: 12rpx;
+}
+
+.order-list-cell-unit {
+  width: 96rpx;
+  flex-shrink: 0;
+}
+
+.order-list-cell-op {
+  width: 96rpx;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+.order-list-find-btn {
+  padding: 10rpx 16rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #fff;
+  background: #ff7043;
+  border-radius: 999rpx;
+  line-height: 1.2;
+}
+
+.order-list-find-btn--active {
+  opacity: 0.85;
+}
+
+.order-list-matched-tag {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.order-list-item--unmatched {
+  background: #fffaf7;
+}
+
+.order-list-item--matched {
+  background: #fff;
+}
+
+.order-list-remark--saved {
+  padding-top: 0;
+  padding-left: 72rpx;
+}
+
+.order-list-remark-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 32rpx;
+  color: #666;
+  word-break: break-all;
 }
 
 .bottom-btn-label {
   margin-top: 8rpx;
   font-size: 24rpx;
   color: #666;
-}
-
-.new-goods-warning {
-  background: #fff3e0;
-  padding: 16rpx 24rpx;
-}
-
-.warning-text {
-  color: #e65100;
-  font-size: 26rpx;
 }
 
 .parsing-mask {

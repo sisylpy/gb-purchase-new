@@ -9,7 +9,7 @@
           <image src="/images/calender.png" class="date-icon"></image>
           <text class="date-text">{{dateDisplay}}</text>
           <text class="week-text">{{weekDisplay}}</text>
-          <image src="/images/arrow-down.png" class="arrow-down"></image>
+          <image src="/images/arrow-down.svg" class="arrow-down"></image>
         </view>
       </picker>
       <view class="status-tag status-tag--done" bindtap="onEditAll" wx:if="{{isCompleted}}">
@@ -187,7 +187,7 @@
         <picker mode="selector" range="{{salesTypes}}" range-key="label" value="{{modalSalesTypeIndex}}" bindchange="onSalesTypeChange">
           <view class="meal-form-input meal-type-picker">
             <text class="meal-type-badge">{{salesTypes[modalSalesTypeIndex].label}}</text>
-            <image src="/images/arrow-down.png" class="meal-type-arrow"></image>
+            <image src="/images/arrow-down.svg" class="meal-type-arrow"></image>
           </view>
         </picker>
       </view>

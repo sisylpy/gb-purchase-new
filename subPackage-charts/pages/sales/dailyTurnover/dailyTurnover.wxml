@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 <view class="flex flex-column">
 
@@ -174,10 +174,10 @@
         <view class="daily-card__top">
           <!-- 左侧：日期 + 星期 + 天气图标 -->
           <view class="daily-card__date-info">
-            <text class="daily-card__date-text">{{row.date}}</text>
+            <text class="daily-card__date-text">{{tool.getAttrDateString(row.date)}}</text>
             <view class="daily-card__date-sub">
               <text class="daily-card__weekday">{{row.weekLabel}}</text>
-              <text class="daily-card__weather">☀</text>
+              <!-- <text class="daily-card__weather">☀</text> -->
             </view>
           </view>
 

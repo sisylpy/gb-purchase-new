@@ -1,0 +1,98 @@
+<!-- 采购员待读 -->
+<view wx:if="{{viewMode === 'buyer_pending'}}" class="flex-column darkGray">
+  <view class="flex-row p-20 font-sl">
+    <view class="flex-row half-row">
+      <text class="flex-shrink-0 mr-20">时间:</text>
+      <text>{{todayDate}}{{orderTime}}</text>
+    </view>
+    <view class="flex-row half-row">
+      <text class="mr-20">订货商品:</text>
+      <text>{{batch.gbDPGEntities.length}}个</text>
+    </view>
+  </view>
+</view>
+
+<!-- 采购员已确认 / 供货商已完成 -->
+<view wx:elif="{{viewMode === 'buyer_detail' || viewMode === 'seller_done'}}" class="flex-column darkGray">
+  <view class="flex-row pt-20 pb-20">
+    <view class="flex-row-between half-row font-md">
+      <text class="mr-10">订货时间:</text>
+      <text>{{batch.gbDpbHour}}:{{batch.gbDpbMinute}}</text>
+    </view>
+    <view style="width: 100rpx;"></view>
+    <view class="flex-row-between half-row font-md">
+      <text class="mr-10">订货商品:</text>
+      <text>{{batch.gbDPGEntities.length}}个</text>
+    </view>
+  </view>
+  <view class="flex-row-between">
+    <view class="flex-row" wx:if="{{viewMode === 'buyer_detail' && batchStatus == 2}}">
+      <text class="mr-10">付款:</text>
+      <text>{{batch.gbDpbPayType == 1 ? '记账' : '现金'}}</text>
+    </view>
+    <view class="flex-row" wx:elif="{{viewMode === 'seller_done'}}">
+      <text class="mr-10">付款:</text>
+      <text>{{batch.gbDpbPayType == 1 ? '记账' : '现金'}}</text>
+    </view>
+    <text wx:else></text>
+    <view class="flex-row">
+      <text class="text-danger mr-20" wx:if="{{viewMode === 'buyer_detail' && batchStatus == 2}}">(待确认收货)</text>
+      <text class="mr-10">总计:</text>
+      <text class="big mainColor">¥{{batch.gbDpbSubtotal}}</text>
+    </view>
+  </view>
+</view>
+
+<!-- 供货商待确认（批次内汇总） -->
+<view wx:elif="{{viewMode === 'seller_confirm'}}" class="flex-column darkGray">
+  <view class="flex-row pt-20 pb-20">
+    <view class="flex-row-between half-row font-md">
+      <text class="mr-10">订货时间:</text>
+      <text>{{batch.gbDpbHour}}:{{batch.gbDpbMinute}}</text>
+    </view>
+    <view style="width: 100rpx;"></view>
+    <view class="flex-row-between half-row">
+      <text class="mr-10">订货商品:</text>
+      <text>{{batch.gbDPGEntities.length}}个</text>
+    </view>
+  </view>
+</view>
+
+<!-- 供货商编辑中 -->
+<view wx:elif="{{viewMode === 'seller_edit'}}" class="batch-summary-bar">
+  <view class="batch-summary-item">
+    <image src="/images/icon_stock.png" class="batch-summary-icon" mode="aspectFit" />
+    <view class="batch-summary-text">
+      <text class="batch-summary-label">完成出库</text>
+      <text class="batch-summary-value">{{finishedOutCount}}个</text>
+    </view>
+  </view>
+  <view class="batch-summary-divider"></view>
+  <view class="batch-summary-item">
+    <image src="/images/Time-3.png" class="batch-summary-icon" mode="aspectFit" />
+    <view class="batch-summary-text">
+      <text class="batch-summary-label">订货时间</text>
+      <text class="batch-summary-value">{{orderTimeText}}</text>
+    </view>
+  </view>
+  <view class="batch-summary-divider"></view>
+  <view class="batch-summary-item">
+    <image src="/images/money.png" class="batch-summary-icon" mode="aspectFit" />
+    <view class="batch-summary-text">
+      <text class="batch-summary-label">合计金额</text>
+      <text class="batch-summary-value is-total">¥{{batchSubtotalText}}</text>
+    </view>
+  </view>
+</view>
+
+<!-- 供货商编辑完成待付款展示 -->
+<view wx:elif="{{viewMode === 'seller_edit_done'}}" class="flex-row-between p-20">
+  <view class="flex-row">
+    <text class="mr-10">付款:</text>
+    <text>{{batch.gbDpbPayType == 1 ? '记账' : '现金'}}</text>
+  </view>
+  <view class="flex-row">
+    <text class="mr-10">总计:</text>
+    <text class="big mainColor">¥{{batch.gbDpbSubtotal}}</text>
+  </view>
+</view>

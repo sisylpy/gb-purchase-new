@@ -44,12 +44,7 @@
         </view>
       </view>
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toJrdh" hover-class="hover">
-        <view class="flex-column center-content">
-          <image src="/images/gongyingshang.png" class="icon" />
-          <text>供货商</text>
-        </view>
-      </view>
+    
 
      
 
@@ -73,12 +68,7 @@
       </view> -->
 
     
-      <!-- <view class="quarter-row pt-20 pb-20" bindtap="toGroupGoods" hover-class="hover">
-        <view class="flex-column center-content">
-          <image src="/images/orderlisto.png" class="icon" />
-          <text>商品管理</text>
-        </view>
-      </view> -->
+     
       
      
 
@@ -105,6 +95,13 @@
       </view>
 
 
+      <view class="quarter-row pt-20 pb-20" bindtap="toJrdh" hover-class="hover">
+        <view class="flex-column center-content">
+          <image src="/images/gongyingshang.png" class="icon" />
+          <text>供货商</text>
+        </view>
+      </view>
+      
       <!-- <view class="quarter-row pt-20 pb-20" bindtap="toReportStock" hover-class="hover">
         <view class="flex-column center-content">
           <image src="/images/home/stock0.png" class="icon" />
@@ -152,8 +149,16 @@
         </view>
       </view>
 
-      <view class="quarter-row pt-20 pb-20" bindtap="toResGoods" hover-class="hover">
-        <view class="flex-column center-content">
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toGroupGoods" hover-class="hover"  wx:if="{{disInfo.mendianDepartmentList.length == 1}}">
+        <view class="flex-column center-content" >
+          <image src="/images/orderlisto.png" class="icon" />
+          <text>商品管理</text>
+        </view>
+      </view>
+
+      <view class="quarter-row pt-20 pb-20" bindtap="toResGoods" hover-class="hover" wx:else="">
+        <view class="flex-column center-content" >
           <image src="/images/orderlisto.png" class="icon" />
           <text>门店商品</text>
         </view>

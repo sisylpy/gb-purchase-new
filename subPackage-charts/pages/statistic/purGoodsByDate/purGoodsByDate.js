@@ -27,8 +27,8 @@ Page({
     });
 
     if (this.data.update) {
-    
       this._getPurUserStatistics();
+      this._getGoodsList();
     }
 
   },
@@ -81,6 +81,7 @@ Page({
 
     })
     this._getPurUserStatistics();
+    this._getGoodsList();
   },
 
 
@@ -114,8 +115,6 @@ Page({
             purUserArr: res.result.data.depUserArr,
           });
 
-          // 获取统计信息成功后，再获取商品列表
-          this._getGoodsList();
         } else {
           this.setData({
             arr: []
@@ -244,7 +243,7 @@ Page({
       wx.navigateTo({
         url: '../purchaseDeatil/purchaseDeatil?startDate=' + this.data.startDate + '&stopDate=' + 
         this.data.stopDate + '&hanzi=' + this.data.hanzi + '&greatId=' + this.data.greatId + '&type='
-        + type,
+        + type + '&disId=' + this.data.disId,
       })
     
   },

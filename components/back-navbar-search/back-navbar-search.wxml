@@ -27,7 +27,10 @@
           <view class="nav-button {{tabIndex == 2 ? 'nav-button-active' : ''}}" data-index="2" bindtap="onTabClick" data-type="waste">
             <text class="nav-button-text">废弃</text>
           </view>
-          <view class="nav-button {{tabIndex == 3 ? 'nav-button-active' : ''}}" data-index="3" bindtap="onTabClick" data-type="employeeMeal">
+          <view class="nav-button {{tabIndex == 3 ? 'nav-button-active' : ''}}" data-index="3" bindtap="onTabClick" data-type="return">
+            <text class="nav-button-text">退货</text>
+          </view>
+          <view class="nav-button {{tabIndex == 4 ? 'nav-button-active' : ''}}" data-index="4" bindtap="onTabClick" data-type="employeeMeal">
             <text class="nav-button-text">员工餐</text>
           </view>
         </block>
@@ -50,7 +53,7 @@
     <!-- 右侧区域 -->
     <view class="nav-right" style="width: {{rightWidth}}px; ">
       <image src="/images/search.png" class="nav-icon" bindtap="onSearchTap"/>
-      <image src="/images/minus.png" class="nav-icon" bindtap="onMinusTap"/>
+      <text class="nav-icon" bindtap="onMinusTap">−</text>
     </view>
   </view>
 </view>

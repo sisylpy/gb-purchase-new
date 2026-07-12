@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 
 <view class="flex flex-column">
@@ -7,7 +7,7 @@
   <!-- 商品信息卡片 -->
   <view class="goods-card bg-white p-20 mb-20" wx:if="{{disGoods}}">
     <view class="flex-row">
-      <image src="{{(url + disGoods.gbDgNxFatherImg || '/images/logo.jpg')}}" mode="aspectFill" class="goods-img" />
+      <image src="{{(url + disGoods.gbDgNxFatherImg || '/images/logo.png')}}" mode="aspectFill" class="goods-img" />
       <view class="flex-column flex-1 ml-20">
         <text class="font-bold font-lg">{{disGoods.gbDgGoodsName}}</text>
         <text class="font-sm text-secondary mt-10" wx:if="{{disGoods.gbDistributerGoodsEntity}}">
@@ -67,7 +67,6 @@
         <!-- 头部：部门 + 日期 -->
         <view class="flex-row-between mb-15">
           <view class="flex-row align-center">
-            <image src="/images/store.png" class="icon-sm mr-10"></image>
             <text class="font-sm font-bold">{{item.departmentName || '未知部门'}}</text>
           </view>
           <view class="flex-row align-center">

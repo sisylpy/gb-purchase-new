@@ -129,14 +129,24 @@ Page({
      console.log("res.reus", res.result.data)
       if (res.result.code == 0) {
         load.hideLoading();
-    
+        var data = res.result.data;
+        var wasteCost = parseFloat(data.wasteCostTotal) || 0;
+        var lossCost = parseFloat(data.lossCostTotal) || 0;
+        var lossWasteTotal = Math.round((wasteCost + lossCost) * 10) / 10;
+
         this.setData({
-          allTotal: res.result.data.allTotal,
-          costTotal: res.result.data.costTotal,
-          costPerDay: res.result.data.costPerDay,
-          purchasePerDay: res.result.data.purchasePerDay,
-          employeeMealCostTotal: res.result.data.employeeMealCostTotal || 0,
-          arr: res.result.data.arr,
+          allTotal: data.allTotal,
+          zicaiTotal: data.zicaiTotal || 0,
+          dinghuoTotal: data.dinghuoTotal || 0,
+          restStockTotal: data.restStockTotal || 0,
+          saleCostTotal: data.saleCostTotal || 0,
+          lossWasteTotal: lossWasteTotal,
+          costTotal: data.costTotal,
+          returnCostTotal: data.returnCostTotal || 0,
+          costPerDay: data.costPerDay,
+          purchasePerDay: data.purchasePerDay,
+          employeeMealCostTotal: data.employeeMealCostTotal || 0,
+          arr: data.arr,
         });
     
         // 初始化合并图表
@@ -336,15 +346,53 @@ Page({
   },
 
 
+  toSummaryPurchase(e) {
+    var kind = e.currentTarget.dataset.kind;
+    var base = 'startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate
+      + '&disId=' + this.data.disId + '&hanzi=' + encodeURIComponent(this.data.hanzi || '');
+    if (kind === 'zicai') {
+      wx.navigateTo({
+        url: '../purchaseDeatil/purchaseDeatil?' + base + '&greatId=-1&type=1',
+      });
+    } else if (kind === 'dinghuo') {
+      wx.navigateTo({
+        url: '../purchaseDeatil/purchaseDeatil?' + base + '&greatId=-1&type=5',
+      });
+    } else if (kind === 'stock') {
+      wx.navigateTo({
+        url: '../stockPurGoods/stockPurGoods?' + base + '&dateType=' + (this.data.dateType || 'month')
+          + '&searchDepIds=-1&id=-1',
+      });
+    }
+  },
+
+  toSummaryCost(e) {
+    var kind = e.currentTarget.dataset.kind;
+    var valueMap = {
+      sales: this.data.saleCostTotal,
+      loss: this.data.lossWasteTotal,
+      return: this.data.returnCostTotal,
+      employeeMeal: this.data.employeeMealCostTotal,
+    };
+    wx.navigateTo({
+      url: '../costGoodsByDate/costGoodsByDate?disId=' + this.data.disId
+        + '&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate
+        + '&dateType=' + (this.data.dateType || 'month') + '&fenxiType=costEcharts&searchDepId=-1'
+        + '&value=' + (valueMap[kind] || 0) + '&allCostTotal=' + (this.data.costTotal || 0)
+        + '&id=-1&type=' + kind + '&hanzi=' + encodeURIComponent(this.data.hanzi || ''),
+    });
+  },
+
   toPurGoodsFenxi(e) {
-    var day = e.currentTarget.dataset.item.day;
-    var purTotal = e.currentTarget.dataset.item.purTotal;    
+    var item = e.currentTarget.dataset.item;
+    var day = item.day;
+    var dayTotal = (parseFloat(item.zicai) || 0) + (parseFloat(item.dinghuo) || 0);
     // 使用公共方法获取中文星期几
     var week = this.getChineseWeekDay(day);
 
     wx.navigateTo({
       url: '../purGoodsByDate/purGoodsByDate?startDate=' + day  + '&stopDate=' + day + '&disId=' +
-        this.data.disId  + '&hanzi=' + week + '&dateType=customer&value=' + purTotal + '&purTotal=' + this.data.allTotal + '&id=-1'
+        this.data.disId  + '&hanzi=' + week + '&dateType=customer&value=' + dayTotal + '&purTotal=' + this.data.allTotal + '&id=-1'
     })
   },
 

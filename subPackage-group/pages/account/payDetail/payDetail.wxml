@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 
 <view class="flex flex-column">
@@ -23,7 +23,6 @@
         <view class=" {{payDetailArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
           <view class="font-lg  empty_view">
             <view class="flex-column center-content">
-              <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
               <text class="big">没有支付记录</text>
             </view>
           </view>
@@ -63,7 +62,6 @@
         <view class=" {{payDetailArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
           <view class="font-lg  empty_view">
             <view class="flex-column center-content">
-              <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
               <text class="big">没有支付记录</text>
             </view>
           </view>
@@ -111,7 +109,6 @@
         <view class=" {{payDetailArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
           <view class="font-lg  empty_view">
             <view class="flex-column center-content">
-              <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
               <text class="big">没有支付记录</text>
             </view>
           </view>

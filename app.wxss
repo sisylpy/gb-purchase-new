@@ -759,6 +759,22 @@ button::after {
   border-radius: 10rpx;
 }
 
+.proxy-store-tag {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 10rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  background-color: var(--gb-primary);
+}
+
+.proxy-store-tag text {
+  font-size: 22rpx;
+  line-height: 1.3;
+  color: #fff;
+}
+
 /* -------------------------------------------------------------------------- */
 /* 7. 背景 */
 /* -------------------------------------------------------------------------- */

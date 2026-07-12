@@ -1,0 +1,57 @@
+// 公共层：subPackage-group 与 subPackage-mendian 的 dishIngredientDashboard 共用
+// 原两份 dga.wxs 逐字节相同，抽到此处作为唯一源，由各页面 <wxs src> 引用。
+
+function num(s) {
+  if (s == null || s === undefined || s === '') {
+    return NaN;
+  }
+  // WXS 无全局 String 构造器，勿用 String(s)
+  return parseFloat((s + '').trim());
+}
+
+function isPos(s) {
+  var n = num(s);
+  return n == n && n > 0;
+}
+
+function isNeg(s) {
+  var n = num(s);
+  return n == n && n < 0;
+}
+
+function barWidthPct(s) {
+  var n = num(s);
+  if (n != n) return 0;
+  if (n > 100) return 100;
+  if (n < 0) return 0;
+  return n;
+}
+
+function highShareOrAbnormal(share, status) {
+  var n = num(share);
+  if (n == n && n >= 25) {
+    return true;
+  }
+  if (status === 'ABNORMAL') {
+    return true;
+  }
+  return false;
+}
+
+var PIE = ['#FF4D4F', '#FA8C16', '#FADB14', '#52C41A', '#1890FF', '#8C8C8C', '#BFBFBF'];
+function pieColorAt(i) {
+  if (i == null || i === undefined) {
+    i = 0;
+  }
+  var idx = (i * 1) % PIE.length;
+  if (idx < 0) idx = idx + PIE.length;
+  return PIE[idx % PIE.length];
+}
+
+module.exports = {
+  isPos: isPos,
+  isNeg: isNeg,
+  barWidthPct: barWidthPct,
+  highShareOrAbnormal: highShareOrAbnormal,
+  pieColorAt: pieColorAt
+};

@@ -35,6 +35,21 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
+  /**
+   * 解析页面参数：兼容中文直传与 encodeURIComponent 两种写法
+   */
+  _parseRouteParam: function (value) {
+    if (!value || typeof value !== 'string') return '';
+    try {
+      if (/%[0-9A-Fa-f]{2}/.test(value)) {
+        return decodeURIComponent(value);
+      }
+      return value;
+    } catch (e) {
+      return value;
+    }
+  },
+
   onLoad: function (options) {
     
      var disInfo = wx.getStorageSync('disInfo');
@@ -59,17 +74,29 @@ Page({
        })
      }
 
+    const depId = options.depId || (depInfo && depInfo.gbDepartmentId);
+    const depFatherId = options.depFatherId || (depInfo && depInfo.gbDepartmentFatherId);
+    const goodsName = this._parseRouteParam(options.goodsName);
+    const standard = this._parseRouteParam(options.standard);
+
+    if (depId) {
+      this.setData({ depId });
+    }
+    if (depFatherId) {
+      this.setData({ depFatherId });
+    }
+
     this.setData({
-     
+      standard,
       goods: {
-        gbDgGoodsSort: this.data.depId,
-        gbDgGoodsSonsSort: this.data.depId,
+        gbDgGoodsSort: depId,
+        gbDgGoodsSonsSort: depId,
         gbDgGbDepartmentId: this.data.toDepId,
         gbDgPullOff: 0,
         gbDgGoodsStatus: 0,
         gbDgDistributerId: this.data.disId,
-        gbDgGoodsName: options.goodsName,
-        gbDgGoodsStandardname: "",
+        gbDgGoodsName: goodsName,
+        gbDgGoodsStandardname: standard,
         gbDgGoodsStandardWeight: "",
         gbDgCartonUnit: "",
         gbDgQuantityDays: "",
@@ -84,6 +111,8 @@ Page({
       },
       fatherName:"临时添加",
       isGrade: 0,
+    }, () => {
+      this._ifCanSave();
     })
   },
 
@@ -290,6 +319,10 @@ Page({
           });
           var pages = getCurrentPages();
           var prevPage = pages[pages.length - 2];
+          var applyItem = prevPage.data.applyItem || {};
+          var applyNumber = applyItem.gbDoQuantity != null && applyItem.gbDoQuantity !== ''
+            ? String(applyItem.gbDoQuantity)
+            : '';
           prevPage.setData({
             item: item,
             depGoods: null,
@@ -297,6 +330,9 @@ Page({
             isSearching: false,
             show: true,
             applyStandardName: item.gbDgGoodsStandardname,
+            applyNumber: applyNumber,
+            applyRemark: applyItem.gbDoRemark || '',
+            canSave: !!applyNumber,
             addNewGoods: true,
           });
           wx.navigateBack({

@@ -1,20 +1,12 @@
 {
   "pages": [
-    "pages/home/home",
-    "pages/categoryGoods/categoryGoods",
-    "pages/snapshotGoods/snapshotGoods",
-    "pages/orders/orders",
-    "pages/checkout/checkout",
-    "pages/billPending/billPending",
-    "pages/mine/mine",
-    "pages/index/index",
+    "pages/index/index",   
     "pages/splash/splash",
     "pages/common/selectDate/selectDate",
     "pages/register/register",
     "pages/tro/tro" ,
     "pages/inviteRegister/inviteRegister",
     "pages/inviteTro/inviteTro",
-    "pages/inviteTroNx/inviteTroNx",
     "pages/inviteAndOrder/inviteAndOrder",
     "pages/inviteAdmin/inviteAdmin"
   ],
@@ -54,7 +46,20 @@
       
         "pages/food/index/index",
         "pages/food/depFoodList/depFoodList",
-        "pages/food/dishDailySales/dishDailySales"
+        "pages/food/dishDailySales/dishDailySales",
+
+        "pages/supplier/index/index",
+        "pages/supplier/supplierOrder/supplierOrder",
+        "pages/supplier/supplierBills/supplierBills",
+        "pages/supplier/purUserFenxi/purUserFenxi",
+        "pages/supplier/resGoods/resGoods",
+        "pages/supplier/appointSupplierList/appointSupplierList",
+        "pages/supplier/myPurchaseDetail/myPurchaseDetail",
+        "pages/supplier/jrdhGoodsStars/jrdhGoodsStars",
+        "pages/supplier/jrdhGoodsList/jrdhGoodsList",
+        "pages/supplier/jrdhOrderList/jrdhOrderList",
+        "pages/supplier/jrdhGoodsFenxi/jrdhGoodsFenxi",
+        "pages/supplier/jrdhIndex/jrdhIndex"
        
       ]
     },
@@ -82,30 +87,19 @@
       ]
     },
     {
-      "root": "subPackage-supplier/",
-      "name": "supplier",
+      "root": "subPackage-jrdh/",
+      "name": "jrdh",
       "pages": [
-        "pages/supplier/index/index",
+        "pages/jinriListWithLogin/jinriListWithLogin",
         "pages/gbOrderBatch/gbOrderBatch",
         "pages/gbOrderWeight/gbOrderWeight",
         "pages/gbOrderInput/gbOrderInput",
         "pages/settlePageGb/settlePageGb",
-        "pages/jinriListWithLogin/jinriListWithLogin",
         "pages/gbReceiveBatch/gbReceiveBatch",
         "pages/gbOrderBatchReturn/gbOrderBatchReturn",
         "pages/disOrderBatchDetail/disOrderBatchDetail",
         "pages/depUserEdit/depUserEdit",
-        "pages/supplier/supplierOrder/supplierOrder",
-        "pages/supplier/supplierBills/supplierBills",
-        "pages/supplier/purUserFenxi/purUserFenxi",
-        "pages/supplier/resGoods/resGoods",
-        "pages/supplier/appointSupplierList/appointSupplierList",
-        "pages/supplier/myPurchaseDetail/myPurchaseDetail",
-        "pages/supplier/jrdhGoodsStars/jrdhGoodsStars",
-        "pages/supplier/jrdhGoodsList/jrdhGoodsList",
-        "pages/supplier/jrdhOrderList/jrdhOrderList",
-        "pages/supplier/jrdhGoodsFenxi/jrdhGoodsFenxi",
-        "pages/supplier/jrdhIndex/jrdhIndex"
+        "pages/fromJingjing/fromJingjing"
       ]
     },
     {
@@ -145,14 +139,7 @@
         "pages/report/subDepCost/subDepCost"
       ]
     },
-    {
-      "root": "subPackage-yishang/",
-      "name": "yishang",
-      "pages": [
-        "pages/yishang/nxDistributerGoods/nxDistributerGoods",
-        "pages/yishang/nxDistributerGoodsSearch/nxDistributerGoodsSearch"
-      ]
-    },
+    
     {
       "root": "subPackage-group/",
       "name": "group",
@@ -187,48 +174,16 @@
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
   },
-  "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#187e6e",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/home/home",
-        "text": "首页",
-        "iconPath": "images/tab/home.png",
-        "selectedIconPath": "images/tab/home-active.png"
-      },
-      {
-        "pagePath": "pages/categoryGoods/categoryGoods",
-        "text": "全部类别",
-        "iconPath": "images/book.png",
-        "selectedIconPath": "images/dish.png"
-      },
-      {
-        "pagePath": "pages/snapshotGoods/snapshotGoods",
-        "text": "快照商品",
-        "iconPath": "images/goods-3.png",
-        "selectedIconPath": "images/goods.png"
-      },
-      {
-        "pagePath": "pages/orders/orders",
-        "text": "订货",
-        "iconPath": "images/tab/orders.png",
-        "selectedIconPath": "images/tab/orders-active.png"
-      },
-      {
-        "pagePath": "pages/mine/mine",
-        "text": "我的",
-        "iconPath": "images/tab/mine.png",
-        "selectedIconPath": "images/tab/mine-active.png"
-      }
-    ]
-  },
   "networkTimeout": {
     "request": 300000
   },
   "usingComponents": {
     "navbar-dual": "/components/navbar-dual/navbar-dual"
+  },
+  "plugins": {
+    "QCloudAIVoice": {
+      "version": "2.3.13",
+      "provider": "wx3e17776051baf153"
+    }
   }
 }

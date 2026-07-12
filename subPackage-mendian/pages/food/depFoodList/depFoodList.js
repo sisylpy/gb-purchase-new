@@ -198,14 +198,14 @@ Page({
 
 
   onShow() {
-  
+
     if (this.data.update) {
       this._syncDatesFromMyDateStorage();
       this.setData({ update: false });
-      this._initData();
+      this._fetchDishes();
       return;
     }
-   
+
   },
 
   onLoad(optons) {
@@ -325,12 +325,20 @@ Page({
     var departmentId = this.data.departmentId;
     if (!categoryId || !distributerId) return;
 
+    // 根据 startDate / stopDate 动态计算 days
+    var start = this.data.startDate;
+    var stop = this.data.stopDate;
+    var days = 30; // 默认
+    if (start && stop) {
+      var diff = new Date(stop.replace(/-/g, '/')).getTime() - new Date(start.replace(/-/g, '/')).getTime();
+      days = Math.round(diff / (1000 * 60 * 60 * 24)) + 1;
+    }
     // 构建请求参数
     var reqData = {
       distributerId: distributerId,
       scopeMode: scopeMode,
       categoryId: categoryId,
-      days: 30,
+      days: days,
       sortBy: this.data.sortBy || 'sales',
       sortOrder: this.data.sortOrder || 'desc',
       keyword: this.data.searchKeyword || undefined,
@@ -539,7 +547,16 @@ Page({
     wx.navigateBack({ delta: 1 });
   },
 
-  
+  /** 跳转到日期选择页面 */
+  toDatePageSearch: function () {
+    this.setData({ update: true });
+    wx.navigateTo({
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate +
+        '&stopDate=' + this.data.stopDate +
+        '&dateType=' + (this.data.dateType || 'month'),
+    });
+  },
+
   onToggleSearchBar: function () {
     var open = !this.data.searchBarOpen;
     if (open) {

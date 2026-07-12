@@ -1,4 +1,4 @@
-<wxs src="../../../../utils/fn.wxs" module="tool" />
+<wxs src="/wxs/format.wxs" module="tool" />
 
 
 
@@ -11,7 +11,6 @@
   <view class=" {{payArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
     <view class="font-lg  empty_view">
       <view class="flex-column center-content">
-        <image class="empty_image" src="../../../../images/gouwucheicon-3.png"></image>
         <text class="big">没有优惠卷</text>
       </view>
     </view>

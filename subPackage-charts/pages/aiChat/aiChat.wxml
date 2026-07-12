@@ -5,7 +5,7 @@
   <view class="gem-nav" style="padding-top: {{statusBarHeight + 20}}px;">
    
 
-<back-navbar style="height: {{navBarHeight}}rpx;" title="{{pageTitle || 'Ai助手'}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+<back-navbar style="height: {{navBarHeight}}rpx;" title="{{pageTitle || 'AI助手'}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
      
   </view>
 
@@ -30,8 +30,20 @@
     <!-- 空会话：问候 + 推荐主题（Gemini 首页） -->
     <block wx:if="{{!isLoading && messages.length === 0}}">
       <view class="gem-home">
-        <view class="gem-greet">{{greetLine1}}</view>
-        <view class="gem-greet-sub">需要我为你做些什么？</view>
+        <view class="gem-hero-banner">
+          <view class="gem-hero-deco gem-hero-deco-ring"></view>
+          <view class="gem-hero-deco gem-hero-deco-star gem-hero-deco-star-1">✦</view>
+          <view class="gem-hero-deco gem-hero-deco-star gem-hero-deco-star-2">✦</view>
+          <view class="gem-hero-inner">
+            <view class="gem-hero-avatar-wrap">
+              <image class="gem-hero-avatar" src="{{url + 'uploadImage/imPurchase/300jj.png'}}" mode="aspectFit"></image>
+            </view>
+            <view class="gem-hero-text">
+              <text class="gem-hero-title">{{heroTitle}}</text>
+              <text class="gem-hero-sub">{{heroSubtitle}}</text>
+            </view>
+          </view>
+        </view>
         <view class="gem-subtitle" wx:if="{{topicPageSubtitle}}">{{topicPageSubtitle}}</view>
         <view class="gem-pill-list">
           <view class="gem-topic-block" wx:for="{{topics}}" wx:for-item="topic" wx:key="id">

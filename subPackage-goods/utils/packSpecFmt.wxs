@@ -1,0 +1,74 @@
+var base = require('../../wxs/orderGoodsFmt.base.wxs');
+var hasText = base.hasText;
+
+function disGoods(depGoods) {
+  if (!depGoods || !depGoods.gbDistributerGoodsEntity) {
+    return null;
+  }
+  return depGoods.gbDistributerGoodsEntity;
+}
+
+function pickField(depGoods, flatKey, disKey) {
+  if (!depGoods) {
+    return '';
+  }
+  if (hasText(depGoods[flatKey])) {
+    return depGoods[flatKey];
+  }
+  var dis = disGoods(depGoods);
+  if (dis && hasText(dis[disKey])) {
+    return dis[disKey];
+  }
+  return '';
+}
+
+function packUnit(depGoods) {
+  if (!depGoods) {
+    return '';
+  }
+  if (hasText(depGoods.gbDdgDepGoodsStandardname)) {
+    return depGoods.gbDdgDepGoodsStandardname;
+  }
+  var dis = disGoods(depGoods);
+  if (dis && hasText(dis.gbDgGoodsStandardname)) {
+    return dis.gbDgGoodsStandardname;
+  }
+  return '';
+}
+
+function specWeight(depGoods) {
+  var weight = pickField(depGoods, 'gbDgGoodsStandardWeight', 'gbDgGoodsStandardWeight');
+  var unit = packUnit(depGoods);
+  if (!hasText(weight)) {
+    return '';
+  }
+  if (hasText(unit) && unit !== '斤') {
+    return weight + '/' + unit;
+  }
+  return weight;
+}
+
+function cartonSpec(depGoods) {
+  var weight = pickField(depGoods, 'gbDgGoodsStandardWeight', 'gbDgGoodsStandardWeight');
+  var unit = packUnit(depGoods);
+  var carton = pickField(depGoods, 'gbDgCartonUnit', 'gbDgCartonUnit');
+  var count = pickField(depGoods, 'gbDgItemsPerCarton', 'gbDgItemsPerCarton');
+  if (!hasText(carton)) {
+    return '';
+  }
+  if (hasText(count)) {
+    if (hasText(weight) && hasText(unit) && unit !== '斤') {
+      return weight + '*' + count + unit + '/' + carton;
+    }
+    if (hasText(unit)) {
+      return count + unit + '/' + carton;
+    }
+    return count + '/' + carton;
+  }
+  return carton;
+}
+
+module.exports = {
+  specWeight: specWeight,
+  cartonSpec: cartonSpec,
+};
