@@ -6,10 +6,11 @@
 
 ## 阻断或影响正式验收的接口缺口
 
-1. `POST /franchise/v1/inspections` 的正式请求只有 `storeId`、`startedAt`、`summary`，没有 `idempotencyKey`，后台也没有创建巡店单的幂等记录。前端只能在一次页面会话内禁用重复点击，无法保证网络超时重试不生成两张巡店单。
-2. `POST /franchise/v1/rectification-tasks/{taskId}:accept` 只有 `rowVersion`，没有 `idempotencyKey`。前端已禁用重复点击，但无法按产品要求验证“接受任务”同键重试。
-3. 巡店现场原文只有新增接口，没有更新或作废巡店记录接口。AI 返回 422 后，前端只能新增一条修订记录；如果原记录已有照片，必须先作废并在新记录下重新上传，不能直接“修改原始记录后重试”。
-4. 当前运行环境没有可用的巡店员/店长微信正式登录态。不能用开发 Header、固定用户 ID 或验收历史 ID 代替，因此小程序页面上的正向真实闭环需要具备正式角色的微信用户登录后继续验收。
+1. 测试注册页使用当前 Bearer Token 调用 `PUT /franchise/v1/me/roles/INSPECTOR`，请求体为空，不提交用户、品牌、门店或部门 ID。当前后台尚未实现该角色绑定合同；合同应幂等地给当前 `gb_department_user` 追加 `INSPECTOR`，保留已有角色和组织关系，并按后台现有组织规则确定品牌及门店范围。接口缺失时页面会明确显示失败，不在本地伪造注册成功。
+2. `POST /franchise/v1/inspections` 的正式请求只有 `storeId`、`startedAt`、`summary`，没有 `idempotencyKey`，后台也没有创建巡店单的幂等记录。前端只能在一次页面会话内禁用重复点击，无法保证网络超时重试不生成两张巡店单。
+3. `POST /franchise/v1/rectification-tasks/{taskId}:accept` 只有 `rowVersion`，没有 `idempotencyKey`。前端已禁用重复点击，但无法按产品要求验证“接受任务”同键重试。
+4. 巡店现场原文只有新增接口，没有更新或作废巡店记录接口。AI 返回 422 后，前端只能新增一条修订记录；如果原记录已有照片，必须先作废并在新记录下重新上传，不能直接“修改原始记录后重试”。
+5. 当前运行环境没有可用的巡店员/店长微信正式登录态。不能用开发 Header、固定用户 ID 或验收历史 ID 代替，因此小程序页面上的正向真实闭环需要具备正式角色的微信用户登录后继续验收。
 
 ## 可降级展示但不伪造的数据缺口
 

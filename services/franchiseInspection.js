@@ -208,6 +208,7 @@ module.exports = {
   ensureToken: ensureToken,
   bootstrapIdentity: bootstrapIdentity,
   getMe: function () { return get('me'); },
+  registerInspector: function () { return put('me/roles/INSPECTOR', {}); },
   listStores: function () { return get('stores'); },
   listAssignees: function (storeId) { return get('stores/' + storeId + '/assignees', { role: 'STORE_MANAGER' }); },
   createInspection: function (body) { return post('inspections', body); },

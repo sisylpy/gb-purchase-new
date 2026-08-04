@@ -5,6 +5,7 @@ Component({
     visible: false,
     loading: false,
     identity: null,
+    requiresInspectorRegistration: false,
     error: '',
   },
 
@@ -22,26 +23,36 @@ Component({
       var that = this;
       this.setData({ loading: true, error: '' });
       api.bootstrapIdentity().then(function (identity) {
-        var actions = identity.allowedActions || [];
-        var visible = actions.some(function (action) {
-          return action.indexOf('INSPECTION_') === 0 || action.indexOf('RECTIFICATION_') === 0 ||
-            action.indexOf('ISSUE_') === 0;
+        var roles = identity.roleCodes || [];
+        var isInspector = roles.indexOf('INSPECTOR') >= 0;
+        that.setData({
+          visible: true,
+          identity: identity,
+          requiresInspectorRegistration: !isInspector,
+          loading: false,
+          error: '',
         });
-        that.setData({ visible: visible, identity: identity, loading: false, error: '' });
       }).catch(function (error) {
-        // 无正式加盟角色时不展示假入口；登录异常可由用户点击重新校验。
+        var needsRegistration = error && error.errorCode === 'FRANCHISE_ROLE_MISSING';
         var isAuth = error && (error.errorCode === 'AUTH_REQUIRED' || error.errorCode === 'TOKEN_INVALID' ||
           error.errorCode === 'TOKEN_EXPIRED');
         that.setData({
-          visible: false,
+          visible: needsRegistration,
+          identity: null,
+          requiresInspectorRegistration: needsRegistration,
           loading: false,
-          error: isAuth ? '巡店登录状态已失效，点击重新登录' : '',
+          error: isAuth ? '巡店登录状态已失效，点击重新登录' :
+            (needsRegistration ? '' : (error.message || '巡店身份校验失败，点击重试')),
         });
       });
     },
 
     openInspection: function () {
-      wx.navigateTo({ url: '/subPackage-inspection/pages/home/home' });
+      wx.navigateTo({
+        url: this.data.requiresInspectorRegistration
+          ? '/subPackage-inspection/pages/register/register'
+          : '/subPackage-inspection/pages/home/home',
+      });
     },
   },
 });
