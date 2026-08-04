@@ -1,0 +1,13 @@
+<view class="prep-entry" wx:if="{{visible}}" bindtap="openPreparation" hover-class="prep-entry--pressed">
+  <view class="prep-entry__icon">🥣</view>
+  <view class="prep-entry__text">
+    <text class="prep-entry__title">备料管理</text>
+    <text class="prep-entry__description">管理中间制品的生产、使用、废弃与成本</text>
+  </view>
+  <text class="prep-entry__arrow">›</text>
+</view>
+
+<view class="prep-entry-error" wx:if="{{error}}" bindtap="checkAccess">
+  <text>{{error}}</text>
+  <text class="prep-entry-error__retry">重新校验</text>
+</view>

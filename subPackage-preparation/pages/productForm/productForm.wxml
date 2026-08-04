@@ -1,0 +1,47 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{editing ? '编辑中间制品' : '新建中间制品'}}" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
+  <scroll-view wx:else scroll-y class="prep-scroll form-scroll">
+    <view class="prep-section">
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">产品编码</text>
+        <input class="prep-input" data-field="productCode" value="{{form.productCode}}" bindinput="onInput" placeholder="例如：FILLING-PORK" />
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">产品名称</text>
+        <input class="prep-input" data-field="productName" value="{{form.productName}}" bindinput="onInput" placeholder="例如：猪肉母馅" />
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">备料部门</text>
+        <picker range="{{departments}}" range-key="departmentName" value="{{departmentIndex}}" bindchange="onDepartmentChange">
+          <view class="prep-picker">{{departments[departmentIndex].departmentName || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">计量维度</text>
+        <picker range="{{dimensions}}" range-key="label" value="{{dimensionIndex}}" bindchange="onDimensionChange" disabled="{{editing && form.unitLocked === 1}}">
+          <view class="prep-picker">{{dimensions[dimensionIndex].label}}</view>
+        </picker>
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label">基础单位</text>
+        <view class="prep-picker readonly">{{form.baseUnitCode}}（由计量维度确定）</view>
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">默认保质期</text>
+        <view class="prep-inline">
+          <input class="prep-input" type="digit" data-field="shelfLifeValue" value="{{form.shelfLifeValue}}" bindinput="onInput" />
+          <picker range="{{shelfUnits}}" range-key="label" value="{{shelfUnitIndex}}" bindchange="onShelfUnitChange">
+            <view class="prep-picker unit-picker">{{shelfUnits[shelfUnitIndex].label}}</view>
+          </picker>
+        </view>
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label">储存说明</text>
+        <textarea class="prep-textarea" data-field="storageNote" value="{{form.storageNote}}" bindinput="onInput" placeholder="例如：冷藏密封保存" />
+      </view>
+    </view>
+    <view class="prep-tip" wx:if="{{editing}}">中间制品产生业务数据后，计量维度和基础单位由后台锁定；旧 rowVersion 会明确返回 409。</view>
+  </scroll-view>
+  <view class="prep-actions" wx:if="{{!loading}}"><button class="prep-button prep-button-primary" disabled="{{submitting}}" bindtap="submit">{{submitting ? '提交中…' : '保存'}}</button></view>
+</view>

@@ -1,0 +1,36 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="完成生产" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading}}">正在读取批次…</view>
+  <scroll-view wx:else scroll-y class="prep-scroll complete-scroll">
+    <view class="prep-section" wx:if="{{!completed}}">
+      <view class="prep-row"><text class="prep-label">批次号</text><text class="prep-value">{{batch.batchNo}}</text></view>
+      <view class="prep-row"><text class="prep-label">中间制品</text><text class="prep-value">{{batch.intermediateProductName}}</text></view>
+      <view class="prep-row"><text class="prep-label">理论产量</text><text class="prep-value">{{batch.theoreticalOutput.quantity}} {{batch.theoreticalOutput.unitCode}}</text></view>
+      <view class="prep-row"><text class="prep-label">材料总成本</text><text class="prep-value">{{batch.materialCostText}}</text></view>
+    </view>
+    <view class="prep-section" wx:if="{{!completed}}">
+      <view class="prep-form-row"><text class="prep-form-label prep-required">实际合格产量</text><input class="prep-input" type="digit" data-field="actualQuantity" value="{{actualQuantity}}" bindinput="onInput" /></view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">实际单位</text><input class="prep-input" data-field="inputUnitCode" value="{{inputUnitCode}}" bindinput="onInput" /></view>
+      <view class="prep-form-row"><text class="prep-form-label">完成时间</text><view class="prep-picker readonly">提交成功时由后台记录</view></view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">过期时间</text><view class="prep-inline"><picker mode="date" value="{{expiresDate}}" bindchange="onDateChange"><view class="prep-picker">{{expiresDate}}</view></picker><picker mode="time" value="{{expiresTime}}" bindchange="onTimeChange"><view class="prep-picker">{{expiresTime}}</view></picker></view></view>
+    </view>
+
+    <block wx:if="{{completed}}">
+      <view class="prep-tip prep-tip-green">生产已完成。产量和成本已冻结为只读。</view>
+      <view class="prep-section">
+        <view class="prep-section-title">完成结果</view>
+        <view class="prep-row"><text class="prep-label">理论产量</text><text class="prep-value">{{result.theoreticalOutput.quantity}} {{result.theoreticalOutput.unitCode}}</text></view>
+        <view class="prep-row"><text class="prep-label">实际合格产量</text><text class="prep-value prep-value-important">{{result.actualQualifiedOutput.quantity}} {{result.actualQualifiedOutput.unitCode}}</text></view>
+        <view class="prep-row"><text class="prep-label">加工损耗分析数量</text><text class="prep-value">{{result.processLossQuantityText}} {{result.baseUnitCode}}</text></view>
+        <view class="prep-row"><text class="prep-label">加工损耗分析金额</text><text class="prep-value">{{result.processLossCostText}}</text></view>
+        <view class="prep-row"><text class="prep-label">材料总成本</text><text class="prep-value">{{result.materialCostText}}</text></view>
+        <view class="prep-row"><text class="prep-label">冻结单位成本</text><text class="prep-value">{{result.unitCostText}}</text></view>
+        <view class="prep-row"><text class="prep-label">剩余数量</text><text class="prep-value">{{result.remainingQuantity}} {{result.baseUnitCode}}</text></view>
+        <view class="prep-row"><text class="prep-label">完成时间</text><text class="prep-value">{{result.producedText}}</text></view>
+        <view class="prep-row"><text class="prep-label">过期时间</text><text class="prep-value">{{result.expiresText}}</text></view>
+      </view>
+      <view class="prep-tip">加工损耗金额仅用于分析，已经反映在实际单位成本中，不会重复计费。</view>
+    </block>
+  </scroll-view>
+  <view class="prep-actions" wx:if="{{!loading}}"><button class="prep-button prep-button-primary" wx:if="{{!completed}}" disabled="{{submitting}}" bindtap="submit">{{submitting ? '完成提交中…' : '确认完成生产'}}</button><button class="prep-button prep-button-primary" wx:else bindtap="toDetail">查看批次详情</button></view>
+</view>

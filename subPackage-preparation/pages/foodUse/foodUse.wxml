@@ -1,0 +1,44 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="用于菜品" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading && foodIndex < 0}}">正在加载 VERSIONED 菜品…</view>
+  <scroll-view wx:else scroll-y class="food-use-scroll">
+    <view class="prep-tip">仅支持 VERSIONED 菜品和已发布菜品配方。这里记录的是“中间制品实记成本”，直接原料仍由原系统按期间推算。</view>
+    <block wx:if="{{!completed}}">
+      <view class="prep-section">
+        <view class="prep-form-row"><text class="prep-form-label prep-required">1. VERSIONED 菜品</text><view class="prep-picker {{foodIndex < 0 ? 'prep-placeholder' : ''}}" bindtap="openFoodPicker">{{foodIndex < 0 ? '搜索并选择菜品' : foods[foodIndex].foodName}}</view></view>
+        <view class="prep-form-row"><text class="prep-form-label prep-required">2. 已发布菜品配方</text><picker range="{{versions}}" range-key="label" value="{{versionIndex < 0 ? 0 : versionIndex}}" bindchange="onVersionChange" disabled="{{versions.length === 0}}"><view class="prep-picker">{{versionIndex < 0 ? '请先选择菜品' : versions[versionIndex].label + '（PUBLISHED）'}}</view></picker></view>
+        <view class="prep-form-row"><text class="prep-form-label prep-required">3. 实际制作份数</text><input class="prep-input" type="digit" value="{{portions}}" bindinput="onPortionsInput" placeholder="实际完成份数" /></view>
+        <view class="prep-form-row"><text class="prep-form-label prep-required">制作时间</text><view class="prep-inline"><picker mode="date" value="{{producedDate}}" bindchange="onDateChange"><view class="prep-picker">{{producedDate}}</view></picker><picker mode="time" value="{{producedTime}}" bindchange="onTimeChange"><view class="prep-picker">{{producedTime}}</view></picker></view></view>
+      </view>
+
+      <view class="prep-section" wx:for="{{components}}" wx:key="id" wx:for-index="componentIndex">
+        <view class="component-head"><view><view class="component-name">{{item.productName}}</view><view class="prep-muted">标准：每份 {{item.quantityPerPortion}} {{item.inputUnitCode}}</view></view><view class="prep-small-button" data-index="{{componentIndex}}" bindtap="addLine">增加批次</view></view>
+        <view class="variance-grid"><view><text>标准需要量</text><text class="variance-strong">{{item.standardRequiredText}} {{item.inputUnitCode}}</text></view><view><text>实际使用量</text><text class="variance-strong">{{item.actualUsedText}} {{item.inputUnitCode}}</text></view><view><text>数量偏差</text><text class="variance-strong">{{item.varianceText}} {{item.inputUnitCode}}</text></view></view>
+        <view class="use-line" wx:for="{{item.lines}}" wx:key="localId" wx:for-item="line" wx:for-index="lineIndex">
+          <view class="line-head"><text>使用行 {{lineIndex + 1}}</text><text class="delete-link" wx:if="{{item.lines.length > 1}}" data-component="{{componentIndex}}" data-line="{{lineIndex}}" bindtap="removeLine">删除</text></view>
+          <view class="prep-picker {{line.batch ? '' : 'prep-placeholder'}}" data-component="{{componentIndex}}" data-line="{{lineIndex}}" bindtap="openBatchPicker">{{line.batch ? line.batch.display : '搜索并选择可用中间制品批次'}}</view>
+          <view class="prep-inline used-input"><input class="prep-input" type="digit" value="{{line.usedQuantity}}" data-component="{{componentIndex}}" data-line="{{lineIndex}}" bindinput="onUsedInput" placeholder="实际使用量" /><view class="unit-readonly">{{line.inputUnitCode}}</view></view>
+        </view>
+        <view class="prep-empty compact" wx:if="{{item.batches.length === 0}}">暂无后台判定为“可用”的批次；过期或耗尽批次不会进入选择列表。</view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="prep-tip prep-tip-green">菜品使用已记账。</view>
+      <view class="prep-section">
+        <view class="prep-section-title">中间制品实记成本</view>
+        <view class="cost-total">{{result.totalCostText}}</view>
+        <view class="prep-row"><text class="prep-label">实际制作份数</text><text class="prep-value">{{result.producedPortionCount}}</text></view>
+        <view class="prep-row"><text class="prep-label">每份中间制品成本</text><text class="prep-value">{{result.perPortionText}}</text></view>
+        <view class="prep-row"><text class="prep-label">使用单据</text><text class="prep-value">{{result.factNo}}</text></view>
+        <view class="prep-tip" wx:if="{{result.netZero}}">存在使用后净零记录，本次实记成本为 0。</view>
+      </view>
+      <view class="prep-section"><view class="prep-section-title">使用明细</view><view class="prep-row" wx:for="{{result.intermediateLines}}" wx:key="productionIntermediateId"><text class="prep-label">{{item.intermediateProductName}} · {{item.intermediateBatchNo}}</text><text class="prep-value">{{item.inputQuantity}} {{item.inputUnitCode}} / {{item.totalCost}} 元</text></view></view>
+      <view class="prep-tip">此处不是菜品完整成本，也不是菜品全部材料成本。</view>
+    </block>
+  </scroll-view>
+  <view class="prep-actions" wx:if="{{!loading}}"><button class="prep-button prep-button-primary" wx:if="{{!completed}}" disabled="{{submitting || components.length === 0}}" bindtap="submit">{{submitting ? '提交中…' : '提交菜品使用'}}</button><button class="prep-button prep-button-primary" wx:else bindtap="toRecords">查看使用记录</button></view>
+
+  <view class="prep-modal-mask" wx:if="{{showFoodPicker}}" bindtap="closeFoodPicker"><view class="prep-modal" catchtap="noop"><view class="prep-section-title">选择 VERSIONED 菜品</view><input class="prep-input" value="{{foodKeyword}}" bindinput="onFoodSearch" placeholder="搜索菜品名称或分类" /><scroll-view scroll-y class="prep-modal-list"><view class="option-row" wx:for="{{filteredFoods}}" wx:key="foodId" data-id="{{item.foodId}}" bindtap="chooseFood"><view><view>{{item.foodName}}</view><view class="prep-muted">{{item.categoryName}} · VERSIONED</view></view><text class="prep-arrow">›</text></view><view class="prep-empty compact" wx:if="{{filteredFoods.length === 0}}">没有可用的 VERSIONED 菜品</view></scroll-view></view></view>
+  <view class="prep-modal-mask" wx:if="{{showBatchPicker}}" bindtap="closeBatchPicker"><view class="prep-modal" catchtap="noop"><view class="prep-section-title">选择中间制品批次</view><input class="prep-input" value="{{batchPicker.keyword}}" bindinput="onBatchSearch" placeholder="按批次号或 ID 搜索" /><scroll-view scroll-y class="prep-modal-list"><view class="option-row" wx:for="{{batchPicker.filteredRows}}" wx:key="intermediateBatchId" data-item="{{item}}" bindtap="chooseBatch"><view><view>{{item.batchNo}}</view><view class="prep-muted">剩余 {{item.remainingQuantity}} · 到期 {{item.expiresAt}}</view></view><text class="prep-arrow">›</text></view><view class="prep-empty compact" wx:if="{{batchPicker.filteredRows.length === 0}}">没有可用批次</view></scroll-view></view></view>
+</view>

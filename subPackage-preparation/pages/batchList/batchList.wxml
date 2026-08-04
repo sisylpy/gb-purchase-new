@@ -1,0 +1,22 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{selectAction === 'discard' ? '选择废弃批次' : '生产批次'}}" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <scroll-view scroll-x class="prep-tabs"><view wx:for="{{tabs}}" wx:key="value" class="prep-tab {{status === item.value ? 'prep-tab-active' : ''}}" data-value="{{item.value}}" bindtap="onTabTap">{{item.label}}</view></scroll-view>
+  <view class="prep-search"><input class="prep-input" value="{{keyword}}" bindinput="onSearch" placeholder="搜索批次号或中间制品" /></view>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载批次…</view>
+  <view class="prep-empty" wx:elif="{{filteredBatches.length === 0}}"><view class="prep-empty-title">暂无生产批次</view><text>当前筛选条件下没有记录。</text></view>
+  <scroll-view wx:else scroll-y class="batch-list">
+    <view class="prep-list-card" wx:for="{{filteredBatches}}" wx:key="batchId" data-item="{{item}}" bindtap="toBatch">
+      <view class="prep-card-head"><view><view class="prep-card-title">{{item.intermediateProductName}}</view><view class="batch-no">{{item.batchNo}}</view></view><text class="prep-status {{item.statusClass}}">{{item.statusLabel}}</text></view>
+      <view class="prep-card-meta">
+        <view>配方 V{{item.recipeVersionNo}} · {{item.departmentName}}</view>
+        <view>创建：{{item.createdText}}</view>
+      </view>
+      <view class="batch-bottom" wx:if="{{item.status === 'COMPLETED' || item.status === 'CLOSED'}}">
+        <view><text class="prep-muted">剩余</text><text>{{item.remainingQuantity}} {{item.baseUnitCode}}</text></view>
+        <text class="prep-status {{item.availabilityClass}}">{{item.availabilityLabel}}</text>
+      </view>
+      <view class="draft-note" wx:if="{{item.status === 'DRAFT'}}">尚未领料，未扣减采购库存</view>
+    </view>
+  </scroll-view>
+  <view class="prep-actions" wx:if="{{!selectAction}}"><button class="prep-button prep-button-primary" bindtap="toCreate">创建生产批次</button></view>
+</view>

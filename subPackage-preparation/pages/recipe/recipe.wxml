@@ -1,0 +1,73 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{productName || '配方管理'}}" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <scroll-view scroll-x class="prep-tabs" wx:if="{{versions.length}}">
+    <view wx:for="{{versions}}" wx:key="id" class="version-tab {{version.id === item.id ? 'version-active' : ''}}" data-id="{{item.id}}" bindtap="selectVersion">
+      <text>{{item.label}}</text><text class="version-state">{{item.statusLabel}}</text>
+    </view>
+  </scroll-view>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载配方…</view>
+  <scroll-view wx:else scroll-y class="recipe-scroll">
+    <view class="prep-tip {{isDraft ? '' : 'prep-tip-green'}}">{{isDraft ? '当前为草稿，可编辑并保存；发布前请确认所有单位换算已登记。' : '当前版本已发布或退役，只读展示，不能继续编辑。需要修改请从该版本复制新草稿。'}}</view>
+
+    <view class="prep-section">
+      <view class="prep-section-title">产出设置</view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">理论产量</text>
+        <view class="prep-inline">
+          <input class="prep-input" type="digit" value="{{theoreticalOutputQuantity}}" data-field="theoreticalOutputQuantity" bindinput="onHeaderInput" disabled="{{!isDraft}}" />
+          <picker range="{{outputUnits}}" value="{{outputUnitIndex}}" bindchange="onOutputUnitChange" disabled="{{!isDraft}}">
+            <view class="prep-picker unit-box">{{outputUnits[outputUnitIndex]}}</view>
+          </picker>
+        </view>
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">版本保质期（分钟）</text>
+        <input class="prep-input" type="number" value="{{shelfLifeMinutes}}" data-field="shelfLifeMinutes" bindinput="onHeaderInput" disabled="{{!isDraft}}" />
+      </view>
+    </view>
+
+    <view class="prep-section">
+      <view class="section-head">
+        <view class="prep-section-title no-margin">配方原料</view>
+        <view class="prep-small-button" wx:if="{{isDraft}}" bindtap="openGoodsPicker">增加原料</view>
+      </view>
+      <view class="prep-empty compact" wx:if="{{components.length === 0}}">尚未添加原料</view>
+      <view class="component-card" wx:for="{{components}}" wx:key="rawGoodsId">
+        <view class="component-head"><text>{{index + 1}}. {{item.rawGoodsName}}</text><text class="delete-link" wx:if="{{isDraft}}" data-index="{{index}}" bindtap="deleteComponent">删除</text></view>
+        <view class="prep-inline component-inputs">
+          <input class="prep-input" type="digit" value="{{item.inputQuantityText}}" data-index="{{index}}" data-field="inputQuantityText" bindinput="onComponentInput" disabled="{{!isDraft}}" placeholder="数量" />
+          <input class="prep-input unit-input" value="{{item.inputUnitText}}" data-index="{{index}}" data-field="inputUnitText" bindinput="onComponentInput" disabled="{{!isDraft}}" placeholder="单位代码" />
+        </view>
+        <view class="prep-muted">原料 ID：{{item.rawGoodsId}}</view>
+      </view>
+    </view>
+
+    <view class="prep-section">
+      <view class="prep-row"><text class="prep-label">版本</text><text class="prep-value">V{{version.versionNo}}</text></view>
+      <view class="prep-row"><text class="prep-label">状态</text><text class="prep-value">{{version.status}}</text></view>
+      <view class="prep-row"><text class="prep-label">基于版本</text><text class="prep-value">{{version.basedOnVersionId || '—'}}</text></view>
+      <view class="prep-row"><text class="prep-label">发布时间</text><text class="prep-value">{{version.publishedAt || '—'}}</text></view>
+    </view>
+  </scroll-view>
+
+  <view class="prep-actions" wx:if="{{!loading}}">
+    <button class="prep-button prep-button-secondary" disabled="{{submitting}}" data-action="copy" bindtap="versionAction">从此版本复制</button>
+    <button class="prep-button prep-button-danger" wx:if="{{version.status === 'PUBLISHED'}}" disabled="{{submitting}}" data-action="retire" bindtap="versionAction">退役</button>
+    <button class="prep-button prep-button-secondary" wx:if="{{isDraft}}" disabled="{{submitting}}" bindtap="saveDraft">保存草稿</button>
+    <button class="prep-button prep-button-primary" wx:if="{{isDraft}}" disabled="{{submitting || dirty}}" data-action="publish" bindtap="versionAction">发布</button>
+  </view>
+
+  <view class="prep-modal-mask" wx:if="{{showGoodsPicker}}" bindtap="closeGoodsPicker">
+    <view class="prep-modal" catchtap="noop">
+      <view class="prep-section-title">选择真实商品原料</view>
+      <view class="prep-inline"><input class="prep-input" value="{{goodsKeyword}}" bindinput="onGoodsKeyword" confirm-type="search" bindconfirm="searchGoods" placeholder="输入原料名称搜索" /><view class="prep-small-button" bindtap="searchGoods">搜索</view></view>
+      <view class="prep-loading compact" wx:if="{{goodsLoading}}">搜索中…</view>
+      <scroll-view scroll-y class="prep-modal-list" wx:else>
+        <view class="goods-row" wx:for="{{goodsResults}}" wx:key="gbDistributerGoodsId" data-item="{{item}}" bindtap="chooseGoods">
+          <view><view>{{item.gbDgGoodsName}}</view><view class="prep-muted">{{item.gbDgGoodsStandardname || '未标基础单位'}} · ID {{item.gbDistributerGoodsId}}</view></view><text class="prep-arrow">›</text>
+        </view>
+        <view class="prep-empty compact" wx:if="{{!goodsLoading && goodsResults.length === 0}}">请输入关键词查询</view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

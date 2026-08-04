@@ -1,0 +1,4 @@
+@import "../../styles/common.wxss";
+.complete-scroll { height: calc(100vh - 150rpx); }
+.prep-inline picker { flex: 1; }
+.readonly { color: #7c848d; }

@@ -1,0 +1,47 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="实际领料" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading}}">正在读取配方和库存批次…</view>
+  <scroll-view wx:else scroll-y class="issue-scroll">
+    <view class="prep-tip">不自动跨库存批次拆分，也不自动选择最低价批次。一个原料要使用两个采购批次时，请由员工增加两行并分别选择。</view>
+    <view class="prep-card batch-info"><text>{{batch.batchNo}}</text><text>{{batch.intermediateProductName}} · 配方 V{{batch.recipeVersionNo}}</text></view>
+
+    <view class="prep-section" wx:for="{{materials}}" wx:key="recipeComponentId" wx:for-index="componentIndex">
+      <view class="material-head"><view><view class="material-name">{{componentIndex + 1}}. {{item.rawGoodsName}}</view><view class="prep-muted">配方需要 {{item.plannedInputQuantity}} {{item.plannedInputUnitCode}}</view></view><view class="prep-small-button" data-index="{{componentIndex}}" bindtap="addLine">增加批次</view></view>
+
+      <view class="issue-line" wx:for="{{item.lines}}" wx:key="localId" wx:for-item="line" wx:for-index="lineIndex">
+        <view class="line-head"><text>领料行 {{lineIndex + 1}}</text><text class="delete-link" wx:if="{{item.lines.length > 1}}" data-component="{{componentIndex}}" data-line="{{lineIndex}}" bindtap="removeLine">删除</text></view>
+        <view class="prep-form-row">
+          <text class="prep-form-label prep-required">采购库存批次</text>
+          <view class="prep-picker {{line.stock ? '' : 'prep-placeholder'}}" data-component="{{componentIndex}}" data-line="{{lineIndex}}" bindtap="openStockPicker">{{line.stock ? line.stock.display : '搜索并选择真实采购库存批次'}}</view>
+        </view>
+        <block wx:if="{{line.stock}}">
+          <view class="stock-grid">
+            <view><text>采购日期</text><text class="stock-strong">{{line.stock.purchaseDate || '—'}}</text></view>
+            <view><text>剩余数量</text><text class="stock-strong">{{line.stock.remainingQuantity}} {{line.stock.quantityUnitCode}}</text></view>
+            <view><text>库存版本</text><text class="stock-strong">{{line.stock.rowVersion}}</text></view>
+            <view><text>库存批次</text><text class="stock-strong">#{{line.stock.rawStockBatchId}}</text></view>
+          </view>
+        </block>
+        <view class="prep-form-row">
+          <text class="prep-form-label prep-required">本次实际领用量</text>
+          <view class="prep-inline"><input class="prep-input" type="digit" value="{{line.inputQuantity}}" data-component="{{componentIndex}}" data-line="{{lineIndex}}" data-field="inputQuantity" bindinput="onLineInput" placeholder="数量" /><input class="prep-input unit-input" value="{{line.inputUnitCode}}" data-component="{{componentIndex}}" data-line="{{lineIndex}}" data-field="inputUnitCode" bindinput="onLineInput" placeholder="单位" /></view>
+        </view>
+      </view>
+      <view class="prep-empty compact" wx:if="{{item.candidates.length === 0}}">当前部门没有可选择的真实采购库存批次</view>
+    </view>
+  </scroll-view>
+  <view class="prep-actions" wx:if="{{!loading}}"><button class="prep-button prep-button-primary" disabled="{{submitting || materials.length === 0}}" bindtap="submit">{{submitting ? '领料提交中…' : '确认实际领料'}}</button></view>
+
+  <view class="prep-modal-mask" wx:if="{{stockPicker.visible}}" bindtap="closeStockPicker">
+    <view class="prep-modal" catchtap="noop">
+      <view class="prep-section-title">选择采购库存批次</view>
+      <input class="prep-input" value="{{stockPicker.keyword}}" bindinput="onStockSearch" placeholder="按批次 ID 或采购日期搜索" />
+      <scroll-view scroll-y class="prep-modal-list stock-list">
+        <view class="stock-option {{item.usable ? '' : 'stock-disabled'}}" wx:for="{{stockPicker.filteredRows}}" wx:key="rawStockBatchId" data-item="{{item}}" bindtap="chooseStock">
+          <view><view>#{{item.rawStockBatchId}} · {{item.purchaseDate || '日期未知'}}</view><view class="prep-muted">剩余 {{item.remainingQuantity}} {{item.quantityUnitCode || '单位未登记'}} · 成本 {{item.remainingCost}}</view><view class="unusable" wx:if="{{!item.usable}}">{{item.unusableReason}}</view></view><text class="prep-arrow">›</text>
+        </view>
+        <view class="prep-empty compact" wx:if="{{stockPicker.filteredRows.length === 0}}">没有匹配的库存批次</view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,45 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="中间制品详情" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
+  <scroll-view wx:else scroll-y class="prep-scroll detail-scroll">
+    <view class="prep-section">
+      <view class="prep-card-head">
+        <view><view class="product-name">{{product.productName}}</view><view class="product-code">{{product.productCode}}</view></view>
+        <text class="prep-status {{product.statusClass}}">{{product.statusLabel}}</text>
+      </view>
+      <view class="prep-divider"></view>
+      <view class="prep-row"><text class="prep-label">基础单位</text><text class="prep-value">{{product.baseUnitCode}}</text></view>
+      <view class="prep-row"><text class="prep-label">计量维度</text><text class="prep-value">{{product.unitDimension}}</text></view>
+      <view class="prep-row"><text class="prep-label">默认保质期</text><text class="prep-value">{{product.shelfLifeText}}</text></view>
+      <view class="prep-row"><text class="prep-label">储存说明</text><text class="prep-value">{{product.storageNote || '—'}}</text></view>
+      <view class="inline-actions"><view class="prep-small-button" bindtap="toEdit">编辑信息</view><view class="prep-small-button {{product.status === 'ENABLED' ? 'prep-small-button-danger' : ''}}" bindtap="changeStatus">{{product.status === 'ENABLED' ? '停用' : '启用'}}</view></view>
+    </view>
+
+    <view class="prep-section">
+      <view class="section-head"><view class="prep-section-title no-margin">包装换算</view><view class="prep-small-button" bindtap="openConversion">新增</view></view>
+      <view class="prep-empty compact" wx:if="{{conversions.length === 0}}">暂无自定义包装单位</view>
+      <view class="prep-row" wx:for="{{conversions}}" wx:key="id">
+        <view><view>{{item.unitCode}}</view><view class="prep-muted">{{item.factorText}}</view></view>
+        <view class="prep-small-button prep-small-button-danger" data-item="{{item}}" bindtap="disableConversion">停用</view>
+      </view>
+    </view>
+
+    <view class="prep-section" bindtap="openRecipe">
+      <view class="section-head"><view class="prep-section-title no-margin">配方版本</view><text class="prep-arrow">›</text></view>
+      <view class="prep-row"><text class="prep-label">当前已发布</text><text class="prep-value">{{publishedVersions.length ? 'V' + publishedVersions[0].recipeVersionNo : '尚未发布'}}</text></view>
+      <view class="prep-muted recipe-hint">{{recipeId ? '查看草稿、发布版本与历史版本' : '建立第一份配方草稿'}}</view>
+    </view>
+
+    <view class="prep-section" bindtap="toLoss"><view class="section-head"><view class="prep-section-title no-margin">备料损耗分析</view><text class="prep-arrow">›</text></view></view>
+  </scroll-view>
+
+  <view class="prep-modal-mask" wx:if="{{showConversion}}" bindtap="closeConversion">
+    <view class="prep-modal" catchtap="noop">
+      <view class="prep-section-title">新增包装换算</view>
+      <view class="prep-tip">标准单位 G、KG、JIN、ML、L、EA 不需要另建换算。换算系数表示 1 包装单位等于多少 {{product.baseUnitCode}}。</view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">包装单位代码</text><input class="prep-input" data-field="unitCode" value="{{conversionForm.unitCode}}" bindinput="onConversionInput" placeholder="例如 BOX、BAG" /></view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">换算数量（{{product.baseUnitCode}}）</text><input class="prep-input" type="digit" data-field="factorToBase" value="{{conversionForm.factorToBase}}" bindinput="onConversionInput" /></view>
+      <view class="modal-actions"><view class="prep-button prep-button-secondary" bindtap="closeConversion">取消</view><button class="prep-button prep-button-primary" disabled="{{submitting}}" bindtap="saveConversion">保存</button></view>
+    </view>
+  </view>
+</view>

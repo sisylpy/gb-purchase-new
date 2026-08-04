@@ -1,0 +1,19 @@
+@import "../../styles/common.wxss";
+.issue-scroll { box-sizing: border-box; height: calc(100vh - 150rpx); padding: 18rpx 22rpx 180rpx; }
+.batch-info { display: flex; flex-direction: column; gap: 8rpx; }
+.batch-info text:first-child { color: #187e6e; font-size: 24rpx; }
+.batch-info text:last-child { font-size: 30rpx; font-weight: 600; }
+.material-head, .line-head, .stock-option { align-items: center; display: flex; justify-content: space-between; }
+.material-name { font-size: 30rpx; font-weight: 600; }
+.issue-line { background: #f9fafb; border-radius: 14rpx; margin-top: 18rpx; padding: 18rpx; }
+.line-head { font-size: 25rpx; font-weight: 600; }
+.delete-link, .unusable { color: #d44747; font-size: 23rpx; }
+.stock-grid { display: grid; gap: 10rpx; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 14rpx; }
+.stock-grid view { background: #fff; border-radius: 10rpx; display: flex; flex-direction: column; gap: 6rpx; padding: 12rpx; }
+.stock-grid text { color: #7c848d; font-size: 21rpx; }
+.stock-grid .stock-strong { font-size: 25rpx; font-weight: 500; }
+.unit-input { flex: none !important; width: 180rpx; }
+.stock-option { border-bottom: 1rpx solid #edf0f2; min-height: 112rpx; }
+.stock-disabled { opacity: .62; }
+.stock-list { margin-top: 12rpx; }
+.compact { min-height: 90rpx; padding: 18rpx; }

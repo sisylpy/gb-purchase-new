@@ -1,0 +1,72 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="备料管理" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="prep-loading" wx:if="{{loading && !department}}">正在核验备料权限…</view>
+
+  <view class="prep-error" wx:elif="{{accessDenied}}">
+    <view class="prep-empty-title">暂时无法进入</view>
+    <text>{{accessMessage}}</text>
+    <view class="prep-small-button home-retry" bindtap="loadAccess">重新校验</view>
+  </view>
+
+  <scroll-view wx:else scroll-y class="home-scroll">
+    <view class="department-bar">
+      <view>
+        <text class="department-label">生产部门</text>
+        <text class="department-name">{{department.departmentName}}</text>
+      </view>
+      <picker range="{{departments}}" range-key="departmentName" value="{{departmentIndex}}" bindchange="onDepartmentChange">
+        <view class="department-switch" wx:if="{{departments.length > 1}}">切换</view>
+      </picker>
+    </view>
+
+    <view class="stats-grid">
+      <view class="stat-card primary" data-type="MATERIALS_ISSUED" bindtap="onStatTap">
+        <text class="stat-value">{{stats.pendingProduction === null ? '—' : stats.pendingProduction}}</text>
+        <text class="stat-label">今日待生产</text>
+      </view>
+      <view class="stat-card" data-type="DRAFT" bindtap="onStatTap">
+        <text class="stat-value">{{stats.issueIncomplete === null ? '—' : stats.issueIncomplete}}</text>
+        <text class="stat-label">领料未完成</text>
+      </view>
+      <view class="stat-card" data-type="COMPLETED" bindtap="onStatTap">
+        <text class="stat-value">{{stats.completedToday === null ? '—' : stats.completedToday}}</text>
+        <text class="stat-label">已完成批次</text>
+      </view>
+      <view class="stat-card" bindtap="onStatTap">
+        <text class="stat-value">{{stats.expiringSoon === null ? '—' : stats.expiringSoon}}</text>
+        <text class="stat-label">即将过期</text>
+        <text class="stat-note">待后台统计</text>
+      </view>
+      <view class="stat-card danger" data-type="EXPIRED" bindtap="onStatTap">
+        <text class="stat-value">{{stats.expired === null ? '—' : stats.expired}}</text>
+        <text class="stat-label">已过期待处理</text>
+      </view>
+      <view class="stat-card" data-type="use" bindtap="onStatTap">
+        <text class="stat-value">{{stats.useToday === null ? '—' : stats.useToday}}</text>
+        <text class="stat-label">今日使用</text>
+      </view>
+      <view class="stat-card" data-type="discard" bindtap="onStatTap">
+        <text class="stat-value">{{stats.discardToday === null ? '—' : stats.discardToday}}</text>
+        <text class="stat-label">今日废弃</text>
+      </view>
+    </view>
+
+    <view class="prep-tip" wx:if="{{statsError}}">{{statsError}}</view>
+
+    <view class="prep-section action-section">
+      <view class="prep-section-title">主要操作</view>
+      <view class="action-grid">
+        <view class="action-item action-main" data-target="create" bindtap="go"><text class="action-icon">＋</text><text>开始生产</text></view>
+        <view class="action-item" data-target="products" bindtap="go"><text class="action-icon">🥣</text><text>中间制品</text></view>
+        <view class="action-item" data-target="batches" bindtap="go"><text class="action-icon">📋</text><text>生产批次</text></view>
+        <view class="action-item" data-target="use" bindtap="go"><text class="action-icon">🍽️</text><text>用于菜品</text></view>
+        <view class="action-item" data-target="discard" bindtap="go"><text class="action-icon">♻️</text><text>废弃处理</text></view>
+        <view class="action-item" data-target="cost" bindtap="go"><text class="action-icon">¥</text><text>成本分析</text></view>
+        <view class="action-item" data-target="loss" bindtap="go"><text class="action-icon">📉</text><text>损耗分析</text></view>
+      </view>
+    </view>
+
+    <view class="prep-tip prep-tip-green">批次是否可用、是否过期均以后端返回为准；页面不会用手机时间改写批次状态。</view>
+  </scroll-view>
+</view>

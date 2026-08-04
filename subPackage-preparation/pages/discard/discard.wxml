@@ -1,0 +1,21 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="部分废弃" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading}}">正在读取批次…</view>
+  <scroll-view wx:else scroll-y class="prep-scroll discard-scroll">
+    <view class="prep-card">
+      <view class="prep-card-title">{{batch.intermediateProductName}}</view><view class="prep-card-meta">{{batch.batchNo}} · 剩余 {{batch.remainingQuantity}} {{baseUnitCode}} · {{batch.availabilityStatus}}</view>
+    </view>
+    <view class="prep-tip">只扣减本次输入数量，不会默认清空整批。过期批次可以废弃，但不能用于菜品。</view>
+    <view class="prep-section" wx:if="{{!completed}}">
+      <view class="prep-form-row"><text class="prep-form-label prep-required">废弃数量</text><view class="prep-inline"><input class="prep-input" type="digit" value="{{discardQuantity}}" data-field="discardQuantity" bindinput="onInput" placeholder="本次废弃数量" /><input class="prep-input unit-input" value="{{inputUnitCode}}" data-field="inputUnitCode" bindinput="onInput" /></view></view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">废弃原因</text><picker range="{{reasons}}" range-key="label" value="{{reasonIndex}}" bindchange="onReasonChange"><view class="prep-picker">{{reasons[reasonIndex].label}}</view></picker></view>
+      <view class="prep-form-row"><text class="prep-form-label {{reasons[reasonIndex].code === 'OTHER' ? 'prep-required' : ''}}">补充说明</text><textarea class="prep-textarea" value="{{reasonText}}" data-field="reasonText" bindinput="onInput" placeholder="可填写污染情况、处理方式等" /></view>
+      <view class="prep-form-row"><text class="prep-form-label">照片</text><view class="photo-box" wx:if="{{!localPhotoPath}}" bindtap="choosePhoto">拍照或选择照片</view><view wx:else><image class="prep-photo" mode="aspectFill" src="{{localPhotoPath}}"></image><view class="prep-small-button prep-small-button-danger photo-delete" bindtap="clearPhoto">移除</view></view><view class="photo-warning">后台当前只接收 photoPath 字符串但未提供照片上传接口，本地临时照片不会伪装成已上传路径。</view></view>
+    </view>
+    <block wx:if="{{completed}}">
+      <view class="prep-tip prep-tip-green">本次部分废弃已记账。</view>
+      <view class="prep-section"><view class="prep-section-title">废弃结果</view><view class="prep-row"><text class="prep-label">本次废弃数量</text><text class="prep-value prep-value-important">{{result.discardQuantity}} {{result.discardUnitCode}}</text></view><view class="prep-row"><text class="prep-label">本次废弃成本</text><text class="prep-value">{{result.costText}}</text></view><view class="prep-row"><text class="prep-label">废弃原因</text><text class="prep-value">{{result.reasonLabel}}</text></view><view class="prep-row"><text class="prep-label">废弃后剩余数量</text><text class="prep-value">{{result.batchRemainingQuantity}} {{result.baseUnitCode}}</text></view></view>
+    </block>
+  </scroll-view>
+  <view class="prep-actions" wx:if="{{!loading}}"><button class="prep-button prep-button-danger" wx:if="{{!completed}}" disabled="{{submitting}}" bindtap="submit">{{submitting ? '提交中…' : '确认部分废弃'}}</button><button class="prep-button prep-button-primary" wx:else bindtap="toDetail">返回批次详情</button></view>
+</view>

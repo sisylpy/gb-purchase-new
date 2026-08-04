@@ -1,0 +1,46 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="菜品成本分析" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载 VERSIONED 菜品…</view>
+  <scroll-view wx:else scroll-y class="analysis-scroll">
+    <view class="prep-section">
+      <view class="prep-form-row"><text class="prep-form-label prep-required">菜品</text><view class="prep-picker {{foodIndex < 0 ? 'prep-placeholder' : ''}}" bindtap="openFoodPicker">{{foodIndex < 0 ? '搜索并选择 VERSIONED 菜品' : foods[foodIndex].foodName}}</view></view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">分析期间</text><view class="prep-inline"><picker mode="date" value="{{startDate}}" bindchange="onStartDate"><view class="prep-picker">{{startDate}}</view></picker><text>至</text><picker mode="date" value="{{endDate}}" bindchange="onEndDate"><view class="prep-picker">{{endDate}}</view></picker></view></view>
+      <button class="prep-button prep-button-primary analyze-button" disabled="{{analyzing}}" bindtap="analyze">{{analyzing ? '分析中…' : '查看成本分析'}}</button>
+    </view>
+
+    <block wx:if="{{analysis}}">
+      <view class="prep-section">
+        <view class="prep-card-head"><view><view class="prep-card-title">{{analysis.foodName}}</view><view class="prep-muted">{{analysis.departmentName}} · {{analysis.startDate}} 至 {{analysis.endDate}}</view></view><text class="quality-tag">{{analysis.dataQuality}}</text></view>
+        <view class="prep-summary-grid analysis-summary"><view class="prep-summary-item"><view class="prep-summary-label">生产份数</view><view class="prep-summary-value">{{analysis.productionText}}</view></view><view class="prep-summary-item"><view class="prep-summary-label">销售份数</view><view class="prep-summary-value">{{analysis.salesText}}</view></view></view>
+        <view class="reconciliation {{analysis.portionReconciliationStatus === 'MATCH' ? 'match' : 'mismatch'}}">份数对账：{{analysis.portionReconciliationStatus}}</view>
+      </view>
+
+      <view class="cost-card inferred">
+        <view class="cost-head"><view><view class="cost-title">直接原料成本</view><view class="evidence-label">证据：推算 · INFERRED</view></view><view class="cost-amount">{{analysis.directAmountText}}</view></view>
+        <view class="prep-row"><text class="prep-label">单份直接原料成本</text><text class="prep-value">{{analysis.directPerText}}</text></view>
+      </view>
+      <view class="cost-card recorded">
+        <view class="cost-head"><view><view class="cost-title">中间制品成本</view><view class="evidence-label">证据：实记 · RECORDED</view></view><view class="cost-amount">{{analysis.intermediateAmountText}}</view></view>
+        <view class="prep-row"><text class="prep-label">每份中间制品成本</text><text class="prep-value">{{analysis.intermediatePerText}}</text></view>
+        <view class="prep-tip" wx:if="{{analysis.intermediateCost.amount === null}}">期间没有生产事实，中间制品成本暂无记录，不显示为 0。</view>
+        <view class="prep-tip prep-tip-green" wx:if="{{analysis.netZero}}">存在使用后完整冲销的净零记录，本期中间制品实记成本为 ¥0.00。</view>
+      </view>
+      <view class="cost-card mixed">
+        <view class="cost-head"><view><view class="cost-title">组合材料成本</view><view class="evidence-label">证据：混合 · MIXED</view></view><view class="cost-amount">{{analysis.combinedAmountText}}</view></view>
+        <view class="prep-row"><text class="prep-label">完整单份组合成本</text><text class="prep-value">{{analysis.combinedPerText}}</text></view>
+      </view>
+
+      <view class="prep-section">
+        <view class="prep-section-title">营业与毛利</view>
+        <view class="prep-row"><text class="prep-label">营业额</text><text class="prep-value">{{analysis.revenueText}}</text></view>
+        <view class="prep-row"><text class="prep-label">毛利</text><text class="prep-value">{{analysis.grossProfitText}}</text></view>
+        <view class="prep-row"><text class="prep-label">毛利率</text><text class="prep-value">{{analysis.grossMarginText}}</text></view>
+        <view class="prep-tip" wx:if="{{analysis.portionReconciliationStatus !== 'MATCH'}}">份数未对账为 MATCH，完整单份组合成本、毛利和毛利率暂不可计算。</view>
+      </view>
+
+      <view class="prep-section"><view class="fold-head" bindtap="toggleEvidence"><view class="prep-section-title no-margin">成本证据</view><text>{{showEvidence ? '收起' : '展开'}}</text></view><block wx:if="{{showEvidence}}"><view class="evidence-section"><view class="evidence-title">直接原料推算证据</view><view class="evidence-row" wx:for="{{evidence.directRawCost.components}}" wx:key="rawGoodsId"><text>{{item.rawGoodsName || ('原料 #' + item.rawGoodsId)}}</text><text>{{item.allocatedCostText}}</text></view></view><view class="evidence-section"><view class="evidence-title">中间制品实记证据</view><view class="evidence-row" wx:for="{{evidence.intermediateCost.components}}" wx:key="factId"><text>{{item.intermediateProductName}} · {{item.intermediateBatchNo}}</text><text>{{item.netRecordedCostText}}</text></view></view></block></view>
+      <view class="prep-tip" wx:for="{{analysis.warnings}}" wx:key="*this">{{item}}</view>
+    </block>
+  </scroll-view>
+  <view class="prep-modal-mask" wx:if="{{showFoodPicker}}" bindtap="closeFoodPicker"><view class="prep-modal" catchtap="noop"><view class="prep-section-title">选择 VERSIONED 菜品</view><input class="prep-input" value="{{foodKeyword}}" bindinput="onFoodSearch" placeholder="搜索菜品名称或分类" /><scroll-view scroll-y class="prep-modal-list"><view class="option-row" wx:for="{{filteredFoods}}" wx:key="foodId" data-id="{{item.foodId}}" bindtap="chooseFood"><view><view>{{item.foodName}}</view><view class="prep-muted">{{item.categoryName}} · VERSIONED</view></view><text class="prep-arrow">›</text></view><view class="prep-empty compact" wx:if="{{filteredFoods.length === 0}}">没有 VERSIONED 菜品</view></scroll-view></view></view>
+</view>

@@ -12,6 +12,27 @@
   ],
   "subPackages": [
     {
+      "root": "subPackage-preparation/",
+      "name": "preparation",
+      "pages": [
+        "pages/home/home",
+        "pages/products/products",
+        "pages/productForm/productForm",
+        "pages/productDetail/productDetail",
+        "pages/recipe/recipe",
+        "pages/batchCreate/batchCreate",
+        "pages/batchList/batchList",
+        "pages/batchDetail/batchDetail",
+        "pages/issue/issue",
+        "pages/complete/complete",
+        "pages/foodUse/foodUse",
+        "pages/discard/discard",
+        "pages/records/records",
+        "pages/costAnalysis/costAnalysis",
+        "pages/lossAnalysis/lossAnalysis"
+      ]
+    },
+    {
       "root": "subPackage-mendian/",
       "name": "mendian",
       "pages": [

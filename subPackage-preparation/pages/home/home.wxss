@@ -1,0 +1,121 @@
+@import "../../styles/common.wxss";
+
+.home-scroll {
+  height: calc(100vh - 150rpx);
+  padding-bottom: 40rpx;
+}
+
+.department-bar {
+  align-items: center;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+}
+
+.department-label {
+  color: #858c95;
+  font-size: 23rpx;
+  margin-right: 14rpx;
+}
+
+.department-name {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.department-switch {
+  border: 1rpx solid #187e6e;
+  border-radius: 999rpx;
+  color: #187e6e;
+  font-size: 23rpx;
+  padding: 8rpx 18rpx;
+}
+
+.stats-grid {
+  display: grid;
+  gap: 14rpx;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 20rpx 22rpx;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 17rpx;
+  display: flex;
+  flex-direction: column;
+  min-height: 126rpx;
+  padding: 20rpx;
+}
+
+.stat-card.primary {
+  background: #187e6e;
+  color: #fff;
+}
+
+.stat-card.danger .stat-value {
+  color: #d74747;
+}
+
+.stat-value {
+  color: #202429;
+  font-size: 42rpx;
+  font-weight: 700;
+}
+
+.primary .stat-value {
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 25rpx;
+  margin-top: 8rpx;
+}
+
+.stat-note {
+  color: #9aa0a7;
+  font-size: 20rpx;
+  margin-top: 4rpx;
+}
+
+.action-section {
+  margin: 0 22rpx 18rpx;
+}
+
+.action-grid {
+  display: grid;
+  gap: 12rpx;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.action-item {
+  align-items: center;
+  background: #f6f8f8;
+  border-radius: 15rpx;
+  display: flex;
+  flex-direction: column;
+  font-size: 25rpx;
+  gap: 8rpx;
+  justify-content: center;
+  min-height: 126rpx;
+  text-align: center;
+}
+
+.action-item.action-main {
+  background: #e8f5f1;
+  color: #187e6e;
+}
+
+.action-icon {
+  font-size: 38rpx;
+  font-weight: 600;
+}
+
+.home-retry {
+  margin-top: 30rpx;
+}
+
+.home-scroll > .prep-tip {
+  margin-left: 22rpx;
+  margin-right: 22rpx;
+}

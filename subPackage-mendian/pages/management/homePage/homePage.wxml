@@ -3,6 +3,8 @@
 
   <back-navbar style="height: {{navBarHeight}}rpx;" title="{{mendianInfo.gbDepartmentName}}管理" show-back="{{true}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
+  <preparation-entry />
+
 
   <view class="flex-column pt-10  font-sl">
 

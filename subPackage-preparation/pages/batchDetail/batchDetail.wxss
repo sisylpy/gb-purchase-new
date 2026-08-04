@@ -1,0 +1,21 @@
+@import "../../styles/common.wxss";
+.detail-scroll { box-sizing: border-box; height: calc(100vh - 150rpx); padding: 18rpx 22rpx 190rpx; }
+.batch-hero { background: linear-gradient(145deg, #187e6e, #11675c); border-radius: 20rpx; color: #fff; margin-bottom: 18rpx; padding: 26rpx; }
+.batch-product { font-size: 38rpx; font-weight: 700; }
+.batch-no { font-size: 24rpx; margin-top: 8rpx; opacity: .82; }
+.hero-grid { display: grid; gap: 18rpx; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 26rpx; }
+.hero-grid view { display: flex; flex-direction: column; gap: 6rpx; }
+.hero-grid text { font-size: 22rpx; opacity: .75; }
+.hero-grid .hero-strong { font-size: 27rpx; font-weight: 600; }
+.text-status { background: rgba(255,255,255,.9); border-radius: 999rpx; padding: 4rpx 10rpx; width: fit-content; }
+.fold-head, .movement-row, .material-total { align-items: center; display: flex; justify-content: space-between; }
+.fold-head > text { color: #187e6e; font-size: 23rpx; }
+.no-margin { margin: 0; }
+.material-row, .trace-row, .movement-row { border-top: 1rpx solid #edf0f2; padding: 20rpx 0; }
+.material-title { font-size: 28rpx; font-weight: 600; }
+.material-grid { color: #68717a; display: grid; font-size: 23rpx; gap: 8rpx; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 10rpx; }
+.material-total { color: #187e6e; font-size: 30rpx; font-weight: 600; margin-top: 12rpx; padding-top: 16rpx; }
+.trace-row { font-size: 26rpx; line-height: 1.7; }
+.compact { min-height: 90rpx; padding: 18rpx; }
+.detail-actions { display: flex; white-space: nowrap; }
+.detail-actions .prep-button { flex: none; min-width: 210rpx; }

@@ -1,0 +1,10 @@
+@import "../../styles/common.wxss";
+.detail-scroll { height: calc(100vh - 150rpx); }
+.product-name { font-size: 38rpx; font-weight: 700; }
+.product-code { color: #89919a; font-size: 24rpx; margin-top: 8rpx; }
+.inline-actions, .modal-actions, .section-head { align-items: center; display: flex; gap: 14rpx; justify-content: space-between; }
+.inline-actions { margin-top: 24rpx; }
+.no-margin { margin: 0; }
+.recipe-hint { margin-top: 12rpx; }
+.compact { min-height: 100rpx; padding: 20rpx; }
+.modal-actions { margin-top: 24rpx; }

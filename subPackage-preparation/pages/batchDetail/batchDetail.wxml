@@ -1,0 +1,82 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="生产批次详情" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载批次与成本穿透…</view>
+  <scroll-view wx:else scroll-y class="detail-scroll">
+    <view class="batch-hero">
+      <view class="prep-card-head"><view><view class="batch-product">{{batch.intermediateProductName}}</view><view class="batch-no">{{batch.batchNo}}</view></view><text class="prep-status {{batch.statusClass}}">{{batch.statusLabel}}</text></view>
+      <view class="hero-grid">
+        <view><text>配方版本</text><text class="hero-strong">V{{batch.recipeVersionNo}}</text></view>
+        <view><text>生产部门</text><text class="hero-strong">{{batch.departmentName}}</text></view>
+        <view><text>理论产量</text><text class="hero-strong">{{batch.theoreticalOutput.quantity}} {{batch.theoreticalOutput.unitCode}}</text></view>
+        <view><text>可用状态</text><text class="hero-strong {{batch.availabilityClass}} text-status">{{batch.availabilityLabel}}</text></view>
+      </view>
+    </view>
+
+    <view class="prep-tip" wx:if="{{batch.status === 'DRAFT'}}">DRAFT 仅表示批次已建立，采购库存尚未扣减。</view>
+
+    <view class="prep-section" wx:if="{{batch.actualQualifiedOutput}}">
+      <view class="prep-section-title">生产完成</view>
+      <view class="prep-summary-grid">
+        <view class="prep-summary-item"><view class="prep-summary-label">实际合格产量</view><view class="prep-summary-value">{{batch.actualQualifiedOutput.quantity}} {{batch.actualQualifiedOutput.unitCode}}</view></view>
+        <view class="prep-summary-item"><view class="prep-summary-label">剩余数量</view><view class="prep-summary-value">{{batch.remainingQuantity}} {{batch.baseUnitCode}}</view></view>
+        <view class="prep-summary-item"><view class="prep-summary-label">材料总成本</view><view class="prep-summary-value">{{batch.materialCostText}}</view></view>
+        <view class="prep-summary-item"><view class="prep-summary-label">冻结单位成本</view><view class="prep-summary-value">{{batch.unitCostText}}</view></view>
+      </view>
+      <view class="prep-row"><text class="prep-label">完成时间</text><text class="prep-value">{{batch.producedText}}</text></view>
+      <view class="prep-row"><text class="prep-label">过期时间</text><text class="prep-value">{{batch.expiresText}}</text></view>
+      <view class="prep-row"><text class="prep-label">加工损耗分析数量</text><text class="prep-value">{{batch.processLossQuantityText}} {{batch.baseUnitCode}}</text></view>
+      <view class="prep-row"><text class="prep-label">加工损耗分析金额</text><text class="prep-value">{{batch.processLossCostText}}</text></view>
+      <view class="prep-tip">加工损耗金额仅用于分析，已经反映在实际单位成本中，不会重复计费。</view>
+    </view>
+
+    <view class="prep-section" wx:if="{{batch.materials.length}}">
+      <view class="fold-head" data-field="showMaterials" bindtap="toggleSection"><view class="prep-section-title no-margin">实际领料（{{batch.materials.length}}）</view><text>{{showMaterials ? '收起' : '展开'}}</text></view>
+      <block wx:if="{{showMaterials}}">
+        <view class="material-row" wx:for="{{batch.materials}}" wx:key="materialLineId">
+          <view class="material-title">{{item.rawGoodsName}}</view>
+          <view class="material-grid"><text>实际 {{item.inputQuantity}} {{item.inputUnitCode}}</text><text>基础量 {{item.quantityText}}</text><text>成本 {{item.costText}}</text><text>库存批次 #{{item.rawStockBatchId}}</text></view>
+        </view>
+        <view class="material-total"><text>材料总成本</text><text>{{batch.materialCostText}}</text></view>
+        <view class="prep-muted">这是中间制品材料总成本，不是最终菜品完整成本。</view>
+      </block>
+    </view>
+
+    <view class="prep-section">
+      <view class="fold-head" data-field="showTrace" bindtap="toggleSection"><view class="prep-section-title no-margin">成本穿透</view><text>{{showTrace ? '收起' : '展开'}}</text></view>
+      <block wx:if="{{showTrace}}"><view class="trace-row" wx:for="{{batch.costTrace}}" wx:key="materialLineId"><view>{{item.rawGoodsName}} · 采购明细 #{{item.purchaseGoodsId}}</view><view class="prep-muted">库存版本 {{item.stockVersionBefore}} → {{item.stockVersionAfter}} · {{item.businessPurpose}}</view><view>{{item.costText}}</view></view></block>
+    </view>
+
+    <view class="prep-section">
+      <view class="fold-head" data-field="showUsage" bindtap="toggleSection"><view class="prep-section-title no-margin">使用记录（{{batch.usageMovements.length}}）</view><text>{{showUsage ? '收起' : '展开'}}</text></view>
+      <block wx:if="{{showUsage}}"><view class="movement-row" wx:for="{{batch.usageMovements}}" wx:key="id"><view><view>{{item.movementLabel}} · {{item.quantityText}} {{batch.baseUnitCode}}</view><view class="prep-muted">{{item.occurredText}} · {{item.costText}}</view></view><view class="prep-small-button {{item.hasReversal ? '' : 'prep-small-button-danger'}}" wx:if="{{!item.hasReversal}}" data-item="{{item}}" bindtap="reverseFoodUse">冲销</view><text class="prep-muted" wx:else>已冲销</text></view><view class="prep-empty compact" wx:if="{{batch.usageMovements.length === 0}}">暂无使用记录</view></block>
+    </view>
+
+    <view class="prep-section">
+      <view class="fold-head" data-field="showDiscards" bindtap="toggleSection"><view class="prep-section-title no-margin">废弃记录（{{batch.discardMovements.length}}）</view><text>{{showDiscards ? '收起' : '展开'}}</text></view>
+      <block wx:if="{{showDiscards}}"><view class="movement-row" wx:for="{{batch.discardMovements}}" wx:key="id"><view><view>{{item.movementLabel}} · {{item.quantityText}} {{batch.baseUnitCode}}</view><view class="prep-muted">{{item.occurredText}} · {{item.costText}}</view></view><view class="prep-small-button prep-small-button-danger" wx:if="{{!item.hasReversal}}" data-item="{{item}}" bindtap="reverseDiscard">冲销</view><text class="prep-muted" wx:else>已冲销</text></view><view class="prep-empty compact" wx:if="{{batch.discardMovements.length === 0}}">暂无废弃记录</view></block>
+    </view>
+
+    <view class="prep-section">
+      <view class="fold-head" data-field="showReversals" bindtap="toggleSection"><view class="prep-section-title no-margin">冲销记录（{{batch.reversalMovements.length}}）</view><text>{{showReversals ? '收起' : '展开'}}</text></view>
+      <block wx:if="{{showReversals}}"><view class="movement-row" wx:for="{{batch.reversalMovements}}" wx:key="id"><view><view>{{item.movementLabel}} · 恢复 {{item.quantityText}} {{batch.baseUnitCode}}</view><view class="prep-muted">{{item.occurredText}} · {{item.costText}}</view></view></view><view class="prep-empty compact" wx:if="{{batch.reversalMovements.length === 0}}">暂无冲销记录</view></block>
+    </view>
+
+    <view class="prep-section">
+      <view class="prep-section-title">数量与成本守恒</view>
+      <view class="prep-row"><text class="prep-label">数量守恒</text><text class="prep-value">{{batch.quantityBalanced === null ? '尚不可核验' : (batch.quantityBalanced ? '守恒' : '不守恒')}}</text></view>
+      <view class="prep-row"><text class="prep-label">数量差异</text><text class="prep-value">{{batch.quantityDifferenceText}}</text></view>
+      <view class="prep-row"><text class="prep-label">成本守恒</text><text class="prep-value">{{batch.costBalanced === null ? '尚不可核验' : (batch.costBalanced ? '守恒' : '不守恒')}}</text></view>
+      <view class="prep-row"><text class="prep-label">成本差异</text><text class="prep-value">{{batch.costDifferenceText}}</text></view>
+      <view class="prep-row"><text class="prep-label">剩余成本</text><text class="prep-value">{{batch.remainingCostText}}</text></view>
+    </view>
+  </scroll-view>
+
+  <scroll-view scroll-x class="prep-actions detail-actions" wx:if="{{!loading}}">
+    <button class="prep-button prep-button-primary" wx:if="{{batch.status === 'DRAFT'}}" bindtap="toIssue">实际领料</button>
+    <button class="prep-button prep-button-primary" wx:if="{{batch.status === 'MATERIALS_ISSUED'}}" bindtap="toComplete">完成生产</button>
+    <button class="prep-button prep-button-danger" wx:if="{{batch.status === 'MATERIALS_ISSUED'}}" disabled="{{submitting}}" bindtap="reverseIssue">冲销领料</button>
+    <button class="prep-button prep-button-secondary" wx:if="{{(batch.status === 'COMPLETED' || batch.status === 'CLOSED') && batch.availabilityStatus === 'AVAILABLE'}}" bindtap="toFoodUse">用于菜品</button>
+    <button class="prep-button prep-button-danger" wx:if="{{(batch.status === 'COMPLETED' || batch.status === 'CLOSED') && batch.remainingQuantity > 0}}" bindtap="toDiscard">部分废弃</button>
+    <button class="prep-button prep-button-secondary" wx:if="{{batch.status === 'COMPLETED' || batch.status === 'CLOSED'}}" bindtap="toLoss">损耗分析</button>
+  </scroll-view>
+</view>

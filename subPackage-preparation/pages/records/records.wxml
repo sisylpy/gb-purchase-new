@@ -1,0 +1,15 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="使用与废弃记录" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-tabs"><view class="prep-tab {{type === 'use' ? 'prep-tab-active' : ''}}" data-type="use" bindtap="switchType">菜品使用</view><view class="prep-tab {{type === 'discard' ? 'prep-tab-active' : ''}}" data-type="discard" bindtap="switchType">废弃与冲销</view></view>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载记录…</view>
+  <scroll-view wx:else scroll-y class="record-list">
+    <block wx:if="{{type === 'use'}}">
+      <view class="prep-list-card" wx:for="{{uses}}" wx:key="productionFactId"><view class="prep-card-head"><view><view class="prep-card-title">{{item.targetFoodName}}</view><view class="record-no">{{item.factNo}}</view></view><text class="prep-status {{item.statusClass}}">{{item.statusLabel}}</text></view><view class="prep-card-meta"><view>实际制作 {{item.producedPortionCount}} 份 · {{item.producedText}}</view><view>中间制品实记成本 {{item.costText}} · 每份 {{item.perPortionText}}</view></view><view class="record-actions"><view class="prep-small-button prep-small-button-danger" wx:if="{{item.postingStatus === 'CONFIRMED'}}" data-item="{{item}}" bindtap="reverseUse">冲销菜品使用</view><text class="prep-muted" wx:else>原记录已冲销，不可重复冲销</text></view></view>
+      <view class="prep-empty" wx:if="{{uses.length === 0}}"><view class="prep-empty-title">暂无菜品使用记录</view></view>
+    </block>
+    <block wx:else>
+      <view class="prep-list-card" wx:for="{{discards}}" wx:key="discardId" data-id="{{item.intermediateBatchId}}" bindtap="toBatch"><view class="prep-card-head"><view><view class="prep-card-title">{{item.intermediateProductName}}</view><view class="record-no">{{item.intermediateBatchNo}}</view></view><text class="prep-status {{item.entryType === 'REVERSAL' ? 'status-muted' : 'status-danger'}}">{{item.entryLabel}}</text></view><view class="prep-card-meta"><view>{{item.entryType === 'REVERSAL' ? '恢复' : '废弃'}} {{item.discardQuantity}} {{item.discardUnitCode}} · {{item.costText}}</view><view>{{item.createdText}} · {{item.reasonText || '无补充说明'}}</view></view><view class="record-actions" catchtap="noop"><view class="prep-small-button prep-small-button-danger" wx:if="{{item.entryType === 'DISCARD' && !item.reversed}}" data-item="{{item}}" bindtap="reverseDiscard">冲销废弃</view><text class="prep-muted" wx:elif="{{item.reversed}}">原记录已冲销，不可重复冲销</text></view></view>
+      <view class="prep-empty" wx:if="{{discards.length === 0}}"><view class="prep-empty-title">暂无废弃记录</view></view>
+    </block>
+  </scroll-view>
+</view>

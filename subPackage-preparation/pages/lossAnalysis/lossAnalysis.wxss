@@ -1,0 +1,12 @@
+@import "../../styles/common.wxss";
+.loss-scroll { box-sizing: border-box; height: calc(100vh - 150rpx); padding: 18rpx 22rpx 70rpx; }
+.prep-inline picker { flex: 1; }
+.analyze-button { margin-top: 22rpx; }
+.loss-card { background: #fff; border-radius: 18rpx; margin-bottom: 18rpx; padding: 24rpx; }
+.loss-card.process { border-top: 7rpx solid #db9c40; }
+.loss-card.discard { border-top: 7rpx solid #d35353; }
+.loss-head, .reason-row { align-items: center; display: flex; justify-content: space-between; }
+.loss-title { font-size: 31rpx; font-weight: 600; }
+.loss-sub { color: #7a828c; font-size: 22rpx; margin-top: 7rpx; }
+.loss-amount { font-size: 36rpx; font-weight: 700; }
+.reason-row { border-top: 1rpx solid #edf0f2; color: #5f6871; font-size: 24rpx; min-height: 68rpx; }

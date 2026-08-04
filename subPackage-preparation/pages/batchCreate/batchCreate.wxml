@@ -1,0 +1,39 @@
+<view class="prep-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="创建生产批次" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-loading" wx:if="{{loading && products.length === 0}}">正在加载生产条件…</view>
+  <scroll-view wx:else scroll-y class="prep-scroll create-scroll">
+    <view class="prep-tip">按“中间制品 → 已发布配方 → 备料部门”建立批次。DRAFT 只表示批次已建立，此时尚未扣减库存。</view>
+    <view class="prep-section">
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">1. 中间制品</text>
+        <picker range="{{products}}" range-key="productName" value="{{productIndex < 0 ? 0 : productIndex}}" bindchange="onProductChange">
+          <view class="prep-picker {{productIndex < 0 ? 'prep-placeholder' : ''}}">{{productIndex < 0 ? '请选择中间制品' : products[productIndex].productName}}</view>
+        </picker>
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">2. 已发布配方</text>
+        <picker range="{{versions}}" range-key="recipeVersionNo" value="{{versionIndex < 0 ? 0 : versionIndex}}" bindchange="onVersionChange" disabled="{{versions.length === 0}}">
+          <view class="prep-picker {{versionIndex < 0 ? 'prep-placeholder' : ''}}">{{versionIndex < 0 ? '请先选择有已发布配方的制品' : 'V' + versions[versionIndex].recipeVersionNo}}</view>
+        </picker>
+        <view class="version-summary" wx:if="{{versionIndex >= 0}}">
+          <text>理论产量</text><text>{{versions[versionIndex].theoreticalOutputQuantity}} {{versions[versionIndex].theoreticalOutputUnitCode}}</text>
+        </view>
+      </view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">3. 备料部门</text>
+        <picker range="{{departments}}" range-key="departmentName" value="{{departmentIndex}}" bindchange="onDepartmentChange">
+          <view class="prep-picker">{{departments[departmentIndex].departmentName || '无可用备料部门'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="prep-section" wx:if="{{productIndex >= 0 && versionIndex >= 0}}">
+      <view class="prep-section-title">创建预览</view>
+      <view class="prep-row"><text class="prep-label">中间制品</text><text class="prep-value">{{products[productIndex].productName}}</text></view>
+      <view class="prep-row"><text class="prep-label">配方版本</text><text class="prep-value">V{{versions[versionIndex].recipeVersionNo}}（PUBLISHED）</text></view>
+      <view class="prep-row"><text class="prep-label">理论产量</text><text class="prep-value">{{versions[versionIndex].theoreticalOutputQuantity}} {{versions[versionIndex].theoreticalOutputUnitCode}}</text></view>
+      <view class="prep-row"><text class="prep-label">初始状态</text><text class="prep-value prep-warning-text">DRAFT（未扣库存）</text></view>
+      <view class="prep-row"><text class="prep-label">生产部门</text><text class="prep-value">{{departments[departmentIndex].departmentName}}</text></view>
+    </view>
+  </scroll-view>
+  <view class="prep-actions"><button class="prep-button prep-button-primary" disabled="{{submitting || productIndex < 0 || versionIndex < 0 || departments.length === 0}}" bindtap="submit">{{submitting ? '创建中…' : '创建生产批次'}}</button></view>
+</view>

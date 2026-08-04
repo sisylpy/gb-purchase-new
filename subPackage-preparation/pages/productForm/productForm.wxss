@@ -1,0 +1,4 @@
+@import "../../styles/common.wxss";
+.form-scroll { height: calc(100vh - 150rpx); }
+.unit-picker { flex: none !important; width: 190rpx; }
+.readonly { color: #79818a; }

@@ -1,0 +1,4 @@
+@import "../../styles/common.wxss";
+.record-list { box-sizing: border-box; height: calc(100vh - 245rpx); padding: 18rpx 22rpx 60rpx; }
+.record-no { color: #818992; font-size: 23rpx; margin-top: 7rpx; }
+.record-actions { border-top: 1rpx solid #edf0f2; margin-top: 16rpx; padding-top: 16rpx; text-align: right; }

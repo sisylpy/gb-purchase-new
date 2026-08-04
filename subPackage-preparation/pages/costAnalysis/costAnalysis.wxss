@@ -1,0 +1,24 @@
+@import "../../styles/common.wxss";
+.analysis-scroll { box-sizing: border-box; height: calc(100vh - 150rpx); padding: 18rpx 22rpx 70rpx; }
+.prep-inline picker { flex: 1; }
+.analyze-button { margin-top: 22rpx; }
+.analysis-summary { margin-top: 22rpx; }
+.quality-tag { background: #edf1f2; border-radius: 999rpx; color: #5c646d; font-size: 21rpx; padding: 8rpx 14rpx; }
+.reconciliation { border-radius: 12rpx; font-size: 25rpx; margin-top: 16rpx; padding: 14rpx 18rpx; }
+.reconciliation.match { background: #e8f5f1; color: #187e6e; }
+.reconciliation.mismatch { background: #fff0e6; color: #ad601d; }
+.cost-card { background: #fff; border-left: 8rpx solid; border-radius: 18rpx; margin-bottom: 18rpx; padding: 24rpx; }
+.cost-card.inferred { border-left-color: #5a8fe6; }
+.cost-card.recorded { border-left-color: #187e6e; }
+.cost-card.mixed { border-left-color: #9b6acc; }
+.cost-head, .fold-head, .evidence-row, .option-row { align-items: center; display: flex; justify-content: space-between; }
+.cost-title { font-size: 31rpx; font-weight: 600; }
+.evidence-label { color: #7d858e; font-size: 22rpx; margin-top: 7rpx; }
+.cost-amount { font-size: 36rpx; font-weight: 700; }
+.fold-head > text { color: #187e6e; font-size: 23rpx; }
+.no-margin { margin: 0; }
+.evidence-section { border-top: 1rpx solid #edf0f2; margin-top: 18rpx; padding-top: 18rpx; }
+.evidence-title { font-size: 26rpx; font-weight: 600; margin-bottom: 10rpx; }
+.evidence-row { color: #666f78; font-size: 23rpx; min-height: 58rpx; }
+.option-row { border-bottom: 1rpx solid #edf0f2; min-height: 104rpx; }
+.compact { min-height: 90rpx; padding: 18rpx; }
