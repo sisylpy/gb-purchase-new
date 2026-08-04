@@ -9,7 +9,8 @@ Page({
     canAccept: false, canEdit: false, canReview: false,
     form: { reason: '', measures: '', description: '', supplement: '' },
     currentMedia: [], mediaUploading: false, reviewMedia: [], reviewMediaUploading: false,
-    approveComment: '', rejectReason: '', rejectRequirement: '', error: '',
+    approveComment: '', rejectReason: '', rejectRequirement: '', draftDirty: false, reviewDirty: false,
+    refreshNotice: '', error: '',
   },
 
   onLoad: function (options) {
@@ -17,11 +18,27 @@ Page({
     this.loadDetail();
   },
 
-  onShow: function () { if (this.loadedOnce) this.loadDetail(); },
-  onPullDownRefresh: function () { this.loadDetail().then(function () { wx.stopPullDownRefresh(); }).catch(function () { wx.stopPullDownRefresh(); }); },
+  onShow: function () {
+    if (!this.loadedOnce) return;
+    if (this.data.draftDirty || this.data.reviewDirty) {
+      this.setData({ refreshNotice: '页面有未保存内容，已暂停自动刷新。' });
+      return;
+    }
+    this.loadDetail();
+  },
+  onPullDownRefresh: function () {
+    if (this.data.draftDirty || this.data.reviewDirty) {
+      this.setData({ refreshNotice: '页面有未保存内容，已暂停刷新。' });
+      wx.stopPullDownRefresh();
+      return;
+    }
+    this.loadDetail().then(function () { wx.stopPullDownRefresh(); }).catch(function () { wx.stopPullDownRefresh(); });
+  },
 
   loadDetail: function () {
     var that = this;
+    this.detailRequestSequence = Number(this.detailRequestSequence || 0) + 1;
+    var sequence = this.detailRequestSequence;
     this.setData({ loading: true, error: '' });
     return Promise.all([api.bootstrapIdentity(), api.getTask(this.data.taskId), api.listStores()])
       .then(function (results) {
@@ -59,21 +76,33 @@ Page({
           var timeline = util.decorateTimeline(detail.timeline).map(function (event) {
             var eventDetail = event.detail || {};
             return Object.assign({}, event, {
-              actorName: userMap[String(event.actorUserId)] || ('用户 ' + event.actorUserId),
+              actorName: userMap[String(event.actorUserId)] || '操作人信息暂无',
               media: submissionMap[String(eventDetail.submissionId)] || reviewMap[String(eventDetail.reviewId)] || [],
             });
           });
+          if (sequence !== that.detailRequestSequence) return;
           var isAssignee = Number(identity.userId) === Number(task.assigneeUserId);
           var isReviewer = Number(identity.userId) === Number(task.reviewerUserId);
+          var submissions = (detail.submissions || []).map(function (submission) {
+            return Object.assign({}, submission, {
+              statusText: submission.status === 'SUBMITTED' ? '已提交' : '草稿',
+              timeText: submission.submittedAt ? util.formatTime(submission.submittedAt) : '尚未提交',
+            });
+          });
+          var reviews = (detail.reviews || []).map(function (review) {
+            return Object.assign({}, review, { timeText: util.formatTime(review.reviewedAt) });
+          });
           that.loadedOnce = true;
+          that.formDirty = false;
+          that.currentMediaBaseline = that.readyIds(currentDraft ? (currentDraft.media || []) : []).join(',');
           that.setData({
             loading: false,
             identity: identity,
-            store: store || { storeName: '门店 ' + task.storeId },
+            store: store || { storeName: '未命名门店' },
             task: Object.assign({}, task, { statusText: util.statusLabel(task.status), statusClass: util.statusClass(task.status), dueText: util.formatTime(task.dueAt) }),
             issue: Object.assign({}, issue, { severityText: util.severityLabel(issue.severity), statusText: util.statusLabel(issue.status) }),
-            submissions: detail.submissions || [],
-            reviews: detail.reviews || [],
+            submissions: submissions,
+            reviews: reviews,
             timeline: timeline,
             originalMedia: originalMedia,
             canAccept: isAssignee && util.hasAction(identity, 'RECTIFICATION_ACCEPT') && task.status === 'PENDING_ACCEPTANCE',
@@ -82,10 +111,14 @@ Page({
             form: currentDraft ? util.parseRectification(currentDraft.content) : { reason: '', measures: '', description: '', supplement: '' },
             currentMedia: currentDraft ? (currentDraft.media || []) : [],
             reviewMedia: [],
-            lastReview: (detail.reviews || []).length ? detail.reviews[detail.reviews.length - 1] : null,
+            lastReview: reviews.length ? reviews[reviews.length - 1] : null,
+            draftDirty: false,
+            reviewDirty: false,
+            refreshNotice: '',
           });
         });
       }).catch(function (error) {
+        if (sequence !== that.detailRequestSequence) return;
         that.setData({ loading: false, error: error.message || '整改任务加载失败' });
         util.showError(error, { afterClose: function () { if (Number(error.status) === 404) wx.navigateBack({ delta: 1 }); } });
       });
@@ -105,10 +138,29 @@ Page({
   },
 
   onFormInput: function (event) {
-    this.setData({ ['form.' + event.currentTarget.dataset.field]: event.detail.value });
+    this.formDirty = true;
+    this.setData({ ['form.' + event.currentTarget.dataset.field]: event.detail.value, draftDirty: true, refreshNotice: '' });
   },
-  onCurrentMediaChange: function (event) { this.setData({ currentMedia: event.detail.files || [], mediaUploading: !!event.detail.uploading }); },
-  onReviewMediaChange: function (event) { this.setData({ reviewMedia: event.detail.files || [], reviewMediaUploading: !!event.detail.uploading }); },
+  onCurrentMediaChange: function (event) {
+    var files = event.detail.files || [];
+    var signature = this.readyIds(files).join(',');
+    var hasLocalWork = files.some(function (row) { return !row.mediaAssetId || row.uploadStatus === 'uploading' || row.uploadStatus === 'failed'; });
+    this.setData({
+      currentMedia: files,
+      mediaUploading: !!event.detail.uploading,
+      draftDirty: !!this.formDirty || hasLocalWork || signature !== String(this.currentMediaBaseline || ''),
+      refreshNotice: '',
+    });
+  },
+  onReviewMediaChange: function (event) {
+    var files = event.detail.files || [];
+    this.setData({
+      reviewMedia: files,
+      reviewMediaUploading: !!event.detail.uploading,
+      reviewDirty: files.length > 0 || !!this.data.approveComment || !!this.data.rejectReason || !!this.data.rejectRequirement,
+      refreshNotice: '',
+    });
+  },
   readyIds: function (files) { return (files || []).filter(function (row) { return row.mediaAssetId && row.status === 'READY' && row.uploadStatus !== 'failed' && row.uploadStatus !== 'uploading'; }).map(function (row) { return Number(row.mediaAssetId); }); },
 
   saveDraft: function () {
@@ -157,7 +209,23 @@ Page({
     });
   },
 
-  onReviewInput: function (event) { this.setData({ [event.currentTarget.dataset.field]: event.detail.value }); },
+  onReviewInput: function (event) { this.setData({ [event.currentTarget.dataset.field]: event.detail.value, reviewDirty: true, refreshNotice: '' }); },
+
+  refreshDetail: function () {
+    var that = this;
+    var dirty = this.data.draftDirty || this.data.reviewDirty;
+    var action = dirty
+      ? util.confirm('刷新任务', '刷新将放弃尚未保存的页面编辑，是否继续？')
+      : Promise.resolve(true);
+    action.then(function (confirmed) {
+      if (!confirmed) return;
+      that.formDirty = false;
+      that.setData({ draftDirty: false, reviewDirty: false, refreshNotice: '' });
+      that.loadDetail();
+    });
+  },
+
+  retry: function () { this.loadDetail(); },
 
   review: function (event) {
     if (!this.data.canReview || this.data.actionLoading || this.data.reviewMediaUploading) return;

@@ -16,10 +16,11 @@ Page({
     loading: true,
     registering: false,
     alreadyInspector: false,
-    userName: '—',
-    phone: '未填写',
-    organizationName: '未获取到所属组织',
-    storeScope: '由后台按现有组织关系确定',
+    navigating: false,
+    userName: '暂无',
+    phone: '暂无',
+    organizationName: '暂无',
+    storeScope: '暂无',
     error: '',
   },
 
@@ -34,9 +35,14 @@ Page({
     this.setData({ loading: true, error: '' });
     api.bootstrapIdentity().then(function (identity) {
       that.fillLocalProfile(identity);
+      if (hasInspectorRole(identity)) {
+        that.setData({ loading: false, alreadyInspector: true });
+        that.enterWorkspace();
+        return;
+      }
       that.setData({
         loading: false,
-        alreadyInspector: hasInspectorRole(identity),
+        alreadyInspector: false,
       });
     }).catch(function (error) {
       if (error && error.errorCode === 'FRANCHISE_ROLE_MISSING') {
@@ -58,12 +64,12 @@ Page({
     var departmentName = textOrFallback(department.gbDepartmentName, '');
     var organization = distributerName && departmentName && distributerName !== departmentName
       ? distributerName + ' · ' + departmentName
-      : (departmentName || distributerName || '未获取到所属组织');
+      : (departmentName || distributerName || '暂无');
     this.setData({
-      userName: textOrFallback(identity && identity.userName, textOrFallback(user.gbDuWxNickName, '—')),
-      phone: textOrFallback(user.gbDuWxPhone, '未填写'),
+      userName: textOrFallback(identity && identity.userName, textOrFallback(user.gbDuWxNickName, '暂无')),
+      phone: textOrFallback(user.gbDuWxPhone, '暂无'),
       organizationName: organization,
-      storeScope: departmentName || '由后台按现有组织关系确定',
+      storeScope: departmentName || '暂无',
     });
   },
 
@@ -75,33 +81,33 @@ Page({
     }
     var that = this;
     this.setData({ registering: true, error: '' });
-    api.registerInspector().then(function () {
-      return api.getMe();
-    }).then(function (identity) {
+    api.bootstrapIdentity().then(function (identity) {
       if (!hasInspectorRole(identity)) {
-        return Promise.reject({
-          inspectionError: true,
-          status: 409,
-          errorCode: 'INSPECTOR_ROLE_NOT_EFFECTIVE',
-          message: '后台已响应注册，但刷新身份后仍未获得巡店员角色',
-        });
+        throw new Error('当前账号尚未获得巡店员身份');
       }
       that.setData({ registering: false, alreadyInspector: true });
-      wx.showToast({ title: '巡店员注册成功', icon: 'success' });
-      setTimeout(function () { that.enterWorkspace(); }, 600);
+      that.enterWorkspace();
     }).catch(function (error) {
-      var missingContract = Number(error && error.status) === 404;
+      var missingRole = error && error.errorCode === 'FRANCHISE_ROLE_MISSING';
       that.setData({
         registering: false,
-        error: missingContract
-          ? '当前后台尚未提供巡店员角色注册接口，前端没有伪造注册结果。'
-          : (error.message || '巡店员注册失败，请稍后重试'),
+        error: missingRole
+          ? '当前后台尚未提供统一角色体系下的巡店员注册能力，页面不会伪造注册成功。'
+          : (error.message || '当前身份校验失败，请稍后重试'),
       });
     });
   },
 
   enterWorkspace: function () {
-    wx.redirectTo({ url: '/subPackage-inspection/pages/home/home' });
+    if (this.data.navigating) return;
+    this.setData({ navigating: true });
+    var that = this;
+    wx.redirectTo({
+      url: '/subPackage-inspection/pages/home/home',
+      fail: function () {
+        that.setData({ navigating: false, error: '工作台打开失败，请重试' });
+      },
+    });
   },
 
   retry: function () { this.loadProfile(); },

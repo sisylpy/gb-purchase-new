@@ -20,6 +20,8 @@ Page({
     activeTab: '',
     items: [],
     listLoading: false,
+    listError: '',
+    statsError: '',
   },
 
   onLoad: function () {
@@ -42,12 +44,16 @@ Page({
 
   loadAll: function () {
     var that = this;
-    this.setData({ loading: true, error: '' });
+    this.setData({ loading: true, error: '', listError: '', statsError: '' });
     return api.bootstrapIdentity().then(function (identity) {
       return api.listStores().then(function (stores) {
         var isInspector = util.hasAction(identity, 'INSPECTION_CREATE') || util.hasAction(identity, 'RECTIFICATION_REVIEW');
         var isManager = util.hasAction(identity, 'RECTIFICATION_LIST_MINE');
-        var mode = that.data.mode || (isInspector ? 'inspector' : (isManager ? 'manager' : 'readonly'));
+        var previousMode = that.data.mode;
+        var previousAllowed = (previousMode === 'inspector' && isInspector) ||
+          (previousMode === 'manager' && isManager) ||
+          (previousMode === 'readonly' && !isInspector && !isManager);
+        var mode = previousAllowed ? previousMode : (isInspector ? 'inspector' : (isManager ? 'manager' : 'readonly'));
         that.ready = true;
         that.setData({
           loading: false,
@@ -90,7 +96,7 @@ Page({
     }
     var active = tabs.some(function (tab) { return tab.key === this.data.activeTab; }, this)
       ? this.data.activeTab : tabs[0].key;
-    this.setData({ mode: mode, tabs: tabs, activeTab: active, items: [] });
+    this.setData({ mode: mode, tabs: tabs, activeTab: active, items: [], stats: [], statsError: '' });
   },
 
   switchMode: function (event) {
@@ -105,20 +111,24 @@ Page({
     var that = this;
     var identity = this.data.identity;
     if (!identity) return Promise.resolve();
-    if (this.data.mode === 'manager') {
+    var mode = this.data.mode;
+    if (mode === 'manager') {
       return Promise.all([
         api.listTasks({ status: 'PENDING_ACCEPTANCE', assigneeUserId: identity.userId, page: 1, pageSize: 1 }),
         api.listTasks({ status: 'IN_PROGRESS', assigneeUserId: identity.userId, page: 1, pageSize: 1 }),
         api.listTasks({ status: 'PENDING_REVIEW', assigneeUserId: identity.userId, page: 1, pageSize: 1 }),
         api.listTasks({ status: 'COMPLETED', assigneeUserId: identity.userId, page: 1, pageSize: 1 }),
       ]).then(function (rows) {
-        that.setData({ stats: [
+        if (that.data.mode !== mode) return;
+        that.setData({ statsError: '', stats: [
           { value: total(rows[0]), label: '待接受' },
           { value: total(rows[1]), label: '整改中' },
           { value: total(rows[2]), label: '待复核' },
           { value: total(rows[3]), label: '已完成' },
         ] });
-      }).catch(function () { that.setData({ stats: [] }); });
+      }).catch(function () {
+        if (that.data.mode === mode) that.setData({ statsError: '统计暂时无法加载' });
+      });
     }
     var from = util.localDate(0) + 'T00:00:00';
     var to = util.localDate(1) + 'T00:00:00';
@@ -129,13 +139,16 @@ Page({
       api.listTasks({ status: 'PENDING_REVIEW', reviewerUserId: identity.userId, page: 1, pageSize: 1 }),
       api.listInspections({ inspectorUserId: identity.userId, status: 'COMPLETED', page: 1, pageSize: 1 }),
     ]).then(function (rows) {
-      that.setData({ stats: [
+      if (that.data.mode !== mode) return;
+      that.setData({ statsError: '', stats: [
         { value: total(rows[0]), label: '今日巡店' },
         { value: total(rows[1]) === null || total(rows[2]) === null ? null : total(rows[1]) + total(rows[2]), label: '进行中' },
         { value: total(rows[3]), label: '待复核' },
         { value: total(rows[4]), label: '已完成' },
       ] });
-    }).catch(function () { that.setData({ stats: [] }); });
+    }).catch(function () {
+      if (that.data.mode === mode) that.setData({ statsError: '统计暂时无法加载' });
+    });
   },
 
   selectTab: function (event) {
@@ -148,42 +161,54 @@ Page({
     var tab = this.data.activeTab;
     var identity = this.data.identity;
     if (!tab || !identity) return Promise.resolve();
-    this.setData({ listLoading: true, error: '' });
+    this.listRequestSequence = Number(this.listRequestSequence || 0) + 1;
+    var sequence = this.listRequestSequence;
+    this.setData({ listLoading: true, listError: '' });
     var request;
     if (this.data.mode === 'manager') {
-      request = api.listTasks({ status: tab, assigneeUserId: identity.userId, page: 1, pageSize: 20 }).then(function (page) {
-        return that.decorateTasks((page && page.items) || [], { status: tab, assigneeUserId: identity.userId });
+      request = api.listAllTasks({ status: tab, assigneeUserId: identity.userId }).then(function (rows) {
+        return that.decorateTasks(rows, { status: tab, assigneeUserId: identity.userId });
       });
     } else if (tab === 'review') {
-      request = api.listTasks({ status: 'PENDING_REVIEW', reviewerUserId: identity.userId, page: 1, pageSize: 20 })
-        .then(function (page) { return that.decorateTasks((page && page.items) || [], { status: 'PENDING_REVIEW', reviewerUserId: identity.userId }); });
+      request = api.listAllTasks({ status: 'PENDING_REVIEW', reviewerUserId: identity.userId })
+        .then(function (rows) { return that.decorateTasks(rows, { status: 'PENDING_REVIEW', reviewerUserId: identity.userId }); });
     } else {
       var queries = tab === 'active'
-        ? [{ inspectorUserId: identity.userId, status: 'DRAFT', page: 1, pageSize: 20 }, { inspectorUserId: identity.userId, status: 'IN_PROGRESS', page: 1, pageSize: 20 }]
-        : [{ inspectorUserId: this.data.mode === 'readonly' ? '' : identity.userId, status: tab === 'all' ? '' : tab, page: 1, pageSize: 20 }];
-      request = Promise.all(queries.map(function (query) { return api.listInspections(query); })).then(function (pages) {
+        ? [{ inspectorUserId: identity.userId, status: 'DRAFT' }, { inspectorUserId: identity.userId, status: 'IN_PROGRESS' }]
+        : [{ inspectorUserId: this.data.mode === 'readonly' ? '' : identity.userId, status: tab === 'all' ? '' : tab }];
+      request = Promise.all(queries.map(function (query) { return api.listAllInspections(query); })).then(function (pages) {
         var rows = [];
-        pages.forEach(function (page) { rows = rows.concat((page && page.items) || []); });
+        pages.forEach(function (pageRows) { rows = rows.concat(pageRows || []); });
         return that.decorateInspections(rows);
       });
     }
     return request.then(function (items) {
-      that.setData({ listLoading: false, items: items });
+      if (sequence !== that.listRequestSequence) return;
+      that.setData({ listLoading: false, listError: '', items: items });
     }).catch(function (error) {
-      that.setData({ listLoading: false, items: [], error: error.message || '列表加载失败' });
+      if (sequence !== that.listRequestSequence) return;
+      that.setData({ listLoading: false, listError: error.message || '列表加载失败' });
       util.showError(error);
     });
   },
 
   decorateInspections: function (rows) {
     var storeMap = {};
-    this.data.stores.forEach(function (store) { storeMap[String(store.storeId)] = store.storeName || ('门店 ' + store.storeId); });
-    return (rows || []).map(function (row) {
+    var seen = {};
+    this.data.stores.forEach(function (store) { storeMap[String(store.storeId)] = store.storeName || '未命名门店'; });
+    return (rows || []).filter(function (row) {
+      var key = String(row.inspectionId);
+      if (seen[key]) return false;
+      seen[key] = true;
+      return true;
+    }).sort(function (left, right) {
+      return String(right.startedAt || '').localeCompare(String(left.startedAt || '')) || Number(right.inspectionId) - Number(left.inspectionId);
+    }).map(function (row) {
       return Object.assign({}, row, {
         itemType: 'inspection',
         listKey: 'inspection-' + row.inspectionId,
-        displayTitle: storeMap[String(row.storeId)] || ('门店 ' + row.storeId),
-        displayNo: row.inspectionNo || ('巡店 #' + row.inspectionId),
+        displayTitle: storeMap[String(row.storeId)] || '未命名门店',
+        displayNo: row.inspectionNo || '巡店单号暂无',
         displayTime: util.formatTime(row.startedAt),
         displayStatus: util.statusLabel(row.status),
         statusClass: util.statusClass(row.status),
@@ -194,13 +219,13 @@ Page({
   decorateTasks: function (rows, query) {
     var that = this;
     var storeMap = {};
-    this.data.stores.forEach(function (store) { storeMap[String(store.storeId)] = store.storeName || ('门店 ' + store.storeId); });
+    this.data.stores.forEach(function (store) { storeMap[String(store.storeId)] = store.storeName || '未命名门店'; });
     return Promise.all([
       Promise.all((rows || []).map(function (task) { return api.getTask(task.rectificationTaskId); })),
-      api.listTasks(Object.assign({}, query || {}, { overdue: true, page: 1, pageSize: 100 })),
+      api.listAllTasks(Object.assign({}, query || {}, { overdue: true })),
     ]).then(function (results) {
       var overdueIds = {};
-      ((results[1] && results[1].items) || []).forEach(function (task) { overdueIds[String(task.rectificationTaskId)] = true; });
+      (results[1] || []).forEach(function (task) { overdueIds[String(task.rectificationTaskId)] = true; });
       return Promise.all(results[0].map(function (detail) {
         return detail.issue && detail.issue.inspectionId ? api.getInspection(detail.issue.inspectionId) : Promise.resolve(null);
       })).then(function (inspectionDetails) {
@@ -211,10 +236,11 @@ Page({
           return Object.assign({}, task, {
             itemType: 'task',
             listKey: 'task-' + task.rectificationTaskId,
-            displayTitle: issue.title || ('问题 ' + task.issueId),
-            storeName: storeMap[String(task.storeId)] || ('门店 ' + task.storeId),
-            inspectionTime: inspection ? util.formatTime(inspection.startedAt) : '—',
-            inspectorLabel: inspection ? ('巡店员 #' + inspection.inspectorUserId) : '巡店员 —',
+            displayTitle: issue.title || '整改问题',
+            storeName: storeMap[String(task.storeId)] || '未命名门店',
+            inspectionTime: inspection ? util.formatTime(inspection.startedAt) : '暂无',
+            inspectorLabel: inspection && Number(inspection.inspectorUserId) === Number(that.data.identity.userId)
+              ? that.data.identity.userName : '巡店员信息暂无',
             displayTime: util.formatTime(task.dueAt),
             displayStatus: util.statusLabel(task.status),
             statusClass: util.statusClass(task.status),
@@ -238,5 +264,6 @@ Page({
   },
 
   retry: function () { this.loadAll(); },
+  retryList: function () { this.loadList(); },
   toBack: function () { wx.navigateBack({ delta: 1 }); },
 });

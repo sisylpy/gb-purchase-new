@@ -18,29 +18,51 @@ Page({
   loadPage: function () {
     var that = this;
     var draft = wx.getStorageSync(this.recordStorageKey) || {};
-    if (!draft.candidates || !draft.candidates.length) {
+    if (!draft.item || Number(draft.item.inspectionItemId) !== Number(this.data.itemId) || !draft.candidates || !draft.candidates.length) {
       this.setData({ loading: false, error: '候选问题草稿不存在，请返回现场记录重新整理。' });
       return;
     }
-    return Promise.all([api.getInspection(this.data.inspectionId), api.listStores()])
+    this.setData({ loading: true, error: '' });
+    return Promise.all([api.bootstrapIdentity(), api.getInspection(this.data.inspectionId), api.listStores()])
       .then(function (results) {
-        var detail = results[0];
+        var identity = results[0];
+        if (!util.hasAction(identity, 'INSPECTION_EDIT')) {
+          return Promise.reject({ inspectionError: true, status: 403, message: '当前身份不能确认巡店问题' });
+        }
+        var detail = results[1];
         var inspection = detail.inspection;
-        var store = (results[1] || []).find(function (row) { return Number(row.storeId) === Number(inspection.storeId); });
-        return api.listAssignees(inspection.storeId).then(function (assignees) {
+        var store = (results[2] || []).find(function (row) { return Number(row.storeId) === Number(inspection.storeId); });
+        return Promise.all([
+          api.listAssignees(inspection.storeId),
+          api.listAllMedia({ storeId: inspection.storeId, status: 'READY' }),
+        ]).then(function (directories) {
+          var assignees = directories[0] || [];
+          var allMedia = directories[1] || [];
+          var invalidAssignee = false;
+          var invalidMedia = false;
           var candidates = draft.candidates.filter(function (row) { return row.generateTask !== false; }).map(function (row) {
-            var assignee = (assignees || []).find(function (user) { return Number(user.userId) === Number(row.assigneeUserId); });
-            var media = (draft.mediaFiles || []).filter(function (file) {
-              return (row.evidenceMediaIds || []).map(Number).indexOf(Number(file.mediaAssetId)) >= 0;
+            var assignee = assignees.find(function (user) { return Number(user.userId) === Number(row.assigneeUserId); });
+            if (!assignee) invalidAssignee = true;
+            var requestedMediaIds = (row.evidenceMediaIds || []).map(Number);
+            var media = allMedia.filter(function (file) {
+              return file.status === 'READY' && requestedMediaIds.indexOf(Number(file.mediaAssetId)) >= 0;
             });
-            return Object.assign({}, row, { assigneeName: assignee ? assignee.userName : ('用户 ' + row.assigneeUserId), media: media });
+            if (media.length !== requestedMediaIds.length) invalidMedia = true;
+            return Object.assign({}, row, {
+              assigneeName: assignee ? assignee.userName : '负责人已不在当前门店可指派范围',
+              severityText: util.severityLabel(row.severity),
+              media: media,
+            });
           });
           that.setData({
             loading: false,
             inspection: inspection,
-            store: store || { storeName: '门店 ' + inspection.storeId },
+            store: store || { storeName: '未命名门店' },
             candidates: candidates,
-            error: candidates.length ? '' : '请至少勾选一个需要确认并生成整改任务的候选问题。',
+            error: !candidates.length
+              ? '请至少勾选一个需要确认并生成整改任务的候选问题。'
+              : (invalidAssignee ? '负责人目录已变化，请返回候选问题页重新选择。'
+                : (invalidMedia ? '关联的现场照片已不可用，请返回候选问题页重新选择。' : '')),
           });
         });
       }).catch(function (error) {
@@ -48,6 +70,8 @@ Page({
         util.showError(error);
       });
   },
+
+  retry: function () { this.loadPage(); },
 
   submitAll: function () {
     if (this.data.submitting || !this.data.candidates.length) return;

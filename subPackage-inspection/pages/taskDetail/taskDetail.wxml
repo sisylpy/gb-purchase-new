@@ -1,8 +1,9 @@
 <view class="inspection-page">
   <back-navbar style="height: {{navBarHeight}}rpx;" title="整改任务详情" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="loading" wx:if="{{loading}}">正在加载整改任务…</view>
-  <view class="error" wx:elif="{{error}}">{{error}}</view>
+  <view class="error" wx:elif="{{error}}"><text>{{error}}</text><view class="small-button retry" bindtap="retry">重新加载</view></view>
   <scroll-view wx:else scroll-y class="inspection-scroll">
+    <view class="tip tip-red" wx:if="{{refreshNotice}}"><text>{{refreshNotice}}</text><text class="retry-link" bindtap="refreshDetail">放弃编辑并刷新</text></view>
     <view class="inspection-card">
       <view class="card-head"><text class="card-title">{{issue.title}}</text><text class="status {{task.statusClass}}">{{task.statusText}}</text></view>
       <view class="row"><text class="row-label">整改任务</text><text class="row-value">{{task.taskNo}}</text></view>
@@ -36,7 +37,7 @@
     <view class="inspection-section" wx:if="{{submissions.length}}">
       <view class="section-title">历史整改提交</view>
       <view class="history-card" wx:for="{{submissions}}" wx:key="submissionId" wx:for-item="submission">
-        <view class="card-head"><text class="history-title">第 {{submission.roundNo}} 轮 · {{submission.status}}</text><text class="muted">{{submission.submittedAt || '草稿'}}</text></view>
+        <view class="card-head"><text class="history-title">第 {{submission.roundNo}} 轮 · {{submission.statusText}}</text><text class="muted">{{submission.timeText}}</text></view>
         <text class="history-content">{{submission.content || '未填写说明'}}</text>
         <view class="history-media" wx:if="{{submission.media.length}}"><inspection-media-uploader value="{{submission.media}}" editable="{{false}}" /></view>
       </view>
@@ -55,7 +56,7 @@
     <view class="inspection-section" wx:if="{{reviews.length}}">
       <view class="section-title">历史复核</view>
       <view class="review-history {{review.decision === 'REJECT' ? 'rejected' : ''}}" wx:for="{{reviews}}" wx:key="reviewId" wx:for-item="review">
-        <view class="card-head"><text class="history-title">第 {{review.roundNo}} 轮 · {{review.decision === 'APPROVE' ? '通过' : '退回'}}</text><text class="muted">{{review.reviewedAt}}</text></view>
+        <view class="card-head"><text class="history-title">第 {{review.roundNo}} 轮 · {{review.decision === 'APPROVE' ? '通过' : '退回'}}</text><text class="muted">{{review.timeText}}</text></view>
         <text>{{review.reviewComment}}</text>
         <view class="history-media" wx:if="{{review.media.length}}"><inspection-media-uploader value="{{review.media}}" editable="{{false}}" /></view>
       </view>
@@ -71,6 +72,7 @@
           <view class="history-media" wx:if="{{event.media.length}}"><inspection-media-uploader value="{{event.media}}" editable="{{false}}" /></view>
         </view>
       </view>
+      <view class="muted" wx:if="{{!timeline.length}}">后台尚未返回时间线记录</view>
     </view>
   </scroll-view>
 

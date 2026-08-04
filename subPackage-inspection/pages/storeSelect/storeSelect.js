@@ -3,7 +3,7 @@ var api = require('../../../services/franchiseInspection');
 var util = require('../../../utils/franchiseInspection');
 
 Page({
-  data: { navBarHeight: 0, loading: true, stores: [], filtered: [], keyword: '', selectedId: 0, creating: false, error: '' },
+  data: { navBarHeight: 0, loading: true, stores: [], filtered: [], keyword: '', selectedId: 0, creating: false, error: '', createError: '' },
 
   onLoad: function () {
     this.setData({ navBarHeight: app.globalData.navBarHeight * app.globalData.rpxR });
@@ -32,6 +32,8 @@ Page({
             recentInspection: latest ? util.formatTime(latest.startedAt) : '暂无巡店记录',
             unfinished: [results[1], results[2], results[3]].some(function (result) { return Number(result && result.total || 0) > 0; }),
           });
+        }).catch(function () {
+          return Object.assign({}, store, { recentInspection: '暂时无法加载', unfinished: false, summaryUnavailable: true });
         });
       }));
     }).then(function (stores) {
@@ -57,17 +59,18 @@ Page({
     var store = this.data.stores.find(function (row) { return Number(row.storeId) === Number(this.data.selectedId); }, this);
     if (!store) return;
     var that = this;
-    this.setData({ creating: true });
+    this.setData({ creating: true, createError: '' });
     api.createInspection({ storeId: store.storeId, startedAt: util.localDateTime(), summary: '门店现场巡店' })
       .then(function (inspection) {
         wx.redirectTo({
           url: '/subPackage-inspection/pages/inspectionRecord/inspectionRecord?inspectionId=' + inspection.inspectionId + '&storeId=' + store.storeId,
         });
       }).catch(function (error) {
-        that.setData({ creating: false });
+        that.setData({ creating: false, createError: error.message || '巡店单创建失败' });
         util.showError(error);
       });
   },
 
+  retry: function () { this.loadStores(); },
   toBack: function () { wx.navigateBack({ delta: 1 }); },
 });

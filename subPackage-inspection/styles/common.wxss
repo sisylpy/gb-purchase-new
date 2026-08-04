@@ -40,6 +40,8 @@ page { background: #f5f6f8; color: #202429; font-size: 28rpx; }
 .button-danger { background: #fff0f0; color: #cd4141; }
 .button[disabled] { background: #cfd4d7; color: #fff; }
 .small-button { border: 1rpx solid #187e6e; border-radius: 10rpx; color: #187e6e; display: inline-flex; font-size: 24rpx; line-height: 54rpx; padding: 0 18rpx; }
+.retry { margin-top: 24rpx; }
+.retry-link { color: #187e6e; display: block; font-weight: 600; margin-top: 12rpx; }
 .row { align-items: center; border-bottom: 1rpx solid #edf0f2; display: flex; justify-content: space-between; min-height: 72rpx; }
 .row:last-child { border-bottom: 0; }
 .row-label { color: #717982; flex-shrink: 0; font-size: 25rpx; margin-right: 20rpx; }

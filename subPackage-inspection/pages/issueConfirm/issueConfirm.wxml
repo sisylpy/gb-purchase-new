@@ -1,7 +1,7 @@
 <view class="inspection-page">
   <back-navbar style="height: {{navBarHeight}}rpx;" title="确认问题并下发" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="loading" wx:if="{{loading}}">正在准备确认信息…</view>
-  <view class="error" wx:elif="{{error}}">{{error}}</view>
+  <view class="error" wx:elif="{{error}}"><text>{{error}}</text><view class="small-button retry" bindtap="retry">重新检查</view></view>
   <scroll-view wx:else scroll-y class="inspection-scroll">
     <view class="tip tip-red">这是正式提交前的最后确认。提交成功后，现场事实和照片将进入只读状态。</view>
     <view class="inspection-card">
@@ -10,7 +10,7 @@
       <view class="row"><text class="row-label">正式问题数</text><text class="row-value">{{candidates.length}}</text></view>
     </view>
     <view class="inspection-card" wx:for="{{candidates}}" wx:key="candidateKey" wx:for-item="candidate" wx:for-index="index">
-      <view class="card-head"><text class="card-title">{{index + 1}}. {{candidate.title}}</text><text class="status status-warning">{{candidate.severity}}</text></view>
+      <view class="card-head"><text class="card-title">{{index + 1}}. {{candidate.title}}</text><text class="status status-warning">{{candidate.severityText}}</text></view>
       <view class="confirm-block"><text class="confirm-label">现场描述</text><text>{{candidate.description}}</text></view>
       <view class="confirm-block"><text class="confirm-label">问题分类</text><text>{{candidate.category}}</text></view>
       <view class="confirm-block"><text class="confirm-label">整改负责人</text><text>{{candidate.assigneeName}}</text></view>

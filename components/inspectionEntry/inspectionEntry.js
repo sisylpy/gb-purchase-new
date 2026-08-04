@@ -20,6 +20,9 @@ Component({
   methods: {
     checkAccess: function () {
       if (this.data.loading) return;
+      var now = Date.now();
+      if (this.lastAccessCheckAt && now - this.lastAccessCheckAt < 800) return;
+      this.lastAccessCheckAt = now;
       var that = this;
       this.setData({ loading: true, error: '' });
       api.bootstrapIdentity().then(function (identity) {

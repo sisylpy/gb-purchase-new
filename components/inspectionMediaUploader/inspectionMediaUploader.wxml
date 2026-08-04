@@ -3,7 +3,7 @@
     <view class="media-item" wx:for="{{files}}" wx:key="localKey" wx:for-item="file" wx:for-index="index">
       <image wx:if="{{file.thumbPath}}" class="media-image" src="{{file.thumbPath}}" mode="aspectFill" bindtap="preview" data-index="{{index}}" />
       <view wx:else class="media-image media-placeholder" bindtap="reloadThumbnail" data-index="{{index}}">
-        <text>{{file.thumbError || '加载缩略图'}}</text>
+        <text>{{file.thumbError || (file.thumbnailLoading ? '正在加载…' : '加载缩略图')}}</text>
       </view>
       <view class="media-progress" wx:if="{{file.uploadStatus === 'uploading'}}">
         <view class="media-progress__bar" style="width: {{file.progress}}%;"></view>

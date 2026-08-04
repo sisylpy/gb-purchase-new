@@ -20,6 +20,7 @@
         "pages/storeSelect/storeSelect",
         "pages/inspectionRecord/inspectionRecord",
         "pages/issueConfirm/issueConfirm",
+        "pages/issueDetail/issueDetail",
         "pages/inspectionDetail/inspectionDetail",
         "pages/taskDetail/taskDetail"
       ]

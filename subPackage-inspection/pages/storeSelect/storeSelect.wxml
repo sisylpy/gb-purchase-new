@@ -3,12 +3,13 @@
   <view class="search-wrap"><input class="search" placeholder="搜索门店名称" value="{{keyword}}" bindinput="onSearch" /></view>
   <scroll-view scroll-y class="store-scroll">
     <view class="loading" wx:if="{{loading}}">正在加载可见门店…</view>
-    <view class="error" wx:elif="{{error}}">{{error}}</view>
+    <view class="error" wx:elif="{{error}}"><text>{{error}}</text><view class="small-button retry" bindtap="retry">重新加载</view></view>
+    <view class="tip tip-red" wx:elif="{{createError}}">{{createError}}，请确认后重试。</view>
     <view class="empty" wx:elif="{{!filtered.length}}"><view class="empty-title">没有可见门店</view><text>门店范围由后台正式身份控制</text></view>
     <view class="inspection-card store-card {{selectedId === item.storeId ? 'selected' : ''}}" wx:for="{{filtered}}" wx:key="storeId" data-id="{{item.storeId}}" bindtap="selectStore">
-      <view class="card-head"><text class="card-title">{{item.storeName || ('门店 ' + item.storeId)}}</text><text class="select-dot">{{selectedId === item.storeId ? '✓' : ''}}</text></view>
+      <view class="card-head"><text class="card-title">{{item.storeName || '未命名门店'}}</text><text class="select-dot">{{selectedId === item.storeId ? '✓' : ''}}</text></view>
       <view class="card-meta">最近巡店：{{item.recentInspection}}</view>
-      <view class="card-meta muted">后台未提供门店地址或区域</view>
+      <view class="card-meta muted" wx:if="{{item.summaryUnavailable}}">巡店概要加载失败，仍可选择该门店</view>
       <view class="unfinished" wx:if="{{item.unfinished}}">存在未完成巡店</view>
     </view>
   </scroll-view>

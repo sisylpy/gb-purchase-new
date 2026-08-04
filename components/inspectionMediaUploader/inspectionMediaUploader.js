@@ -5,11 +5,16 @@ function normalizeIncoming(value) {
   return (value || []).map(function (row) {
     var interrupted = row.uploadStatus === 'uploading' && !row.mediaAssetId;
     return Object.assign({
+      localKey: row.localKey || (row.mediaAssetId ? 'asset-' + row.mediaAssetId : util.createKey('media')),
       uploadStatus: row.status === 'READY' ? 'ready' : (interrupted ? 'failed' : (row.uploadStatus || 'ready')),
       uploadError: interrupted ? '上传已中断，请点击重试' : (row.uploadError || ''),
       progress: row.status === 'READY' ? 100 : Number(row.progress || 0),
     }, row, interrupted ? { uploadStatus: 'failed', uploadError: '上传已中断，请点击重试' } : {});
   });
+}
+
+function findFileIndex(files, localKey) {
+  return (files || []).findIndex(function (row) { return row.localKey === localKey; });
 }
 
 Component({
@@ -36,6 +41,7 @@ Component({
 
   lifetimes: {
     attached: function () {
+      this.componentDetached = false;
       this.uploadTasks = {};
       var files = normalizeIncoming(this.data.value);
       this.setData({ files: files });
@@ -43,6 +49,7 @@ Component({
       this.emitChange();
     },
     detached: function () {
+      this.componentDetached = true;
       Object.keys(this.uploadTasks || {}).forEach(function (key) {
         var task = this.uploadTasks[key];
         if (task && typeof task.abort === 'function') task.abort();
@@ -53,13 +60,28 @@ Component({
   methods: {
     loadThumbnails: function () {
       var that = this;
-      (this.data.files || []).forEach(function (file, index) {
-        if (!file.mediaAssetId || file.thumbPath || file.uploadStatus !== 'ready') return;
+      (this.data.files || []).forEach(function (file) {
+        if (!file.mediaAssetId || file.thumbPath || file.thumbnailLoading || file.uploadStatus !== 'ready') return;
+        var localKey = file.localKey;
+        var startIndex = findFileIndex(that.data.files, localKey);
+        if (startIndex < 0) return;
+        that.setData({ ['files[' + startIndex + '].thumbnailLoading']: true });
         api.downloadMedia(file, false).then(function (path) {
-          that.setData({ ['files[' + index + '].thumbPath']: path });
+          var index = findFileIndex(that.data.files, localKey);
+          if (index < 0) return;
+          that.setData({
+            ['files[' + index + '].thumbPath']: path,
+            ['files[' + index + '].thumbError']: '',
+            ['files[' + index + '].thumbnailLoading']: false,
+          });
           that.emitChange();
         }).catch(function () {
-          that.setData({ ['files[' + index + '].thumbError']: '缩略图加载失败，点击可重试' });
+          var index = findFileIndex(that.data.files, localKey);
+          if (index < 0) return;
+          that.setData({
+            ['files[' + index + '].thumbError']: '缩略图加载失败，点击可重试',
+            ['files[' + index + '].thumbnailLoading']: false,
+          });
         });
       });
     },
@@ -103,6 +125,7 @@ Component({
       var that = this;
       var file = this.data.files[index];
       if (!file || !file.localPath) return;
+      var localKey = file.localKey;
       this.setData({
         ['files[' + index + '].uploadStatus']: 'uploading',
         ['files[' + index + '].uploadError']: '',
@@ -116,29 +139,47 @@ Component({
         mediaStage: this.data.mediaStage,
         filePath: file.localPath,
       }, function (progress) {
-        that.setData({ ['files[' + index + '].progress']: progress });
+        var currentIndex = findFileIndex(that.data.files, localKey);
+        if (currentIndex >= 0) that.setData({ ['files[' + currentIndex + '].progress']: progress });
       });
       this.uploadTasks[file.localKey] = operation.task();
       operation.promise.then(function (asset) {
         delete that.uploadTasks[file.localKey];
+        if (that.componentDetached) return;
+        var currentIndex = findFileIndex(that.data.files, localKey);
+        if (currentIndex < 0) return;
         var ready = Object.assign({}, file, asset, {
           uploadStatus: 'ready',
           progress: 100,
           uploadError: '',
         });
-        that.setData({ ['files[' + index + ']']: ready });
+        that.setData({ ['files[' + currentIndex + ']']: ready });
         that.emitChange();
       }).catch(function (error) {
         delete that.uploadTasks[file.localKey];
+        if (that.componentDetached) return;
+        var currentIndex = findFileIndex(that.data.files, localKey);
+        if (currentIndex < 0) return;
         that.setData({
-          ['files[' + index + '].uploadStatus']: 'failed',
-          ['files[' + index + '].uploadError']: error.message || '上传失败，请重试',
+          ['files[' + currentIndex + '].uploadStatus']: 'failed',
+          ['files[' + currentIndex + '].uploadError']: error.message || '上传失败，请重试',
+          ['files[' + currentIndex + '].uploadErrorStatus']: Number(error.status || 0),
+          ['files[' + currentIndex + '].uploadErrorCode']: error.errorCode || '',
         });
         that.emitChange();
       });
     },
 
-    retry: function (event) { this.uploadOne(Number(event.currentTarget.dataset.index)); },
+    retry: function (event) {
+      var index = Number(event.currentTarget.dataset.index);
+      var file = this.data.files[index];
+      var needsLogin = file && (Number(file.uploadErrorStatus) === 401 ||
+        ['AUTH_REQUIRED', 'TOKEN_INVALID', 'TOKEN_EXPIRED'].indexOf(file.uploadErrorCode) >= 0);
+      var that = this;
+      (needsLogin ? api.ensureToken(true) : Promise.resolve()).then(function () {
+        that.uploadOne(index);
+      }).catch(function (error) { util.showError(error); });
+    },
 
     remove: function (event) {
       var index = Number(event.currentTarget.dataset.index);
@@ -190,7 +231,10 @@ Component({
 
     reloadThumbnail: function (event) {
       var index = Number(event.currentTarget.dataset.index);
-      this.setData({ ['files[' + index + '].thumbError']: '' });
+      this.setData({
+        ['files[' + index + '].thumbError']: '',
+        ['files[' + index + '].thumbnailLoading']: false,
+      });
       this.loadThumbnails();
     },
 

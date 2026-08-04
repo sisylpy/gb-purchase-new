@@ -7,7 +7,7 @@
     <view class="register-hero">
       <view class="role-icon">巡</view>
       <text class="register-title">注册成为巡店员</text>
-      <text class="register-subtitle">使用当前微信登录账号增加巡店员角色，不会创建第二个用户或覆盖已有角色。</text>
+      <text class="register-subtitle">此页仅为巡店员注册测试入口，只使用当前微信登录账号。</text>
     </view>
 
     <view class="inspection-section">
@@ -21,7 +21,6 @@
     <view class="inspection-section">
       <view class="role-row">
         <view><text class="role-label">申请角色</text><text class="role-name">巡店员</text></view>
-        <text class="role-code">INSPECTOR</text>
       </view>
       <view class="tip tip-green">品牌、门店和部门范围由后台根据当前账号的现有组织关系确定，本页面不提交用户 ID 或固定组织 ID。</view>
     </view>
@@ -31,8 +30,8 @@
       <text class="retry-link" bindtap="retry">重新检查身份</text>
     </view>
 
-    <button class="button register-button" loading="{{registering}}" disabled="{{registering}}" bindtap="registerInspector">
-      {{alreadyInspector ? '进入巡店员工作台' : (registering ? '正在注册…' : '注册成为巡店员')}}
+    <button class="button register-button" loading="{{registering || navigating}}" disabled="{{registering || navigating}}" bindtap="registerInspector">
+      {{registering ? '正在校验注册结果…' : '注册成为巡店员'}}
     </button>
     <text class="test-note">此页面为当前门店小程序的测试入口，后续可随巡店功能整体迁移。</text>
   </scroll-view>

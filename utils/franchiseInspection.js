@@ -14,10 +14,10 @@ var statusLabels = {
 var severityLabels = { LOW: '低', MEDIUM: '中', HIGH: '高', CRITICAL: '严重' };
 var eventLabels = {
   INSPECTION_CREATED: '巡店创建',
-  INSPECTION_UPDATED: '巡店信息更新',
+  INSPECTION_DRAFT_UPDATED: '巡店信息更新',
   INSPECTION_ITEM_ADDED: '现场记录保存',
-  AI_DRAFT_GENERATED: 'AI 草稿生成',
-  ISSUES_CONFIRMED: '问题确认',
+  AI_DRAFT_READY: 'AI 草稿生成',
+  ISSUE_CONFIRMED: '问题确认',
   RECTIFICATION_TASK_CREATED: '整改任务生成',
   ISSUE_STATUS_CHANGED: '问题状态变化',
   INSPECTION_SUBMITTED: '巡店提交',
@@ -43,12 +43,12 @@ function localDateTime() {
 }
 
 function formatTime(value) {
-  return value ? String(value).replace('T', ' ').slice(0, 16) : '—';
+  return value ? String(value).replace('T', ' ').slice(0, 16) : '暂无';
 }
 
-function statusLabel(value) { return statusLabels[value] || value || '—'; }
-function severityLabel(value) { return severityLabels[value] || value || '—'; }
-function eventLabel(value) { return eventLabels[value] || value || '业务记录'; }
+function statusLabel(value) { return statusLabels[value] || '状态暂无'; }
+function severityLabel(value) { return severityLabels[value] || '暂无'; }
+function eventLabel(value) { return eventLabels[value] || '业务记录'; }
 
 function statusClass(value) {
   if (value === 'COMPLETED') return 'status-success';
@@ -99,7 +99,8 @@ function showError(error, options) {
   if (status === 409) title = '数据已发生变化';
   if (status === 422) {
     title = 'AI 整理未完成';
-    content = '本次内容未能整理成有效问题，请修改原始记录后重试。';
+    content = ((error && error.message) ? error.message + '。' : 'AI 返回的草稿结构无效。') +
+      '原始记录和已上传照片已保留，可直接重试。';
   }
   if (status >= 500) title = '服务暂时异常';
   wx.showModal({
@@ -128,6 +129,11 @@ function decorateTimeline(rows) {
   return (rows || []).map(function (row) {
     var detail = row.detail || {};
     var detailText = detail.reviewComment || detail.reason || detail.summary || '';
+    if (!detailText && detail.taskNo) detailText = '任务编号：' + detail.taskNo;
+    if (!detailText && detail.issueNo) detailText = '问题编号：' + detail.issueNo;
+    if (!detailText && typeof detail.candidateCount !== 'undefined') detailText = '整理出 ' + detail.candidateCount + ' 个候选问题';
+    if (!detailText && typeof detail.issueCount !== 'undefined') detailText = '本次提交 ' + detail.issueCount + ' 个正式问题';
+    if (!detailText && detail.roundNo && row.eventType === 'RECTIFICATION_SUBMITTED') detailText = '第 ' + detail.roundNo + ' 轮整改已提交';
     return Object.assign({}, row, {
       displayType: eventLabel(row.eventType),
       displayTime: formatTime(row.occurredAt),

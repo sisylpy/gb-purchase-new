@@ -18,6 +18,8 @@ Page({
 
   loadDetail: function () {
     var that = this;
+    this.detailRequestSequence = Number(this.detailRequestSequence || 0) + 1;
+    var sequence = this.detailRequestSequence;
     this.setData({ loading: true, error: '' });
     return Promise.all([api.bootstrapIdentity(), api.getInspection(this.data.inspectionId), api.listStores()])
       .then(function (results) {
@@ -41,15 +43,24 @@ Page({
           userMap[String(identity.userId)] = identity.userName;
           (more[1] || []).forEach(function (user) { userMap[String(user.userId)] = user.userName; });
           var timeline = util.decorateTimeline(detail.timeline).map(function (event) {
-            return Object.assign({}, event, { actorName: userMap[String(event.actorUserId)] || ('用户 ' + event.actorUserId) });
+            return Object.assign({}, event, { actorName: userMap[String(event.actorUserId)] || '操作人信息暂无' });
           });
+          if (sequence !== that.detailRequestSequence) return;
           that.loadedOnce = true;
           that.setData({
             loading: false,
             identity: identity,
-            inspection: Object.assign({}, inspection, { displayStatus: util.statusLabel(inspection.status), statusClass: util.statusClass(inspection.status), displayStartedAt: util.formatTime(inspection.startedAt) }),
-            store: store || { storeName: '门店 ' + inspection.storeId },
-            items: detail.items || [],
+            inspection: Object.assign({}, inspection, {
+              displayStatus: util.statusLabel(inspection.status),
+              statusClass: util.statusClass(inspection.status),
+              displayStartedAt: util.formatTime(inspection.startedAt),
+              inspectorName: Number(inspection.inspectorUserId) === Number(identity.userId) ? identity.userName : '巡店员信息暂无',
+            }),
+            store: store || { storeName: '未命名门店' },
+            items: (detail.items || []).map(function (item) {
+              var labels = { NOT_REQUESTED: '未整理', READY: '已生成草稿', FAILED: '整理失败' };
+              return Object.assign({}, item, { aiStatusText: labels[item.aiStatus] || '暂无' });
+            }),
             issues: (detail.issues || []).map(function (issue) { return Object.assign({}, issue, { severityText: util.severityLabel(issue.severity), statusText: util.statusLabel(issue.status), statusClass: util.statusClass(issue.status) }); }),
             tasks: (detail.rectificationTasks || []).map(function (task) { return Object.assign({}, task, { statusText: util.statusLabel(task.status), statusClass: util.statusClass(task.status), dueText: util.formatTime(task.dueAt) }); }),
             media: Object.keys(evidenceIds).map(function (id) { return mediaMap[id]; }).filter(Boolean),
@@ -58,6 +69,7 @@ Page({
           });
         });
       }).catch(function (error) {
+        if (sequence !== that.detailRequestSequence) return;
         that.setData({ loading: false, error: error.message || '巡店详情加载失败' });
         util.showError(error, { afterClose: function () { if (Number(error.status) === 404) wx.navigateBack({ delta: 1 }); } });
       });
@@ -66,6 +78,10 @@ Page({
   openTask: function (event) {
     wx.navigateTo({ url: '/subPackage-inspection/pages/taskDetail/taskDetail?taskId=' + event.currentTarget.dataset.id });
   },
+  openIssue: function (event) {
+    wx.navigateTo({ url: '/subPackage-inspection/pages/issueDetail/issueDetail?issueId=' + event.currentTarget.dataset.id });
+  },
+  retry: function () { this.loadDetail(); },
   continueInspection: function () {
     wx.navigateTo({ url: '/subPackage-inspection/pages/inspectionRecord/inspectionRecord?inspectionId=' + this.data.inspectionId + '&storeId=' + this.data.inspection.storeId });
   },

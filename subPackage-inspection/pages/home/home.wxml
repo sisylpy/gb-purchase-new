@@ -21,6 +21,7 @@
         <text class="stat-value">{{item.value === null ? '—' : item.value}}</text><text class="stat-label">{{item.label}}</text>
       </view>
     </view>
+    <view class="tip" wx:if="{{statsError}}">{{statsError}}，下拉可重试。</view>
 
     <button class="start-button" wx:if="{{mode === 'inspector' && isInspector}}" bindtap="startInspection">＋ 开始巡店</button>
 
@@ -28,8 +29,9 @@
       <view class="tab {{activeTab === item.key ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="key" data-key="{{item.key}}" bindtap="selectTab">{{item.label}}</view>
     </scroll-view>
 
+    <view class="tip tip-red" wx:if="{{listError}}"><text>{{listError}}</text><text class="retry-link" bindtap="retryList">重新加载</text></view>
     <view class="loading list-loading" wx:if="{{listLoading}}">正在加载…</view>
-    <view class="empty" wx:elif="{{!items.length}}"><view class="empty-title">暂无记录</view><text>当前分类下没有待处理事项</text></view>
+    <view class="empty" wx:elif="{{!items.length && !listError}}"><view class="empty-title">暂无记录</view><text>当前分类下没有待处理事项</text></view>
     <view class="inspection-card list-card" wx:for="{{items}}" wx:key="listKey" wx:for-index="index" data-index="{{index}}" bindtap="openItem" hover-class="card-pressed">
       <view class="card-head"><text class="card-title">{{item.displayTitle}}</text><text class="status {{item.statusClass}}">{{item.displayStatus}}</text></view>
       <view class="card-meta" wx:if="{{item.itemType === 'inspection'}}">{{item.displayNo}} · {{item.displayTime}}</view>
