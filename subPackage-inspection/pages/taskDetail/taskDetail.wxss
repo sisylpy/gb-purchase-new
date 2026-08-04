@@ -1,0 +1,14 @@
+@import "../../styles/common.wxss";
+.fact-block { border-bottom: 1rpx solid #edf0f2; display: flex; flex-direction: column; font-size: 27rpx; line-height: 1.65; padding: 16rpx 0; }
+.fact-label { color: #727b84; font-size: 23rpx; margin-bottom: 5rpx; }
+.photo-section { margin-top: 20rpx; }
+.accept-button { background: #187e6e; border-radius: 16rpx; color: #fff; font-size: 30rpx; margin: 0 0 18rpx; }
+.accept-button::after { border: 0; }
+.history-card, .review-history { background: #f7f9f8; border-radius: 14rpx; margin-bottom: 14rpx; padding: 18rpx; }
+.review-history.rejected { background: #fff1f1; border-left: 6rpx solid #d34646; }
+.history-title { font-size: 26rpx; font-weight: 600; }
+.history-content { display: block; font-size: 26rpx; line-height: 1.7; margin-top: 12rpx; white-space: pre-wrap; }
+.history-media { margin-top: 14rpx; }
+.review-actions { display: flex; gap: 14rpx; margin-top: 22rpx; }
+.review-actions .button { flex: 1; }
+.timeline-detail { background: #f6f8f8; border-radius: 10rpx; color: #59636b; font-size: 23rpx; line-height: 1.6; margin-top: 7rpx; padding: 10rpx 13rpx; white-space: pre-wrap; }

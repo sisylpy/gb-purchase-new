@@ -5,6 +5,8 @@
 
   <preparation-entry />
 
+  <inspection-entry />
+
 
   <view class="flex-column pt-10  font-sl">
 

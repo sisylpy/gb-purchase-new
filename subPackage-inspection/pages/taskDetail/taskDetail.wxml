@@ -1,0 +1,78 @@
+<view class="inspection-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="整改任务详情" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="loading" wx:if="{{loading}}">正在加载整改任务…</view>
+  <view class="error" wx:elif="{{error}}">{{error}}</view>
+  <scroll-view wx:else scroll-y class="inspection-scroll">
+    <view class="inspection-card">
+      <view class="card-head"><text class="card-title">{{issue.title}}</text><text class="status {{task.statusClass}}">{{task.statusText}}</text></view>
+      <view class="row"><text class="row-label">整改任务</text><text class="row-value">{{task.taskNo}}</text></view>
+      <view class="row"><text class="row-label">门店</text><text class="row-value">{{store.storeName}}</text></view>
+      <view class="row"><text class="row-label">截止时间</text><text class="row-value">{{task.dueText}}</text></view>
+      <view class="row"><text class="row-label">当前轮次</text><text class="row-value">第 {{task.currentRound}} 轮</text></view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">巡店发现的问题</view>
+      <view class="fact-block"><text class="fact-label">现场事实</text><text>{{issue.description}}</text></view>
+      <view class="fact-block"><text class="fact-label">问题分类 / 严重程度</text><text>{{issue.category}} / {{issue.severityText}}</text></view>
+      <view class="fact-block"><text class="fact-label">整改要求</text><text>{{task.requirement}}</text></view>
+      <view class="fact-block"><text class="fact-label">验收标准</text><text>{{task.acceptanceCriteria}}</text></view>
+      <view class="photo-section" wx:if="{{originalMedia.length}}"><text class="fact-label">巡店发现时的照片</text><inspection-media-uploader value="{{originalMedia}}" editable="{{false}}" /></view>
+    </view>
+
+    <view class="tip tip-red" wx:if="{{task.status === 'REJECTED' && lastReview}}">上一轮已被退回：{{lastReview.reviewComment}}</view>
+
+    <button class="accept-button" wx:if="{{canAccept}}" disabled="{{actionLoading}}" bindtap="acceptTask">{{actionLoading ? '处理中…' : '接受整改任务'}}</button>
+
+    <view class="inspection-section" wx:if="{{canEdit}}">
+      <view class="section-title">第 {{task.currentRound}} 轮整改</view>
+      <view class="form-row"><text class="form-label">问题原因</text><textarea class="form-textarea" value="{{form.reason}}" data-field="reason" bindinput="onFormInput" /></view>
+      <view class="form-row"><text class="form-label">已采取措施</text><textarea class="form-textarea" value="{{form.measures}}" data-field="measures" bindinput="onFormInput" /></view>
+      <view class="form-row"><text class="form-label required">整改说明</text><textarea class="form-textarea" value="{{form.description}}" data-field="description" bindinput="onFormInput" /></view>
+      <view class="form-row"><text class="form-label">补充说明</text><textarea class="form-textarea" value="{{form.supplement}}" data-field="supplement" bindinput="onFormInput" /></view>
+      <view class="form-row"><text class="form-label required">整改完成后的照片</text><inspection-media-uploader storeId="{{task.storeId}}" businessType="RECTIFICATION_TASK" businessId="{{taskId}}" mediaStage="RECTIFICATION_EVIDENCE" value="{{currentMedia}}" editable="{{true}}" bindchange="onCurrentMediaChange" /></view>
+    </view>
+
+    <view class="inspection-section" wx:if="{{submissions.length}}">
+      <view class="section-title">历史整改提交</view>
+      <view class="history-card" wx:for="{{submissions}}" wx:key="submissionId" wx:for-item="submission">
+        <view class="card-head"><text class="history-title">第 {{submission.roundNo}} 轮 · {{submission.status}}</text><text class="muted">{{submission.submittedAt || '草稿'}}</text></view>
+        <text class="history-content">{{submission.content || '未填写说明'}}</text>
+        <view class="history-media" wx:if="{{submission.media.length}}"><inspection-media-uploader value="{{submission.media}}" editable="{{false}}" /></view>
+      </view>
+    </view>
+
+    <view class="inspection-section review-section" wx:if="{{canReview}}">
+      <view class="section-title">巡店员复核</view>
+      <view class="tip tip-green">请对照原始问题、整改要求、验收标准与店长提交照片后作出决定。</view>
+      <view class="form-row"><text class="form-label">通过意见</text><textarea class="form-textarea" value="{{approveComment}}" data-field="approveComment" bindinput="onReviewInput" placeholder="说明达到验收标准的依据" /></view>
+      <view class="form-row"><text class="form-label required">退回原因</text><textarea class="form-textarea" value="{{rejectReason}}" data-field="rejectReason" bindinput="onReviewInput" placeholder="退回时必须填写" /></view>
+      <view class="form-row"><text class="form-label required">需要补充的整改要求</text><textarea class="form-textarea" value="{{rejectRequirement}}" data-field="rejectRequirement" bindinput="onReviewInput" /></view>
+      <view class="form-row"><text class="form-label">复核照片（可选）</text><inspection-media-uploader storeId="{{task.storeId}}" businessType="RECTIFICATION_TASK" businessId="{{taskId}}" mediaStage="REVIEW_EVIDENCE" value="{{reviewMedia}}" editable="{{true}}" bindchange="onReviewMediaChange" /></view>
+      <view class="review-actions"><button class="button button-danger" disabled="{{actionLoading}}" data-decision="REJECT" bindtap="review">退回</button><button class="button button-primary" disabled="{{actionLoading}}" data-decision="APPROVE" bindtap="review">通过</button></view>
+    </view>
+
+    <view class="inspection-section" wx:if="{{reviews.length}}">
+      <view class="section-title">历史复核</view>
+      <view class="review-history {{review.decision === 'REJECT' ? 'rejected' : ''}}" wx:for="{{reviews}}" wx:key="reviewId" wx:for-item="review">
+        <view class="card-head"><text class="history-title">第 {{review.roundNo}} 轮 · {{review.decision === 'APPROVE' ? '通过' : '退回'}}</text><text class="muted">{{review.reviewedAt}}</text></view>
+        <text>{{review.reviewComment}}</text>
+        <view class="history-media" wx:if="{{review.media.length}}"><inspection-media-uploader value="{{review.media}}" editable="{{false}}" /></view>
+      </view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">完整业务时间线</view>
+      <view class="timeline">
+        <view class="timeline-item" wx:for="{{timeline}}" wx:key="eventId" wx:for-item="event">
+          <view class="timeline-dot"></view><view class="timeline-title">{{event.displayType}}</view>
+          <view class="timeline-meta">{{event.actorName}} · {{event.displayTime}}<text wx:if="{{event.statusText}}"> · {{event.statusText}}</text></view>
+          <view class="timeline-detail" wx:if="{{event.detailText}}">{{event.detailText}}</view>
+          <view class="history-media" wx:if="{{event.media.length}}"><inspection-media-uploader value="{{event.media}}" editable="{{false}}" /></view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="bottom-actions" wx:if="{{canEdit}}"><button class="button button-secondary" disabled="{{actionLoading || mediaUploading}}" bindtap="saveDraft">保存草稿</button><button class="button button-primary" disabled="{{actionLoading || mediaUploading}}" bindtap="submitRectification">提交复核</button></view>
+</view>

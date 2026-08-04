@@ -1,0 +1,28 @@
+<view class="media-uploader">
+  <view class="media-grid">
+    <view class="media-item" wx:for="{{files}}" wx:key="localKey" wx:for-item="file" wx:for-index="index">
+      <image wx:if="{{file.thumbPath}}" class="media-image" src="{{file.thumbPath}}" mode="aspectFill" bindtap="preview" data-index="{{index}}" />
+      <view wx:else class="media-image media-placeholder" bindtap="reloadThumbnail" data-index="{{index}}">
+        <text>{{file.thumbError || '加载缩略图'}}</text>
+      </view>
+      <view class="media-progress" wx:if="{{file.uploadStatus === 'uploading'}}">
+        <view class="media-progress__bar" style="width: {{file.progress}}%;"></view>
+        <text>{{file.progress}}%</text>
+      </view>
+      <view class="media-failed" wx:if="{{file.uploadStatus === 'failed'}}" bindtap="retry" data-index="{{index}}">
+        <text class="media-failed__message">{{file.uploadError || '上传失败'}}</text><text>点击重试</text>
+      </view>
+      <view class="media-tools" wx:if="{{editable && file.uploadStatus !== 'uploading'}}">
+        <text class="media-tool" bindtap="move" data-index="{{index}}" data-direction="-1">‹</text>
+        <text class="media-tool" bindtap="move" data-index="{{index}}" data-direction="1">›</text>
+        <text class="media-tool media-tool--delete" bindtap="remove" data-index="{{index}}">×</text>
+      </view>
+    </view>
+
+    <view class="media-add" wx:if="{{editable && files.length < max}}" bindtap="chooseMedia">
+      <text class="media-add__plus">＋</text>
+      <text>拍照/相册</text>
+    </view>
+  </view>
+  <view class="media-hint" wx:if="{{editable}}">上传完成后才可正式提交；照片顺序可用左右按钮调整。</view>
+</view>

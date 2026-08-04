@@ -1,0 +1,54 @@
+<view class="inspection-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="现场巡店记录" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="loading" wx:if="{{loading}}">正在加载巡店草稿…</view>
+  <view class="error" wx:elif="{{error}}">{{error}}</view>
+  <scroll-view wx:else scroll-y class="inspection-scroll">
+    <view class="inspection-card header-card">
+      <view class="card-head"><text class="card-title">{{store.storeName}}</text><text class="status status-muted">{{inspection.status}}</text></view>
+      <view class="card-meta">{{inspection.inspectionNo}} · 巡店员 {{identity.userName}}</view>
+      <view class="card-meta">开始时间 {{inspection.startedAt}}</view>
+      <view class="draft-state">{{item ? '草稿已保存' : '原始记录尚未保存'}} · rowVersion {{inspection.rowVersion}}</view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">原始现场记录</view>
+      <view class="section-subtitle">可直接使用手机系统输入法的语音输入。AI 整理不会覆盖这段原文。</view>
+      <textarea class="form-textarea form-textarea-large" maxlength="4000" placeholder="请把现场发现的问题说出来或输入文字……" value="{{rawText}}" bindinput="onRawInput" />
+      <button class="inline-save" disabled="{{saving}}" bindtap="saveRaw">{{saving ? '保存中…' : (item ? '保存修订记录' : '保存草稿')}}</button>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">巡店现场照片</view>
+      <view class="section-subtitle">现场照片使用 INSPECTION_EVIDENCE 阶段上传，只保存后台返回的媒体资产 ID。</view>
+      <inspection-media-uploader storeId="{{storeId}}" businessType="INSPECTION_ITEM" businessId="{{item.inspectionItemId || 0}}" mediaStage="INSPECTION_EVIDENCE" value="{{mediaFiles}}" editable="{{canUploadMedia}}" bindchange="onMediaChange" />
+    </view>
+
+    <button class="ai-button" disabled="{{!item || organizing || mediaUploading}}" bindtap="organizeDraft">{{organizing ? 'AI 正在整理…' : 'AI 帮我整理'}}</button>
+    <view class="tip">AI 整理内容仅为草稿，巡店员确认后才会生成正式问题和整改任务。</view>
+
+    <view class="candidate-head" wx:if="{{candidates.length}}"><text>AI 整理出 {{candidates.length}} 个候选问题</text></view>
+    <view class="inspection-card candidate-card" wx:for="{{candidates}}" wx:key="candidateKey" wx:for-item="candidate" wx:for-index="index">
+      <view class="candidate-title-row"><text class="candidate-number">问题 {{index + 1}}</text><view><text class="candidate-tool" data-index="{{index}}" data-direction="-1" bindtap="moveCandidate">上移</text><text class="candidate-tool" data-index="{{index}}" data-direction="1" bindtap="moveCandidate">下移</text><text class="candidate-tool danger-text" data-index="{{index}}" bindtap="deleteCandidate">删除</text></view></view>
+      <view class="form-row"><text class="form-label required">问题标题</text><input class="form-input" value="{{candidate.title}}" data-index="{{index}}" data-field="title" bindinput="onCandidateInput" /></view>
+      <view class="form-row"><text class="form-label required">问题分类</text><input class="form-input" value="{{candidate.category}}" data-index="{{index}}" data-field="category" bindinput="onCandidateInput" /></view>
+      <view class="two-column">
+        <view class="form-row"><text class="form-label required">严重程度</text><picker range="{{severityOptions}}" range-key="label" data-index="{{index}}" bindchange="onSeverityChange"><view class="form-picker">{{candidate.severity}}</view></picker></view>
+        <view class="form-row"><text class="form-label required">截止日期</text><picker mode="date" value="{{candidate.dueDate}}" data-index="{{index}}" bindchange="onDueDateChange"><view class="form-picker">{{candidate.dueDate}}</view></picker></view>
+      </view>
+      <view class="form-row"><text class="form-label required">现场描述</text><textarea class="form-textarea" value="{{candidate.description}}" data-index="{{index}}" data-field="description" bindinput="onCandidateInput" /></view>
+      <view class="form-row"><text class="form-label required">整改要求</text><textarea class="form-textarea" value="{{candidate.rectificationRequirement}}" data-index="{{index}}" data-field="rectificationRequirement" bindinput="onCandidateInput" /></view>
+      <view class="form-row"><text class="form-label required">验收标准</text><textarea class="form-textarea" value="{{candidate.acceptanceCriteria}}" data-index="{{index}}" data-field="acceptanceCriteria" bindinput="onCandidateInput" /></view>
+      <view class="form-row"><text class="form-label required">负责人</text><picker range="{{assignees}}" range-key="userName" value="{{candidate.assigneeIndex}}" data-index="{{index}}" bindchange="onAssigneeChange"><view class="form-picker">{{assignees[candidate.assigneeIndex].userName || '请选择目标门店店长'}}</view></picker></view>
+      <view class="form-row" wx:if="{{candidate.photoOptions.length}}">
+        <text class="form-label">关联现场照片</text>
+        <checkbox-group data-index="{{index}}" bindchange="onCandidateMediaChange">
+          <label class="photo-option" wx:for="{{candidate.photoOptions}}" wx:key="mediaAssetId" wx:for-item="photo">
+            <image src="{{photo.thumbPath || photo.localPath}}" mode="aspectFill" /><checkbox value="{{photo.mediaAssetId}}" checked="{{photo.checked}}" color="#187e6e" />
+          </label>
+        </checkbox-group>
+      </view>
+      <checkbox-group data-index="{{index}}" bindchange="toggleTask"><label class="task-toggle"><checkbox value="task" checked="{{candidate.generateTask}}" color="#187e6e" />本次确认并生成整改任务</label></checkbox-group>
+    </view>
+  </scroll-view>
+  <view class="bottom-actions" wx:if="{{candidates.length}}"><button class="button button-primary" disabled="{{mediaUploading}}" bindtap="goConfirm">确认问题与下发整改</button></view>
+</view>
