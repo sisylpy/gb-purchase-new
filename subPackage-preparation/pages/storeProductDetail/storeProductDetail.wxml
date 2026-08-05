@@ -1,0 +1,23 @@
+<view class="prep-page">
+  <back-navbar title="备料品详情" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
+  <scroll-view wx:else scroll-y class="detail-scroll">
+    <view class="prep-section">
+      <view class="prep-card-head"><view class="prep-card-title">{{product.productName}}</view><text class="prep-status {{product.statusClass}}">{{product.statusLabel}}</text></view>
+      <view class="prep-row"><text class="prep-label">使用单位</text><text class="prep-value">{{product.usageUnitCode}}</text></view>
+      <view class="prep-row"><text class="prep-label">配方状态</text><text class="prep-value {{product.recipeConfigured ? 'prep-success-text' : 'prep-warning-text'}}">{{product.recipeConfigured ? '已启用' : '未维护'}}</text></view>
+    </view>
+    <view class="prep-section" bindtap="toRecipe"><view class="section-link"><view><view class="prep-section-title compact">组成原料与标准用量</view><text class="prep-muted">{{recipe.components.length || 0}} 种原料，保存时自动发布新版本</text></view><text class="prep-arrow">›</text></view></view>
+    <view class="prep-section" wx:if="{{product.recipeConfigured}}">
+      <view class="prep-section-title">配方参考成本</view>
+      <view wx:if="{{cost}}"><view class="cost-main">{{cost.unitCostText}}<text>/ {{cost.usageUnitCode}}</text></view><view class="prep-muted">按当前原料库存加权成本计算，仅供理论参考</view></view>
+      <view class="prep-tip" wx:if="{{costError}}">{{costError}}</view>
+    </view>
+    <view class="quick-grid">
+      <view class="quick-card" bindtap="toLoss"><text class="quick-icon">✎</text><text>记录原料损耗</text></view>
+      <view class="quick-card" bindtap="toRecords"><text class="quick-icon">📋</text><text>查看损耗记录</text></view>
+    </view>
+    <view class="detail-actions"><view class="prep-small-button" bindtap="toEdit">编辑备料品</view><view class="prep-small-button {{product.status === 'ENABLED' ? 'prep-small-button-danger' : ''}}" bindtap="toggleStatus">{{product.status === 'ENABLED' ? '停用' : '启用'}}</view></view>
+  </scroll-view>
+</view>

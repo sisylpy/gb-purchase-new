@@ -2,7 +2,7 @@
   <view class="prep-entry__icon">🥣</view>
   <view class="prep-entry__text">
     <text class="prep-entry__title">备料管理</text>
-    <text class="prep-entry__description">管理中间制品的生产、使用、废弃与成本</text>
+    <text class="prep-entry__description">维护备料品、配方和原料损耗</text>
   </view>
   <text class="prep-entry__arrow">›</text>
 </view>

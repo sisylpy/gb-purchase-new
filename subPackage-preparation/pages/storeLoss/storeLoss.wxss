@@ -1,0 +1,8 @@
+@import "../../styles/common.wxss";
+.loss-scroll { box-sizing: border-box; height: calc(100vh - 130rpx); padding: 22rpx 22rpx 180rpx; }
+.compact { min-height: 150rpx; padding: 30rpx; }
+.stock-card { align-items: center; border: 2rpx solid #e3e6e9; border-radius: 15rpx; display: flex; justify-content: space-between; margin-top: 14rpx; padding: 20rpx; }
+.stock-card.selected { background: #edf8f5; border-color: #187e6e; }
+.stock-date { font-size: 27rpx; margin-bottom: 8rpx; }
+.select-dot { align-items: center; background: #187e6e; border-radius: 50%; color: #fff; display: flex; height: 38rpx; justify-content: center; width: 38rpx; }
+.unit-label { background: #f0f3f3; border-radius: 10rpx; flex-shrink: 0; padding: 20rpx; }

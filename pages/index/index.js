@@ -103,6 +103,10 @@ Page({
     
     var userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
+      // 历史本地登录缓存没有正式令牌时，静默刷新一次，轻量备料不再信任客户端门店参数。
+      if (!wx.getStorageSync('token')) {
+        this._userLogin();
+      }
       var admin = userInfo.gbDuAdmin;
       if (admin ==  12) {
         var orderDepInfo = wx.getStorageSync('orderDepInfo') || wx.getStorageSync('mendianInfo');
@@ -266,6 +270,10 @@ Page({
             console.log("login====", res.result);
             if (res.result.code !== -1) {
               if (res.result.data !== "noBuyer") {
+                if (res.result.data.token) {
+                  wx.setStorageSync('token', res.result.data.token);
+                  wx.setStorageSync('tokenExpiresAt', res.result.data.tokenExpiresAt || '');
+                }
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
                 wx.setStorageSync('userInfo', res.result.data.depUserInfo);
 

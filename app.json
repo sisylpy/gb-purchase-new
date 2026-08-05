@@ -29,6 +29,13 @@
       "root": "subPackage-preparation/",
       "name": "preparation",
       "pages": [
+        "pages/storeHome/storeHome",
+        "pages/storeProducts/storeProducts",
+        "pages/storeProductForm/storeProductForm",
+        "pages/storeProductDetail/storeProductDetail",
+        "pages/storeRecipe/storeRecipe",
+        "pages/storeLoss/storeLoss",
+        "pages/storeLossRecords/storeLossRecords",
         "pages/home/home",
         "pages/products/products",
         "pages/productForm/productForm",

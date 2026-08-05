@@ -1,0 +1,17 @@
+<view class="prep-page">
+  <back-navbar title="备料品" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
+  <scroll-view scroll-x class="prep-tabs">
+    <view wx:for="{{tabs}}" wx:key="value" class="prep-tab {{status === item.value ? 'prep-tab-active' : ''}}" data-value="{{item.value}}" bindtap="onTabTap">{{item.label}}</view>
+  </scroll-view>
+  <view class="prep-search"><input class="prep-input" placeholder="搜索备料品名称" value="{{keyword}}" bindinput="onSearch" /></view>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载备料品…</view>
+  <view class="prep-empty" wx:elif="{{filteredProducts.length === 0}}"><view class="prep-empty-title">暂无备料品</view><text>新增后即可维护组成原料和标准用量。</text></view>
+  <scroll-view wx:else scroll-y class="product-list">
+    <view class="prep-list-card" wx:for="{{filteredProducts}}" wx:key="id" data-id="{{item.id}}" bindtap="toDetail">
+      <view class="prep-card-head"><view><view class="prep-card-title">{{item.productName}}</view><view class="unit">使用单位：{{item.usageUnitCode}}</view></view><text class="prep-status {{item.statusClass}}">{{item.statusLabel}}</text></view>
+      <view class="recipe {{item.recipeConfigured ? 'ready' : ''}}">{{item.recipeText}}</view>
+    </view>
+  </scroll-view>
+  <view class="prep-actions"><button class="prep-button prep-button-primary" bindtap="toCreate">新增备料品</button></view>
+</view>

@@ -9,6 +9,13 @@ page {
   background: #f5f6f8;
 }
 
+/* custom 导航固定定位，业务内容统一用同高占位，避免被状态栏和胶囊遮挡。 */
+.prep-navbar-spacer {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 100%;
+}
+
 .prep-scroll {
   box-sizing: border-box;
   padding: 20rpx 22rpx 170rpx;
