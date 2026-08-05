@@ -82,6 +82,61 @@ function queryString(params) {
   return parts.length ? '?' + parts.join('&') : '';
 }
 
+// 普通门店轻量备料：不传分销商、部门或操作人，范围由正式登录身份决定。
+function getStorePreparationHome() {
+  return get('preparation/store/home');
+}
+
+function listStoreProducts(status) {
+  return get('preparation/store/products', { status: status });
+}
+
+function getStoreProduct(id) {
+  return get('preparation/store/products/' + id);
+}
+
+function createStoreProduct(body) {
+  return post('preparation/store/products', body);
+}
+
+function updateStoreProduct(id, body) {
+  return put('preparation/store/products/' + id, body);
+}
+
+function changeStoreProductStatus(id, enabled, rowVersion) {
+  return post('preparation/store/products/' + id + '/' + (enabled ? 'enable' : 'disable'), {
+    rowVersion: rowVersion,
+  });
+}
+
+function getStoreRecipe(productId) {
+  return get('preparation/store/products/' + productId + '/recipe');
+}
+
+function saveStoreRecipe(productId, body) {
+  return put('preparation/store/products/' + productId + '/recipe', body);
+}
+
+function getStoreReferenceCost(productId) {
+  return get('preparation/store/products/' + productId + '/reference-cost');
+}
+
+function listStoreLossMaterials(productId) {
+  return get('preparation/store/products/' + productId + '/loss-materials');
+}
+
+function listStoreLossStocks(productId, recipeComponentId) {
+  return get('preparation/store/products/' + productId + '/loss-materials/' + recipeComponentId + '/stock-batches');
+}
+
+function createStoreRawLoss(body) {
+  return post('preparation/store/losses', body);
+}
+
+function listStoreRawLosses(productId) {
+  return get('preparation/store/losses', { productId: productId });
+}
+
 // P1：部门能力、中间制品、单位换算和版本化配方。
 function listCapabilities(distributerId, departmentId) {
   return get('preparation/p1/department-capabilities', {
@@ -288,6 +343,19 @@ module.exports = {
   normalizeError: normalizeError,
   createIdempotencyKey: createIdempotencyKey,
   queryString: queryString,
+  getStorePreparationHome: getStorePreparationHome,
+  listStoreProducts: listStoreProducts,
+  getStoreProduct: getStoreProduct,
+  createStoreProduct: createStoreProduct,
+  updateStoreProduct: updateStoreProduct,
+  changeStoreProductStatus: changeStoreProductStatus,
+  getStoreRecipe: getStoreRecipe,
+  saveStoreRecipe: saveStoreRecipe,
+  getStoreReferenceCost: getStoreReferenceCost,
+  listStoreLossMaterials: listStoreLossMaterials,
+  listStoreLossStocks: listStoreLossStocks,
+  createStoreRawLoss: createStoreRawLoss,
+  listStoreRawLosses: listStoreRawLosses,
   listCapabilities: listCapabilities,
   listProducts: listProducts,
   getProduct: getProduct,

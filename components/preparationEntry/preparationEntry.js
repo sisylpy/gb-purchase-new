@@ -1,4 +1,3 @@
-var preparationApi = require('../../services/preparation');
 var preparationUtil = require('../../utils/preparation');
 
 Component({
@@ -24,38 +23,19 @@ Component({
     checkAccess: function () {
       if (this.data.loading) return;
       var identity = preparationUtil.getIdentity();
-      if (!identity.distributerId || !identity.operatorId) {
+      if (!identity.distributerId || !identity.operatorId || !wx.getStorageSync('token')) {
         this.setData({
           visible: false,
-          error: '登录身份不完整，暂时无法校验备料权限',
+          error: '请重新登录后使用备料管理',
         });
         return;
       }
 
-      var that = this;
-      this.setData({ loading: true, error: '' });
-      preparationApi.listCapabilities(identity.distributerId).then(function (rows) {
-        var departments = preparationUtil.enabledPreparationDepartments(rows, identity);
-        var selected = preparationUtil.selectCurrentDepartment(departments, identity);
-        if (selected) {
-          wx.setStorageSync('preparationDepartmentId', selected.departmentId);
-        }
-        that.setData({
-          visible: departments.length > 0,
-          loading: false,
-          error: '',
-        });
-      }).catch(function (error) {
-        that.setData({
-          visible: false,
-          loading: false,
-          error: error.message || '备料权限校验失败',
-        });
-      });
+      this.setData({ visible: true, loading: false, error: '' });
     },
 
     openPreparation: function () {
-      wx.navigateTo({ url: '/subPackage-preparation/pages/home/home' });
+      wx.navigateTo({ url: '/subPackage-preparation/pages/storeHome/storeHome' });
     },
   },
 });

@@ -1,0 +1,21 @@
+<view class="prep-page">
+  <back-navbar title="维护配方" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载配方…</view>
+  <scroll-view wx:else scroll-y class="recipe-scroll">
+    <view class="prep-tip prep-tip-green">以下用量表示制作 1 {{usageUnitCode}}“{{productName}}”所需的理论原料。保存后由后台发布新配方版本。</view>
+    <view class="prep-section">
+      <view class="section-head"><view><view class="prep-section-title no-margin">组成原料</view><text class="prep-muted">原料和标准用量</text></view><view class="prep-small-button" bindtap="openGoodsPicker">添加原料</view></view>
+      <view class="prep-empty compact" wx:if="{{components.length === 0}}">尚未添加原料</view>
+      <view class="component-card" wx:for="{{components}}" wx:key="rawGoodsId">
+        <view class="component-head"><text>{{index + 1}}. {{item.rawGoodsName}}</text><text class="delete" data-index="{{index}}" bindtap="deleteComponent">删除</text></view>
+        <view class="prep-inline"><input class="prep-input" type="digit" placeholder="标准用量" value="{{item.quantityText}}" data-index="{{index}}" bindinput="onQuantityInput" /><picker range="{{units}}" value="{{item.unitIndex}}" data-index="{{index}}" bindchange="onUnitChange"><view class="prep-picker unit-picker">{{units[item.unitIndex]}}</view></picker></view>
+      </view>
+    </view>
+    <view class="prep-tip">这里是配方参考量，不会扣减库存，也不会创建生产批次。</view>
+  </scroll-view>
+  <view class="prep-actions"><button class="prep-button prep-button-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">保存并启用配方</button></view>
+  <view class="prep-modal-mask" wx:if="{{showGoodsPicker}}" bindtap="closeGoodsPicker">
+    <view class="prep-modal" catchtap="noop"><view class="prep-section-title">选择原料</view><view class="prep-inline"><input class="prep-input" placeholder="输入原料名称" value="{{goodsKeyword}}" bindinput="onGoodsKeyword" bindconfirm="searchGoods" confirm-type="search" /><view class="prep-small-button" bindtap="searchGoods">搜索</view></view><view class="prep-loading compact" wx:if="{{goodsLoading}}">搜索中…</view><scroll-view wx:else scroll-y class="prep-modal-list"><view class="goods-row" wx:for="{{goodsResults}}" wx:key="gbDistributerGoodsId" data-item="{{item}}" bindtap="chooseGoods"><view><view>{{item.gbDgGoodsName}}</view><view class="prep-muted">{{item.gbDgGoodsStandardname || '未标规格'}}</view></view><text class="prep-arrow">›</text></view><view class="prep-empty compact" wx:if="{{goodsResults.length === 0}}">输入名称后搜索现有原料</view></scroll-view></view>
+  </view>
+</view>

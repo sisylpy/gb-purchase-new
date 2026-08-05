@@ -1,0 +1,5 @@
+@import "../../styles/common.wxss";
+.product-list { box-sizing: border-box; height: calc(100vh - 360rpx); padding: 16rpx 22rpx 150rpx; }
+.unit { color: #7b838d; font-size: 24rpx; margin-top: 8rpx; }
+.recipe { background: #fff4e6; border-radius: 10rpx; color: #a36216; display: inline-block; font-size: 23rpx; margin-top: 18rpx; padding: 8rpx 14rpx; }
+.recipe.ready { background: #e9f6f1; color: #187e6e; }
