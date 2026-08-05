@@ -56,10 +56,6 @@
         </view>
       </scroll-view>
 
-       <view class="flex-row p-20" bindtap="toFilterType">
-      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
-    </view>
-
     </view>
   </view>
 

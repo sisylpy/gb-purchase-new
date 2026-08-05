@@ -210,13 +210,6 @@ Page({
     };
   },
 
-  toFilter: function () {
-    wx.removeStorageSync('tab1IndexDep');
-    wx.navigateTo({
-      url: '../../sel/filterStockDepartment/filterStockDepartment',
-    });
-  },
-
   toBack: function () {
     wx.navigateBack({ delta: 1 });
   },

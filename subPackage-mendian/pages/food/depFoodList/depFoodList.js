@@ -517,7 +517,7 @@ Page({
     }
 
     wx.navigateTo({
-      url: '../foodBusinessDetail/foodBusinessDetail?' + q.join('&'),
+      url: '/subPackage-group/pages/food/foodBusinessDetail/foodBusinessDetail?' + q.join('&'),
     });
   },
 

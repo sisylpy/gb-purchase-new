@@ -199,20 +199,13 @@ Page({
     });
   },
 
-  /** 跳转采购员退货商品 */
-  toPurGoodsStars: function (e) {
-    wx.navigateTo({
-      url: '../purUserReturnGoods/purUserReturnGoods?purUserId=' + e.currentTarget.dataset.item.gbDepartmentUserId + '&name=' + e.currentTarget.dataset.item.gbDuWxNickName,
-    });
-  },
-
   /** 跳转日期选择 */
   toDatePageSearch: function () {
     this.setData({
       update: true,
     });
     wx.navigateTo({
-      url: '../../sel/searchDate/searchDate?startDate=' + this.data.startDate +
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate +
         '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
     });
   },

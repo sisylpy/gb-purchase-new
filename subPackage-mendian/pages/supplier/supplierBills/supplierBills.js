@@ -165,7 +165,7 @@ Page({
       update: true,
     })
     wx.navigateTo({
-      url: '../../sel/date/date?dateType=' + this.data.dateType + '&startDate='
+      url: '/pages/common/selectDate/selectDate?dateType=' + this.data.dateType + '&startDate='
        + this.data.startDate + '&stopDate=' + this.data.stopDate, 
     })
   },

@@ -100,8 +100,7 @@
         "pages/supplier/jrdhGoodsStars/jrdhGoodsStars",
         "pages/supplier/jrdhGoodsList/jrdhGoodsList",
         "pages/supplier/jrdhOrderList/jrdhOrderList",
-        "pages/supplier/jrdhGoodsFenxi/jrdhGoodsFenxi",
-        "pages/supplier/jrdhIndex/jrdhIndex"
+        "pages/supplier/jrdhGoodsFenxi/jrdhGoodsFenxi"
        
       ]
     },

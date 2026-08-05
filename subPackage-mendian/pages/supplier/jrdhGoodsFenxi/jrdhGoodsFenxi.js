@@ -559,7 +559,7 @@ Page({
       update: true,
     })
     wx.navigateTo({
-      url: '../../sel/date/date?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
     })
   },
 
@@ -701,7 +701,7 @@ Page({
       supplierName: this.data.supplierInfo.nxJrdhsSupplierName
     };
     wx.setStorageSync('selectedSupplier', selectedSupplier);wx.navigateTo({
-      url: '../../goods/goodsFenxi/goodsFenxi?id=' + id + '&supplierId=' + this.data.supplierId
+      url: '/subPackage-goods/pages/goodsFenxi/goodsFenxi?id=' + id + '&supplierId=' + this.data.supplierId
       + '&supplierName=' + this.data.supplierInfo.nxJrdhsSupplierName,
     })
   },

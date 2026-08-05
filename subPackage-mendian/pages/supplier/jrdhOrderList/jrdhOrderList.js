@@ -173,7 +173,7 @@ Page({
     })
    
     wx.navigateTo({
-      url: '../stockList/stockList?disGoodsId=' + this.data.goodsId
+      url: '/subPackage-goods/pages/stockGoodsList/stockGoodsList?disGoodsId=' + this.data.goodsId
        + '&dateDuring=' + this.data.dateDuring + '&startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate
        +'&name=' + this.data.goodsName+'&days=' + this.data.days + '&searchDepIds=' + this.data.searchDepIds + '&depType=' + this.data.depType + '&searchDepName=' + this.data.searchDepName,
        

@@ -57,7 +57,7 @@
             <text class="user-stat-label">采购总额</text>
             <text class="user-stat-value">¥{{item.itemData.billTotal}}</text>
           </view>
-          <view class="user-stat-item" catch:tap="toPurGoodsStars" data-item="{{item}}">
+          <view class="user-stat-item">
             <text class="user-stat-label">退货总额</text>
             <text class="user-stat-value">¥{{item.itemData.returnPayTotal}}</text>
           </view>

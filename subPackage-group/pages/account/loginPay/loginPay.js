@@ -34,7 +34,7 @@ Page({
     var userInfo = wx.getStorageSync('userInfo');
    if(userInfo){
      wx.redirectTo({
-       url: '../index/index',
+       url: '../payList/payList',
      })
    }
 

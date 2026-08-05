@@ -288,7 +288,7 @@ Page({
     var id = e.currentTarget.dataset.id;
     wx.setStorageSync('disGoods', item);
     wx.navigateTo({
-      url: '../../../../subPackage-goods/pages/goods/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id
+      url: '/subPackage-charts/pages/cost/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id
     });
   },
 
@@ -296,7 +296,7 @@ Page({
     var item = e.currentTarget.dataset.item;
     wx.setStorageSync('disGoods', item);
     wx.navigateTo({
-      url: '../../goods/stockGoodsList/stockGoodsList?disGoodsId=' + item.gbDistributerGoodsId
+      url: '/subPackage-charts/pages/stock/stockGoodsList/stockGoodsList?disGoodsId=' + item.gbDistributerGoodsId
     });
   },
 
