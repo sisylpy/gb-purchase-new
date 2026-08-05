@@ -1,6 +1,8 @@
 const app = getApp()
 const globalData = app.globalData;
 var load = require('../../../../lib/load.js');
+var preparationApi = require('../../../../services/preparation');
+var preparationUtil = require('../../../../utils/preparation');
 
 
 import {
@@ -25,6 +27,66 @@ var BULK_WEIGHT_G_THRESHOLD = 5000;
 /** 原料弹窗距顶：仅搜索时留白多；已选商品展示表单时上移 */
 var MODAL_PAD_TOP_RATIO_SEARCH = 0.23;
 var MODAL_PAD_TOP_RATIO_PICKED = 0.08;
+var PREPARATION_MIGRATION_CACHE_PREFIX = 'preparationFoodRecipeMigration:';
+var P1_STANDARD_UNITS = ['G', 'KG', 'JIN', 'ML', 'L', 'EA'];
+
+function _toP1Unit(unit) {
+  var value = String(unit || '').trim();
+  var lower = value.toLowerCase();
+  var aliases = {
+    g: 'G',
+    '克': 'G',
+    kg: 'KG',
+    '公斤': 'KG',
+    '千克': 'KG',
+    '斤': 'JIN',
+    ml: 'ML',
+    '毫升': 'ML',
+    l: 'L',
+    '升': 'L',
+    '个': 'EA',
+    '只': 'EA',
+    '枚': 'EA',
+    '颗': 'EA',
+    '张': 'EA',
+    '条': 'EA',
+    '根': 'EA',
+  };
+  return aliases[lower] || aliases[value] || value.toUpperCase();
+}
+
+function _fromP1Unit(unit) {
+  var labels = {
+    G: 'g',
+    KG: 'kg',
+    JIN: '斤',
+    ML: 'ml',
+    L: 'L',
+    EA: '个',
+  };
+  var normalized = String(unit || '').toUpperCase();
+  return labels[normalized] || unit || '';
+}
+
+function _unitFactorToGram(unit) {
+  var factors = { G: 1, KG: 1000, JIN: 500 };
+  return factors[String(unit || '').toUpperCase()] || 0;
+}
+
+function _legacyRawToP1Component(raw) {
+  var display = _convertPackToMinUnitForDisplay(
+    raw.gbDfgGoodsAmount,
+    raw.gbDfgGoodsStandardname,
+    _getGoodsEntity(raw),
+    raw
+  );
+  return {
+    itemKind: 'RAW_GOODS',
+    rawGoodsId: Number(raw.gbDfgDisGoodsId),
+    quantityPerPortion: Number(display.portion),
+    inputUnitCode: _toP1Unit(display.minUnit),
+  };
+}
 
 /** 解析规格字符串中的数值与单位（如 3Kg、500g、1.5斤） */
 function _parseWeightUnit(weightStr) {
@@ -764,6 +826,18 @@ Page({
     costDays: 30,
     costDaysLabel: '近30天',
     versionedMode: false,
+    versionedDetail: null,
+    versionedComponents: [],
+    showPreparation: false,
+    preparationLoading: false,
+    preparationProducts: [],
+    filteredPreparationProducts: [],
+    preparationKeyword: '',
+    selectedPreparation: null,
+    preparationAmount: '50',
+    preparationModalType: 'add',
+    preparationEditIndex: -1,
+    recipeSaving: false,
   },
 
 
@@ -771,6 +845,8 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    this._skipFirstShow = true;
+    this.preparationIdentity = preparationUtil.getIdentity();
     var wh = globalData.windowHeight * globalData.rpxR;
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
@@ -794,8 +870,12 @@ Page({
     })
 
     // 通过接口获取菜品已有的配料列表
-    if (foodId && foodItem.gbDfRecipeModel !== 'VERSIONED') {
-      this._fetchFoodGoods(foodId);
+    if (foodId) {
+      if (foodItem.gbDfRecipeModel === 'VERSIONED') {
+        this._fetchVersionedRecipe();
+      } else {
+        this._fetchFoodGoods(foodId);
+      }
     }
 
 
@@ -810,6 +890,10 @@ Page({
   },
 
   onShow: function () {
+    if (this._skipFirstShow) {
+      this._skipFirstShow = false;
+      return;
+    }
     var foodId = this.data.foodId;
     if (foodId && this.data._hasLoaded) {
       // 从编辑页返回时刷新菜品数据
@@ -833,20 +917,10 @@ Page({
         that.setData({
           foodItem: foodItem,
           versionedMode: foodItem && foodItem.gbDfRecipeModel === 'VERSIONED',
-          rawArr: foodItem && foodItem.gbDfRecipeModel === 'VERSIONED'
-            ? []
-            : that.data.rawArr,
         }, function () {
           // 售价变动后重新计算毛利
-          if (!that.data.versionedMode) {
-            that._processRawArr(that.data.rawArr || []);
-          } else if (!that._versionedRedirecting) {
-            that._versionedRedirecting = true;
-            wx.redirectTo({
-              url: '/subPackage-preparation/pages/foodRecipe/foodRecipe?foodId=' +
-                encodeURIComponent(String(foodId)),
-            });
-          }
+          if (that.data.versionedMode) that._fetchVersionedRecipe();
+          else that._processRawArr(that.data.rawArr || []);
         });
       }
     });
@@ -900,6 +974,174 @@ Page({
     });
   },
 
+  _loadEditableVersionedDetail() {
+    var that = this;
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    return preparationApi.getFoodRecipeByFood(
+      this.data.foodId,
+      identity.distributerId
+    ).then(function (detail) {
+      return preparationApi.listFoodVersions(
+        detail.recipe.id,
+        identity.distributerId
+      ).then(function (versions) {
+        var draft = (versions || []).find(function (row) {
+          return row.status === 'DRAFT';
+        });
+        if (draft && (!detail.version || Number(detail.version.id) !== Number(draft.id))) {
+          return preparationApi.getFoodRecipe(
+            detail.recipe.id,
+            identity.distributerId,
+            draft.id
+          );
+        }
+        return detail;
+      });
+    });
+  },
+
+  _fetchVersionedRecipe(options) {
+    var that = this;
+    var opts = options || {};
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    if (!identity.distributerId) {
+      wx.showToast({ title: '当前登录身份不完整', icon: 'none' });
+      return Promise.resolve();
+    }
+    if (opts.showLoading) load.showLoading('刷新配方');
+    return this._loadEditableVersionedDetail().then(function (detail) {
+      var components = detail.components || [];
+      var cached = wx.getStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
+      if (!components.length && cached && Array.isArray(cached.components)) {
+        components = cached.components;
+      }
+      return that._decorateVersionedComponents(components).then(function (displayRows) {
+        if (opts.showLoading) load.hideLoading();
+        that.setData({
+          versionedMode: true,
+          versionedDetail: detail,
+          versionedComponents: components,
+        });
+        that._processRawArr(displayRows);
+      });
+    }).catch(function (error) {
+      if (opts.showLoading) load.hideLoading();
+      preparationUtil.showError(error);
+    });
+  },
+
+  _decorateVersionedComponents(components) {
+    var that = this;
+    return Promise.all((components || []).map(function (component, index) {
+      if (component.itemKind === 'INTERMEDIATE_PRODUCT') {
+        return that._decoratePreparationComponent(component, index);
+      }
+      return that._decorateRawComponent(component, index);
+    }));
+  },
+
+  _decorateRawComponent(component, index) {
+    return preparationApi.getRawGoods(component.rawGoodsId).then(function (goods) {
+      goods = goods || {};
+      var displayUnit = _fromP1Unit(component.inputUnitCode);
+      var packQty = _packQtyInMinUnit(goods, displayUnit);
+      var row = {
+        gbDistributerFoodGoodsId: 'RAW_GOODS:' + component.rawGoodsId,
+        gbDfgDisGoodsId: component.rawGoodsId,
+        gbDfgGoodsName: goods.gbDgGoodsName || ('配料 #' + component.rawGoodsId),
+        gbDfgGoodsAmount: String(component.quantityPerPortion),
+        gbDfgGoodsStandardname: displayUnit,
+        gbDfgPortionAmount: String(component.quantityPerPortion),
+        gbDfgPortionUnit: displayUnit,
+        gbDfgPackQtyInMin: packQty > 0 ? String(packQty) : '',
+        gbDistributerGoodsEntity: goods,
+        _isVersioned: true,
+        _componentKind: 'RAW_GOODS',
+        _componentIndex: index,
+        _recipeComponent: component,
+        _displayAmount: String(component.quantityPerPortion),
+        _displayUnit: displayUnit,
+      };
+      var price = _getRawLinePrice(row, goods);
+      var cost = _calcRawLineCost(row);
+      row._cost = cost.toFixed(2);
+      row._costAvailable = cost > 0;
+      row._packPriceLabel = price > 0 && goods.gbDgGoodsStandardname
+        ? (price.toFixed(2) + '/' + goods.gbDgGoodsStandardname)
+        : '成本待计算';
+      return row;
+    }).catch(function () {
+      return {
+        gbDistributerFoodGoodsId: 'RAW_GOODS:' + component.rawGoodsId,
+        gbDfgDisGoodsId: component.rawGoodsId,
+        gbDfgGoodsName: '配料 #' + component.rawGoodsId,
+        _isVersioned: true,
+        _componentKind: 'RAW_GOODS',
+        _componentIndex: index,
+        _recipeComponent: component,
+        _displayAmount: String(component.quantityPerPortion),
+        _displayUnit: _fromP1Unit(component.inputUnitCode),
+        _cost: '0.00',
+        _costAvailable: false,
+        _packPriceLabel: '成本待计算',
+      };
+    });
+  },
+
+  _decoratePreparationComponent(component, index) {
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    return Promise.all([
+      preparationApi.getProduct(component.intermediateProductId, identity.distributerId),
+      preparationApi.getStoreReferenceCost(component.intermediateProductId)
+        .catch(function () { return null; }),
+    ]).then(function (results) {
+      var product = results[0] || {};
+      var reference = results[1] || {};
+      var inputGramFactor = _unitFactorToGram(component.inputUnitCode);
+      var usageGramFactor = _unitFactorToGram(reference.usageUnitCode);
+      var unitCost = Number(reference.theoreticalUnitCost);
+      var costPerGram = unitCost > 0 && usageGramFactor > 0
+        ? unitCost / usageGramFactor
+        : 0;
+      var grams = Number(component.quantityPerPortion) * (inputGramFactor || 1);
+      var cost = costPerGram > 0 ? grams * costPerGram : 0;
+      return {
+        gbDistributerFoodGoodsId: 'INTERMEDIATE_PRODUCT:' + component.intermediateProductId,
+        gbDfgGoodsName: product.productName || ('备料 #' + component.intermediateProductId),
+        _isVersioned: true,
+        _isPreparation: true,
+        _componentKind: 'INTERMEDIATE_PRODUCT',
+        _componentIndex: index,
+        _recipeComponent: component,
+        _preparationProduct: product,
+        _displayAmount: String(grams),
+        _displayUnit: 'g',
+        _cost: cost.toFixed(2),
+        _costAvailable: costPerGram > 0,
+        _packPriceLabel: costPerGram > 0
+          ? ((costPerGram * 500).toFixed(2) + '/斤')
+          : '成本待计算',
+      };
+    }).catch(function () {
+      var grams = Number(component.quantityPerPortion) *
+        (_unitFactorToGram(component.inputUnitCode) || 1);
+      return {
+        gbDistributerFoodGoodsId: 'INTERMEDIATE_PRODUCT:' + component.intermediateProductId,
+        gbDfgGoodsName: '备料 #' + component.intermediateProductId,
+        _isVersioned: true,
+        _isPreparation: true,
+        _componentKind: 'INTERMEDIATE_PRODUCT',
+        _componentIndex: index,
+        _recipeComponent: component,
+        _displayAmount: String(grams),
+        _displayUnit: 'g',
+        _cost: '0.00',
+        _costAvailable: false,
+        _packPriceLabel: '成本待计算',
+      };
+    });
+  },
+
   _closeRawModal() {
     this._resetModalForm();
     this.setData({
@@ -949,6 +1191,16 @@ Page({
     var totalCost = 0;
     for (var i = 0; i < list.length; i++) {
       var raw = list[i];
+      if (raw._isVersioned) {
+        var versionedCost = parseFloat(raw._cost) || 0;
+        raw._cost = versionedCost.toFixed(2);
+        raw._packPriceLabel = raw._packPriceLabel || '成本待计算';
+        raw._ratio = salePrice > 0
+          ? (versionedCost / salePrice * 100).toFixed(1)
+          : '0.0';
+        totalCost += versionedCost;
+        continue;
+      }
       var entity = _getGoodsEntity(raw);
       var ctx = _buildUnitContext(entity);
       var display = _convertPackToMinUnitForDisplay(
@@ -1068,7 +1320,7 @@ Page({
     var name = row.gbDfgGoodsName || '该配料';
     var that = this;
     wx.showModal({
-      title: '删除配料',
+      title: row._isPreparation ? '删除备料' : '删除配料',
       content: '确定删除「' + name + '」吗？',
       confirmText: '删除',
       confirmColor: '#ff3b30',
@@ -1083,6 +1335,16 @@ Page({
   _doDeleteGoods(idx) {
     var row = this.data.rawArr[idx];
     if (!row) return;
+    if (row._isVersioned) {
+      var components = this.data.versionedComponents.slice();
+      components.splice(Number(row._componentIndex), 1);
+      if (!components.length) {
+        wx.showToast({ title: '菜品配方至少保留一项', icon: 'none' });
+        return;
+      }
+      this._saveAndPublishComponents(components, '删除中');
+      return;
+    }
     var id = row.gbDistributerFoodGoodsId;
     if (!id) {
       var rawArr = this.data.rawArr.slice();
@@ -1110,6 +1372,10 @@ Page({
 
   editGoods(e) {
     var item = e.currentTarget.dataset.item;
+    if (item && item._isPreparation) {
+      this.editPreparation(item);
+      return;
+    }
     var entity = _getGoodsEntity(item);
     this.setData({
       modalType: 'edit',
@@ -1129,10 +1395,6 @@ Page({
   },
 
   toAddGoods(e) {
-    if (this.data.versionedMode) {
-      this._toVersionedRecipe('raw');
-      return;
-    }
     var that = this;
     this._resetModalForm();
     this.setData({
@@ -1151,24 +1413,336 @@ Page({
   },
 
   toAddPreparation() {
-    this._toVersionedRecipe('preparation');
+    this.setData({
+      showPreparation: true,
+      preparationLoading: true,
+      preparationKeyword: '',
+      selectedPreparation: null,
+      preparationAmount: '50',
+      preparationModalType: 'add',
+      preparationEditIndex: -1,
+    });
+    this._loadPreparationProducts();
   },
 
-  toManageVersionedRecipe() {
-    this._toVersionedRecipe('');
-  },
-
-  _toVersionedRecipe(picker) {
-    var foodId = this.data.foodId;
-    if (!foodId) {
-      wx.showToast({ title: '缺少菜品信息', icon: 'none' });
+  _loadPreparationProducts() {
+    var that = this;
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    if (!identity.distributerId) {
+      this.setData({ preparationLoading: false });
+      wx.showToast({ title: '当前登录身份不完整', icon: 'none' });
       return;
     }
-    var query = 'foodId=' + encodeURIComponent(String(foodId));
-    if (picker) query += '&openPicker=' + encodeURIComponent(picker);
-    wx.navigateTo({
-      url: '/subPackage-preparation/pages/foodRecipe/foodRecipe?' + query,
+    preparationApi.listProducts(identity.distributerId, 'ENABLED').then(function (rows) {
+      var massRows = (rows || []).filter(function (row) {
+        return row.unitDimension === 'MASS';
+      });
+      return Promise.all(massRows.map(function (row) {
+        return preparationApi.listPublishedRecipeVersions(row.id, identity.distributerId)
+          .then(function (versions) {
+            return Object.assign({}, row, {
+              canSelect: !!(versions && versions.length),
+            });
+          })
+          .catch(function () {
+            return Object.assign({}, row, { canSelect: false });
+          });
+      }));
+    }).then(function (rows) {
+      var selectableRows = (rows || []).filter(function (row) {
+        return row.canSelect;
+      });
+      that.setData({
+        preparationLoading: false,
+        preparationProducts: selectableRows,
+        filteredPreparationProducts: selectableRows,
+      });
+    }).catch(function (error) {
+      that.setData({ preparationLoading: false });
+      preparationUtil.showError(error);
     });
+  },
+
+  onPreparationKeywordInput(e) {
+    var keyword = String(e.detail.value || '').trim().toLowerCase();
+    var rows = (this.data.preparationProducts || []).filter(function (row) {
+      if (!keyword) return true;
+      return String(row.productName || '').toLowerCase().indexOf(keyword) >= 0 ||
+        String(row.productCode || '').toLowerCase().indexOf(keyword) >= 0;
+    });
+    this.setData({
+      preparationKeyword: e.detail.value || '',
+      filteredPreparationProducts: rows,
+    });
+  },
+
+  selectPreparation(e) {
+    var product = e.currentTarget.dataset.item;
+    if (!product) return;
+    var duplicate = (this.data.versionedComponents || []).some(function (component) {
+      return component.itemKind === 'INTERMEDIATE_PRODUCT' &&
+        Number(component.intermediateProductId) === Number(product.id);
+    });
+    if (!this.data.versionedMode) {
+      duplicate = (this.data.rawArr || []).some(function (row) {
+        return row._isPreparation &&
+          Number(row._recipeComponent.intermediateProductId) === Number(product.id);
+      });
+    }
+    if (duplicate) {
+      wx.showToast({ title: '该备料已经添加', icon: 'none' });
+      return;
+    }
+    this.setData({
+      selectedPreparation: product,
+      preparationAmount: '50',
+    });
+  },
+
+  onPreparationAmountInput(e) {
+    this.setData({ preparationAmount: e.detail.value });
+  },
+
+  onPreparationAmountMinus() {
+    var current = Number(this.data.preparationAmount) || 0;
+    var next = Math.max(1, current - 1);
+    this.setData({ preparationAmount: String(next) });
+  },
+
+  onPreparationAmountPlus() {
+    var current = Number(this.data.preparationAmount) || 0;
+    this.setData({ preparationAmount: String(current + 1) });
+  },
+
+  clearSelectedPreparation() {
+    if (this.data.preparationModalType === 'edit') return;
+    this.setData({ selectedPreparation: null, preparationAmount: '50' });
+  },
+
+  cancelPreparation() {
+    this.setData({
+      showPreparation: false,
+      selectedPreparation: null,
+      preparationKeyword: '',
+      preparationProducts: [],
+      filteredPreparationProducts: [],
+      preparationModalType: 'add',
+      preparationEditIndex: -1,
+    });
+  },
+
+  editPreparation(row) {
+    this.setData({
+      showPreparation: true,
+      preparationLoading: false,
+      selectedPreparation: row._preparationProduct || {
+        id: row._recipeComponent.intermediateProductId,
+        productName: row.gbDfgGoodsName,
+      },
+      preparationAmount: String(row._displayAmount || ''),
+      preparationModalType: 'edit',
+      preparationEditIndex: Number(row._componentIndex),
+    });
+  },
+
+  confirmPreparation() {
+    var product = this.data.selectedPreparation;
+    var amount = Number(this.data.preparationAmount);
+    if (!product) {
+      wx.showToast({ title: '请先选择备料', icon: 'none' });
+      return;
+    }
+    if (!(amount > 0)) {
+      wx.showToast({ title: '请输入每份使用多少克', icon: 'none' });
+      return;
+    }
+    var components = this._currentP1Components();
+    var component = {
+      itemKind: 'INTERMEDIATE_PRODUCT',
+      intermediateProductId: Number(product.id),
+      quantityPerPortion: amount,
+      inputUnitCode: 'G',
+    };
+    if (this.data.preparationModalType === 'edit') {
+      components.splice(this.data.preparationEditIndex, 1, component);
+    } else {
+      components.push(component);
+    }
+    this._saveAndPublishComponents(components, '保存备料');
+  },
+
+  _currentP1Components() {
+    if (this.data.versionedMode) {
+      return (this.data.versionedComponents || []).map(function (component) {
+        return {
+          itemKind: component.itemKind,
+          rawGoodsId: component.itemKind === 'RAW_GOODS'
+            ? Number(component.rawGoodsId)
+            : undefined,
+          intermediateProductId: component.itemKind === 'INTERMEDIATE_PRODUCT'
+            ? Number(component.intermediateProductId)
+            : undefined,
+          quantityPerPortion: Number(component.quantityPerPortion),
+          inputUnitCode: String(component.inputUnitCode || '').toUpperCase(),
+        };
+      });
+    }
+    return (this.data.rawArr || []).map(_legacyRawToP1Component);
+  },
+
+  _validateP1Components(components) {
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    var invalid = (components || []).find(function (component) {
+      var id = component.itemKind === 'INTERMEDIATE_PRODUCT'
+        ? component.intermediateProductId
+        : component.rawGoodsId;
+      return !(Number(id) > 0) ||
+        !(Number(component.quantityPerPortion) > 0) ||
+        !String(component.inputUnitCode || '').trim();
+    });
+    if (invalid) {
+      return Promise.reject({
+        preparationError: true,
+        status: 400,
+        message: '配方中存在用量或单位不完整的项目',
+      });
+    }
+    return Promise.all((components || []).map(function (component) {
+      var unit = String(component.inputUnitCode || '').toUpperCase();
+      if (P1_STANDARD_UNITS.indexOf(unit) >= 0) return Promise.resolve();
+      var params = {
+        distributerId: identity.distributerId,
+        itemKind: component.itemKind,
+      };
+      if (component.itemKind === 'INTERMEDIATE_PRODUCT') {
+        params.intermediateProductId = component.intermediateProductId;
+      } else {
+        params.rawGoodsId = component.rawGoodsId;
+      }
+      return preparationApi.listConversions(params).then(function (conversions) {
+        var valid = (conversions || []).some(function (conversion) {
+          return Number(conversion.enabled) !== 0 &&
+            String(conversion.unitCode || '').toUpperCase() === unit;
+        });
+        if (!valid) {
+          return Promise.reject({
+            preparationError: true,
+            status: 400,
+            message: '原配料单位“' + unit + '”尚未配置换算关系，不能安全升级配方',
+          });
+        }
+      });
+    }));
+  },
+
+  _saveAndPublishComponents(components, loadingText) {
+    var that = this;
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    if (this.data.recipeSaving) return;
+    if (!identity.distributerId || !identity.operatorId) {
+      wx.showToast({ title: '当前登录身份不完整', icon: 'none' });
+      return;
+    }
+    if (!components.length) {
+      wx.showToast({ title: '菜品配方至少保留一项', icon: 'none' });
+      return;
+    }
+    this.setData({ recipeSaving: true });
+    load.showLoading(loadingText || '保存配方');
+    this._validateP1Components(components).then(function () {
+      if (that.data.versionedMode) {
+        return that._loadEditableVersionedDetail();
+      }
+      wx.setStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId, {
+        foodId: that.data.foodId,
+        savedAt: Date.now(),
+        components: components,
+      });
+      return preparationApi.enableVersionedFood(that.data.foodId, {
+        distributerId: identity.distributerId,
+        foodRowVersion: Number(that.data.foodItem.gbDfRecipeRowVersion || 0),
+        operatorId: identity.operatorId,
+      }).then(function (detail) {
+        var foodItem = Object.assign({}, that.data.foodItem, {
+          gbDfRecipeModel: 'VERSIONED',
+        });
+        that.setData({
+          foodItem: foodItem,
+          versionedMode: true,
+          versionedDetail: detail,
+          versionedComponents: components,
+        });
+        return detail;
+      });
+    }).then(function (detail) {
+      if (!detail) return null;
+      if (detail.version && detail.version.status === 'DRAFT') return detail;
+      return preparationApi.foodVersionAction(
+        detail.recipe.id,
+        detail.version.id,
+        'copy',
+        that._versionActionBody(detail)
+      );
+    }).then(function (draftDetail) {
+      if (!draftDetail) return null;
+      return preparationApi.saveFoodDraft(
+        draftDetail.recipe.id,
+        draftDetail.version.id,
+        {
+          distributerId: identity.distributerId,
+          recipeRowVersion: draftDetail.recipe.rowVersion,
+          versionRowVersion: draftDetail.version.rowVersion,
+          components: components,
+          operatorId: identity.operatorId,
+        }
+      );
+    }).then(function (savedDetail) {
+      if (!savedDetail) return null;
+      return preparationApi.foodVersionAction(
+        savedDetail.recipe.id,
+        savedDetail.version.id,
+        'publish',
+        that._versionActionBody(savedDetail)
+      );
+    }).then(function (publishedDetail) {
+      if (!publishedDetail) {
+        that.setData({ recipeSaving: false });
+        load.hideLoading();
+        return;
+      }
+      wx.removeStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
+      var foodItem = Object.assign({}, that.data.foodItem, {
+        gbDfRecipeModel: 'VERSIONED',
+        gbDfRecipeRowVersion: publishedDetail.recipe.rowVersion,
+      });
+      wx.setStorageSync('Food', foodItem);
+      that.setData({
+        foodItem: foodItem,
+        versionedMode: true,
+        versionedDetail: publishedDetail,
+        versionedComponents: components,
+        recipeSaving: false,
+      });
+      that.cancelPreparation();
+      that._closeRawModal();
+      load.hideLoading();
+      wx.showToast({ title: '保存成功', icon: 'success' });
+      return that._fetchVersionedRecipe();
+    }).catch(function (error) {
+      that.setData({ recipeSaving: false });
+      load.hideLoading();
+      preparationUtil.showError(error);
+    });
+  },
+
+  _versionActionBody(detail) {
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    return {
+      distributerId: identity.distributerId,
+      recipeRowVersion: detail.recipe.rowVersion,
+      versionRowVersion: detail.version.rowVersion,
+      operatorId: identity.operatorId,
+    };
   },
 
   _resetModalForm() {
@@ -1392,7 +1966,8 @@ Page({
   refreshData() {
     var foodId = this.data.foodId;
     if (foodId) {
-      this._fetchFoodGoods(foodId);
+      if (this.data.versionedMode) this._fetchVersionedRecipe({ showLoading: true });
+      else this._fetchFoodGoods(foodId);
     }
   },
 
@@ -1436,13 +2011,18 @@ Page({
     });
     var foodId = this.data.foodId;
     if (foodId) {
-      this._fetchFoodGoods(foodId, { loadingText: '刷新成本' });
+      if (this.data.versionedMode) this._fetchVersionedRecipe({ showLoading: true });
+      else this._fetchFoodGoods(foodId, { loadingText: '刷新成本' });
     }
   },
 
   onMinusAmount(e) {
     var idx = e.currentTarget.dataset.index;
     var raw = this.data.rawArr[idx];
+    if (raw && raw._isPreparation) {
+      this.editPreparation(raw);
+      return;
+    }
     var current = parseFloat(raw.gbDfgGoodsAmount) || 0;
     if (current <= 0.01) {
       wx.showToast({ title: '用量不能小于0', icon: 'none' });
@@ -1455,6 +2035,10 @@ Page({
   onPlusAmount(e) {
     var idx = e.currentTarget.dataset.index;
     var raw = this.data.rawArr[idx];
+    if (raw && raw._isPreparation) {
+      this.editPreparation(raw);
+      return;
+    }
     // 打开编辑弹窗进行调整
     this.editGoods({ currentTarget: { dataset: { item: raw } } });
   },
@@ -1509,6 +2093,26 @@ Page({
     var string = String(keyword || '').replace(/\s*/g, '');
     if (!string) {
       this.setData({ strArr: [], isSearching: false });
+      return;
+    }
+    if (this.data.versionedMode) {
+      var thatVersioned = this;
+      var identity = this.preparationIdentity || preparationUtil.getIdentity();
+      load.showLoading('查询原料');
+      preparationApi.searchRawGoods(identity.distributerId, string)
+        .then(function (rows) {
+          load.hideLoading();
+          thatVersioned.setData({
+            strArr: rows || [],
+            isSearching: true,
+          }, function () {
+            thatVersioned._syncFoodSearchModalLayout();
+          });
+        })
+        .catch(function (error) {
+          load.hideLoading();
+          preparationUtil.showError(error);
+        });
       return;
     }
     var fid = this.data.foodId;
@@ -1625,6 +2229,35 @@ Page({
       return;
     }
     var portionPersist = _buildPortionPersistPayload(portionMin, minUnit, ctx);
+
+    if (this.data.versionedMode) {
+      var versionedComponents = this._currentP1Components();
+      var versionedComponent = {
+        itemKind: 'RAW_GOODS',
+        rawGoodsId: Number(goods.gbDistributerGoodsId),
+        quantityPerPortion: Number(portionMin),
+        inputUnitCode: _toP1Unit(minUnit),
+      };
+      if (this.data.modalType === 'edit') {
+        versionedComponents.splice(
+          Number((this.data.editGoods || {})._componentIndex),
+          1,
+          versionedComponent
+        );
+      } else {
+        var alreadyAdded = versionedComponents.some(function (component) {
+          return component.itemKind === 'RAW_GOODS' &&
+            Number(component.rawGoodsId) === Number(versionedComponent.rawGoodsId);
+        });
+        if (alreadyAdded) {
+          wx.showToast({ title: '该配料已经添加', icon: 'none' });
+          return;
+        }
+        versionedComponents.push(versionedComponent);
+      }
+      this._saveAndPublishComponents(versionedComponents, '保存配料');
+      return;
+    }
 
     if (this.data.modalType == 'edit') {
       var baseEdit = this.data.editGoods || {};

@@ -41,7 +41,6 @@
         "pages/productForm/productForm",
         "pages/productDetail/productDetail",
         "pages/recipe/recipe",
-        "pages/foodRecipe/foodRecipe",
         "pages/batchCreate/batchCreate",
         "pages/batchList/batchList",
         "pages/batchDetail/batchDetail",

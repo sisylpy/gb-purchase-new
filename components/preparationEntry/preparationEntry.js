@@ -1,3 +1,4 @@
+var preparationApi = require('../../services/preparation');
 var preparationUtil = require('../../utils/preparation');
 
 Component({
@@ -5,6 +6,9 @@ Component({
     visible: false,
     loading: false,
     error: '',
+    mode: 'store',
+    title: '备料管理',
+    description: '维护备料品、配方和原料损耗',
   },
 
   lifetimes: {
@@ -31,11 +35,40 @@ Component({
         return;
       }
 
-      this.setData({ visible: true, loading: false, error: '' });
+      var that = this;
+      this.setData({ loading: true, error: '' });
+      preparationApi.listCapabilities(identity.distributerId).then(function (rows) {
+        var departments = preparationUtil.enabledPreparationDepartments(rows, identity);
+        var selected = preparationUtil.selectCurrentDepartment(departments, identity);
+        var advanced = !!selected;
+        if (selected) {
+          wx.setStorageSync('preparationDepartmentId', selected.departmentId);
+        }
+        that.setData({
+          visible: true,
+          loading: false,
+          error: '',
+          mode: advanced ? 'central' : 'store',
+          title: advanced ? '中央厨房备料' : '备料管理',
+          description: advanced
+            ? '生产批次、领料、库存与成本追踪'
+            : '维护备料品、配方和原料损耗',
+        });
+      }).catch(function (error) {
+        that.setData({
+          visible: false,
+          loading: false,
+          error: error.message || '备料模式校验失败，请稍后重试',
+        });
+      });
     },
 
     openPreparation: function () {
-      wx.navigateTo({ url: '/subPackage-preparation/pages/storeHome/storeHome' });
+      if (this.data.loading) return;
+      var route = this.data.mode === 'central'
+        ? '/subPackage-preparation/pages/home/home'
+        : '/subPackage-preparation/pages/storeHome/storeHome';
+      wx.navigateTo({ url: route });
     },
   },
 });

@@ -94,7 +94,7 @@
     <!-- 配料清单 -->
     <view class="raw-section">
       <view class="raw-section-header">
-        <text class="raw-section-title">{{versionedMode ? '新版配方' : '配料清单（' + rawArr.length + '）'}}</text>
+        <text class="raw-section-title">配料清单（{{rawArr.length}}）</text>
         <view class="raw-section-actions">
           <view class="raw-section-add raw-section-add--preparation" bindtap="toAddPreparation" hover-class="raw-section-add--hover">
             <text class="raw-section-add-plus">+</text>
@@ -107,16 +107,8 @@
         </view>
       </view>
 
-      <view wx:if="{{versionedMode}}" class="food-versioned-tip" bindtap="toManageVersionedRecipe">
-        <view>
-          <text class="food-versioned-tip__title">该菜品已启用新版配方</text>
-          <text class="food-versioned-tip__text">配料和备料统一在新版配方中维护</text>
-        </view>
-        <text class="food-versioned-tip__arrow">›</text>
-      </view>
-
       <!-- 空状态 -->
-      <view wx:elif="{{!rawArr.length}}" class="food-raw-empty">
+      <view wx:if="{{!rawArr.length}}" class="food-raw-empty">
         <text class="food-raw-empty__text">暂无配方内容，可添加配料或已有备料品</text>
       </view>
 
@@ -148,14 +140,19 @@
           <!-- 第一行：图片 + 名称/单价 + 操作 -->
           <view class="raw-item-top">
             <view class="raw-item-main">
+              <view class="raw-item-preparation-img" wx:if="{{raw._isPreparation}}">备</view>
               <image
+                wx:else
                 class="raw-item-img"
                 src="{{url + raw.gbDistributerGoodsEntity.gbDgNxFatherImg}}"
                 mode="aspectFill"
               />
               <view class="raw-item-info">
-                <text class="raw-item-name">{{raw.gbDfgGoodsName}}</text>
-                <text class="raw-item-price">¥{{raw._packPriceLabel}}</text>
+                <view class="raw-item-name-line">
+                  <text class="raw-item-kind" wx:if="{{raw._isPreparation}}">备料</text>
+                  <text class="raw-item-name">{{raw.gbDfgGoodsName}}</text>
+                </view>
+                <text class="raw-item-price">{{raw._packPriceLabel === '成本待计算' ? raw._packPriceLabel : '¥' + raw._packPriceLabel}}</text>
               </view>
             </view>
             <view class="raw-item-action">
@@ -179,7 +176,7 @@
               </view>
             </view>
             <view class="raw-item-cost">
-              <text class="raw-cost-text">¥{{raw._cost}}</text>
+              <text class="raw-cost-text">{{raw._costAvailable === false ? '—' : '¥' + raw._cost}}</text>
             </view>
             <view class="raw-item-ratio">
               <text class="raw-ratio-text">{{raw._ratio}}%</text>
@@ -190,6 +187,98 @@
     </view>
     <view class="page-bottom-pad"></view>
   </scroll-view>
+</view>
+
+<!-- 添加 / 编辑备料：备料作为一个整体使用，只填写每份克数 -->
+<view class="food-search-modal" wx:if="{{showPreparation}}" catchtouchmove="stopMove">
+  <view class="food-search-modal__panel preparation-modal__panel" catchtap="stopTap">
+    <view class="food-search-modal__head">
+      <text class="food-search-modal__title">{{preparationModalType == 'edit' ? '编辑备料' : '添加备料'}}</text>
+    </view>
+
+    <scroll-view scroll-y class="preparation-modal__scroll" catchtouchmove="stopMove">
+      <block wx:if="{{!selectedPreparation}}">
+        <view class="raw-add-modal__search">
+          <image class="raw-add-modal__search-icon" src="/images/search-3.png" mode="aspectFit" />
+          <input
+            class="raw-add-modal__search-input"
+            placeholder="搜索备料名称或编码"
+            placeholder-style="color: #999; font-size: 28rpx;"
+            bindinput="onPreparationKeywordInput"
+            value="{{preparationKeyword}}"
+          />
+        </view>
+
+        <view class="preparation-modal__loading" wx:if="{{preparationLoading}}">正在加载备料…</view>
+        <view class="preparation-modal__empty" wx:elif="{{!filteredPreparationProducts.length}}">
+          {{preparationKeyword ? '没有找到匹配的备料' : '暂无可选备料'}}
+        </view>
+        <view wx:else class="preparation-modal__list">
+          <view
+            wx:for="{{filteredPreparationProducts}}"
+            wx:for-item="product"
+            wx:key="id"
+            class="preparation-modal__item"
+            data-item="{{product}}"
+            bindtap="selectPreparation"
+            hover-class="preparation-modal__item--hover"
+          >
+            <view class="preparation-modal__item-icon">备</view>
+            <view class="preparation-modal__item-info">
+              <text class="preparation-modal__item-name">{{product.productName}}</text>
+              <text class="preparation-modal__item-code" wx:if="{{product.productCode}}">{{product.productCode}}</text>
+            </view>
+            <text class="preparation-modal__item-status">选择</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view class="preparation-modal__picked">
+          <view class="preparation-modal__picked-icon">备</view>
+          <view class="preparation-modal__picked-info">
+            <text class="preparation-modal__picked-name">{{selectedPreparation.productName}}</text>
+            <text class="preparation-modal__picked-code" wx:if="{{selectedPreparation.productCode}}">{{selectedPreparation.productCode}}</text>
+          </view>
+          <text
+            class="preparation-modal__reselect"
+            wx:if="{{preparationModalType != 'edit'}}"
+            bindtap="clearSelectedPreparation"
+          >重选</text>
+        </view>
+
+        <view class="preparation-modal__form">
+          <text class="preparation-modal__label">每份用量</text>
+          <view class="preparation-modal__amount">
+            <view class="preparation-modal__step-btn" bindtap="onPreparationAmountMinus" hover-class="preparation-modal__step-btn--hover">-</view>
+            <input
+              class="preparation-modal__amount-input"
+              type="digit"
+              value="{{preparationAmount}}"
+              bindinput="onPreparationAmountInput"
+              hold-keyboard="{{true}}"
+            />
+            <text class="preparation-modal__unit">g</text>
+            <view class="preparation-modal__step-btn" bindtap="onPreparationAmountPlus" hover-class="preparation-modal__step-btn--hover">+</view>
+          </view>
+        </view>
+
+        <view class="preparation-modal__hint">
+          <text class="preparation-modal__hint-icon">i</text>
+          <text>备料作为一个整体加入菜品，不展开内部配方</text>
+        </view>
+      </block>
+    </scroll-view>
+
+    <view class="food-search-modal__footer">
+      <view class="food-search-modal__actions">
+        <view class="cancel-btn" bindtap="cancelPreparation" hover-class="hoverBtn">取消</view>
+        <view class="confirm-btn" catchtap="confirmPreparation" hover-class="hoverBtn">
+          {{preparationModalType == 'edit' ? '确认保存' : '确认添加'}}
+        </view>
+      </view>
+    </view>
+  </view>
 </view>
 
 <!-- 添加 / 编辑原料（支持最小单位用量与包装换算） -->
