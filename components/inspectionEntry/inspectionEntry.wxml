@@ -1,0 +1,13 @@
+<view class="inspection-entry" wx:if="{{visible}}" bindtap="openInspection" hover-class="inspection-entry--pressed">
+  <view class="inspection-entry__icon">{{requiresInspectorRegistration ? '+' : '✓'}}</view>
+  <view class="inspection-entry__text">
+    <text class="inspection-entry__title">巡店管理</text>
+    <text class="inspection-entry__description">{{requiresInspectorRegistration ? '注册成为巡店员，开始现场巡店' : '现场巡店、门店整改与复核闭环'}}</text>
+  </view>
+  <text class="inspection-entry__arrow">›</text>
+</view>
+
+<view class="inspection-entry-error" wx:if="{{error}}" bindtap="checkAccess">
+  <text>{{error}}</text>
+  <text class="inspection-entry-error__retry">重新校验</text>
+</view>

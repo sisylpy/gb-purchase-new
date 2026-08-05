@@ -3,6 +3,7 @@
 
   "usingComponents": {
     "back-navbar": "/components/back-navbar/back-navbar",
-    "preparation-entry": "/components/preparationEntry/preparationEntry"
+    "preparation-entry": "/components/preparationEntry/preparationEntry",
+    "inspection-entry": "/components/inspectionEntry/inspectionEntry"
   }
 }

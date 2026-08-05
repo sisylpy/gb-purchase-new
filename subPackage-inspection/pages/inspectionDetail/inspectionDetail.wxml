@@ -1,0 +1,52 @@
+<view class="inspection-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="巡店详情" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="loading" wx:if="{{loading}}">正在加载完整巡店记录…</view>
+  <view class="error" wx:elif="{{error}}"><text>{{error}}</text><view class="small-button retry" bindtap="retry">重新加载</view></view>
+  <scroll-view wx:else scroll-y class="inspection-scroll">
+    <view class="inspection-card">
+      <view class="card-head"><text class="card-title">{{store.storeName}}</text><text class="status {{inspection.statusClass}}">{{inspection.displayStatus}}</text></view>
+      <view class="row"><text class="row-label">巡店单编号</text><text class="row-value">{{inspection.inspectionNo}}</text></view>
+      <view class="row"><text class="row-label">开始时间</text><text class="row-value">{{inspection.displayStartedAt}}</text></view>
+      <view class="row"><text class="row-label">巡店员</text><text class="row-value">{{inspection.inspectorName}}</text></view>
+    </view>
+
+    <view class="inspection-section" wx:if="{{!items.length}}"><view class="empty compact">尚未保存现场原始记录</view></view>
+    <view class="inspection-section {{record.recordStatus === 'VOID' ? 'void-record' : ''}}" wx:for="{{items}}" wx:key="inspectionItemId" wx:for-item="record">
+      <view class="section-title">现场原始记录 · {{record.recordStatus === 'VOID' ? '已作废' : '有效'}}</view>
+      <text class="raw-text">{{record.rawText}}</text>
+      <view class="card-meta" wx:if="{{record.recordStatus !== 'VOID'}}">AI 草稿：{{record.aiStatusText}}</view>
+      <view class="void-reason" wx:else>作废原因：{{record.voidReason || '未填写'}}</view>
+    </view>
+
+    <view class="inspection-section" wx:if="{{media.length}}">
+      <view class="section-title">巡店现场照片</view>
+      <inspection-media-uploader value="{{media}}" editable="{{false}}" />
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">正式问题与整改任务</view>
+      <view class="empty compact" wx:if="{{!issues.length}}">尚未生成正式问题</view>
+      <view class="issue-row" wx:for="{{issues}}" wx:key="issueId" wx:for-item="issue" data-id="{{issue.issueId}}" bindtap="openIssue">
+        <view class="card-head"><text class="issue-title">{{issue.title}}</text><text class="status {{issue.statusClass}}">{{issue.statusText}}</text></view>
+        <view class="card-meta">{{issue.issueNo}} · {{issue.category}} · 严重程度 {{issue.severityText}}</view>
+        <view class="card-meta">查看问题详情 ›</view>
+      </view>
+      <view class="task-link" wx:for="{{tasks}}" wx:key="rectificationTaskId" wx:for-item="task" data-id="{{task.rectificationTaskId}}" bindtap="openTask">
+        <view><text class="task-no">{{task.taskNo}}</text><text class="card-meta block">截止 {{task.dueText}}</text></view><text class="status {{task.statusClass}}">{{task.statusText}}</text><text class="arrow">›</text>
+      </view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">完整业务时间线</view>
+      <view class="timeline" wx:if="{{timeline.length}}">
+        <view class="timeline-item" wx:for="{{timeline}}" wx:key="eventId" wx:for-item="event">
+          <view class="timeline-dot"></view><view class="timeline-title">{{event.displayType}}</view>
+          <view class="timeline-meta">{{event.actorName}} · {{event.displayTime}}<text wx:if="{{event.statusText}}"> · {{event.statusText}}</text></view>
+          <view class="timeline-meta timeline-detail" wx:if="{{event.detailText}}">{{event.detailText}}</view>
+        </view>
+      </view>
+      <view class="muted" wx:else>后台尚未返回时间线记录</view>
+    </view>
+  </scroll-view>
+  <view class="bottom-actions" wx:if="{{canContinue}}"><button class="button button-primary" bindtap="continueInspection">继续现场记录</button></view>
+</view>

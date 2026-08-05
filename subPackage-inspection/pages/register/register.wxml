@@ -1,0 +1,41 @@
+<view class="inspection-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="巡店员注册" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+
+  <view class="loading" wx:if="{{loading}}">正在读取当前登录信息…</view>
+
+  <scroll-view wx:else scroll-y class="register-scroll">
+    <view class="register-hero">
+      <view class="role-icon">巡</view>
+      <text class="register-title">注册成为巡店员</text>
+      <text class="register-subtitle">此页仅为巡店员注册测试入口，只使用当前微信登录账号。</text>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">当前用户</view>
+      <view class="form-row">
+        <text class="form-label required">用户姓名</text>
+        <input class="name-input" maxlength="100" value="{{userName}}" bindinput="onUserNameInput" placeholder="请输入真实姓名" />
+      </view>
+      <view class="row"><text class="row-label">手机号</text><text class="row-value">{{phone}}</text></view>
+      <view class="row"><text class="row-label">所属组织</text><text class="row-value">{{organizationName}}</text></view>
+      <view class="row"><text class="row-label">门店范围</text><text class="row-value">{{storeScope}}</text></view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="role-row">
+        <view><text class="role-label">申请角色</text><text class="role-name">巡店员</text></view>
+      </view>
+      <view class="tip tip-green">品牌、门店和部门范围由后台根据当前账号的现有组织关系确定，本页面不提交用户 ID 或固定组织 ID。</view>
+    </view>
+
+    <view class="tip tip-red" wx:if="{{error}}">
+      <text>{{error}}</text>
+      <text class="retry-link" bindtap="retry">重新检查身份</text>
+    </view>
+
+    <button class="button register-button" loading="{{registering || navigating}}" disabled="{{registering || navigating}}" bindtap="registerInspector">
+      {{registering ? (registerStage || '正在注册…') : (alreadyInspector ? '进入巡店工作台' : '注册成为巡店员')}}
+    </button>
+    <text class="test-note">此页面为当前门店小程序的测试入口，后续可随巡店功能整体迁移。</text>
+  </scroll-view>
+</view>

@@ -1,0 +1,47 @@
+<view class="inspection-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="问题详情" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="loading" wx:if="{{loading}}">正在加载问题详情…</view>
+  <view class="error" wx:elif="{{error}}"><text>{{error}}</text><view class="small-button retry" bindtap="retry">重新加载</view></view>
+  <scroll-view wx:else scroll-y class="inspection-scroll">
+    <view class="inspection-card">
+      <view class="card-head"><text class="card-title">{{issue.title}}</text><text class="status {{issue.statusClass}}">{{issue.statusText}}</text></view>
+      <view class="row"><text class="row-label">问题编号</text><text class="row-value">{{issue.issueNo}}</text></view>
+      <view class="row"><text class="row-label">门店</text><text class="row-value">{{store.storeName}}</text></view>
+      <view class="row"><text class="row-label">问题分类</text><text class="row-value">{{issue.category}}</text></view>
+      <view class="row"><text class="row-label">严重程度</text><text class="row-value">{{issue.severityText}}</text></view>
+      <view class="row"><text class="row-label">上报时间</text><text class="row-value">{{issue.reportedAtText}}</text></view>
+      <view class="row"><text class="row-label">上报人</text><text class="row-value">{{issue.reporterName}}</text></view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">现场事实</view>
+      <text class="long-text">{{issue.description}}</text>
+      <view class="photo-section" wx:if="{{media.length}}">
+        <view class="section-subtitle">巡店发现时的照片</view>
+        <inspection-media-uploader value="{{media}}" editable="{{false}}" />
+      </view>
+      <view class="muted" wx:else>该问题没有可恢复的现场照片</view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">整改任务</view>
+      <view class="empty compact" wx:if="{{!tasks.length}}">尚未生成整改任务</view>
+      <view class="task-link" wx:for="{{tasks}}" wx:key="rectificationTaskId" wx:for-item="task" data-id="{{task.rectificationTaskId}}" bindtap="openTask">
+        <view><text class="task-no">{{task.taskNo}}</text><text class="card-meta block">截止 {{task.dueText}}</text></view>
+        <text class="status {{task.statusClass}}">{{task.statusText}}</text><text class="arrow">›</text>
+      </view>
+    </view>
+
+    <view class="inspection-section">
+      <view class="section-title">完整业务时间线</view>
+      <view class="timeline" wx:if="{{timeline.length}}">
+        <view class="timeline-item" wx:for="{{timeline}}" wx:key="eventId" wx:for-item="event">
+          <view class="timeline-dot"></view><view class="timeline-title">{{event.displayType}}</view>
+          <view class="timeline-meta">{{event.actorName}} · {{event.displayTime}}<text wx:if="{{event.statusText}}"> · {{event.statusText}}</text></view>
+          <view class="timeline-detail" wx:if="{{event.detailText}}">{{event.detailText}}</view>
+        </view>
+      </view>
+      <view class="muted" wx:else>后台尚未返回时间线记录</view>
+    </view>
+  </scroll-view>
+</view>

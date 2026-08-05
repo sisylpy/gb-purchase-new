@@ -1,0 +1,8 @@
+@import "../../styles/common.wxss";
+.search-wrap { background: #fff; padding: 16rpx 22rpx; }
+.search { background: #f3f5f6; border-radius: 999rpx; box-sizing: border-box; font-size: 27rpx; height: 72rpx; padding: 0 28rpx; }
+.store-scroll { box-sizing: border-box; height: calc(100vh - 235rpx); padding: 18rpx 22rpx 170rpx; }
+.store-card { border: 2rpx solid transparent; }
+.store-card.selected { border-color: #187e6e; box-shadow: 0 8rpx 22rpx rgba(24, 126, 110, 0.1); }
+.select-dot { align-items: center; background: #e7f5f0; border: 2rpx solid #9ccfc0; border-radius: 50%; color: #187e6e; display: flex; flex-shrink: 0; font-size: 24rpx; height: 38rpx; justify-content: center; width: 38rpx; }
+.unfinished { color: #b76512; font-size: 23rpx; margin-top: 9rpx; }

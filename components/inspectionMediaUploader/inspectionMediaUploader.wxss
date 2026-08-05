@@ -1,0 +1,13 @@
+.media-grid { display: grid; gap: 14rpx; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.media-item, .media-add { aspect-ratio: 1; background: #f2f4f5; border-radius: 14rpx; overflow: hidden; position: relative; }
+.media-image { height: 100%; width: 100%; }
+.media-placeholder { align-items: center; color: #8b929b; display: flex; font-size: 20rpx; justify-content: center; padding: 16rpx; text-align: center; }
+.media-add { align-items: center; border: 2rpx dashed #bdd5ce; color: #66817a; display: flex; flex-direction: column; font-size: 22rpx; justify-content: center; }
+.media-add__plus { color: #187e6e; font-size: 48rpx; line-height: 1; margin-bottom: 8rpx; }
+.media-progress, .media-failed { align-items: center; background: rgba(0, 0, 0, 0.64); bottom: 0; color: #fff; display: flex; flex-direction: column; font-size: 20rpx; justify-content: center; left: 0; position: absolute; right: 0; top: 0; }
+.media-failed__message { display: -webkit-box; line-height: 1.35; max-height: 54rpx; overflow: hidden; padding: 0 10rpx; text-align: center; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.media-progress__bar { background: #36c09a; bottom: 0; height: 8rpx; left: 0; position: absolute; }
+.media-tools { background: rgba(0, 0, 0, 0.56); bottom: 0; display: flex; height: 44rpx; justify-content: flex-end; left: 0; position: absolute; right: 0; }
+.media-tool { align-items: center; color: #fff; display: flex; font-size: 32rpx; justify-content: center; width: 46rpx; }
+.media-tool--delete { background: rgba(205, 57, 57, 0.78); }
+.media-hint { color: #8b929b; font-size: 22rpx; line-height: 1.5; margin-top: 14rpx; }

@@ -269,6 +269,11 @@ Page({
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
                 wx.setStorageSync('userInfo', res.result.data.depUserInfo);
 
+                if (res.result.data.token) {
+                  wx.setStorageSync('token', 'Bearer ' + res.result.data.token);
+                  wx.setStorageSync('franchiseTokenExpiresAt', res.result.data.tokenExpiresAt || '');
+                }
+
                 wx.setStorageSync('mendianInfo', res.result.data.depInfo);
                 var admin = res.result.data.depUserInfo.gbDuAdmin;
                

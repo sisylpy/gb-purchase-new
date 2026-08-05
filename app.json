@@ -12,6 +12,20 @@
   ],
   "subPackages": [
     {
+      "root": "subPackage-inspection/",
+      "name": "inspection",
+      "pages": [
+        "pages/register/register",
+        "pages/home/home",
+        "pages/storeSelect/storeSelect",
+        "pages/inspectionRecord/inspectionRecord",
+        "pages/issueConfirm/issueConfirm",
+        "pages/issueDetail/issueDetail",
+        "pages/inspectionDetail/inspectionDetail",
+        "pages/taskDetail/taskDetail"
+      ]
+    },
+    {
       "root": "subPackage-preparation/",
       "name": "preparation",
       "pages": [
