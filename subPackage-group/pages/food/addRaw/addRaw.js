@@ -862,20 +862,16 @@ Page({
       wx.showToast({ title: '缺少菜品数据', icon: 'none' });
       foodItem = {};
     }
-    var foodId = foodItem.foodId || '';
+    var foodId = foodItem.foodId || foodItem.gbDistributerFoodId || '';
     this.setData({
       foodItem: foodItem,
       foodId: foodId,
       versionedMode: foodItem.gbDfRecipeModel === 'VERSIONED',
     })
 
-    // 通过接口获取菜品已有的配料列表
+    // Food 是跨页缓存，配方模式和 rowVersion 必须以后台最新数据为准。
     if (foodId) {
-      if (foodItem.gbDfRecipeModel === 'VERSIONED') {
-        this._fetchVersionedRecipe();
-      } else {
-        this._fetchFoodGoods(foodId);
-      }
+      this._refreshFoodItem(foodId);
     }
 
 
@@ -905,22 +901,29 @@ Page({
     this._tryDrawDonut();
   },
 
+  _normalizeFoodItem(latestFood) {
+    var current = this.data.foodItem || {};
+    var foodItem = Object.assign({}, current, latestFood || {});
+    foodItem.foodId = foodItem.foodId || foodItem.gbDistributerFoodId || this.data.foodId;
+    foodItem.dishName = foodItem.dishName || foodItem.gbDfFoodName || '';
+    if (typeof foodItem.gbDfFoodPrice !== 'undefined') {
+      foodItem.salePrice = foodItem.gbDfFoodPrice;
+    }
+    return foodItem;
+  },
+
   _refreshFoodItem(foodId) {
     var that = this;
     getFoodByFoodId(foodId).then(function (res) {
       if (res.result.code == 0) {
-        var foodItem = res.result.data;
-        // 字段映射：后端返回 gbDfFoodPrice，页面使用 salePrice
-        if (foodItem && typeof foodItem.gbDfFoodPrice !== 'undefined') {
-          foodItem.salePrice = foodItem.gbDfFoodPrice;
-        }
+        var foodItem = that._normalizeFoodItem(res.result.data);
+        wx.setStorageSync('Food', foodItem);
         that.setData({
           foodItem: foodItem,
           versionedMode: foodItem && foodItem.gbDfRecipeModel === 'VERSIONED',
         }, function () {
-          // 售价变动后重新计算毛利
           if (that.data.versionedMode) that._fetchVersionedRecipe();
-          else that._processRawArr(that.data.rawArr || []);
+          else that._fetchFoodGoods(foodId);
         });
       }
     });
@@ -1653,26 +1656,56 @@ Page({
       if (that.data.versionedMode) {
         return that._loadEditableVersionedDetail();
       }
-      wx.setStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId, {
-        foodId: that.data.foodId,
-        savedAt: Date.now(),
-        components: components,
-      });
-      return preparationApi.enableVersionedFood(that.data.foodId, {
-        distributerId: identity.distributerId,
-        foodRowVersion: Number(that.data.foodItem.gbDfRecipeRowVersion || 0),
-        operatorId: identity.operatorId,
-      }).then(function (detail) {
-        var foodItem = Object.assign({}, that.data.foodItem, {
-          gbDfRecipeModel: 'VERSIONED',
-        });
+      return preparationApi.getFoodDetail(that.data.foodId).then(function (latestFood) {
+        if (!latestFood) {
+          return Promise.reject({
+            preparationError: true,
+            status: 404,
+            message: '菜品不存在，请刷新后重试',
+          });
+        }
+        var foodItem = that._normalizeFoodItem(latestFood);
+        var latestVersioned = latestFood.gbDfRecipeModel === 'VERSIONED';
+        wx.setStorageSync('Food', foodItem);
         that.setData({
           foodItem: foodItem,
-          versionedMode: true,
-          versionedDetail: detail,
-          versionedComponents: components,
+          versionedMode: latestVersioned,
         });
-        return detail;
+
+        // 页面仍显示旧配方、后台却已升级时，先刷新而不是覆盖现有新版草稿。
+        if (latestVersioned) {
+          return that._fetchVersionedRecipe().then(function () {
+            return Promise.reject({
+              preparationError: true,
+              status: 409,
+              message: '菜品配方已更新，请重新选择备料后保存',
+            });
+          });
+        }
+
+        wx.setStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId, {
+          foodId: that.data.foodId,
+          savedAt: Date.now(),
+          components: components,
+        });
+        return preparationApi.enableVersionedFood(that.data.foodId, {
+          distributerId: identity.distributerId,
+          foodRowVersion: Number(latestFood.gbDfRecipeRowVersion || 0),
+          operatorId: identity.operatorId,
+        }).then(function (detail) {
+          var enabledFoodItem = Object.assign({}, foodItem, {
+            gbDfRecipeModel: 'VERSIONED',
+            gbDfRecipeRowVersion: Number(latestFood.gbDfRecipeRowVersion || 0) + 1,
+          });
+          wx.setStorageSync('Food', enabledFoodItem);
+          that.setData({
+            foodItem: enabledFoodItem,
+            versionedMode: true,
+            versionedDetail: detail,
+            versionedComponents: components,
+          });
+          return detail;
+        });
       });
     }).then(function (detail) {
       if (!detail) return null;

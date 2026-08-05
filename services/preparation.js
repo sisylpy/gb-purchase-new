@@ -54,8 +54,19 @@ function call(path, data, method, options) {
   });
 }
 
+function compactQuery(query) {
+  var result = {};
+  Object.keys(query || {}).forEach(function (key) {
+    var value = query[key];
+    if (value !== null && typeof value !== 'undefined' && value !== '') {
+      result[key] = value;
+    }
+  });
+  return result;
+}
+
 function get(path, query) {
-  return call(path, query, 'GET');
+  return call(path, compactQuery(query), 'GET');
 }
 
 function post(path, body) {
