@@ -156,13 +156,36 @@ function bootstrapIdentity() {
   });
 }
 
-function registerInspector(profile) {
+function getInspectorInvitationSummary(lookup) {
+  return get('invitations/' + encodeURIComponent(String(lookup || '').trim()) + '/summary');
+}
+
+function acceptInspectorInvitation(lookup, profile) {
   var input = profile || {};
   return wxLoginCode().then(function (code) {
     var body = { code: code, userName: String(input.userName || '').trim() };
     var avatarUrl = String(input.avatarUrl || '').trim();
     if (avatarUrl) body.avatarUrl = avatarUrl;
-    return post('inspectors:register', body);
+    return post('invitations/' + encodeURIComponent(String(lookup || '').trim()) + ':accept', body);
+  }).then(function (data) {
+    if (!data || !data.token) {
+      return Promise.reject(normalizeError({
+        statusCode: 500,
+        data: { code: 500, errorCode: 'INVITATION_ACCEPT_RESPONSE_INVALID', msg: '加入结果不完整，请重试' },
+      }));
+    }
+    mediaDownloadCache = {};
+    wx.setStorageSync('token', 'Bearer ' + data.token);
+    wx.setStorageSync('franchiseTokenExpiresAt', data.tokenExpiresAt || '');
+    wx.setStorageSync('franchiseOrganization', {
+      companyId: data.companyId,
+      companyName: data.companyName,
+      brandId: data.brandId,
+      brandName: data.brandName,
+      regionDepartmentId: data.regionDepartmentId,
+      regionName: data.regionName,
+    });
+    return data;
   });
 }
 
@@ -288,7 +311,8 @@ module.exports = {
   normalizeError: normalizeError,
   ensureToken: ensureToken,
   bootstrapIdentity: bootstrapIdentity,
-  registerInspector: registerInspector,
+  getInspectorInvitationSummary: getInspectorInvitationSummary,
+  acceptInspectorInvitation: acceptInspectorInvitation,
   refreshIdentity: refreshIdentity,
   getMe: function () { return get('me'); },
   listStores: function () { return get('stores'); },

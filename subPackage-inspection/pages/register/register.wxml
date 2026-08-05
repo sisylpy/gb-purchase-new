@@ -6,26 +6,36 @@
   <scroll-view wx:else scroll-y class="register-scroll">
     <view class="register-hero">
       <view class="role-icon">巡</view>
-      <text class="register-title">注册成为巡店员</text>
-      <text class="register-subtitle">此页仅为巡店员注册测试入口，只使用当前微信登录账号。</text>
+      <text class="register-title">加入区域巡店团队</text>
+      <text class="register-subtitle">使用总部发出的单人邀请加入指定公司、品牌和区域。</text>
     </view>
 
-    <view class="inspection-section">
+    <view class="inspection-section" wx:if="{{invitation}}">
+      <view class="section-title">邀请归属</view>
+      <view class="row"><text class="row-label">加盟总部</text><text class="row-value">{{invitation.companyName}}</text></view>
+      <view class="row"><text class="row-label">品牌</text><text class="row-value">{{invitation.brandName}}</text></view>
+      <view class="row"><text class="row-label">经营区域</text><text class="row-value">{{invitation.regionName}}</text></view>
+      <view class="row"><text class="row-label">区域巡店负责人</text><text class="row-value">{{invitation.regionInspectionManagerName || '总部暂未指定'}}</text></view>
+      <view class="row"><text class="row-label">邀请角色</text><text class="row-value">巡店人员</text></view>
+      <view class="row"><text class="row-label">有效期至</text><text class="row-value">{{invitation.expiresAt}}</text></view>
+    </view>
+
+    <view class="inspection-section" wx:if="{{invitation && invitation.acceptable}}">
       <view class="section-title">当前用户</view>
       <view class="form-row">
         <text class="form-label required">用户姓名</text>
         <input class="name-input" maxlength="100" value="{{userName}}" bindinput="onUserNameInput" placeholder="请输入真实姓名" />
       </view>
       <view class="row"><text class="row-label">手机号</text><text class="row-value">{{phone}}</text></view>
-      <view class="row"><text class="row-label">所属组织</text><text class="row-value">{{organizationName}}</text></view>
-      <view class="row"><text class="row-label">门店范围</text><text class="row-value">{{storeScope}}</text></view>
+      <view class="row"><text class="row-label">加入组织</text><text class="row-value">{{organizationName}}</text></view>
+      <view class="row"><text class="row-label">授权区域</text><text class="row-value">{{storeScope}}</text></view>
     </view>
 
-    <view class="inspection-section">
+    <view class="inspection-section" wx:if="{{invitation && invitation.acceptable}}">
       <view class="role-row">
         <view><text class="role-label">申请角色</text><text class="role-name">巡店员</text></view>
       </view>
-      <view class="tip tip-green">品牌、门店和部门范围由后台根据当前账号的现有组织关系确定，本页面不提交用户 ID 或固定组织 ID。</view>
+      <view class="tip tip-green">公司、品牌、区域和角色全部由邀请确定。本页面不会提交或允许选择其他 regionId。</view>
     </view>
 
     <view class="tip tip-red" wx:if="{{error}}">
@@ -33,9 +43,9 @@
       <text class="retry-link" bindtap="retry">重新检查身份</text>
     </view>
 
-    <button class="button register-button" loading="{{registering || navigating}}" disabled="{{registering || navigating}}" bindtap="registerInspector">
-      {{registering ? (registerStage || '正在注册…') : (alreadyInspector ? '进入巡店工作台' : '注册成为巡店员')}}
+    <button wx:if="{{invitation && invitation.acceptable}}" class="button register-button" loading="{{registering || navigating}}" disabled="{{registering || navigating}}" bindtap="registerInspector">
+      {{registering ? (registerStage || '正在加入…') : (alreadyInspector ? '进入巡店工作台' : '确认加入该区域')}}
     </button>
-    <text class="test-note">此页面为当前门店小程序的测试入口，后续可随巡店功能整体迁移。</text>
+    <text class="test-note">邀请只能由一名微信用户使用；加入后重新登录仍会恢复所属区域和巡店身份。</text>
   </scroll-view>
 </view>
