@@ -763,6 +763,7 @@ Page({
     modalQuickTags: [],
     costDays: 30,
     costDaysLabel: '近30天',
+    versionedMode: false,
   },
 
 
@@ -789,10 +790,11 @@ Page({
     this.setData({
       foodItem: foodItem,
       foodId: foodId,
+      versionedMode: foodItem.gbDfRecipeModel === 'VERSIONED',
     })
 
     // 通过接口获取菜品已有的配料列表
-    if (foodId) {
+    if (foodId && foodItem.gbDfRecipeModel !== 'VERSIONED') {
       this._fetchFoodGoods(foodId);
     }
 
@@ -830,9 +832,21 @@ Page({
         }
         that.setData({
           foodItem: foodItem,
+          versionedMode: foodItem && foodItem.gbDfRecipeModel === 'VERSIONED',
+          rawArr: foodItem && foodItem.gbDfRecipeModel === 'VERSIONED'
+            ? []
+            : that.data.rawArr,
         }, function () {
           // 售价变动后重新计算毛利
-          that._processRawArr(that.data.rawArr || []);
+          if (!that.data.versionedMode) {
+            that._processRawArr(that.data.rawArr || []);
+          } else if (!that._versionedRedirecting) {
+            that._versionedRedirecting = true;
+            wx.redirectTo({
+              url: '/subPackage-preparation/pages/foodRecipe/foodRecipe?foodId=' +
+                encodeURIComponent(String(foodId)),
+            });
+          }
         });
       }
     });
@@ -1115,6 +1129,10 @@ Page({
   },
 
   toAddGoods(e) {
+    if (this.data.versionedMode) {
+      this._toVersionedRecipe('raw');
+      return;
+    }
     var that = this;
     this._resetModalForm();
     this.setData({
@@ -1129,6 +1147,27 @@ Page({
       editGoods: null,
     }, function () {
       that._syncFoodSearchModalLayout();
+    });
+  },
+
+  toAddPreparation() {
+    this._toVersionedRecipe('preparation');
+  },
+
+  toManageVersionedRecipe() {
+    this._toVersionedRecipe('');
+  },
+
+  _toVersionedRecipe(picker) {
+    var foodId = this.data.foodId;
+    if (!foodId) {
+      wx.showToast({ title: '缺少菜品信息', icon: 'none' });
+      return;
+    }
+    var query = 'foodId=' + encodeURIComponent(String(foodId));
+    if (picker) query += '&openPicker=' + encodeURIComponent(picker);
+    wx.navigateTo({
+      url: '/subPackage-preparation/pages/foodRecipe/foodRecipe?' + query,
     });
   },
 

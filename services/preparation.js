@@ -209,6 +209,10 @@ function getFoodRecipeByFood(foodId, distributerId) {
   return get('preparation/p1/food-recipes/by-food/' + foodId, { distributerId: distributerId });
 }
 
+function enableVersionedFood(foodId, body) {
+  return post('preparation/p1/food-recipes/foods/' + foodId + '/enable-versioned', body);
+}
+
 function getFoodRecipe(recipeId, distributerId, versionId) {
   return get('preparation/p1/food-recipes/' + recipeId, {
     distributerId: distributerId,
@@ -218,6 +222,14 @@ function getFoodRecipe(recipeId, distributerId, versionId) {
 
 function listFoodVersions(recipeId, distributerId) {
   return get('preparation/p1/food-recipes/' + recipeId + '/versions', { distributerId: distributerId });
+}
+
+function saveFoodDraft(recipeId, versionId, body) {
+  return put('preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId + '/draft', body);
+}
+
+function foodVersionAction(recipeId, versionId, action, body) {
+  return post('preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId + '/' + action, body);
 }
 
 // P2：生产批次、领料、完成和领料冲销。
@@ -339,6 +351,16 @@ function listFoodTree(distributerId) {
   return get('gbdistributerfood/disGetFood/' + distributerId);
 }
 
+function getFoodDetail(foodId) {
+  return get('gbdistributerfood/getFoodByFoodId/' + foodId);
+}
+
+function getLegacyFoodGoods(foodId, days) {
+  return get('gbdistributerfoodgoods/getFoodGoodsList/' + foodId, {
+    days: days || 30,
+  });
+}
+
 module.exports = {
   normalizeError: normalizeError,
   createIdempotencyKey: createIdempotencyKey,
@@ -371,8 +393,11 @@ module.exports = {
   saveIntermediateDraft: saveIntermediateDraft,
   intermediateVersionAction: intermediateVersionAction,
   getFoodRecipeByFood: getFoodRecipeByFood,
+  enableVersionedFood: enableVersionedFood,
   getFoodRecipe: getFoodRecipe,
   listFoodVersions: listFoodVersions,
+  saveFoodDraft: saveFoodDraft,
+  foodVersionAction: foodVersionAction,
   createBatch: createBatch,
   listBatches: listBatches,
   getBatch: getBatch,
@@ -398,4 +423,6 @@ module.exports = {
   searchRawGoods: searchRawGoods,
   getRawGoods: getRawGoods,
   listFoodTree: listFoodTree,
+  getFoodDetail: getFoodDetail,
+  getLegacyFoodGoods: getLegacyFoodGoods,
 };

@@ -94,16 +94,30 @@
     <!-- 配料清单 -->
     <view class="raw-section">
       <view class="raw-section-header">
-        <text class="raw-section-title">配料清单（{{rawArr.length}}）</text>
-        <view class="raw-section-add" bindtap="toAddGoods" data-type="raw" hover-class="raw-section-add--hover">
-          <text class="raw-section-add-plus">+</text>
-          <text>添加配料</text>
+        <text class="raw-section-title">{{versionedMode ? '新版配方' : '配料清单（' + rawArr.length + '）'}}</text>
+        <view class="raw-section-actions">
+          <view class="raw-section-add raw-section-add--preparation" bindtap="toAddPreparation" hover-class="raw-section-add--hover">
+            <text class="raw-section-add-plus">+</text>
+            <text>添加备料</text>
+          </view>
+          <view class="raw-section-add" bindtap="toAddGoods" data-type="raw" hover-class="raw-section-add--hover">
+            <text class="raw-section-add-plus">+</text>
+            <text>添加配料</text>
+          </view>
         </view>
       </view>
 
+      <view wx:if="{{versionedMode}}" class="food-versioned-tip" bindtap="toManageVersionedRecipe">
+        <view>
+          <text class="food-versioned-tip__title">该菜品已启用新版配方</text>
+          <text class="food-versioned-tip__text">配料和备料统一在新版配方中维护</text>
+        </view>
+        <text class="food-versioned-tip__arrow">›</text>
+      </view>
+
       <!-- 空状态 -->
-      <view wx:if="{{!rawArr.length}}" class="food-raw-empty">
-        <text class="food-raw-empty__text">暂无原料，点击「添加配料」从商品库选择</text>
+      <view wx:elif="{{!rawArr.length}}" class="food-raw-empty">
+        <text class="food-raw-empty__text">暂无配方内容，可添加配料或已有备料品</text>
       </view>
 
       <!-- 配料列表 -->

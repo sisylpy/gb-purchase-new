@@ -431,6 +431,15 @@
   font-size: 32rpx;
   font-weight: 600;
   color: var(--gb-text, #333);
+  flex-shrink: 0;
+}
+
+.raw-section-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12rpx;
 }
 
 .raw-section-add {
@@ -445,6 +454,11 @@
   border-radius: 999rpx;
 }
 
+.raw-section-add--preparation {
+  color: var(--gb-primary, #187e6e);
+  background: #e8f5f2;
+}
+
 .raw-section-add--hover {
   opacity: 0.88;
 }
@@ -453,6 +467,40 @@
   font-size: 30rpx;
   margin-right: 6rpx;
   line-height: 1;
+}
+
+.food-versioned-tip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26rpx 24rpx;
+  margin-bottom: 16rpx;
+  background: #eef8f5;
+  border: 1rpx solid #cce8e1;
+  border-radius: 16rpx;
+}
+
+.food-versioned-tip__title,
+.food-versioned-tip__text {
+  display: block;
+}
+
+.food-versioned-tip__title {
+  color: var(--gb-primary, #187e6e);
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.food-versioned-tip__text {
+  color: var(--gb-text-secondary, #666);
+  font-size: 24rpx;
+  margin-top: 8rpx;
+}
+
+.food-versioned-tip__arrow {
+  color: var(--gb-primary, #187e6e);
+  font-size: 44rpx;
+  margin-left: 16rpx;
 }
 
 /* 空状态 */
