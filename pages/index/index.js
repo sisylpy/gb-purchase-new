@@ -187,7 +187,7 @@ Page({
           // this._checkIfShowPage();
         } else {
           load.hideLoading()
-          this.setData({ purArr: [] });r
+          this.setData({ purArr: [] });
           wx.showToast({ title: res.result.msg, icon: 'none' });
           this.setData({ purArr: [] });
         }
@@ -270,10 +270,6 @@ Page({
             console.log("login====", res.result);
             if (res.result.code !== -1) {
               if (res.result.data !== "noBuyer") {
-                if (res.result.data.token) {
-                  wx.setStorageSync('token', res.result.data.token);
-                  wx.setStorageSync('tokenExpiresAt', res.result.data.tokenExpiresAt || '');
-                }
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
                 wx.setStorageSync('userInfo', res.result.data.depUserInfo);
 

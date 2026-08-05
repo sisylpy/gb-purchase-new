@@ -23,10 +23,10 @@ Component({
     checkAccess: function () {
       if (this.data.loading) return;
       var identity = preparationUtil.getIdentity();
-      if (!identity.distributerId || !identity.operatorId || !wx.getStorageSync('token')) {
+      if (!identity.distributerId || !identity.operatorId || !identity.currentStoreId || !wx.getStorageSync('token')) {
         this.setData({
           visible: false,
-          error: '请重新登录后使用备料管理',
+          error: '请使用有效门店账号登录后使用备料管理',
         });
         return;
       }
