@@ -8,3 +8,5 @@
 .block { display: block; margin-top: 2rpx; }
 .arrow { color: #82938e; font-size: 40rpx; }
 .timeline-detail { background: #f6f8f8; border-radius: 10rpx; color: #59636b; margin-top: 7rpx; padding: 10rpx 13rpx; }
+.void-record { background: #fff5f5; border-left: 6rpx solid #d34646; }
+.void-reason { color: #b42318; font-size: 24rpx; margin-top: 12rpx; }

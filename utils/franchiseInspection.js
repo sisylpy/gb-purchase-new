@@ -16,6 +16,8 @@ var eventLabels = {
   INSPECTION_CREATED: '巡店创建',
   INSPECTION_DRAFT_UPDATED: '巡店信息更新',
   INSPECTION_ITEM_ADDED: '现场记录保存',
+  INSPECTION_ITEM_UPDATED: '现场原文修改',
+  INSPECTION_ITEM_VOIDED: '现场原文作废',
   AI_DRAFT_READY: 'AI 草稿生成',
   ISSUE_CONFIRMED: '问题确认',
   RECTIFICATION_TASK_CREATED: '整改任务生成',
@@ -89,6 +91,7 @@ function persistentCommand(scope, factory) {
 }
 
 function clearPersistentCommand(scope) { wx.removeStorageSync('franchiseCommand:' + scope); }
+function readPersistentCommand(scope) { return wx.getStorageSync('franchiseCommand:' + scope) || null; }
 
 function showError(error, options) {
   var status = Number(error && error.status || 0);
@@ -186,6 +189,7 @@ module.exports = {
   clearPersistentKey: clearPersistentKey,
   persistentCommand: persistentCommand,
   clearPersistentCommand: clearPersistentCommand,
+  readPersistentCommand: readPersistentCommand,
   showError: showError,
   confirm: confirm,
   decorateTimeline: decorateTimeline,

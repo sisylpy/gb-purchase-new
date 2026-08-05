@@ -34,7 +34,7 @@ Page({
         var store = (results[2] || []).find(function (row) { return Number(row.storeId) === Number(inspection.storeId); });
         return Promise.all([
           api.listAssignees(inspection.storeId),
-          api.listAllMedia({ storeId: inspection.storeId, status: 'READY' }),
+          api.listRelatedMedia('INSPECTION_ITEM', that.data.itemId, 'INSPECTION_EVIDENCE'),
         ]).then(function (directories) {
           var assignees = directories[0] || [];
           var allMedia = directories[1] || [];
@@ -158,10 +158,6 @@ Page({
         },
       });
     }).catch(function (error) {
-      if (error.errorCode === 'ROW_VERSION_CONFLICT' && that.activeCommandScope) {
-        util.clearPersistentKey(that.activeCommandScope);
-        util.clearPersistentCommand(that.activeCommandScope);
-      }
       that.setData({ submitting: false });
       util.showError(error, { afterClose: function () { if (Number(error.status) === 409) that.loadPage(); } });
     });

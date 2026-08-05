@@ -28,6 +28,7 @@ Page({
     navBarHeight: 0,
     loading: true,
     saving: false,
+    voiding: false,
     organizing: false,
     inspectionId: 0,
     storeId: 0,
@@ -83,14 +84,18 @@ Page({
       var store = (results[2] || []).find(function (row) { return Number(row.storeId) === Number(inspection.storeId); });
       var local = wx.getStorageSync(that.draftStorageKey) || {};
       var items = detail.items || [];
+      var activeItems = items.filter(function (row) { return row.recordStatus !== 'VOID'; });
       var localItemId = local.item && Number(local.item.inspectionItemId);
       var item = localItemId
-        ? items.find(function (row) { return Number(row.inspectionItemId) === localItemId; })
-        : (items.length ? items[items.length - 1] : null);
+        ? activeItems.find(function (row) { return Number(row.inspectionItemId) === localItemId; })
+        : (activeItems.length ? activeItems[activeItems.length - 1] : null);
       var sameItem = !localItemId || (item && Number(item.inspectionItemId) === localItemId);
-      var candidates = sameItem && local.candidates && local.candidates.length
+      var useLocalDraft = localItemId
+        ? sameItem && Number(local.item.rowVersion) === Number(item && item.rowVersion)
+        : !item;
+      var candidates = useLocalDraft && local.candidates && local.candidates.length
         ? local.candidates : ((item && item.aiCandidates) || []);
-      var rawText = sameItem && typeof local.rawText === 'string' ? local.rawText : (item ? item.rawText : '');
+      var rawText = useLocalDraft && typeof local.rawText === 'string' ? local.rawText : (item ? item.rawText : '');
       that.identity = identity;
       that.setData({
         identity: identity,
@@ -103,12 +108,12 @@ Page({
         canUploadMedia: !!item,
         rawText: rawText,
         rawDirty: !!item && String(rawText || '').trim() !== String(item.rawText || '').trim(),
-        mediaFiles: sameItem ? persistedMedia(local.mediaFiles || []) : [],
+        mediaFiles: useLocalDraft ? persistedMedia(local.mediaFiles || []) : [],
         candidates: candidates,
         candidateDirty: false,
         loading: false,
       });
-      return Promise.all([that.loadAssignees(), that.restoreCandidateMedia()]);
+      return Promise.all([that.loadAssignees(), that.restoreItemMedia()]);
     }).then(function () {
       that.normalizeCandidates();
       that.saveLocalDraft();
@@ -125,15 +130,15 @@ Page({
     });
   },
 
-  restoreCandidateMedia: function () {
+  restoreItemMedia: function () {
     var that = this;
-    var ids = {};
-    (this.data.candidates || []).forEach(function (candidate) {
-      (candidate.evidenceMediaIds || []).forEach(function (id) { ids[String(id)] = true; });
-    });
-    if (!Object.keys(ids).length || this.data.mediaFiles.length) return Promise.resolve();
-    return api.listAllMedia({ storeId: this.data.storeId, status: 'READY' }).then(function (rows) {
-      that.setData({ mediaFiles: (rows || []).filter(function (row) { return ids[String(row.mediaAssetId)]; }) });
+    if (!this.data.item) return Promise.resolve();
+    var localMap = {};
+    (this.data.mediaFiles || []).forEach(function (row) { localMap[String(row.mediaAssetId)] = row; });
+    return api.listRelatedMedia('INSPECTION_ITEM', this.data.item.inspectionItemId, 'INSPECTION_EVIDENCE').then(function (rows) {
+      that.setData({ mediaFiles: (rows || []).map(function (row) {
+        return Object.assign({}, row, localMap[String(row.mediaAssetId)] || {});
+      }) });
     });
   },
 
@@ -190,29 +195,66 @@ Page({
       wx.showToast({ title: '原始记录已保存', icon: 'success' });
       return;
     }
-    if (this.data.item && this.data.mediaFiles.length) {
-      wx.showModal({
-        title: '原始记录已经锁定',
-        content: '后台没有修改现场原文的接口。请先作废当前照片，再保存修订记录并重新上传与新记录关联的照片。',
-        showCancel: false,
-      });
-      return;
-    }
     var that = this;
     this.setData({ saving: true });
-    api.addInspectionItem(this.data.inspectionId, {
-      rowVersion: this.data.inspection.rowVersion,
+    var updating = !!this.data.item;
+    var request = {
+      rowVersion: updating ? this.data.item.rowVersion : this.data.inspection.rowVersion,
       rawText: text,
       category: '现场巡查',
-      sortNo: ((this.data.inspectionItems || []).length || 0) + 1,
-    }).then(function (response) {
-      var inspection = Object.assign({}, that.data.inspection, { rowVersion: response.inspectionRowVersion });
-      that.setData({ saving: false, inspection: inspection, item: response.item, canUploadMedia: true, rawText: response.item.rawText, rawDirty: false, candidates: [], candidateDirty: false, mediaFiles: [] });
+      sortNo: updating ? this.data.item.sortNo : (((this.data.inspectionItems || []).length || 0) + 1),
+    };
+    var operation = updating
+      ? api.updateInspectionItem(this.data.inspectionId, this.data.item.inspectionItemId, request)
+      : api.addInspectionItem(this.data.inspectionId, request);
+    operation.then(function (response) {
+      var savedItem = updating ? response : response.item;
+      var inspection = updating ? that.data.inspection : Object.assign({}, that.data.inspection, { rowVersion: response.inspectionRowVersion });
+      var items = (that.data.inspectionItems || []).slice();
+      var itemIndex = items.findIndex(function (row) { return Number(row.inspectionItemId) === Number(savedItem.inspectionItemId); });
+      if (itemIndex >= 0) items[itemIndex] = savedItem; else items.push(savedItem);
+      that.setData({ saving: false, inspection: inspection, inspectionItems: items, item: savedItem, canUploadMedia: true, rawText: savedItem.rawText, rawDirty: false, candidates: [], candidateDirty: false, mediaFiles: updating ? that.data.mediaFiles : [] });
       that.saveLocalDraft();
-      wx.showToast({ title: '草稿已保存', icon: 'success' });
+      wx.showToast({ title: updating ? '原文已修改' : '草稿已保存', icon: 'success' });
     }).catch(function (error) {
       that.setData({ saving: false });
       util.showError(error, { afterClose: function () { if (Number(error.status) === 409) that.loadPage(); } });
+    });
+  },
+
+  voidRaw: function () {
+    if (!this.data.item || this.data.voiding) return;
+    var that = this;
+    wx.showModal({
+      title: '作废现场原文',
+      content: '',
+      editable: true,
+      placeholderText: '请输入作废原因',
+      confirmColor: '#c53b3b',
+      success: function (result) {
+        if (!result.confirm) return;
+        var reason = String(result.content || '').trim();
+        if (!reason) { wx.showToast({ title: '请填写作废原因', icon: 'none' }); return; }
+        that.setData({ voiding: true });
+        api.voidInspectionItem(that.data.inspectionId, that.data.item.inspectionItemId, {
+          rowVersion: that.data.item.rowVersion,
+          reason: reason,
+        }).then(function (response) {
+          var inspection = that.data.inspection;
+          var items = (that.data.inspectionItems || []).map(function (row) {
+            return Number(row.inspectionItemId) === Number(response.inspectionItemId) ? response : row;
+          });
+          that.setData({
+            voiding: false, inspection: inspection, inspectionItems: items, item: null,
+            rawText: '', rawDirty: false, canUploadMedia: false, mediaFiles: [], candidates: [], candidateDirty: false,
+          });
+          that.saveLocalDraft();
+          wx.showToast({ title: '现场原文已作废', icon: 'success' });
+        }).catch(function (error) {
+          that.setData({ voiding: false });
+          util.showError(error, { afterClose: function () { if (Number(error.status) === 409) that.loadPage(); } });
+        });
+      },
     });
   },
 

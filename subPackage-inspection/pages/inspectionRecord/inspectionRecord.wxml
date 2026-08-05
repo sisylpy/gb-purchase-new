@@ -14,7 +14,19 @@
       <view class="section-title">原始现场记录</view>
       <view class="section-subtitle">可直接使用手机系统输入法的语音输入。AI 整理不会覆盖这段原文。</view>
       <textarea class="form-textarea form-textarea-large" maxlength="4000" placeholder="请把现场发现的问题说出来或输入文字……" value="{{rawText}}" bindinput="onRawInput" />
-      <button class="inline-save" disabled="{{saving}}" bindtap="saveRaw">{{saving ? '保存中…' : (item ? '保存修订记录' : '保存草稿')}}</button>
+      <view class="raw-actions">
+        <button class="inline-save" disabled="{{saving || voiding}}" bindtap="saveRaw">{{saving ? '保存中…' : (item ? '保存原文修改' : '保存草稿')}}</button>
+        <button class="inline-void" wx:if="{{item}}" disabled="{{saving || voiding}}" bindtap="voidRaw">{{voiding ? '作废中…' : '作废这条原文'}}</button>
+      </view>
+    </view>
+
+    <view class="inspection-section" wx:if="{{inspectionItems.length}}">
+      <view class="section-title">现场原文历史</view>
+      <view class="raw-history {{record.recordStatus === 'VOID' ? 'void' : ''}}" wx:for="{{inspectionItems}}" wx:key="inspectionItemId" wx:for-item="record">
+        <view class="card-head"><text>记录 {{index + 1}}</text><text>{{record.recordStatus === 'VOID' ? '已作废' : '有效'}}</text></view>
+        <text class="raw-history-text">{{record.rawText}}</text>
+        <text class="void-reason" wx:if="{{record.recordStatus === 'VOID'}}">作废原因：{{record.voidReason}}</text>
+      </view>
     </view>
 
     <view class="inspection-section">

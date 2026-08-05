@@ -11,10 +11,11 @@
     </view>
 
     <view class="inspection-section" wx:if="{{!items.length}}"><view class="empty compact">尚未保存现场原始记录</view></view>
-    <view class="inspection-section" wx:for="{{items}}" wx:key="inspectionItemId" wx:for-item="record">
-      <view class="section-title">现场原始记录</view>
+    <view class="inspection-section {{record.recordStatus === 'VOID' ? 'void-record' : ''}}" wx:for="{{items}}" wx:key="inspectionItemId" wx:for-item="record">
+      <view class="section-title">现场原始记录 · {{record.recordStatus === 'VOID' ? '已作废' : '有效'}}</view>
       <text class="raw-text">{{record.rawText}}</text>
-      <view class="card-meta">AI 草稿：{{record.aiStatusText}}</view>
+      <view class="card-meta" wx:if="{{record.recordStatus !== 'VOID'}}">AI 草稿：{{record.aiStatusText}}</view>
+      <view class="void-reason" wx:else>作废原因：{{record.voidReason || '未填写'}}</view>
     </view>
 
     <view class="inspection-section" wx:if="{{media.length}}">

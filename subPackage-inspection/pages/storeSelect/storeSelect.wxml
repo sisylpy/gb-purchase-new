@@ -5,7 +5,8 @@
     <view class="loading" wx:if="{{loading}}">正在加载可见门店…</view>
     <view class="error" wx:elif="{{error}}"><text>{{error}}</text><view class="small-button retry" bindtap="retry">重新加载</view></view>
     <view class="tip tip-red" wx:elif="{{createError}}">{{createError}}，请确认后重试。</view>
-    <view class="empty" wx:elif="{{!filtered.length}}"><view class="empty-title">没有可见门店</view><text>门店范围由后台正式身份控制</text></view>
+    <view class="tip tip-green" wx:if="{{pendingCreate}}">已保留“{{pendingStoreName}}”的创建请求；重试会使用同一个幂等键和完全相同的请求。</view>
+    <view class="empty" wx:if="{{!loading && !error && !filtered.length}}"><view class="empty-title">没有可见门店</view><text>门店范围由后台正式身份控制</text></view>
     <view class="inspection-card store-card {{selectedId === item.storeId ? 'selected' : ''}}" wx:for="{{filtered}}" wx:key="storeId" data-id="{{item.storeId}}" bindtap="selectStore">
       <view class="card-head"><text class="card-title">{{item.storeName || '未命名门店'}}</text><text class="select-dot">{{selectedId === item.storeId ? '✓' : ''}}</text></view>
       <view class="card-meta">最近巡店：{{item.recentInspection}}</view>
@@ -13,5 +14,5 @@
       <view class="unfinished" wx:if="{{item.unfinished}}">存在未完成巡店</view>
     </view>
   </scroll-view>
-  <view class="bottom-actions"><button class="button button-primary" disabled="{{!selectedId || creating}}" bindtap="createInspection">{{creating ? '正在创建…' : '创建巡店单'}}</button></view>
+  <view class="bottom-actions"><button class="button button-primary" disabled="{{!selectedId || creating}}" bindtap="createInspection">{{creating ? '正在创建…' : (pendingCreate ? '重试创建巡店单' : '创建巡店单')}}</button></view>
 </view>

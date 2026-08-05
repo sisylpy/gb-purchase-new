@@ -24,6 +24,7 @@
     <view class="tip tip-red" wx:if="{{task.status === 'REJECTED' && lastReview}}">上一轮已被退回：{{lastReview.reviewComment}}</view>
 
     <button class="accept-button" wx:if="{{canAccept}}" disabled="{{actionLoading}}" bindtap="acceptTask">{{actionLoading ? '处理中…' : '接受整改任务'}}</button>
+    <view class="tip tip-red" wx:if="{{canAccept && acceptConflict}}">上次接受请求的版本已过期，原幂等键仍被保留。<text class="retry-link" bindtap="resetAcceptCommand">确认后基于最新版本重新发起</text></view>
 
     <view class="inspection-section" wx:if="{{canEdit}}">
       <view class="section-title">第 {{task.currentRound}} 轮整改</view>

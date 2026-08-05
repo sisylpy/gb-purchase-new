@@ -1,54 +1,50 @@
-# 巡店员注册与角色机制审计
+# 巡店员注册与统一角色机制审计
 
-记录时间：2026-08-04
+记录时间：2026-08-05
 
-审计范围包括门店小程序现有采购员、库管员、店长注册与入口，以及巡店后台的身份表、鉴权服务和 `/franchise/v1/me` 合同。本轮只修改小程序，未修改后台。
+审计基线：后台正式提交 `0ca55ab4074c9f25341c93a1ca724a03bad10e97`。
 
-## 审计结论
+## 结论
 
-当前不能安全地将巡店员注册实现为前端直接调用某个现有角色接口，因为项目已存在两套角色存储和读取主权：
+巡店身份已经收口到原有 `gb_department_user` 用户体系。巡店接口不再读取或写入
+`gb_fr_user_role`、`gb_fr_user_store_scope`；两张旧加盟角色表对应的实体、Mapper 和运行时双读逻辑已删除。
+`GET /franchise/v1/me` 由 `gb_department_user.gb_du_admin` 及其现有配送商、部门、品牌、门店关系生成
+`roleCodes`、`brandId`、`visibleStoreIds`、`departmentId` 和 `allowedActions`。
 
-1. 原有门店用户角色保存在 `gb_department_user.gb_du_admin` 单值字段。
-2. 巡店后台新增 `gb_fr_user_role` 和 `gb_fr_user_store_scope` 表，可为同一用户保存多个加盟角色和门店范围。
-3. `/franchise/v1/me` 只从新增加盟角色表读取 `roleCodes`，没有把 `gb_du_admin` 映射到同一角色集合。
+正式角色映射包括：`gb_du_admin=8 -> INSPECTOR`、`11 -> STORE_MANAGER`、`51 -> REGIONAL_MANAGER`、
+`92 -> HQ_OPERATOR`、`0 -> HQ_ADMIN`。当前主权是单值角色，不支持同一 `gb_department_user` 同时拥有多个
+`roleCodes`；巡店员与店长闭环必须使用两个正式微信用户。
 
-因此，前端已删除猜测的 `PUT /franchise/v1/me/roles/INSPECTOR`，注册页不会写本地角色、不会伪造 `/me` 响应，也不会通过新表接口掩盖两套主权。
+## 原有采购员、库管员与本次巡店员的差异
 
-## 原有采购员和库管员机制
+- 原有采购员、库管员注册仍由邀请页传入整数 `admin`、组织参数和微信 code，最终创建
+  `gb_department_user` 并写入 `gb_du_admin`。
+- 巡店员不复用邀请、二维码或客户端组织参数。正式接口为
+  `POST /franchise/v1/inspectors:register`，只允许 `code`、`userName`、可选 `avatarUrl`。
+- 后台通过一次性微信 code 获取 OpenID；已有唯一部门用户时将该行更新为 `gb_du_admin=8`，没有用户时仅在
+  品牌和总部组织可唯一确定的条件下创建同一体系中的新行。
+- 前端不提交 `userId`、`gbDepartmentUserId`、`roleCode`、`brandId`、`storeId` 或 `departmentId`，也不调用已删除的
+  `PUT /franchise/v1/me/roles/INSPECTOR`。
 
-- 原有整数角色常量中，门店采购员为 1、集团采购员为 2、库管员为 3、店长为 11，另有仓库采购员 31 等细分编码。
-- 小程序采购员注册调用 `POST /gbdepartmentuser/gbPurchaserRegitsteWithFile`，提交微信登录 `code`、姓名、头像以及邀请页带入的 `admin`、部门和配送商参数。
-- 邀请页将采购员和库管员编码放入二维码路径；后台将整数角色写入新建的 `GbDepartmentUserEntity.gbDuAdmin` 行。
-- 该接口依赖邀请参数、客户端传入的组织 ID 和微信 `code`，不是“当前 Bearer Token 用户追加角色”合同，不适合复用为本轮巡店员注册。
-- 工作台入口主要根据登录返回的 `userInfo.gbDuAdmin` 单值分支，不是根据通用 `roleCodes` 数组分支。
+## 正式前端流程
 
-## 用户、角色与组织关系
+1. 点击注册时调用第一次 `wx.login`，立即把 code 与姓名、可选头像提交到正式注册接口。
+2. 不缓存或复用第一次 code。
+3. 注册成功后再次调用 `wx.login`，用第二个 code 调用现有 `gbLoginIndex/{code}` 获取正式签名 Token。
+4. 保存现有登录响应中的用户、配送商、部门资料和 Bearer Token。
+5. 调用 `/franchise/v1/me`；只有服务端 `roleCodes` 包含 `INSPECTOR` 才进入巡店工作台。
 
-- 原有用户实体是 `gb_department_user`；角色是其 `gb_du_admin` 单值字段。
-- 用户与部门、父部门、配送商的关系也保存在同一行的现有字段。
-- 原有注册查重按 OpenID 和角色查询，表面上可能为不同角色创建多行；但登录链路按 OpenID 读取单个 `GbDepartmentUserEntity`。因此现有实现不能被认定为安全、明确的“一个登录用户多角色”机制。
-- 巡店新表支持多角色，但这与原有单值角色并行，并且已重复表达店长等角色。
+页面不会在本地追加角色，不会用姓名或固定 ID 判定身份，注册错误按后台真实响应展示并保留姓名输入。
 
-## 当前巡店身份合同
+## 角色覆盖边界
 
-- `FranchiseIdentityService.loadPrincipal` 先校验原有 `gb_department_user` 用户存在，再只查询 `gb_fr_user_role`。
-- 没有有效加盟角色行时返回 `FRANCHISE_ROLE_MISSING`。
-- 品牌、当前门店和可见门店分别来自 `gb_fr_user_role`、`gb_fr_user_store_scope` 以及后台对高级角色的范围扩展。
-- 当前后台只提供 `GET /franchise/v1/me`、门店目录和业务接口，没有当前用户角色追加或绑定接口。
+由于正式主权为 `gb_du_admin` 单值，已有店长、采购员或库管员调用巡店员注册会把同一用户行转换为巡店员，
+而不是追加第二个并存角色。这是最终后台合同的明确行为。门店店长应直接进入整改工作台，不应点击巡店员注册；
+小程序入口因此允许正式 `STORE_MANAGER` 进入整改模式，只有没有任何巡店体系角色的用户进入测试注册页。
 
-## 最小后台收口需求
+## 审计证据位置
 
-不新增邀请注册流程。后台需先明确并实施统一角色主权，然后在该主权下提供以下最小能力：
-
-1. 由现有登录 Token 唯一识别 `gb_department_user`，请求体不接受用户 ID。
-2. 为当前用户追加巡店员角色，不创建第二个用户，不删除或覆盖已有角色。
-3. 品牌、部门和门店范围由后台按现有组织关系确定，前端不传固定 ID。
-4. 命令幂等；成功后 `/franchise/v1/me.roleCodes` 必须从同一统一主权读取并包含巡店员角色。
-
-在该合同由后台确认前，前端不命名、不调用一个自行推测的注册 URI。当前测试注册页仅展示真实登录用户信息、校验 `/me`；只有返回的 `roleCodes` 真实包含巡店员角色时才进入工作台。
-
-## 主要审计证据位置
-
-- 小程序：`services/apiDistributerGbUser.js`、`subPackage-mendian/pages/mendian/depUserRegister`、`subPackage-group/pages/account/invitePage`、`pages/index/index.js`。
-- 原有后台：`GbDepartmentUserController`、`GbDepartmentUserEntity`、`GbConstants.DepartmentUserRole`、`GbDepartmentUserMapper.xml`。
-- 巡店后台：`FranchiseIdentityController`、`FranchiseIdentityService`、`FranchiseIdentityDirectoryService`、`FrUserRoleEntity`、`FrUserStoreScopeEntity` 和巡店 SQL 迁移。
+- 后台：`FranchiseIdentityController`、`FranchiseInspectorRegistrationService`、`FranchiseIdentityService`、
+  `FranchisePrincipalResolver`、`GbDepartmentUserEntity`、`GbConstants.DepartmentUserRole`。
+- 小程序：`services/franchiseInspection.js`、`components/inspectionEntry`、
+  `subPackage-inspection/pages/register`、`subPackage-inspection/pages/home`。

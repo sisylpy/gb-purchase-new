@@ -34,14 +34,31 @@ function normalizeError(error) {
   var status = httpStatus >= 200 && httpStatus < 300 && Number(businessCode) !== 0
     ? Number(businessCode)
     : Number(httpStatus || businessCode || 0);
+  var errorCode = body.errorCode || '';
+  var message = String(body.msg || body.message || response.errMsg || '请求失败，请稍后重试');
+  if (errorCode === 'MEDIA_ASSET_ID_INVALID') {
+    message = '照片标识无效，请刷新页面后重试';
+  }
   return {
     inspectionError: true,
     status: status,
     code: Number(businessCode) !== 0 ? businessCode : numericCode(status),
-    errorCode: body.errorCode || '',
-    message: String(body.msg || body.message || response.errMsg || '请求失败，请稍后重试'),
+    errorCode: errorCode,
+    message: message,
     raw: error,
   };
+}
+
+function wxLoginCode() {
+  return withTimeout(new Promise(function (resolve, reject) {
+    wx.login({
+      success: function (result) {
+        if (result && result.code) resolve(result.code);
+        else reject(normalizeError({ statusCode: 400, data: { code: 400, errorCode: 'WECHAT_CODE_REQUIRED', msg: '微信登录凭证获取失败，请重试' } }));
+      },
+      fail: function (error) { reject(normalizeError(error)); },
+    });
+  }), 30000, '微信登录超时，请重试');
 }
 
 function withTimeout(promise, timeoutMs, message) {
@@ -112,17 +129,8 @@ function saveLoginResult(result) {
 }
 
 function refreshToken() {
-  return new Promise(function (resolve, reject) {
-    wx.login({
-      success: function (login) {
-        if (!login.code) {
-          reject(normalizeError({ statusCode: 403, data: { code: 403, msg: '微信登录凭证获取失败' } }));
-          return;
-        }
-        withTimeout(loginApi.gbLoginIndex(login.code), 30000).then(saveLoginResult).then(resolve).catch(reject);
-      },
-      fail: function (error) { reject(normalizeError(error)); },
-    });
+  return wxLoginCode().then(function (code) {
+    return withTimeout(loginApi.gbLoginIndex(code), 30000).then(saveLoginResult);
   });
 }
 
@@ -145,6 +153,33 @@ function bootstrapIdentity() {
   return ensureToken(false).then(function () { return get('me'); }).catch(function (error) {
     if (!isTokenError(error)) return Promise.reject(error);
     return ensureToken(true).then(function () { return get('me'); });
+  });
+}
+
+function registerInspector(profile) {
+  var input = profile || {};
+  return wxLoginCode().then(function (code) {
+    var body = { code: code, userName: String(input.userName || '').trim() };
+    var avatarUrl = String(input.avatarUrl || '').trim();
+    if (avatarUrl) body.avatarUrl = avatarUrl;
+    return post('inspectors:register', body);
+  });
+}
+
+function refreshIdentity() {
+  return refreshToken().then(function () { return get('me'); });
+}
+
+function normalizeRelatedMedia(rows) {
+  return (rows || []).map(function (row) {
+    return Object.assign({
+      localKey: 'asset-' + row.mediaAssetId,
+      status: row.status || 'READY',
+      uploadStatus: 'ready',
+      progress: 100,
+      mimeType: row.mediaType || '',
+      createdAt: row.uploadedAt || '',
+    }, row);
   });
 }
 
@@ -253,6 +288,8 @@ module.exports = {
   normalizeError: normalizeError,
   ensureToken: ensureToken,
   bootstrapIdentity: bootstrapIdentity,
+  registerInspector: registerInspector,
+  refreshIdentity: refreshIdentity,
   getMe: function () { return get('me'); },
   listStores: function () { return get('stores'); },
   listAssignees: function (storeId) { return get('stores/' + storeId + '/assignees', { role: 'STORE_MANAGER' }); },
@@ -262,6 +299,12 @@ module.exports = {
   getInspection: function (id) { return get('inspections/' + id); },
   updateInspection: function (id, body) { return patch('inspections/' + id, body); },
   addInspectionItem: function (id, body) { return post('inspections/' + id + '/items', body); },
+  updateInspectionItem: function (inspectionId, itemId, body) {
+    return patch('inspections/' + inspectionId + '/items/' + itemId, body);
+  },
+  voidInspectionItem: function (inspectionId, itemId, body) {
+    return remove('inspections/' + inspectionId + '/items/' + itemId, body);
+  },
   organizeDraft: function (inspectionId, itemId, body) {
     return post('inspections/' + inspectionId + '/items/' + itemId + ':organize-draft', body, { timeoutMs: 180000 });
   },
@@ -282,6 +325,11 @@ module.exports = {
   reviewRectification: function (id, body) { return post('rectification-tasks/' + id + ':review', body); },
   listMedia: function (query) { return get('media-assets', query); },
   listAllMedia: function (query) { return listAll('media-assets', query); },
+  listRelatedMedia: function (businessType, businessId, evidenceStage) {
+    var query = { businessType: businessType, businessId: businessId };
+    if (evidenceStage) query.evidenceStage = evidenceStage;
+    return get('media-assets/relations', query).then(normalizeRelatedMedia);
+  },
   voidMedia: function (id, rowVersion) { return remove('media-assets/' + id, { rowVersion: rowVersion }); },
   uploadMedia: uploadMedia,
   downloadMedia: downloadMedia,

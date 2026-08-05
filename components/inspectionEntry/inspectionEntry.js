@@ -27,11 +27,12 @@ Component({
       this.setData({ loading: true, error: '' });
       api.bootstrapIdentity().then(function (identity) {
         var roles = identity.roleCodes || [];
-        var isInspector = roles.indexOf('INSPECTOR') >= 0;
+        var workspaceRoles = ['INSPECTOR', 'STORE_MANAGER', 'REGIONAL_MANAGER', 'HQ_OPERATOR', 'HQ_ADMIN'];
+        var canOpenWorkspace = roles.some(function (role) { return workspaceRoles.indexOf(role) >= 0; });
         that.setData({
           visible: true,
           identity: identity,
-          requiresInspectorRegistration: !isInspector,
+          requiresInspectorRegistration: !canOpenWorkspace,
           loading: false,
           error: '',
         });

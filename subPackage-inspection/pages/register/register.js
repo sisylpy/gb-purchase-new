@@ -17,7 +17,9 @@ Page({
     registering: false,
     alreadyInspector: false,
     navigating: false,
-    userName: '暂无',
+    userName: '',
+    avatarUrl: '',
+    registerStage: '',
     phone: '暂无',
     organizationName: '暂无',
     storeScope: '暂无',
@@ -45,7 +47,7 @@ Page({
         alreadyInspector: false,
       });
     }).catch(function (error) {
-      if (error && error.errorCode === 'FRANCHISE_ROLE_MISSING') {
+      if (error && ['FRANCHISE_ROLE_MISSING', 'AUTH_REQUIRED', 'TOKEN_INVALID', 'TOKEN_EXPIRED'].indexOf(error.errorCode) >= 0) {
         that.setData({ loading: false, alreadyInspector: false, error: '' });
         return;
       }
@@ -66,11 +68,16 @@ Page({
       ? distributerName + ' · ' + departmentName
       : (departmentName || distributerName || '暂无');
     this.setData({
-      userName: textOrFallback(identity && identity.userName, textOrFallback(user.gbDuWxNickName, '暂无')),
+      userName: textOrFallback(identity && identity.userName, textOrFallback(user.gbDuWxNickName, this.data.userName)),
+      avatarUrl: textOrFallback(user.gbDuWxAvartraUrl, this.data.avatarUrl),
       phone: textOrFallback(user.gbDuWxPhone, '暂无'),
       organizationName: organization,
       storeScope: departmentName || '暂无',
     });
+  },
+
+  onUserNameInput: function (event) {
+    this.setData({ userName: event.detail.value, error: '' });
   },
 
   registerInspector: function () {
@@ -79,21 +86,31 @@ Page({
       this.enterWorkspace();
       return;
     }
+    var userName = String(this.data.userName || '').trim();
+    if (!userName) {
+      this.setData({ error: '请填写巡店员姓名' });
+      return;
+    }
     var that = this;
-    this.setData({ registering: true, error: '' });
-    api.bootstrapIdentity().then(function (identity) {
+    this.setData({ registering: true, registerStage: '正在提交巡店员注册…', error: '' });
+    api.registerInspector({
+      userName: userName,
+      avatarUrl: this.data.avatarUrl,
+    }).then(function () {
+      that.setData({ registerStage: '注册成功，正在重新微信登录…' });
+      return api.refreshIdentity();
+    }).then(function (identity) {
       if (!hasInspectorRole(identity)) {
-        throw new Error('当前账号尚未获得巡店员身份');
+        throw { inspectionError: true, status: 403, errorCode: 'INSPECTOR_ROLE_NOT_EFFECTIVE', message: '重新登录后未获取到巡店员身份，请联系管理员' };
       }
-      that.setData({ registering: false, alreadyInspector: true });
+      that.fillLocalProfile(identity);
+      that.setData({ registering: false, registerStage: '', alreadyInspector: true });
       that.enterWorkspace();
     }).catch(function (error) {
-      var missingRole = error && error.errorCode === 'FRANCHISE_ROLE_MISSING';
       that.setData({
         registering: false,
-        error: missingRole
-          ? '当前后台尚未提供统一角色体系下的巡店员注册能力，页面不会伪造注册成功。'
-          : (error.message || '当前身份校验失败，请稍后重试'),
+        registerStage: '',
+        error: error.message || '巡店员注册失败，请稍后重试',
       });
     });
   },

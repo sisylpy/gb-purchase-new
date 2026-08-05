@@ -44,29 +44,15 @@ Page({
         var store = (results[2] || []).find(function (row) {
           return Number(row.storeId) === Number(issue.storeId);
         });
-        var relatedInspection = issue.inspectionId ? api.getInspection(issue.inspectionId) : Promise.resolve(null);
         return Promise.all([
-          relatedInspection,
-          api.listAllMedia({ storeId: issue.storeId, status: 'READY' }),
+          api.listRelatedMedia('ISSUE', issue.issueId, 'INSPECTION_EVIDENCE'),
           api.listAssignees(issue.storeId),
         ]).then(function (more) {
           if (sequence !== that.detailRequestSequence) return;
-          var inspectionDetail = more[0];
-          var allMedia = more[1] || [];
-          var evidenceIds = [];
-          if (inspectionDetail) {
-            (inspectionDetail.items || []).some(function (record) {
-              var candidate = (record.aiCandidates || []).find(function (row) {
-                return row.candidateKey === issue.candidateKey;
-              });
-              if (!candidate) return false;
-              evidenceIds = (candidate.evidenceMediaIds || []).map(Number);
-              return true;
-            });
-          }
+          var issueMedia = more[0] || [];
           var userMap = {};
           userMap[String(identity.userId)] = identity.userName;
-          (more[2] || []).forEach(function (user) { userMap[String(user.userId)] = user.userName; });
+          (more[1] || []).forEach(function (user) { userMap[String(user.userId)] = user.userName; });
           var timeline = util.decorateTimeline(detail.timeline).map(function (event) {
             return Object.assign({}, event, {
               actorName: userMap[String(event.actorUserId)] || '操作人信息暂无',
@@ -92,9 +78,7 @@ Page({
                 dueText: util.formatTime(task.dueAt),
               });
             }),
-            media: allMedia.filter(function (asset) {
-              return evidenceIds.indexOf(Number(asset.mediaAssetId)) >= 0;
-            }),
+            media: issueMedia,
             timeline: timeline,
           });
         });

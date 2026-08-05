@@ -3,7 +3,7 @@ var api = require('../../../services/franchiseInspection');
 var util = require('../../../utils/franchiseInspection');
 
 Page({
-  data: { navBarHeight: 0, loading: true, stores: [], filtered: [], keyword: '', selectedId: 0, creating: false, error: '', createError: '' },
+  data: { navBarHeight: 0, loading: true, stores: [], filtered: [], keyword: '', selectedId: 0, creating: false, pendingCreate: false, pendingStoreName: '', error: '', createError: '' },
 
   onLoad: function () {
     this.setData({ navBarHeight: app.globalData.navBarHeight * app.globalData.rpxR });
@@ -18,6 +18,7 @@ Page({
         return Promise.reject({ inspectionError: true, status: 403, message: '当前身份没有创建巡店权限' });
       }
       that.identity = identity;
+      that.createScope = 'inspection-create:' + identity.userId;
       return api.listStores();
     }).then(function (stores) {
       return Promise.all((stores || []).map(function (store) {
@@ -37,7 +38,16 @@ Page({
         });
       }));
     }).then(function (stores) {
-      that.setData({ loading: false, stores: stores, filtered: stores });
+      var pending = util.readPersistentCommand(that.createScope);
+      var pendingStore = pending && stores.find(function (row) { return Number(row.storeId) === Number(pending.storeId); });
+      that.setData({
+        loading: false,
+        stores: stores,
+        filtered: stores,
+        selectedId: pendingStore ? Number(pendingStore.storeId) : that.data.selectedId,
+        pendingCreate: !!pendingStore,
+        pendingStoreName: pendingStore ? pendingStore.storeName : '',
+      });
     }).catch(function (error) {
       that.setData({ loading: false, error: error.message || '门店加载失败' });
       util.showError(error);
@@ -52,7 +62,15 @@ Page({
     this.setData({ keyword: event.detail.value, filtered: filtered });
   },
 
-  selectStore: function (event) { this.setData({ selectedId: Number(event.currentTarget.dataset.id) }); },
+  selectStore: function (event) {
+    var selectedId = Number(event.currentTarget.dataset.id);
+    var pending = util.readPersistentCommand(this.createScope);
+    if (pending && Number(pending.storeId) !== selectedId) {
+      wx.showToast({ title: '请先重试完成上次创建请求', icon: 'none' });
+      return;
+    }
+    this.setData({ selectedId: selectedId });
+  },
 
   createInspection: function () {
     if (!this.data.selectedId || this.data.creating) return;
@@ -60,13 +78,22 @@ Page({
     if (!store) return;
     var that = this;
     this.setData({ creating: true, createError: '' });
-    api.createInspection({ storeId: store.storeId, startedAt: util.localDateTime(), summary: '门店现场巡店' })
+    var scope = this.createScope;
+    var command = util.persistentCommand(scope, function () { return {
+      idempotencyKey: util.persistentKey(scope, 'inspection-create'),
+      storeId: store.storeId,
+      startedAt: util.localDateTime(),
+      summary: '门店现场巡店',
+    }; });
+    api.createInspection(command)
       .then(function (inspection) {
+        util.clearPersistentKey(scope);
+        util.clearPersistentCommand(scope);
         wx.redirectTo({
-          url: '/subPackage-inspection/pages/inspectionRecord/inspectionRecord?inspectionId=' + inspection.inspectionId + '&storeId=' + store.storeId,
+          url: '/subPackage-inspection/pages/inspectionRecord/inspectionRecord?inspectionId=' + inspection.inspectionId + '&storeId=' + command.storeId,
         });
       }).catch(function (error) {
-        that.setData({ creating: false, createError: error.message || '巡店单创建失败' });
+        that.setData({ creating: false, pendingCreate: true, pendingStoreName: store.storeName, createError: error.message || '巡店单创建失败' });
         util.showError(error);
       });
   },

@@ -68,6 +68,10 @@ Page({
         return Promise.all([that.loadStats(), that.loadList()]);
       });
     }).catch(function (error) {
+      if (error && error.errorCode === 'FRANCHISE_ROLE_MISSING') {
+        wx.redirectTo({ url: '/subPackage-inspection/pages/register/register' });
+        return;
+      }
       that.ready = false;
       that.setData({ loading: false, error: error.message || '巡店权限加载失败' });
       util.showError(error);

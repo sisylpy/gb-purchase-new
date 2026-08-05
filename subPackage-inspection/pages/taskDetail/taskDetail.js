@@ -5,12 +5,12 @@ var util = require('../../../utils/franchiseInspection');
 Page({
   data: {
     navBarHeight: 0, loading: true, actionLoading: false, taskId: 0, identity: null, store: null,
-    task: null, issue: null, submissions: [], reviews: [], timeline: [], originalMedia: [],
+    task: null, issue: null, submissions: [], reviews: [], timeline: [], originalMedia: [], taskMedia: [],
     canAccept: false, canEdit: false, canReview: false,
     form: { reason: '', measures: '', description: '', supplement: '' },
     currentMedia: [], mediaUploading: false, reviewMedia: [], reviewMediaUploading: false,
     approveComment: '', rejectReason: '', rejectRequirement: '', draftDirty: false, reviewDirty: false,
-    refreshNotice: '', error: '',
+    refreshNotice: '', acceptConflict: false, error: '',
   },
 
   onLoad: function (options) {
@@ -47,32 +47,49 @@ Page({
         var task = detail.task;
         var issue = detail.issue;
         var store = (results[2] || []).find(function (row) { return Number(row.storeId) === Number(task.storeId); });
-        var extras = [api.listAssignees(task.storeId)];
-        if (issue.inspectionId) extras.push(api.getInspection(issue.inspectionId)); else extras.push(Promise.resolve(null));
-        extras.push(api.listAllMedia({ storeId: task.storeId, status: 'READY' }));
+        var rawSubmissions = detail.submissions || [];
+        var rawReviews = detail.reviews || [];
+        var extras = [
+          api.listAssignees(task.storeId),
+          api.listRelatedMedia('ISSUE', issue.issueId, 'INSPECTION_EVIDENCE'),
+          api.listRelatedMedia('RECTIFICATION_TASK', task.rectificationTaskId),
+          Promise.all(rawSubmissions.map(function (submission) {
+            return api.listRelatedMedia('RECTIFICATION_SUBMISSION', submission.submissionId, 'RECTIFICATION_EVIDENCE');
+          })),
+          Promise.all(rawReviews.map(function (review) {
+            return api.listRelatedMedia('RECTIFICATION_REVIEW', review.reviewId, 'REVIEW_EVIDENCE');
+          })),
+        ];
         return Promise.all(extras).then(function (more) {
           var managers = more[0] || [];
-          var inspectionDetail = more[1];
-          var allMedia = more[2] || [];
-          var evidenceIds = [];
-          if (inspectionDetail) {
-            (inspectionDetail.items || []).some(function (record) {
-              var candidate = (record.aiCandidates || []).find(function (row) { return row.candidateKey === issue.candidateKey; });
-              if (candidate) { evidenceIds = (candidate.evidenceMediaIds || []).map(Number); return true; }
-              return false;
-            });
-          }
-          var originalMedia = allMedia.filter(function (asset) { return evidenceIds.indexOf(Number(asset.mediaAssetId)) >= 0; });
-          var currentDraft = (detail.submissions || []).find(function (submission) {
+          var originalMedia = more[1] || [];
+          var taskMedia = more[2] || [];
+          var submissions = rawSubmissions.map(function (submission, index) {
+            var related = more[3][index] || [];
+            var embedded = {};
+            (submission.media || []).forEach(function (row) { embedded[String(row.mediaAssetId)] = row; });
+            return Object.assign({}, submission, { media: related.length ? related.map(function (row) {
+              return Object.assign({}, row, embedded[String(row.mediaAssetId)] || {});
+            }) : (submission.media || []) });
+          });
+          var reviews = rawReviews.map(function (review, index) {
+            var related = more[4][index] || [];
+            var embedded = {};
+            (review.media || []).forEach(function (row) { embedded[String(row.mediaAssetId)] = row; });
+            return Object.assign({}, review, { media: related.length ? related.map(function (row) {
+              return Object.assign({}, row, embedded[String(row.mediaAssetId)] || {});
+            }) : (review.media || []) });
+          });
+          var currentDraft = submissions.find(function (submission) {
             return Number(submission.roundNo) === Number(task.currentRound) && submission.status === 'DRAFT';
           });
           var userMap = {};
           userMap[String(identity.userId)] = identity.userName;
           managers.forEach(function (user) { userMap[String(user.userId)] = user.userName; });
           var submissionMap = {};
-          (detail.submissions || []).forEach(function (row) { submissionMap[String(row.submissionId)] = row.media || []; });
+          submissions.forEach(function (row) { submissionMap[String(row.submissionId)] = row.media || []; });
           var reviewMap = {};
-          (detail.reviews || []).forEach(function (row) { reviewMap[String(row.reviewId)] = row.media || []; });
+          reviews.forEach(function (row) { reviewMap[String(row.reviewId)] = row.media || []; });
           var timeline = util.decorateTimeline(detail.timeline).map(function (event) {
             var eventDetail = event.detail || {};
             return Object.assign({}, event, {
@@ -83,13 +100,18 @@ Page({
           if (sequence !== that.detailRequestSequence) return;
           var isAssignee = Number(identity.userId) === Number(task.assigneeUserId);
           var isReviewer = Number(identity.userId) === Number(task.reviewerUserId);
-          var submissions = (detail.submissions || []).map(function (submission) {
+          var acceptScope = 'rectification-accept:' + task.rectificationTaskId;
+          if (task.status !== 'PENDING_ACCEPTANCE') {
+            util.clearPersistentKey(acceptScope);
+            util.clearPersistentCommand(acceptScope);
+          }
+          submissions = submissions.map(function (submission) {
             return Object.assign({}, submission, {
               statusText: submission.status === 'SUBMITTED' ? '已提交' : '草稿',
               timeText: submission.submittedAt ? util.formatTime(submission.submittedAt) : '尚未提交',
             });
           });
-          var reviews = (detail.reviews || []).map(function (review) {
+          reviews = reviews.map(function (review) {
             return Object.assign({}, review, { timeText: util.formatTime(review.reviewedAt) });
           });
           that.loadedOnce = true;
@@ -105,6 +127,7 @@ Page({
             reviews: reviews,
             timeline: timeline,
             originalMedia: originalMedia,
+            taskMedia: taskMedia,
             canAccept: isAssignee && util.hasAction(identity, 'RECTIFICATION_ACCEPT') && task.status === 'PENDING_ACCEPTANCE',
             canEdit: isAssignee && util.hasAction(identity, 'RECTIFICATION_SAVE_DRAFT') && (task.status === 'IN_PROGRESS' || task.status === 'REJECTED'),
             canReview: isReviewer && util.hasAction(identity, 'RECTIFICATION_REVIEW') && task.status === 'PENDING_REVIEW',
@@ -115,6 +138,7 @@ Page({
             draftDirty: false,
             reviewDirty: false,
             refreshNotice: '',
+            acceptConflict: task.status === 'PENDING_ACCEPTANCE' && that.data.acceptConflict,
           });
         });
       }).catch(function (error) {
@@ -130,10 +154,31 @@ Page({
     util.confirm('接受整改任务', '接受后任务进入整改中，是否继续？').then(function (confirmed) {
       if (!confirmed) return;
       that.setData({ actionLoading: true });
-      api.acceptTask(that.data.taskId, { rowVersion: that.data.task.rowVersion }).then(function () {
+      var scope = 'rectification-accept:' + that.data.taskId;
+      var command = util.persistentCommand(scope, function () { return {
+        rowVersion: that.data.task.rowVersion,
+        idempotencyKey: util.persistentKey(scope, 'rectification-accept'),
+      }; });
+      api.acceptTask(that.data.taskId, command).then(function () {
+        util.clearPersistentKey(scope);
+        util.clearPersistentCommand(scope);
         that.setData({ actionLoading: false });
         return that.loadDetail();
-      }).catch(function (error) { that.setData({ actionLoading: false }); util.showError(error, { afterClose: function () { that.loadDetail(); } }); });
+      }).catch(function (error) {
+        that.setData({ actionLoading: false, acceptConflict: error.errorCode === 'ROW_VERSION_CONFLICT' });
+        util.showError(error, { afterClose: function () { that.loadDetail(); } });
+      });
+    });
+  },
+
+  resetAcceptCommand: function () {
+    var that = this;
+    util.confirm('重新发起接受请求', '上次请求使用的任务版本已过期。确认后才会基于最新版本生成新的幂等键；不会自动静默重试。').then(function (confirmed) {
+      if (!confirmed) return;
+      var scope = 'rectification-accept:' + that.data.taskId;
+      util.clearPersistentKey(scope);
+      util.clearPersistentCommand(scope);
+      that.setData({ acceptConflict: false });
     });
   },
 
@@ -202,7 +247,6 @@ Page({
         wx.showToast({ title: '已提交复核', icon: 'success' });
         return that.loadDetail();
       }).catch(function (error) {
-        if (error.errorCode === 'ROW_VERSION_CONFLICT') { util.clearPersistentKey(scope); util.clearPersistentCommand(scope); }
         that.setData({ actionLoading: false });
         util.showError(error, { afterClose: function () { if (Number(error.status) === 409) that.loadDetail(); } });
       });
@@ -260,7 +304,6 @@ Page({
           wx.showToast({ title: decision === 'APPROVE' ? '复核已通过' : '已退回整改', icon: 'success' });
           return that.loadDetail();
         }).catch(function (error) {
-          if (error.errorCode === 'ROW_VERSION_CONFLICT') { util.clearPersistentKey(scope); util.clearPersistentCommand(scope); }
           that.setData({ actionLoading: false });
           util.showError(error, { afterClose: function () { if (Number(error.status) === 409) that.loadDetail(); } });
         });
