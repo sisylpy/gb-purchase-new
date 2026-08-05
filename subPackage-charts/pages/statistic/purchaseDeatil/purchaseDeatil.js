@@ -456,21 +456,6 @@ Page({
     })
   },
 
-
-
-  toFenxi(e) {
-    var item = e.currentTarget.dataset.item;
-    var purId = e.currentTarget.dataset.purid;
-    var id = e.currentTarget.dataset.id;
-
-    wx.setStorageSync('disGoods', item);
-    wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id, 
-
-    })
-    
-  },
-
   // 跳转到筛选页面 - 对应WXML中的toFilterType
   toFilterType() {
     this.toFilter();

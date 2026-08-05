@@ -634,30 +634,6 @@ Page({
   },
 
 
-  toFenxi(e) {
-    var item = e.currentTarget.dataset.item;
-    var purId = e.currentTarget.dataset.purgoods.gbDistributerPurchaseGoodsId;
-    var purchaseDate = e.currentTarget.dataset.purgoods.gbDpgPurchaseDate;
-    wx.setStorageSync('disGoods', item);
-    wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + item.gbDistributerGoodsId  + '&purGoodsId=' + purId + '&purchaseDate=' + purchaseDate
-      , 
-
-    })
-
-  },
-
-  toCost(e) {
-    var item = e.currentTarget.dataset.item;
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.item);
-
-    wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/stockGoodsList/stockGoodsList?disGoodsId=' + item.gbDistributerGoodsId,
-    })
-
-  },
-
-
   onUnload() {
     // 清理滚动防抖定时器
     if (this.scrollDebounceTimer) {

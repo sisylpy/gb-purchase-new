@@ -49,21 +49,12 @@
 
       </view>
 
-      <view class="coupon-right flex-row-between" >
+      <view class="coupon-right">
         <view class="flex-column">
         <text class="text-main" style="font-size: 20rpx; padding: 4rpx 10rpx; border-radius: 8rpx; border: 1px solid rgb(163, 253, 163);">京京送货</text>
         <view>{{item.nxDistributerCouponEntity.nxDistributerCouponName}}</view>
         <text class="" style="font-size: 24rpx;">{{tool.transferCouponDateString(item.nxGducStartTimeZone)}}-{{tool.transferCouponDateString(item.nxGducStopTimeZone)}}</text>
       </view>
-
-      <view class="bg-buy"  wx:if="{{item.nxGducStartDate > todayDate}}" style="padding: 10rpx 20rpx; border-radius: 34rpx;" bind:tap="toShixianTishi"> 
-        <text style="font-size: 24rpx;" >去使用</text>
-      </view>
-      <view class="bg-buy is-active"  wx:else="" style="padding: 10rpx 20rpx; border-radius: 34rpx;" bind:tap="toShixian" data-item="{{item}}"> 
-        <text style="font-size: 24rpx;" >去使用</text>
-      </view>
-
-
       </view>
 
 
@@ -78,23 +69,4 @@
 
 
 
-</view>
-
-
-
-
-<view class="overlay flex-column {{showChoice ? 'show' : 'hide'}}" catch:tap="hide">
-
-<view class="flex-column popup ">
-  <view class="border-bottom flex-column bg-white p-30" wx:for="{{disInfo.mendianDepartmentList}}" wx:for-item="dep" bindtap="{{dep.gbDepartmentEntityList.length == 0 ? 'choiceMendian' : ''}}" data-item="{{dep}}" hover-class="{{dep.gbDepartmentEntityList.length == 0 ? 'hover' : ''}}">
-    <text class=' normal mr-10'>{{dep.gbDepartmentName}}</text>
-    <block wx:if="{{dep.gbDepartmentSubAmount > 0}}">
-      <view class="flex-column">
-        <view class="flex-row p-20 {{subIndex !== dep.gbDepartmentEntityList.length - 1 ? 'border-bottom' : ''}} " wx:for="{{dep.gbDepartmentEntityList}}" wx:for-item="subDep" wx:for-index="subIndex" bind:tap="choiceSubDep" data-item="{{subDep}}" hover-class="hover">
-          <text> {{subDep.gbDepartmentName}}</text>
-        </view>
-      </view>
-    </block>
-  </view>
-</view>
 </view>

@@ -308,11 +308,6 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 <view class='overlay {{showOperationBtn ? "show" : "hide"}}' style="height:{{maskHeight > windowHeight ? maskHeight : windowHeight}}rpx;" catchtap="hideMaskBtn">
 
   <view class="flex-column nnn bg-white">
-    <view class="p-30 flex-row border-bottom" catchtap="toLiziMarket">
-      <image src="/images/location.png" class="icon mr-20"></image>
-      <text class="">查看市场供应</text>
-    </view>
-    
     <view class="p-30 flex-row border-bottom" catchtap="toOpenDetail">
       <image src="/images/edit.png" class="icon mr-20"></image>
       <text class="">修改商品</text>

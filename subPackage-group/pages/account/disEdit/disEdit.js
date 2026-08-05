@@ -414,7 +414,6 @@ getName(e){
       showCancel: false,
       success: (res) => {
         if (res.confirm) {
-          // wx.navigateTo({ url: '/pages/settings/index' });
           // wx.openSetting(); // 打开微信设置页subPackage-group/pages/account/disEdit/disEdit
 
         }
@@ -431,7 +430,6 @@ getName(e){
       confirmText: '去设置',
       success: (res) => {
         if (res.confirm) {
-          // wx.navigateTo({ url: '/pages/settings/index' });
           wx.openSetting(); // 打开微信设置页
 
         }

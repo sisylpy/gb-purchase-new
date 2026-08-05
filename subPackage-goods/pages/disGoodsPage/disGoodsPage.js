@@ -1011,19 +1011,6 @@ Page({
 
   },
 
-
-
-  toLiziMarket(e) {
-    this.setData({
-      showOperationBtn: false,
-    });
-    wx.navigateTo({
-      url: '/subPackage-yishang/pages/yishang/map/map?nxGoodsId=' + this.data.goods.gbDgNxGoodsId + '&nxGoodsName=' +  this.data.goods.gbDgGoodsName,
-    })
-  },
-
-  
-
   toBack() {
     wx.navigateBack({
       delta: 1,

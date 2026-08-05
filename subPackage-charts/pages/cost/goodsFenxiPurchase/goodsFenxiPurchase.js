@@ -692,18 +692,6 @@ setTimeout(() => {
 
 
 
-  // 
-
-
-  toFenxi(e) {
-    
-    var purId = e.currentTarget.dataset.purid;
-    wx.setStorageSync('disGoods', this.data.disGoods);
-    wx.navigateTo({
-      url: '/subPackage-charts/pages/cost/goodsPurList/goodsPurList?disGoodsId=' +  this.data.disGoods.gbDistributerGoodsId + '&purGoodsId=' + purId, 
-    })
-  },
-
   showDetail(e) {
     const purIndex = e.currentTarget.dataset.purIndex;
 
@@ -723,14 +711,6 @@ setTimeout(() => {
   toBack() {
     wx.navigateBack({
       delta: 1,
-    })
-  },
-
-
-  toFilter() {
-    wx.setStorageSync('supplierList', this.data.supplierList);
-    wx.navigateTo({
-      url: '/subPackage-charts/pages/sel/filterData/filterData',
     })
   },
 

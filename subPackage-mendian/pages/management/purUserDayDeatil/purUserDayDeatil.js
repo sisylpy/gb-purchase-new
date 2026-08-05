@@ -168,14 +168,4 @@ Page({
       this.toStockPage();
     }
   },
-
-  toCost: function (e) {
-    var item = e.currentTarget.dataset.item;
-    var stockId = e.currentTarget.dataset.id;
-    wx.setStorageSync('disGoods', item);
-    wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/stockGoodsList/stockGoodsList?disGoodsId=' + item.gbDistributerGoodsId + '&stockId=' + stockId,
-    });
-  },
-
 });

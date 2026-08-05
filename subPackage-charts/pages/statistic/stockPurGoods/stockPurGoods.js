@@ -478,19 +478,6 @@ Page({
 
 
 
-  // 
-
-  toFenxi(e) {
-    var id = e.currentTarget.dataset.id;
-    var purId = e.currentTarget.dataset.purid;
-
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
-    wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id, 
-
-    })
-  },
-
   showDetail(e) {
     var goodsIndex = e.currentTarget.dataset.goodsIndex;
     var purIndex = e.currentTarget.dataset.purIndex;

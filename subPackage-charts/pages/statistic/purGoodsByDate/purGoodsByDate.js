@@ -265,20 +265,6 @@ Page({
 
 
 
-  // 
-
-  toFenxi(e) {
-    var id = e.currentTarget.dataset.id;
-    var purId = e.currentTarget.dataset.purid;
-
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
-    wx.navigateTo({
-    
-      url: '/subPackage-goods/pages/goods/goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id, 
-
-    })
-  },
-
   showDetail(e) {
     const goodsIndex = e.currentTarget.dataset.goodsIndex;
     const purIndex = e.currentTarget.dataset.purIndex;
@@ -483,20 +469,6 @@ Page({
 
     })
   },
-
-
-
-  toCost(e) {
-    var item  = e.currentTarget.dataset.item;
-    var stockId = e.currentTarget.dataset.id;
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.item);
-   
-    wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/stockGoodsList/stockGoodsList?disGoodsId=' + item.gbDistributerGoodsId + '&stockId=' + stockId,
-    })
-
-  },
-
 
   onUnload() {
 

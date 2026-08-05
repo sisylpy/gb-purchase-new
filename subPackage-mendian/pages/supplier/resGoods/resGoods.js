@@ -529,7 +529,7 @@ Page({
     var id = e.currentTarget.dataset.id;
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
     wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/goodsOrderList/goodsOrderList?disGoodsId=' + id +'&type=1',
+      url: '/subPackage-goods/pages/goodsOrderList/goodsOrderList?disGoodsId=' + id +'&type=1',
     })
     // 
   },
@@ -537,13 +537,13 @@ Page({
   toFenxi(e) {
     var id = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/goodsFenxi/goodsFenxi?id=' + id,
+      url: '/subPackage-goods/pages/goodsFenxi/goodsFenxi?id=' + id,
     })
   },
 
   toGoods(e){
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/disGoodsPage/disGoodsPage?disGoodsId=' + e.currentTarget.dataset.id,
+      url: '/subPackage-goods/pages/disGoodsPage/disGoodsPage?disGoodsId=' + e.currentTarget.dataset.id,
     })
   },
 
@@ -552,7 +552,7 @@ Page({
   toStock(e){
      wx.setStorageSync('disGoods', e.currentTarget.dataset.item);
     wx.navigateTo({
-      url: '/subPackage-goods/pages/goods/stockGoodsList/stockGoodsList?disGoodsId=' + e.currentTarget.dataset.id ,
+      url: '/subPackage-goods/pages/stockGoodsList/stockGoodsList?disGoodsId=' + e.currentTarget.dataset.id ,
     })
 
   },

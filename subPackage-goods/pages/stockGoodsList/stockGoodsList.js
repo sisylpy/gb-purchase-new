@@ -535,10 +535,6 @@ Page({
     this.setData({
       update: true,
     })
-    // wx.navigateTo({
-    //   url: '/pages/common/searchDate/searchDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
-    // })
-
     wx.navigateTo({
       url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
     })
