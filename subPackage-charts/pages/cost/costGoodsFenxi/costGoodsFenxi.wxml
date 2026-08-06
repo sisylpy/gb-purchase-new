@@ -262,7 +262,16 @@
             <text class="cog-td cog-td--right">偏差({{goods.gbDgGoodsStandardname}})</text>
           </view>
           <view class="cog-tr" wx:for="{{goods.supportedDishes}}" wx:for-item="row" wx:key="dishId">
-            <text class="cog-td cog-td--name">{{row.dishName}}</text>
+            <view class="cog-td cog-td--name">
+              <text class="cog-dish-name">{{row.dishName}}</text>
+              <block wx:if="{{row.usageMode == 'VIA_INTERMEDIATE'}}">
+                <view class="cog-usage-path" wx:for="{{row.usagePaths}}" wx:for-item="path" wx:key="intermediateProductId">
+                  <text class="cog-usage-tag">经{{path.intermediateProductName}}</text>
+                  <text class="cog-usage-formula">{{path.intermediateQuantityPerPortion}}{{path.intermediateUnitLabel}}/份 → 本原料{{path.rawQuantityPerPortion}}{{goods.gbDgGoodsStandardname}}/份</text>
+                </view>
+              </block>
+              <text wx:else class="cog-usage-direct">直接使用</text>
+            </view>
             <text class="cog-td">{{row.salesPortions}}</text>
             <text class="cog-td">{{row.recipeUnitPerDish}}</text>
             <text class="cog-td">{{row.theoryUsage}}</text>

@@ -638,8 +638,35 @@ page {
 }
 
 .cog-td--name {
-  flex: 1.35;
+  flex: 2.1;
   text-align: left;
+}
+
+.cog-dish-name {
+  display: block;
+  font-weight: 600;
+}
+
+.cog-usage-path {
+  margin-top: 6rpx;
+}
+
+.cog-usage-tag {
+  display: inline-block;
+  padding: 1rpx 8rpx;
+  border-radius: 8rpx;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 21rpx;
+}
+
+.cog-usage-formula,
+.cog-usage-direct {
+  display: block;
+  margin-top: 3rpx;
+  color: #6b7280;
+  font-size: 20rpx;
+  line-height: 1.35;
 }
 
 .min-w-0 {
