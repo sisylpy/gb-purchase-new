@@ -38,6 +38,7 @@ Page({
     var paths = {
       create: '/subPackage-preparation/pages/storeProductForm/storeProductForm',
       products: '/subPackage-preparation/pages/storeProducts/storeProducts',
+      production: '/subPackage-preparation/pages/storeProduction/storeProduction',
       loss: '/subPackage-preparation/pages/storeLoss/storeLoss',
       records: '/subPackage-preparation/pages/storeLossRecords/storeLossRecords',
     };

@@ -1092,9 +1092,8 @@ Page({
   },
 
   _decoratePreparationComponent(component, index) {
-    var identity = this.preparationIdentity || preparationUtil.getIdentity();
     return Promise.all([
-      preparationApi.getProduct(component.intermediateProductId, identity.distributerId),
+      preparationApi.getStoreProduct(component.intermediateProductId),
       preparationApi.getStoreReferenceCost(component.intermediateProductId)
         .catch(function () { return null; }),
     ]).then(function (results) {
@@ -1102,7 +1101,9 @@ Page({
       var reference = results[1] || {};
       var inputGramFactor = _unitFactorToGram(component.inputUnitCode);
       var usageGramFactor = _unitFactorToGram(reference.usageUnitCode);
-      var unitCost = Number(reference.theoreticalUnitCost);
+      var referenceValue = reference.referenceUnitCost;
+      var unitCost = referenceValue === null || typeof referenceValue === 'undefined'
+        ? 0 : Number(referenceValue);
       var costPerGram = unitCost > 0 && usageGramFactor > 0
         ? unitCost / usageGramFactor
         : 0;
@@ -1119,7 +1120,7 @@ Page({
         _preparationProduct: product,
         _displayAmount: String(grams),
         _displayUnit: 'g',
-        _cost: cost.toFixed(2),
+        _cost: costPerGram > 0 ? cost.toFixed(2) : '',
         _costAvailable: costPerGram > 0,
         _packPriceLabel: costPerGram > 0
           ? ((costPerGram * 500).toFixed(2) + '/斤')
@@ -1138,7 +1139,7 @@ Page({
         _recipeComponent: component,
         _displayAmount: String(grams),
         _displayUnit: 'g',
-        _cost: '0.00',
+        _cost: '',
         _costAvailable: false,
         _packPriceLabel: '成本待计算',
       };
@@ -1192,15 +1193,19 @@ Page({
   _processRawArr(list) {
     var salePrice = parseFloat(this.data.foodItem.salePrice) || 0;
     var totalCost = 0;
+    var totalCostComplete = true;
     for (var i = 0; i < list.length; i++) {
       var raw = list[i];
       if (raw._isVersioned) {
-        var versionedCost = parseFloat(raw._cost) || 0;
-        raw._cost = versionedCost.toFixed(2);
+        var versionedAvailable = raw._costAvailable !== false && raw._cost !== ''
+          && raw._cost !== null && typeof raw._cost !== 'undefined';
+        var versionedCost = versionedAvailable ? (parseFloat(raw._cost) || 0) : 0;
+        raw._cost = versionedAvailable ? versionedCost.toFixed(2) : '';
         raw._packPriceLabel = raw._packPriceLabel || '成本待计算';
-        raw._ratio = salePrice > 0
+        raw._ratio = versionedAvailable && salePrice > 0
           ? (versionedCost / salePrice * 100).toFixed(1)
-          : '0.0';
+          : (versionedAvailable ? '0.0' : '—');
+        if (!versionedAvailable) totalCostComplete = false;
         totalCost += versionedCost;
         continue;
       }
@@ -1217,21 +1222,31 @@ Page({
       var linePrice = _getRawLinePrice(raw, entity);
       var cost = _calcRawLineCost(raw);
       raw._cost = cost.toFixed(2);
+      raw._costAvailable = cost > 0;
       raw._packPriceLabel = linePrice > 0 && ctx.packUnit
         ? (linePrice.toFixed(2) + '/' + ctx.packUnit)
         : '—';
       raw._ratio = salePrice > 0 ? (cost / salePrice * 100).toFixed(1) : '0.0';
+      if (!raw._costAvailable) {
+        raw._cost = '';
+        raw._ratio = '—';
+        totalCostComplete = false;
+      }
       totalCost += cost;
     }
-    var costRate = salePrice > 0 ? (totalCost / salePrice * 100).toFixed(1) : '0.0';
-    var profit = (salePrice - totalCost).toFixed(2);
-    var grossMarginRate = salePrice > 0 ? ((salePrice - totalCost) / salePrice * 100).toFixed(1) : '0.0';
+    var costRate = totalCostComplete && salePrice > 0 ? (totalCost / salePrice * 100).toFixed(1) : '—';
+    var profit = totalCostComplete ? (salePrice - totalCost).toFixed(2) : '—';
+    var grossMarginRate = totalCostComplete && salePrice > 0
+      ? ((salePrice - totalCost) / salePrice * 100).toFixed(1) : '—';
 
     // 利润评价
     var profitLevelClass = 'profit-tag--good';
     var profitHint = '做得好！毛利表现优秀';
     var gm = parseFloat(grossMarginRate);
-    if (gm < 30) {
+    if (!totalCostComplete) {
+      profitLevelClass = 'profit-tag--normal';
+      profitHint = '部分配料缺少成本依据，暂不计算完整毛利';
+    } else if (gm < 30) {
       profitLevelClass = 'profit-tag--bad';
       profitHint = '毛利率偏低，建议优化';
     } else if (gm < 50) {
@@ -1241,8 +1256,9 @@ Page({
 
     this.setData({
       rawArr: list,
-      totalCost: totalCost.toFixed(2),
-      costTotal: totalCost.toFixed(2),
+      totalCost: totalCostComplete ? totalCost.toFixed(2) : '—',
+      costTotal: totalCostComplete ? totalCost.toFixed(2) : '—',
+      totalCostComplete: totalCostComplete,
       costRate: costRate,
       profit: profit,
       grossMarginRate: grossMarginRate,

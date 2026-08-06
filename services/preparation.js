@@ -132,6 +132,22 @@ function getStoreReferenceCost(productId) {
   return get('preparation/store/products/' + productId + '/reference-cost');
 }
 
+function listStoreProductionMaterials(productId) {
+  return get('preparation/store/products/' + productId + '/production-materials');
+}
+
+function listStoreProductionStocks(productId, recipeComponentId) {
+  return get('preparation/store/products/' + productId + '/production-materials/' + recipeComponentId + '/stock-batches');
+}
+
+function createStoreProduction(body) {
+  return post('preparation/store/productions', body);
+}
+
+function listStoreProductions(productId) {
+  return get('preparation/store/productions', { productId: productId });
+}
+
 function listStoreLossMaterials(productId) {
   return get('preparation/store/products/' + productId + '/loss-materials');
 }
@@ -385,6 +401,10 @@ module.exports = {
   getStoreRecipe: getStoreRecipe,
   saveStoreRecipe: saveStoreRecipe,
   getStoreReferenceCost: getStoreReferenceCost,
+  listStoreProductionMaterials: listStoreProductionMaterials,
+  listStoreProductionStocks: listStoreProductionStocks,
+  createStoreProduction: createStoreProduction,
+  listStoreProductions: listStoreProductions,
   listStoreLossMaterials: listStoreLossMaterials,
   listStoreLossStocks: listStoreLossStocks,
   createStoreRawLoss: createStoreRawLoss,

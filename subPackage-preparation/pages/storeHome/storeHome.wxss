@@ -11,5 +11,6 @@
 .action-grid { display: grid; gap: 14rpx; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .action-item { align-items: center; background: #f6f8f8; border-radius: 16rpx; display: flex; flex-direction: column; font-size: 27rpx; gap: 10rpx; justify-content: center; min-height: 142rpx; }
 .action-item.primary { background: #187e6e; color: #fff; }
+.action-item.primary-soft { background: #dff2ec; color: #176f61; }
 .action-icon { font-size: 40rpx; }
 .retry { margin-top: 24rpx; }

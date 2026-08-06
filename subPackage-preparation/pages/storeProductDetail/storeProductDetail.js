@@ -22,12 +22,16 @@ Page({
     api.getStoreReferenceCost(this.data.id).then(function (cost) {
       cost = cost || {};
       cost.recipeCostText = util.formatMoney(cost.recipeReferenceCost);
-      cost.unitCostText = util.formatMoney(cost.theoreticalUnitCost);
-      that.setData({ cost: cost, costError: cost.complete ? '' : '部分原料缺少可用库存成本，参考成本暂不完整。' });
+      cost.unitCostText = util.formatMoney(cost.referenceUnitCost);
+      cost.costSourceText = cost.costEvidence === 'RECORDED_STORE_PRODUCTION'
+        ? '按最近一次实际制作的原料成本和产出计算'
+        : '按当前原料库存加权成本计算，仅供理论参考';
+      that.setData({ cost: cost, costError: cost.complete ? '' : '部分原料缺少可用成本依据，参考成本暂不完整。' });
     }).catch(function (error) { that.setData({ cost: null, costError: error.message || '参考成本暂不可用' }); });
   },
   toEdit: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeProductForm/storeProductForm?id=' + this.data.id }); },
   toRecipe: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeRecipe/storeRecipe?productId=' + this.data.id }); },
+  toProduction: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeProduction/storeProduction?productId=' + this.data.id }); },
   toLoss: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeLoss/storeLoss?productId=' + this.data.id }); },
   toRecords: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeLossRecords/storeLossRecords?productId=' + this.data.id }); },
   toggleStatus: function () {

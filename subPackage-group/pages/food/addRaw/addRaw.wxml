@@ -41,10 +41,14 @@
         <view class="kpi-cell">
           <text class="kpi-label">理论毛利率</text>
           <view class="kpi-value-wrap">
-            <text class="kpi-value kpi-value--rate">{{grossMarginRate || '0.0'}}%</text>
+            <text class="kpi-value kpi-value--rate">{{grossMarginRate === '—' ? '—' : (grossMarginRate || '0.0') + '%'}}</text>
           </view>
         </view>
       </view>
+    </view>
+
+    <view class="hint-bar cost-missing-hint" wx:if="{{totalCostComplete === false}}">
+      <view class="hint-left"><text class="hint-text">部分配料缺少可靠成本依据，完整理论成本和毛利暂不显示为 0。</text></view>
     </view>
 
     <!-- 收益卡片 -->
@@ -71,7 +75,7 @@
           <view class="legend-item" wx:for="{{rawArr}}" wx:for-item="raw" wx:for-index="idx" wx:key="gbDistributerFoodGoodsId" wx:if="{{idx < 4}}">
             <view class="legend-dot" style="background-color: {{pieColors[idx % pieColors.length]}};"></view>
             <text class="legend-name">{{raw.gbDfgGoodsName}}</text>
-            <text class="legend-ratio">{{raw._ratio}}%</text>
+            <text class="legend-ratio">{{raw._ratio === '—' ? '—' : raw._ratio + '%'}}</text>
           </view>
         </view>
       </view>
@@ -179,7 +183,7 @@
               <text class="raw-cost-text">{{raw._costAvailable === false ? '—' : '¥' + raw._cost}}</text>
             </view>
             <view class="raw-item-ratio">
-              <text class="raw-ratio-text">{{raw._ratio}}%</text>
+              <text class="raw-ratio-text">{{raw._ratio === '—' ? '—' : raw._ratio + '%'}}</text>
             </view>
           </view>
         </view>

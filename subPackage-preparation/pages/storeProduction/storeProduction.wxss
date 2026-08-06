@@ -1,0 +1,13 @@
+@import "../../styles/common.wxss";
+.production-scroll { box-sizing: border-box; height: calc(100vh - 130rpx); padding: 22rpx 22rpx 190rpx; }
+.material-card { background: #fff; border-radius: 18rpx; box-sizing: border-box; margin-bottom: 18rpx; padding: 24rpx; }
+.material-head { align-items: center; display: flex; justify-content: space-between; margin-bottom: 18rpx; }
+.material-name { font-size: 30rpx; font-weight: 600; margin-bottom: 7rpx; }
+.add-line { border: 1rpx solid #187e6e; border-radius: 999rpx; color: #187e6e; flex-shrink: 0; font-size: 23rpx; padding: 10rpx 16rpx; }
+.issue-line { background: #f7f9f9; border-radius: 14rpx; margin-top: 14rpx; padding: 18rpx; }
+.line-head { color: #606871; display: flex; font-size: 24rpx; justify-content: space-between; margin-bottom: 12rpx; }
+.remove-line { color: #d94b4b; }
+.quantity-row { margin-top: 14rpx; }
+.unit-label { background: #eef2f1; border-radius: 10rpx; flex-shrink: 0; min-width: 88rpx; padding: 20rpx 14rpx; text-align: center; }
+.warning { background: #fff4e3; color: #9b5a12; }
+.output-help { line-height: 1.6; margin-top: 12rpx; }

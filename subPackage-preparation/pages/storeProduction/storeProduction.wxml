@@ -1,0 +1,51 @@
+<view class="prep-page">
+  <back-navbar title="记录备料制作" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
+  <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
+  <scroll-view wx:else scroll-y class="production-scroll">
+    <view class="prep-tip">实际领用会直接扣减原料库存并形成备料参考成本；不创建、不选择生产批次。</view>
+    <view class="prep-section">
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">选择备料品</text>
+        <picker range="{{products}}" range-key="productName" value="{{productIndex}}" bindchange="onProductChange">
+          <view class="prep-picker {{product ? '' : 'prep-placeholder'}}">{{product ? product.productName : '请选择已发布配方的备料品'}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <block wx:if="{{product}}">
+      <view class="material-card" wx:for="{{materials}}" wx:key="recipeComponentId" wx:for-item="material" wx:for-index="materialIndex">
+        <view class="material-head">
+          <view>
+            <view class="material-name">{{materialIndex + 1}}. {{material.rawGoodsName}}</view>
+            <view class="prep-muted">配方参考 {{material.standardQuantity}} {{material.standardUnitCode}}</view>
+          </view>
+          <view class="add-line" data-material-index="{{materialIndex}}" bindtap="addStockLine">增加库存批次</view>
+        </view>
+        <view class="prep-tip warning" wx:if="{{material.stocks.length === 0}}">当前门店及子部门没有可用库存，请先完成采购入库。</view>
+        <view class="issue-line" wx:for="{{material.lines}}" wx:key="index" wx:for-item="line" wx:for-index="lineIndex">
+          <view class="line-head"><text>领用行 {{lineIndex + 1}}</text><text class="remove-line" wx:if="{{material.lines.length > 1}}" data-material-index="{{materialIndex}}" data-line-index="{{lineIndex}}" bindtap="removeStockLine">移除</text></view>
+          <picker range="{{material.stocks}}" range-key="displayLabel" value="{{line.stockIndex}}" data-material-index="{{materialIndex}}" data-line-index="{{lineIndex}}" bindchange="onStockChange">
+            <view class="prep-picker {{line.stock ? '' : 'prep-placeholder'}}">{{line.stock ? line.stock.displayLabel : '选择有库存的进货记录'}}</view>
+          </picker>
+          <view class="prep-inline quantity-row" wx:if="{{line.stock}}">
+            <input class="prep-input" type="digit" placeholder="实际领用数量" value="{{line.quantity}}" data-material-index="{{materialIndex}}" data-line-index="{{lineIndex}}" bindinput="onQuantityInput" />
+            <view class="unit-label">{{line.stock.stockUnitLabel}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="prep-section">
+        <view class="prep-form-row">
+          <text class="prep-form-label prep-required">本次实际产出</text>
+          <view class="prep-inline">
+            <input class="prep-input" type="digit" placeholder="例如 10" value="{{actualOutputQuantity}}" bindinput="onOutputInput" />
+            <view class="unit-label">{{product.usageUnitCode}}</view>
+          </view>
+        </view>
+        <view class="prep-muted output-help">系统以本次原料实际成本 ÷ 实际产出，冻结本次单位成本并提供给菜品理论成本计算。</view>
+      </view>
+    </block>
+  </scroll-view>
+  <view class="prep-actions"><button class="prep-button prep-button-primary" loading="{{submitting}}" disabled="{{submitting || !product}}" bindtap="submit">确认记录制作</button></view>
+</view>

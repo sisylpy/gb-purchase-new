@@ -10,7 +10,7 @@
   </view>
 
   <scroll-view wx:else scroll-y class="store-home-scroll">
-    <view class="mode-tip">普通门店备料不产生生产批次，配方和原料损耗可直接维护。</view>
+    <view class="mode-tip">普通门店备料不产生生产批次。制作时仍会真实扣减原料并形成备料参考成本。</view>
     <view class="stats-grid">
       <view class="stat-card"><text class="stat-value">{{stats.productCount || 0}}</text><text class="stat-label">备料品</text></view>
       <view class="stat-card"><text class="stat-value">{{stats.enabledRecipeCount || 0}}</text><text class="stat-label">已启用配方</text></view>
@@ -22,6 +22,7 @@
       <view class="action-grid">
         <view class="action-item primary" data-target="create" bindtap="go"><text class="action-icon">＋</text><text>新增备料</text></view>
         <view class="action-item" data-target="products" bindtap="go"><text class="action-icon">🥣</text><text>备料品</text></view>
+        <view class="action-item primary-soft" data-target="production" bindtap="go"><text class="action-icon">✓</text><text>记录制作</text></view>
         <view class="action-item" data-target="loss" bindtap="go"><text class="action-icon">✎</text><text>记录损耗</text></view>
         <view class="action-item" data-target="records" bindtap="go"><text class="action-icon">📋</text><text>损耗记录</text></view>
       </view>

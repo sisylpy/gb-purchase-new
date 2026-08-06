@@ -34,6 +34,7 @@
         "pages/storeProductForm/storeProductForm",
         "pages/storeProductDetail/storeProductDetail",
         "pages/storeRecipe/storeRecipe",
+        "pages/storeProduction/storeProduction",
         "pages/storeLoss/storeLoss",
         "pages/storeLossRecords/storeLossRecords",
         "pages/home/home",
