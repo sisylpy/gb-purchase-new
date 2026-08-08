@@ -1,0 +1,12 @@
+<view class="computer-login-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="电脑端登录" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="computer-login-card">
+    <view class="page-title">输入电脑上的登录码</view>
+    <view class="page-description">登录码仅用于本次授权，五分钟内有效。请确认电脑页面显示“精彩账本·加盟总部工作台”。</view>
+    <input class="code-input" maxlength="8" value="{{userCode}}" bindinput="inputCode" placeholder="请输入 8 位登录码" />
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+    <view class="success" wx:if="{{approved}}">已确认登录，可以返回电脑继续使用。</view>
+    <button class="approve-button" disabled="{{userCode.length !== 8 || submitting || approved}}" bindtap="approve">{{submitting ? '正在确认…' : (approved ? '已确认' : '确认登录')}}</button>
+    <view class="security-tip">如果你没有在电脑端发起登录，请不要输入任何登录码。</view>
+  </view>
+</view>

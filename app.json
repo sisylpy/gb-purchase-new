@@ -17,6 +17,7 @@
       "pages": [
         "pages/register/register",
         "pages/home/home",
+        "pages/computerLogin/computerLogin",
         "pages/storeSelect/storeSelect",
         "pages/inspectionRecord/inspectionRecord",
         "pages/issueConfirm/issueConfirm",

@@ -24,6 +24,7 @@
     <view class="tip" wx:if="{{statsError}}">{{statsError}}，下拉可重试。</view>
 
     <button class="start-button" wx:if="{{mode === 'inspector' && isInspector}}" bindtap="startInspection">＋ 开始巡店</button>
+    <button class="computer-login-button" bindtap="openComputerLogin">电脑端登录</button>
 
     <scroll-view scroll-x class="tabs" enhanced show-scrollbar="{{false}}">
       <view class="tab {{activeTab === item.key ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="key" data-key="{{item.key}}" bindtap="selectTab">{{item.label}}</view>

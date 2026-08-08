@@ -21,3 +21,12 @@
 .overdue { color: #d34646; font-size: 23rpx; margin-top: 8rpx; }
 .list-loading { min-height: 240rpx; }
 .retry { margin-top: 24rpx; }
+.computer-login-button {
+  margin: 20rpx 28rpx 8rpx;
+  border: 1rpx solid #b9d8cb;
+  border-radius: 16rpx;
+  color: #245b49;
+  background: #f1f8f5;
+  font-size: 28rpx;
+  font-weight: 600;
+}

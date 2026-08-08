@@ -257,6 +257,10 @@ Page({
 
   startInspection: function () { wx.navigateTo({ url: '/subPackage-inspection/pages/storeSelect/storeSelect' }); },
 
+  openComputerLogin: function () {
+    wx.navigateTo({ url: '/subPackage-inspection/pages/computerLogin/computerLogin' });
+  },
+
   openItem: function (event) {
     var item = this.data.items[Number(event.currentTarget.dataset.index)];
     if (!item) return;

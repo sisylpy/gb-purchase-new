@@ -315,6 +315,9 @@ module.exports = {
   acceptInspectorInvitation: acceptInspectorInvitation,
   refreshIdentity: refreshIdentity,
   getMe: function () { return get('me'); },
+  approveWebLogin: function (userCode) {
+    return post('auth/web-login-sessions/' + encodeURIComponent(String(userCode || '').trim()) + ':approve', {});
+  },
   listStores: function () { return get('stores'); },
   listAssignees: function (storeId) { return get('stores/' + storeId + '/assignees', { role: 'STORE_MANAGER' }); },
   createInspection: function (body) { return post('inspections', body); },
