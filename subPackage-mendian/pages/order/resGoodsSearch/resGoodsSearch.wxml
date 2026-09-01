@@ -16,7 +16,7 @@
   </view>
 
   <view class="  flex-column " catchtouchmove="preventTouchMove" style="height:{{windowHeight - 310}}rpx; width: {{windowWidth}}rpx; background: #FFF;">
-    <view wx:if="{{searchResult || disSearchArr.length > 0}}" style="width:{{windowWidth}}rpx;">
+    <view wx:if="{{searchResult || disSearchArr.length > 0 || headquartersStandardMapped}}" style="width:{{windowWidth}}rpx;">
       <view class='navbarSearch bg-white border-bottom '>
         <block wx:for="{{tabsSearch}}" wx:for-item="tabsSearch" wx:key="id">
           <view id="{{index}}" class="navbar-item {{tab1IndexSearch==index?'bar-item-on':''}}" data-index='{{index}}' bindtap='onTab1ClickSearch' hover-class="hover">
@@ -26,7 +26,7 @@
           </view>
         </block>
 
-        <view class="navbar-slider" style="left: {{sliderLeftSearch}}px; width:{{windowWidth / 4}}rpx; transform: translateX({{sliderOffsetSearch}}px); -webkit-transform: translateX({{sliderOffsetSearch}}px);">
+        <view class="navbar-slider" style="left: {{sliderLeftSearch}}px; width:{{windowWidth / (tabsSearch.length * 2)}}rpx; transform: translateX({{sliderOffsetSearch}}px); -webkit-transform: translateX({{sliderOffsetSearch}}px);">
         </view>
       </view>
 
@@ -159,6 +159,32 @@
           </scroll-view>
         </swiper-item>
 
+        <swiper-item wx:if="{{hasFranchiseHeadquarters}}">
+          <scroll-view scroll-y style="height:{{windowHeight - 420}}rpx;">
+            <view class="flex-column center-content p-20 gray" wx:if="{{!headquartersStandardMapped}}">
+              当前部门尚未绑定总部标准部门
+            </view>
+            <view class="flex-column center-content p-20 gray" wx:elif="{{headquartersStandardGoods.length == 0}}">
+              总部当前没有该部门需要采购的标准原料
+            </view>
+            <view class="flex-row-between border-bottom p-20 bg-white"
+                  wx:for="{{headquartersStandardGoods}}" wx:key="distributerGoodsId"
+                  wx:for-item="goods" wx:for-index="goodsIndex">
+              <view class="flex-column" style="width: {{windowWidth - 220}}rpx;">
+                <view class="font-xl font-bold">{{goods.goodsName}}</view>
+                <view class="gray font-sm">规格：{{goods.standardWeight}}{{goods.standardName ? '/' + goods.standardName : ''}}</view>
+                <view class="gray font-sm">总部菜品：{{goods.requiredByFoods}}</view>
+                <view class="standard-ready" wx:if="{{goods.departmentGoodsExists}}">已加入我的商品</view>
+                <view class="standard-new" wx:else>总部标准 · 当前部门尚未使用</view>
+              </view>
+              <view class="save_btn" catchtap="applyHeadquartersStandardGoods"
+                    data-goods="{{goods}}" data-index="{{goodsIndex}}">
+                {{goods.departmentGoodsExists ? '订货' : '添加并订货'}}
+              </view>
+            </view>
+          </scroll-view>
+        </swiper-item>
+
 
         <swiper-item>
           <!-- disSearchArr -->
@@ -239,7 +265,7 @@
 
     <!-- // -->
 
-    <view class="flex-column center-content" style="margin-top: 40rpx;" wx:if="{{disSearchArr.length == 0}}">
+    <view class="flex-column center-content" style="margin-top: 40rpx;" wx:if="{{disSearchArr.length == 0 && !headquartersStandardMapped}}">
       <view class="flex-row gray p-20">
         <text class="">没有搜索到商品</text>
       </view>

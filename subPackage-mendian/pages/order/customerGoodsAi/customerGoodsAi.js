@@ -4,39 +4,6 @@ var dateUtils = require('../../../../lib/dateUtil');
 var reorderApi = require('../../../../services/depReorderReminderApi.js');
 var orderApi = require('../../../../services/depOrder.js');
 
-function enrichReorderRow(raw) {
-  var item = Object.assign({}, raw);
-  var reason = item.aiRemindReason || 'none';
-  var parts = [];
-  if (reason.indexOf('habit') !== -1) {
-    parts.push('习惯到货');
-  }
-  if (reason.indexOf('stock_below_two_day_usage') !== -1) {
-    parts.push('估算消耗·库存偏紧');
-  }
-  item.aiRemindReasonText = parts.length ? parts.join(' · ') : '';
-
-  var gp = item.aiRecommendGapWeightProductionOnly;
-  var gl = item.aiRecommendGapWeightWithLossWaste;
-  var hasGap = (gp != null && gp !== '' && String(gp) !== '0')
-    || (gl != null && gl !== '' && String(gl) !== '0');
-  var hasDeplete = !!(item.aiEstimateDepleteDateProductionOnly || item.aiEstimateDepleteDateWithLossWaste);
-  var prodAvg = item.aiReduceProductionDailyAvg;
-  var lossAvg = item.aiReduceLossWasteDailyAvg;
-  var hasReduceAvg = (prodAvg != null && prodAvg !== '' && String(prodAvg) !== '0')
-    || (lossAvg != null && lossAvg !== '' && String(lossAvg) !== '0');
-  item._showAiReducePanel = hasGap || hasDeplete || hasReduceAvg;
-
-  return item;
-}
-
-function enrichReorderList(rows) {
-  if (!rows || !rows.length) {
-    return rows || [];
-  }
-  return rows.map(enrichReorderRow);
-}
-
 Page({
 
   onShow() {
@@ -163,10 +130,10 @@ Page({
         var body = res.result;
         if (body && body.code === 0) {
           var pageData = body.page || {};
-          var newData = enrichReorderList(pageData.list || []);
+          var newData = pageData.list || [];
           var curr = pageData.currPage || pageToFetch;
           var totalPg = pageData.totalPage || 0;
-          // totalPage/totalCount 为 SQL 候选池；列表另按 aiShouldRemindToday 过滤，故某页可能 0 条但仍 hasMore
+          // V2 服务端已完成补货状态筛选与排序，前端直接分页追加即可。
           var hasMore = curr < totalPg;
 
           if (newData.length === 0 && hasMore) {

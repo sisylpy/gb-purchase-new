@@ -55,7 +55,8 @@
                   <view class="seller-order-qty-wrap">
                     <text class="seller-order-qty">{{fmt.orderQtyLabel(item)}}</text>
                   </view>
-                  <view wx:if="{{item.gbDpgIsCheck}}">
+                  <view wx:if="{{item.gbDpgIsReceived}}" class="received-status">已收货</view>
+                  <view wx:elif="{{item.gbDpgIsCheck}}">
                     <image src="/images/selected-2.png" mode="aspectFill" class="icon" />
                   </view>
                 </view>
@@ -185,19 +186,22 @@
 
     <block wx:elif="{{batch.gbDpbStatus == 2 }}">
       <view class="flex-row-between ">
-            <view class="flex-row" style="margin-top: 10rpx;">
+            <view class="flex-row" style="margin-top: 10rpx;" wx:if="{{!hasReceivedGoods}}">
               <view class="btn_container" style="width:{{windowWidth / 4  }}rpx; line-height: 100rpx; height: 100rpx;">
                 <view class="btn_item" style="width:{{windowWidth / 4 - 20}}rpx; line-height: 80rpx; height: 80rpx;" bindtap="toEditOrders" hover-class="numHover">修改订单</view>
               </view>
             </view>
+            <view wx:else></view>
 
              <view class="flex-row">
              <view class="flex-row mr-30">
               <text class="text-danger">({{batch.gbDpbPayType == 0 ? '现金' : '记账'}}支付)</text>
              </view>
-             <view class="flex-row">
-              <text class="mr-10"> 总计:</text>
-              <text class="big mainColor">¥{{batch.gbDpbSubtotal}}</text>
+             <view class="flex-column" style="align-items:flex-end;">
+              <text class="text-secondary">商品金额 ¥{{batch.gbDpbSubtotal}}</text>
+              <text class="text-secondary" wx:if="{{batch.gbDpbNxDeliveryFee > 0}}">配送费 +¥{{batch.gbDpbNxDeliveryFee}}</text>
+              <text class="text-secondary" wx:if="{{batch.gbDpbNxCouponDiscountAmount > 0}}">{{batch.gbDpbNxCouponName}} -¥{{batch.gbDpbNxCouponDiscountAmount}}</text>
+              <view class="flex-row"><text class="mr-10">应付:</text><text class="big mainColor">¥{{batch.gbDpbPaySubtotal ? batch.gbDpbPaySubtotal : batch.gbDpbSubtotal}}</text></view>
             </view>
              </view>
           </view>
@@ -209,9 +213,11 @@
           <text class="mr-10">付款:</text>
           <text class="">{{(batch.gbDpbPayType == 1) ? '记账': '现金'}}</text>
         </view>
-        <view class="felx-row">
-          <text class="mr-10">总计:</text>
-          <text class="big mainColor">¥{{batch.gbDpbSubtotal}}</text>
+        <view class="flex-column" style="align-items:flex-end;">
+          <text class="text-secondary">商品金额 ¥{{batch.gbDpbSubtotal}}</text>
+          <text class="text-secondary" wx:if="{{batch.gbDpbNxDeliveryFee > 0}}">配送费 +¥{{batch.gbDpbNxDeliveryFee}}</text>
+          <text class="text-secondary" wx:if="{{batch.gbDpbNxCouponDiscountAmount > 0}}">{{batch.gbDpbNxCouponName}} -¥{{batch.gbDpbNxCouponDiscountAmount}}</text>
+          <view class="flex-row"><text class="mr-10">应付:</text><text class="big mainColor">¥{{batch.gbDpbPaySubtotal ? batch.gbDpbPaySubtotal : batch.gbDpbSubtotal}}</text></view>
         </view>
       </view>
     </block>

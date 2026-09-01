@@ -76,7 +76,7 @@ Page({
         idempotencyKey: that.data.idempotencyKey,
       }).then(function (result) {
         that.setData({ submitting: false, quantity: '', idempotencyKey: api.createIdempotencyKey('STORE-LOSS') });
-        wx.showModal({ title: '原料损耗已记录', content: result.rawGoodsName + ' ' + result.lossQuantity + ' ' + (result.unitLabel || result.unitCode || '') + '\n关联备料品：' + result.productName + '\n记录时间：' + result.recordTime, showCancel: false, success: function () { that.refreshStocks(); } });
+        wx.showModal({ title: '原料损耗已记录', content: result.rawGoodsName + ' ' + result.lossQuantity + ' ' + (result.unitLabel || result.unitCode || '') + '\n关联中间料：' + result.productName + '\n记录时间：' + result.recordTime, showCancel: false, success: function () { that.refreshStocks(); } });
       }).catch(function (error) {
         // 网络失败保留同一 idempotencyKey，用户可安全重试。
         that.setData({ submitting: false });

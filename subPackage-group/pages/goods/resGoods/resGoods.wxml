@@ -88,7 +88,7 @@
 
         <scroll-view scroll-y="true" scroll-with-animation="true" bindscroll="onGoodsScrollDep" bindscrolltolower="onReachBottomDep" scroll-into-view="{{scrollIntoViewDep}}" scroll-top="{{depGoodsScrollTop}}" style="width: {{windowWidth - 150}}rpx; height: {{windowHeight - 200- statusBarHeight}}rpx; " class="goods-list-dep">
 
-          <view class="flex-column  goods-item-dep-wrap" wx:for="{{disGoodsArrAi}}" wx:for-item="goods" wx:key="gbDepartmentDisGoodsId" wx:for-index="depGoodsIndex">
+          <view class="flex-column  goods-item-dep-wrap" wx:for="{{disGoodsArrAi}}" wx:for-item="goods" wx:key="gbDistributerGoodsId" wx:for-index="depGoodsIndex">
             <view wx:if="{{goods.isFirstInCategory}}" id="cat-dep-{{goods.gbDgDfgGoodsGrandId}}" class="goods-category-title-dep"></view>
             <view class="flex-row-default goods-item-dep p-20" id="{{goods.viewId}}" style="align-items: flex-start;">
               <view class="img-wrapper">

@@ -2,6 +2,8 @@
 
 const globalData = getApp().globalData;
 var load = require('../../../../lib/load.js');
+var franchiseApi = require('../../../../services/franchiseInspection.js');
+var franchiseUtil = require('../../../../utils/franchiseInspection.js');
 
 import {
   getDisInfo,
@@ -27,6 +29,17 @@ Page({
     if (needRefresh) {
       wx.removeStorageSync('needRefreshDisPoints');
     }
+    this._loadFranchiseIdentity();
+  },
+
+  _loadFranchiseIdentity() {
+    franchiseApi.bootstrapIdentity().then(identity => {
+      this.setData({
+        hasFranchiseHeadquarters: franchiseUtil.hasFranchiseStoreIdentity(identity),
+      });
+    }).catch(() => {
+      this.setData({ hasFranchiseHeadquarters: false });
+    });
   },
 
   _refreshDisInfo(retryLeft) {
@@ -58,6 +71,7 @@ Page({
    * 页面的初始数据
    */
   data: {
+    hasFranchiseHeadquarters: false,
     editNow: false,
     showName: false,
     showPhone: false,
@@ -179,6 +193,12 @@ Page({
       url: '../food/index/index',
     })
 
+  },
+
+  toHeadquartersTasks: function () {
+    wx.navigateTo({
+      url: '/subPackage-inspection/pages/home/home',
+    });
   },
 
   showDisName(){
@@ -477,13 +497,6 @@ toPayList(){
     url: '../payList/payList',
   })
 },
-
-toCouponList(){
-  wx.navigateTo({
-    url: '../couponList/couponList',
-  })
-},
-
 
 toGroupGoods(){
   wx.navigateTo({

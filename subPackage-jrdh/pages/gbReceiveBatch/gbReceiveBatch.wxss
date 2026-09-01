@@ -222,6 +222,18 @@
   color: #2380a5;
 }
 
+.received-status {
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  padding: 5rpx 12rpx;
+  border-radius: 16rpx;
+  color: #168a4a;
+  background: #e8f7ed;
+  font-size: 24rpx;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 button.btn_item_gray {
   background: none;
   font-weight: 400;

@@ -1,21 +1,117 @@
 <view class="prep-page">
-  <back-navbar title="维护配方" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="标准配方" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
   <view class="prep-loading" wx:if="{{loading}}">正在加载配方…</view>
   <scroll-view wx:else scroll-y class="recipe-scroll">
-    <view class="prep-tip prep-tip-green">以下用量表示制作 1 {{usageUnitCode}}“{{productName}}”所需的理论原料。保存后由后台发布新配方版本。</view>
-    <view class="prep-section">
-      <view class="section-head"><view><view class="prep-section-title no-margin">组成原料</view><text class="prep-muted">原料和标准用量</text></view><view class="prep-small-button" bindtap="openGoodsPicker">添加原料</view></view>
-      <view class="prep-empty compact" wx:if="{{components.length === 0}}">尚未添加原料</view>
-      <view class="component-card" wx:for="{{components}}" wx:key="rawGoodsId">
-        <view class="component-head"><text>{{index + 1}}. {{item.rawGoodsName}}</text><text class="delete" data-index="{{index}}" bindtap="deleteComponent">删除</text></view>
-        <view class="prep-inline"><input class="prep-input" type="digit" placeholder="标准用量" value="{{item.quantityText}}" data-index="{{index}}" bindinput="onQuantityInput" /><picker range="{{units}}" value="{{item.unitIndex}}" data-index="{{index}}" bindchange="onUnitChange"><view class="prep-picker unit-picker">{{units[item.unitIndex]}}</view></picker></view>
+    <view class="recipe-name">{{productName}}</view>
+
+    <view class="output-row">
+      <view class="output-label"><text>标准产出</text><text class="info-icon">i</text></view>
+      <view class="output-control"><input class="output-input" type="digit" placeholder="500" value="{{standardOutputQuantity}}" bindinput="onStandardOutputInput" /><view class="output-unit">{{usageUnitLabel}}</view></view>
+    </view>
+    <view class="recipe-hint"><text class="hint-dot"></text><text>以下所有投料量，均对应制作 {{standardOutputQuantity || '—'}} {{usageUnitLabel}}{{productName}}</text></view>
+
+    <view class="ingredient-panel">
+      <view class="ingredient-head"><view class="ingredient-title">组成原料（{{components.length}}）</view><view class="add-ingredient" bindtap="openGoodsPicker">＋ 添加原料</view></view>
+      <view class="prep-empty compact" wx:if="{{components.length === 0}}">还没有组成原料，请从已有采购原料中添加。</view>
+      <view class="component-table" wx:else>
+        <view class="component-table-head"><text>原料</text><text>标准投料量</text><text>配比</text><text></text></view>
+        <view class="component-row" wx:for="{{components}}" wx:key="rawGoodsId">
+          <view class="component-material">
+            <text class="component-index">{{index + 1}}</text>
+            <image wx:if="{{item.imageUrl}}" class="component-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
+            <view wx:else class="component-image component-placeholder">原</view>
+            <view class="component-info"><text class="component-name">{{item.rawGoodsName}}</text><text class="component-spec">{{item.specText}}</text></view>
+          </view>
+          <view class="quantity-cell">
+            <view class="quantity-stepper">
+              <view class="quantity-button minus" data-index="{{index}}" data-direction="-1" bindtap="stepComponentQuantity">−</view>
+              <input class="quantity-input" type="digit" value="{{item.quantityText}}" data-index="{{index}}" bindinput="onQuantityInput" />
+              <view class="quantity-button plus" data-index="{{index}}" data-direction="1" bindtap="stepComponentQuantity">＋</view>
+            </view>
+            <picker range="{{unitNames}}" value="{{item.unitIndex}}" data-index="{{index}}" bindchange="onUnitChange"><view class="row-unit">{{unitNames[item.unitIndex]}}</view></picker>
+          </view>
+          <text class="component-rate">{{item.ratioText}}</text>
+          <view class="delete" data-index="{{index}}" bindtap="deleteComponent">×</view>
+        </view>
       </view>
     </view>
-    <view class="prep-tip">这里是配方参考量，不会扣减库存，也不会创建生产批次。</view>
+
+    <view class="input-summary">
+      <view class="summary-values">
+        <view class="summary-cell"><text class="summary-label">当前总投料量</text><text class="summary-value primary">{{totalInputText}}</text></view>
+        <view class="summary-cell"><text class="summary-label">标准产出</text><text class="summary-value">{{standardOutputQuantity || '—'}} {{usageUnitLabel}}</text></view>
+        <view class="summary-cell"><text class="summary-label">投料 / 产出比</text><text class="summary-value {{inputOutputWarning ? 'warning' : 'primary'}}">{{inputOutputRateText}}</text></view>
+      </view>
+      <view class="summary-warning" wx:if="{{inputOutputWarning}}"><text class="warning-triangle">▲</text><text>当前总投料量高于标准产出，请确认是否存在正常加工损耗</text></view>
+      <view class="summary-warning muted" wx:elif="{{inputOutputRateValue === null}}">不同计量维度无法直接汇总投料与产出比例</view>
+    </view>
+
+    <view class="save-hint" wx:if="{{hasUnsavedChanges}}">配比已更新，保存后将用于菜品原料展开</view>
   </scroll-view>
-  <view class="prep-actions"><button class="prep-button prep-button-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">保存并启用配方</button></view>
-  <view class="prep-modal-mask" wx:if="{{showGoodsPicker}}" bindtap="closeGoodsPicker">
-    <view class="prep-modal" catchtap="noop"><view class="prep-section-title">选择原料</view><view class="prep-inline"><input class="prep-input" placeholder="输入原料名称" value="{{goodsKeyword}}" bindinput="onGoodsKeyword" bindconfirm="searchGoods" confirm-type="search" /><view class="prep-small-button" bindtap="searchGoods">搜索</view></view><view class="prep-loading compact" wx:if="{{goodsLoading}}">搜索中…</view><scroll-view wx:else scroll-y class="prep-modal-list"><view class="goods-row" wx:for="{{goodsResults}}" wx:key="gbDistributerGoodsId" data-item="{{item}}" bindtap="chooseGoods"><view><view>{{item.gbDgGoodsName}}</view><view class="prep-muted">{{item.gbDgGoodsStandardname || '未标规格'}}</view></view><text class="prep-arrow">›</text></view><view class="prep-empty compact" wx:if="{{goodsResults.length === 0}}">输入名称后搜索现有原料</view></scroll-view></view>
+
+  <view class="prep-actions recipe-actions"><button class="prep-button prep-button-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">保存配方</button></view>
+
+  <view class="ingredient-picker-mask" wx:if="{{showGoodsPicker}}" bindtap="closeGoodsPicker" catchtouchmove="noop">
+    <view class="ingredient-dialog" catchtap="noop">
+      <view class="ingredient-dialog-head">添加原料</view>
+      <view class="ingredient-dialog-body">
+        <block wx:if="{{!selectedGoods}}">
+          <view class="dialog-search">
+            <image class="dialog-search-icon" src="/images/search-3.png" mode="aspectFit"></image>
+            <input class="dialog-search-input" placeholder="搜索商品名称、简拼或全拼" placeholder-style="color:#999;font-size:30rpx;" adjust-position="{{false}}" value="{{goodsKeyword}}" bindinput="onGoodsKeyword" bindconfirm="searchGoods" confirm-type="search" />
+            <view class="dialog-search-clear" wx:if="{{goodsKeyword}}" bindtap="clearGoodsKeyword">×</view>
+          </view>
+          <view class="dialog-loading" wx:if="{{goodsLoading}}">正在搜索原料…</view>
+          <scroll-view wx:elif="{{goodsResults.length}}" scroll-y class="dialog-results" bindscroll="dismissKeyboard">
+            <view class="dialog-result-row" wx:for="{{goodsResults}}" wx:key="gbDistributerGoodsId">
+              <view class="dialog-result-main">
+                <view class="dialog-result-name">{{item.gbDgGoodsName}}</view>
+                <view class="dialog-result-meta">{{item.specText}}</view>
+              </view>
+              <view class="dialog-select" data-item="{{item}}" bindtap="chooseGoods">选择</view>
+            </view>
+          </scroll-view>
+          <view class="dialog-no-result" wx:elif="{{goodsKeyword}}">没有找到匹配的原料</view>
+        </block>
+        <scroll-view wx:else scroll-y class="dialog-config-scroll" bindscroll="dismissKeyboard">
+          <view class="dialog-selected rich">
+            <view class="dialog-selected-check">✓</view>
+            <image wx:if="{{selectedImageUrl}}" class="dialog-selected-image" src="{{selectedImageUrl}}" mode="aspectFill"></image>
+            <view wx:else class="dialog-selected-image dialog-selected-placeholder">原</view>
+            <view class="dialog-selected-main">
+              <view class="dialog-selected-name">{{selectedGoods.gbDgGoodsName}}</view>
+              <view class="dialog-selected-spec">{{selectedPackLabel}}</view>
+            </view>
+            <view class="dialog-reselect" bindtap="clearSelectedGoods">重选</view>
+          </view>
+
+          <view class="dialog-form">
+            <view class="dialog-form-row quantity">
+              <text class="dialog-form-label">标准投料量</text>
+              <view class="selected-stepper">
+                <view class="stepper-button minus" data-direction="-1" bindtap="stepSelectedQuantity">−</view>
+                <input class="selected-quantity-input" type="digit" placeholder="0" value="{{selectedQuantity}}" bindinput="onSelectedQuantity" bindconfirm="dismissKeyboard" confirm-type="done" />
+                <view class="stepper-button" data-direction="1" bindtap="stepSelectedQuantity">＋</view>
+                <picker range="{{selectedUnitNames}}" value="{{selectedUnitIndex}}" bindtap="dismissKeyboard" bindchange="onSelectedUnit"><view class="selected-unit">{{selectedUnitNames[selectedUnitIndex]}} ▾</view></picker>
+              </view>
+            </view>
+          </view>
+
+          <view class="dialog-quick" wx:if="{{selectedQuickTags.length}}">
+            <text class="dialog-quick-label">常用用量</text>
+            <view class="dialog-quick-list">
+              <view wx:for="{{selectedQuickTags}}" wx:key="value" class="dialog-quick-tag {{item.active ? 'active' : ''}}" data-value="{{item.value}}" bindtap="onSelectedQuickQuantity">{{item.label}}</view>
+            </view>
+          </view>
+
+          <view class="dialog-output-hint">以上投料量对应制作 {{standardOutputQuantity || '—'}} {{usageUnitLabel}}{{productName}}；成本在菜品经营分析时按底层采购原料统一核算。</view>
+        </scroll-view>
+      </view>
+      <view class="ingredient-dialog-footer">
+        <view class="dialog-cancel" bindtap="closeGoodsPicker">取消</view>
+        <view class="dialog-confirm" bindtap="confirmSelectedGoods">确认添加</view>
+      </view>
+    </view>
   </view>
 </view>

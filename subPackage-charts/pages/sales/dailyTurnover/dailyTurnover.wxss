@@ -370,23 +370,35 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16rpx;
+  gap: 10rpx;
+}
+
+.ai-import-top-btn {
+  padding: 9rpx 16rpx;
+  border-radius: 28rpx;
+  background: #168f7b;
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .download-btn {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #007aff;
-  padding: 8rpx 20rpx;
+  padding: 8rpx 14rpx;
   border: 1rpx solid #007aff;
   border-radius: 30rpx;
+  white-space: nowrap;
 }
 
 .upload-btn {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #34c759;
-  padding: 8rpx 20rpx;
+  padding: 8rpx 14rpx;
   border: 1rpx solid #34c759;
   border-radius: 30rpx;
+  white-space: nowrap;
 }
 
 /* ========================================
@@ -492,4 +504,303 @@
   font-weight: 500;
   color: #fff;
   background: #007aff;
+}
+
+/* ========================================
+   AI经营日报识别预览
+   ======================================== */
+.ai-import-modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1300;
+}
+
+.ai-import-mask {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.52);
+}
+
+.ai-import-panel {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 86vh;
+  overflow: hidden;
+  background: #f6f7f8;
+  border-radius: 24rpx 24rpx 0 0;
+}
+
+.ai-import-header {
+  height: 104rpx;
+  padding: 0 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-bottom: 1rpx solid #eceeef;
+  box-sizing: border-box;
+}
+
+.ai-import-title {
+  color: #202629;
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ai-import-file {
+  max-width: 590rpx;
+  margin-top: 4rpx;
+  overflow: hidden;
+  color: #899095;
+  font-size: 21rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-import-close {
+  width: 56rpx;
+  height: 56rpx;
+  color: #7b8287;
+  font-size: 44rpx;
+  font-weight: 300;
+  line-height: 52rpx;
+  text-align: center;
+}
+
+.ai-import-scroll {
+  height: calc(86vh - 208rpx);
+  box-sizing: border-box;
+}
+
+.ai-import-state {
+  margin: 20rpx 24rpx 16rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 12rpx;
+  border-left: 6rpx solid;
+}
+
+.ai-import-state--ready {
+  color: #176f60;
+  background: #eaf6f3;
+  border-left-color: #168f7b;
+}
+
+.ai-import-state--error {
+  color: #a8560d;
+  background: #fff4e7;
+  border-left-color: #e08a2e;
+}
+
+.ai-import-state__title {
+  font-size: 29rpx;
+  font-weight: 600;
+}
+
+.ai-import-state__desc {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  line-height: 1.45;
+}
+
+.ai-import-summary {
+  display: flex;
+  margin: 0 24rpx 16rpx;
+  padding: 20rpx 8rpx;
+  background: #fff;
+  border-radius: 12rpx;
+}
+
+.ai-import-summary__item {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1rpx solid #edf0f1;
+}
+
+.ai-import-summary__item:last-child { border-right: none; }
+
+.ai-import-summary__value {
+  color: #283036;
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ai-import-summary__value--green { color: #168f7b; }
+.ai-import-summary__value--orange { color: #d97416; }
+
+.ai-import-summary__label {
+  margin-top: 4rpx;
+  color: #90979b;
+  font-size: 21rpx;
+}
+
+.ai-import-section {
+  margin: 0 24rpx 16rpx;
+  padding: 22rpx 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+}
+
+.ai-import-section__title {
+  margin-bottom: 14rpx;
+  color: #2b3337;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.ai-import-notice {
+  padding: 4rpx 0;
+  color: #6f787d;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.ai-import-issue {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #edf0f1;
+}
+
+.ai-import-issue:first-of-type { padding-top: 4rpx; }
+.ai-import-issue:last-child { padding-bottom: 0; border-bottom: none; }
+
+.ai-import-issue__top,
+.ai-import-day__top,
+.ai-import-dish__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ai-import-issue__dish {
+  max-width: 380rpx;
+  color: #30373b;
+  font-size: 25rpx;
+  font-weight: 600;
+}
+
+.ai-import-issue__position {
+  color: #a0a6aa;
+  font-size: 20rpx;
+}
+
+.ai-import-issue__message {
+  margin-top: 8rpx;
+  color: #b75a0c;
+  font-size: 23rpx;
+  line-height: 1.5;
+}
+
+.ai-import-issue__action,
+.ai-import-candidates {
+  margin-top: 5rpx;
+  color: #7c858a;
+  font-size: 21rpx;
+  line-height: 1.45;
+}
+
+.ai-import-candidates__label { color: #596267; }
+.ai-import-candidate { color: #168f7b; }
+
+.ai-import-day,
+.ai-import-dish {
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #edf0f1;
+}
+
+.ai-import-day:last-child,
+.ai-import-dish:last-child { border-bottom: none; }
+
+.ai-import-day__date {
+  color: #30383c;
+  font-size: 25rpx;
+  font-weight: 600;
+}
+
+.ai-import-day__status,
+.ai-import-dish__status {
+  padding: 3rpx 10rpx;
+  border-radius: 8rpx;
+  font-size: 20rpx;
+}
+
+.is-ready { color: #168f7b; background: #eaf6f3; }
+.is-error { color: #b96011; background: #fff1e1; }
+
+.ai-import-day__numbers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 9rpx;
+  color: #626b70;
+  font-size: 21rpx;
+}
+
+.ai-import-day__declared {
+  margin-top: 6rpx;
+  color: #92999d;
+  font-size: 20rpx;
+}
+
+.ai-import-dish__name {
+  max-width: 530rpx;
+  color: #353d41;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.ai-import-dish__arrow {
+  color: #168f7b;
+  font-weight: 400;
+}
+
+.ai-import-dish__meta {
+  margin-top: 6rpx;
+  color: #90979b;
+  font-size: 20rpx;
+}
+
+.ai-import-scroll-bottom { height: 26rpx; }
+
+.ai-import-footer {
+  height: 104rpx;
+  padding: 14rpx 24rpx calc(14rpx + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  box-sizing: content-box;
+  background: #fff;
+  border-top: 1rpx solid #e8ebec;
+}
+
+.ai-import-footer__ghost,
+.ai-import-footer__primary {
+  flex: 1;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10rpx;
+  font-size: 27rpx;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.ai-import-footer__ghost {
+  color: #5f686d;
+  background: #f4f5f6;
+}
+
+.ai-import-footer__primary {
+  color: #fff;
+  background: #168f7b;
 }

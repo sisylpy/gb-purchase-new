@@ -382,7 +382,15 @@ Page({
     });
 
     if (categoryId != null && categoryId !== '') {
-      var cname = opts.categoryName ? decodeURIComponent(opts.categoryName) : (opts.fatherName ? decodeURIComponent(opts.fatherName) : '菜品');
+      var routeCategoryName = opts.categoryName || opts.fatherName || '';
+      var cname = '菜品分类';
+      if (routeCategoryName) {
+        try {
+          cname = decodeURIComponent(routeCategoryName);
+        } catch (error) {
+          cname = String(routeCategoryName);
+        }
+      }
       var did = opts.distributerId || opts.disId;
       if (did == null || did === '') {
         var u = wx.getStorageSync('userInfo');
@@ -394,7 +402,10 @@ Page({
         navBarHeight: globalData.navBarHeight * globalData.rpxR,
         categoryId: String(categoryId),
         categoryName: cname,
+        manageFatherName: cname,
         distributerId: did,
+        scopeMode: opts.scopeMode || 'GROUP',
+        departmentId: opts.departmentId || null,
         
       });
      
@@ -455,10 +466,16 @@ Page({
           };
           // 菜品列表（API 字段名 foods）
           var foods = (data.foods || []).map(_enrichDishCard);
-          that.setData({
+          var categoryName = data.categoryName == null ? '' : String(data.categoryName).trim();
+          var categoryPatch = {
             categorySummary: summary,
             dishes: foods,
-          });
+          };
+          if (categoryName) {
+            categoryPatch.categoryName = categoryName;
+            categoryPatch.manageFatherName = categoryName;
+          }
+          that.setData(categoryPatch);
         } else {
           // 接口异常时 fallback 到 mock
           console.warn('[depFoodList] API code != 0, fallback to mock');
@@ -624,6 +641,10 @@ Page({
 
   /** 修改类别名称 - 显示弹窗 */
   renameFather() {
+    if (!this.data.categoryId) {
+      wx.showToast({ title: '分类数据异常', icon: 'none' });
+      return;
+    }
     this.setData({
       showRenamePopup: true,
       renameInputValue: this.data.categoryName || this.data.manageFatherName || '',
@@ -637,6 +658,7 @@ Page({
 
   /** 改名弹窗 - 确认 */
   confirmRename() {
+    if (typeof wx.hideKeyboard === 'function') wx.hideKeyboard({ fail: function () {} });
     var that = this;
     var newName = (this.data.renameInputValue || '').trim();
     if (!newName) {
@@ -655,7 +677,7 @@ Page({
     }
     load.showLoading('修改中');
     updateGbFood({
-      id: categoryId,
+      gbDistributerFoodId: Number(categoryId),
       gbDfFoodName: newName,
       gbDfDistributerId: distributerId,
     }).then(function (res) {
@@ -684,8 +706,11 @@ Page({
 
   /** 改名弹窗 - 取消 */
   cancelRename() {
+    if (typeof wx.hideKeyboard === 'function') wx.hideKeyboard({ fail: function () {} });
     this.setData({ showRenamePopup: false });
   },
+
+  stopRenameTap() {},
 
 
   _applyFoodSearchFilter: function () {

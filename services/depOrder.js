@@ -39,8 +39,10 @@ var jingjingGetBuyingGoodsGbWithNx = function (disId) {
   return requestUtil.get('gbdistributerpurchasebatch/jingjingGetBuyingGoodsGbWithNx/' + disId);
 };
 
-var deleteDisPurBatchGbItem = function (id) {
-  return requestUtil.get('gbdistributerpurchasebatch/deleteDisPurBatchGbItem/' + id);
+var deleteDisPurBatchGbItem = function (id, cancelAutoOrder) {
+  return requestUtil.get('gbdistributerpurchasebatch/deleteDisPurBatchGbItem/' + id, {
+    cancelAutoOrder: cancelAutoOrder === true,
+  });
 };
 
 var deleteDisPurBatchGb = function (batchId) {
@@ -69,8 +71,10 @@ var updateOrderGbJjSx = function (data) {
   return requestUtil.post('gbdepartmentorders/updateOrderGbJjSx', data, { useUrlParams: true });
 };
 
-var deleteOrderGb = function (id) {
-  return requestUtil.get('gbdepartmentorders/deleteOrderGb/' + id);
+var deleteOrderGb = function (id, cancelAutoOrder) {
+  return requestUtil.get('gbdepartmentorders/deleteOrderGb/' + id, {
+    cancelAutoOrder: cancelAutoOrder === true,
+  });
 };
 
 var depGetApplyAiByTime = function (id) {
@@ -202,6 +206,12 @@ var queryDepDisGoodsByQuickSearchGb = function (data) {
   return requestUtil.post('nxgoods/queryDepDisGoodsByQuickSearchGb', data, { useUrlParams: true });
 };
 
+var getHeadquartersStandardGoods = function (departmentId) {
+  return requestUtil.get('gbdepartmentorders/headquarters-standard-goods', {
+    departmentId: departmentId
+  });
+};
+
 var queryDepDisGoodsByQuickSearchJj = function (data) {
   return requestUtil.post('nxdistributergoods/queryDepDisGoodsByQuickSearchJj', data, { useUrlParams: true });
 };
@@ -283,6 +293,19 @@ var jrdhSellerRegisterWithFileGbJj = function (filePathList, userName, code, adm
     filePathList[0],
     'file',
     { userName, code, admin, gbDisId, buyUserId, gbDepId }
+  );
+};
+
+var bindJrdhUserToNxDistributer = function (data) {
+  return requestUtil.post('nxjrdhuser/bindNxDistributerSeller', data, { useUrlParams: true });
+};
+
+var jrdhNxSellerRegisterWithFile = function (filePathList, userName, code, nxDisId) {
+  return requestUtil.uploadFile(
+    'nxjrdhuser/jrdhNxSellerRegisterWithFile',
+    filePathList[0],
+    'file',
+    { userName: userName, code: code, nxDisId: nxDisId }
   );
 };
 
@@ -476,6 +499,7 @@ module.exports = {
   deleteDepGoods: deleteDepGoods,
   getDisGoodsStock: getDisGoodsStock,
   queryDepDisGoodsByQuickSearchGb: queryDepDisGoodsByQuickSearchGb,
+  getHeadquartersStandardGoods: getHeadquartersStandardGoods,
   queryDepDisGoodsByQuickSearchJj: queryDepDisGoodsByQuickSearchJj,
   depGetDepGoodsGb: depGetDepGoodsGb,
   disGetDepGoodsCataGb: disGetDepGoodsCataGb,
@@ -494,6 +518,8 @@ module.exports = {
   supplierInitWeightPurItem: supplierInitWeightPurItem,
   whichJrdhUserLoginGbJj: whichJrdhUserLoginGbJj,
   jrdhSellerRegisterWithFileGbJj: jrdhSellerRegisterWithFileGbJj,
+  bindJrdhUserToNxDistributer: bindJrdhUserToNxDistributer,
+  jrdhNxSellerRegisterWithFile: jrdhNxSellerRegisterWithFile,
   // gbOrderWeight 需要的 API
   gbOrderOutWeight: gbOrderOutWeight,
   supplierGetUnWeightOutPurGoods: supplierGetUnWeightOutPurGoods,

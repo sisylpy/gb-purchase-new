@@ -99,7 +99,8 @@ module.exports.isReadOnly = function (status) {
 
           <!-- 订单金额和类型 -->
           <view class="bill-amount-section flex-column">
-            <view class="bill-amount">{{item.gbDpbSubtotal}}元</view>
+            <view class="bill-amount">{{item.gbDpbPaySubtotal ? item.gbDpbPaySubtotal : item.gbDpbSubtotal}}元</view>
+            <text class="text-danger" wx:if="{{item.gbDpbNxCouponDiscountAmount > 0}}">已优惠 {{item.gbDpbNxCouponDiscountAmount}}元</text>
             <text class="bill-type-text tag-return" wx:if="{{item.gbDpbPurchaseType == 9}}">退货单</text>
             <text class="bill-type-text tag-auto" wx:elif="{{item.gbDpbPurchaseType == 21}}">自动订货</text>
             <text class="bill-type-text tag-purchase" wx:else="">采购员订货</text>

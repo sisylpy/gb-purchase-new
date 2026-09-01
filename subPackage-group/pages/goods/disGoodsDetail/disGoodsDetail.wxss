@@ -49,4 +49,56 @@ page{
   padding-left: 20rpx;
   font-size: 38rpx;
 }
+.goods-spec-card {
+  margin: 24rpx;
+  padding: 32rpx 28rpx;
+  background: #fff;
+  border-radius: 16rpx;
+}
 
+.goods-spec-name {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.goods-spec-tip {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  line-height: 1.55;
+  color: #888;
+}
+
+.goods-spec-field {
+  display: flex;
+  align-items: center;
+  min-height: 94rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.goods-spec-label {
+  width: 160rpx;
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.goods-spec-input {
+  flex: 1;
+  height: 72rpx;
+  font-size: 30rpx;
+  text-align: right;
+  color: #222;
+}
+
+.goods-spec-example {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24rpx;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  background: #f4f8f7;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #687773;
+}

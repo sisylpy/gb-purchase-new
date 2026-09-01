@@ -111,6 +111,28 @@ function hasSingleOrderOutQty(order) {
   return hasText(singleOrderOutQty(order));
 }
 
+/**
+ * 单条订单的出库单价文案。
+ * 配送回写的历史订单可能没有 gbDoPrintStandard，依次回退到商品基础单位和下单单位。
+ */
+function singleOrderOutPriceLabel(order) {
+  if (!order || !isValid(order.gbDoPrice)) {
+    return '';
+  }
+  var item = {
+    gbDpgStandard: order.gbDoStandard,
+    gbDistributerGoodsEntity: order.gbDistributerGoodsEntity,
+  };
+  if (hasOrderStandardScale(order)) {
+    return orderOutPriceLabel(order, item);
+  }
+  var goods = order.gbDistributerGoodsEntity;
+  var unit = hasText(order.gbDoPrintStandard) ? order.gbDoPrintStandard
+    : (goods && hasText(goods.gbDgGoodsStandardname) ? goods.gbDgGoodsStandardname
+      : (hasText(order.gbDoStandard) ? order.gbDoStandard : ''));
+  return order.gbDoPrice + '元' + (unit ? '/' + unit : '');
+}
+
 function orderOutPriceLabel(orders, item) {
   if (!orders) {
     return '';
@@ -162,13 +184,95 @@ function hasOrderOutSubtotal(orders, item) {
   return hasText(orderOutSubtotal(orders, item));
 }
 
-/** 供货商是否已通过小程序提交批次 */
+/** 批次是否已经绑定传统供货商或 NX 配送商。 */
 function isSupplierInvolved(batch) {
   if (!batch) {
     return false;
   }
   var sellOpenId = batch.gbDpbSellUserOpenId;
-  return sellOpenId != null && sellOpenId !== '';
+  var supplierId = parseFloat(batch.gbDpbSupplierId);
+  var nxDisId = parseFloat(batch.gbDpbNxDistributerId);
+  return (sellOpenId != null && sellOpenId !== '')
+    || (!isNaN(supplierId) && supplierId > 0)
+    || (!isNaN(nxDisId) && nxDisId > 0)
+    || !!batch.nxJrdhSupplierEntity;
+}
+
+function batchSellerName(batch) {
+  if (!batch) {
+    return '';
+  }
+  var seller = batch.nxJrdhSellerEntity;
+  if (seller && hasText(seller.nxJrdhWxNickName)) {
+    return seller.nxJrdhWxNickName;
+  }
+  var supplier = batch.nxJrdhSupplierEntity;
+  if (supplier && hasText(supplier.nxJrdhsSupplierName)) {
+    return supplier.nxJrdhsSupplierName;
+  }
+  if (supplier && supplier.jrdhUserEntity && hasText(supplier.jrdhUserEntity.nxJrdhWxNickName)) {
+    return supplier.jrdhUserEntity.nxJrdhWxNickName;
+  }
+  return '';
+}
+
+function normalizeImageUrl(path, serverUrl, fallback) {
+  if (!hasText(path)) {
+    return fallback || '/images/user.png';
+  }
+  path = path + '';
+  if (path.indexOf('http://') === 0 || path.indexOf('https://') === 0) {
+    return path;
+  }
+  var baseUrl = (serverUrl || '') + '';
+  if (baseUrl && baseUrl.charAt(baseUrl.length - 1) === '/' && path.charAt(0) === '/') {
+    return baseUrl + path.slice(1);
+  }
+  if (baseUrl && baseUrl.charAt(baseUrl.length - 1) !== '/' && path.charAt(0) !== '/') {
+    return baseUrl + '/' + path;
+  }
+  return baseUrl + path;
+}
+
+function batchBuyerAvatarUrl(batch, serverUrl) {
+  var purchaser = batch && batch.nxJrdhPurEntity;
+  return normalizeImageUrl(
+    purchaser && purchaser.gbDuWxAvartraUrl,
+    serverUrl,
+    '/images/user.png'
+  );
+}
+
+function batchSellerAvatarUrl(batch, serverUrl) {
+  var seller = batch && batch.nxJrdhSellerEntity;
+  var supplier = batch && batch.nxJrdhSupplierEntity;
+  var supplierUser = supplier && supplier.jrdhUserEntity;
+  var supplierUsers = supplier && supplier.nxJrdhUserList;
+  if (!supplierUser && supplierUsers && supplierUsers.length > 0) {
+    supplierUser = supplierUsers[0];
+  }
+  var path = seller && seller.nxJrdhWxAvartraUrl;
+  if (!hasText(path)) {
+    path = supplierUser && supplierUser.nxJrdhWxAvartraUrl;
+  }
+  return normalizeImageUrl(path, serverUrl, '/images/user.png');
+}
+
+function isBatchSellerUnread(batch) {
+  var status = batch ? parseFloat(batch.gbDpbStatus) : NaN;
+  return !isNaN(status) && status === -1;
+}
+
+/** 配送商回复后，餐馆端不再拥有删除订货权限。 */
+function canDeleteBatchOrder(batch) {
+  if (!batch) {
+    return true;
+  }
+  if (hasText(batch.gbDpbSellerReplyFullTime)) {
+    return false;
+  }
+  var status = parseFloat(batch.gbDpbStatus);
+  return !(isSupplierInvolved(batch) && !isNaN(status) && status >= 1);
 }
 
 /** 订单行是否已有出库数量/单价/小计 */
@@ -223,6 +327,24 @@ function proxyStoreLabel(order, storeList) {
   return name + '待采';
 }
 
+/** 商品缩略图：优先使用商品原图，兼容绝对地址和历史相对地址。 */
+function goodsImageUrl(goods, serverUrl) {
+  if (!goods) return '/images/logo.png';
+  var path = goods.gbDgGoodsFileLarge || goods.gbDgNxFatherImgLarge ||
+    goods.gbDgGoodsFile || goods.gbDgGoodsFileImg || goods.gbDgNxGoodsFatherImg || goods.gbDgNxFatherImg;
+  if (!path) return '/images/logo.png';
+  path = path + '';
+  if (path.indexOf('http://') === 0 || path.indexOf('https://') === 0) return path;
+  var base = (serverUrl || '') + '';
+  if (base && base.charAt(base.length - 1) === '/' && path.charAt(0) === '/') {
+    return base + path.slice(1);
+  }
+  if (base && base.charAt(base.length - 1) !== '/' && path.charAt(0) !== '/') {
+    return base + '/' + path;
+  }
+  return base + path;
+}
+
 module.exports = {
   isValid: isValid,
   isPositiveNum: isPositiveNum,
@@ -239,15 +361,22 @@ module.exports = {
   hasPurRowOutQty: hasPurRowOutQty,
   singleOrderOutQty: singleOrderOutQty,
   hasSingleOrderOutQty: hasSingleOrderOutQty,
+  singleOrderOutPriceLabel: singleOrderOutPriceLabel,
   orderOutPriceLabel: orderOutPriceLabel,
   hasOrderOutPrice: hasOrderOutPrice,
   orderOutSubtotal: orderOutSubtotal,
   hasOrderOutSubtotal: hasOrderOutSubtotal,
   isOrderPriceHigh: isOrderPriceHigh,
   isSupplierInvolved: isSupplierInvolved,
+  batchSellerName: batchSellerName,
+  batchBuyerAvatarUrl: batchBuyerAvatarUrl,
+  batchSellerAvatarUrl: batchSellerAvatarUrl,
+  isBatchSellerUnread: isBatchSellerUnread,
+  canDeleteBatchOrder: canDeleteBatchOrder,
   hasOrderOutMeta: hasOrderOutMeta,
   shouldShowOrderOutMeta: shouldShowOrderOutMeta,
   isStoreProxyOrder: isStoreProxyOrder,
   proxyStoreName: proxyStoreName,
   proxyStoreLabel: proxyStoreLabel,
+  goodsImageUrl: goodsImageUrl,
 };

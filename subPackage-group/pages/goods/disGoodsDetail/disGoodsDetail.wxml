@@ -2,11 +2,43 @@
 
 
 <view class="flex flex-column ">
- <back-navbar style="height: {{navBarHeight}}rpx;" title="修改商品" 
+ <back-navbar style="height: {{navBarHeight}}rpx;" title="{{specOnly ? '补充商品规格' : '修改商品'}}"
 avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
 
-<view class="bg-white p-20  flex-column  font-lg" >
+<view class="goods-spec-card" wx:if="{{specOnly}}">
+  <view class="goods-spec-name">{{goods.gbDgGoodsName}}</view>
+  <view class="goods-spec-tip">完善采购包装规格后，系统才能正确计算每份用量和成本。</view>
+
+  <view class="goods-spec-field">
+    <text class="goods-spec-label">采购单位</text>
+    <input
+      class="goods-spec-input"
+      value="{{goods.gbDgGoodsStandardname}}"
+      placeholder="例如：瓶、袋、箱、斤"
+      bindinput="getComGoodsContent"
+      data-type="1"
+    />
+  </view>
+  <view class="goods-spec-field">
+    <text class="goods-spec-label">规格重量</text>
+    <input
+      class="goods-spec-input"
+      value="{{goods.gbDgGoodsStandardWeight}}"
+      placeholder="例如：500ml、2.5kg、8个"
+      bindinput="getComGoodsContent"
+      data-type="2"
+    />
+  </view>
+  <view class="goods-spec-example">
+    <text>填写示例：</text>
+    <text>生抽：采购单位“瓶”，规格重量“500ml”</text>
+    <text>大米：采购单位“袋”，规格重量“25kg”</text>
+  </view>
+</view>
+
+
+<view class="bg-white p-20  flex-column  font-lg" wx:if="{{!specOnly}}">
   <!-- <text class="">基本信息:</text> -->
   <view class=" flex-row ">
       <text class="text-secondary flex-shrink-0">商品名称:</text>
@@ -61,7 +93,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
 </view>
 
-<view class="bg-white p-20  flex-column font-lg">
+<view class="bg-white p-20  flex-column font-lg" wx:if="{{!specOnly}}">
 
 
   <view class="pt-20 pb-20  flex-column ">
@@ -163,5 +195,5 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
 
 <view class="p-20 ">
-  <view class=" saveBtn {{canSave ? 'is-active' : ''}}" bindtap="updateComGoods">保存</view>
+  <view class=" saveBtn {{canSave ? 'is-active' : ''}}" bindtap="updateComGoods">{{specOnly ? '保存规格' : '保存'}}</view>
 </view>

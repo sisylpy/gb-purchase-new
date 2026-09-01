@@ -1,0 +1,58 @@
+page {
+  background: #f4f7f5;
+  color: #17231f;
+  min-height: 100%;
+}
+
+.page { min-height: 100vh; padding-bottom: 56rpx; box-sizing: border-box; }
+.nav { position: fixed; left: 0; right: 0; top: 0; z-index: 20; box-sizing: border-box; background: rgba(255,255,255,.96); border-bottom: 1rpx solid #e7ece9; }
+.nav-title { height: 44px; display: flex; align-items: center; justify-content: center; font-size: 34rpx; font-weight: 700; }
+.hero { margin: 28rpx 24rpx 20rpx; padding: 34rpx; color: #fff; border-radius: 28rpx; background: linear-gradient(135deg, #0d805d, #20a473); box-shadow: 0 14rpx 34rpx rgba(20,128,94,.18); }
+.hero-kicker { font-size: 23rpx; opacity: .78; letter-spacing: 2rpx; }
+.hero-title { margin-top: 10rpx; font-size: 42rpx; font-weight: 800; }
+.hero-desc { margin-top: 14rpx; font-size: 26rpx; line-height: 1.65; opacity: .9; }
+.tabs { display: flex; margin: 0 24rpx 20rpx; padding: 8rpx; background: #e8efeb; border-radius: 18rpx; }
+.tab { flex: 1; padding: 18rpx 0; text-align: center; color: #66716c; font-size: 27rpx; border-radius: 14rpx; }
+.tab-active { background: #fff; color: #0b805c; font-weight: 700; box-shadow: 0 4rpx 14rpx rgba(31,65,52,.08); }
+.task-list { padding: 0 24rpx; }
+.task-card { margin-bottom: 20rpx; padding: 28rpx; background: #fff; border: 2rpx solid transparent; border-radius: 24rpx; box-shadow: 0 8rpx 24rpx rgba(27,56,45,.06); }
+.task-card-active { border-color: #21a578; }
+.task-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20rpx; }
+.restaurant-name { max-width: 430rpx; font-size: 30rpx; font-weight: 750; }
+.department-name { margin-top: 5rpx; font-size: 23rpx; color: #7b8581; }
+.status { flex-shrink: 0; padding: 8rpx 14rpx; border-radius: 999rpx; font-size: 21rpx; }
+.status-PENDING { background: #fff2d8; color: #a56200; }
+.status-CLAIMED { background: #e1f4ed; color: #087b59; }
+.status-COMPLETED { background: #e9f0ed; color: #66736e; }
+.goods-name { margin-top: 24rpx; font-size: 38rpx; font-weight: 800; }
+.meta-row { margin-top: 14rpx; display: flex; justify-content: space-between; gap: 20rpx; color: #69746f; font-size: 24rpx; }
+.goods-detail { margin-top: 16rpx; padding: 18rpx; background: #f6f8f7; border-radius: 14rpx; color: #58635e; font-size: 24rpx; line-height: 1.55; }
+.actions { margin-top: 24rpx; }
+button { margin: 0; }
+.primary-button { width: 100%; color: #fff; background: #10845f; border-radius: 16rpx; font-size: 28rpx; font-weight: 700; }
+.primary-button::after, .search-button::after, .text-button::after, .outline-button::after { border: 0; }
+.locked-tip { padding: 18rpx; text-align: center; color: #89918e; background: #f3f5f4; border-radius: 14rpx; font-size: 24rpx; }
+.catalog-panel { margin-top: 26rpx; padding-top: 24rpx; border-top: 1rpx solid #e8ecea; }
+.catalog-title { font-size: 28rpx; font-weight: 750; }
+.search-row { display: flex; gap: 12rpx; margin-top: 16rpx; }
+.search-input { flex: 1; height: 76rpx; padding: 0 20rpx; background: #f2f6f4; border-radius: 14rpx; font-size: 26rpx; }
+.search-button { width: 132rpx; height: 76rpx; line-height: 76rpx; padding: 0; color: #fff; background: #172f27; border-radius: 14rpx; font-size: 25rpx; }
+.result-count { margin: 18rpx 0 8rpx; color: #8a938f; font-size: 22rpx; }
+.catalog-item { display: flex; align-items: center; justify-content: space-between; padding: 22rpx 4rpx; border-bottom: 1rpx solid #eef1ef; }
+.catalog-main { min-width: 0; }
+.catalog-name { font-size: 28rpx; font-weight: 650; }
+.catalog-standard { margin-top: 6rpx; color: #7e8883; font-size: 23rpx; }
+.catalog-choose { flex-shrink: 0; margin-left: 20rpx; color: #0a855f; font-size: 24rpx; font-weight: 700; }
+.catalog-actions { flex-shrink: 0; margin-left: 16rpx; text-align: right; }
+.catalog-choose { margin-left: 0; }
+.catalog-create { margin-top: 12rpx; color: #a86600; font-size: 22rpx; font-weight: 650; }
+.panel-actions { display: flex; justify-content: flex-end; gap: 14rpx; margin-top: 20rpx; }
+.text-button { width: auto; padding: 0 22rpx; color: #52605a; background: transparent; font-size: 24rpx; }
+.danger { color: #bc4b43; }
+.complete-line { margin-top: 20rpx; color: #6c7873; font-size: 23rpx; }
+.empty, .empty-card { margin: 34rpx 24rpx; padding: 70rpx 30rpx; text-align: center; color: #7d8783; }
+.empty-card { background: #fff; border-radius: 24rpx; }
+.done-icon { width: 92rpx; height: 92rpx; line-height: 92rpx; margin: 0 auto 22rpx; color: #fff; background: #18a274; border-radius: 50%; font-size: 46rpx; }
+.empty-title { color: #28342f; font-size: 30rpx; font-weight: 700; }
+.empty-desc { margin-top: 14rpx; font-size: 24rpx; line-height: 1.6; }
+.outline-button { margin-top: 28rpx; color: #0b805c; background: #edf7f3; border-radius: 14rpx; font-size: 26rpx; }

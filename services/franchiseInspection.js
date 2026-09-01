@@ -1,6 +1,6 @@
 /**
- * 加盟巡店与整改正式接口。
- * 复用 lib/request 和现有微信登录，只在这里处理巡店业务码、分页与媒体传输。
+ * 加盟门店总部整改任务接口。
+ * 门店端只负责接受任务、提交整改和查看复核结果。
  */
 var http = require('../lib/request');
 var config = require('../config/index');
@@ -106,7 +106,6 @@ function call(path, data, method, options) {
 function get(path, query) { return call(path, query || {}, 'GET'); }
 function post(path, body, options) { return call(path, body || {}, 'POST', options); }
 function put(path, body) { return call(path, body || {}, 'PUT'); }
-function patch(path, body) { return call(path, body || {}, 'PATCH'); }
 function remove(path, body) { return call(path, body || {}, 'DELETE'); }
 
 function saveLoginResult(result) {
@@ -114,7 +113,7 @@ function saveLoginResult(result) {
   if (numericCode(body.code) !== 0 || !body.data || !body.data.token) {
     return Promise.reject(normalizeError({
       statusCode: 403,
-      data: body.code ? body : { code: 403, errorCode: 'AUTH_REQUIRED', msg: '请重新登录后使用巡店管理' },
+      data: body.code ? body : { code: 403, errorCode: 'AUTH_REQUIRED', msg: '请重新登录后查看总部任务' },
     }));
   }
   var data = body.data;
@@ -156,41 +155,32 @@ function bootstrapIdentity() {
   });
 }
 
-function getInspectorInvitationSummary(lookup) {
-  return get('invitations/' + encodeURIComponent(String(lookup || '').trim()) + '/summary');
-}
-
-function acceptInspectorInvitation(lookup, profile) {
-  var input = profile || {};
-  return wxLoginCode().then(function (code) {
-    var body = { code: code, userName: String(input.userName || '').trim() };
-    var avatarUrl = String(input.avatarUrl || '').trim();
-    if (avatarUrl) body.avatarUrl = avatarUrl;
-    return post('invitations/' + encodeURIComponent(String(lookup || '').trim()) + ':accept', body);
-  }).then(function (data) {
-    if (!data || !data.token) {
-      return Promise.reject(normalizeError({
-        statusCode: 500,
-        data: { code: 500, errorCode: 'INVITATION_ACCEPT_RESPONSE_INVALID', msg: '加入结果不完整，请重试' },
-      }));
-    }
-    mediaDownloadCache = {};
-    wx.setStorageSync('token', 'Bearer ' + data.token);
-    wx.setStorageSync('franchiseTokenExpiresAt', data.tokenExpiresAt || '');
-    wx.setStorageSync('franchiseOrganization', {
-      companyId: data.companyId,
-      companyName: data.companyName,
-      brandId: data.brandId,
-      brandName: data.brandName,
-      regionDepartmentId: data.regionDepartmentId,
-      regionName: data.regionName,
-    });
-    return data;
-  });
-}
-
 function refreshIdentity() {
   return refreshToken().then(function () { return get('me'); });
+}
+
+function getStoreOwnerInvitationSummary(lookup) {
+  return get('store-owner-invitations/' + encodeURIComponent(String(lookup || '').trim()) + '/summary');
+}
+
+function acceptStoreOwnerInvitation(lookup, profile) {
+  var input = profile || {};
+  return wxLoginCode().then(function (code) {
+    return post('store-owner-invitations/' + encodeURIComponent(String(lookup || '').trim()) + ':accept', {
+      code: code,
+      userName: String(input.userName || '').trim(),
+    });
+  }).then(function (accepted) {
+    if (accepted && accepted.token) {
+      wx.setStorageSync('token', 'Bearer ' + accepted.token);
+      wx.setStorageSync('franchiseTokenExpiresAt', accepted.tokenExpiresAt || '');
+      if (accepted.currentUser) wx.setStorageSync('franchiseCurrentUser', accepted.currentUser);
+    }
+    // 接受邀请已经建立正式门店用户；再次按原登录主链取得完整门店、部门和经营资料。
+    return refreshToken().then(function (loginData) {
+      return { invitation: accepted, login: loginData };
+    });
+  });
 }
 
 function normalizeRelatedMedia(rows) {
@@ -311,45 +301,33 @@ module.exports = {
   normalizeError: normalizeError,
   ensureToken: ensureToken,
   bootstrapIdentity: bootstrapIdentity,
-  getInspectorInvitationSummary: getInspectorInvitationSummary,
-  acceptInspectorInvitation: acceptInspectorInvitation,
   refreshIdentity: refreshIdentity,
+  getStoreOwnerInvitationSummary: getStoreOwnerInvitationSummary,
+  acceptStoreOwnerInvitation: acceptStoreOwnerInvitation,
   getMe: function () { return get('me'); },
-  approveWebLogin: function (userCode) {
-    return post('auth/web-login-sessions/' + encodeURIComponent(String(userCode || '').trim()) + ':approve', {});
+  createRestaurantUpgradeTicket: function (body) {
+    return post('onboarding/restaurant-upgrade-ticket', body);
   },
   listStores: function () { return get('stores'); },
+  getFranchiseeOperations: function (storeId) {
+    return get('franchisee/operations/overview', storeId ? { storeId: storeId } : {});
+  },
+  getStoreOperationOverview: function (storeId) {
+    return get('stores/' + storeId + '/operation-overview');
+  },
+  listStoreRecipeVersions: function (storeId) {
+    return get('standard-sync/stores/' + storeId + '/recipe-versions');
+  },
+  applyLatestRecipeVersion: function (adoptionId, body) {
+    return post('standard-sync/recipe-adoptions/' + adoptionId + ':apply-latest', body);
+  },
   listAssignees: function (storeId) { return get('stores/' + storeId + '/assignees', { role: 'STORE_MANAGER' }); },
-  createInspection: function (body) { return post('inspections', body); },
-  listInspections: function (query) { return get('inspections', query); },
-  listAllInspections: function (query) { return listAll('inspections', query); },
-  getInspection: function (id) { return get('inspections/' + id); },
-  updateInspection: function (id, body) { return patch('inspections/' + id, body); },
-  addInspectionItem: function (id, body) { return post('inspections/' + id + '/items', body); },
-  updateInspectionItem: function (inspectionId, itemId, body) {
-    return patch('inspections/' + inspectionId + '/items/' + itemId, body);
-  },
-  voidInspectionItem: function (inspectionId, itemId, body) {
-    return remove('inspections/' + inspectionId + '/items/' + itemId, body);
-  },
-  organizeDraft: function (inspectionId, itemId, body) {
-    return post('inspections/' + inspectionId + '/items/' + itemId + ':organize-draft', body, { timeoutMs: 180000 });
-  },
-  confirmIssues: function (inspectionId, itemId, body) {
-    return post('inspections/' + inspectionId + '/items/' + itemId + '/issues:confirm', body);
-  },
-  submitInspection: function (id, body) { return post('inspections/' + id + ':submit', body); },
-  getIssue: function (id) { return get('issues/' + id); },
-  createRectificationTask: function (issueId, body) {
-    return post('issues/' + issueId + '/rectification-tasks', body);
-  },
   listTasks: function (query) { return get('rectification-tasks', query); },
   listAllTasks: function (query) { return listAll('rectification-tasks', query); },
   getTask: function (id) { return get('rectification-tasks/' + id); },
   acceptTask: function (id, body) { return post('rectification-tasks/' + id + ':accept', body); },
   saveSubmissionDraft: function (id, body) { return put('rectification-tasks/' + id + '/submission-draft', body); },
   submitRectification: function (id, body) { return post('rectification-tasks/' + id + ':submit', body); },
-  reviewRectification: function (id, body) { return post('rectification-tasks/' + id + ':review', body); },
   listMedia: function (query) { return get('media-assets', query); },
   listAllMedia: function (query) { return listAll('media-assets', query); },
   listRelatedMedia: function (businessType, businessId, evidenceStage) {

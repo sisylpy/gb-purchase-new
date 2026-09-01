@@ -23,10 +23,11 @@
       </view>
     </view>
 
-    <!-- 下载/上传模板 -->
+    <!-- AI外部报表 / 标准模板 -->
     <view class="tool-btns">
+      <view class="ai-import-top-btn" bindtap="onAiImportExcel">AI导入</view>
       <view class="download-btn" bindtap="onDownloadCombinedTemplate">下载模板</view>
-      <view class="upload-btn" bindtap="onUploadCombinedExcel">上传模板</view>
+      <view class="upload-btn" bindtap="onUploadCombinedExcel">标准导入</view>
     </view>
   </view>
 
@@ -251,6 +252,132 @@
     <view class="center-content flex-column" style="padding-top: 200rpx;">
       <image class="empty_image" src="/images/cart-Empty.png"></image>
       <text class="big">无数据</text>
+    </view>
+  </view>
+
+  <!-- AI经营日报识别结果：未确认前不写入任何业务数据 -->
+  <view class="ai-import-modal" wx:if="{{showAiImportPreview && aiImportPreview}}" catchtouchmove="noopAiImport">
+    <view class="ai-import-mask" bindtap="onCloseAiImportPreview"></view>
+    <view class="ai-import-panel">
+      <view class="ai-import-header">
+        <view>
+          <view class="ai-import-title">AI经营日报识别</view>
+          <view class="ai-import-file">{{aiImportPreview.fileName}}</view>
+        </view>
+        <view class="ai-import-close" bindtap="onCloseAiImportPreview">×</view>
+      </view>
+
+      <scroll-view class="ai-import-scroll" scroll-y="true">
+        <view class="ai-import-state {{aiImportPreview.canCommit ? 'ai-import-state--ready' : 'ai-import-state--error'}}">
+          <view class="ai-import-state__title">
+            {{aiImportPreview.canCommit ? '核对完成，可以导入' : '导入未完成'}}
+          </view>
+          <view class="ai-import-state__desc" wx:if="{{!aiImportPreview.canCommit}}">
+            发现 {{aiImportPreview.summary.errorCount}} 个问题，本次尚未写入任何数据
+          </view>
+          <view class="ai-import-state__desc" wx:else>
+            菜品、销量、单价和营业额已经完成交叉核对
+          </view>
+        </view>
+
+        <view class="ai-import-summary">
+          <view class="ai-import-summary__item">
+            <text class="ai-import-summary__value">{{aiImportPreview.summary.sourceDishRows}}</text>
+            <text class="ai-import-summary__label">菜品行</text>
+          </view>
+          <view class="ai-import-summary__item">
+            <text class="ai-import-summary__value ai-import-summary__value--green">{{aiImportPreview.summary.matchedDishRows}}</text>
+            <text class="ai-import-summary__label">已匹配</text>
+          </view>
+          <view class="ai-import-summary__item">
+            <text class="ai-import-summary__value ai-import-summary__value--orange">{{aiImportPreview.summary.unresolvedDishRows}}</text>
+            <text class="ai-import-summary__label">待处理</text>
+          </view>
+          <view class="ai-import-summary__item">
+            <text class="ai-import-summary__value">{{aiImportPreview.summary.dateCount}}</text>
+            <text class="ai-import-summary__label">营业日</text>
+          </view>
+        </view>
+
+        <view class="ai-import-section" wx:if="{{aiImportPreview.notices.length > 0}}">
+          <view class="ai-import-section__title">识别说明</view>
+          <view class="ai-import-notice" wx:for="{{aiImportPreview.notices}}" wx:key="*this">• {{item}}</view>
+        </view>
+
+        <view class="ai-import-section" wx:if="{{aiImportPreview.issues.length > 0}}">
+          <view class="ai-import-section__title">需要处理（{{aiImportPreview.issues.length}}）</view>
+          <view class="ai-import-issue" wx:for="{{aiImportPreview.issues}}" wx:key="index" wx:for-item="problem">
+            <view class="ai-import-issue__top">
+              <text class="ai-import-issue__dish">{{problem.externalDishName || problem.code}}</text>
+              <text class="ai-import-issue__position" wx:if="{{problem.sheetName}}">
+                {{problem.sheetName}}{{problem.rowNumber ? ' · 第' + problem.rowNumber + '行' : ''}}
+              </text>
+            </view>
+            <view class="ai-import-issue__message">{{problem.message}}</view>
+            <view class="ai-import-issue__action">建议：{{problem.action}}</view>
+            <view class="ai-import-candidates" wx:if="{{problem.candidates.length > 0}}">
+              <text class="ai-import-candidates__label">可能对应：</text>
+              <text class="ai-import-candidate" wx:for="{{problem.candidates}}" wx:key="foodId" wx:for-item="candidate">
+                {{candidate.foodName}}{{index < problem.candidates.length - 1 ? '、' : ''}}
+              </text>
+            </view>
+          </view>
+        </view>
+
+        <view class="ai-import-section" wx:if="{{aiImportPreview.dailyRows.length > 0}}">
+          <view class="ai-import-section__title">营业额核对</view>
+          <view class="ai-import-day" wx:for="{{aiImportPreview.dailyRows}}" wx:key="date" wx:for-item="day">
+            <view class="ai-import-day__top">
+              <text class="ai-import-day__date">{{day.date}}</text>
+              <text class="ai-import-day__status {{day.status === 'READY' ? 'is-ready' : 'is-error'}}">
+                {{day.status === 'READY' ? '已核对' : '有问题'}}
+              </text>
+            </view>
+            <view class="ai-import-day__numbers">
+              <text>菜品 {{day.dishCount}} 道</text>
+              <text>菜品营业额 ¥{{day.calculatedDineInRevenue}}</text>
+              <text>总营业额 ¥{{day.calculatedTotalRevenue}}</text>
+            </view>
+            <view class="ai-import-day__declared" wx:if="{{day.declaredTotalRevenue !== null}}">
+              Excel合计 ¥{{day.declaredTotalRevenue}}
+              <text wx:if="{{day.difference !== null}}"> · 差额 ¥{{day.difference}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="ai-import-section" wx:if="{{aiImportPreview.dishRows.length > 0}}">
+          <view class="ai-import-section__title">菜品识别明细</view>
+          <view class="ai-import-dish" wx:for="{{aiImportPreview.dishRows}}" wx:key="index" wx:for-item="dish">
+            <view class="ai-import-dish__main">
+              <view class="ai-import-dish__name">
+                <text>{{dish.externalDishName}}</text>
+                <text class="ai-import-dish__arrow" wx:if="{{dish.systemDishName}}"> → {{dish.systemDishName}}</text>
+              </view>
+              <text class="ai-import-dish__status {{dish.status === 'MATCHED' ? 'is-ready' : 'is-error'}}">
+                {{dish.status === 'MATCHED' ? '已匹配' : '未通过'}}
+              </text>
+            </view>
+            <view class="ai-import-dish__meta">
+              {{dish.date || '日期未识别'}} · 销量 {{dish.quantity || '-'}}
+              <text wx:if="{{dish.unitPrice !== null}}"> · ¥{{dish.unitPrice}}/份</text>
+              <text wx:if="{{dish.lineAmount !== null}}"> · ¥{{dish.lineAmount}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="ai-import-scroll-bottom"></view>
+      </scroll-view>
+
+      <view class="ai-import-footer" wx:if="{{aiImportPreview.canCommit}}">
+        <view class="ai-import-footer__ghost" bindtap="onCloseAiImportPreview">取消</view>
+        <view class="ai-import-footer__primary" bindtap="onCommitAiImport">
+          {{aiImportSubmitting ? '正在导入...' : '确认导入'}}
+        </view>
+      </view>
+      <view class="ai-import-footer" wx:else>
+        <view class="ai-import-footer__ghost" bindtap="onOpenAiImportFailureReport">下载错误明细</view>
+        <view class="ai-import-footer__primary" bindtap="onRetryAiImport">修改后重新上传</view>
+      </view>
     </view>
   </view>
 

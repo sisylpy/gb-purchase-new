@@ -70,7 +70,8 @@
     class="submit-btn {{canRegister ? 'submit-btn-active' : 'submit-btn-disabled'}}"  
     open-type="chooseAvatar"
     bindchooseavatar="onChooseAvatar"
-    disabled="{{!canRegister}}"
+    loading="{{registering}}"
+    disabled="{{!canRegister || registering}}"
   >
     提交注册
   </button>

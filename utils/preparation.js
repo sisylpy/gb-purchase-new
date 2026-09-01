@@ -196,6 +196,7 @@ function errorTitle(error) {
 }
 
 function showError(error) {
+  if (error && error.authenticationFailure) return;
   var message = error && error.message ? error.message : '请求失败，请稍后重试';
   wx.showModal({
     title: errorTitle(error),

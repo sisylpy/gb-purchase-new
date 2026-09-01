@@ -36,7 +36,7 @@
           <view class="gem-hero-deco gem-hero-deco-star gem-hero-deco-star-2">✦</view>
           <view class="gem-hero-inner">
             <view class="gem-hero-avatar-wrap">
-              <image class="gem-hero-avatar" src="{{url + 'uploadImage/imPurchase/300jj.png'}}" mode="aspectFit"></image>
+              <image class="gem-hero-avatar" src="{{url + 'uploadImage/imPurchase/900whole.png'}}" mode="aspectFit"></image>
             </view>
             <view class="gem-hero-text">
               <text class="gem-hero-title">{{heroTitle}}</text>
@@ -80,6 +80,9 @@
             </view>
           </view>
         </view>
+        <view class="gem-human-hint">
+          <text>需要人工帮助？对我说“转人工”即可</text>
+        </view>
       </view>
     </block>
 
@@ -112,6 +115,20 @@
               <view wx:elif="{{item.content && !item.answerPreview && (!item.cards || item.cards.length === 0)}}" class="gem-ai-stream-row">
                 <text class="gem-bubble-text">{{item.content}}</text>
                 <view class="gem-stream-cursor" wx:if="{{item.isLoading}}"></view>
+              </view>
+
+              <!-- 用户主动要求转人工时，在对话中按需展示客服入口 -->
+              <view wx:if="{{item.showCustomerService}}" class="gem-service-card">
+                <view class="gem-service-copy">
+                  <text class="gem-service-title">人工客服</text>
+                  <text class="gem-service-desc">进入企业微信，与客服人员继续沟通</text>
+                </view>
+                <view
+                  class="gem-service-action"
+                  catchtap="onCustomerServiceTap"
+                  hover-class="gem-service-action-hover"
+                  aria-label="打开企业微信人工客服"
+                >联系人工客服</view>
               </view>
 
               <!-- 业务卡片渲染（cards 经 cardNormalizer 预构建 cardData） -->
@@ -211,13 +228,17 @@
         <view class="gem-side-btn" catchtap="onOpenDrawerTap" hover-class="gem-side-btn-hover">
           <text class="gem-side-btn-icon">☰</text>
         </view>
-        <input
+        <textarea
           class="gem-input gem-input--row"
-          type="text"
           placeholder="问问Ai助手"
           placeholder-class="gem-input-ph"
           value="{{inputValue}}"
-          cursor-spacing="16"
+          auto-height="{{true}}"
+          fixed="{{true}}"
+          maxlength="-1"
+          disable-default-padding="{{true}}"
+          show-confirm-bar="{{false}}"
+          cursor-spacing="24"
           adjust-position="{{true}}"
           disabled="{{isSending}}"
           focus="{{inputFocus}}"
@@ -226,7 +247,7 @@
           bindinput="onInputChange"
           bindconfirm="onSendTap"
           confirm-type="send"
-        />
+        ></textarea>
         <view
           wx:if="{{isSending}}"
           class="gem-stop-btn"

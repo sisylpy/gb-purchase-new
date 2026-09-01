@@ -4,6 +4,7 @@ var apiUrl = require('../../../../config/index.js');
 var dateUtils = require('../../../../lib/dateUtil');
 var orderApi = require('../../../../services/depOrder.js');
 var stockReduceKind = require('../../../../lib/stockReduceKind.js');
+var autoOrderDelete = require('../../../../utils/autoOrderDelete.js');
 
 // ========================
 // 本页面接口统一使用 services/depOrder.js
@@ -2409,9 +2410,21 @@ Page({
 
     })
 
+    var order = this.data.applyItem;
+    autoOrderDelete.chooseDeleteMode(order).then(cancelAutoOrder => {
+      this._deleteApplyApi(cancelAutoOrder);
+    }).catch(err => {
+      if (!err || !err.cancelled) {
+        wx.showToast({ title: '请选择删除方式', icon: 'none' });
+      }
+    });
+  },
+
+  _deleteApplyApi(cancelAutoOrder) {
+
     var that = this;
     load.showLoading("删除订单");
-    orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(res => {
+    orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId, cancelAutoOrder).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
 

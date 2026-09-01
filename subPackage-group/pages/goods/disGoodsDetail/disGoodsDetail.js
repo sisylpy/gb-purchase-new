@@ -17,7 +17,9 @@ Page({
        navBarHeight: globalData.navBarHeight * globalData.rpxR,
      });
 
-    this._getGoodsDetail();
+    if (!this.data.specOnly) {
+      this._getGoodsDetail();
+    }
   },
 
   /**
@@ -32,6 +34,7 @@ Page({
     gbDepId: "",
     nxGoodsId: -1,
     supplierId: -1,
+    specOnly: false,
     // items:[
     //   {
     //     name: '2',
@@ -73,9 +76,11 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    var specOnly = options.specOnly === '1';
     this.setData({
       url: config.server,
       disGoodsId: options.id,
+      specOnly: specOnly,
     })
     var userInfo = wx.getStorageSync('userInfo');
     if (userInfo) {
@@ -102,21 +107,23 @@ Page({
       this.setData({
         goods: value
       })
-      if (value.gbDepartmentEntity !== null) {
+      if (!specOnly && value.gbDepartmentEntity) {
         this.setData({
           toDepInfo: value.gbDepartmentEntity,
           gbDepId: value.gbDgGbDepartmentId,
           nxDisId: value.gbDgNxDistributerId,
         })
         this._showWhichType(this.data.toDepInfo.gbDepartmentType);
-      } else {
+      } else if (!specOnly) {
         this.setData({
           toDepInfo: null
         })
       }
     }
 
-    this._getSupplier();
+    if (!specOnly) {
+      this._getSupplier();
+    }
 
   },
 
@@ -709,6 +716,10 @@ Page({
 
 
   updateComGoods(e) {
+    if (this.data.specOnly) {
+      this._saveGoodsSpecification();
+      return;
+    }
     if (this.data.canSave) {
       var goods = this.data.goods;
       goods.gbDgGbDepartmentId = this.data.gbDepId;
@@ -745,6 +756,54 @@ Page({
     }
 
 
+  },
+
+  _saveGoodsSpecification() {
+    var goods = this.data.goods || {};
+    var goodsId = Number(goods.gbDistributerGoodsId || this.data.disGoodsId);
+    var packUnit = String(goods.gbDgGoodsStandardname || '').trim();
+    var standardWeight = String(goods.gbDgGoodsStandardWeight || '').trim();
+    var specNumber = parseFloat(standardWeight.replace(/[^\d.]/g, ''));
+    if (!goodsId) {
+      wx.showToast({ title: '商品信息不完整', icon: 'none' });
+      return;
+    }
+    if (!packUnit) {
+      wx.showToast({ title: '请填写采购单位', icon: 'none' });
+      return;
+    }
+    if (!(specNumber > 0)) {
+      wx.showToast({ title: '请填写正确的规格重量', icon: 'none' });
+      return;
+    }
+    load.showLoading('保存商品规格');
+    goodsApi.disUpdateDisGoodsBasicGb({
+      gbDistributerGoodsId: goodsId,
+      gbDgGoodsName: goods.gbDgGoodsName,
+      gbDgGoodsStandardname: packUnit,
+      gbDgGoodsStandardWeight: standardWeight,
+    }).then(res => {
+      load.hideLoading();
+      if (res.result.code != 0) {
+        wx.showToast({ title: res.result.msg || '商品规格保存失败', icon: 'none' });
+        return;
+      }
+      var savedGoods = Object.assign({}, goods, res.result.data || {}, {
+        gbDgGoodsStandardname: packUnit,
+        gbDgGoodsStandardWeight: standardWeight,
+      });
+      wx.setStorageSync('disGoods', savedGoods);
+      var pages = getCurrentPages();
+      var prevPage = pages[pages.length - 2];
+      if (prevPage) prevPage.setData({ update: true });
+      wx.navigateBack({ delta: 1 });
+    }).catch(error => {
+      load.hideLoading();
+      wx.showToast({
+        title: (error && error.errMsg) || '商品规格保存失败',
+        icon: 'none',
+      });
+    });
   },
 
 

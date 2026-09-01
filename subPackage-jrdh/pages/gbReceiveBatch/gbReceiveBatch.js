@@ -60,6 +60,7 @@ Page({
     batch: {
       gbDPGEntities: []
     },
+    hasReceivedGoods: false,
     from: "",
     buySubtotalSum: 0,
   },
@@ -75,6 +76,19 @@ Page({
       }
     }
     return Math.round(sum * 100) / 100;
+  },
+
+  /** 已收货：采购商品已入库/结账，或其下任一餐馆订单状态已变为收货完成。 */
+  _isPurchaseGoodsReceived(item) {
+    if (!item) return false;
+    if (Number(item.gbDpgStatus) >= 4) return true;
+    var orders = Array.isArray(item.gbDepartmentOrdersEntities)
+      ? item.gbDepartmentOrdersEntities
+      : [];
+    for (var i = 0; i < orders.length; i++) {
+      if (Number(orders[i] && orders[i].gbDoStatus) >= 4) return true;
+    }
+    return false;
   },
 
   onLoad: function (options) {
@@ -145,13 +159,17 @@ Page({
             }
           }
 
+          var hasReceivedGoods = false;
           for (var i = 0; i < this.data.batch.gbDPGEntities.length; i++) {
             var item = this.data.batch.gbDPGEntities[i];
             item.gbDpgIsCheck = orderGoodsCheck.computePurGoodsIsCheck(item);
+            item.gbDpgIsReceived = this._isPurchaseGoodsReceived(item);
+            if (item.gbDpgIsReceived) hasReceivedGoods = true;
           }
           this.setData({
             waitWeightCount: waitWeightCount,
             batch: this.data.batch,
+            hasReceivedGoods: hasReceivedGoods,
             buySubtotalSum: this._buySubtotalSumFromBatch(this.data.batch),
           })
 
@@ -182,14 +200,28 @@ Page({
         indexJrdhUserLoginJj(res.code)
           .then((res) => {
             load.hideLoading();
+            if (res.result.code !== 0 || !res.result.data || !res.result.data.userInfo) {
+              wx.showToast({
+                title: res.result.msg || '供货商登录失败',
+                icon: 'none',
+              });
+              return;
+            }
             this.setData({
               jrdhUserInfo: res.result.data.userInfo,
               sellerId: res.result.data.userInfo.nxJrdhUserId,
             })
             wx.setStorageSync('jrdhUserInfo', res.result.data.userInfo);
             this._getInitData();
+          }).catch(() => {
+            load.hideLoading();
+            wx.showToast({ title: '供货商登录失败', icon: 'none' });
           })
-      }
+      },
+      fail: () => {
+        load.hideLoading();
+        wx.showToast({ title: '微信登录失败', icon: 'none' });
+      },
     })
   },
 

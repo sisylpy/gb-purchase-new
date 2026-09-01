@@ -22,12 +22,21 @@
         wx:key="gbDepartmentOrdersId"
       >
         <view class="dept-col dept-col-name">
-          <block wx:if="{{orders.gbDoParentDepartmentName}}">
-            <text>{{orders.gbDoParentDepartmentName}} · {{orders.gbDoOrderDepartmentName}}</text>
-          </block>
-          <block wx:else>
-            <text>{{orders.gbDoOrderDepartmentName}}</text>
-          </block>
+          <view class="dept-order-name-line">
+            <block wx:if="{{orders.gbDoParentDepartmentName}}">
+              <text>{{orders.gbDoParentDepartmentName}} · {{orders.gbDoOrderDepartmentName}}</text>
+            </block>
+            <block wx:else>
+              <text>{{orders.gbDoOrderDepartmentName}}</text>
+            </block>
+            <view
+              class="nx-delivery-linked-badge"
+              wx:if="{{orders.gbDoNxDistributerId > 0 && orders.gbDoNxDepartmentOrderId > 0}}"
+            >
+              <image src="/images/delivery.png" class="nx-delivery-linked-icon" mode="aspectFit" />
+              <text>已转配送</text>
+            </view>
+          </view>
         </view>
         <view class="dept-col dept-col-qty">
           <text wx:if="{{fmt.hasOrderQtyDisplay(orders, purItem)}}">{{fmt.orderQtyDisplay(orders, purItem)}}</text>
@@ -40,6 +49,13 @@
         <view class="dept-col dept-col-sub">
           <text wx:if="{{fmt.isPositiveNum(orders.gbDoSubtotal)}}">¥{{orders.gbDoSubtotal}}</text>
           <text wx:else class="text-danger">-</text>
+        </view>
+        <view
+          class="dept-order-remark"
+          wx:if="{{orders.gbDoRemark && orders.gbDoRemark !== 'null'}}"
+        >
+          <text class="dept-order-remark-label">订货备注</text>
+          <text class="dept-order-remark-content">{{orders.gbDoRemark}}</text>
         </view>
       </view>
     </view>
@@ -78,6 +94,13 @@
             <block wx:else>
               <text class="mr-10">{{orders.gbDoOrderDepartmentName}}</text>
             </block>
+            <view
+              class="nx-delivery-linked-badge nx-delivery-linked-badge-simple"
+              wx:if="{{orders.gbDoNxDistributerId > 0 && orders.gbDoNxDepartmentOrderId > 0}}"
+            >
+              <image src="/images/delivery.png" class="nx-delivery-linked-icon" mode="aspectFit" />
+              <text>已转配送</text>
+            </view>
             <text class="mainColor">{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
             <block wx:if="{{fmt.hasOrderScaleSpecLabel(orders, item)}}">
               <text class="font-md">{{fmt.orderScaleSpecLabel(orders, item)}}</text>

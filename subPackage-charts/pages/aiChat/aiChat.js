@@ -2,6 +2,7 @@
  * AI 对话页（算账版）— 布局与交互参考 Google Gemini 浅色客户端
  *
  * 接口（新版 Run API）：
+ * - listAdvisors()                      GET ai/advisors（按稳定 code 解析主键）
  * - getAdvisorDetail(advisorId)        GET ai/advisors/{id}?scene=MINIAPP（统一顾问详情，含推荐问题）
  * - createAiRun(payload)               POST /ai/runs
  * - connectAiRunSse(runId, handlers)   GET  /ai/runs/{runId}/events（SSE 命名事件流）
@@ -19,12 +20,22 @@ var workRecordDraftUtil = require('../../utils/workRecordDraftUtil');
 
 
 var MENU_OPERATION_ADVISOR_ID = aiChatHelpers.MENU_OPERATION_ADVISOR_ID;
+var DEFAULT_ADVISOR_CODE = aiChatHelpers.DEFAULT_ADVISOR_CODE;
+var MENU_OPERATION_ADVISOR_CODE = aiChatHelpers.MENU_OPERATION_ADVISOR_CODE;
+var findAdvisorByCode = aiChatHelpers.findAdvisorByCode;
 var extractSuggestedTopicsPayload = aiChatHelpers.extractSuggestedTopicsPayload;
 var normalizeSuggestedTopic = aiChatHelpers.normalizeSuggestedTopic;
 var buildRunPayloadBase = aiChatHelpers.buildRunPayloadBase;
 var normalizeConversationRow = aiChatHelpers.normalizeConversationRow;
 var isWorkRecordConversation = aiChatHelpers.isWorkRecordConversation;
 var cleanContextSummary = aiChatHelpers.cleanContextSummary;
+
+/** 仅识别明确的人工客服诉求，避免把“人工智能”等普通问题误判为转人工。 */
+function isCustomerServiceRequest(text) {
+  var normalized = String(text || '').replace(/\s+/g, '');
+  if (!normalized) return false;
+  return /(转人工|人工客服|真人客服|人工服务|找人工|联系人工|接入人工|转接人工|找客服|联系客服|接入客服|转接客服|客服入口|客服链接|客服在哪|怎么找客服)/.test(normalized);
+}
 
 Page({
   data: {
@@ -34,7 +45,7 @@ Page({
     userId: 0,
     userInitial: '?',
     heroTitle: '你好，我是AI助手',
-    heroSubtitle: '可以帮你看经营、库存、采购，还能直接回答问题',
+    heroSubtitle: '可以帮你看采购、库存、菜单和整体经营，还能直接回答问题',
     greetLine1: '你好',
     conversationId: null,
     isLoading: true,
@@ -66,8 +77,10 @@ Page({
     currentRunId: null,
     /** 页面标题（如 "菜单经营顾问"），空则使用默认 "经营看板" */
     pageTitle: '',
-    /** 智能体 ID，用于加载推荐问题；由 URL 参数 advisorId 传入 */
+    /** 智能体数据库主键；可兼容 URL advisorId，也可由 advisorCode 动态解析 */
     advisorId: null,
+    /** 智能体稳定业务键；数据库重建后仍保持不变 */
+    advisorCode: DEFAULT_ADVISOR_CODE,
     /** 是否展示调试 JSON */
     showDebugJson: true,
     /** 已记入店长日志的卡片 key 集合（防重复） */
@@ -118,18 +131,22 @@ Page({
     }
     var greetLine1 = nick ? nick + '，你好' : '你好';
     var heroTitle = '你好，我是AI助手';
-    var heroSubtitle = '可以帮你看经营、库存、采购，还能直接回答问题';
+    var heroSubtitle = '可以帮你看采购、库存、菜单和整体经营，还能直接回答问题';
 
-    // 从 URL 参数解析 advisorId 与 pageTitle（菜单经营顾问等固定入口传入）
+    // 兼容旧 advisorId，同时优先支持不会随数据库重建变化的 advisorCode。
     var advisorId = null;
     if (options.advisorId) {
       var parsed = Number(options.advisorId);
       if (!isNaN(parsed) && parsed > 0) advisorId = parsed;
     }
+    var advisorCode = options.advisorCode
+      ? decodeURIComponent(options.advisorCode).trim().toUpperCase()
+      : '';
+    if (!advisorId && !advisorCode) advisorCode = DEFAULT_ADVISOR_CODE;
     var pageTitle = options.pageTitle ? decodeURIComponent(options.pageTitle) : '';
 
     // 菜单模式下调整问候语
-    if (advisorId === MENU_OPERATION_ADVISOR_ID) {
+    if (advisorCode === MENU_OPERATION_ADVISOR_CODE || advisorId === MENU_OPERATION_ADVISOR_ID) {
       greetLine1 = '菜单经营顾问';
       heroTitle = '你好，我是菜单经营顾问';
       heroSubtitle = '可以帮你看菜单整体经营、菜品销量与毛利情况';
@@ -156,11 +173,12 @@ Page({
       runPayloadBase: payload,
       isLoading: false,
       advisorId: advisorId,
+      advisorCode: advisorCode,
       pageTitle: pageTitle,
     });
 
-    // 直接传参，避免 setData 异步导致 that.data.advisorId 尚未更新
-    that._loadTopics(advisorId);
+    // 直接传参，避免 setData 异步导致页面数据尚未更新。
+    that._loadTopics(advisorId, advisorCode);
   },
 
   onUnload: function () {
@@ -169,28 +187,22 @@ Page({
 
   /**
    * 拉取推荐问题（老板常问）
-   * @param {number|null} [forcedAdvisorId] 外部传入的 advisorId（如菜单顾问13），优先使用
+   * @param {number|null} [forcedAdvisorId] 兼容旧入口传入的数据库主键
+   * @param {string} [forcedAdvisorCode] 稳定顾问 code（推荐）
    */
-  _loadTopics: function (forcedAdvisorId) {
+  _loadTopics: function (forcedAdvisorId, forcedAdvisorCode) {
     var that = this;
-    // 优先使用外部传入的 advisorId（避免 setData 异步时序问题）
-    // 未传入时回退到原有逻辑：门店端用 departmentId，集团端用 distributerId
     var advisorId = forcedAdvisorId || that.data.advisorId;
-    if (!advisorId) {
-      advisorId = that.data.departmentId;
-      var runBase = that.data.runPayloadBase;
-      if (runBase && runBase.scopeMode === 'GROUP' && runBase.distributerId) {
-        advisorId = runBase.distributerId;
-      }
-    }
-    if (!advisorId) {
-      that.setData({ topics: [], topicPageTitle: '', topicPageSubtitle: '' });
-      return;
-    }
-    ai
-      .getAdvisorDetail(advisorId)
+    var advisorCode = String(forcedAdvisorCode || that.data.advisorCode || DEFAULT_ADVISOR_CODE)
+      .trim()
+      .toUpperCase();
+
+    var loadDetail = function (resolvedAdvisorId) {
+      return ai.getAdvisorDetail(resolvedAdvisorId)
       .then(function (res) {
         var result = res.result;
+        var detail = result && result.data;
+        that._applyAdvisorIdentity(detail || { advisorId: resolvedAdvisorId, code: advisorCode });
         var rawTopics = extractSuggestedTopicsPayload(result);
         if (!rawTopics || !rawTopics.length) {
           that.setData({
@@ -210,12 +222,53 @@ Page({
           topicPageSubtitle: '',
           topics: topics,
         });
-      })
+      });
+    };
+
+    var requestPromise;
+    if (advisorId) {
+      requestPromise = loadDetail(advisorId);
+    } else {
+      requestPromise = ai.listAdvisors().then(function (res) {
+        var advisor = findAdvisorByCode(res && res.result, advisorCode);
+        var resolvedId = advisor && Number(advisor.advisorId || advisor.id);
+        if (!resolvedId) {
+          throw new Error('advisor code not found: ' + advisorCode);
+        }
+        that._applyAdvisorIdentity(advisor);
+        return loadDetail(resolvedId);
+      });
+    }
+
+    return requestPromise
       .catch(function () {
         // 接口失败时隐藏推荐问题模块，不影响聊天
-        console.log('[AI对话] 推荐问题加载失败，隐藏模块');
+        console.log('[AI对话] 推荐问题加载失败，隐藏模块，advisorCode=' + advisorCode);
         that.setData({ topics: [], topicPageTitle: '', topicPageSubtitle: '' });
       });
+  },
+
+  _applyAdvisorIdentity: function (advisor) {
+    advisor = advisor || {};
+    var advisorId = Number(advisor.advisorId || advisor.id || 0) || null;
+    var advisorCode = String(advisor.advisorCode || advisor.code || this.data.advisorCode || '')
+      .trim()
+      .toUpperCase();
+    var advisorName = advisor.advisorName || advisor.name || '';
+    var updates = {
+      advisorId: advisorId,
+      advisorCode: advisorCode,
+    };
+    if (advisorCode === MENU_OPERATION_ADVISOR_CODE) {
+      updates.greetLine1 = '菜单经营顾问';
+      updates.heroTitle = '你好，我是菜单经营顾问';
+      updates.heroSubtitle = '可以帮你看菜单整体经营、菜品销量与毛利情况';
+    } else if (this.data.pageTitle) {
+      updates.heroTitle = '你好，我是' + this.data.pageTitle;
+    } else if (advisorName) {
+      updates.heroTitle = '你好，我是' + advisorName;
+    }
+    this.setData(updates);
   },
 
   /** 将接口消息列表转为页面消息结构 */
@@ -267,6 +320,30 @@ Page({
   onOpenDrawerTap: function () {
     this.setData({ drawerOpen: true });
     this._loadConversationHistoryList();
+  },
+
+  /** 打开京采账本企业微信人工客服。 */
+  onCustomerServiceTap: function () {
+    if (typeof wx.openCustomerServiceChat !== 'function') {
+      wx.showToast({ title: '请更新微信后联系客服', icon: 'none', duration: 2500 });
+      return;
+    }
+    try {
+      wx.openCustomerServiceChat({
+        extInfo: {
+          url: 'https://work.weixin.qq.com/kfid/kfce23df54c35579b3f',
+        },
+        corpId: 'ww9778dea409045fe6',
+        fail: function (error) {
+          var message = error && error.errMsg ? String(error.errMsg) : '';
+          if (message.indexOf('cancel') === -1) {
+            wx.showToast({ title: '客服暂时无法打开，请稍后重试', icon: 'none', duration: 2500 });
+          }
+        },
+      });
+    } catch (error) {
+      wx.showToast({ title: '请更新微信后联系客服', icon: 'none', duration: 2500 });
+    }
   },
 
   onDrawerMaskTap: function () {
@@ -479,6 +556,11 @@ Page({
       return;
     }
 
+    if (isCustomerServiceRequest(message)) {
+      that._showCustomerServiceReply(message);
+      return;
+    }
+
     // 关闭上一次 SSE
     that._cleanupSse();
 
@@ -553,6 +635,50 @@ Page({
             that._sending = false;
             that.setData({ isSending: false, streamingStages: [] });
           });
+      }
+    );
+  },
+
+  /** 用户明确要求转人工时，直接在对话中提供企微客服入口。 */
+  _showCustomerServiceReply: function (message) {
+    var that = this;
+    var now = Date.now();
+    that._cleanupSse();
+    that._sending = false;
+    var userMsg = {
+      id: now,
+      role: 'user',
+      content: message,
+      time: '',
+      richNodes: '',
+    };
+    var aiMsg = {
+      id: now + 1,
+      role: 'assistant',
+      content: '好的，我帮你联系人工客服。',
+      isLoading: false,
+      time: '',
+      richNodes: '',
+      showCustomerService: true,
+      _realMessageReady: false,
+    };
+    that.setData(
+      {
+        historyLoaded: true,
+        expandedTopicId: '',
+        drawerOpen: false,
+        drawerExpandedTopicId: '',
+        inputValue: '',
+        inputFocus: false,
+        inputSelectionStart: -1,
+        inputSelectionEnd: -1,
+        isSending: false,
+        messages: that.data.messages.concat([userMsg, aiMsg]),
+        streamingStages: [],
+        currentRunId: null,
+      },
+      function () {
+        that._scrollToBottom();
       }
     );
   },

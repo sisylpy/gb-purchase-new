@@ -26,6 +26,7 @@ Page({
       depInfo: depInfoValue,
       depFatherId: depInfoValue.gbDepartmentId,
       depId: depInfoValue.gbDepartmentId,
+      isCentralKitchen: Number(depInfoValue.gbDepartmentType) === 5,
     })
 
    
@@ -111,6 +112,16 @@ bindKeyInput(e){
     wx.navigateBack({
       delta: 1
     });
+  },
+
+  // 仅中央厨房部门（gbDepartmentType=5）可进入复杂配料功能
+  openCentralPreparation() {
+    wx.navigateTo({ url: '/subPackage-preparation/pages/home/home' });
+  },
+
+  // 普通部门进入轻量备料（列表、添加、操作）
+  openStorePreparation() {
+    wx.navigateTo({ url: '/subPackage-preparation/pages/storeHome/storeHome' });
   },
 
 

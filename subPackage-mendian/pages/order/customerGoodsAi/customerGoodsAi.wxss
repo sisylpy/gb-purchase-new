@@ -114,15 +114,6 @@
   overflow-wrap: break-word;
 }
 
-/* 补货参考内整行文案（无左侧图标） */
-.customer-ai-block-line {
-  width: 100%;
-  box-sizing: border-box;
-  line-height: 1.5;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
 .goods_back{
   background-color: rgb(255, 251, 242);
   border: 2px solid rgb(214, 210, 191);

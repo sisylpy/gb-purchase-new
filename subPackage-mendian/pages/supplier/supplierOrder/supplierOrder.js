@@ -12,6 +12,20 @@ import {
   depGetAllSupplier
 } from '../../../../services/supplier'
 
+function normalizeNxResponseData(data) {
+  if (data && typeof data === 'object') {
+    return data;
+  }
+  if (typeof data === 'string') {
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      return {};
+    }
+  }
+  return {};
+}
+
 Page({
 
 
@@ -115,8 +129,41 @@ _getPurSelArr() {
   };
   load.showLoading("保存订货");
   saveDisPurGoodsBatchGbSupplier(batch).then(res => {
-    load.hideLoading();
-    wx.navigateBack({delta: 1})
+    if (res.result.code != 0) {
+      load.hideLoading();
+      wx.showToast({ title: res.result.msg || '保存订货失败', icon: 'none' });
+      return;
+    }
+    var batchId = Number(res.result.data || 0);
+    var nxDisId = Number(res.result.nxDisId || batch.gbDpbNxDistributerId || 0);
+    if (batchId <= 0 || nxDisId <= 0) {
+      load.hideLoading();
+      wx.navigateBack({delta: 1});
+      return;
+    }
+    wx.request({
+      url: apiUrl.nxApiUrl + 'nxdistributergoods/nxDisImportJczbBatch',
+      method: 'POST',
+      data: { batchId: batchId, nxDisId: nxDisId },
+      header: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
+      dataType: 'json',
+      success: function (nxRes) {
+        load.hideLoading();
+        var nxData = normalizeNxResponseData(nxRes.data);
+        if (Number(nxData.code) === 0) {
+          wx.navigateBack({delta: 1});
+        } else {
+          wx.showToast({
+            title: nxData.msg || '订货已保存，转配送失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: function () {
+        load.hideLoading();
+        wx.showToast({ title: '订货已保存，转配送失败', icon: 'none' });
+      }
+    });
 
   })
 

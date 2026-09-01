@@ -13,12 +13,12 @@
     </view>
 
     <view class="inspection-section">
-      <view class="section-title">巡店发现的问题</view>
+      <view class="section-title">总部发现的问题</view>
       <view class="fact-block"><text class="fact-label">现场事实</text><text>{{issue.description}}</text></view>
       <view class="fact-block"><text class="fact-label">问题分类 / 严重程度</text><text>{{issue.category}} / {{issue.severityText}}</text></view>
       <view class="fact-block"><text class="fact-label">整改要求</text><text>{{task.requirement}}</text></view>
       <view class="fact-block"><text class="fact-label">验收标准</text><text>{{task.acceptanceCriteria}}</text></view>
-      <view class="photo-section" wx:if="{{originalMedia.length}}"><text class="fact-label">巡店发现时的照片</text><inspection-media-uploader value="{{originalMedia}}" editable="{{false}}" /></view>
+      <view class="photo-section" wx:if="{{originalMedia.length}}"><text class="fact-label">问题发现时的照片</text><inspection-media-uploader value="{{originalMedia}}" editable="{{false}}" /></view>
     </view>
 
     <view class="tip tip-red" wx:if="{{task.status === 'REJECTED' && lastReview}}">上一轮已被退回：{{lastReview.reviewComment}}</view>
@@ -42,16 +42,6 @@
         <text class="history-content">{{submission.content || '未填写说明'}}</text>
         <view class="history-media" wx:if="{{submission.media.length}}"><inspection-media-uploader value="{{submission.media}}" editable="{{false}}" /></view>
       </view>
-    </view>
-
-    <view class="inspection-section review-section" wx:if="{{canReview}}">
-      <view class="section-title">巡店员复核</view>
-      <view class="tip tip-green">请对照原始问题、整改要求、验收标准与店长提交照片后作出决定。</view>
-      <view class="form-row"><text class="form-label">通过意见</text><textarea class="form-textarea" value="{{approveComment}}" data-field="approveComment" bindinput="onReviewInput" placeholder="说明达到验收标准的依据" /></view>
-      <view class="form-row"><text class="form-label required">退回原因</text><textarea class="form-textarea" value="{{rejectReason}}" data-field="rejectReason" bindinput="onReviewInput" placeholder="退回时必须填写" /></view>
-      <view class="form-row"><text class="form-label required">需要补充的整改要求</text><textarea class="form-textarea" value="{{rejectRequirement}}" data-field="rejectRequirement" bindinput="onReviewInput" /></view>
-      <view class="form-row"><text class="form-label">复核照片（可选）</text><inspection-media-uploader storeId="{{task.storeId}}" businessType="RECTIFICATION_TASK" businessId="{{taskId}}" mediaStage="REVIEW_EVIDENCE" value="{{reviewMedia}}" editable="{{true}}" bindchange="onReviewMediaChange" /></view>
-      <view class="review-actions"><button class="button button-danger" disabled="{{actionLoading}}" data-decision="REJECT" bindtap="review">退回</button><button class="button button-primary" disabled="{{actionLoading}}" data-decision="APPROVE" bindtap="review">通过</button></view>
     </view>
 
     <view class="inspection-section" wx:if="{{reviews.length}}">

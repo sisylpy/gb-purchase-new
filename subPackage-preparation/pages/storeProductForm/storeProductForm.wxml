@@ -1,14 +1,23 @@
 <view class="prep-page">
-  <back-navbar title="{{editing ? '编辑备料品' : '新增备料品'}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="{{editing ? '编辑基本信息' : '新建中间料'}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
   <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
   <scroll-view wx:else scroll-y class="prep-scroll form-scroll">
-    <view class="prep-section">
-      <view class="prep-form-row"><text class="prep-form-label prep-required">备料品名称</text><input class="prep-input" placeholder="例如：黑料、母馅、葱油" value="{{form.productName}}" bindinput="onNameInput" /></view>
-      <view class="prep-form-row"><text class="prep-form-label prep-required">使用单位</text><picker range="{{units}}" range-key="label" value="{{unitIndex}}" bindchange="onUnitChange"><view class="prep-picker">{{units[unitIndex].label}}</view></picker></view>
-      <view class="prep-form-row switch-row"><view><text class="prep-form-label">启用状态</text><text class="prep-muted">停用后不会删除既有配方和损耗记录</text></view><switch color="#187e6e" checked="{{form.enabled}}" bindchange="onEnabledChange" /></view>
+    <view class="flow-tip" wx:if="{{!editing}}">
+      <text class="flow-step">第 1 步 / 2</text>
+      <text class="flow-title">先填写基本信息</text>
+      <text class="flow-desc">保存后会直接进入标准配方，不会让您自己寻找下一步。</text>
     </view>
-    <view class="prep-tip prep-tip-green">保存后继续维护配方原料和每个使用单位的标准用量。</view>
+    <view class="prep-section">
+      <view class="prep-section-title">{{editing ? '基本信息' : '中间料信息'}}</view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">中间料名称</text><input class="prep-input" placeholder="例如：猪肉母馅、葱油、高汤" value="{{form.productName}}" bindinput="onNameInput" /></view>
+      <view class="prep-form-row">
+        <text class="prep-form-label prep-required">使用单位</text>
+        <picker range="{{units}}" range-key="label" value="{{unitIndex}}" bindchange="onUnitChange"><view class="prep-picker">{{units[unitIndex].label}}</view></picker>
+        <text class="field-help">菜品使用该中间料时采用的计量单位，例如克、毫升或份。</text>
+      </view>
+    </view>
+    <view class="prep-tip" wx:if="{{editing}}">组成原料、标准投料量和标准产出请在「标准配方」中维护。</view>
   </scroll-view>
-  <view class="prep-actions"><button class="prep-button prep-button-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">保存</button></view>
+  <view class="prep-actions"><button class="prep-button prep-button-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">{{editing ? '保存基本信息' : '下一步：配置配方'}}</button></view>
 </view>

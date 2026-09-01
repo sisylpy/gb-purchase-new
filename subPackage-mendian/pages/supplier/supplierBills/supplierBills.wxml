@@ -65,7 +65,7 @@
   <!-- 订单列表容器 -->
   <view class="supplier-bills-container" wx:if="{{billArr.length > 0}}">
     
-    <view class="supplier-bill-item" wx:for="{{billArr}}" wx:for-item="item" wx:key="gbDistributerPurchaseBatchId" hover-class="supplier-bill-hover" bindtap="openBatchDetail" data-id="{{item.gbDistributerPurchaseBatchId}}" data-value="{{item.gbDpbSubtotal}}" data-item="{{item}}">
+    <view class="supplier-bill-item" wx:for="{{billArr}}" wx:for-item="item" wx:key="gbDistributerPurchaseBatchId" hover-class="supplier-bill-hover" bindtap="openBatchDetail" data-id="{{item.gbDistributerPurchaseBatchId}}" data-value="{{item.gbDpbPaySubtotal ? item.gbDpbPaySubtotal : item.gbDpbSubtotal}}" data-item="{{item}}">
       
       <!-- 订单类型标签 -->
       <view class="bill-type-section">
@@ -87,8 +87,12 @@
         </view>
         <view class="bill-right-section">
           <view class="bill-amount-section">
-            <text class="bill-amount-value">¥{{item.gbDpbSubtotal}}</text>
-            <text class="bill-amount-label">订货金额</text>
+            <text class="bill-amount-value">¥{{item.gbDpbPaySubtotal ? item.gbDpbPaySubtotal : item.gbDpbSubtotal}}</text>
+            <text class="bill-amount-label">{{item.gbDpbNxCouponDiscountAmount > 0 ? '' : '订货金额'}}</text>
+            <view class="bill-coupon-detail" wx:if="{{item.gbDpbNxCouponDiscountAmount > 0}}">
+              <text class="bill-origin-amount">原价 ¥{{item.gbDpbSubtotal}}</text>
+              <text class="bill-coupon-line">{{item.gbDpbNxCouponName}} -¥{{item.gbDpbNxCouponDiscountAmount}}</text>
+            </view>
           </view>
           <view class="bill-status-section">
             <view class="status-badge status-pending" wx:if="{{item.gbDpbStatus == 3}}">待结账</view>

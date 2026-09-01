@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "电脑端登录",
-  "usingComponents": {
-    "back-navbar": "/components/back-navbar/back-navbar"
-  }
-}

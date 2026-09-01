@@ -19,9 +19,9 @@
 
     <view class="flex-row p-20" style="background-color: #f0f9ff; width: {{windowWidth}}rpx; ">
       <view class="searchInput flex-row">
-        <input class="" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" style="width:{{windowWidth - 60}}rpx;line-height: 60rpx; height: 60rpx; " placeholder-class="holderClass" bindinput="getString" confirm-type='search' ></input>
-        <view class="" style=" position: absolute; right: 40rpx; z-index: 99999; " bindtap="delSearch" hover-class="hover" wx:if="{{searchString.length > 0}}">
-          <image src="/images/del.png" class="icon"></image>
+        <input class="search-input-control" placeholder="{{placeHolder}}" bindconfirm="getSearchString" value="{{searchString}}" placeholder-class="holderClass" bindinput="getString" confirm-type='search' ></input>
+        <view class="search-clear" bindtap="delSearch" hover-class="hover" wx:if="{{searchString.length > 0}}">
+          <image src="/images/del.png" class="search-clear-icon"></image>
         </view>
       </view>
     </view>
@@ -59,12 +59,12 @@
               <!-- ./empty -->
               <view class="flex-row-default  border-bottom middle p-20 bg-white" wx:for="{{depSearchArr}}" wx:key="gbDepartmentDisGoodsId" wx:for-item="goods" wx:for-index="index">
 
-                <image bindtap="showDialogBtn" data-item="{{goods.gbDistributerGoodsEntity}}" src="{{url + goods.gbDistributerGoodsEntity.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item margin-right" />
+                <image bindtap="showDialogBtn" data-item="{{goods.gbDistributerGoodsEntity}}" src="{{url + goods.gbDistributerGoodsEntity.gbDgNxFatherImg}}" mode="aspectFill" class="goods_item edit-goods-thumb" />
 
                 <view class="flex-row" catch:tap="applyGoodsDep" data-order="{{goods.gbDepartmentOrdersEntity}}" data-disgoods="{{goods.gbDistributerGoodsEntity}}" data-index="{{index}}" data-depgoods="{{goods}}" hover-class="hover">
                   <view class="flex-column " style="width: {{windowWidth - 340}}rpx; ">
                     <view class="middle five-weight nnnn" style="width: {{windowWidth - 340}}rpx; ">
-                      <text>{{goods.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
+                      <text class="edit-goods-name">{{goods.gbDistributerGoodsEntity.gbDgGoodsName}}</text>
                       <block wx:if="{{goods.gbDistributerGoodsEntity.nxDistributerAliasEntities.length > 0}}">
                         <text wx:for="{{goods.gbDistributerGoodsEntity.gbDistributerAliasEntities}}" wx:for-item="alias">@{{alias.gbDaAliasName}}</text>
                       </block>
@@ -138,12 +138,12 @@
               <view class="flex-row-between border-bottom p-20 bg-white" wx:for="{{disSearchArr}}" wx:for-item="sons" wx:for-index="index" wx:key="gbDistributerGoodsId">
 
                 <view class="flex-row-default">
-                  <image bindtap="showDialogBtnNx" data-item="{{sons}}" src="{{sons.nxGoodsFile !== null ? url + sons.nxGoodsFile : '/images/logo.png'}}" mode="aspectFill" class="goods_item margin-right" />
+                  <image bindtap="showDialogBtnNx" data-item="{{sons}}" src="{{sons.nxGoodsFile !== null ? url + sons.nxGoodsFile : '/images/logo.png'}}" mode="aspectFill" class="goods_item edit-goods-thumb" />
                   <view class="flex-row" catch:tap="applyGoods" data-order="{{sons.gbDepartmentOrdersEntity}}" data-nxgoods="{{sons}}" data-index="{{index}}" data-disgoods="{{sons.gbDistributerGoodsEntity}}" data-depgoods="{{sons.gbDepartmentDisGoodsEntity}}" hover-class="{{sons.gbDepartmentOrdersEntity == null ? 'hover' :''}}">
                     <view class="flex-column" style="width: {{windowWidth - 320}}rpx;  ">
                       <view class="flex-row middle">
                         <text class=" {{sons.nxGoodsBrand !== null && sons.nxGoodsBrand.length > 0 ? 'brand' : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand.length > 0 ? sons.nxGoodsBrand : ''}}</text>
-                        <text class=" five-weight margin-right">{{sons.nxGoodsName}}</text>
+                        <text class="edit-goods-name five-weight margin-right">{{sons.nxGoodsName}}</text>
                         <block wx:if="{{sons.nxDistributerAliasEntities.length > 0}}">
                           <text class="small" wx:for="{{sons.nxDistributerAliasEntities}}" wx:for-item="alias">@{{alias.nxDaAliasName}}</text>
                         </block>

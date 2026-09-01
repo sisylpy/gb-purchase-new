@@ -14,8 +14,8 @@ Page({
       { code: 'JIN', label: '斤' }, { code: 'ML', label: '毫升（ml）' },
       { code: 'L', label: '升（L）' }, { code: 'EA', label: '个' },
     ],
-    unitIndex: 2,
-    form: { productName: '', usageUnitCode: 'JIN', enabled: true, rowVersion: 0 },
+    unitIndex: 0,
+    form: { productName: '', usageUnitCode: 'G', enabled: true, rowVersion: 0 },
   },
   onLoad: function (options) {
     var id = options && options.id ? Number(options.id) : null;
@@ -36,18 +36,17 @@ Page({
   },
   onNameInput: function (event) { this.setData({ 'form.productName': event.detail.value }); },
   onUnitChange: function (event) { var idx = Number(event.detail.value || 0); this.setData({ unitIndex: idx, 'form.usageUnitCode': this.data.units[idx].code }); },
-  onEnabledChange: function (event) { this.setData({ 'form.enabled': !!event.detail.value }); },
   submit: function () {
     if (this.data.submitting) return;
-    if (!String(this.data.form.productName || '').trim()) { wx.showToast({ title: '请输入备料品名称', icon: 'none' }); return; }
+    if (!String(this.data.form.productName || '').trim()) { wx.showToast({ title: '请输入中间料名称', icon: 'none' }); return; }
     var that = this;
     this.setData({ submitting: true });
     var action = this.data.editing ? api.updateStoreProduct(this.data.id, this.data.form) : api.createStoreProduct(this.data.form);
     action.then(function (row) {
       that.setData({ submitting: false });
-      wx.showToast({ title: '保存成功', icon: 'success' });
+      wx.showToast({ title: that.data.editing ? '已保存' : '基本信息已保存', icon: 'success' });
       if (that.data.editing) { setTimeout(function () { wx.navigateBack({ delta: 1 }); }, 500); }
-      else { setTimeout(function () { wx.redirectTo({ url: '/subPackage-preparation/pages/storeRecipe/storeRecipe?productId=' + row.id }); }, 500); }
+      else { setTimeout(function () { wx.redirectTo({ url: '/subPackage-preparation/pages/storeRecipe/storeRecipe?productId=' + row.id + '&firstSetup=1' }); }, 500); }
     }).catch(function (error) { that.setData({ submitting: false }); util.showError(error); });
   },
   toBack: function () { wx.navigateBack({ delta: 1 }); },

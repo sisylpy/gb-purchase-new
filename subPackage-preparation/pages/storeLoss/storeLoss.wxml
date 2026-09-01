@@ -3,9 +3,9 @@
   <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
   <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
   <scroll-view wx:else scroll-y class="loss-scroll">
-    <view class="prep-tip">本次损耗将直接计入原料损耗，不产生备料生产批次。</view>
+    <view class="prep-tip">本次损耗将直接计入原料损耗，不产生中间料生产批次。</view>
     <view class="prep-section">
-      <view class="prep-form-row"><text class="prep-form-label prep-required">选择备料品</text><picker range="{{products}}" range-key="productName" value="{{productIndex}}" bindchange="onProductChange"><view class="prep-picker {{product ? '' : 'prep-placeholder'}}">{{product ? product.productName : '请选择已维护配方的备料品'}}</view></picker></view>
+      <view class="prep-form-row"><text class="prep-form-label prep-required">选择中间料</text><picker range="{{products}}" range-key="productName" value="{{productIndex}}" bindchange="onProductChange"><view class="prep-picker {{product ? '' : 'prep-placeholder'}}">{{product ? product.productName : '请选择已完成配方的中间料'}}</view></picker></view>
       <view class="prep-form-row" wx:if="{{product}}"><text class="prep-form-label prep-required">选择实际损耗的配方原料</text><picker range="{{materials}}" range-key="rawGoodsName" value="{{materialIndex}}" bindchange="onMaterialChange"><view class="prep-picker {{material ? '' : 'prep-placeholder'}}">{{material ? material.rawGoodsName : '请选择原料'}}</view></picker></view>
     </view>
     <view class="prep-section" wx:if="{{material}}">

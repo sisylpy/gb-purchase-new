@@ -7,6 +7,27 @@ var GB_DU_ADMIN_STORE_MANAGER_APP = 11;
 var GB_DU_ADMIN_STORE_ORDER_APP = 12;
 
 var MENU_OPERATION_ADVISOR_ID = 13;
+var DEFAULT_ADVISOR_CODE = 'ADV_BOSS';
+var MENU_OPERATION_ADVISOR_CODE = 'MENU_OPERATION';
+
+function extractAdvisorListPayload(result) {
+  if (!result) return [];
+  var code = result.code;
+  if (code !== undefined && code !== 0 && code !== '0') return [];
+  return Array.isArray(result.data) ? result.data : [];
+}
+
+function findAdvisorByCode(result, advisorCode) {
+  var target = String(advisorCode || '').trim().toUpperCase();
+  if (!target) return null;
+  var advisors = extractAdvisorListPayload(result);
+  for (var i = 0; i < advisors.length; i += 1) {
+    var row = advisors[i] || {};
+    var code = String(row.code || row.advisorCode || '').trim().toUpperCase();
+    if (code === target) return row;
+  }
+  return null;
+}
 
 function emojiForTopicId(id) {
   var map = {
@@ -187,6 +208,10 @@ function cleanContextSummary(cs) {
 
 module.exports = {
   MENU_OPERATION_ADVISOR_ID: MENU_OPERATION_ADVISOR_ID,
+  DEFAULT_ADVISOR_CODE: DEFAULT_ADVISOR_CODE,
+  MENU_OPERATION_ADVISOR_CODE: MENU_OPERATION_ADVISOR_CODE,
+  extractAdvisorListPayload: extractAdvisorListPayload,
+  findAdvisorByCode: findAdvisorByCode,
   extractSuggestedTopicsPayload: extractSuggestedTopicsPayload,
   normalizeSuggestedTopic: normalizeSuggestedTopic,
   buildRunPayloadBase: buildRunPayloadBase,

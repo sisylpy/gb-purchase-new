@@ -132,6 +132,13 @@ Page({
       success: (loginRes) => {
         indexJrdhUserLoginJj(loginRes.code).then((res) => {
           load.hideLoading();
+          if (res.result.code !== 0 || !res.result.data || !res.result.data.userInfo) {
+            wx.showToast({
+              title: res.result.msg || '供货商登录失败',
+              icon: 'none',
+            });
+            return;
+          }
           const userInfo = res.result.data.userInfo;
           this.setData({
             jrdhUserInfo: userInfo,
@@ -148,7 +155,14 @@ Page({
             this.restoreSelectedSupplier();
           }
           this._getSupplierBillsGb();
+        }).catch(() => {
+          load.hideLoading();
+          wx.showToast({ title: '供货商登录失败', icon: 'none' });
         });
+      },
+      fail: () => {
+        load.hideLoading();
+        wx.showToast({ title: '微信登录失败', icon: 'none' });
       },
     });
   },

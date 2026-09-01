@@ -75,9 +75,10 @@
                   <view class="font-sl pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
                     已称重
                   </view>
-                  <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
+                  <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4 && order.gbDoStatus == 2}}">
                     <view class="bg-mainColor p-20 radius-20" bind:tap="receiveStock" data-item="{{order}}">收货</view>
                   </view>
+                  <view class="font-sl pt-20 pb-20 text-secondary" wx:elif="{{order.gbDoBuyStatus == 4}}">配送中</view>
                   <view class="p-10" wx:elif="{{order.gbDoBuyStatus == 5}}" bindtap="haveReceive">
                     已收货
                   </view>
@@ -188,9 +189,10 @@
                 <view class="font-sl pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
                   已称重
                 </view>
-                <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
+                <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4 && order.gbDoStatus == 2}}">
                   <view class="bg-mainColor p-20 radius-20" bind:tap="receiveStock" data-item="{{order}}">收货</view>
                 </view>
+                <view class="font-sl pt-20 pb-20 text-secondary" wx:elif="{{order.gbDoBuyStatus == 4}}">配送中</view>
                 <view wx:else="" class="button-container-white" bindtap="toEditApply" data-order="{{order}}" data-subname="" data-id="{{order.gbDistributerGoodsEntity.gbDistributerGoodsId}}" data-name="{{order.gbDistributerGoodsEntity.gbDgGoodsName}}" data-type="goods" data-color="{{order.gbDistributerGoodsEntity.gbDgNxGoodsFatherColor}}" data-goods="{{order.gbDistributerGoodsEntity}}" hover-class="hover">
                   <image src="../../../../images/edit.png" class="icon"></image>
                 </view>
@@ -288,9 +290,10 @@
                 <view class="font-sl pt-20 pb-20" wx:if="{{order.gbDoBuyStatus == 3}}">
                   已称重
                 </view>
-                <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4}}">
+                <view class="font-sl pt-20 pb-20" wx:elif="{{order.gbDoBuyStatus == 4 && order.gbDoStatus == 2}}">
                   <view class="bg-mainColor p-20 radius-20" bind:tap="receiveStock" data-item="{{order}}">收货</view>
                 </view>
+                <view class="font-sl pt-20 pb-20 text-secondary" wx:elif="{{order.gbDoBuyStatus == 4}}">配送中</view>
                 <view wx:else="" class="button-container-white" bindtap="toEditApply" data-order="{{order}}" data-subname="" data-id="{{order.gbDistributerGoodsEntity.gbDistributerGoodsId}}" data-name="{{order.gbDistributerGoodsEntity.gbDgGoodsName}}" data-type="goods" data-color="{{order.gbDistributerGoodsEntity.gbDgNxGoodsFatherColor}}" data-goods="{{order.gbDistributerGoodsEntity}}" hover-class="hover">
                   <image src="../../../../images/edit.png" class="icon"></image>
                 </view>

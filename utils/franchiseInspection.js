@@ -64,6 +64,15 @@ function hasAction(identity, action) {
   return !!identity && (identity.allowedActions || []).indexOf(action) >= 0;
 }
 
+function hasFranchiseStoreIdentity(identity) {
+  if (!identity || !identity.brand || !identity.brand.brandId) return false;
+  var roles = identity.roles || [];
+  var hasStoreRole = roles.some(function (role) {
+    return role && (role.code === 'FRANCHISEE_OWNER' || role.code === 'STORE_MANAGER');
+  });
+  return hasStoreRole || hasAction(identity, 'RECTIFICATION_LIST_MINE');
+}
+
 function createKey(prefix) {
   return String(prefix || 'inspection') + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
 }
@@ -184,6 +193,7 @@ module.exports = {
   eventLabel: eventLabel,
   statusClass: statusClass,
   hasAction: hasAction,
+  hasFranchiseStoreIdentity: hasFranchiseStoreIdentity,
   createKey: createKey,
   persistentKey: persistentKey,
   clearPersistentKey: clearPersistentKey,

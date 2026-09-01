@@ -1,67 +1,140 @@
+<view class="page">
+  <customer-navbar title="精彩账本" avatar="/images/logo.png"></customer-navbar>
+  <view class="nav-spacer" style="height: {{navBarHeight}}rpx;"></view>
 
-
-  <view class="flex flex-column">
-  <customer-navbar  style="height: {{navBarHeight}}rpx;" title="京采账本" avatar="/images/logo.png" button-text="设置" bindnavbuttontap="toEditUser"></customer-navbar>
-
-
-
-  <view class="flex-column center-content" style="margin-top: 40rpx;">
-
-<!-- <image src="{{url + 'uploadImage/imPurchase/say.png'}}" mode="aspectFill" class="p-30"/> -->
-<view class="flex-row p-30 font-lg">
-  🎉 恭喜你！成功邀请好友注册！
-</view>
-<view class="flex-row p-10 font-lg-2">
-  💎 你的邀请获得了 1000 点奖励！
-</view>
-<view class="flex-row p-10 font-lg-2">
-  等待好友注册成功奖励已发放至你的账户，快去查看吧！💰
-</view>
-<view class="flex-row p-10 font-lg-2">
-  继续邀请好友，更多奖励等着你！😊
-</view>
-
-<button style="width: {{windowWidth - 140}}rpx; background-color: #ee4502; line-height: 100rpx; height: 100rpx; margin-top: 100rpx; color: #fff; font-weight: 500;" class="font-md" open-type="share">继续邀请好友</button>
-
-</view>
-
-
-
-
-
-
-
-</view> 
-
-
-<!-- 供货商注册 -->
-<view class="overlay1 popup-mask {{isSellRegiste ? 'show' : 'hide'}}">
-  <view class="popup1 popup-container p-30">
-    <view class="">
-      <view class="">
-        <view class="center-content flex-column">
-          <text class="font-lg p-30">注册接单用户信息</text>
+  <view class="content">
+    <view class="hero-card">
+      <view class="hero-glow hero-glow-one"></view>
+      <view class="hero-glow hero-glow-two"></view>
+      <view class="hero-content">
+        <view class="hero-kicker">
+          <text class="kicker-dot"></text>
+          <text>配送商专属 · 订单转接</text>
         </view>
-        <view class="flex-row">
-          <text>用户头像</text>
-          <button class="avatar-wrapper" style="width: {{windowWidth - 220}}rpx;" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-            <image class="avatar" src="{{avatarUrl}}"></image>
-          </button>
-        </view>
-        <view class="flex-row">
-          <text class="mr-20">用户昵称</text>
-          <mp-form bindsubmit="formSubmit">
-            <mp-cells>
-              <mp-cell title="昵称">
-                <input type="nickname" bindinput="onNicknameInput" class="weui-input" placeholder="" />
-              </mp-cell>
-            </mp-cells>
-          </mp-form>
+        <view class="hero-title">接住饭店订单，统一在京采接单出货</view>
+        <view class="hero-desc">饭店客户在“京采账本”提交的订货单，可以转入你的“京采接单”，和原有配送订单一起备货、出货。</view>
+        <view class="transfer-strip">
+          <view class="product-node">
+            <view class="product-icon">账</view>
+            <view class="product-copy">
+              <text class="product-name">京采账本</text>
+              <text class="product-role">饭店下单</text>
+            </view>
+          </view>
+          <view class="transfer-arrow">
+            <text class="arrow-line"></text>
+            <text class="arrow-head">›</text>
+            <text class="arrow-label">转为订单</text>
+          </view>
+          <view class="product-node product-node-right">
+            <view class="product-icon order-icon">接</view>
+            <view class="product-copy">
+              <text class="product-name">京采接单</text>
+              <text class="product-role">统一出货</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>
-    <view class="p-20 mt-30">
-      <button bindtap="save" class="register-btn {{canRegister ? 'is-active' : ''}}">注册</button>
+
+    <view class="flow-card">
+      <view class="section-eyebrow">怎么使用</view>
+      <view class="section-title">一次登记，之后三步完成转单</view>
+      <view class="flow-list">
+        <view class="flow-item">
+          <view class="step-column">
+            <view class="step-number">1</view>
+            <view class="step-line"></view>
+          </view>
+          <view class="step-content">
+            <view class="step-title">饭店客户提交订单</view>
+            <view class="step-desc">客户在京采账本选择商品并提交订货单。</view>
+          </view>
+        </view>
+        <view class="flow-item">
+          <view class="step-column">
+            <view class="step-number">2</view>
+            <view class="step-line"></view>
+          </view>
+          <view class="step-content">
+            <view class="step-title">订单分享给当前微信</view>
+            <view class="step-desc">打开客户分享的订单，确认转入你的配送订单。</view>
+          </view>
+        </view>
+        <view class="flow-item flow-item-last">
+          <view class="step-column">
+            <view class="step-number">3</view>
+          </view>
+          <view class="step-content">
+            <view class="step-title">在京采接单统一出货</view>
+            <view class="step-desc">与其他订单一起备货、分拣和完成配送。</view>
+          </view>
+        </view>
+      </view>
     </view>
+
+    <view wx:if="{{isLoading}}" class="state-card loading-card">
+      <view class="loading-orbit"><view class="loading-dot"></view></view>
+      <view class="state-title">正在确认接单身份</view>
+      <view class="state-desc">请稍候，我们正在检查当前微信是否已登记。</view>
+    </view>
+
+    <view wx:elif="{{bindSuccess}}" class="state-card success-card">
+      <view class="success-mark">✓</view>
+      <view class="state-badge success-badge">登记完成</view>
+      <view class="state-title">现在可以接收饭店订单了</view>
+      <view class="state-desc">当前微信已登记为“{{displayNxDisName}}”的接单人。</view>
+      <view class="success-notice">以后饭店把京采账本订单分享给你时，打开并确认转入，即可在京采接单统一处理和出货。</view>
+      <button class="home-btn" bindtap="goToSupplierHome">进入供货商主页</button>
+    </view>
+
+    <view wx:elif="{{isSellRegiste}}" class="state-card">
+      <view class="register-heading">
+        <view class="register-heading-copy">
+          <view class="section-eyebrow">最后一步</view>
+          <view class="section-title left-title">登记当前微信为接单人</view>
+          <view class="register-desc">以后订单分享到这个微信，即可识别并转入。</view>
+        </view>
+        <view class="once-tag">一次登记</view>
+      </view>
+
+      <view wx:if="{{displayNxDisName}}" class="merchant-chip">
+        <text class="merchant-chip-label">绑定配送商</text>
+        <text class="merchant-chip-name">{{displayNxDisName}}</text>
+      </view>
+      <view wx:if="{{bindError}}" class="inline-error">{{bindError}}</view>
+
+      <view class="form-panel">
+        <view class="form-row avatar-row">
+          <view class="form-copy">
+            <text class="form-label">微信头像</text>
+            <text class="form-hint">用于识别接单人</text>
+          </view>
+          <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+            <image class="avatar" src="{{avatarUrl}}" mode="aspectFill"></image>
+            <view class="avatar-edit">+</view>
+          </button>
+        </view>
+        <view class="form-row">
+          <view class="form-copy">
+            <text class="form-label">微信昵称</text>
+            <text class="form-hint">方便饭店确认接单人</text>
+          </view>
+          <input class="nickname-input" type="nickname" bindinput="onNicknameInput" placeholder="请输入昵称" placeholder-class="nickname-placeholder" />
+        </view>
+      </view>
+
+      <button bindtap="save" disabled="{{!canRegister}}" class="register-btn {{canRegister ? 'is-active' : ''}}">完成登记，开始接单</button>
+      <view class="privacy-note">仅用于接单身份识别，不会修改你的微信资料</view>
+    </view>
+
+    <view wx:else class="state-card error-card">
+      <view class="error-mark">!</view>
+      <view class="state-title">暂时无法登记</view>
+      <view class="state-desc">{{bindError}}</view>
+      <button class="retry-btn" bindtap="_userLogin">重新尝试</button>
+    </view>
+
+    <view class="bottom-note">精彩账本 · 让饭店订货与配送出货顺畅衔接</view>
   </view>
 </view>

@@ -1,42 +1,50 @@
+<wxs src="../../../../utils/orderGoodsFmt.wxs" module="fmt" />
+
 <back-navbar style="height: {{navBarHeight}}rpx;" title="自采商品" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
 <!-- 商品列表 -->
 <scroll-view scroll-y class="page-content">
   <view class="goods-list mt-30">
     <view class="goods-card" wx:for="{{displayPurArr}}" wx:key="gbDistributerPurchaseGoodsId" wx:for-index="index">
-      <view class="goods-header ">
-        <view class="goods-name">{{index + 1}}.</view>
+      <view class="goods-header">
+        <view class="goods-index">{{index + 1}}.</view>
+        <image
+          class="goods-image"
+          mode="aspectFill"
+          src="{{fmt.goodsImageUrl(item.gbDistributerGoodsEntity, url)}}"
+        />
         <view class="goods-info">
-          <text class="goods-brand" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsBrand}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
-          <text class="goods-name">{{item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsName : ''}}</text>
-          <text class="goods-detail" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsDetail && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
-          <text class="" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null'}}">
-            <text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
-          
-          </text>
-          <text class=""  wx:else="">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
-        </view>
-      </view>
+          <view class="goods-title-row">
+            <text class="goods-brand" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsBrand}}">{{item.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
+            <text class="goods-name">{{item.gbDistributerGoodsEntity ? item.gbDistributerGoodsEntity.gbDgGoodsName : ''}}</text>
+            <text class="goods-detail" wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsDetail && item.gbDistributerGoodsEntity.gbDgGoodsDetail !== 'null'}}">{{item.gbDistributerGoodsEntity.gbDgGoodsDetail}}</text>
+            <text wx:if="{{item.gbDistributerGoodsEntity && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight && item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight !== 'null'}}">
+              <text>({{item.gbDistributerGoodsEntity.gbDgGoodsStandardWeight}}/{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}})</text>
+            </text>
+            <text wx:else="">{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}</text>
+          </view>
 
-      <view class="order-list">
-        <view class="order-item" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:key="gbDepartmentOrdersId" wx:for-item="orders" wx:if="{{orders.isNotice}}">
-          <block wx:if="{{subDepAmount == 1}}">
-            <view class="flex-row p-20 font-md">
-              <text class="mr-10" >订货:</text>
-              <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
-              <text wx:if="{{orders.gbDoDsStandardScale && orders.gbDoDsStandardScale !== '-1'}}" class="text-secondary font-sl">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
+          <view class="order-list">
+            <view class="order-item" wx:for="{{item.gbDepartmentOrdersEntities}}" wx:key="gbDepartmentOrdersId" wx:for-item="orders" wx:if="{{orders.isNotice}}">
+              <block wx:if="{{subDepAmount == 1}}">
+                <view class="order-summary">
+                  <text class="order-label">订货:</text>
+                  <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
+                  <text wx:if="{{orders.gbDoDsStandardScale && orders.gbDoDsStandardScale !== '-1'}}" class="text-secondary font-sl">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
+                </view>
+              </block>
+              <block wx:else>
+                <view class="order-department">
+                  <view class="order-department-row">
+                    <text class="mr-30">{{orders.gbDoParentDepartmentName}}.{{orders.gbDoOrderDepartmentName}}</text>
+                    <text class="order-label">订货:</text>
+                    <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
+                    <text wx:if="{{orders.gbDoDsStandardScale && orders.gbDoDsStandardScale !== '-1'}}" class="text-secondary font-sl">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
+                  </view>
+                </view>
+              </block>
             </view>
-          </block>
-          <block wx:else>
-            <view class="order-department">
-              <view class="order-department-row">
-                <text class="mr-30">{{orders.gbDoParentDepartmentName}}.{{orders.gbDoOrderDepartmentName}}</text>
-                <text class="mr-10" style="color: #999; font-size: 34rpx;">订货:</text>
-                <text>{{orders.gbDoQuantity}}{{orders.gbDoStandard}}</text>
-                <text wx:if="{{orders.gbDoDsStandardScale && orders.gbDoDsStandardScale !== '-1'}}" class="text-secondary font-sl">({{orders.gbDoDsStandardScale}}{{item.gbDistributerGoodsEntity.gbDgGoodsStandardname}}/{{orders.gbDoStandard}})</text>
-              </view>
-            </view>
-          </block>
+          </view>
         </view>
       </view>
 

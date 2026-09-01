@@ -244,10 +244,10 @@ Page({
     });
   },
 
-  //13 
+  // 使用稳定 code，避免数据库重建后 advisorId 变化。
   toMenuAi() {
     wx.navigateTo({
-      url: '/subPackage-charts/pages/aiChat/aiChat?advisorId=48',
+      url: '/subPackage-charts/pages/aiChat/aiChat?advisorCode=MENU_OPERATION',
     });
   },
 

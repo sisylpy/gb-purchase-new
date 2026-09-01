@@ -2,6 +2,7 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
 var config = require('../../../../config/index.js');
 var depOrder = require('../../../../services/depOrder');
+var autoOrderDelete = require('../../../../utils/autoOrderDelete.js');
 
 // ========================
 // 本页面使用的所有接口方法（来自 depOrder）
@@ -181,12 +182,18 @@ Page({
   },
 
   /** 为单部门数据中的所有订单计算全局序号 */
-  _calculateGlobalOrderIndex(depArr) {
-    if (!depArr || !Array.isArray(depArr) || depArr.length === 0) return [];
-    var dep = depArr[0];
-    if (!dep.depOrders || !Array.isArray(dep.depOrders)) return [];
+  _calculateGlobalOrderIndex(categoryData) {
+    if (!categoryData || !Array.isArray(categoryData) || categoryData.length === 0) return [];
+
+    // 分类接口存在两种合法结构：
+    // 1. 单门店直接返回商品类别数组；2. 历史接口返回 [{ depOrders: 商品类别数组 }]。
+    // 原逻辑只兼容第 2 种，单门店数据会被误判为空。
+    var first = categoryData[0];
+    var fatherArr = first && Array.isArray(first.depOrders)
+      ? first.depOrders
+      : categoryData;
     var globalOrderIndex = 1;
-    return dep.depOrders.map(function(father) {
+    return fatherArr.map(function(father) {
       return this._assignGlobalIndex(father, function() { return globalOrderIndex++; });
     }.bind(this));
   },
@@ -540,8 +547,19 @@ Page({
   /** 确认删除订单（从删除确认弹窗触发） */
   deleteApplyApi() {
     this.setData({ popupType: "", showPopupWarn: false });
+    var order = this.data.applyItem;
+    autoOrderDelete.chooseDeleteMode(order).then(function(cancelAutoOrder) {
+      this._deleteApplyApi(cancelAutoOrder);
+    }.bind(this)).catch(function(err) {
+      if (!err || !err.cancelled) {
+        wx.showToast({ title: '请选择删除方式', icon: 'none' });
+      }
+    });
+  },
+
+  _deleteApplyApi(cancelAutoOrder) {
     load.showLoading("删除订单");
-    depOrder.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(function(res) {
+    depOrder.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId, cancelAutoOrder).then(function(res) {
       load.hideLoading();
       if (res.result.code == 0) {
         this._refreshDataWithSearch();

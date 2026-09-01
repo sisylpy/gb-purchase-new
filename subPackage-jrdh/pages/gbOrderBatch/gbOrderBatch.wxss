@@ -10,6 +10,167 @@
   overflow: hidden;
 }
 
+.nx-bridge-card {
+  width: 620rpx;
+  box-sizing: border-box;
+  padding: 42rpx 38rpx 30rpx;
+  border-radius: 26rpx;
+  background: #fff;
+}
+
+.nx-bridge-badge {
+  display: table;
+  margin: 0 auto 18rpx;
+  padding: 7rpx 18rpx;
+  border-radius: 999rpx;
+  color: #aa5610;
+  background: #fff1df;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.nx-bridge-title {
+  color: #1f2937;
+  font-size: 36rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.nx-bridge-desc {
+  margin-top: 24rpx;
+  color: #60646b;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+
+.nx-bridge-error {
+  margin-top: 22rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 12rpx;
+  color: #b42318;
+  background: #fff1f0;
+  font-size: 24rpx;
+  word-break: break-all;
+}
+
+.nx-bridge-button {
+  margin-top: 34rpx;
+  height: 88rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  background: #ee6500;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 88rpx;
+}
+
+.nx-bridge-secondary-button {
+  height: 76rpx;
+  margin-top: 12rpx;
+  color: #7a8189;
+  font-size: 27rpx;
+  line-height: 76rpx;
+}
+
+.nx-bridge-button::after,
+.nx-bridge-secondary-button::after,
+.nx-order-bridge-button::after {
+  border: none;
+}
+
+.nx-order-bridge {
+  flex-shrink: 0;
+  margin: 0 10rpx 16rpx;
+  padding: 22rpx;
+  border: 1rpx solid #f0c895;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #fff9f1 0%, #fff3e3 100%);
+  box-shadow: 0 8rpx 20rpx rgba(174, 94, 21, 0.08);
+}
+
+.nx-order-bridge-transferred,
+.nx-order-bridge-delivered,
+.nx-order-bridge-closed {
+  border-color: #b9dfcc;
+  background: linear-gradient(135deg, #f3fbf7 0%, #eaf7f0 100%);
+  box-shadow: 0 8rpx 20rpx rgba(29, 126, 79, 0.08);
+}
+
+.nx-order-bridge-partial,
+.nx-order-bridge-conflict {
+  border-color: #edc2bd;
+  background: #fff6f5;
+}
+
+.nx-order-bridge-main {
+  display: flex;
+  align-items: flex-start;
+}
+
+.nx-order-bridge-icon {
+  flex: 0 0 auto;
+  width: 64rpx;
+  height: 64rpx;
+  margin-right: 18rpx;
+  border-radius: 18rpx;
+  color: #fff;
+  background: #ec6a13;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 64rpx;
+  text-align: center;
+}
+
+.nx-order-bridge-transferred .nx-order-bridge-icon,
+.nx-order-bridge-delivered .nx-order-bridge-icon,
+.nx-order-bridge-closed .nx-order-bridge-icon {
+  background: #218b5a;
+}
+
+.nx-order-bridge-partial .nx-order-bridge-icon,
+.nx-order-bridge-conflict .nx-order-bridge-icon {
+  background: #c45a50;
+}
+
+.nx-order-bridge-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.nx-order-bridge-title {
+  color: #27312c;
+  font-size: 29rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.nx-order-bridge-desc {
+  margin-top: 7rpx;
+  color: #717972;
+  font-size: 24rpx;
+  line-height: 1.55;
+}
+
+.nx-order-bridge-button {
+  height: 78rpx;
+  margin-top: 18rpx;
+  border-radius: 15rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #f07a1b, #e95d00);
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 78rpx;
+}
+
+.nx-order-bridge-transferred .nx-order-bridge-button,
+.nx-order-bridge-delivered .nx-order-bridge-button {
+  background: linear-gradient(135deg, #269566, #167c51);
+}
+
+.nx-order-bridge-partial .nx-order-bridge-button {
+  background: #c45a50;
+}
+
 .batch-body-wrap-done {
   margin-bottom: 0;
 }

@@ -1,0 +1,20 @@
+<view class="page">
+  <customer-navbar style="height: {{navBarHeight}}rpx;" title="{{relayMode ? '邀请门店老板' : '门店老板注册'}}" avatar="/images/back.png" bindnavbuttontap="toBack"></customer-navbar>
+  <view class="loading" wx:if="{{loading}}">正在确认门店邀请…</view>
+  <view class="card" wx:elif="{{summary}}">
+    <view class="brand">{{summary.brandName}}</view>
+    <view class="store">{{summary.storeName}}</view>
+    <view class="company">所属加盟公司：{{summary.companyName}}</view>
+    <block wx:if="{{relayMode}}">
+      <view class="tip">点击下面按钮，把这家门店的注册链接直接发给本店老板。老板打开后会自动归属到该门店。</view>
+      <button class="primary" open-type="share" disabled="{{!summary.acceptable}}">邀请本店老板</button>
+    </block>
+    <block wx:else>
+      <view class="tip">注册完成后，你将作为这家门店的老板进入精彩账本。门店归属由邀请自动确定，不需要再选择门店。</view>
+      <input class="input" type="nickname" placeholder="请输入本店老板姓名" value="{{userName}}" bindinput="inputName" />
+      <button class="primary" loading="{{saving}}" disabled="{{saving || !summary.acceptable}}" bindtap="accept">确认注册并进入门店</button>
+    </block>
+    <view class="status" wx:if="{{!summary.acceptable}}">该邀请当前状态：{{summary.invitationStatus}}</view>
+  </view>
+  <view class="error" wx:if="{{error}}">{{error}}<text bindtap="loadSummary">　重新加载</text></view>
+</view>

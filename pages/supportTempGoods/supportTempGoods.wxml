@@ -1,0 +1,81 @@
+<view class="page" style="padding-top: {{navHeight}}px;">
+  <view class="nav" style="height: {{navHeight}}px; padding-top: {{statusBarHeight}}px;">
+    <view class="nav-title">临时商品客服台</view>
+  </view>
+
+  <view class="hero">
+    <view class="hero-kicker">京采账本 · 统一客服</view>
+    <view class="hero-title">新商品待处理池</view>
+    <view class="hero-desc">汇总所有饭馆提交的临时商品。先领取，再匹配正式目录，避免重复处理。</view>
+  </view>
+
+  <view class="tabs">
+    <view class="tab {{scope == 'OPEN' ? 'tab-active' : ''}}" data-scope="OPEN" bindtap="switchScope">待处理</view>
+    <view class="tab {{scope == 'DONE' ? 'tab-active' : ''}}" data-scope="DONE" bindtap="switchScope">已完成</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <view wx:elif="{{forbidden}}" class="empty-card">
+    <view class="empty-title">当前账号不能进入客服台</view>
+    <view class="empty-desc">请从企业微信打开，并确认该成员已加入临时商品客服名单。</view>
+    <button class="outline-button" bindtap="loadTasks">重新检查</button>
+  </view>
+  <view wx:elif="{{tasks.length == 0}}" class="empty-card">
+    <view class="done-icon">✓</view>
+    <view class="empty-title">{{scope == 'OPEN' ? '暂时没有待处理商品' : '还没有已完成记录'}}</view>
+  </view>
+
+  <view class="task-list" wx:else>
+    <view class="task-card {{task.taskId == activeTaskId ? 'task-card-active' : ''}}"
+      wx:for="{{tasks}}" wx:key="taskId" wx:for-item="task">
+      <view class="task-head">
+        <view>
+          <view class="restaurant-name">{{task.restaurantName}}</view>
+          <view class="department-name" wx:if="{{task.departmentName}}">{{task.departmentName}}</view>
+        </view>
+        <view class="status status-{{task.status}}">{{task.statusText}}</view>
+      </view>
+      <view class="goods-name">{{task.goodsName}}</view>
+      <view class="meta-row">
+        <text>规格：{{task.goodsStandard || '未填写'}}</text>
+        <text>{{task.createdAtText}}</text>
+      </view>
+      <view class="goods-detail" wx:if="{{task.goodsDetail}}">说明：{{task.goodsDetail}}</view>
+
+      <view class="actions" wx:if="{{scope == 'OPEN' && task.taskId != activeTaskId}}">
+        <button wx:if="{{task.canClaim}}" class="primary-button" data-id="{{task.taskId}}" bindtap="claimTask">领取处理</button>
+        <button wx:elif="{{task.canPromote}}" class="primary-button" data-id="{{task.taskId}}"
+          data-name="{{task.goodsName}}" bindtap="beginProcess">匹配正式商品</button>
+        <view wx:else class="locked-tip">已锁定，等待其他客服处理</view>
+      </view>
+
+      <view class="catalog-panel" wx:if="{{task.taskId == activeTaskId}}">
+        <view class="catalog-title">搜索正式商品目录</view>
+        <view class="search-row">
+          <input class="search-input" value="{{searchKeyword}}" bindinput="onKeywordInput" confirm-type="search"
+            bindconfirm="searchCatalog" placeholder="输入正式商品名称" />
+          <button class="search-button" bindtap="searchCatalog" loading="{{searching}}">搜索</button>
+        </view>
+        <view class="result-count" wx:if="{{!searching}}">找到 {{resultTotal}} 个结果</view>
+        <view class="catalog-item" wx:for="{{catalogItems}}" wx:key="nxGoodsId" wx:for-item="catalog">
+          <view class="catalog-main">
+            <view class="catalog-name">{{catalog.goodsName}}</view>
+            <view class="catalog-standard">{{catalog.standard || '默认规格'}}</view>
+          </view>
+          <view class="catalog-actions">
+            <view class="catalog-choose" data-id="{{catalog.nxGoodsId}}" data-name="{{catalog.goodsName}}"
+              bindtap="chooseCatalogGoods">匹配现有</view>
+            <view class="catalog-create" data-id="{{catalog.nxGoodsId}}" data-name="{{catalog.goodsName}}"
+              bindtap="createSiblingGoods">同品类新增</view>
+          </view>
+        </view>
+        <view class="panel-actions">
+          <button class="text-button" bindtap="cancelProcess">收起</button>
+          <button class="text-button danger" data-id="{{task.taskId}}" bindtap="releaseTask">释放待办</button>
+        </view>
+      </view>
+
+      <view class="complete-line" wx:if="{{scope == 'DONE'}}">正式商品编号：{{task.promotedNxGoodsId}}</view>
+    </view>
+  </view>
+</view>

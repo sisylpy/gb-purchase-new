@@ -1,6 +1,5 @@
 var app = getApp();
 var api = require('../../../services/preparation');
-var util = require('../../../utils/preparation');
 
 Page({
   data: {
@@ -25,11 +24,9 @@ Page({
     this.setData({ loading: true, error: '' });
     return api.getStorePreparationHome().then(function (row) {
       row = row || {};
-      row.todayLossText = util.formatMoney(row.todayRawLossCost, '¥0.00');
-      row.monthLossText = util.formatMoney(row.monthRawLossCost, '¥0.00');
       that.setData({ loading: false, stats: row });
     }).catch(function (error) {
-      that.setData({ loading: false, error: error.message || '备料数据加载失败' });
+      that.setData({ loading: false, error: error.message || '中间料数据加载失败' });
     });
   },
 
@@ -38,9 +35,6 @@ Page({
     var paths = {
       create: '/subPackage-preparation/pages/storeProductForm/storeProductForm',
       products: '/subPackage-preparation/pages/storeProducts/storeProducts',
-      production: '/subPackage-preparation/pages/storeProduction/storeProduction',
-      loss: '/subPackage-preparation/pages/storeLoss/storeLoss',
-      records: '/subPackage-preparation/pages/storeLossRecords/storeLossRecords',
     };
     if (paths[target]) wx.navigateTo({ url: paths[target] });
   },

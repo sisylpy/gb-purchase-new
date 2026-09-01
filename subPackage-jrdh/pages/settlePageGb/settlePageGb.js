@@ -138,7 +138,7 @@ Page({
     var selectArr = this.data.selectArr;
     var temp = 0;
     for (var i = 0; i < selectArr.length; i++) {
-      var itemTotal = Number(selectArr[i].gbDpbSubtotal);
+      var itemTotal = Number(selectArr[i].gbDpbPaySubtotal || selectArr[i].gbDpbSubtotal);
 
       // 如果是退货单（gbDpbPurchaseType == 9），则减去金额
       if (selectArr[i].gbDpbPurchaseType == 9) {

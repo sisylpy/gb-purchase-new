@@ -119,6 +119,10 @@
       <image src="../../../../images/zidongtianjia.png" class="icon mr-20"></image>
       <text class="font-md">自动订货商品</text>
     </view>
+    <view class="p-30 flex-row border-bottom" wx:if="{{supplierItem.nxJrdhsNxDistributerId}}" catch:tap="toSupplierCoupon" hover-class="hover">
+      <image src="../../../../images/zidongtianjia.png" class="icon mr-20"></image>
+      <text class="font-md">配送商优惠券</text>
+    </view>
     <!-- <view class="p-30  flex-row border-bottom" catch:tap="toSupplierStars" hover-class="hover">
       <image src="../../../../images/starGray.png" class="icon mr-20"></image>
       <text class="font-md">退货</text>

@@ -40,6 +40,11 @@ Page({
     combinedTemplateStartDate: '',
     combinedTemplateEndDate: '',
     todayDate: '',
+
+    // AI经营日报导入：上传后先展示预览/失败明细，确认后才入库
+    showAiImportPreview: false,
+    aiImportPreview: null,
+    aiImportSubmitting: false,
   },
 
   onShow() {
@@ -499,6 +504,152 @@ Page({
       title: '请选 .xlsx 或 .xls（Excel）',
       icon: 'none',
       duration: 2800,
+    });
+  },
+
+  /** 选择任意订货/POS系统导出的Excel，由AI识别菜品销量和营业额。 */
+  onAiImportExcel: function () {
+    var departmentId = this._ensureTemplateDepartmentId();
+    if (!departmentId) return;
+    var distributerId = this._resolveDistributerId();
+    if (!distributerId) {
+      wx.showToast({ title: '缺少批发商信息', icon: 'none' });
+      return;
+    }
+    var that = this;
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      success: function (res) {
+        var f = (res.tempFiles || [])[0];
+        if (!f || !f.path) {
+          wx.showToast({ title: '未获取到文件', icon: 'none' });
+          return;
+        }
+        if (!that._isExcelChatFile(f)) {
+          that._promptNonExcelChatFile(f);
+          return;
+        }
+        that._analyzeAiRevenueFile(f.path, departmentId, distributerId);
+      },
+      fail: function (err) {
+        var msg = err && err.errMsg ? String(err.errMsg) : '';
+        if (msg.indexOf('cancel') < 0 && msg.indexOf('取消') < 0) {
+          wx.showToast({ title: '未选择文件', icon: 'none' });
+        }
+      },
+    });
+  },
+
+  _analyzeAiRevenueFile: function (filePath, departmentId, distributerId) {
+    var that = this;
+    wx.showLoading({ title: 'AI正在识别...', mask: true });
+    foodSalesExcelApi
+      .analyzeAiRevenueExcel(filePath, departmentId, distributerId)
+      .then(function (res) {
+        wx.hideLoading();
+        var result = res.result || {};
+        if (result.code !== 0 && result.code !== '0') {
+          wx.showModal({
+            title: '识别失败',
+            content: result.msg || 'Excel暂时无法识别，请检查文件后重试',
+            showCancel: false,
+          });
+          return;
+        }
+        var preview = result.data;
+        if (!preview) {
+          wx.showToast({ title: '没有返回识别结果', icon: 'none' });
+          return;
+        }
+        that.setData({
+          aiImportPreview: preview,
+          showAiImportPreview: true,
+          aiImportSubmitting: false,
+        });
+      })
+      .catch(function (err) {
+        wx.hideLoading();
+        console.error('analyze ai revenue excel', err);
+        wx.showToast({ title: 'AI识别请求失败', icon: 'none' });
+      });
+  },
+
+  onCloseAiImportPreview: function () {
+    if (this.data.aiImportSubmitting) return;
+    this.setData({ showAiImportPreview: false });
+  },
+
+  noopAiImport: function () {},
+
+  onRetryAiImport: function () {
+    if (this.data.aiImportSubmitting) return;
+    this.setData({ showAiImportPreview: false });
+    this.onAiImportExcel();
+  },
+
+  onOpenAiImportFailureReport: function () {
+    var preview = this.data.aiImportPreview;
+    if (!preview || !preview.jobId) return;
+    var departmentId = this._ensureTemplateDepartmentId();
+    var distributerId = this._resolveDistributerId();
+    if (!departmentId || !distributerId) return;
+    wx.showLoading({ title: '生成明细...', mask: true });
+    foodSalesExcelApi
+      .openAiRevenueFailureReport(preview.jobId, departmentId, distributerId)
+      .then(function () { wx.hideLoading(); })
+      .catch(function (err) {
+        wx.hideLoading();
+        console.error('open ai revenue failure report', err);
+        wx.showToast({ title: '失败明细打开失败', icon: 'none' });
+      });
+  },
+
+  onCommitAiImport: function () {
+    var preview = this.data.aiImportPreview;
+    if (!preview || !preview.jobId || !preview.canCommit || this.data.aiImportSubmitting) {
+      return;
+    }
+    var departmentId = this._ensureTemplateDepartmentId();
+    var distributerId = this._resolveDistributerId();
+    if (!departmentId || !distributerId) return;
+    var that = this;
+    wx.showModal({
+      title: '确认导入',
+      content: '确认按识别结果覆盖对应日期的菜品销量和营业额？',
+      success: function (modalRes) {
+        if (!modalRes.confirm) return;
+        that.setData({ aiImportSubmitting: true });
+        wx.showLoading({ title: '正在导入...', mask: true });
+        foodSalesExcelApi
+          .commitAiRevenueImport(preview.jobId, departmentId, distributerId)
+          .then(function (res) {
+            wx.hideLoading();
+            var result = res.result || {};
+            if (result.code === 0 || result.code === '0') {
+              that.setData({
+                showAiImportPreview: false,
+                aiImportPreview: null,
+                aiImportSubmitting: false,
+              });
+              wx.showToast({ title: '导入成功', icon: 'success' });
+              that._initData();
+            } else {
+              that.setData({ aiImportSubmitting: false });
+              wx.showModal({
+                title: '导入未完成',
+                content: result.msg || '本次数据均未写入，请稍后重试',
+                showCancel: false,
+              });
+            }
+          })
+          .catch(function (err) {
+            wx.hideLoading();
+            that.setData({ aiImportSubmitting: false });
+            console.error('commit ai revenue import', err);
+            wx.showToast({ title: '导入请求失败', icon: 'none' });
+          });
+      },
     });
   },
 

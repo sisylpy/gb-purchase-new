@@ -4,6 +4,6 @@
   <view class="prep-loading" wx:if="{{loading}}">正在加载损耗记录…</view>
   <view class="prep-empty" wx:elif="{{rows.length === 0}}"><view class="prep-empty-title">暂无原料损耗</view><text>记录后会同步反映在正式原料库存和损耗账本中。</text></view>
   <scroll-view wx:else scroll-y class="records-scroll">
-    <view class="prep-list-card" wx:for="{{rows}}" wx:key="rawLossRecordId"><view class="prep-card-head"><view><view class="prep-card-title">{{item.rawGoodsName}}</view><view class="prep-muted">关联备料品：{{item.productName}}</view></view><view class="quantity">{{item.lossQuantity}} {{item.unitLabel || item.unitCode}}</view></view><view class="record-meta"><text>{{item.reasonLabel}}</text><text>{{item.costText}}</text><text>{{item.timeText}}</text></view><view class="note" wx:if="{{item.note}}">{{item.note}}</view></view>
+    <view class="prep-list-card" wx:for="{{rows}}" wx:key="rawLossRecordId"><view class="prep-card-head"><view><view class="prep-card-title">{{item.rawGoodsName}}</view><view class="prep-muted">关联中间料：{{item.productName}}</view></view><view class="quantity">{{item.lossQuantity}} {{item.unitLabel || item.unitCode}}</view></view><view class="record-meta"><text>{{item.reasonLabel}}</text><text>{{item.costText}}</text><text>{{item.timeText}}</text></view><view class="note" wx:if="{{item.note}}">{{item.note}}</view></view>
   </scroll-view>
 </view>

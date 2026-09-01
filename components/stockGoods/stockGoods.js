@@ -284,6 +284,7 @@ Component({
     },
 
     onTabSelect(e) {
+      this.dismissKeyboard();
       var type = e.currentTarget.dataset.type;
       if (String(type) === String(this.data.showType)) return;
       this._applyShowType(type);
@@ -342,6 +343,7 @@ Component({
     },
 
     onMinUnitChange(e) {
+      this.dismissKeyboard();
       var idx = parseInt(e.detail.value, 10) || 0;
       var opts = this.data.minUnitOptions || stockUnit.MIN_UNIT_OPTIONS;
       var unit = opts[idx] || 'g';
@@ -367,6 +369,7 @@ Component({
     },
 
     onLossReasonTap(e) {
+      this.dismissKeyboard();
       var idx = parseInt(e.currentTarget.dataset.index, 10) || 0;
       var patch = { lossReasonIndex: idx };
       if (idx !== 3) patch.reason = '';
@@ -378,6 +381,7 @@ Component({
     },
 
     choiceImg() {
+      this.dismissKeyboard();
       var that = this;
       wx.chooseImage({
         count: 1,
@@ -394,6 +398,7 @@ Component({
     },
 
     cancle() {
+      this.dismissKeyboard();
       this.setData({
         show: false,
         showType: '1',
@@ -408,6 +413,7 @@ Component({
     },
 
     confirm() {
+      this.dismissKeyboard();
       if (!this.data.canSure) return;
       var reason = this.data.reason;
       if (String(this.data.showType) === '2') {
@@ -429,6 +435,14 @@ Component({
         resWeight: '0',
         inputAmountMin: '',
       });
+    },
+
+    dismissKeyboard() {
+      if (this.data.keyboardOffset) this.setData({ keyboardOffset: 0 });
+      if (typeof wx.hideKeyboard !== 'function') return;
+      try {
+        wx.hideKeyboard({ fail: function () {} });
+      } catch (error) {}
     },
 
     stopTap() {},

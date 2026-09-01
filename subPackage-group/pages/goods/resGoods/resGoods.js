@@ -464,36 +464,28 @@ _getInitDataPageDep(isRefresh, callback) {
 
   // 部门端商品滚动时联动二级分类高亮
   onGoodsScrollDep(e) {
-   
-    // 精准高亮二级分类，并联动一级分类
     var scrollTop = (e && e.detail && typeof e.detail.scrollTop === 'number') ? e.detail.scrollTop : 0;
     var positions = this.data.categoryPositionsDep || [];
     var activeId = '';
-    
-    // 添加调试日志：检查每个分类位置
+
     for (var pi = positions.length - 1; pi >= 0; pi--) {
-      if (scrollTop >= positions[pi].top) {
+      if (scrollTop + 4 >= positions[pi].top) {
         activeId = positions[pi].id;
         break;
       }
     }
-    
-    // 边界兜底：如果没找到，默认第一个
+
     if (!activeId && positions.length > 0) {
       activeId = positions[0].id;
     }
-    
-    // 添加调试日志：显示 activeId 和当前状态
-    
-    // 二级分类高亮
-    if (activeId && activeId !== this.data.activeSubCatIdDep) {
+
+    if (activeId && String(activeId) !== String(this.data.activeSubCatIdDep)) {
       this.setData({
         activeSubCatIdDep: activeId,
         subcatScrollIntoViewDep: 'subcat-dep-' + activeId
       });
-    } else {
     }
-    
+
     // 联动一级分类高亮
     if (activeId && this.data.disGoodsCataArr) {
       // 找到当前二级分类对应的一级分类id
@@ -518,69 +510,55 @@ _getInitDataPageDep(isRefresh, callback) {
         }
       }
       if (subIndex !== -1 && subIndex !== this.data.selectedSub) {
-          this.setData({
-            selectedSub: subIndex,
-            fatherArr: this.data.disGoodsCataArr[subIndex].fatherGoodsEntities
+        this.setData({
+          selectedSub: subIndex,
+          fatherArr: this.data.disGoodsCataArr[subIndex].fatherGoodsEntities
         });
-      } else {
       }
     }
   },
 
-  // 1. 新增：部门端商品分类锚点位置缓存
+  // 缓存每个二级分类在 scroll-view 内容区内的绝对位置。
   calculateCategoryPositionsDep() {
-    // console.log('[calculateCategoryPositionsDep] 方法开始执行');
     var that = this;
-    wx.createSelectorQuery()
-      .selectAll('.goods-category-title-dep')
-      .boundingClientRect();
-    wx.createSelectorQuery()
-      .select('.goods-list-dep')
-      .boundingClientRect();
-    
-    wx.createSelectorQuery()
-      .selectAll('.goods-category-title-dep')
-      .boundingClientRect(function(rects) {
-        wx.createSelectorQuery()
-          .select('.goods-list-dep')
-          .boundingClientRect(function(listRect) {
-            if (rects && listRect) {
-              var rawPositions = [];
-              for (var ri = 0; ri < rects.length; ri++) {
-                rawPositions.push({
-                  id: rects[ri].id.replace('cat-dep-', ''),
-                  top: rects[ri].top - listRect.top
-                });
-              }
-              // 取第一个的 top 作为基准
-              var baseTop = rawPositions.length > 0 ? rawPositions[0].top : 0;
-              // 重新计算所有 top，让第一个为 0
-              var positions = [];
-              for (var pidx = 0; pidx < rawPositions.length; pidx++) {
-                positions.push({
-                  id: rawPositions[pidx].id,
-                  top: rawPositions[pidx].top - baseTop
-                });
-              }
-              // 按 top 从小到大排序
-              positions.sort(function(a, b) { return a.top - b.top; });
-              // console.log('[calculateCategoryPositionsDep] 归一化后 positions:', positions);
-              that.setData({
-                categoryPositionsDep: positions
-              });
-              
-              var goodsOrder = [];
-              var arr = that.data.disGoodsArrAi || [];
-              for (var goi = 0; goi < arr.length; goi++) {
-                goodsOrder.push(arr[goi].gbDgDfgGoodsGrandId);
-              }
-              // console.log('[calculateCategoryPositionsDep] disGoodsArrAi 渲染顺序:', goodsOrder);
-              // console.log('[calculateCategoryPositionsDep] 分类锚点位置(已排序):', positions);
-            } else {
-              // console.warn('[calculateCategoryPositionsDep] 未获取到有效的节点信息', res);
-            }
-          });
+    var query = wx.createSelectorQuery();
+    query.selectAll('.goods-category-title-dep').boundingClientRect();
+    query.select('.goods-list-dep').boundingClientRect();
+    query.select('.goods-list-dep').scrollOffset();
+    query.exec(function(res) {
+      var rects = res && res[0];
+      var listRect = res && res[1];
+      var scrollInfo = res && res[2];
+      if (!rects || !listRect) {
+        that.setData({
+          categoryPositionsDep: []
+        });
+        return;
+      }
+
+      var currentScrollTop = scrollInfo && typeof scrollInfo.scrollTop === 'number'
+        ? scrollInfo.scrollTop
+        : 0;
+      var positions = [];
+      for (var ri = 0; ri < rects.length; ri++) {
+        positions.push({
+          id: rects[ri].id.replace('cat-dep-', ''),
+          top: rects[ri].top - listRect.top + currentScrollTop
+        });
+      }
+      positions.sort(function(a, b) {
+        return a.top - b.top;
       });
+
+      // 第一项就是内容起点，消除不同机型边框造成的 1px 左右误差。
+      var baseTop = positions.length > 0 ? positions[0].top : 0;
+      for (var pi = 0; pi < positions.length; pi++) {
+        positions[pi].top = positions[pi].top - baseTop;
+      }
+      that.setData({
+        categoryPositionsDep: positions
+      });
+    });
   },
   
 

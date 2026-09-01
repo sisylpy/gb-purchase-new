@@ -3,184 +3,55 @@
     "miniprogram": {
       "list": [
         {
-          "name": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
-          "pathName": "subPackage-mendian/pages/order/resGoodsSearch/resGoodsSearch",
-          "query": "",
+          "name": "pages/supportTempGoods/supportTempGoods",
+          "pathName": "pages/supportTempGoods/supportTempGoods",
+          "query": "taskId=2",
           "scene": null,
           "launchMode": "default"
         },
         {
-          "name": "subPackage-mendian/pages/order/editDepApplyGoods/editDepApplyGoods",
-          "pathName": "subPackage-mendian/pages/order/editDepApplyGoods/editDepApplyGoods",
-          "query": "from=paste&orderPasteIndex=0",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/order/paste/paste",
-          "pathName": "subPackage-mendian/pages/order/paste/paste",
-          "query": "depFatherId=61&depId=61&disId=14",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/order/chefOrderDep/chefOrderDep",
-          "pathName": "subPackage-mendian/pages/order/chefOrderDep/chefOrderDep",
+          "name": "pages/index/index",
+          "pathName": "pages/index/index",
           "query": "",
           "launchMode": "default",
-          "scene": null
+          "scene": 1119,
+          "partialCompile": {
+            "enabled": true,
+            "pages": []
+          }
         },
         {
-          "name": "subPackage-mendian/pages/mendian/depUserRegister/depUserRegister",
-          "pathName": "subPackage-mendian/pages/mendian/depUserRegister/depUserRegister",
+          "name": "pages/index/index",
+          "pathName": "pages/index/index",
           "query": "",
           "launchMode": "default",
+          "scene": 1119
+        },
+        {
+          "name": "subPackage-preparation/pages/storeProductDetail/storeProductDetail",
+          "pathName": "subPackage-preparation/pages/storeProductDetail/storeProductDetail",
+          "query": "id=4",
+          "launchMode": "default",
           "scene": null
         },
         {
-          "name": "pages/tro/tro",
-          "pathName": "pages/tro/tro",
+          "name": "subPackage-inspection/pages/home/home",
+          "pathName": "subPackage-inspection/pages/home/home",
           "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-jrdh/pages/fromJingjing/fromJingjing",
-          "pathName": "subPackage-jrdh/pages/fromJingjing/fromJingjing",
-          "query": "nxDisId=160",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/inviteTro/inviteTro",
-          "pathName": "pages/inviteTro/inviteTro",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/inviteAndOrder/inviteAndOrder",
-          "pathName": "pages/inviteAndOrder/inviteAndOrder",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/tro/tro",
-          "pathName": "pages/tro/tro",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-group/pages/food/addRaw/addRaw",
-          "pathName": "subPackage-group/pages/food/addRaw/addRaw",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/food/index/index",
-          "pathName": "subPackage-mendian/pages/food/index/index",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-charts/pages/aiChat/aiChat",
-          "pathName": "subPackage-charts/pages/aiChat/aiChat",
-          "query": "advisorId=1",
           "launchMode": "default",
           "scene": null
         },
         {
           "name": "subPackage-jrdh/pages/gbOrderBatch/gbOrderBatch",
           "pathName": "subPackage-jrdh/pages/gbOrderBatch/gbOrderBatch",
-          "query": "batchId=41&retName=%E9%99%95%E5%91%B3%E8%BD%A9&disId=12&fromBuyer=1&depId=57&buyUserId=18",
+          "query": "batchId=70&retName=%E4%BA%94%E6%98%9F%E9%A5%BA%E5%AD%90%E9%A6%86&disId=15&fromBuyer=0",
           "launchMode": "default",
           "scene": null
         },
         {
-          "name": "subPackage-charts/pages/sales/dailyTurnover/dailyTurnover",
-          "pathName": "subPackage-charts/pages/sales/dailyTurnover/dailyTurnover",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-charts/pages/statistic/stockPurGoods/stockPurGoods",
-          "pathName": "subPackage-charts/pages/statistic/stockPurGoods/stockPurGoods",
-          "query": "startDate=2026-06-01&stopDate=2026-06-25&disId=12&hanzi=%25E6%259C%25AC%25E6%259C%2588&dateType=month&searchDepIds=-1&id=-1",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-charts/pages/statistic/index/index",
-          "pathName": "subPackage-charts/pages/statistic/index/index",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-jrdh/pages/jinriListWithLogin/jinriListWithLogin",
-          "pathName": "subPackage-jrdh/pages/jinriListWithLogin/jinriListWithLogin",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-jrdh/pages/gbOrderBatchReturn/gbOrderBatchReturn",
-          "pathName": "subPackage-jrdh/pages/gbOrderBatchReturn/gbOrderBatchReturn",
-          "query": "batchId=35",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/management/purUserEveryDay/purUserEveryDay",
-          "pathName": "subPackage-mendian/pages/management/purUserEveryDay/purUserEveryDay",
-          "query": "purUserId=18&startDate=2026-06-01&stopDate=2026-06-25&dateType=thisMonth",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
-          "pathName": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
-          "pathName": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
-          "pathName": "subPackage-mendian/pages/order/resGoodsAi/resGoodsAi",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-mendian/pages/order/purGoods/purGoods",
-          "pathName": "subPackage-mendian/pages/order/purGoods/purGoods",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-group/pages/account/payPage/payPage",
-          "pathName": "subPackage-group/pages/account/payPage/payPage",
-          "query": "type=0",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "subPackage-group/pages/goods/resGoods/resGoods",
-          "pathName": "subPackage-group/pages/goods/resGoods/resGoods",
-          "query": "",
+          "name": "subPackage-jrdh/pages/fromJingjing/fromJingjing",
+          "pathName": "subPackage-jrdh/pages/fromJingjing/fromJingjing",
+          "query": "nxDisId=160&nxDisName=%E7%B2%92%E5%AD%90%E9%85%8D%E9%80%81",
           "launchMode": "default",
           "scene": null
         }
@@ -204,6 +75,6 @@
     "ignoreDevUnusedFiles": true,
     "bigPackageSizeSupport": false
   },
-  "libVersion": "3.14.3",
+  "libVersion": "3.17.1",
   "projectname": "jczb-restraunt"
 }

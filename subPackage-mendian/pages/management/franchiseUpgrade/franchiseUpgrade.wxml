@@ -1,0 +1,19 @@
+<view class="page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="升级加盟" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="content">
+    <view class="card">
+      <view class="title">将“{{restaurantName}}”升级为加盟总部</view>
+      <view class="desc">升级只增加加盟公司、品牌和总部管理关系。原采购、库存、菜品、门店和历史数据全部保留，不会新建第二套餐馆数据。</view>
+      <button class="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="createCode">生成加盟升级码</button>
+    </view>
+
+    <view class="card code-card" wx:if="{{upgradeCode}}">
+      <view class="label">加盟升级码</view>
+      <view class="code" bindtap="copyCode">{{upgradeCode}}</view>
+      <view class="expiry">有效至 {{expiresAt}}，点击升级码可复制</view>
+      <view class="steps">请打开“精彩账本加盟总部”管理小程序，在首页选择“已有餐馆升级”，填写公司和品牌资料并输入此码。</view>
+    </view>
+
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+  </view>
+</view>

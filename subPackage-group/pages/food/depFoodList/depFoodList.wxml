@@ -2,7 +2,7 @@
 
 <view  class="dcl-page1 flex-column flex">
  
-  <back-navbar title="{{manageFatherName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBackManage"></back-navbar>
+  <back-navbar title="{{categoryName || manageFatherName || '菜品分类'}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBackManage"></back-navbar>
 
   <view class="food-menu-head">
       <view class="food-menu-head__left">
@@ -121,4 +121,25 @@
     <!-- 底部安全区 -->
     <view class="dcl-bottom-safe"></view>
   </scroll-view>
+</view>
+
+<!-- 修改大类名称 -->
+<view class="rename-overlay" wx:if="{{showRenamePopup}}" bindtap="cancelRename" catchtouchmove="stopRenameTap">
+  <view class="rename-dialog" catchtap="stopRenameTap">
+    <view class="rename-dialog__title">修改大类名称</view>
+    <input
+      class="rename-dialog__input"
+      value="{{renameInputValue}}"
+      placeholder="请输入大类名称"
+      maxlength="20"
+      focus="{{showRenamePopup}}"
+      confirm-type="done"
+      bindinput="onRenameInput"
+      bindconfirm="confirmRename"
+    />
+    <view class="rename-dialog__btns">
+      <view class="rename-dialog__btn rename-dialog__btn--cancel" bindtap="cancelRename">取消</view>
+      <view class="rename-dialog__btn rename-dialog__btn--confirm" bindtap="confirmRename">确认修改</view>
+    </view>
+  </view>
 </view>

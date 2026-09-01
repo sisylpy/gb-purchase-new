@@ -4,6 +4,40 @@
  */
 
 var request = require('../lib/request');
+var apiUrl = require('../config/index');
+
+var requestNxCoupon = function (path, data) {
+  return new Promise(function (resolve, reject) {
+    wx.request({
+      url: apiUrl.nxApiUrl + 'nxdepartmentusercoupon/jczb/' + path,
+      method: 'POST',
+      header: { 'Content-Type': 'application/json' },
+      data: data,
+      success: function (res) { resolve({ result: res.data || {} }); },
+      fail: reject,
+    });
+  });
+};
+
+var jczbGetClaimableCoupons = function (data) {
+  return requestNxCoupon('claimableList', data);
+};
+
+var jczbGetOwnedCoupons = function (data) {
+  return requestNxCoupon('ownedList', data);
+};
+
+var jczbClaimCoupon = function (data) {
+  return requestNxCoupon('claim', data);
+};
+
+var jczbClaimCoupons = function (data) {
+  return requestNxCoupon('claim', data);
+};
+
+var jczbGetOrderPreview = function (data) {
+  return requestNxCoupon('orderPreview', data);
+};
 
 var depGetAllSupplier = function (depId) {
   return request.get('nxjrdhsupplier/depGetAllSupplier/' + depId);
@@ -72,4 +106,9 @@ module.exports = {
   updateJrdhSupplier: updateJrdhSupplier,
   disGetDepGoodsGbPageWithSupplier: disGetDepGoodsGbPageWithSupplier,
   disGetDepGoodsCataGbWithSupplier: disGetDepGoodsCataGbWithSupplier,
+  jczbGetClaimableCoupons: jczbGetClaimableCoupons,
+  jczbGetOwnedCoupons: jczbGetOwnedCoupons,
+  jczbClaimCoupon: jczbClaimCoupon,
+  jczbClaimCoupons: jczbClaimCoupons,
+  jczbGetOrderPreview: jczbGetOrderPreview,
 };

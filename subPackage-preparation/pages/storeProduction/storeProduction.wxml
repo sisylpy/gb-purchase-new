@@ -1,14 +1,14 @@
 <view class="prep-page">
-  <back-navbar title="记录备料制作" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="记录中间料制作" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
   <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
   <scroll-view wx:else scroll-y class="production-scroll">
-    <view class="prep-tip">实际领用会直接扣减原料库存并形成备料参考成本；不创建、不选择生产批次。</view>
+    <view class="prep-tip">实际领用会直接扣减原料库存并记录制作数量；菜品成本仍按中间料配比展开到底层原料核算。</view>
     <view class="prep-section">
       <view class="prep-form-row">
-        <text class="prep-form-label prep-required">选择备料品</text>
+        <text class="prep-form-label prep-required">选择中间料</text>
         <picker range="{{products}}" range-key="productName" value="{{productIndex}}" bindchange="onProductChange">
-          <view class="prep-picker {{product ? '' : 'prep-placeholder'}}">{{product ? product.productName : '请选择已发布配方的备料品'}}</view>
+          <view class="prep-picker {{product ? '' : 'prep-placeholder'}}">{{product ? product.productName : '请选择已完成配方的中间料'}}</view>
         </picker>
       </view>
     </view>
@@ -43,7 +43,7 @@
             <view class="unit-label">{{product.usageUnitCode}}</view>
           </view>
         </view>
-        <view class="prep-muted output-help">系统以本次原料实际成本 ÷ 实际产出，冻结本次单位成本并提供给菜品理论成本计算。</view>
+        <view class="prep-muted output-help">系统记录本次原料实际领用和实际产出，仅用于制作追溯；菜品成本仍按期间采购原料核算。</view>
       </view>
     </block>
   </scroll-view>

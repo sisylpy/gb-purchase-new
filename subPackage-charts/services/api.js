@@ -205,6 +205,7 @@ module.exports = {
   getAiRun: aiChatApi.getAiRun,
   listConversations: aiChatApi.listConversations,
   getConversationMessages: aiChatApi.getConversationMessages,
+  listAdvisors: aiChatApi.listAdvisors,
   getAdvisorDetail: aiChatApi.getAdvisorDetail,
   // 图钉 & 工作笔记
   createWorkRecordFromBusinessCard: aiChatApi.createWorkRecordFromBusinessCard,

@@ -25,6 +25,7 @@ function normalizeError(error) {
   var message = body.msg || body.message || response.errMsg || '请求失败，请稍后重试';
   return {
     preparationError: true,
+    authenticationFailure: !!response.authenticationFailure,
     status: status,
     code: Number(businessCode) !== 0 ? businessCode : asCode(status),
     message: String(message),
@@ -124,12 +125,17 @@ function getStoreRecipe(productId) {
   return get('preparation/store/products/' + productId + '/recipe');
 }
 
-function saveStoreRecipe(productId, body) {
-  return put('preparation/store/products/' + productId + '/recipe', body);
+function searchStoreIngredientOptions(productId, keyword, excludeRawGoodsIds) {
+  var normalizedKeyword = String(keyword || '').trim();
+  if (!normalizedKeyword) return Promise.resolve([]);
+  return get('preparation/store/products/' + productId + '/ingredient-options', {
+    keyword: normalizedKeyword,
+    excludeRawGoodsIds: (excludeRawGoodsIds || []).join(','),
+  });
 }
 
-function getStoreReferenceCost(productId) {
-  return get('preparation/store/products/' + productId + '/reference-cost');
+function saveStoreRecipe(productId, body) {
+  return put('preparation/store/products/' + productId + '/recipe', body);
 }
 
 function listStoreProductionMaterials(productId) {
@@ -399,8 +405,8 @@ module.exports = {
   updateStoreProduct: updateStoreProduct,
   changeStoreProductStatus: changeStoreProductStatus,
   getStoreRecipe: getStoreRecipe,
+  searchStoreIngredientOptions: searchStoreIngredientOptions,
   saveStoreRecipe: saveStoreRecipe,
-  getStoreReferenceCost: getStoreReferenceCost,
   listStoreProductionMaterials: listStoreProductionMaterials,
   listStoreProductionStocks: listStoreProductionStocks,
   createStoreProduction: createStoreProduction,

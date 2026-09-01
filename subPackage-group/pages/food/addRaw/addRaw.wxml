@@ -102,7 +102,7 @@
         <view class="raw-section-actions">
           <view class="raw-section-add raw-section-add--preparation" bindtap="toAddPreparation" hover-class="raw-section-add--hover">
             <text class="raw-section-add-plus">+</text>
-            <text>添加备料</text>
+            <text>添加中间料</text>
           </view>
           <view class="raw-section-add" bindtap="toAddGoods" data-type="raw" hover-class="raw-section-add--hover">
             <text class="raw-section-add-plus">+</text>
@@ -113,7 +113,7 @@
 
       <!-- 空状态 -->
       <view wx:if="{{!rawArr.length}}" class="food-raw-empty">
-        <text class="food-raw-empty__text">暂无配方内容，可添加配料或已有备料品</text>
+        <text class="food-raw-empty__text">暂无配方内容，可添加采购原料或已完成的中间料</text>
       </view>
 
       <!-- 配料列表 -->
@@ -144,7 +144,7 @@
           <!-- 第一行：图片 + 名称/单价 + 操作 -->
           <view class="raw-item-top">
             <view class="raw-item-main">
-              <view class="raw-item-preparation-img" wx:if="{{raw._isPreparation}}">备</view>
+              <view class="raw-item-preparation-img" wx:if="{{raw._isPreparation}}">中</view>
               <image
                 wx:else
                 class="raw-item-img"
@@ -153,10 +153,10 @@
               />
               <view class="raw-item-info">
                 <view class="raw-item-name-line">
-                  <text class="raw-item-kind" wx:if="{{raw._isPreparation}}">备料</text>
+                  <text class="raw-item-kind" wx:if="{{raw._isPreparation}}">中间料</text>
                   <text class="raw-item-name">{{raw.gbDfgGoodsName}}</text>
                 </view>
-                <text class="raw-item-price">{{raw._packPriceLabel === '成本待计算' ? raw._packPriceLabel : '¥' + raw._packPriceLabel}}</text>
+                <text class="raw-item-price">{{raw._isPreparation ? raw._packPriceLabel : (raw._packPriceLabel === '成本待计算' ? raw._packPriceLabel : '¥' + raw._packPriceLabel)}}</text>
               </view>
             </view>
             <view class="raw-item-action">
@@ -193,29 +193,31 @@
   </scroll-view>
 </view>
 
-<!-- 添加 / 编辑备料：备料作为一个整体使用，只填写每份克数 -->
-<view class="food-search-modal" wx:if="{{showPreparation}}" catchtouchmove="stopMove">
+<!-- 添加 / 编辑中间料：中间料作为一个整体使用，只填写菜品每份用量 -->
+<view class="food-search-modal" wx:if="{{showPreparation}}" catchtouchmove="stopMove" bindtap="dismissKeyboard">
   <view class="food-search-modal__panel preparation-modal__panel" catchtap="stopTap">
     <view class="food-search-modal__head">
-      <text class="food-search-modal__title">{{preparationModalType == 'edit' ? '编辑备料' : '添加备料'}}</text>
+      <text class="food-search-modal__title">{{preparationModalType == 'edit' ? '编辑中间料用量' : '添加中间料'}}</text>
     </view>
 
-    <scroll-view scroll-y class="preparation-modal__scroll" catchtouchmove="stopMove">
+    <scroll-view scroll-y class="preparation-modal__scroll" catchtouchmove="stopMove" bindscroll="dismissKeyboard">
       <block wx:if="{{!selectedPreparation}}">
         <view class="raw-add-modal__search">
           <image class="raw-add-modal__search-icon" src="/images/search-3.png" mode="aspectFit" />
           <input
             class="raw-add-modal__search-input"
-            placeholder="搜索备料名称或编码"
+            placeholder="搜索中间料名称"
             placeholder-style="color: #999; font-size: 28rpx;"
             bindinput="onPreparationKeywordInput"
+            bindconfirm="dismissKeyboard"
+            confirm-type="done"
             value="{{preparationKeyword}}"
           />
         </view>
 
-        <view class="preparation-modal__loading" wx:if="{{preparationLoading}}">正在加载备料…</view>
+        <view class="preparation-modal__loading" wx:if="{{preparationLoading}}">正在加载中间料…</view>
         <view class="preparation-modal__empty" wx:elif="{{!filteredPreparationProducts.length}}">
-          {{preparationKeyword ? '没有找到匹配的备料' : '暂无可选备料'}}
+          {{preparationKeyword ? '没有找到匹配的中间料' : '暂无已完成标准配方的中间料'}}
         </view>
         <view wx:else class="preparation-modal__list">
           <view
@@ -227,10 +229,10 @@
             bindtap="selectPreparation"
             hover-class="preparation-modal__item--hover"
           >
-            <view class="preparation-modal__item-icon">备</view>
+            <view class="preparation-modal__item-icon">中</view>
             <view class="preparation-modal__item-info">
               <text class="preparation-modal__item-name">{{product.productName}}</text>
-              <text class="preparation-modal__item-code" wx:if="{{product.productCode}}">{{product.productCode}}</text>
+              <text class="preparation-modal__item-code">标准配方 {{product.ingredientCount}} 种原料 · 标准产出 {{product.standardOutputText}}</text>
             </view>
             <text class="preparation-modal__item-status">选择</text>
           </view>
@@ -239,10 +241,10 @@
 
       <block wx:else>
         <view class="preparation-modal__picked">
-          <view class="preparation-modal__picked-icon">备</view>
+          <view class="preparation-modal__picked-icon">中</view>
           <view class="preparation-modal__picked-info">
             <text class="preparation-modal__picked-name">{{selectedPreparation.productName}}</text>
-            <text class="preparation-modal__picked-code" wx:if="{{selectedPreparation.productCode}}">{{selectedPreparation.productCode}}</text>
+            <text class="preparation-modal__picked-code">{{selectedPreparation.ingredientCount}} 种原料 · 标准产出 {{selectedPreparation.standardOutputText}}</text>
           </view>
           <text
             class="preparation-modal__reselect"
@@ -260,16 +262,17 @@
               type="digit"
               value="{{preparationAmount}}"
               bindinput="onPreparationAmountInput"
-              hold-keyboard="{{true}}"
+              bindconfirm="dismissKeyboard"
+              confirm-type="done"
             />
-            <text class="preparation-modal__unit">g</text>
+            <text class="preparation-modal__unit">{{preparationAmountUnitLabel}}</text>
             <view class="preparation-modal__step-btn" bindtap="onPreparationAmountPlus" hover-class="preparation-modal__step-btn--hover">+</view>
           </view>
         </view>
 
         <view class="preparation-modal__hint">
           <text class="preparation-modal__hint-icon">i</text>
-          <text>备料作为一个整体加入菜品，不展开内部配方</text>
+          <text>菜品只填写每份中间料用量；经营分析会按中间料配比自动展开到底层采购原料。</text>
         </view>
       </block>
     </scroll-view>
@@ -286,7 +289,7 @@
 </view>
 
 <!-- 添加 / 编辑原料（支持最小单位用量与包装换算） -->
-<view class="food-search-modal" wx:if="{{showFood}}" catchtouchmove="stopMove">
+<view class="food-search-modal" wx:if="{{showFood}}" catchtouchmove="stopMove" bindtap="dismissKeyboard">
   <view
     class="food-search-modal__panel raw-add-modal__panel"
     style="margin-top: {{foodSearchModalPadTopRpx}}rpx; max-height: {{foodSearchModalPanelMaxRpx}}rpx;"
@@ -296,7 +299,7 @@
       <text class="food-search-modal__title">{{modalType == 'edit' ? '编辑原料' : '添加原料'}}</text>
     </view>
 
-    <scroll-view scroll-y class="raw-add-modal__scroll" catchtouchmove="stopMove">
+    <scroll-view scroll-y class="raw-add-modal__scroll" catchtouchmove="stopMove" bindscroll="dismissKeyboard">
       <!-- 搜索（仅添加原料；编辑时不允许换商品） -->
       <block wx:if="{{modalType != 'edit'}}">
         <view class="raw-add-modal__search">
@@ -306,9 +309,7 @@
             placeholder="搜索商品名称、简拼或全拼"
             placeholder-style="color: #999; font-size: 28rpx;"
             adjust-position="{{false}}"
-            hold-keyboard="{{true}}"
             confirm-type="{{searchKeyword ? 'search' : 'done'}}"
-            confirm-hold="{{true}}"
             bindinput="onSearchKeywordInput"
             bindconfirm="onSearchConfirm"
             value="{{searchKeyword}}"
@@ -327,6 +328,7 @@
           scroll-y
           class="searchList is-active"
           catchtouchmove="stopMove"
+          bindscroll="dismissKeyboard"
           style="height: {{strArr.length ? (strArr.length < 6 ? strArr.length * 108 : foodSearchScrollRpx) : 120}}rpx;"
         >
           <view
@@ -382,9 +384,15 @@
         </view>
 
         <view class="raw-add-modal__form">
-          <view class="raw-add-modal__row">
+          <view
+            class="raw-add-modal__row raw-add-modal__row--link {{modalGoodsSpecMissing ? 'raw-add-modal__row--warning' : ''}}"
+            bindtap="toEditModalGoodsSpecification"
+            hover-class="raw-add-modal__row--link-hover"
+          >
             <text class="raw-add-modal__label">采购包装</text>
-            <text class="raw-add-modal__value">{{modalPackLabel}}</text>
+            <text class="raw-add-modal__value {{modalGoodsSpecMissing ? 'raw-add-modal__value--warning' : ''}}">
+              {{modalGoodsSpecMissing ? '规格不完整，去补充' : modalPackLabel}}
+            </text>
             <text class="raw-add-modal__arrow">›</text>
           </view>
           <view class="raw-add-modal__row">
@@ -402,11 +410,12 @@
                   type="digit"
                   value="{{modalPortionAmount}}"
                   bindinput="onModalPortionInput"
-                  hold-keyboard="{{true}}"
+                  bindconfirm="dismissKeyboard"
+                  confirm-type="done"
                 />
                 <view class="raw-add-modal__step-btn" bindtap="onModalPortionPlus" hover-class="raw-add-modal__step-btn--hover">+</view>
               </view>
-              <picker mode="selector" range="{{minUnitOptions}}" value="{{modalMinUnitIndex}}" bindchange="onMinUnitChange">
+              <picker mode="selector" range="{{minUnitOptions}}" value="{{modalMinUnitIndex}}" bindtap="dismissKeyboard" bindchange="onMinUnitChange">
                 <view class="raw-add-modal__unit-pick">
                   <text>{{modalMinUnit}}</text>
                   <text class="raw-add-modal__unit-arrow">▾</text>
@@ -416,7 +425,7 @@
           </view>
           <view class="raw-add-modal__row raw-add-modal__row--picker">
             <text class="raw-add-modal__label">最小单位</text>
-            <picker mode="selector" range="{{minUnitOptions}}" value="{{modalMinUnitIndex}}" bindchange="onMinUnitChange">
+            <picker mode="selector" range="{{minUnitOptions}}" value="{{modalMinUnitIndex}}" bindtap="dismissKeyboard" bindchange="onMinUnitChange">
               <view class="raw-add-modal__unit-pick raw-add-modal__unit-pick--wide">
                 <text>{{modalMinUnit}}</text>
                 <text class="raw-add-modal__unit-arrow">▾</text>
@@ -433,15 +442,17 @@
                 <input
                   class="raw-add-modal__conversion-input"
                   type="digit"
-                  placeholder="{{modalConversionPlaceholder}}"
+                  placeholder="{{modalGoodsSpecMissing ? '先完善商品规格' : modalConversionPlaceholder}}"
                   value="{{modalPackQtyInMin}}"
+                  disabled="{{modalGoodsSpecMissing}}"
                   bindinput="onConversionCountInput"
-                  hold-keyboard="{{true}}"
+                  bindconfirm="dismissKeyboard"
+                  confirm-type="done"
                 />
                 <text class="raw-add-modal__conversion-suffix">{{modalMinUnit}}</text>
               </view>
-              <text class="raw-add-modal__conversion-sub" wx:if="{{modalPackEquivText}}">保存为 {{modalPackEquivText}}</text>
-              <text class="raw-add-modal__conversion-warn" wx:elif="{{modalConversionRequired && !modalPackQtyInMin}}">商品未配置默认规格，请填写换算后才能保存并计算成本</text>
+              <text class="raw-add-modal__conversion-warn" wx:if="{{modalGoodsSpecMissing}}">商品未配置可用规格，请点击上方“采购包装”进入商品详情补充规格重量</text>
+              <text class="raw-add-modal__conversion-sub" wx:elif="{{modalPackEquivText}}">保存为 {{modalPackEquivText}}</text>
             </view>
           </view>
         </view>

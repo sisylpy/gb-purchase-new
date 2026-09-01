@@ -1390,6 +1390,28 @@
   letter-spacing: 0.3rpx;
 }
 
+/* 优惠券明细 */
+.bill-coupon-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 8rpx;
+  padding-top: 8rpx;
+  border-top: 1rpx dashed #eee;
+}
+
+.bill-origin-amount {
+  font-size: 28rpx;
+  color: #000;
+  margin-bottom: 2rpx;
+}
+
+.bill-coupon-line {
+  font-size: 20rpx;
+  color: #FF6B6B;
+  font-weight: 500;
+}
+
 /* 订单状态区域 */
 .bill-status-section {
   display: flex;

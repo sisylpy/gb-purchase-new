@@ -6,10 +6,10 @@ Page({
   data: {
     navBarHeight: 0, loading: true, actionLoading: false, taskId: 0, identity: null, store: null,
     task: null, issue: null, submissions: [], reviews: [], timeline: [], originalMedia: [], taskMedia: [],
-    canAccept: false, canEdit: false, canReview: false,
+    canAccept: false, canEdit: false,
     form: { reason: '', measures: '', description: '', supplement: '' },
-    currentMedia: [], mediaUploading: false, reviewMedia: [], reviewMediaUploading: false,
-    approveComment: '', rejectReason: '', rejectRequirement: '', draftDirty: false, reviewDirty: false,
+    currentMedia: [], mediaUploading: false,
+    draftDirty: false,
     refreshNotice: '', acceptConflict: false, error: '',
   },
 
@@ -20,14 +20,14 @@ Page({
 
   onShow: function () {
     if (!this.loadedOnce) return;
-    if (this.data.draftDirty || this.data.reviewDirty) {
+    if (this.data.draftDirty) {
       this.setData({ refreshNotice: '页面有未保存内容，已暂停自动刷新。' });
       return;
     }
     this.loadDetail();
   },
   onPullDownRefresh: function () {
-    if (this.data.draftDirty || this.data.reviewDirty) {
+    if (this.data.draftDirty) {
       this.setData({ refreshNotice: '页面有未保存内容，已暂停刷新。' });
       wx.stopPullDownRefresh();
       return;
@@ -99,7 +99,6 @@ Page({
           });
           if (sequence !== that.detailRequestSequence) return;
           var isAssignee = Number(identity.userId) === Number(task.assigneeUserId);
-          var isReviewer = Number(identity.userId) === Number(task.reviewerUserId);
           var acceptScope = 'rectification-accept:' + task.rectificationTaskId;
           if (task.status !== 'PENDING_ACCEPTANCE') {
             util.clearPersistentKey(acceptScope);
@@ -130,13 +129,10 @@ Page({
             taskMedia: taskMedia,
             canAccept: isAssignee && util.hasAction(identity, 'RECTIFICATION_ACCEPT') && task.status === 'PENDING_ACCEPTANCE',
             canEdit: isAssignee && util.hasAction(identity, 'RECTIFICATION_SAVE_DRAFT') && (task.status === 'IN_PROGRESS' || task.status === 'REJECTED'),
-            canReview: isReviewer && util.hasAction(identity, 'RECTIFICATION_REVIEW') && task.status === 'PENDING_REVIEW',
             form: currentDraft ? util.parseRectification(currentDraft.content) : { reason: '', measures: '', description: '', supplement: '' },
             currentMedia: currentDraft ? (currentDraft.media || []) : [],
-            reviewMedia: [],
             lastReview: reviews.length ? reviews[reviews.length - 1] : null,
             draftDirty: false,
-            reviewDirty: false,
             refreshNotice: '',
             acceptConflict: task.status === 'PENDING_ACCEPTANCE' && that.data.acceptConflict,
           });
@@ -197,15 +193,6 @@ Page({
       refreshNotice: '',
     });
   },
-  onReviewMediaChange: function (event) {
-    var files = event.detail.files || [];
-    this.setData({
-      reviewMedia: files,
-      reviewMediaUploading: !!event.detail.uploading,
-      reviewDirty: files.length > 0 || !!this.data.approveComment || !!this.data.rejectReason || !!this.data.rejectRequirement,
-      refreshNotice: '',
-    });
-  },
   readyIds: function (files) { return (files || []).filter(function (row) { return row.mediaAssetId && row.status === 'READY' && row.uploadStatus !== 'failed' && row.uploadStatus !== 'uploading'; }).map(function (row) { return Number(row.mediaAssetId); }); },
 
   saveDraft: function () {
@@ -253,62 +240,21 @@ Page({
     });
   },
 
-  onReviewInput: function (event) { this.setData({ [event.currentTarget.dataset.field]: event.detail.value, reviewDirty: true, refreshNotice: '' }); },
-
   refreshDetail: function () {
     var that = this;
-    var dirty = this.data.draftDirty || this.data.reviewDirty;
+    var dirty = this.data.draftDirty;
     var action = dirty
       ? util.confirm('刷新任务', '刷新将放弃尚未保存的页面编辑，是否继续？')
       : Promise.resolve(true);
     action.then(function (confirmed) {
       if (!confirmed) return;
       that.formDirty = false;
-      that.setData({ draftDirty: false, reviewDirty: false, refreshNotice: '' });
+      that.setData({ draftDirty: false, refreshNotice: '' });
       that.loadDetail();
     });
   },
 
   retry: function () { this.loadDetail(); },
-
-  review: function (event) {
-    if (!this.data.canReview || this.data.actionLoading || this.data.reviewMediaUploading) return;
-    var decision = event.currentTarget.dataset.decision;
-    var comment;
-    if (decision === 'REJECT') {
-      if (!String(this.data.rejectReason || '').trim() || !String(this.data.rejectRequirement || '').trim()) {
-        wx.showToast({ title: '请填写退回原因和补充要求', icon: 'none' }); return;
-      }
-      comment = '退回原因：' + this.data.rejectReason.trim() + '\n需要补充：' + this.data.rejectRequirement.trim();
-    } else {
-      comment = String(this.data.approveComment || '').trim();
-      if (!comment) { wx.showToast({ title: '请填写通过意见', icon: 'none' }); return; }
-    }
-    var that = this;
-    util.confirm(decision === 'APPROVE' ? '通过整改' : '退回整改', decision === 'APPROVE' ? '通过后任务将完成，是否继续？' : '退回后店长将进入下一轮整改，是否继续？')
-      .then(function (confirmed) {
-        if (!confirmed) return;
-        that.setData({ actionLoading: true });
-        var scope = 'rectification-review:' + that.data.taskId + ':' + that.data.task.currentRound + ':' + decision;
-        var command = util.persistentCommand(scope, function () { return {
-          rowVersion: that.data.task.rowVersion,
-          idempotencyKey: util.persistentKey(scope, 'rectification-review'),
-          decision: decision,
-          reviewComment: comment,
-          mediaAssetIds: that.readyIds(that.data.reviewMedia),
-        }; });
-        api.reviewRectification(that.data.taskId, command).then(function () {
-          util.clearPersistentKey(scope);
-          util.clearPersistentCommand(scope);
-          that.setData({ actionLoading: false });
-          wx.showToast({ title: decision === 'APPROVE' ? '复核已通过' : '已退回整改', icon: 'success' });
-          return that.loadDetail();
-        }).catch(function (error) {
-          that.setData({ actionLoading: false });
-          util.showError(error, { afterClose: function () { if (Number(error.status) === 409) that.loadDetail(); } });
-        });
-      });
-  },
 
   toBack: function () { wx.navigateBack({ delta: 1 }); },
 });

@@ -78,13 +78,33 @@
           </view>
         </view>
 
-        <!-- 订单金额 -->
-        <view class="order-info-item highlight-item">
+        <!-- 商品小计 -->
+        <view class="order-info-item">
           <view class="order-info-label">
-            <text class="label-text">订单金额</text>
+            <text class="label-text">商品小计</text>
           </view>
           <view class="order-info-value">
-            <text class="amount-value">{{value}}元</text>
+            <text class="amount-value subtotal-amount">¥{{batchItem.gbDpbSubtotal}}</text>
+          </view>
+        </view>
+
+        <!-- 优惠 -->
+        <view class="order-info-item" wx:if="{{batchItem.gbDpbNxCouponDiscountAmount > 0}}">
+          <view class="order-info-label">
+            <text class="label-text">优惠</text>
+          </view>
+          <view class="order-info-value">
+            <text class="amount-value coupon-amount">-{{batchItem.gbDpbNxCouponName}} ¥{{batchItem.gbDpbNxCouponDiscountAmount}}</text>
+          </view>
+        </view>
+
+        <!-- 实付金额 -->
+        <view class="order-info-item highlight-item">
+          <view class="order-info-label">
+            <text class="label-text">实付金额</text>
+          </view>
+          <view class="order-info-value">
+            <text class="amount-value pay-amount">¥{{value}}元</text>
           </view>
         </view>
 

@@ -993,8 +993,8 @@
 /* 时间值 */
 .time-value {
   font-size: 26rpx;
-  color: #4A90E2;
-  font-weight: 500;
+  color: #000;
+  font-weight: 400;
 }
 
 /* 金额值 */
@@ -1005,6 +1005,25 @@
   text-shadow: 0 2rpx 4rpx rgba(74, 144, 226, 0.1);
 }
 
+/* 优惠金额（红色） */
+.coupon-amount {
+  font-size: 24rpx;
+  color: #FF6B6B;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+/* 商品小计（黑色） */
+.subtotal-amount {
+  color: #000;
+}
+
+/* 实付金额（强调） */
+.pay-amount {
+  font-size: 40rpx;
+  color: #4A90E2;
+}
+
 /* 订货方式标签样式 */
 .bill-type-text {
   font-size: 24rpx;
@@ -1012,7 +1031,7 @@
   border-radius: 20rpx;
   font-weight: 500;
   background: #f8f9fa;
-  color: #6c757d;
+  color: #000;
   border: 1rpx solid #e9ecef;
 }
 

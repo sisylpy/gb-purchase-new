@@ -24,9 +24,13 @@ var dateUtils = require('../../lib/dateUtil');
 var load = require('../../lib/load');
 var requestUtil = require('../../lib/request');
 var depOrderApi = require('../../services/depOrder');
+var autoOrderDelete = require('../../utils/autoOrderDelete.js');
 var pagesApi = require('../services/pages');
 var purchaseContext = require('../../lib/purchaseContext');
 var batchBuyerInput = require('../../lib/batchBuyerInput');
+var nxBillAmount = require('../../lib/nxBillAmount');
+var supplierApi = require('../../services/supplier');
+var weComApi = require('../../services/wecom');
 
 
 // --- 本页面用到的所有 API 接口 ---
@@ -80,6 +84,11 @@ Page({
     selNumber: 1,
     gbDepartmentEntities: [],
     _checkedDepartment: false,  // 首次部门检查标记，只检查一次
+    homeCouponViews: [],
+    homeCouponLoading: false,
+    claimingAllHomeCoupons: false,
+    homeCouponPopupVisible: false,
+    authChecking: true,
   },
 
   // ============================================
@@ -101,31 +110,8 @@ Page({
     });
 
     
-    var userInfo = wx.getStorageSync('userInfo');
-    if (userInfo) {
-      // 历史本地登录缓存没有正式令牌时，静默刷新一次，轻量备料不再信任客户端门店参数。
-      if (!wx.getStorageSync('token')) {
-        this._userLogin();
-      }
-      var admin = userInfo.gbDuAdmin;
-      if (admin ==  12) {
-        var orderDepInfo = wx.getStorageSync('orderDepInfo') || wx.getStorageSync('mendianInfo');
-        if (orderDepInfo) {
-          wx.setStorageSync('orderDepInfo', orderDepInfo);
-        }
-        wx.redirectTo({
-          url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
-        });
-      } else {
-        var depInfo = wx.getStorageSync('mendianInfo');
-        this.setData({
-          userInfo: userInfo,
-          mendianInfo: depInfo,
-        });
-      }
-    } else {
-      this._userLogin();
-    }
+    // 每次冷启动都用微信身份向后台确认用户，不能让数据库清空后的旧缓存继续冒充有效账号。
+    this._userLogin();
 
     this.calculateSlider(0);
   },
@@ -152,8 +138,9 @@ Page({
     
     wx.removeStorageSync('selArr');
 
-    if (this.data.depId && this.data.mendianInfo) {
+    if (!this.data.authChecking && this.data.depId && this.data.mendianInfo) {
       if (depChanged) {
+        this._homeCouponPopupDismissed = false;
         this.setData({ purArr: [], batchArr: [], selectedArr: [] });
       }
       if (this.data.tab1Index == 0) {
@@ -161,7 +148,152 @@ Page({
       } else {
         this._initBatchData();
       }
+      this._loadHomeClaimableCoupons();
     }
+  },
+
+  /** 与商城首页一致：展示所有已绑定 NX 配送商当前可领取的优惠券。 */
+  _loadHomeClaimableCoupons: function () {
+    var depId = this.data.depId;
+    var disInfo = this.data.disInfo || wx.getStorageSync('disInfo') || {};
+    var mendianInfo = this.data.mendianInfo || wx.getStorageSync('mendianInfo') || {};
+    var gbDisId = Number(disInfo.gbDistributerId || mendianInfo.gbDepartmentDisId || 0);
+    if (!depId || !gbDisId) {
+      this.setData({
+        homeCouponViews: [],
+        homeCouponLoading: false,
+        homeCouponPopupVisible: false,
+      });
+      return;
+    }
+    this.setData({ homeCouponLoading: true });
+    supplierApi.depGetAllSupplier(depId).then(function (response) {
+      var result = response.result || {};
+      var suppliers = result.code === 0 ? (result.data || []) : [];
+      suppliers = suppliers.filter(function (supplier) {
+        return supplier && Number(supplier.nxJrdhsNxDistributerId) > 0;
+      });
+      if (!suppliers.length) {
+        this.setData({
+          homeCouponViews: [],
+          homeCouponLoading: false,
+          homeCouponPopupVisible: false,
+        });
+        return [];
+      }
+      return Promise.all(suppliers.map(function (supplier) {
+        var payload = {
+          nxDisId: Number(supplier.nxJrdhsNxDistributerId),
+          supplierId: Number(supplier.nxJrdhSupplierId),
+          gbDisId: gbDisId,
+          gbDisName: disInfo.gbDistributerName || mendianInfo.gbDepartmentName || '',
+        };
+        return supplierApi.jczbGetClaimableCoupons(payload).then(function (couponResponse) {
+          var couponResult = couponResponse.result || {};
+          return couponResult.code === 0 ? (couponResult.data || []).map(function (coupon) {
+            var isDiscount = Number(coupon.couponType) === 1;
+            var percent = Number(coupon.discountPercent || 0);
+            return Object.assign({}, coupon, payload, {
+              supplierName: supplier.nxJrdhsSupplierName
+                || (supplier.jrdhUserEntity && supplier.jrdhUserEntity.nxJrdhWxNickName)
+                || ('配送商 ' + supplier.nxJrdhsNxDistributerId),
+              amountText: isDiscount ? ((percent > 10 ? percent / 10 : percent) + '折') : ('¥' + (coupon.discountAmount || '0')),
+              thresholdText: '满' + (coupon.thresholdAmount || '0') + '元可用',
+            });
+          }) : [];
+        }).catch(function () { return []; });
+      }));
+    }.bind(this)).then(function (couponGroups) {
+      if (!couponGroups) return;
+      var coupons = [];
+      couponGroups.forEach(function (group) { coupons = coupons.concat(group || []); });
+      this.setData({
+        homeCouponViews: coupons,
+        homeCouponLoading: false,
+        homeCouponPopupVisible: coupons.length > 0
+          && (this.data.homeCouponPopupVisible || !this._homeCouponPopupDismissed),
+      });
+    }.bind(this)).catch(function () {
+      this.setData({
+        homeCouponViews: [],
+        homeCouponLoading: false,
+        homeCouponPopupVisible: false,
+      });
+    }.bind(this));
+  },
+
+  closeHomeCouponPopup: function () {
+    this._homeCouponPopupDismissed = true;
+    this.setData({ homeCouponPopupVisible: false });
+  },
+
+  claimAllHomeCoupons: function () {
+    var coupons = this.data.homeCouponViews || [];
+    if (!coupons.length || this.data.claimingAllHomeCoupons) return;
+
+    this.setData({ claimingAllHomeCoupons: true });
+    var claimGroups = {};
+    coupons.forEach(function (item) {
+      var groupKey = [item.nxDisId, item.supplierId, item.gbDisId].join(':');
+      if (!claimGroups[groupKey]) {
+        claimGroups[groupKey] = {
+          nxDisId: item.nxDisId,
+          supplierId: item.supplierId,
+          gbDisId: item.gbDisId,
+          gbDisName: item.gbDisName,
+          couponIds: [],
+        };
+      }
+      claimGroups[groupKey].couponIds.push(item.couponId);
+    });
+
+    var requests = Object.keys(claimGroups).map(function (groupKey) {
+      var group = claimGroups[groupKey];
+      return supplierApi.jczbClaimCoupons(group).then(function (response) {
+        var result = response.result || {};
+        return {
+          success: result.code === 0,
+          message: result.msg || '',
+          count: group.couponIds.length,
+        };
+      }).catch(function () {
+        return { success: false, message: '网络异常，请稍后重试', count: 0 };
+      });
+    });
+
+    Promise.all(requests).then(function (results) {
+      var successCount = results.reduce(function (total, result) {
+        return total + (result.success ? result.count : 0);
+      }, 0);
+      var firstFailure = results.filter(function (result) { return !result.success; })[0];
+      this.setData({ claimingAllHomeCoupons: false });
+
+      if (successCount === coupons.length) {
+        this._homeCouponPopupDismissed = true;
+        this.setData({ homeCouponPopupVisible: false });
+        wx.showToast({ title: '接收成功', icon: 'success' });
+      } else if (successCount > 0) {
+        wx.showToast({ title: '部分接收成功', icon: 'none' });
+      } else {
+        wx.showToast({
+          title: (firstFailure && firstFailure.message) || '接收失败，请稍后重试',
+          icon: 'none',
+        });
+      }
+      this._loadHomeClaimableCoupons();
+    }.bind(this));
+  },
+
+  openHomeSupplierCoupons: function (e) {
+    var item = e.currentTarget.dataset.item;
+    if (!item) return;
+    this._homeCouponPopupDismissed = true;
+    this.setData({ homeCouponPopupVisible: false });
+    wx.navigateTo({
+      url: '/subPackage-group/pages/account/couponList/couponList?nxDisId=' + item.nxDisId
+        + '&supplierId=' + item.supplierId
+        + '&supplierName=' + encodeURIComponent(item.supplierName || '配送商优惠券'),
+    });
   },
 
   /** 获取采购商品列表（Tab1 - 未采购） */
@@ -205,8 +337,23 @@ Page({
           this.setData({ orderRefreshing: false });
           var newOrderCount = "tabs[0].amount";
           var wxOrderCountData = "tabs[1].amount";
+          var batchArr = (res.result.data.arr || []).map(function (batch) {
+            var purchaseGoods = (batch.gbDPGEntities || []).map(function (item) {
+              return Object.assign({}, item, {
+                supplierOutbound: batchBuyerInput.isPurchaseGoodsOutbound(item),
+              });
+            });
+            return Object.assign({}, batch, {
+              gbDPGEntities: purchaseGoods,
+              hasSupplierOutbound: purchaseGoods.some(function (item) {
+                return item.supplierOutbound;
+              }),
+              nxBillAmount: nxBillAmount.build(batch),
+              isNxDistributerBatch: batchBuyerInput.isNxDistributerBatch(batch),
+            });
+          });
           var batchPatch = {
-            batchArr: res.result.data.arr,
+            batchArr: batchArr,
             [newOrderCount]: res.result.data.orderAmount,
             [wxOrderCountData]: res.result.data.wxAmount,
           };
@@ -261,6 +408,27 @@ Page({
   // ============================================
 
 
+  /** 清除餐馆端登录缓存，避免切换为供货商身份后继续使用旧餐馆数据 */
+  _clearRestaurantSession: function () {
+    ['token', 'franchiseTokenExpiresAt', 'disInfo', 'userInfo', 'mendianInfo', 'orderDepInfo']
+      .forEach(function (key) { wx.removeStorageSync(key); });
+  },
+
+  /** 未注册用户进入餐馆注册页 */
+  _redirectToRegistration: function () {
+    this._clearRestaurantSession();
+    wx.redirectTo({ url: '/pages/register/register' });
+  },
+
+  /** 已注册供货商进入供货商首页 */
+  _redirectToSupplierHome: function () {
+    this._clearRestaurantSession();
+    this.setData({ authChecking: false });
+    wx.redirectTo({
+      url: '/subPackage-jrdh/pages/jinriListWithLogin/jinriListWithLogin'
+    });
+  },
+
   /** 微信登录 */
   _userLogin: function () {
     wx.login({
@@ -268,29 +436,37 @@ Page({
         pagesApi.gbLoginIndex(resLogin.code)
           .then(function (res) {
             console.log("login====", res.result);
-            if (res.result.code !== -1) {
-              if (res.result.data !== "noBuyer") {
+            var result = res.result || {};
+            var data = result.data || {};
+            if (result.code === 0 && data.identityState === 'SUPPLIER_ACTIVE') {
+              this._redirectToSupplierHome();
+            } else if (result.code === 0 && data.identityState === 'RESTAURANT_ACTIVE' && data.depUserInfo) {
                 wx.setStorageSync('disInfo', res.result.data.disInfo);
                 wx.setStorageSync('userInfo', res.result.data.depUserInfo);
 
                 if (res.result.data.token) {
                   wx.setStorageSync('token', 'Bearer ' + res.result.data.token);
                   wx.setStorageSync('franchiseTokenExpiresAt', res.result.data.tokenExpiresAt || '');
+                  // 普通微信中会静默跳过；从企业微信工作台打开时自动绑定内部成员。
+                  weComApi.syncCurrentMember().catch(function (err) {
+                    console.warn('[企微绑定] 本次同步未完成', err);
+                  });
                 }
 
                 wx.setStorageSync('mendianInfo', res.result.data.depInfo);
                 var admin = res.result.data.depUserInfo.gbDuAdmin;
+                this.setData({ authChecking: false });
                
                 if ( admin == 0 || admin == 11 ) {
                   this.setData({
-                    disInfo: res.result.data.disInfro,
+                    disInfo: res.result.data.disInfo,
                     userInfo: res.result.data.depUserInfo,
                     depId: res.result.data.depInfo.gbDepartmentId,
                     mendianInfo: res.result.data.depInfo,
-                  });
-                  // this._checkIfShowPage();
-
-                  this._getInitData();
+                  }, function () {
+                    this._getInitData();
+                    this._loadHomeClaimableCoupons();
+                  }.bind(this));
                 } else {
                   wx.setStorageSync('disInfo', res.result.data.disInfo);
                   wx.setStorageSync('userInfo', res.result.data.depUserInfo);
@@ -300,17 +476,21 @@ Page({
                     url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',
                   });
                 }
-              } else {
-                wx.redirectTo({
-                  url: '/subPackage-jrdh/pages/jinriListWithLogin/jinriListWithLogin',
-                });
-              }
+            } else if (result.code === 0 && data.identityState === 'UNREGISTERED') {
+              this._redirectToRegistration();
             } else {
-              wx.redirectTo({
-                url: '../tro/tro',
-              });
+              this.setData({ authChecking: false });
+              wx.showToast({ title: result.msg || '登录失败，请稍后重试', icon: 'none' });
             }
+          }.bind(this))
+          .catch(function () {
+            this.setData({ authChecking: false });
+            wx.showToast({ title: '网络异常，请稍后重试', icon: 'none' });
           }.bind(this));
+      }.bind(this),
+      fail: function () {
+        this.setData({ authChecking: false });
+        wx.showToast({ title: '微信登录失败，请重试', icon: 'none' });
       }.bind(this)
     });
   },
@@ -468,25 +648,71 @@ Page({
   /** 取消订货商品 */
   cancelGbBatchItem: function () {
     this.setData({ showOperation: false });
-    if (this.data.editPurGoods.gbDpgOrdersWeightAmount > 0) {
-      wx.showModal({
-        title: '供货商已出库',
-        content: '如果要取消订货，请供货商先设置商品为"重新拣货称重"',
-        showCancel: false,
-        confirmText: "好的",
-      });
-    } else {
-      var id = this.data.editPurGoods.gbDistributerPurchaseGoodsId;
-      var that = this;
-      depOrderApi.deleteDisPurBatchGbItem(id)
-        .then(function (res) {
-          if (res.result.code == 0) {
-            that._initBatchData();
-          } else {
-            wx.showToast({ title: res.result.msg, icon: 'none' });
-          }
-        });
+    if (batchBuyerInput.isPurchaseGoodsOutbound(this.data.editPurGoods)) {
+      wx.showToast({ title: '配送商已出库，不能取消订货', icon: 'none' });
+      return;
     }
+    if (batchBuyerInput.hasSupplierReplied(this.data.editBatch)) {
+      wx.showToast({ title: '配送商已回复，不能删除订货', icon: 'none' });
+      return;
+    }
+    var purchaseGoods = this.data.editPurGoods;
+    autoOrderDelete.choosePurchaseDeleteMode(purchaseGoods)
+      .then(function (cancelAutoOrder) {
+        this._deleteCurrentPurchaseGoods(cancelAutoOrder);
+      }.bind(this))
+      .catch(function (err) {
+        if (!err || !err.cancelled) {
+          wx.showToast({ title: '请选择删除方式', icon: 'none' });
+        }
+      });
+  },
+
+  _deleteCurrentPurchaseGoods: function (cancelAutoOrder) {
+    var purchaseGoods = this.data.editPurGoods || {};
+    var orders = Array.isArray(purchaseGoods.gbDepartmentOrdersEntities)
+      ? purchaseGoods.gbDepartmentOrdersEntities.filter(function (order) {
+        return order && Number(order.gbDepartmentOrdersId) > 0;
+      })
+      : [];
+    var that = this;
+    load.showLoading('取消配送');
+
+    var deletion;
+    if (orders.length > 0) {
+      deletion = orders.reduce(function (chain, order) {
+        return chain.then(function () {
+          return depOrderApi.deleteOrderGb(order.gbDepartmentOrdersId, cancelAutoOrder)
+            .then(function (res) {
+              if (!res.result || res.result.code != 0) {
+                throw new Error((res.result && res.result.msg) || '删除失败');
+              }
+            });
+        });
+      }, Promise.resolve());
+    } else {
+      deletion = depOrderApi.deleteDisPurBatchGbItem(
+        purchaseGoods.gbDistributerPurchaseGoodsId,
+        cancelAutoOrder
+      ).then(function (res) {
+        if (!res.result || res.result.code != 0) {
+          throw new Error((res.result && res.result.msg) || '删除失败');
+        }
+      });
+    }
+
+    deletion.then(function () {
+      load.hideLoading();
+      wx.showToast({
+        title: cancelAutoOrder ? '已永久取消' : '已取消本次',
+        icon: 'success',
+      });
+      that._initBatchData();
+    }).catch(function (err) {
+      load.hideLoading();
+      wx.showToast({ title: err && err.message ? err.message : '删除失败', icon: 'none' });
+      that._initBatchData();
+    });
   },
 
   /** 确认收货（单品） */
@@ -711,7 +937,13 @@ Page({
     });
     var that = this;
     var itemList;
-    if (batchBuyerInput.needsBuyerUnlockBatch(batch)) {
+    if (batch.hasSupplierOutbound) {
+      wx.showToast({ title: '配送商已有商品出库，不能删除批次', icon: 'none' });
+      return;
+    } else if (batchBuyerInput.hasSupplierReplied(batch)) {
+      wx.showToast({ title: '配送商已回复，不能删除订货', icon: 'none' });
+      return;
+    } else if (batchBuyerInput.needsBuyerUnlockBatch(batch)) {
       itemList = ['修改这个批次'];
     } else if (batchBuyerInput.isSupplierInvolved(batch) && Number(batch.gbDpbStatus) >= 2) {
       wx.showToast({ title: '供货商已提交，无法修改', icon: 'none' });
@@ -775,6 +1007,14 @@ Page({
   deleteGbBatch: function () {
     var that = this;
     var batch = this.data.currentBatch;
+    if (batch && batch.hasSupplierOutbound) {
+      wx.showToast({ title: '配送商已有商品出库，不能删除批次', icon: 'none' });
+      return;
+    }
+    if (batchBuyerInput.hasSupplierReplied(batch)) {
+      wx.showToast({ title: '配送商已回复，不能删除订货', icon: 'none' });
+      return;
+    }
     wx.showModal({
       title: '确认删除',
       content: '确定要删除整个订单批次吗？删除后不可恢复。',
@@ -836,6 +1076,13 @@ Page({
     var batch = e.currentTarget.dataset.batch;
     var bIndex = e.currentTarget.dataset.bindex;
     if (!batch) {
+      return;
+    }
+    if (batchBuyerInput.isNxDistributerBatch(batch)) {
+      wx.showToast({
+        title: 'NX配送商订单无需拍照识别',
+        icon: 'none',
+      });
       return;
     }
     this.setData({
@@ -990,8 +1237,6 @@ Page({
     })
   },
 
-
-
   noopForSheet: function () {},
 
 
@@ -1003,7 +1248,7 @@ Page({
  
   onNavTap: function () {
     wx.navigateTo({
-      url: '/subPackage-charts/pages/aiChat/aiChat?advisorId=1',
+      url: '/subPackage-charts/pages/aiChat/aiChat?advisorCode=ADV_BOSS',
     })
   },
 

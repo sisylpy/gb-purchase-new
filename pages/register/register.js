@@ -57,6 +57,7 @@ Page({
     agreed: false,
     showTerms: false,
     canRegister: false,
+    registering: false,
     navBarHeight: 0,
     /** @type {string} wx.login 返回的 code，与注册一并提交 */
     code: '',
@@ -170,6 +171,7 @@ Page({
    */
   onChooseAvatar: function (e) {
     var that = this;
+    if (that.data.registering) return;
     var avatarUrl = e.detail.avatarUrl;
 
     if (!that.data.restaurantName) {
@@ -185,7 +187,7 @@ Page({
       return;
     }
 
-    that.setData({ avatarUrl: avatarUrl });
+    that.setData({ avatarUrl: avatarUrl, registering: true });
     wx.showLoading({ title: '注册小程序订货客户', mask: true });
 
     pagesApi.gbRegisterWithFile(
@@ -200,13 +202,19 @@ Page({
       if (jsonObject.code === 0) {
         wx.setStorageSync('disInfo', jsonObject.data.disInfo);
         wx.setStorageSync('userInfo', jsonObject.data.depUserInfo);
-        wx.setStorageSync('mendianInfo', jsonObject.data.disInfo.mendianDepartmentList[0]);
+        wx.setStorageSync('mendianInfo', jsonObject.data.depInfo || jsonObject.data.disInfo.mendianDepartmentList[0]);
+        if (jsonObject.data.token) {
+          wx.setStorageSync('token', 'Bearer ' + jsonObject.data.token);
+          wx.setStorageSync('franchiseTokenExpiresAt', jsonObject.data.tokenExpiresAt || '');
+        }
 
         var mendianInfo = wx.getStorageSync('mendianInfo');
         wx.redirectTo({
           url: '../index/index?depId=' + (mendianInfo ? mendianInfo.gbDepartmentId : ''),
         });
       } else {
+        that.setData({ registering: false });
+        that._refreshWxLoginCode();
         wx.showToast({
           title: jsonObject.msg || '注册失败',
           icon: 'none'
@@ -214,6 +222,8 @@ Page({
       }
     }).catch(function (err) {
       wx.hideLoading();
+      that.setData({ registering: false });
+      that._refreshWxLoginCode();
       console.error('注册异常', err);
       wx.showToast({
         title: '网络异常',

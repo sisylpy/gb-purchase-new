@@ -1,7 +1,7 @@
 /**
  * 订货习惯提醒分页（与 docs/gb-dep-reorder-reminder-api.md 一致）
  * POST gbdepartmentdisgoods/depReorderReminderPage
- * 服务端规则：库存过剩过滤时参考日均 = max(习惯或单次估算日均, aiReduceProductionDailyAvg 可解析且>0 时)，见文档 §5.8
+ * 服务端负责补货状态预测、库存过滤和排序；页面只展示精简后的建议结果。
  */
 
 var request = require('../lib/request');

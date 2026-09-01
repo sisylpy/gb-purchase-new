@@ -16,6 +16,7 @@ const {
   saveNxStandard,
 } = require('../../../../services/depOrder');
 import pasteDepListCache from '../../../../lib/pasteDepListCache';
+var autoOrderDelete = require('../../../../utils/autoOrderDelete.js');
 
 const { isSameOrder } = pasteDepListCache;
 
@@ -596,9 +597,20 @@ Page({
   },
 
   _delApplyItem() {
+    const order = this.data.applyItem;
+    autoOrderDelete.chooseDeleteMode(order).then(cancelAutoOrder => {
+      this._deleteApplyItem(cancelAutoOrder);
+    }).catch(err => {
+      if (!err || !err.cancelled) {
+        wx.showToast({ title: '请选择删除方式', icon: 'none' });
+      }
+    });
+  },
+
+  _deleteApplyItem(cancelAutoOrder) {
     const id = this.data.applyItem.gbDepartmentOrdersId;
 
-    deleteOrderGb(id).then(res => {
+    deleteOrderGb(id, cancelAutoOrder).then(res => {
       if (res.result.code != 0) return;
 
       wx.setStorageSync('needRefreshOrderData', true);
@@ -854,5 +866,4 @@ Page({
    },
 
 })
-
 

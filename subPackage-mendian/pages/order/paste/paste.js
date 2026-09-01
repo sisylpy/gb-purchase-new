@@ -1,5 +1,6 @@
 import load from '../../../../lib/load';
 const { depPasteSearchGoods, deleteOrderGb } = require('../../../../services/depOrder');
+const { getTemporaryCredential } = require('../../../../services/speech');
 import { parseOrderFromText } from '../../../../lib/orderParser';
 import pasteDepListCache from '../../../../lib/pasteDepListCache';
 
@@ -11,14 +12,25 @@ const {
 } = pasteDepListCache;
 const globalData = getApp().globalData;
 
-// 腾讯云语音识别配置（密钥放在 config.js，已在 .gitignore 中，避免泄露）
-let appConfig = {};
-try { appConfig = require('../../../../config.js'); } catch (e) { appConfig = {}; }
-const TENCENT_CLOUD_SECRET_ID = appConfig.tencentCloud?.secretId || '';
-const TENCENT_CLOUD_SECRET_KEY = appConfig.tencentCloud?.secretKey || '';
-const TENCENT_CLOUD_APP_ID = appConfig.tencentCloud?.appId || '1308821743';
-const TENCENT_CLOUD_ENGINE_MODEL_TYPE = appConfig.tencentCloud?.engineModelType || '16k_zh';
-const TENCENT_CLOUD_VOICE_FORMAT = appConfig.tencentCloud?.voiceFormat || 1;
+const TENCENT_CLOUD_ENGINE_MODEL_TYPE = '16k_zh';
+const TENCENT_CLOUD_VOICE_FORMAT = 1;
+const SPEECH_CREDENTIAL_REFRESH_AHEAD_SECONDS = 120;
+let cachedSpeechCredential = null;
+
+function invalidateSpeechCredential() {
+  cachedSpeechCredential = null;
+}
+
+function isSpeechCredentialUsable(credential) {
+  if (!credential) return false;
+  const expiresAt = Number(credential.expiredTime || 0);
+  const now = Math.floor(Date.now() / 1000);
+  return !!credential.appId &&
+    !!credential.tmpSecretId &&
+    !!credential.tmpSecretKey &&
+    !!credential.token &&
+    expiresAt - SPEECH_CREDENTIAL_REFRESH_AHEAD_SECONDS > now;
+}
 
 // 语音识别管理器（插件未声明/未授权时降级为不可用）
 let speechRecognizerManager = null;
@@ -72,6 +84,7 @@ Page({
     // ===== 语音录音相关 =====
     sentence: '',            // 实时识别文本
     originSentence: '',      // 原始语音/粘贴内容（用于"重新粘贴"恢复）
+    isStartingRecord: false, // 是否正在获取临时凭证并启动录音
     isRecording: false,      // 是否录音中
     recognitionStatus: '',   // 识别状态文案
     hasAiRecognized: false,  // 是否已成功解析（用于底部按钮切换为"重新粘贴"）
@@ -83,6 +96,7 @@ Page({
   },
 
   onLoad(options) {
+    this._pageUnloaded = false;
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
@@ -157,8 +171,8 @@ Page({
       speechRecognizerManager.OnRecognitionComplete = (res) => {
         console.log('========== 语音识别完成 ==========');
         console.log('识别结束', res);
-        if (this.data.silenceTimer) clearTimeout(this.data.silenceTimer);
-        this.setData({ recognitionStatus: '识别完成', isRecording: false });
+        this._clearRecordTimers();
+        this.setData({ recognitionStatus: '识别完成', isRecording: false, isStartingRecord: false });
 
         const recognizedText = this.data.sentence;
         console.log('【语音识别原始文本】:', recognizedText);
@@ -180,7 +194,15 @@ Page({
 
       speechRecognizerManager.OnError = (res) => {
         console.log('识别失败', res);
-        this.setData({ recognitionStatus: '识别失败', isRecording: false });
+        this._clearRecordTimers();
+        if (Number(res && res.code) === 6002) {
+          invalidateSpeechCredential();
+        }
+        this.setData({ recognitionStatus: '识别失败', isRecording: false, isStartingRecord: false });
+        wx.showToast({
+          title: Number(res && res.code) === 6002 ? '语音鉴权失效，请重新录音' : '语音识别失败，请重试',
+          icon: 'none',
+        });
       };
 
       speechRecognizerManager.OnRecorderStop = (res) => {
@@ -251,16 +273,18 @@ Page({
   // ===================== 语音录音 =====================
 
   onHide() {
-    if (this.data.isRecording) this.stopRecord();
+    if (this.data.isRecording || this.data.isStartingRecord) this.stopRecord();
   },
 
   onUnload() {
-    if (this.data.isRecording) this.stopRecord();
+    this._pageUnloaded = true;
+    if (this.data.isRecording || this.data.isStartingRecord) this.stopRecord();
     if (this.data.timer) clearInterval(this.data.timer);
     if (this.data.silenceTimer) clearTimeout(this.data.silenceTimer);
   },
 
   toggleRecord() {
+    if (this.data.isStartingRecord) return;
     if (this.data.isRecording) {
       this.stopRecord();
     } else {
@@ -268,43 +292,96 @@ Page({
     }
   },
 
-  startRecord() {
+  async startRecord() {
     if (!speechRecognizerManager) {
       wx.showToast({ title: '录音插件未配置', icon: 'none' });
       return;
     }
 
     wx.vibrateShort && wx.vibrateShort();
-    const that = this;
     this.setData({
       duration: 0,
-      isRecording: true,
-      recognitionStatus: '识别中...',
+      isStartingRecord: true,
+      isRecording: false,
+      recognitionStatus: '准备录音...',
       sentence: this.data.sentence || '',
     });
 
-    const params = {
-      secretkey: TENCENT_CLOUD_SECRET_KEY,
-      secretid: TENCENT_CLOUD_SECRET_ID,
-      appid: TENCENT_CLOUD_APP_ID,
-      engine_model_type: TENCENT_CLOUD_ENGINE_MODEL_TYPE,
-      voice_format: TENCENT_CLOUD_VOICE_FORMAT,
-    };
+    try {
+      const credential = await this._getSpeechCredential();
+      if (this._pageUnloaded || !this.data.isStartingRecord) return;
+      if (!isSpeechCredentialUsable(credential)) {
+        throw new Error('临时语音凭证不完整或已过期');
+      }
 
-    if (that.data.timer) clearInterval(that.data.timer);
-    that.data.timer = setInterval(() => {
-      that.setData({ duration: that.data.duration + 1 });
+      const params = {
+        secretkey: credential.tmpSecretKey,
+        secretid: credential.tmpSecretId,
+        token: credential.token,
+        appid: credential.appId,
+        engine_model_type: TENCENT_CLOUD_ENGINE_MODEL_TYPE,
+        voice_format: TENCENT_CLOUD_VOICE_FORMAT,
+      };
+
+      this.setData({
+        isStartingRecord: false,
+        isRecording: true,
+        recognitionStatus: '识别中...',
+      });
+      this._startDurationTimer();
+      await Promise.resolve(speechRecognizerManager.start(params));
+    } catch (err) {
+      invalidateSpeechCredential();
+      this._clearRecordTimers();
+      this.setData({
+        isStartingRecord: false,
+        isRecording: false,
+        recognitionStatus: '语音服务暂不可用',
+      });
+      console.error('[paste] 启动语音识别失败', err);
+      const responseBody = err && err.data;
+      wx.showToast({
+        title: (responseBody && responseBody.msg) || '语音服务暂不可用，请稍后重试',
+        icon: 'none',
+      });
+    }
+  },
+
+  async _getSpeechCredential() {
+    if (isSpeechCredentialUsable(cachedSpeechCredential)) {
+      return cachedSpeechCredential;
+    }
+    const response = await getTemporaryCredential();
+    const body = (response && response.result) || {};
+    if (Number(body.code) !== 0 || !body.data) {
+      throw new Error(body.msg || '获取语音凭证失败');
+    }
+    cachedSpeechCredential = body.data;
+    return cachedSpeechCredential;
+  },
+
+  _startDurationTimer() {
+    this._clearRecordTimers();
+    this.data.timer = setInterval(() => {
+      this.setData({ duration: this.data.duration + 1 });
     }, 1000);
+  },
 
-    speechRecognizerManager.start(params);
+  _clearRecordTimers() {
+    if (this.data.timer) {
+      clearInterval(this.data.timer);
+      this.data.timer = null;
+    }
+    if (this.data.silenceTimer) {
+      clearTimeout(this.data.silenceTimer);
+      this.data.silenceTimer = null;
+    }
   },
 
   stopRecord() {
-    const that = this;
-    if (that.data.timer) { clearInterval(that.data.timer); that.data.timer = null; }
-    if (that.data.silenceTimer) { clearTimeout(that.data.silenceTimer); }
-    if (that.data.isRecording) {
-      that.setData({ isRecording: false, silenceTimer: null });
+    this._clearRecordTimers();
+    if (this.data.isRecording || this.data.isStartingRecord) {
+      this.setData({ isRecording: false, isStartingRecord: false, silenceTimer: null });
     }
     if (speechRecognizerManager) speechRecognizerManager.stop();
   },

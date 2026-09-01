@@ -37,6 +37,16 @@
   background-color: #5d5e5d;
 }
 
+.standard-ready,
+.standard-new {
+  display: inline-block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+}
+
+.standard-ready { color: #187e6e; }
+.standard-new { color: #f08308; }
+
 
 
 

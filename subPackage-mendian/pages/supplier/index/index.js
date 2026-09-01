@@ -197,6 +197,20 @@ toSupplierGoods(){this.hideMask();
   })
 },
 
+toSupplierCoupon(){
+  var supplier = this.data.supplierItem;
+  if (!supplier || !supplier.nxJrdhsNxDistributerId) {
+    wx.showToast({ title: '该供货商尚未绑定配送账号', icon: 'none' });
+    return;
+  }
+  this.hideMask();
+  wx.navigateTo({
+    url: '/subPackage-group/pages/account/couponList/couponList?nxDisId=' + supplier.nxJrdhsNxDistributerId
+      + '&supplierId=' + supplier.nxJrdhSupplierId
+      + '&supplierName=' + encodeURIComponent(supplier.nxJrdhsSupplierName || '配送商优惠券')
+  });
+},
+
 
 toDeleteSupplier(){
   load.showLoading("删除订货商");

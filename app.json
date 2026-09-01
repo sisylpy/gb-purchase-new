@@ -1,6 +1,7 @@
 {
   "pages": [
-    "pages/index/index",   
+    "pages/index/index",
+    "pages/supportTempGoods/supportTempGoods",
     "pages/splash/splash",
     "pages/common/selectDate/selectDate",
     "pages/register/register",
@@ -8,24 +9,19 @@
     "pages/inviteRegister/inviteRegister",
     "pages/inviteTro/inviteTro",
     "pages/inviteAndOrder/inviteAndOrder",
-    "pages/inviteAdmin/inviteAdmin"
+    "pages/inviteAdmin/inviteAdmin",
+    "pages/storeOwnerInvite/storeOwnerInvite"
   ],
   "subPackages": [
     {
       "root": "subPackage-inspection/",
       "name": "inspection",
       "pages": [
-        "pages/register/register",
         "pages/home/home",
-        "pages/computerLogin/computerLogin",
-        "pages/storeSelect/storeSelect",
-        "pages/inspectionRecord/inspectionRecord",
-        "pages/issueConfirm/issueConfirm",
-        "pages/issueDetail/issueDetail",
-        "pages/inspectionDetail/inspectionDetail",
         "pages/taskDetail/taskDetail"
       ]
     },
+
     {
       "root": "subPackage-preparation/",
       "name": "preparation",
@@ -36,6 +32,7 @@
         "pages/storeProductDetail/storeProductDetail",
         "pages/storeRecipe/storeRecipe",
         "pages/storeProduction/storeProduction",
+        "pages/storeProductionRecords/storeProductionRecords",
         "pages/storeLoss/storeLoss",
         "pages/storeLossRecords/storeLossRecords",
         "pages/home/home",
@@ -77,6 +74,7 @@
         "pages/management/purUserDayDeatil/purUserDayDeatil",
         "pages/management/depFoodList/depFoodList",
         "pages/management/dishIngredientDashboard/dishIngredientDashboard",
+        "pages/management/franchiseUpgrade/franchiseUpgrade",
         "pages/mendian/index/index",
         "pages/mendian/mendianDetail/mendianDetail",
         "pages/mendian/mendianEdit/mendianEdit",
@@ -225,7 +223,7 @@
   },
   "plugins": {
     "QCloudAIVoice": {
-      "version": "2.3.13",
+      "version": "3.0.0",
       "provider": "wx3e17776051baf153"
     }
   }

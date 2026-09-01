@@ -169,49 +169,61 @@
   width: 100%;
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-between;
+  justify-content: center;
   font-size: 36rpx;
   align-items: center;
   padding: 24rpx 20rpx;
-  gap: 20rpx;
+  gap: 24rpx;
+  box-sizing: border-box;
 }
 
 .confirm-btn {
-  background: linear-gradient(135deg, #cccccc 0%, #adb2b8 100%);
-  color: #808080;
-  width: 40%;
+  flex: 1;
+  height: 80rpx;
+  line-height: 78rpx;
+  background: #f1f4f3;
+  color: #a1aaa7;
   text-align: center;
-  padding: 24rpx 0;
-  border-radius: 12rpx;
+  border: 1rpx solid #e1e7e4;
+  border-radius: 8rpx;
   font-weight: 600;
   font-size: 32rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  box-shadow: none;
   transition: all 0.2s ease;
 }
 
 .confirm-btn.is-active {
-  background: linear-gradient(135deg, #187e6e 0%, #0f6b5d 100%);
-  color: #ffffff;
-  transform: translateY(2rpx);
-  box-shadow: 0 2rpx 8rpx rgba(24, 126, 110, 0.35);
+  background: #edf7f3;
+  color: #187e6e;
+  border-color: #c7e4db;
+  box-shadow: none;
 }
 
 .cancel-btn {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #6c757d;
-  width: 40%;
+  flex: 1;
+  height: 80rpx;
+  line-height: 78rpx;
+  background: #ffffff;
+  color: #4f6760;
   text-align: center;
-  padding: 24rpx 0;
-  border-radius: 12rpx;
+  border-radius: 8rpx;
   font-weight: 600;
   font-size: 32rpx;
-  border: 2rpx solid #dee2e6;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  border: 1rpx solid #cfddd8;
+  box-sizing: border-box;
+  box-shadow: none;
   transition: all 0.2s ease;
 }
 
 .cancel-btn:active {
-  transform: translateY(2rpx);
-  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.15);
+  background: #f3f8f6;
+  border-color: #b9d2ca;
+  box-shadow: none;
+}
+
+.confirm-btn.is-active:active {
+  background: #dfeee9;
+  border-color: #aed7cb;
+  box-shadow: none;
 }

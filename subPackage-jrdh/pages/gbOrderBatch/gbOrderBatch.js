@@ -157,6 +157,18 @@ Page({
     viewMode: '',
     isCompletedView: false,
     buyerCanReEdit: false,
+    nxBridgeReady: false,
+    nxBridgeOpening: false,
+    nxBridgeNxDisId: null,
+    nxBridgeError: '',
+    nxBridgeState: 'hidden',
+    nxBridgeIntroVisible: false,
+    nxBridgeFirstRelation: false,
+    nxBridgeLinkedCount: 0,
+    nxBridgeOrderCount: 0,
+    isNxDistributerUser: false,
+    supplierRelationReady: false,
+    nxBusinessRelationId: null,
   },
 
 
@@ -379,6 +391,9 @@ Page({
             buyerCanReEdit: buyerCanReEdit,
           }, function () {
             this._updateLayoutMetrics();
+            if (!(batchStatus == -1 && !this.data.buyUser && !this._isBuyerInputActive())) {
+              this._syncNxDistributerOrderState();
+            }
           }.bind(this));
 
           if (batchStatus == -1 && !this.data.buyUser && !this._isBuyerInputActive()) {
@@ -443,7 +458,11 @@ Page({
                   buyUser: res.result.data.buyUser,
                   supplierInfo: res.result.data.supplierInfo,
                   userInfo: res.result.data.userInfo, // 设置userInfo，防止重复登录
-                  isSellRegiste: false // 确保登录成功后不显示注册弹窗
+                  isSellRegiste: false, // 确保登录成功后不显示注册弹窗
+                  nxBridgeFirstRelation: !!res.result.data.supplierRelationCreated,
+                  isNxDistributerUser: !!res.result.data.isNxDistributerUser,
+                  supplierRelationReady: !!res.result.data.supplierRelationReady,
+                  nxBusinessRelationId: Number(res.result.data.nxBusinessRelationId || 0),
                 })
                 if (!res.result.data.buyUser) {
                   that.setData({
@@ -461,7 +480,11 @@ Page({
                   isSellRegiste: true
                 })
               }
-            
+            } else {
+              wx.showToast({
+                title: res.result.msg || '登录失败，请稍后重试',
+                icon: 'none'
+              })
             }
           })
       }
@@ -487,10 +510,139 @@ Page({
             viewMode: this._resolveViewMode(batchStatus),
           }, function () {
             this._updateLayoutMetrics();
+            this._syncNxDistributerOrderState();
           }.bind(this));
         }
       })
   },
+
+  /** 统计本批次订单是否已经真正生成配送订单，不能只看批次上的配送商编号。 */
+  _getNxBridgeProgress(batch, nxDisId) {
+    var goodsList = batch && batch.gbDPGEntities ? batch.gbDPGEntities : [];
+    var orderCount = 0;
+    var linkedCount = 0;
+    var conflictCount = 0;
+    for (var i = 0; i < goodsList.length; i++) {
+      var orders = goodsList[i].gbDepartmentOrdersEntities || [];
+      for (var j = 0; j < orders.length; j++) {
+        var order = orders[j] || {};
+        var orderNxDisId = Number(order.gbDoNxDistributerId || 0);
+        var nxOrderId = Number(order.gbDoNxDepartmentOrderId || 0);
+        orderCount++;
+        if (orderNxDisId > 0 && orderNxDisId !== nxDisId) {
+          conflictCount++;
+        } else if (orderNxDisId === nxDisId && nxOrderId > 0) {
+          linkedCount++;
+        }
+      }
+    }
+    var state = 'pending';
+    if (conflictCount > 0) {
+      state = 'conflict';
+    } else if (orderCount > 0 && linkedCount === orderCount) {
+      state = Number(batch.gbDpbStatus) >= 2 ? 'delivered' : 'transferred';
+    } else if (linkedCount > 0) {
+      state = 'partial';
+    } else if (Number(batch && batch.gbDpbStatus) >= 2) {
+      state = 'closed';
+    }
+    return {
+      state: state,
+      orderCount: orderCount,
+      linkedCount: linkedCount,
+    };
+  },
+
+  /** 已绑定配送关系时，在订单页持续提供转单入口；只有首次建立饭店关系才显示引导。 */
+  _syncNxDistributerOrderState() {
+    if (this.data.buyUser || this._isBuyerInputActive()) {
+      this.setData({
+        nxBridgeReady: false,
+        nxBridgeState: 'hidden',
+        nxBridgeIntroVisible: false,
+      });
+      return;
+    }
+    var userInfo = this.data.jrdhUserInfo;
+    var supplierInfo = this.data.supplierInfo;
+    var nxDisId = userInfo ? Number(userInfo.nxJrdhNxDistributerId || 0) : 0;
+    var supplierNxDisId = supplierInfo ? Number(supplierInfo.nxJrdhsNxDistributerId || 0) : 0;
+    var businessRelationId = Number(this.data.nxBusinessRelationId || 0);
+    var hasNxIdentity = this.data.isNxDistributerUser || nxDisId > 0;
+    var hasSupplierRelation = businessRelationId > 0
+      || this.data.supplierRelationReady
+      || (nxDisId > 0 && supplierNxDisId === nxDisId);
+    if (!hasNxIdentity || !hasSupplierRelation) {
+      this.setData({
+        nxBridgeReady: false,
+        nxBridgeState: 'hidden',
+        nxBridgeIntroVisible: false,
+      });
+      return;
+    }
+
+    var progress = this._getNxBridgeProgress(this.data.batch, nxDisId);
+    this.setData({
+      nxBridgeReady: true,
+      nxBridgeNxDisId: nxDisId,
+      nxBridgeState: progress.state,
+      nxBridgeLinkedCount: progress.linkedCount,
+      nxBridgeOrderCount: progress.orderCount,
+      nxBridgeIntroVisible: this.data.nxBridgeFirstRelation && progress.state === 'pending',
+      nxBridgeError: '',
+    });
+  },
+
+  /** 必须由用户点击触发；微信会阻止页面加载完成后的自动跨小程序跳转。 */
+  openNxDistributerOrder() {
+    if (!this.data.nxBridgeReady || this.data.nxBridgeOpening || this.data.nxBridgeState === 'conflict') {
+      return;
+    }
+    var that = this;
+    var nxDisId = Number(this.data.nxBridgeNxDisId || 0);
+    var transferred = this.data.nxBridgeState === 'transferred'
+      || this.data.nxBridgeState === 'delivered';
+    var targetPath = transferred
+      ? 'pages/order/index/index'
+      : 'subPackage-supplier/pages/trans/fromOrderPageGb/fromOrderPageGb?batchId=' +
+        this.data.batchId + '&nxDisId=' + nxDisId;
+    this.setData({ nxBridgeOpening: true, nxBridgeError: '' });
+    wx.navigateToMiniProgram({
+      appId: 'wx87baf9dcf935518a',
+      path: targetPath,
+      extraData: transferred
+        ? { openOrderHome: true }
+        : {
+            batchId: this.data.batchId,
+            nxDisId: nxDisId,
+          },
+      // 当前跨库转单功能只进入配送小程序体验版，避免误用正式版旧代码。
+      envVersion: 'trial',
+      success: function () {
+        that.setData({
+          nxBridgeOpening: false,
+          nxBridgeIntroVisible: false,
+          nxBridgeFirstRelation: false,
+        });
+      },
+      fail: function (error) {
+        console.error('[精彩账本转配送] navigateToMiniProgram 失败:', error);
+        that.setData({
+          nxBridgeOpening: false,
+          nxBridgeError: '打开精彩接单失败，请稍后重试。',
+        });
+      },
+    });
+  },
+
+  dismissNxBridgeIntro() {
+    this.setData({
+      nxBridgeIntroVisible: false,
+      nxBridgeFirstRelation: false,
+    });
+  },
+
+  noop() {},
 
   getSupplierBatch(e) {
 

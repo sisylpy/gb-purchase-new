@@ -124,7 +124,7 @@ Page({
   submit: function () {
     if (this.data.submitting) return;
     if (!this.data.product || !(Number(this.data.actualOutputQuantity) > 0)) {
-      wx.showToast({ title: '请选择备料品并填写实际产出', icon: 'none' });
+      wx.showToast({ title: '请选择中间料并填写实际产出', icon: 'none' });
       return;
     }
     var lines = [];
@@ -166,7 +166,7 @@ Page({
           wx.showModal({
             title: '制作已记录',
             content: result.productName + '\n原料成本：¥' + result.materialTotalCost
-              + '\n参考单位成本：¥' + result.actualUnitCost + '/' + result.outputUnitCode
+              + '\n本次单位成本：¥' + result.actualUnitCost + '/' + result.outputUnitCode
               + '\n未创建生产批次',
             showCancel: false,
             success: function () { wx.navigateBack({ delta: 1 }); },

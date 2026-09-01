@@ -47,19 +47,59 @@
       bind:back="onSellerBack"
     />
     <view class="batch-body-wrap batch-body-wrap-seller {{isCompletedView ? 'batch-body-wrap-done' : ''}}" style="padding-left: {{viewMode === 'seller_edit' ? 10 : 20}}rpx; padding-right: {{viewMode === 'seller_edit' ? 10 : 20}}rpx; margin-top: 10rpx;">
-      <view class="body" style="height:{{isCompletedView ? bodyHeightCompleted : bodyHeight}}rpx;">
+      <view class="body" style="height:{{nxBridgeReady ? bodyHeightCompleted : (isCompletedView ? bodyHeightCompleted : bodyHeight)}}rpx;">
         <order-participants batch="{{batch}}" url="{{url}}" todayDate="{{todayDate}}" />
+
+        <view wx:if="{{nxBridgeReady}}" class="nx-order-bridge nx-order-bridge-{{nxBridgeState}}">
+          <view class="nx-order-bridge-main">
+            <view class="nx-order-bridge-icon">
+              <text wx:if="{{nxBridgeState === 'transferred' || nxBridgeState === 'delivered' || nxBridgeState === 'closed'}}">✓</text>
+              <text wx:elif="{{nxBridgeState === 'conflict'}}">!</text>
+              <text wx:else>接</text>
+            </view>
+            <view class="nx-order-bridge-copy">
+              <view wx:if="{{nxBridgeState === 'transferred'}}" class="nx-order-bridge-title">已转入精彩接单</view>
+              <view wx:elif="{{nxBridgeState === 'delivered'}}" class="nx-order-bridge-title">精彩接单已完成出货</view>
+              <view wx:elif="{{nxBridgeState === 'closed'}}" class="nx-order-bridge-title">本单已在精彩账本完成</view>
+              <view wx:elif="{{nxBridgeState === 'partial'}}" class="nx-order-bridge-title">转单尚未全部完成</view>
+              <view wx:elif="{{nxBridgeState === 'conflict'}}" class="nx-order-bridge-title">订单配送关系异常</view>
+              <view wx:else class="nx-order-bridge-title">本单待接收到精彩接单</view>
+
+              <view wx:if="{{nxBridgeState === 'transferred'}}" class="nx-order-bridge-desc">请在精彩接单继续完成备货、称重和出货。</view>
+              <view wx:elif="{{nxBridgeState === 'delivered'}}" class="nx-order-bridge-desc">出货数据已经回到精彩账本，饭店可以继续确认收货和结账。</view>
+              <view wx:elif="{{nxBridgeState === 'closed'}}" class="nx-order-bridge-desc">这张历史订单未转入精彩接单，无需再次接收。</view>
+              <view wx:elif="{{nxBridgeState === 'partial'}}" class="nx-order-bridge-desc">已有 {{nxBridgeLinkedCount}}/{{nxBridgeOrderCount}} 条订单转入，请继续完成本次转单。</view>
+              <view wx:elif="{{nxBridgeState === 'conflict'}}" class="nx-order-bridge-desc">部分订单已经关联其他配送商，请联系饭店核对。</view>
+              <view wx:else class="nx-order-bridge-desc">接收后在精彩接单与其他订单一起统一处理和出货。</view>
+            </view>
+          </view>
+
+          <view wx:if="{{nxBridgeError}}" class="nx-bridge-error">{{nxBridgeError}}</view>
+          <button
+            wx:if="{{nxBridgeState !== 'conflict' && nxBridgeState !== 'closed'}}"
+            class="nx-order-bridge-button"
+            bindtap="openNxDistributerOrder"
+            loading="{{nxBridgeOpening}}"
+            disabled="{{nxBridgeOpening}}"
+          >
+            <block wx:if="{{nxBridgeOpening}}">正在打开…</block>
+            <block wx:elif="{{nxBridgeState === 'transferred' || nxBridgeState === 'delivered'}}">去精彩接单查看</block>
+            <block wx:elif="{{nxBridgeState === 'partial'}}">继续完成转单</block>
+            <block wx:else>打开精彩接单接收本单</block>
+          </button>
+        </view>
+
         <view
           class="flex-column form_body"
           style="{{viewMode === 'seller_edit' ? 'width: ' + (windowWidth - 40) + 'rpx;' : ''}}"
         >
           <order-goods-list
-            mode="{{viewMode === 'seller_edit' ? 'seller_edit' : 'priced'}}"
-            styleVariant="{{viewMode === 'seller_confirm' ? 'plain' : 'dashed'}}"
+            mode="{{nxBridgeReady ? 'priced' : (viewMode === 'seller_edit' ? 'seller_edit' : 'priced')}}"
+            styleVariant="{{nxBridgeReady ? 'dashed' : (viewMode === 'seller_confirm' ? 'plain' : 'dashed')}}"
             batch="{{batch}}"
             batchStatus="{{batchStatus}}"
             windowWidth="{{windowWidth}}"
-            scrollHeight="{{viewMode === 'seller_edit' ? scrollHeightSeller : scrollHeightDefault}}"
+            scrollHeight="{{nxBridgeReady ? scrollHeightDefault : (viewMode === 'seller_edit' ? scrollHeightSeller : scrollHeightDefault)}}"
             fillHeight="{{true}}"
             focusIndex="{{focusIndex}}"
             bind:showoperation="showOperation"
@@ -75,7 +115,7 @@
         </view>
       </view>
 
-      <block wx:if="{{viewMode === 'seller_edit'}}">
+      <block wx:if="{{viewMode === 'seller_edit' && !nxBridgeReady}}">
         <seller-action-bar
           wx:if="{{batch.gbDpbStatus < 2 || buyerCanReEdit}}"
           variant="tools"
@@ -95,7 +135,7 @@
         />
       </block>
       <seller-action-bar
-        wx:if="{{viewMode === 'seller_confirm'}}"
+        wx:if="{{viewMode === 'seller_confirm' && !nxBridgeReady}}"
         variant="confirm"
         batch="{{batch}}"
         windowWidth="{{windowWidth}}"
@@ -104,6 +144,20 @@
     </view>
   </block>
 
+</view>
+
+<!-- 首次建立饭店供货关系时只引导一次；老用户使用页面内的持续入口。 -->
+<view wx:if="{{nxBridgeIntroVisible}}" class="overlay show">
+  <view class="nx-bridge-card" catchtap="noop">
+    <view class="nx-bridge-badge">首次接单</view>
+    <view class="nx-bridge-title">已连接{{retName || '这个饭店'}}</view>
+    <view class="nx-bridge-desc">以后这个饭店分享的订单，都可以接收到精彩接单，与其他配送订单一起备货和出货。</view>
+    <view wx:if="{{nxBridgeError}}" class="nx-bridge-error">{{nxBridgeError}}</view>
+    <button class="nx-bridge-button" bindtap="openNxDistributerOrder" loading="{{nxBridgeOpening}}" disabled="{{nxBridgeOpening}}">
+      {{nxBridgeOpening ? '正在打开…' : '接收到精彩接单'}}
+    </button>
+    <button class="nx-bridge-secondary-button" bindtap="dismissNxBridgeIntro">先查看订单</button>
+  </view>
 </view>
 
 <!-- 订货已取消 -->

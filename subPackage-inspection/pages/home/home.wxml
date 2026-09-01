@@ -1,44 +1,70 @@
 <view class="inspection-page">
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="巡店管理" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{isFranchiseeOwner ? '加盟商经营' : '总部任务'}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
 
-  <view class="loading" wx:if="{{loading}}">正在核验巡店身份…</view>
-  <view class="error" wx:elif="{{error && !identity}}">
-    <view class="empty-title">暂时无法进入</view><text>{{error}}</text>
-    <view class="small-button retry" bindtap="retry">重新校验</view>
+  <view class="loading" wx:if="{{loading}}">正在加载总部任务…</view>
+  <view class="error" wx:elif="{{error}}">
+    <view class="empty-title">暂时无法进入</view>
+    <text>{{error}}</text>
+    <view class="small-button retry" bindtap="retry">重新加载</view>
   </view>
 
   <scroll-view wx:else scroll-y class="home-scroll">
     <view class="identity-bar">
-      <view><text class="identity-name">{{identity.userName}}</text><text class="identity-role">{{mode === 'manager' ? '店长整改' : (mode === 'readonly' ? '只读查看' : '巡店员')}}</text></view>
-      <view class="mode-switch" wx:if="{{isInspector && isManager}}">
-        <text class="mode-option {{mode === 'inspector' ? 'active' : ''}}" data-mode="inspector" bindtap="switchMode">巡店</text>
-        <text class="mode-option {{mode === 'manager' ? 'active' : ''}}" data-mode="manager" bindtap="switchMode">整改</text>
+      <view><text class="identity-name">{{identity.displayName}}</text><text class="identity-role">{{isFranchiseeOwner ? '加盟商负责人' : '门店整改负责人'}}</text></view>
+    </view>
+
+    <view class="owner-scope" wx:if="{{isFranchiseeOwner}}">
+      <view class="section-title">我的门店</view>
+      <scroll-view scroll-x class="owner-store-tabs" show-scrollbar="{{false}}">
+        <view class="owner-store-tab {{currentScope === 'ALL_STORES' ? 'active' : ''}}"
+              bindtap="selectAllStores">全部门店（{{stores.length}}）</view>
+        <view class="owner-store-tab {{currentScope === 'STORE' && selectedStoreId == item.storeId ? 'active' : ''}}"
+              wx:for="{{stores}}" wx:key="storeId" data-storeid="{{item.storeId}}"
+              bindtap="selectOwnerStore">{{item.storeName}}</view>
+      </scroll-view>
+      <view class="owner-summary" wx:if="{{ownerSummary}}">
+        <view><text class="owner-number">{{ownerSummary.storeCount}}</text><text>家门店</text></view>
+        <view><text class="owner-number">{{ownerSummary.activeRiskCount}}</text><text>活动风险</text></view>
+        <view><text class="owner-number">{{ownerSummary.hqReviewCount}}</text><text>总部复核</text></view>
+        <view><text class="owner-number">{{ownerSummary.overdueTaskCount}}</text><text>逾期任务</text></view>
+        <view><text class="owner-number">{{ownerSummary.periodImpactAmount == null ? '—' : '¥' + ownerSummary.periodImpactAmount}}</text><text>影响金额</text></view>
+        <view><text class="owner-number">{{ownerSummary.verifiedSavingAmount == null ? '—' : '¥' + ownerSummary.verifiedSavingAmount}}</text><text>已验证节省</text></view>
+        <view><text class="owner-number">{{ownerSummary.projected30DaySavingAmount == null ? '—' : '¥' + ownerSummary.projected30DaySavingAmount}}</text><text>30日预计节省</text></view>
       </view>
     </view>
 
-    <view class="stats-grid" wx:if="{{stats.length}}">
+    <view class="inspection-section" wx:if="{{isFranchiseeOwner && currentScope === 'STORE'}}">
+      <view class="section-title">总部菜品配方版本</view>
+      <view class="empty-mini" wx:if="{{recipeVersions.length == 0}}">该店尚未映射总部标准部门</view>
+      <view class="recipe-version-row" wx:for="{{recipeVersions}}" wx:key="adoptionId">
+        <view class="recipe-version-main">
+          <text class="recipe-name">{{item.foodName}}</text>
+          <text class="card-meta">当前 V{{item.currentAppliedVersionNo}} · 总部 V{{item.latestPublishedVersionNo}}</text>
+        </view>
+        <view class="small-button" wx:if="{{item.syncStatus === 'UPDATE_AVAILABLE'}}"
+              data-item="{{item}}" bindtap="applyRecipeVersion">应用新版本</view>
+        <text class="success-text" wx:else>已是最新</text>
+      </view>
+    </view>
+
+    <view class="stats-grid" wx:if="{{!isFranchiseeOwner && stats.length}}">
       <view class="stat-card {{index === 0 ? 'primary' : ''}}" wx:for="{{stats}}" wx:key="label">
         <text class="stat-value">{{item.value === null ? '—' : item.value}}</text><text class="stat-label">{{item.label}}</text>
       </view>
     </view>
-    <view class="tip" wx:if="{{statsError}}">{{statsError}}，下拉可重试。</view>
+    <view class="tip" wx:if="{{!isFranchiseeOwner && statsError}}">{{statsError}}，下拉可重试。</view>
 
-    <button class="start-button" wx:if="{{mode === 'inspector' && isInspector}}" bindtap="startInspection">＋ 开始巡店</button>
-    <button class="computer-login-button" bindtap="openComputerLogin">电脑端登录</button>
-
-    <scroll-view scroll-x class="tabs" enhanced show-scrollbar="{{false}}">
+    <scroll-view wx:if="{{!isFranchiseeOwner}}" scroll-x class="tabs" enhanced show-scrollbar="{{false}}">
       <view class="tab {{activeTab === item.key ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="key" data-key="{{item.key}}" bindtap="selectTab">{{item.label}}</view>
     </scroll-view>
 
-    <view class="tip tip-red" wx:if="{{listError}}"><text>{{listError}}</text><text class="retry-link" bindtap="retryList">重新加载</text></view>
-    <view class="loading list-loading" wx:if="{{listLoading}}">正在加载…</view>
-    <view class="empty" wx:elif="{{!items.length && !listError}}"><view class="empty-title">暂无记录</view><text>当前分类下没有待处理事项</text></view>
-    <view class="inspection-card list-card" wx:for="{{items}}" wx:key="listKey" wx:for-index="index" data-index="{{index}}" bindtap="openItem" hover-class="card-pressed">
+    <view class="tip tip-red" wx:if="{{!isFranchiseeOwner && listError}}"><text>{{listError}}</text><text class="retry-link" bindtap="retryList">重新加载</text></view>
+    <view class="loading list-loading" wx:if="{{!isFranchiseeOwner && listLoading}}">正在加载…</view>
+    <view class="empty" wx:if="{{!isFranchiseeOwner && !listLoading && !items.length && !listError}}"><view class="empty-title">暂无任务</view><text>当前分类下没有待处理事项</text></view>
+    <view wx:if="{{!isFranchiseeOwner}}" class="inspection-card list-card" wx:for="{{items}}" wx:key="rectificationTaskId" wx:for-index="index" data-index="{{index}}" bindtap="openTask" hover-class="card-pressed">
       <view class="card-head"><text class="card-title">{{item.displayTitle}}</text><text class="status {{item.statusClass}}">{{item.displayStatus}}</text></view>
-      <view class="card-meta" wx:if="{{item.itemType === 'inspection'}}">{{item.displayNo}} · {{item.displayTime}}</view>
-      <view class="card-meta" wx:else>{{item.storeName}} · {{item.inspectorLabel}} · 巡店 {{item.inspectionTime}}</view>
-      <view class="card-meta" wx:if="{{item.itemType === 'task'}}">截止 {{item.displayTime}}</view>
-      <view class="overdue" wx:if="{{item.overdue}}">后台判定：已逾期</view>
+      <view class="card-meta">{{item.storeName}} · 发现于 {{item.issueTime}}</view>
+      <view class="card-meta">截止 {{item.displayTime}}</view>
     </view>
   </scroll-view>
 </view>

@@ -44,6 +44,11 @@
   background-position: center;
 }
 
+/* 新订单使用与页面米黄色底图接近的暖色，保留状态区分但不再偏青绿。 */
+.liziBack {
+  background-color: rgba(255, 248, 232, 0.96);
+}
+
 
 
 /* /////// */
@@ -111,6 +116,28 @@ page {
   overflow: hidden;
   padding: 36rpx 36rpx 28rpx 36rpx;
   min-width: 540rpx;
+}
+
+/* 快捷操作弹窗水平居中，左右始终保留相同空白。 */
+.fab-popup-mask {
+  box-sizing: border-box;
+  padding: 0 48rpx 110rpx;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.fab-popup-mask .popup-box {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 654rpx;
+  height: auto;
+  margin: 0;
+}
+
+.fab-popup-mask .popup-content {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
 }
 
 
@@ -338,4 +365,39 @@ button::after {
   color: #888;
   font-size: 28rpx;
   margin-left: 6rpx;
+}
+
+.order-goods-thumb {
+  width: 78rpx;
+  height: 78rpx;
+  margin-right: 12rpx;
+  border-radius: 12rpx;
+  background: #f2f4f3;
+  flex-shrink: 0;
+}
+
+/* 出库金额信息独占商品图片下方一行，避免在名称右侧的窄区域换行拥挤。 */
+.chef-order-row {
+  position: relative;
+}
+
+.chef-order-row--out {
+  padding-bottom: 64rpx !important;
+}
+
+.chef-order-out-meta {
+  position: absolute;
+  left: 12rpx;
+  bottom: 10rpx;
+  width: calc(100% - 152rpx);
+  box-sizing: border-box;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.chef-order-out-meta .third-row {
+  width: 33.33%;
+  text-align: left;
+  flex-shrink: 0;
+  white-space: nowrap;
 }

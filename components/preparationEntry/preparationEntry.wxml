@@ -1,5 +1,5 @@
 <view class="prep-entry" wx:if="{{visible}}" bindtap="openPreparation" hover-class="prep-entry--pressed">
-  <view class="prep-entry__icon">🥣</view>
+  <view class="prep-entry__icon">料</view>
   <view class="prep-entry__text">
     <text class="prep-entry__title">{{title}}</text>
     <text class="prep-entry__description">{{description}}</text>

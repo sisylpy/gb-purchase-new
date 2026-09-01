@@ -798,6 +798,7 @@ button::after {
 
 .bg-mainColor {
   background-color: var(--gb-primary);
+
 }
 
 .bg-success {

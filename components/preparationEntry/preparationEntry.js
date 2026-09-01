@@ -1,4 +1,3 @@
-var preparationApi = require('../../services/preparation');
 var preparationUtil = require('../../utils/preparation');
 
 Component({
@@ -6,9 +5,8 @@ Component({
     visible: false,
     loading: false,
     error: '',
-    mode: 'store',
-    title: '备料管理',
-    description: '维护备料品、配方和原料损耗',
+    title: '中间料',
+    description: '维护中间料配方、制作和损耗记录',
   },
 
   lifetimes: {
@@ -27,48 +25,28 @@ Component({
     checkAccess: function () {
       if (this.data.loading) return;
       var identity = preparationUtil.getIdentity();
-      if (!identity.distributerId || !identity.operatorId || !identity.currentStoreId || !wx.getStorageSync('token')) {
+      // 该入口仅校验登录态，不做部门/中央厨房判断，直接进入门店中间料。
+      if (!identity.distributerId || !identity.operatorId || !wx.getStorageSync('token')) {
         this.setData({
           visible: false,
-          error: '请使用有效门店账号登录后使用备料管理',
+          loading: false,
+          error: '请先登录后使用中间料',
         });
         return;
       }
 
-      var that = this;
-      this.setData({ loading: true, error: '' });
-      preparationApi.listCapabilities(identity.distributerId).then(function (rows) {
-        var departments = preparationUtil.enabledPreparationDepartments(rows, identity);
-        var selected = preparationUtil.selectCurrentDepartment(departments, identity);
-        var advanced = !!selected;
-        if (selected) {
-          wx.setStorageSync('preparationDepartmentId', selected.departmentId);
-        }
-        that.setData({
-          visible: true,
-          loading: false,
-          error: '',
-          mode: advanced ? 'central' : 'store',
-          title: advanced ? '中央厨房备料' : '备料管理',
-          description: advanced
-            ? '生产批次、领料、库存与成本追踪'
-            : '维护备料品、配方和原料损耗',
-        });
-      }).catch(function (error) {
-        that.setData({
-          visible: false,
-          loading: false,
-          error: error.message || '备料模式校验失败，请稍后重试',
-        });
+      this.setData({
+        visible: true,
+        loading: false,
+        error: '',
+        title: '中间料',
+        description: '维护中间料配方、制作和损耗记录',
       });
     },
 
     openPreparation: function () {
       if (this.data.loading) return;
-      var route = this.data.mode === 'central'
-        ? '/subPackage-preparation/pages/home/home'
-        : '/subPackage-preparation/pages/storeHome/storeHome';
-      wx.navigateTo({ url: route });
+      wx.navigateTo({ url: '/subPackage-preparation/pages/storeProducts/storeProducts' });
     },
   },
 });

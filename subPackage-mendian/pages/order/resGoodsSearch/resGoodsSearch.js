@@ -3,6 +3,9 @@ var config = require('../../../../config/index.js');
 var dateUtils = require('../../../../lib/dateUtil');
 var orderApi = require('../../../../services/depOrder.js');
 var stockReduceKind = require('../../../../lib/stockReduceKind.js');
+var franchiseApi = require('../../../../services/franchiseInspection.js');
+var franchiseUtil = require('../../../../utils/franchiseInspection.js');
+var autoOrderDelete = require('../../../../utils/autoOrderDelete.js');
 
 // ========================
 // 本页面使用的所有接口方法（来自 depOrder）
@@ -48,6 +51,7 @@ Page({
     sliderOffsetSearch: 0,
     sliderOffsetsSearch: [],
     sliderLeftSearch: 0,
+    hasFranchiseHeadquarters: false,
     tabsSearch: [{
       id: 0,
       amount: 0,
@@ -57,6 +61,8 @@ Page({
       amount: 0,
       words: "商品目录"
     }],
+    headquartersStandardGoods: [],
+    headquartersStandardMapped: false,
     isSearching: true,
     searchResult: false,
     placeHolder: "输入商品名称或拼音字母、首字母",
@@ -115,6 +121,43 @@ Page({
     }
 
     this._initTabLayout();
+    this._loadFranchiseIdentity();
+  },
+
+  _loadFranchiseIdentity: function () {
+    franchiseApi.bootstrapIdentity().then(function (identity) {
+      if (!franchiseUtil.hasFranchiseStoreIdentity(identity)) return;
+      this.setData({
+        hasFranchiseHeadquarters: true,
+        tabsSearch: [{ id: 0, amount: 0, words: '我的商品' },
+          { id: 1, amount: 0, words: '总部标准' },
+          { id: 2, amount: 0, words: '商品目录' }]
+      }, function () {
+        this._initTabLayout();
+        this._loadHeadquartersStandardGoods();
+      }.bind(this));
+    }.bind(this)).catch(function () {});
+  },
+
+  _catalogTabIndex: function () {
+    return this.data.hasFranchiseHeadquarters ? 2 : 1;
+  },
+
+  _loadHeadquartersStandardGoods: function () {
+    var departmentId = this.data.depId;
+    if (!departmentId) return;
+    orderApi.getHeadquartersStandardGoods(departmentId).then(function (res) {
+      var result = res.result || {};
+      if (result.code !== 0) return;
+      var data = result.data || {};
+      var items = data.items || [];
+      var amountKey = 'tabsSearch[1].amount';
+      this.setData({
+        headquartersStandardGoods: items,
+        headquartersStandardMapped: !!data.mappedToHeadquartersStandard,
+        [amountKey]: items.length
+      });
+    }.bind(this)).catch(function () {});
   },
 
   onShow: function () {
@@ -158,6 +201,7 @@ Page({
         windowWidth = res.windowWidth;
         that.setData({
           sliderOffsetsSearch: tempArr,
+          sliderLeftSearch: itemWidth / 4,
           sliderOffsetSearch: tempArr[that.data.tab1IndexSearch],
         });
       }
@@ -234,7 +278,8 @@ Page({
         load.hideLoading();
         if (res.result.code == 0) {
           var depTabCount = "tabsSearch[0].amount";
-          var disTabCount = "tabsSearch[1].amount";
+          var catalogTabIndex = that._catalogTabIndex();
+          var disTabCount = "tabsSearch[" + catalogTabIndex + "].amount";
           var depGoodsLength = res.result.data.dep.length;
 
           var setData = {
@@ -246,7 +291,7 @@ Page({
           setData[depTabCount] = res.result.data.dep.length;
           setData[disTabCount] = res.result.data.dis.length;
 
-          var tabIdx = depGoodsLength == 0 ? 1 : 0;
+          var tabIdx = depGoodsLength == 0 ? catalogTabIndex : 0;
           setData.tab1IndexSearch = tabIdx;
           setData.itemIndexSearch = tabIdx;
           that.setData(setData, function () {
@@ -274,7 +319,8 @@ Page({
       load.hideLoading();
       if (res.result.code == 0) {
         var depTabCount = "tabsSearch[0].amount";
-        var disTabCount = "tabsSearch[1].amount";
+        var catalogTabIndex = that._catalogTabIndex();
+        var disTabCount = "tabsSearch[" + catalogTabIndex + "].amount";
         var depGoodsLength = res.result.data.dep.length;
 
         var setData = {
@@ -285,7 +331,7 @@ Page({
         setData[depTabCount] = res.result.data.dep.length;
         setData[disTabCount] = res.result.data.dis.length;
 
-        var tabIdx = depGoodsLength == 0 ? 1 : 0;
+        var tabIdx = depGoodsLength == 0 ? catalogTabIndex : 0;
         setData.tab1IndexSearch = tabIdx;
         setData.itemIndexSearch = tabIdx;
         that.setData(setData, function () {
@@ -301,7 +347,7 @@ Page({
   _clearSearch: function () {
     load.hideLoading();
     var depTabCount = "tabsSearch[0].amount";
-    var disTabCount = "tabsSearch[1].amount";
+    var disTabCount = "tabsSearch[" + this._catalogTabIndex() + "].amount";
     var setData = {};
     setData[depTabCount] = "0";
     setData[disTabCount] = "0";
@@ -438,7 +484,7 @@ Page({
       this.setData({
         index: e.currentTarget.dataset.index,
         applyItem: e.currentTarget.dataset.order,
-        showDep: true,
+        show: true,
         applyStandardName: applyItem.gbDoStandard,
         editApply: true,
         applyNumber: applyItem.gbDoQuantity,
@@ -512,6 +558,54 @@ Page({
 
 
 
+  },
+
+  /** 总部标准商品只负责推荐，保存仍复用原部门商品/批发商商品订货入口。 */
+  applyHeadquartersStandardGoods: function (e) {
+    var recommended = e.currentTarget.dataset.goods || {};
+    var disGoods = {
+      gbDistributerGoodsId: recommended.distributerGoodsId,
+      gbDgGoodsName: recommended.goodsName,
+      gbDgGoodsStandardname: recommended.standardName,
+      gbDgGoodsStandardWeight: recommended.standardWeight,
+      gbDgDfgGoodsFatherId: recommended.distributerGoodsFatherId,
+      gbDgNxFatherImg: recommended.imagePath,
+      gbDgPullOff: 0
+    };
+    if (recommended.departmentGoodsExists) {
+      var depGoods = {
+        gbDepartmentDisGoodsId: recommended.departmentDisGoodsId,
+        gbDdgDisGoodsId: recommended.distributerGoodsId,
+        gbDdgDisGoodsFatherId: recommended.distributerGoodsFatherId,
+        gbDdgDepGoodsName: recommended.goodsName,
+        gbDdgShowStandardName: recommended.standardName,
+        gbDdgOrderStandard: recommended.standardName,
+        gbDepartmentGoodsStockEntities: [],
+        gbDistributerGoodsEntity: disGoods
+      };
+      this.setData({
+        depGoods: depGoods,
+        itemDis: disGoods,
+        index: Number(e.currentTarget.dataset.index || 0),
+        showDep: true,
+        applyStandardName: recommended.standardName || '',
+        applyRemark: '',
+        canSave: true,
+        hasStock: false
+      });
+      return;
+    }
+    this.setData({
+      depGoods: null,
+      itemDis: disGoods,
+      nxGoods: null,
+      index: Number(e.currentTarget.dataset.index || 0),
+      show: true,
+      applyStandardName: recommended.standardName || '',
+      applyRemark: '',
+      canSave: true,
+      hasStock: false
+    });
   },
 
   /** 点击编辑订单（商品目录 tab） */
@@ -824,8 +918,19 @@ Page({
   /** 确认删除订单 */
   deleteYes: function () {
     this.setData({ deleteShow: false });
+    var order = this.data.applyItem;
+    autoOrderDelete.chooseDeleteMode(order).then(function (cancelAutoOrder) {
+      this._deleteYes(cancelAutoOrder);
+    }.bind(this)).catch(function (err) {
+      if (!err || !err.cancelled) {
+        wx.showToast({ title: '请选择删除方式', icon: 'none' });
+      }
+    });
+  },
+
+  _deleteYes: function (cancelAutoOrder) {
     var that = this;
-    orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(function (res) {
+    orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId, cancelAutoOrder).then(function (res) {
       if (res.result.code == 0) {
         that.getSearchStringPlaceHolder();
         that.setData({
@@ -881,8 +986,19 @@ Page({
   /** 删除订单（从警告弹窗触发） */
   deleteApplyApi: function () {
     this.setData({ popupType: "", showPopupWarn: false });
+    var order = this.data.applyItem;
+    autoOrderDelete.chooseDeleteMode(order).then(function (cancelAutoOrder) {
+      this._deleteApplyApi(cancelAutoOrder);
+    }.bind(this)).catch(function (err) {
+      if (!err || !err.cancelled) {
+        wx.showToast({ title: '请选择删除方式', icon: 'none' });
+      }
+    });
+  },
+
+  _deleteApplyApi: function (cancelAutoOrder) {
     var that = this;
-    orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(function (res) {
+    orderApi.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId, cancelAutoOrder).then(function (res) {
       if (res.result.code == 0) {
         that.getSearchStringPlaceHolder();
         that.setData({

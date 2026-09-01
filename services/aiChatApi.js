@@ -863,6 +863,16 @@ var endConversation = function (conversationId) {
 // ============================================================
 
 /**
+ * 获取启用中的智能体列表。前端按稳定的 advisor code 解析数据库主键，
+ * 避免数据库重建后自增 ID 改变导致入口失效。
+ * GET /api/ai/advisors
+ * @returns {Promise}
+ */
+var listAdvisors = function () {
+  return request.get('ai/advisors', {}, { showErrorToast: false });
+};
+
+/**
  * 获取 Run 详情（含 menuOperationAnswerPlan 等卡片数据）
  * GET /api/ai/runs/{runId}
  * @param {number|string} runId
@@ -1271,6 +1281,7 @@ module.exports = {
   getRevenueStats: getRevenueStats,
   getDailyTurnover: getDailyTurnover,
   // 智能体详情（统一顾问详情，含推荐问题 questionTopics）
+  listAdvisors: listAdvisors,
   getAdvisorDetail: getAdvisorDetail,
   // 成本分析 - 菜品配料分析
   getGbIngredientAnalysis: getGbIngredientAnalysis,

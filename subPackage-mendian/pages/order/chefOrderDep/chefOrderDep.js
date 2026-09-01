@@ -3,6 +3,7 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
 var apiUrl = require('../../../../config/index');
 var depOrder = require('../../../../services/depOrder');
+var autoOrderDelete = require('../../../../utils/autoOrderDelete.js');
 
 const {
   updateOrderGbJj,
@@ -464,8 +465,20 @@ Page({
       showPopupWarn: false,
     })
 
+    var order = this.data.applyItem;
+    autoOrderDelete.chooseDeleteMode(order).then(cancelAutoOrder => {
+      this._deleteApplyApi(cancelAutoOrder);
+    }).catch(err => {
+      if (!err || !err.cancelled) {
+        wx.showToast({ title: '请选择删除方式', icon: 'none' });
+      }
+    });
+  },
+
+  _deleteApplyApi(cancelAutoOrder) {
+
     load.showLoading("删除订单");
-    deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(res => {
+    deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId, cancelAutoOrder).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
         if (this.data.searchArr !== null && this.data.searchValue && this.data.searchValue.trim()) {

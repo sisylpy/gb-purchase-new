@@ -1,0 +1,6 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "customer-navbar": "/components/back-navbar/back-navbar"
+  }
+}

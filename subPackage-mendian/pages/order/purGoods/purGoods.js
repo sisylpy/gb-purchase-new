@@ -335,8 +335,10 @@ Page({
           });
         }
       } else {
+        var noHistoryCartonInput = false;
         if (needScalePack) {
           orderGoodsScale.setupScalePackFields(displayItem, orderArr);
+          noHistoryCartonInput = orderGoodsScale.isCartonOrderInput(displayItem, orderArr);
         } else {
           displayItem.gbDpgBuyScale = 0;
           displayItem.gbDpgBuyScaleQuantity = "";
@@ -350,7 +352,7 @@ Page({
           orderListCount: orderListCount,
           show: true,
           scaleInput: false,
-          cartonInput: false,
+          cartonInput: noHistoryCartonInput,
           foucusWeight: false,
           foucusPrice: true,
           canSave: false,

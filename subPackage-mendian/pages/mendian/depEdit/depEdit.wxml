@@ -6,6 +6,24 @@
 
   <back-navbar style="height: {{navBarHeight}}rpx;" title="部门修改" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
+  <view wx:if="{{isCentralKitchen}}" class="central-entry" bindtap="openCentralPreparation">
+    <view class="central-entry-icon">🍳</view>
+    <view class="central-entry-text">
+      <text class="central-entry-title">中央厨房配料</text>
+      <text class="central-entry-desc">生产批次、领料、库存与成本追踪</text>
+    </view>
+    <text class="central-entry-arrow">›</text>
+  </view>
+
+  <view wx:else class="central-entry store-entry" bindtap="openStorePreparation">
+    <view class="central-entry-icon">🥣</view>
+    <view class="central-entry-text">
+      <text class="central-entry-title">普通备料</text>
+      <text class="central-entry-desc">备料品列表、添加与操作</text>
+    </view>
+    <text class="central-entry-arrow">›</text>
+  </view>
+
   <view class="flex-column bg-white mt-10">
  
   <view class="p-20 flex-row font-lg">

@@ -1,72 +1,38 @@
-<wxs src="/wxs/format.wxs" module="tool" />
+<back-navbar style="height: {{navBarHeight}}rpx;" title="{{supplierName}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
 
-
-
-<back-navbar style="height: {{navBarHeight}}rpx;" title="京京送货优惠卷" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
-
-<view class="flex-column p-20" style="margin-top: {{navBarHeight}}rpx;">
-
-
-  <!-- emptyView -->
-  <view class=" {{payArr.length == 0   ? 'show' : 'hide'}}" style="height: {{windowHeight / 3}}rpx; text-align:center;">
-    <view class="font-lg  empty_view">
-      <view class="flex-column center-content">
-        <text class="big">没有优惠卷</text>
+<scroll-view scroll-y="true" class="coupon-page" style="top: {{navBarHeight}}rpx;">
+  <view class="section" wx:if="{{ownedCoupons.length > 0}}">
+    <view class="section-title">我的优惠券</view>
+    <view class="coupon-card owned" wx:for="{{ownedCoupons}}" wx:key="userCouponId">
+      <view class="coupon-value">
+        <text class="amount">{{item.amountText}}</text>
+        <text class="threshold">{{item.thresholdText}}</text>
+      </view>
+      <view class="coupon-info">
+        <text class="coupon-name">{{item.couponName}}</text>
+        <text class="coupon-meta">{{item.scopeText}} · {{item.validPeriodText}}</text>
+        <text class="coupon-status">下单结算时自动使用最优惠的一张</text>
       </view>
     </view>
   </view>
-  <!-- ./emptyView -->
 
-  <block wx:if="{{payArr.length > 0}}">
- 
-
-
-    <view class="flex-row twenty_radius bg-white p-20 mb-20 coupon-container" wx:for="{{payArr}}">
-
-      <view class="flex-column coupon-left " wx:if="{{item.nxDistributerCouponEntity.nxDcType == 0}}">
-        <view class="flex-row text-main">
-          <text>¥</text>
-          <text class="big">{{item.nxDistributerCouponEntity.nxDcPrice}}</text>
-        </view>
-        <view>
-          <text class="text-secondary" style="font-size: 24rpx;">满{{item.nxDistributerCouponEntity.nxDcSubtotalPrice}}元减{{item.nxDistributerCouponEntity.nxDcPrice}}元</text>
-        </view>
-
+  <view class="section" wx:if="{{claimableCoupons.length > 0}}">
+    <view class="section-title">可领取</view>
+    <view class="coupon-card" wx:for="{{claimableCoupons}}" wx:key="couponId">
+      <view class="coupon-value">
+        <text class="amount">{{item.amountText}}</text>
+        <text class="threshold">{{item.thresholdText}}</text>
       </view>
-
-
-      <view class="flex-column coupon-left" wx:else="">
-
-        <view class="flex-row text-main">
-
-          <text class="big">{{item.nxDistributerCouponEntity.nxDcPricePercent}}</text>
-          <text>折</text>
-        </view>
-
-        <view >
-          <text class="text-secondary" style="font-size: 24rpx;">满{{item.nxDistributerCouponEntity.nxDcSubtotalPrice}}打{{item.nxDistributerCouponEntity.nxDcPricePercent}}折</text>
-        </view>
-
+      <view class="coupon-info">
+        <text class="coupon-name">{{item.couponName}}</text>
+        <text class="coupon-meta">{{item.scopeText}} · {{item.validPeriodText}}</text>
       </view>
-
-      <view class="coupon-right">
-        <view class="flex-column">
-        <text class="text-main" style="font-size: 20rpx; padding: 4rpx 10rpx; border-radius: 8rpx; border: 1px solid rgb(163, 253, 163);">京京送货</text>
-        <view>{{item.nxDistributerCouponEntity.nxDistributerCouponName}}</view>
-        <text class="" style="font-size: 24rpx;">{{tool.transferCouponDateString(item.nxGducStartTimeZone)}}-{{tool.transferCouponDateString(item.nxGducStopTimeZone)}}</text>
-      </view>
-      </view>
-
-
-      <view class="dotted-line"></view>
-
+      <button class="claim-btn" loading="{{claimingCouponId == item.couponId}}" data-id="{{item.couponId}}" bindtap="claimCoupon">领取</button>
     </view>
-  </block>
+  </view>
 
-
-
-
-
-
-
-</view>
+  <view class="empty" wx:if="{{loaded && ownedCoupons.length == 0 && claimableCoupons.length == 0}}">
+    <text class="empty-title">暂无优惠券</text>
+    <text class="empty-desc">配送商发布精彩账本专用券后，会显示在这里。</text>
+  </view>
+</scroll-view>
