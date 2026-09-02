@@ -39,6 +39,13 @@ function moneyText(value) {
   return isNaN(number) ? '—' : '¥' + number.toFixed(2);
 }
 
+function unitPriceText(value, unitCode) {
+  if (value === null || typeof value === 'undefined' || value === '') return '—';
+  var number = Number(value);
+  if (isNaN(number)) return '—';
+  return '¥' + numberText(number, 8) + '/' + unitText(unitCode);
+}
+
 function unitText(value) {
   var labels = { G: '克', KG: '千克', JIN: '斤', ML: '毫升', L: '升', EA: '个' };
   var key = cleanText(value).toUpperCase();
@@ -85,7 +92,7 @@ function batchView(batch, fromHint) {
     : numberText(row.convertedBaseQuantity) + ' ' + unitText(row.baseUnitCode);
   row._unitPriceText = row.finalHistoricalBaseUnitPrice == null
     ? '—'
-    : moneyText(row.finalHistoricalBaseUnitPrice) + '/' + unitText(row.baseUnitCode);
+    : unitPriceText(row.finalHistoricalBaseUnitPrice, row.baseUnitCode);
   row._statusLabel = fromHint ? '可修正入库批次' : statusLabel(row.evidenceStatus);
   row._statusClass = fromHint ? 'is-hint' : statusClass(row.evidenceStatus);
   row._reason = cleanText(row.missingReason);
@@ -207,7 +214,7 @@ Page({
           + ' ' + unitText(ingredient.baseUnitCode) + '/份';
         ingredient._priceText = ingredient.historicalBaseUnitPrice == null
           ? '—'
-          : moneyText(ingredient.historicalBaseUnitPrice) + '/' + unitText(ingredient.baseUnitCode);
+          : unitPriceText(ingredient.historicalBaseUnitPrice, ingredient.baseUnitCode);
         ingredient._knownCostText = moneyText(ingredient.knownCostAmount);
         ingredient._completeCostText = moneyText(ingredient.completeCostAmount);
         ingredient._reason = cleanText(ingredient.missingReason);
