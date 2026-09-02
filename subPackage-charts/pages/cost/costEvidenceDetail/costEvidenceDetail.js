@@ -92,15 +92,14 @@ function batchView(batch, fromHint) {
   return row;
 }
 
-function goodsView(goods, rawGoodsId) {
-  var row = goods || {};
-  var standardName = cleanText(row.gbDgGoodsStandardname || row.standardName);
-  var standardWeight = cleanText(row.gbDgGoodsStandardWeight || row.standardWeight);
+function goodsView(wrapper, rawGoodsId) {
+  var row = wrapper || {};
+  var standardName = cleanText(row.rawGoodsStandardName);
+  var standardWeight = cleanText(row.rawGoodsStandardWeight);
   return {
-    name: cleanText(row.gbDgGoodsName || row.goodsName) || ('采购商品 #' + rawGoodsId),
+    name: cleanText(row.rawGoodsName) || ('采购商品 #' + rawGoodsId),
     spec: [standardName, standardWeight].filter(function (value) { return !!value; }).join(' '),
-    imageUrl: joinImageUrl(row.gbDgNxFatherImg || row.gbDgNxFatherImgLarge
-      || row.gbDgGoodsFile || row.gbDgGoodsFileImg),
+    imageUrl: joinImageUrl(row.rawGoodsImage),
   };
 }
 
@@ -185,9 +184,7 @@ Page({
     return Promise.all(rows.map(function (wrapper, index) {
       var ingredient = Object.assign({}, wrapper.ingredient || {});
       var rawGoodsId = Number(ingredient.rawGoodsId || 0);
-      var goodsPromise = rawGoodsId
-        ? preparationApi.getRawGoods(rawGoodsId).catch(function () { return null; })
-        : Promise.resolve(null);
+      var goods = goodsView(wrapper, rawGoodsId);
       var batches = (wrapper.priceBatches || []).map(function (row) { return batchView(row, false); });
       var hintsPromise = rawGoodsId && batches.length === 0
         ? preparationApi.listHistoricalReceiptBatches({
@@ -198,9 +195,8 @@ Page({
           limit: 8,
         }).catch(function () { return []; })
         : Promise.resolve([]);
-      return Promise.all([goodsPromise, hintsPromise]).then(function (values) {
-        var goods = goodsView(values[0], rawGoodsId);
-        var hinted = (values[1] || []).map(function (row) { return batchView(row, true); });
+      return hintsPromise.then(function (hints) {
+        var hinted = (hints || []).map(function (row) { return batchView(row, true); });
         ingredient._key = ingredient.id || ('ingredient-' + index);
         ingredient._name = goods.name;
         ingredient._spec = goods.spec;
