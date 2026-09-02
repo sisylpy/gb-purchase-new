@@ -281,16 +281,6 @@ this.setData({
 
   },
 
-  // 清除部门筛选
-  clearDepartmentFilter() {
-    wx.removeStorageSync('selectedDepartment');
-    this.setData({
-      selectedDepartment: null,
-      searchDepId: -1
-    });
-    this._initData();
-  },
-
   // AI分析卡片交互功能
   toggleWarnings() {
     this.setData({
@@ -324,12 +314,6 @@ this.setData({
   },
 
   
-  toFilterType() {
-    wx.navigateTo({
-      url: '../../sel/filterDataType/filterDataType?searchType=mendian',
-    })
-  },
-
   delSearch(){
     wx.removeStorageSync('selDepList');
     this.setData({

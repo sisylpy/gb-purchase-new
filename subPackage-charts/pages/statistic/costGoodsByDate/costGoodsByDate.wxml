@@ -34,17 +34,6 @@
     </view>
   </view>
 
-  <view class="filter-container" wx:if="{{selectedDepartment}}">
-    <view class="filter-row">
-      <view class="filter-chip">
-        <text class="filter-text">部门: {{selectedDepartment.depName}}</text>
-        <view class="filter-delete" bindtap="clearDepartmentFilter">
-          <image src="/images/del-2.png" mode="aspectFill" class="delete-icon"></image>
-        </view>
-      </view>
-    </view>
-  </view>
-
   <scroll-view
     class="page-scroll"
     scroll-y="{{true}}"

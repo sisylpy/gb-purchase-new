@@ -397,13 +397,6 @@ Page({
   },
 
 
-  toFilterType() {
-    wx.navigateTo({
-      url: '../../sel/filterDataType/filterDataType?searchType=mendian',
-    })
-  },
-
-
   toDatePageSearch() {
     this.setData({
       update: true,
