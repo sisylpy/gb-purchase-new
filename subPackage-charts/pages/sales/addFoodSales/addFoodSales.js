@@ -5,7 +5,6 @@ var dateUtils = require('../../../../lib/dateUtil.js');
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
 var foodSalesTemplateWx = require('../../../../lib/foodSalesTemplateWx.js');
-var foodSalesExcelApi = require('../../../../lib/foodSalesExcelApi.js');
 var foodSalesDepUtil = require('../../../utils/foodSalesDepUtil');
 
 var depFatherAndSubDepForChoice = foodSalesDepUtil.depFatherAndSubDepForChoice;
@@ -412,100 +411,25 @@ Page({
     foodSalesTemplateWx.downloadCombinedDailyTemplate(apiUrl.apiUrl, startDate, endDate, departmentId);
   },
 
-  _isExcelChatFile: function (f) {
-    if (!f) return false;
-    var name = String(f.name || '').toLowerCase();
-    var path = String(f.path || '').toLowerCase();
-    return (
-      name.endsWith('.xlsx') ||
-      name.endsWith('.xls') ||
-      path.endsWith('.xlsx') ||
-      path.endsWith('.xls')
-    );
-  },
-
-  _promptNonExcelChatFile: function (f) {
-    var name = String((f && f.name) || '').toLowerCase();
-    if (name.endsWith('.numbers')) {
-      wx.showModal({
-        title: '当前是 Numbers 格式',
-        content:
-          '您选的是 Apple「Numbers」表格（.numbers），与 Excel（.xlsx/.xls）不同，无法直接导入。\n\n请用 Numbers 打开后：右上角「共享」→「Excel」→ 导出 .xlsx，再发到微信里上传。',
-        showCancel: false,
-        confirmText: '知道了',
-      });
-      return;
-    }
-    wx.showToast({
-      title: '请选 .xlsx 或 .xls（Excel）',
-      icon: 'none',
-      duration: 2800,
-    });
-  },
-
   onUploadCombinedExcel: function () {
-    var departmentId = this._ensureTemplateDepartmentId();
-    if (!departmentId) return;
-    var distributerId = this._resolveDistributerId();
-    if (!distributerId) {
-      wx.showToast({ title: '缺少批发商信息', icon: 'none' });
-      return;
-    }
-    var that = this;
-    wx.chooseMessageFile({
-      count: 1,
-      type: 'file',
-      success: function (res) {
-        var list = res.tempFiles || [];
-        var f = list[0];
-        if (!f || !f.path) {
-          wx.showToast({ title: '未获取到文件', icon: 'none' });
-          return;
-        }
-        if (!that._isExcelChatFile(f)) {
-          that._promptNonExcelChatFile(f);
-          return;
-        }
-        wx.showModal({
-          title: '确认上传',
-          content: '确定上传该合并模板 Excel（菜品销量 + 日营业额）？',
-          success: function (modalRes) {
-            if (modalRes.confirm) {
-              that._uploadCombinedExcelFile(f.path, departmentId, distributerId);
-            }
-          },
-        });
-      },
-      fail: function (err) {
-        var msg = err && err.errMsg ? String(err.errMsg) : '';
-        if (msg.indexOf('cancel') >= 0 || msg.indexOf('取消') >= 0) {
-          return;
-        }
-        wx.showToast({ title: '未选择文件', icon: 'none' });
-      },
-    });
+    this._openUnifiedImport('standard');
   },
 
-  _uploadCombinedExcelFile: function (filePath, departmentId, distributerId) {
-    var that = this;
-    wx.showLoading({ title: '正在上传...', mask: true });
-    foodSalesExcelApi
-      .uploadCombinedDailyExcel(filePath, departmentId, distributerId)
-      .then(function (res) {
-        wx.hideLoading();
-        var code = res.result && res.result.code;
-        var msg = res.result && res.result.msg;
-        if (code === 0 || code === '0') {
-          wx.showToast({ title: '导入成功', icon: 'success' });
-        } else {
-          wx.showToast({ title: msg || '上传失败', icon: 'none' });
-        }
-      })
-      .catch(function (err) {
-        wx.hideLoading();
-        console.error('upload combined excel', err);
-        wx.showToast({ title: '网络请求失败', icon: 'none' });
+  _openUnifiedImport: function (mode) {
+    var route = 'subPackage-charts/pages/sales/dailyTurnover/dailyTurnover';
+    var pages = getCurrentPages();
+    var previous = pages.length > 1 ? pages[pages.length - 2] : null;
+    if (previous && previous.route === route) {
+      wx.setStorageSync('dailyTurnoverUnifiedImportRequest', {
+        mode: mode,
+        requestedAt: Date.now(),
       });
+      wx.navigateBack();
+      return;
+    }
+    wx.redirectTo({
+      url: '/' + route + '?autoImport=' + encodeURIComponent(mode),
+    });
   },
 
   onSave: function () {

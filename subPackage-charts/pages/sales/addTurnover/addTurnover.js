@@ -5,7 +5,6 @@ var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
 var foodSalesTemplateWx = require('../../../../lib/foodSalesTemplateWx.js');
-var foodSalesExcelApi = require('../../../../lib/foodSalesExcelApi.js');
 
 Page({
 
@@ -533,67 +532,7 @@ Page({
    * 上传Excel
    */
   onUploadExcel() {
-    const that = this;
-    wx.chooseMessageFile({
-      count: 1,
-      type: 'file',
-      extension: ['xlsx', 'xls'],
-      success(res) {
-        const tempFilePath = res.tempFiles[0].path;
-        console.log('选择文件:', tempFilePath);
-
-        wx.showModal({
-          title: '确认上传',
-          content: '确定要上传Excel文件导入营业额数据吗？',
-          success(modalRes) {
-            if (modalRes.confirm) {
-              that._uploadExcelFile(tempFilePath);
-            }
-          }
-        });
-      },
-      fail(err) {
-        console.error('选择文件失败:', err);
-        wx.showToast({ title: '未选择文件', icon: 'none' });
-      }
-    });
-  },
-
-  /**
-   * 上传Excel文件
-   */
-  _uploadExcelFile(filePath) {
-    const departmentId = this.data.departmentId;
-    const disInfo = this.data.disInfo;
-
-    if (!departmentId) {
-      wx.showToast({ title: '部门ID无效', icon: 'none' });
-      return;
-    }
-
-    const distributerId = disInfo ? disInfo.gbDistributerId : 0;
-
-    wx.showLoading({ title: '正在上传...' });
-
-    api.uploadTurnoverExcel(filePath, departmentId, distributerId)
-      .then(res => {
-        wx.hideLoading();
-        console.log('上传结果:', res);
-
-        if (res.result.code == 0) {
-          wx.showToast({ title: '上传成功', icon: 'success' });
-          setTimeout(() => {
-            wx.navigateBack();
-          }, 1500);
-        } else {
-          wx.showToast({ title: res.result.msg || '上传失败', icon: 'none' });
-        }
-      })
-      .catch(err => {
-        wx.hideLoading();
-        console.error('上传失败:', err);
-        wx.showToast({ title: '网络请求失败', icon: 'none' });
-      });
+    this._openUnifiedImport('ai');
   },
 
   _resolveDepartmentIdForFood() {
@@ -611,17 +550,10 @@ Page({
       return '';
     }
     if (departmentId !== this.data.departmentId) {
+      const disInfo = this.data.disInfo || wx.getStorageSync('disInfo');
       this.setData({ departmentId: departmentId, disInfo: disInfo || this.data.disInfo });
     }
     return departmentId;
-  },
-
-  _resolveFoodDistributerId() {
-    const disInfo = this.data.disInfo || wx.getStorageSync('disInfo');
-    if (disInfo && disInfo.gbDistributerId) {
-      return disInfo.gbDistributerId;
-    }
-    return '';
   },
 
   onDownloadFoodSalesTemplate() {
@@ -686,100 +618,24 @@ Page({
     foodSalesTemplateWx.downloadFoodSalesSmartTemplate(apiUrl.apiUrl, startDate, endDate, departmentId);
   },
 
-  _isExcelChatFile(f) {
-    if (!f) return false;
-    var name = String(f.name || '').toLowerCase();
-    var path = String(f.path || '').toLowerCase();
-    return (
-      name.endsWith('.xlsx') ||
-      name.endsWith('.xls') ||
-      path.endsWith('.xlsx') ||
-      path.endsWith('.xls')
-    );
-  },
-
-  _promptNonExcelChatFile(f) {
-    var name = String((f && f.name) || '').toLowerCase();
-    if (name.endsWith('.numbers')) {
-      wx.showModal({
-        title: '当前是 Numbers 格式',
-        content:
-          '您选的是 Apple「Numbers」表格（.numbers），与 Excel（.xlsx/.xls）不同，无法直接导入。\n\n请用 Numbers 打开后：右上角「共享」→「Excel」→ 导出 .xlsx，再发到微信里上传。',
-        showCancel: false,
-        confirmText: '知道了',
-      });
-      return;
-    }
-    wx.showToast({
-      title: '请选 .xlsx 或 .xls（Excel）',
-      icon: 'none',
-      duration: 2800,
-    });
-  },
-
   onUploadFoodSalesExcel() {
-    const departmentId = this._ensureDepartmentForFoodExcel();
-    if (!departmentId) return;
-    const distributerId = this._resolveFoodDistributerId();
-    if (!distributerId) {
-      wx.showToast({ title: '缺少批发商信息', icon: 'none' });
-      return;
-    }
-    const that = this;
-    wx.chooseMessageFile({
-      count: 1,
-      type: 'file',
-      success(res) {
-        var list = res.tempFiles || [];
-        var f = list[0];
-        if (!f || !f.path) {
-          wx.showToast({ title: '未获取到文件', icon: 'none' });
-          return;
-        }
-        var okExcel = that._isExcelChatFile(f);
-        if (!okExcel) {
-          that._promptNonExcelChatFile(f);
-          return;
-        }
-        const tempFilePath = f.path;
-        wx.showModal({
-          title: '确认上传',
-          content: '确定上传该 Excel 导入菜品销量数据？',
-          success(modalRes) {
-            if (modalRes.confirm) {
-              that._uploadFoodSalesExcelFile(tempFilePath, departmentId, distributerId);
-            }
-          },
-        });
-      },
-      fail(err) {
-        var msg = err && err.errMsg ? String(err.errMsg) : '';
-        if (msg.indexOf('cancel') >= 0 || msg.indexOf('取消') >= 0) {
-          return;
-        }
-        wx.showToast({ title: '未选择文件', icon: 'none' });
-      },
-    });
+    this._openUnifiedImport('ai');
   },
 
-  _uploadFoodSalesExcelFile(filePath, departmentId, distributerId) {
-    wx.showLoading({ title: '正在上传...', mask: true });
-    foodSalesExcelApi
-      .uploadFoodSalesExcel(filePath, departmentId, distributerId)
-      .then((res) => {
-        wx.hideLoading();
-        const code = res.result && res.result.code;
-        const msg = res.result && res.result.msg;
-        if (code === 0 || code === '0') {
-          wx.showToast({ title: '菜品销量导入成功', icon: 'success' });
-        } else {
-          wx.showToast({ title: msg || '上传失败', icon: 'none' });
-        }
-      })
-      .catch((err) => {
-        wx.hideLoading();
-        console.error('upload food sales excel', err);
-        wx.showToast({ title: '网络请求失败', icon: 'none' });
+  _openUnifiedImport(mode) {
+    const route = 'subPackage-charts/pages/sales/dailyTurnover/dailyTurnover';
+    const pages = getCurrentPages();
+    const previous = pages.length > 1 ? pages[pages.length - 2] : null;
+    if (previous && previous.route === route) {
+      wx.setStorageSync('dailyTurnoverUnifiedImportRequest', {
+        mode,
+        requestedAt: Date.now(),
       });
+      wx.navigateBack();
+      return;
+    }
+    wx.redirectTo({
+      url: '/' + route + '?autoImport=' + encodeURIComponent(mode),
+    });
   },
 })

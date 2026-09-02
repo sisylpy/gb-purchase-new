@@ -154,28 +154,6 @@ var saveBatchDailyTurnover = function (list) {
   return request.post('ai/daily-revenue/save-batch', list);
 };
 
-var uploadTurnoverExcel = function (filePath, departmentId, distributerId) {
-  return new Promise(function (resolve, reject) {
-    wx.uploadFile({
-      url: apiUrl.apiUrl + 'ai/daily-revenue/upload-excel',
-      filePath: filePath,
-      name: 'file',
-      formData: {
-        departmentId: departmentId,
-        distributerId: distributerId,
-      },
-      success: function (res) {
-        try {
-          resolve({ result: JSON.parse(res.data) });
-        } catch (e) {
-          resolve({ result: res.data });
-        }
-      },
-      fail: reject,
-    });
-  });
-};
-
 var getWorkRecordConversation = function (params) {
   return request.get('ai/work-records/conversation', params, { showErrorToast: false });
 };
@@ -237,7 +215,6 @@ module.exports = {
   getDailyTurnover: aiChatApi.getDailyTurnover,
   saveDailyTurnover: saveDailyTurnover,
   saveBatchDailyTurnover: saveBatchDailyTurnover,
-  uploadTurnoverExcel: uploadTurnoverExcel,
   getDailyBoard: aiChatApi.getDailyBoard,
   ignoreNewGoodsRecipeReview: aiChatApi.ignoreNewGoodsRecipeReview,
   // 日看板 / 采购统计

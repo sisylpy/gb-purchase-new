@@ -65,17 +65,21 @@ Page({
           update: false
         }, () => {
           this._initData();
+          this._consumeUnifiedImportRequest();
         });
         return;
       }
     }
     this._initData();
+    this._consumeUnifiedImportRequest();
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    this._routeAutoImportMode = options && options.autoImport
+      ? String(options.autoImport) : '';
     this.setData({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
@@ -112,6 +116,38 @@ Page({
     });
 
     this._initData();
+  },
+
+  onReady: function () {
+    this._consumeUnifiedImportRequest();
+  },
+
+  /**
+   * 旧的销量/营业额编辑页只负责把用户带回这个唯一导入入口。
+   * 文件解析、菜名确认、覆盖预览和提交证据不得再分散到其它页面。
+   */
+  _consumeUnifiedImportRequest: function () {
+    var mode = this._routeAutoImportMode || '';
+    this._routeAutoImportMode = '';
+    var request = wx.getStorageSync('dailyTurnoverUnifiedImportRequest');
+    if (request) {
+      wx.removeStorageSync('dailyTurnoverUnifiedImportRequest');
+      var requestedAt = Number(request.requestedAt || 0);
+      if (requestedAt > 0 && Date.now() - requestedAt <= 60000) {
+        mode = request.mode || mode;
+      }
+    }
+    if (!mode || this._autoImportOpening) return;
+    this._autoImportOpening = true;
+    var that = this;
+    setTimeout(function () {
+      that._autoImportOpening = false;
+      if (mode === 'standard') {
+        that.onUploadCombinedExcel();
+      } else {
+        that.onAiImportExcel();
+      }
+    }, 80);
   },
 
   _syncDatesFromMyDateStorage() {
