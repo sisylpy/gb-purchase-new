@@ -249,6 +249,49 @@ function foodVersionAction(recipeId, versionId, action, body) {
   return post('preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId + '/' + action, body);
 }
 
+function listFoodEffectiveIntervals(recipeId, distributerId, storeDepartmentId) {
+  return get('preparation/p1/food-recipes/' + recipeId + '/effective-intervals', {
+    distributerId: distributerId,
+    storeDepartmentId: storeDepartmentId,
+  });
+}
+
+function previewFoodEffectiveInterval(recipeId, versionId, body) {
+  return post(
+    'preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId
+      + '/effective-intervals/preview',
+    body
+  );
+}
+
+function confirmFoodEffectiveInterval(recipeId, versionId, body) {
+  return post(
+    'preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId
+      + '/effective-intervals/confirm',
+    body
+  );
+}
+
+function previewRemoveFoodEffectiveInterval(recipeId, intervalId, body) {
+  return post(
+    'preparation/p1/food-recipes/' + recipeId + '/effective-intervals/' + intervalId
+      + '/remove-preview',
+    body
+  );
+}
+
+function confirmRemoveFoodEffectiveInterval(recipeId, intervalId, body) {
+  return post(
+    'preparation/p1/food-recipes/' + recipeId + '/effective-intervals/' + intervalId
+      + '/remove-confirm',
+    body
+  );
+}
+
+function listHistoricalReceiptBatches(params) {
+  return get('cost-accounting/historical-theory-prices/receipt-batches', params || {});
+}
+
 // P2：生产批次、领料、完成和领料冲销。
 function createBatch(body) {
   return post('preparation/p2/batches', body);
@@ -417,6 +460,12 @@ module.exports = {
   listFoodVersions: listFoodVersions,
   saveFoodDraft: saveFoodDraft,
   foodVersionAction: foodVersionAction,
+  listFoodEffectiveIntervals: listFoodEffectiveIntervals,
+  previewFoodEffectiveInterval: previewFoodEffectiveInterval,
+  confirmFoodEffectiveInterval: confirmFoodEffectiveInterval,
+  previewRemoveFoodEffectiveInterval: previewRemoveFoodEffectiveInterval,
+  confirmRemoveFoodEffectiveInterval: confirmRemoveFoodEffectiveInterval,
+  listHistoricalReceiptBatches: listHistoricalReceiptBatches,
   createBatch: createBatch,
   listBatches: listBatches,
   getBatch: getBatch,

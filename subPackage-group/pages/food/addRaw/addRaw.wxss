@@ -20,6 +20,97 @@
   height: 40rpx;
 }
 
+.page-bottom-pad--editor {
+  height: 150rpx;
+}
+
+.version-editor-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16rpx 0 18rpx;
+  padding: 18rpx 20rpx;
+  background: #eaf6f2;
+  border: 1rpx solid #c8e5dd;
+  border-radius: 16rpx;
+}
+
+.version-editor-intro__dish,
+.version-editor-intro__sub {
+  display: block;
+}
+
+.version-editor-intro__dish {
+  color: #25302e;
+  font-size: 29rpx;
+  font-weight: 600;
+}
+
+.version-editor-intro__sub {
+  margin-top: 5rpx;
+  color: #617672;
+  font-size: 23rpx;
+}
+
+.version-editor-intro__status {
+  margin-left: 18rpx;
+  padding: 5rpx 14rpx;
+  color: #117765;
+  font-size: 22rpx;
+  white-space: nowrap;
+  background: #fff;
+  border-radius: 999rpx;
+}
+
+.version-editor-footer {
+  position: fixed;
+  z-index: 80;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 24rpx calc(18rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1rpx solid #e3e7e5;
+  box-shadow: 0 -5rpx 18rpx rgba(0, 0, 0, 0.06);
+}
+
+.version-editor-footer__title,
+.version-editor-footer__sub {
+  display: block;
+}
+
+.version-editor-footer__title {
+  color: #303739;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.version-editor-footer__sub {
+  margin-top: 4rpx;
+  color: #858e8c;
+  font-size: 21rpx;
+}
+
+.version-editor-footer__save {
+  min-width: 220rpx;
+  height: 76rpx;
+  color: #fff;
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 76rpx;
+  text-align: center;
+  background: #168d79;
+  border-radius: 12rpx;
+}
+
+.version-editor-footer__save.is-disabled {
+  color: #9aa29f;
+  background: #edf0ef;
+}
+
 /* -------------------------------------------------------------------------- */
 /* 顶部状态栏 */
 /* -------------------------------------------------------------------------- */
@@ -469,6 +560,29 @@
   line-height: 1;
 }
 
+.raw-section-version {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 9rpx 17rpx;
+  color: var(--gb-primary, #187e6e);
+  font-size: 24rpx;
+  line-height: 1.4;
+  background: #edf7f4;
+  border: 1rpx solid #cbe7df;
+  border-radius: 999rpx;
+}
+
+.raw-section-version__arrow {
+  margin-left: 5rpx;
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.raw-section-version--hover {
+  opacity: 0.75;
+}
+
 /* 空状态 */
 .food-raw-empty {
   padding: 48rpx 36rpx 56rpx;
@@ -497,6 +611,28 @@
   padding: 12rpx 8rpx;
   border-bottom: 1rpx solid var(--gb-border-soft, #eee);
   margin-bottom: 8rpx;
+}
+
+.raw-list-header--readonly {
+  flex-direction: row;
+  align-items: center;
+}
+
+.raw-list-header--readonly .raw-header-cell--info {
+  flex: 1;
+  min-width: 0;
+}
+
+.raw-list-header--readonly .raw-header-cell--amount {
+  width: 150rpx;
+}
+
+.raw-list-header--readonly .raw-header-cell--cost {
+  width: 120rpx;
+}
+
+.raw-list-header--readonly .raw-header-cell--ratio {
+  width: 75rpx;
 }
 
 .raw-list-header-top {
@@ -574,6 +710,40 @@
   border-bottom: 1rpx solid var(--gb-border-soft, #f0f0f0);
 }
 
+.raw-item--readonly {
+  flex-direction: row;
+  align-items: center;
+}
+
+.raw-item--readonly .raw-item-top {
+  flex: 1;
+  min-width: 0;
+}
+
+.raw-item--readonly .raw-item-bottom {
+  width: 345rpx;
+  margin-top: 0;
+  padding-left: 0;
+  flex-shrink: 0;
+}
+
+.raw-item--readonly .raw-item-bottom .raw-item-amount {
+  width: 150rpx;
+  flex: none;
+}
+
+.raw-item--readonly .raw-item-bottom .raw-item-cost {
+  width: 120rpx;
+}
+
+.raw-item--readonly .raw-item-bottom .raw-item-ratio {
+  width: 75rpx;
+}
+
+.raw-item--readonly .stepper-unit {
+  margin-right: 0;
+}
+
 .raw-item-top {
   display: flex;
   flex-direction: row;
@@ -626,6 +796,14 @@
   background: var(--gb-bg-gray, #f0f0f0);
   flex-shrink: 0;
   margin-right: 16rpx;
+}
+
+.raw-item-img--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gb-text-tertiary, #9aa39f);
+  font-size: 24rpx;
 }
 
 .raw-item-preparation-img {
@@ -682,7 +860,7 @@
 }
 
 .raw-item-price {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: var(--gb-text-muted, #999);
   margin-top: 4rpx;
 }
@@ -1846,4 +2024,17 @@
   font-size: 18rpx;
   font-style: italic;
   flex-shrink: 0;
+}
+.raw-item-replace {
+  margin-right: 14rpx;
+  padding: 8rpx 12rpx;
+  color: #148b78;
+  font-size: 24rpx;
+  line-height: 1;
+  border: 1rpx solid #9fd5ca;
+  border-radius: 20rpx;
+}
+
+.raw-item-replace--hover {
+  background: #edf8f5;
 }

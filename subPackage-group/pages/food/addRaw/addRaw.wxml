@@ -1,8 +1,15 @@
 <view class="flex flex-column page-bg">
 
-  <back-navbar title="{{foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="{{versionEditorMode ? '新建配方版本' : foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
   <scroll-view scroll-y class="content-scroll">
+    <view class="version-editor-intro" wx:if="{{versionEditorMode}}">
+      <view>
+        <text class="version-editor-intro__dish">{{foodItem.dishName}}</text>
+        <text class="version-editor-intro__sub">基于当前 V{{currentRecipeVersionView.versionNo || '-'}} 调整，保存后形成一个完整新版本</text>
+      </view>
+      <text class="version-editor-intro__status">编辑中</text>
+    </view>
     <!-- 顶部状态栏 -->
     <view class="status-bar">
       <view class="status-left">
@@ -34,7 +41,7 @@
           <text class="kpi-label">理论成本（每份）</text>
           <view class="kpi-value-wrap">
             <text class="kpi-symbol kpi-symbol--cost">¥</text>
-            <text class="kpi-value kpi-value--cost">{{totalCost || '0.00'}}</text>
+            <text class="kpi-value kpi-value--cost">{{totalCostComplete === false ? '—' : (totalCost || '0.00')}}</text>
           </view>
         </view>
         <view class="kpi-divider"></view>
@@ -62,7 +69,7 @@
         </view>
         <view class="profit-amount">
           <text class="profit-symbol">¥</text>
-          <text class="profit-num">{{profit || '0.00'}}</text>
+          <text class="profit-num">{{totalCostComplete === false ? '—' : (profit || '0.00')}}</text>
         </view>
         <view class="profit-tag {{profitLevelClass}}">
           <text class="profit-tag-icon">👍</text>
@@ -82,7 +89,7 @@
     </view>
 
     <!-- 提示条 -->
-    <view class="hint-bar">
+    <view class="hint-bar" wx:if="{{versionEditorMode}}">
       <view class="hint-left">
         <image src="/images/icon.png" class="hint-icon" mode="aspectFit"></image>
         <text class="hint-text">调整配料用量，成本和毛利将实时更新</text>
@@ -98,8 +105,8 @@
     <!-- 配料清单 -->
     <view class="raw-section">
       <view class="raw-section-header">
-        <text class="raw-section-title">配料清单（{{rawArr.length}}）</text>
-        <view class="raw-section-actions">
+        <text class="raw-section-title">{{versionEditorMode ? '新版本配料' : (versionedMode ? (currentRecipeVersionView ? '当前配方 V' + currentRecipeVersionView.versionNo : '当前无适用配方') : '原配料清单')}}（{{rawArr.length}}）</text>
+        <view class="raw-section-actions" wx:if="{{versionEditorMode}}">
           <view class="raw-section-add raw-section-add--preparation" bindtap="toAddPreparation" hover-class="raw-section-add--hover">
             <text class="raw-section-add-plus">+</text>
             <text>添加中间料</text>
@@ -109,48 +116,83 @@
             <text>添加配料</text>
           </view>
         </view>
+        <view
+          class="raw-section-version"
+          wx:elif="{{versionedMode}}"
+          bindtap="toRecipeVersionManage"
+          hover-class="raw-section-version--hover"
+        >
+          <text>版本管理（{{recipeVersionHistory.length}}）</text>
+          <text class="raw-section-version__arrow">›</text>
+        </view>
+        <view
+          class="raw-section-version"
+          wx:else
+          bindtap="toCreateFirstRecipeVersion"
+          hover-class="raw-section-version--hover"
+        >
+          <text>建立配方版本</text>
+          <text class="raw-section-version__arrow">›</text>
+        </view>
       </view>
 
       <!-- 空状态 -->
       <view wx:if="{{!rawArr.length}}" class="food-raw-empty">
-        <text class="food-raw-empty__text">暂无配方内容，可添加采购原料或已完成的中间料</text>
+        <text class="food-raw-empty__text">{{versionEditorMode ? '暂无配方内容，可添加采购原料或已完成的中间料' : '当前版本暂无配方内容'}}</text>
       </view>
 
       <!-- 配料列表 -->
-      <view wx:else class="raw-list">
+      <view wx:else class="raw-list {{versionEditorMode ? 'raw-list--editor' : 'raw-list--readonly'}}">
         <!-- 表头 -->
-        <view class="raw-list-header">
-          <view class="raw-list-header-top">
+        <view class="raw-list-header {{versionEditorMode ? '' : 'raw-list-header--readonly'}}">
+          <block wx:if="{{versionEditorMode}}">
+            <view class="raw-list-header-top">
+              <view class="raw-header-cell raw-header-cell--info">
+                <text class="raw-header-text">配料信息</text>
+              </view>
+              <view class="raw-header-cell raw-header-cell--action"></view>
+            </view>
+            <view class="raw-list-header-bottom">
+              <view class="raw-header-cell raw-header-cell--amount">
+                <text class="raw-header-text">用量（每份）</text>
+              </view>
+              <view class="raw-header-cell raw-header-cell--cost">
+                <text class="raw-header-text">成本（每份）</text>
+              </view>
+              <view class="raw-header-cell raw-header-cell--ratio">
+                <text class="raw-header-text">占比</text>
+              </view>
+            </view>
+          </block>
+          <block wx:else>
             <view class="raw-header-cell raw-header-cell--info">
               <text class="raw-header-text">配料信息</text>
             </view>
-            <view class="raw-header-cell raw-header-cell--action"></view>
-          </view>
-          <view class="raw-list-header-bottom">
             <view class="raw-header-cell raw-header-cell--amount">
-              <text class="raw-header-text">用量（每份）</text>
+              <text class="raw-header-text">每份用量</text>
             </view>
             <view class="raw-header-cell raw-header-cell--cost">
-              <text class="raw-header-text">成本（每份）</text>
+              <text class="raw-header-text">每份成本</text>
             </view>
             <view class="raw-header-cell raw-header-cell--ratio">
               <text class="raw-header-text">占比</text>
             </view>
-          </view>
+          </block>
         </view>
 
         <!-- 数据行 -->
-        <view wx:for="{{rawArr}}" wx:for-item="raw" wx:for-index="rawIdx" wx:key="gbDistributerFoodGoodsId" class="raw-item">
+        <view wx:for="{{rawArr}}" wx:for-item="raw" wx:for-index="rawIdx" wx:key="gbDistributerFoodGoodsId" class="raw-item {{versionEditorMode ? 'raw-item--editor' : 'raw-item--readonly'}}">
           <!-- 第一行：图片 + 名称/单价 + 操作 -->
           <view class="raw-item-top">
             <view class="raw-item-main">
               <view class="raw-item-preparation-img" wx:if="{{raw._isPreparation}}">中</view>
               <image
-                wx:else
+                wx:elif="{{raw._imageUrl}}"
                 class="raw-item-img"
-                src="{{url + raw.gbDistributerGoodsEntity.gbDgNxFatherImg}}"
+                src="{{raw._imageUrl}}"
                 mode="aspectFill"
               />
+              <view wx:else class="raw-item-img raw-item-img--placeholder">原</view>
               <view class="raw-item-info">
                 <view class="raw-item-name-line">
                   <text class="raw-item-kind" wx:if="{{raw._isPreparation}}">中间料</text>
@@ -159,7 +201,14 @@
                 <text class="raw-item-price">{{raw._isPreparation ? raw._packPriceLabel : (raw._packPriceLabel === '成本待计算' ? raw._packPriceLabel : '¥' + raw._packPriceLabel)}}</text>
               </view>
             </view>
-            <view class="raw-item-action">
+            <view class="raw-item-action" wx:if="{{versionEditorMode}}">
+              <view
+                wx:if="{{raw._isVersioned && !raw._isPreparation}}"
+                class="raw-item-replace"
+                bindtap="replaceGoods"
+                data-item="{{raw}}"
+                hover-class="raw-item-replace--hover"
+              >更换</view>
               <!-- <view class="action-btn" bindtap="editGoods" data-item="{{raw}}" hover-class="action-btn--hover">
                 <image src="/images/edit.png" class="action-icon" mode="aspectFit"></image>
               </view> -->
@@ -173,10 +222,10 @@
           <view class="raw-item-bottom">
             <view class="raw-item-amount">
               <view class="stepper">
-                <view class="stepper-btn stepper-btn--minus" bindtap="onMinusAmount" data-index="{{rawIdx}}" hover-class="stepper-btn--hover">-</view>
+                <view wx:if="{{versionEditorMode}}" class="stepper-btn stepper-btn--minus" bindtap="onMinusAmount" data-index="{{rawIdx}}" hover-class="stepper-btn--hover">-</view>
                 <text class="stepper-value">{{raw._displayAmount}}</text>
                 <text class="stepper-unit">{{raw._displayUnit}}</text>
-                <view class="stepper-btn stepper-btn--plus" bindtap="onPlusAmount" data-index="{{rawIdx}}" hover-class="stepper-btn--hover">+</view>
+                <view wx:if="{{versionEditorMode}}" class="stepper-btn stepper-btn--plus" bindtap="onPlusAmount" data-index="{{rawIdx}}" hover-class="stepper-btn--hover">+</view>
               </view>
             </view>
             <view class="raw-item-cost">
@@ -189,8 +238,17 @@
         </view>
       </view>
     </view>
-    <view class="page-bottom-pad"></view>
+    <view class="page-bottom-pad {{versionEditorMode ? 'page-bottom-pad--editor' : ''}}"></view>
   </scroll-view>
+  <view class="version-editor-footer" wx:if="{{versionEditorMode}}">
+    <view class="version-editor-footer__summary">
+      <text class="version-editor-footer__title">新版本配方</text>
+      <text class="version-editor-footer__sub">{{rawArr.length}} 项配料{{versionDraftDirty ? ' · 已修改' : ' · 尚未修改'}}</text>
+    </view>
+    <view class="version-editor-footer__save {{versionDraftDirty ? '' : 'is-disabled'}}" bindtap="saveNewRecipeVersion">
+      {{recipeSaving ? '保存中…' : '保存新版本'}}
+    </view>
+  </view>
 </view>
 
 <!-- 添加 / 编辑中间料：中间料作为一个整体使用，只填写菜品每份用量 -->
@@ -296,7 +354,7 @@
     catchtap="stopTap"
   >
     <view class="food-search-modal__head">
-      <text class="food-search-modal__title">{{modalType == 'edit' ? '编辑原料' : '添加原料'}}</text>
+      <text class="food-search-modal__title">{{modalType == 'edit' ? '编辑原料' : (modalType == 'replace' ? '更换原料' : '添加原料')}}</text>
     </view>
 
     <scroll-view scroll-y class="raw-add-modal__scroll" catchtouchmove="stopMove" bindscroll="dismissKeyboard">
@@ -502,7 +560,7 @@
     <view class="food-search-modal__footer">
       <view class="food-search-modal__actions">
         <view class="cancel-btn" bindtap="cancle" hover-class="hoverBtn">取消</view>
-        <view class="confirm-btn" catchtap="confirm" hover-class="hoverBtn">{{modalType == 'edit' ? '确认保存' : '确认添加'}}</view>
+        <view class="confirm-btn" catchtap="confirm" hover-class="hoverBtn">{{modalType == 'edit' ? '确认保存' : (modalType == 'replace' ? '确认更换' : '确认添加')}}</view>
       </view>
     </view>
   </view>

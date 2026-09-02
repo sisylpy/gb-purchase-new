@@ -202,7 +202,9 @@
         "pages/food/foodBusinessDetail/foodBusinessDetail",
         "pages/food/addFood/addFood",
         "pages/food/addFoodFather/addFoodFather",
-        "pages/food/addRaw/addRaw"
+        "pages/food/addRaw/addRaw",
+        "pages/food/recipeVersionManage/recipeVersionManage",
+        "pages/food/recipeVersionEdit/recipeVersionEdit"
 
       ]
     }
