@@ -34,7 +34,7 @@ var pagesApi = require('../services/pages');
  * | wx.getStorageSync('userInfo') | onShow 判断是否已登录，已登录则进首页 |
  * | wx.setStorageSync | 注册成功后写入 disInfo、userInfo |
  * | wx.redirectTo | 已登录或注册成功后的页面跳转 |
- * | wx.navigateBack | 返回上一页 |
+ * | wx.navigateBack / wx.exitMiniProgram | 返回上一页；直接进入注册页时退出小程序 |
  * | wx.showLoading / wx.hideLoading | 注册请求过程遮罩 |
  * | wx.showToast | 校验失败、接口失败提示 |
  */
@@ -157,8 +157,44 @@ Page({
    */
   preventClose: function () {},
 
+  /**
+   * 取消注册。
+   *
+   * 未注册用户由首页通过 redirectTo 进入本页时，页面栈只剩本页，
+   * 直接调用 navigateBack 不会有可见反应。有上一页时正常返回，
+   * 没有上一页时退出小程序，避免审核和用户被困在注册环节。
+   */
   toBack: function () {
-    wx.navigateBack({ delta: 1 });
+    var pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+    if (pages.length > 1) {
+      wx.navigateBack({
+        delta: 1,
+        fail: function () {
+          this._exitRegistration();
+        }.bind(this),
+      });
+      return;
+    }
+
+    this._exitRegistration();
+  },
+
+  /** 退出能力不可用时回到非强制注册的介绍页，确保返回操作始终有反应。 */
+  _exitRegistration: function () {
+    if (typeof wx.exitMiniProgram === 'function') {
+      wx.exitMiniProgram({
+        fail: function () {
+          this._showRegistrationIntro();
+        }.bind(this),
+      });
+      return;
+    }
+
+    this._showRegistrationIntro();
+  },
+
+  _showRegistrationIntro: function () {
+    wx.reLaunch({ url: '/pages/tro/tro' });
   },
 
   // =============================================================================
