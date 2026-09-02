@@ -16,10 +16,8 @@
 .ingredient-amount { color: #424b48; font-size: 24rpx; text-align: right; }
 .ingredient-ratio { color: #187e6e; font-size: 22rpx; text-align: right; }
 .view-all { color: #187e6e; font-size: 23rpx; padding-top: 15rpx; text-align: center; }
-.quick-grid { display: grid; gap: 12rpx; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.quick-card { align-items: center; background: #f0f5f3; border-radius: 10rpx; color: #31524b; display: flex; font-size: 25rpx; justify-content: center; min-height: 68rpx; }
-.quick-card.primary { background: #187e6e; color: #fff; }
-.record-links { color: #596663; display: flex; font-size: 23rpx; justify-content: space-between; padding-top: 17rpx; }
+.loss-action { align-items: center; background: #187e6e; border-radius: 10rpx; color: #fff; display: flex; font-size: 25rpx; justify-content: center; min-height: 68rpx; }
+.loss-record-link { color: #596663; font-size: 23rpx; padding-top: 17rpx; text-align: right; }
 .blocked-operation { align-items: center; background: #f6f8f7; border-radius: 9rpx; color: #737c79; display: flex; font-size: 22rpx; justify-content: space-between; line-height: 1.45; padding: 14rpx; }
 .basic-actions { display: flex; justify-content: flex-end; padding: 4rpx 0 26rpx; }
 .danger-zone { border-top: 1rpx solid #e4e7e7; padding: 18rpx 0 32rpx; text-align: center; }

@@ -115,27 +115,23 @@ Page({
           imageUrl: '',
         });
       });
-      var goodsPromise = Promise.all(components.map(function (line) {
-        return api.getRawGoods(line.rawGoodsId).then(function (goods) {
-          goods = goods || {};
-          return Object.assign({}, line, {
-            imageUrl: joinImageUrl(that.data.server, goods.gbDgNxFatherImg || goods.gbDgNxFatherImgLarge || goods.gbDgGoodsFile),
-            specText: packLabel(goods),
-          });
-        }).catch(function () { return line; });
-      }));
-      return goodsPromise.then(function (decoratedComponents) {
-        that.setData({
-          loading: false,
-          productName: row.productName || '',
-          usageUnitCode: row.usageUnitCode || '',
-          usageUnitLabel: unitLabels[row.usageUnitCode] || row.usageUnitCode || '—',
-          components: decoratedComponents,
-          standardOutputQuantity: row.standardOutputQuantity != null
-            ? String(row.standardOutputQuantity) : '1',
-        }, function () {
-          that.updateRecipeSummary();
+      var decoratedComponents = components.map(function (line) {
+        var goods = line.rawGoods || {};
+        return Object.assign({}, line, {
+          imageUrl: joinImageUrl(that.data.server, goods.gbDgNxFatherImg || goods.gbDgNxFatherImgLarge || goods.gbDgGoodsFile),
+          specText: packLabel(goods),
         });
+      });
+      that.setData({
+        loading: false,
+        productName: row.productName || '',
+        usageUnitCode: row.usageUnitCode || '',
+        usageUnitLabel: unitLabels[row.usageUnitCode] || row.usageUnitCode || '—',
+        components: decoratedComponents,
+        standardOutputQuantity: row.standardOutputQuantity != null
+          ? String(row.standardOutputQuantity) : '1',
+      }, function () {
+        that.updateRecipeSummary();
       });
     }).catch(function (error) { that.setData({ loading: false }); util.showError(error); });
   },

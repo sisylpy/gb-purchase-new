@@ -138,22 +138,6 @@ function saveStoreRecipe(productId, body) {
   return put('preparation/store/products/' + productId + '/recipe', body);
 }
 
-function listStoreProductionMaterials(productId) {
-  return get('preparation/store/products/' + productId + '/production-materials');
-}
-
-function listStoreProductionStocks(productId, recipeComponentId) {
-  return get('preparation/store/products/' + productId + '/production-materials/' + recipeComponentId + '/stock-batches');
-}
-
-function createStoreProduction(body) {
-  return post('preparation/store/productions', body);
-}
-
-function listStoreProductions(productId) {
-  return get('preparation/store/productions', { productId: productId });
-}
-
 function listStoreLossMaterials(productId) {
   return get('preparation/store/products/' + productId + '/loss-materials');
 }
@@ -377,7 +361,9 @@ function searchRawGoods(distributerId, keyword) {
 }
 
 function getRawGoods(goodsId) {
-  return get('gbdistributergoods/gbDisGetGoodsDetail/' + goodsId);
+  return get('gbdistributergoods/gbDisGetGoodsDetail/' + goodsId).then(function (payload) {
+    return payload && payload.goodsInfo ? payload.goodsInfo : payload;
+  });
 }
 
 function listFoodTree(distributerId) {
@@ -407,10 +393,6 @@ module.exports = {
   getStoreRecipe: getStoreRecipe,
   searchStoreIngredientOptions: searchStoreIngredientOptions,
   saveStoreRecipe: saveStoreRecipe,
-  listStoreProductionMaterials: listStoreProductionMaterials,
-  listStoreProductionStocks: listStoreProductionStocks,
-  createStoreProduction: createStoreProduction,
-  listStoreProductions: listStoreProductions,
   listStoreLossMaterials: listStoreLossMaterials,
   listStoreLossStocks: listStoreLossStocks,
   createStoreRawLoss: createStoreRawLoss,

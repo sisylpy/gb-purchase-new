@@ -73,8 +73,8 @@ Page({
       visibleComponents: decoratedComponents.slice(0, 6),
       canOperate: canOperate,
       blockedOperationText: product.status === 'DISABLED'
-        ? '该中间料已停用，重新启用后可记录制作和损耗。'
-        : '完成标准配方后即可记录实际制作和损耗。',
+        ? '该中间料已停用，重新启用后可记录原料损耗。'
+        : '完成标准配方后即可记录原料损耗。',
       blockedActionText: product.status === 'DISABLED'
         ? '重新启用 ›'
         : '去完善标准配方 ›',
@@ -83,9 +83,7 @@ Page({
 
   toEdit: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeProductForm/storeProductForm?id=' + this.data.id }); },
   toRecipe: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeRecipe/storeRecipe?productId=' + this.data.id }); },
-  toProduction: function () { if (this.data.canOperate) wx.navigateTo({ url: '/subPackage-preparation/pages/storeProduction/storeProduction?productId=' + this.data.id }); },
   toLoss: function () { if (this.data.canOperate) wx.navigateTo({ url: '/subPackage-preparation/pages/storeLoss/storeLoss?productId=' + this.data.id }); },
-  toProductionRecords: function () { if (this.data.canOperate) wx.navigateTo({ url: '/subPackage-preparation/pages/storeProductionRecords/storeProductionRecords?productId=' + this.data.id }); },
   toLossRecords: function () { if (this.data.canOperate) wx.navigateTo({ url: '/subPackage-preparation/pages/storeLossRecords/storeLossRecords?productId=' + this.data.id }); },
   handleBlockedAction: function () {
     if (this.data.product && this.data.product.status === 'DISABLED') this.toggleStatus();

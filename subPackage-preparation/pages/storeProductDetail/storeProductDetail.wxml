@@ -29,16 +29,10 @@
     </view>
 
     <view class="prep-section operation-section">
-      <view class="prep-section-title">制作与损耗</view>
+      <view class="prep-section-title">原料损耗</view>
       <view wx:if="{{canOperate}}">
-        <view class="quick-grid">
-          <view class="quick-card primary" bindtap="toProduction"><text>记录制作</text></view>
-          <view class="quick-card" bindtap="toLoss"><text>记录损耗</text></view>
-        </view>
-        <view class="record-links">
-          <text bindtap="toProductionRecords">查看制作记录 ›</text>
-          <text bindtap="toLossRecords">查看损耗记录 ›</text>
-        </view>
+        <view class="loss-action" bindtap="toLoss"><text>记录原料损耗</text></view>
+        <view class="loss-record-link" bindtap="toLossRecords">查看损耗记录 ›</view>
       </view>
       <view class="blocked-operation" wx:else>
         <text>{{blockedOperationText}}</text>

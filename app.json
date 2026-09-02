@@ -31,8 +31,6 @@
         "pages/storeProductForm/storeProductForm",
         "pages/storeProductDetail/storeProductDetail",
         "pages/storeRecipe/storeRecipe",
-        "pages/storeProduction/storeProduction",
-        "pages/storeProductionRecords/storeProductionRecords",
         "pages/storeLoss/storeLoss",
         "pages/storeLossRecords/storeLossRecords",
         "pages/home/home",
