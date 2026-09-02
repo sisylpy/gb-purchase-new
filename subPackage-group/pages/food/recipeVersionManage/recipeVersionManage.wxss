@@ -70,6 +70,18 @@
 .interval-batch__goods { color: #2e3734; font-size: 25rpx; font-weight: 600; }
 .interval-batch__date { margin-top: 8rpx; color: #157c6b; font-size: 24rpx; }
 .interval-batch__meta { margin-top: 5rpx; color: #858e8b; font-size: 21rpx; }
+.replacement-box { padding: 18rpx; border-top: 1rpx solid #edf0ef; background: #f7faf9; border-radius: 12rpx; }
+.replacement-box__switch { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; }
+.replacement-box__switch > view { flex: 1; min-width: 0; }
+.replacement-box__route { display: flex; align-items: stretch; gap: 10rpx; margin-top: 16rpx; }
+.replacement-box__goods { flex: 1; min-width: 0; padding: 14rpx; background: #fff; border: 1rpx solid #e4e9e7; border-radius: 10rpx; }
+.replacement-box__goods--new { border-color: #a7d9ce; background: #eef8f5; }
+.replacement-box__tag, .replacement-box__name, .replacement-box__spec, .replacement-box__note { display: block; }
+.replacement-box__tag { color: #808a87; font-size: 20rpx; }
+.replacement-box__name { margin-top: 5rpx; overflow: hidden; color: #2d3734; font-size: 25rpx; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.replacement-box__spec { margin-top: 4rpx; color: #7b8582; font-size: 21rpx; }
+.replacement-box__arrow { align-self: center; color: #168d79; font-size: 30rpx; font-weight: 650; }
+.replacement-box__note { margin-top: 12rpx; color: #4b7168; font-size: 22rpx; line-height: 1.45; }
 .interval-reason { padding: 16rpx 0; border-top: 1rpx solid #edf0ef; }
 .interval-reason__input { box-sizing: border-box; height: 76rpx; margin-top: 12rpx; padding: 0 18rpx; color: #323a38; font-size: 25rpx; background: #f5f7f6; border-radius: 10rpx; }
 .interval-preview { margin-top: 10rpx; padding: 18rpx; background: #f1f8f6; border-radius: 12rpx; }

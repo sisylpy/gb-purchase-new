@@ -115,6 +115,31 @@
           </view>
         </scroll-view>
       </view>
+      <view class="replacement-box" wx:if="{{intervalReplacementCandidate}}">
+        <view class="replacement-box__switch">
+          <view>
+            <text class="interval-form-row__label">同时记录采购包装升级</text>
+            <text class="interval-form-row__hint">
+              {{intervalReplacementCandidate.explicitlyReplaced ? '这是新版本中明确执行的商品更换' : '检测到新旧版本各替换了1种采购商品，请确认是否属于包装升级'}}
+            </text>
+          </view>
+          <switch color="#168d79" checked="{{intervalRecordReplacement}}" bindchange="onReplacementSwitch" />
+        </view>
+        <view class="replacement-box__route">
+          <view class="replacement-box__goods">
+            <text class="replacement-box__tag">原包装</text>
+            <text class="replacement-box__name">{{intervalReplacementCandidate.replacedName}}</text>
+            <text class="replacement-box__spec">{{intervalReplacementCandidate.replacedSpec || '规格待完善'}}</text>
+          </view>
+          <text class="replacement-box__arrow">→</text>
+          <view class="replacement-box__goods replacement-box__goods--new">
+            <text class="replacement-box__tag">新包装</text>
+            <text class="replacement-box__name">{{intervalReplacementCandidate.replacementName}}</text>
+            <text class="replacement-box__spec">{{intervalReplacementCandidate.replacementSpec || '规格待完善'}}</text>
+          </view>
+        </view>
+        <text class="replacement-box__note" wx:if="{{intervalRecordReplacement}}">商品替代采用与本配方使用相同的营业日起止日期，并保存新旧包装换算证据。</text>
+      </view>
       <view class="interval-form-row">
         <view>
           <text class="interval-form-row__label">设置停止日期</text>
@@ -138,6 +163,7 @@
         <text class="interval-preview__line">影响营业日：{{intervalPreview._affectedText}}</text>
         <text class="interval-preview__line">将替换 {{intervalPreview.supersededIntervalIds.length}} 段旧区间，形成 {{intervalPreview._afterTimeline.length}} 段有效时间</text>
         <text class="interval-preview__warning" wx:if="{{intervalPreview._gapCount}}">调整后存在 {{intervalPreview._gapCount}} 个时间空档，空档日期会待核算。</text>
+        <text class="interval-preview__line" wx:if="{{replacementPreview}}">采购包装升级也已完成预览，将与配方适用时间在同一事务中保存。</text>
         <view wx:for="{{intervalPreview._afterTimeline}}" wx:for-item="row" wx:key="_key" class="interval-preview__row">
           <text>{{row._versionLabel}}</text>
           <text>{{row._periodText}}</text>

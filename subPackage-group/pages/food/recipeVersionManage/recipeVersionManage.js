@@ -1,5 +1,6 @@
 var preparationApi = require('../../../../services/preparation');
 var preparationUtil = require('../../../../utils/preparation');
+var RECIPE_REPLACEMENT_CONTEXT_PREFIX = 'foodRecipeReplacementContext:';
 
 function localDateText(date) {
   var value = date || new Date();
@@ -30,6 +31,59 @@ function cleanText(value) {
   if (value == null) return '';
   var text = String(value).trim();
   return !text || text.toLowerCase() === 'null' ? '' : text;
+}
+
+function purchaseUnitCode(value) {
+  var unit = cleanText(value);
+  var lower = unit.toLowerCase();
+  var aliases = {
+    g: 'G', '克': 'G', kg: 'KG', '公斤': 'KG', '千克': 'KG', '斤': 'JIN',
+    ml: 'ML', '毫升': 'ML', l: 'L', '升': 'L',
+    '个': 'EA', '只': 'EA', '枚': 'EA', '颗': 'EA', '张': 'EA', '条': 'EA', '根': 'EA',
+  };
+  return aliases[lower] || aliases[unit] || unit.toUpperCase();
+}
+
+function purchaseSpec(component) {
+  var goods = (component && component.rawGoods) || {};
+  var name = cleanText(goods.gbDgGoodsStandardname || goods.standardName);
+  var weight = cleanText(goods.gbDgGoodsStandardWeight || goods.standardWeight);
+  return [name, weight].filter(function (value) { return !!value; }).join(' ');
+}
+
+function replacementCandidate(version, base, pending) {
+  if (!version || !base) return null;
+  var currentRaw = (version._components || []).filter(function (row) { return !row._isIntermediate; });
+  var baseRaw = (base._components || []).filter(function (row) { return !row._isIntermediate; });
+  var currentIds = {};
+  var baseIds = {};
+  currentRaw.forEach(function (row) { currentIds[String(row.rawGoodsId)] = true; });
+  baseRaw.forEach(function (row) { baseIds[String(row.rawGoodsId)] = true; });
+  var added = currentRaw.filter(function (row) { return !baseIds[String(row.rawGoodsId)]; });
+  var removed = baseRaw.filter(function (row) { return !currentIds[String(row.rawGoodsId)]; });
+  if (added.length !== 1 || removed.length !== 1) return null;
+  var next = added[0];
+  var previous = removed[0];
+  var pendingMatches = pending && pending.changeType === 'REPLACE'
+    && Number(pending.replacedRawGoodsId) === Number(previous.rawGoodsId)
+    && Number(pending.newRawGoodsId) === Number(next.rawGoodsId);
+  var oldEvidence = pendingMatches && pending.oldGoods && pending.oldGoods.evidence;
+  var newEvidence = pendingMatches && pending.newGoods && pending.newGoods.evidence;
+  return {
+    replacedRawGoodsId: Number(previous.rawGoodsId),
+    replacementRawGoodsId: Number(next.rawGoodsId),
+    replacedName: previous.name,
+    replacementName: next.name,
+    replacedSpec: purchaseSpec(previous),
+    replacementSpec: purchaseSpec(next),
+    replacedPurchaseUnitCode: oldEvidence && oldEvidence.purchaseUnitCode
+      ? oldEvidence.purchaseUnitCode
+      : purchaseUnitCode((previous.rawGoods || {}).gbDgGoodsStandardname),
+    replacementPurchaseUnitCode: newEvidence && newEvidence.purchaseUnitCode
+      ? newEvidence.purchaseUnitCode
+      : purchaseUnitCode((next.rawGoods || {}).gbDgGoodsStandardname),
+    explicitlyReplaced: !!pendingMatches,
+  };
 }
 
 function componentKey(component) {
@@ -113,6 +167,8 @@ function decorateVersions(versions, timeline, baseUrl) {
     row._changedRawGoods = row._components.filter(function (component) {
       return !component._isIntermediate && !baseIds[String(component.rawGoodsId)];
     });
+    var pending = wx.getStorageSync(RECIPE_REPLACEMENT_CONTEXT_PREFIX + String(row.id)) || null;
+    row._replacementCandidate = replacementCandidate(row, base, pending);
   });
   return rows;
 }
@@ -151,6 +207,9 @@ Page({
     intervalBatchLoading: false,
     intervalBatchHints: [],
     intervalSelectedBatchId: null,
+    intervalReplacementCandidate: null,
+    intervalRecordReplacement: false,
+    replacementPreview: null,
   },
 
   onLoad: function (options) {
@@ -244,6 +303,10 @@ Page({
       intervalBatchLoading: true,
       intervalBatchHints: [],
       intervalSelectedBatchId: null,
+      intervalReplacementCandidate: version._replacementCandidate || null,
+      intervalRecordReplacement: !!(version._replacementCandidate
+        && version._replacementCandidate.explicitlyReplaced),
+      replacementPreview: null,
     });
     this.loadIntervalBatchHints(version);
   },
@@ -296,6 +359,7 @@ Page({
       intervalStart: batch._dateText,
       intervalReason: reason + '；参考入库批次#' + batch.stockBatchId,
       intervalPreview: null,
+      replacementPreview: null,
     });
   },
 
@@ -307,11 +371,11 @@ Page({
   stopPropagation: function () {},
 
   onIntervalStartChange: function (event) {
-    this.setData({ intervalStart: event.detail.value, intervalPreview: null });
+    this.setData({ intervalStart: event.detail.value, intervalPreview: null, replacementPreview: null });
   },
 
   onIntervalEndChange: function (event) {
-    this.setData({ intervalEnd: event.detail.value, intervalPreview: null });
+    this.setData({ intervalEnd: event.detail.value, intervalPreview: null, replacementPreview: null });
   },
 
   onIntervalEndSwitch: function (event) {
@@ -319,11 +383,20 @@ Page({
       intervalHasEnd: !!event.detail.value,
       intervalEnd: event.detail.value ? (this.data.intervalEnd || this.data.intervalStart) : '',
       intervalPreview: null,
+      replacementPreview: null,
     });
   },
 
   onIntervalReasonInput: function (event) {
-    this.setData({ intervalReason: event.detail.value, intervalPreview: null });
+    this.setData({ intervalReason: event.detail.value, intervalPreview: null, replacementPreview: null });
+  },
+
+  onReplacementSwitch: function (event) {
+    this.setData({
+      intervalRecordReplacement: !!event.detail.value,
+      intervalPreview: null,
+      replacementPreview: null,
+    });
   },
 
   intervalRequest: function () {
@@ -333,6 +406,32 @@ Page({
       storeDepartmentId: identity.currentStoreId,
       effectiveStart: this.data.intervalStart,
       effectiveEnd: this.data.intervalHasEnd ? this.data.intervalEnd : null,
+      adjustmentReason: String(this.data.intervalReason || '').trim(),
+      operatorId: identity.operatorId,
+    };
+  },
+
+  replacementRequest: function () {
+    var identity = this.identity || preparationUtil.getIdentity();
+    var candidate = this.data.intervalReplacementCandidate;
+    if (!candidate) return null;
+    if (!candidate.replacedPurchaseUnitCode || !candidate.replacementPurchaseUnitCode) {
+      throw {
+        preparationError: true,
+        status: 400,
+        message: '新旧商品的采购包装规格不完整，请先补齐商品规格',
+      };
+    }
+    return {
+      distributerId: identity.distributerId,
+      storeDepartmentId: identity.currentStoreId,
+      replacedRawGoodsId: candidate.replacedRawGoodsId,
+      replacementRawGoodsId: candidate.replacementRawGoodsId,
+      effectiveStart: this.data.intervalStart,
+      effectiveEnd: this.data.intervalHasEnd ? this.data.intervalEnd : null,
+      replacedPurchaseUnitCode: candidate.replacedPurchaseUnitCode,
+      replacementPurchaseUnitCode: candidate.replacementPurchaseUnitCode,
+      sourceRecipeVersionId: this.data.intervalVersion.id,
       adjustmentReason: String(this.data.intervalReason || '').trim(),
       operatorId: identity.operatorId,
     };
@@ -351,16 +450,31 @@ Page({
       return;
     }
     wx.showLoading({ title: '计算影响范围', mask: true });
-    preparationApi.previewFoodEffectiveInterval(this.data.recipe.id, version.id, request)
-      .then(function (preview) {
+    var recipePreviewPromise = preparationApi.previewFoodEffectiveInterval(
+      this.data.recipe.id, version.id, request
+    );
+    var replacementPreviewPromise = Promise.resolve(null);
+    if (this.data.intervalRecordReplacement && this.data.intervalReplacementCandidate) {
+      try {
+        replacementPreviewPromise = preparationApi.previewRawGoodsReplacement(this.replacementRequest());
+      } catch (error) {
         wx.hideLoading();
+        preparationUtil.showError(error);
+        return;
+      }
+    }
+    Promise.all([recipePreviewPromise, replacementPreviewPromise])
+      .then(function (results) {
+        wx.hideLoading();
+        var preview = results[0];
+        var replacementPreview = results[1];
         preview._affectedText = dateText(preview.affectedEffectiveStart) + ' 至 '
           + (preview.affectedEffectiveEnd ? dateText(preview.affectedEffectiveEnd) + '（不含）' : '以后');
         preview._afterTimeline = (preview.afterTimeline || []).map(function (row, index) {
           return previewIntervalView(row, index, that.data.versions);
         });
         preview._gapCount = (preview.gaps || []).length;
-        that.setData({ intervalPreview: preview });
+        that.setData({ intervalPreview: preview, replacementPreview: replacementPreview });
       }).catch(function (error) {
         wx.hideLoading();
         preparationUtil.showError(error);
@@ -381,10 +495,47 @@ Page({
     });
     this.setData({ confirmingInterval: true });
     wx.showLoading({ title: '保存适用时间', mask: true });
-    preparationApi.confirmFoodEffectiveInterval(this.data.recipe.id, version.id, request)
-      .then(function () {
+    var confirmPromise;
+    if (this.data.intervalRecordReplacement && this.data.intervalReplacementCandidate) {
+      var replacementPreview = this.data.replacementPreview;
+      if (!replacementPreview || !replacementPreview.previewToken) {
         wx.hideLoading();
-        that.setData({ confirmingInterval: false, showIntervalEditor: false, intervalPreview: null });
+        this.setData({ confirmingInterval: false, intervalPreview: null });
+        wx.showToast({ title: '请重新预览包装升级影响', icon: 'none' });
+        return;
+      }
+      var replacementRequest;
+      try {
+        replacementRequest = Object.assign({}, this.replacementRequest(), {
+          expectedTimelineRevision: replacementPreview.timelineRevision,
+          expectedPreviewToken: replacementPreview.previewToken,
+        });
+      } catch (error) {
+        wx.hideLoading();
+        this.setData({ confirmingInterval: false, intervalPreview: null, replacementPreview: null });
+        preparationUtil.showError(error);
+        return;
+      }
+      confirmPromise = preparationApi.confirmFoodEffectiveIntervalWithReplacement(
+        this.data.recipe.id,
+        version.id,
+        { recipeInterval: request, rawGoodsReplacement: replacementRequest }
+      );
+    } else {
+      confirmPromise = preparationApi.confirmFoodEffectiveInterval(this.data.recipe.id, version.id, request);
+    }
+    confirmPromise
+      .then(function () {
+        if (that.data.intervalReplacementCandidate) {
+          wx.removeStorageSync(RECIPE_REPLACEMENT_CONTEXT_PREFIX + String(version.id));
+        }
+        wx.hideLoading();
+        that.setData({
+          confirmingInterval: false,
+          showIntervalEditor: false,
+          intervalPreview: null,
+          replacementPreview: null,
+        });
         wx.showToast({ title: '适用时间已更新', icon: 'success' });
         return that.loadVersions();
       }).catch(function (error) {

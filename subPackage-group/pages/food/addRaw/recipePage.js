@@ -28,6 +28,7 @@ var BULK_WEIGHT_G_THRESHOLD = 5000;
 var MODAL_PAD_TOP_RATIO_SEARCH = 0.23;
 var MODAL_PAD_TOP_RATIO_PICKED = 0.08;
 var PREPARATION_MIGRATION_CACHE_PREFIX = 'preparationFoodRecipeMigration:';
+var RECIPE_REPLACEMENT_CONTEXT_PREFIX = 'foodRecipeReplacementContext:';
 var P1_STANDARD_UNITS = ['G', 'KG', 'JIN', 'ML', 'L', 'EA'];
 
 function _todayText() {
@@ -73,6 +74,40 @@ function _fromP1Unit(unit) {
   };
   var normalized = String(unit || '').toUpperCase();
   return labels[normalized] || unit || '';
+}
+
+function _purchaseUnitCode(unit) {
+  return _toP1Unit(unit);
+}
+
+function _baseUnitInfo(unit) {
+  var normalized = _toP1Unit(unit);
+  if (normalized === 'G') return { dimension: 'MASS', factor: 1 };
+  if (normalized === 'KG') return { dimension: 'MASS', factor: 1000 };
+  if (normalized === 'JIN') return { dimension: 'MASS', factor: 500 };
+  if (normalized === 'ML') return { dimension: 'VOLUME', factor: 1 };
+  if (normalized === 'L') return { dimension: 'VOLUME', factor: 1000 };
+  if (normalized === 'EA') return { dimension: 'COUNT', factor: 1 };
+  return null;
+}
+
+/**
+ * 将页面上已经由用户确认的采购包装规格整理为后端单位证据。
+ * factorToBase 始终换算到 g/ml/个，不把“50斤/袋”错误保存为 50g/袋。
+ */
+function _rawGoodsPurchaseEvidence(goods, minUnit, packQtyInMin) {
+  var entity = _getGoodsEntity(goods);
+  var packUnit = String(entity.gbDgGoodsStandardname || '').trim();
+  var base = _baseUnitInfo(minUnit);
+  var quantity = Number(packQtyInMin);
+  if (!packUnit || !base || !(quantity > 0)) return null;
+  return {
+    rawGoodsId: Number(entity.gbDistributerGoodsId),
+    name: entity.gbDgGoodsName || '',
+    purchaseUnitCode: _purchaseUnitCode(packUnit),
+    dimension: base.dimension,
+    factorToBase: quantity * base.factor,
+  };
 }
 
 function _unitFactorToGram(unit) {
@@ -1868,10 +1903,17 @@ function createRecipePage(pageMode) {
    */
   _applyVersionDraftComponents(components, changeContext) {
     var that = this;
+    var existingContext = this.data.versionDraftChangeContext;
+    var nextContext = changeContext || existingContext || null;
+    // 一次显式“更换”代表包装升级候选；后续只改用量时不能把这条业务意图冲掉。
+    if (existingContext && existingContext.changeType === 'REPLACE'
+      && (!changeContext || changeContext.changeType !== 'REPLACE')) {
+      nextContext = existingContext;
+    }
     this.setData({
       versionedComponents: components,
       versionDraftDirty: true,
-      versionDraftChangeContext: changeContext || this.data.versionDraftChangeContext || null,
+      versionDraftChangeContext: nextContext,
     });
     this.cancelPreparation();
     this._closeRawModal();
@@ -1940,9 +1982,119 @@ function createRecipePage(pageMode) {
     }));
   },
 
-  _saveAndPublishComponents(components, loadingText) {
+  _rawGoodsEvidenceFromRow(row) {
+    if (!row || row._isPreparation) return null;
+    var goods = _getGoodsEntity(row);
+    var display = _convertPackToMinUnitForDisplay(
+      row.gbDfgGoodsAmount,
+      row.gbDfgGoodsStandardname,
+      goods,
+      row
+    );
+    var ctx = _buildUnitContext(goods, {
+      minUnit: display.minUnit,
+      packQtyInMin: display.packQtyInMin,
+    });
+    return _rawGoodsPurchaseEvidence(goods, display.minUnit, ctx.packQtyInMin);
+  },
+
+  _ensureOneRawGoodsConversion(evidence) {
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    if (!evidence || !(evidence.rawGoodsId > 0) || !evidence.purchaseUnitCode
+      || !evidence.dimension || !(Number(evidence.factorToBase) > 0)) {
+      return Promise.reject({
+        preparationError: true,
+        status: 400,
+        message: '配料采购规格不完整，请先补齐包装单位和规格重量',
+      });
+    }
+    if (P1_STANDARD_UNITS.indexOf(evidence.purchaseUnitCode) >= 0) {
+      return Promise.resolve(evidence);
+    }
+    return preparationApi.listConversions({
+      distributerId: identity.distributerId,
+      itemKind: 'RAW_GOODS',
+      rawGoodsId: evidence.rawGoodsId,
+    }).then(function (conversions) {
+      var existing = (conversions || []).find(function (row) {
+        return String(row.unitCode || '').toUpperCase()
+          === String(evidence.purchaseUnitCode || '').toUpperCase();
+      });
+      var same = existing
+        && String(existing.dimension || '').toUpperCase() === evidence.dimension
+        && Math.abs(Number(existing.factorToBase) - Number(evidence.factorToBase)) < 0.000001;
+      if (same) return evidence;
+      return preparationApi.saveConversion({
+        distributerId: identity.distributerId,
+        itemKind: 'RAW_GOODS',
+        rawGoodsId: evidence.rawGoodsId,
+        unitCode: evidence.purchaseUnitCode,
+        dimension: evidence.dimension,
+        factorToBase: evidence.factorToBase,
+        rowVersion: existing ? Number(existing.rowVersion || 0) : 0,
+        operatorId: identity.operatorId,
+      }).then(function () { return evidence; });
+    });
+  },
+
+  /**
+   * 发布配方前持久化采购包装换算。历史价格按入库采购单位解析，不能只在页面内存里知道
+   * “1瓶=500ml”，否则营业日成本会进入缺少单位换算状态。
+   */
+  _ensureRawGoodsConversions(components, changeContext) {
+    var that = this;
+    var evidenceByGoodsId = {};
+    (this.data.rawArr || []).forEach(function (row) {
+      var evidence = that._rawGoodsEvidenceFromRow(row);
+      if (evidence && evidence.rawGoodsId > 0) {
+        evidenceByGoodsId[String(evidence.rawGoodsId)] = evidence;
+      }
+    });
+    [changeContext && changeContext.oldGoods, changeContext && changeContext.newGoods]
+      .forEach(function (value) {
+        if (value && value.evidence && value.evidence.rawGoodsId > 0) {
+          evidenceByGoodsId[String(value.evidence.rawGoodsId)] = value.evidence;
+        }
+      });
+
+    var rawGoodsIds = [];
+    (components || []).forEach(function (component) {
+      if (component.itemKind === 'RAW_GOODS' && Number(component.rawGoodsId) > 0
+        && rawGoodsIds.indexOf(Number(component.rawGoodsId)) < 0) {
+        rawGoodsIds.push(Number(component.rawGoodsId));
+      }
+    });
+    if (changeContext && changeContext.changeType === 'REPLACE'
+      && Number(changeContext.replacedRawGoodsId) > 0
+      && rawGoodsIds.indexOf(Number(changeContext.replacedRawGoodsId)) < 0) {
+      rawGoodsIds.push(Number(changeContext.replacedRawGoodsId));
+    }
+
+    return Promise.all(rawGoodsIds.map(function (rawGoodsId) {
+      var known = evidenceByGoodsId[String(rawGoodsId)];
+      if (known) return that._ensureOneRawGoodsConversion(known);
+      return preparationApi.getRawGoods(rawGoodsId).then(function (goods) {
+        var minUnit = stockUnit.suggestMinUnit(
+          goods.gbDgGoodsStandardname,
+          stockUnit.rawPackSpecAmount(goods),
+          goods
+        );
+        var packQty = stockUnit.resolvePackQtyInMin(
+          goods.gbDgGoodsStandardname,
+          minUnit,
+          goods
+        );
+        return that._ensureOneRawGoodsConversion(
+          _rawGoodsPurchaseEvidence(goods, minUnit, packQty)
+        );
+      });
+    }));
+  },
+
+  _saveAndPublishComponents(components, loadingText, changeContext) {
     var that = this;
     var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    var activeChangeContext = changeContext || this.data.versionDraftChangeContext || null;
     if (this.data.recipeSaving) return;
     if (!identity.distributerId || !identity.operatorId) {
       wx.showToast({ title: '当前登录身份不完整', icon: 'none' });
@@ -1954,7 +2106,9 @@ function createRecipePage(pageMode) {
     }
     this.setData({ recipeSaving: true });
     load.showLoading(loadingText || '保存配方');
-    this._validateP1Components(components).then(function () {
+    this._ensureRawGoodsConversions(components, activeChangeContext)
+      .then(function () { return that._validateP1Components(components); })
+      .then(function () {
       if (that.data.versionedMode) {
         return that._loadEditableVersionedDetail();
       }
@@ -2050,6 +2204,19 @@ function createRecipePage(pageMode) {
         gbDfRecipeModel: 'VERSIONED',
         gbDfRecipeRowVersion: publishedDetail.recipe.rowVersion,
       });
+      if (activeChangeContext && activeChangeContext.changeType === 'REPLACE'
+        && Number(activeChangeContext.replacedRawGoodsId) > 0
+        && Number(activeChangeContext.newRawGoodsId) > 0) {
+        wx.setStorageSync(
+          RECIPE_REPLACEMENT_CONTEXT_PREFIX + String(publishedDetail.version.id),
+          Object.assign({}, activeChangeContext, {
+            foodId: Number(that.data.foodId),
+            recipeId: Number(publishedDetail.recipe.id),
+            recipeVersionId: Number(publishedDetail.version.id),
+            savedAt: Date.now(),
+          })
+        );
+      }
       wx.setStorageSync('Food', foodItem);
       that.setData({
         foodItem: foodItem,
@@ -2706,13 +2873,34 @@ function createRecipePage(pageMode) {
       }
       var oldGoods = this.data.editGoods || {};
       var isReplace = this.data.modalType === 'replace';
+      var oldEntity = _getGoodsEntity(oldGoods);
+      var oldDisplay = isReplace ? _convertPackToMinUnitForDisplay(
+        oldGoods.gbDfgGoodsAmount,
+        oldGoods.gbDfgGoodsStandardname,
+        oldEntity,
+        oldGoods
+      ) : null;
+      var oldContext = oldDisplay ? _buildUnitContext(oldEntity, {
+        minUnit: oldDisplay.minUnit,
+        packQtyInMin: oldDisplay.packQtyInMin,
+      }) : null;
+      var newEvidence = _rawGoodsPurchaseEvidence(goods, minUnit, ctx.packQtyInMin);
+      var oldEvidence = oldContext
+        ? _rawGoodsPurchaseEvidence(oldEntity, oldDisplay.minUnit, oldContext.packQtyInMin)
+        : null;
       var versionChangeContext = {
         changeType: isReplace ? 'REPLACE' : (this.data.modalType === 'edit' ? 'QUANTITY' : 'ADD'),
         newRawGoodsId: isReplace || this.data.modalType === 'add'
           ? Number(goods.gbDistributerGoodsId) : null,
         replacedRawGoodsId: isReplace ? Number(oldGoods.gbDfgDisGoodsId) : null,
-        oldGoods: isReplace ? { name: oldGoods.gbDfgGoodsName } : null,
-        newGoods: { name: goods.gbDgGoodsName },
+        oldGoods: isReplace ? {
+          name: oldGoods.gbDfgGoodsName,
+          evidence: oldEvidence,
+        } : null,
+        newGoods: {
+          name: goods.gbDgGoodsName,
+          evidence: newEvidence,
+        },
       };
       if (this.data.versionEditorMode) {
         this._applyVersionDraftComponents(versionedComponents, versionChangeContext);

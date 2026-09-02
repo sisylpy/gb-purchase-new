@@ -272,6 +272,14 @@ function confirmFoodEffectiveInterval(recipeId, versionId, body) {
   );
 }
 
+function confirmFoodEffectiveIntervalWithReplacement(recipeId, versionId, body) {
+  return post(
+    'preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId
+      + '/effective-intervals/confirm-with-replacement',
+    body
+  );
+}
+
 function previewRemoveFoodEffectiveInterval(recipeId, intervalId, body) {
   return post(
     'preparation/p1/food-recipes/' + recipeId + '/effective-intervals/' + intervalId
@@ -290,6 +298,26 @@ function confirmRemoveFoodEffectiveInterval(recipeId, intervalId, body) {
 
 function listHistoricalReceiptBatches(params) {
   return get('cost-accounting/historical-theory-prices/receipt-batches', params || {});
+}
+
+function listRawGoodsReplacements(params) {
+  return get('cost-accounting/raw-goods-replacements', params || {});
+}
+
+function previewRawGoodsReplacement(body) {
+  return post('cost-accounting/raw-goods-replacements/preview', body);
+}
+
+function confirmRawGoodsReplacement(body) {
+  return post('cost-accounting/raw-goods-replacements/confirm', body);
+}
+
+function previewRemoveRawGoodsReplacement(intervalId, body) {
+  return post('cost-accounting/raw-goods-replacements/' + intervalId + '/remove-preview', body);
+}
+
+function confirmRemoveRawGoodsReplacement(intervalId, body) {
+  return post('cost-accounting/raw-goods-replacements/' + intervalId + '/remove-confirm', body);
 }
 
 // P2：生产批次、领料、完成和领料冲销。
@@ -463,9 +491,15 @@ module.exports = {
   listFoodEffectiveIntervals: listFoodEffectiveIntervals,
   previewFoodEffectiveInterval: previewFoodEffectiveInterval,
   confirmFoodEffectiveInterval: confirmFoodEffectiveInterval,
+  confirmFoodEffectiveIntervalWithReplacement: confirmFoodEffectiveIntervalWithReplacement,
   previewRemoveFoodEffectiveInterval: previewRemoveFoodEffectiveInterval,
   confirmRemoveFoodEffectiveInterval: confirmRemoveFoodEffectiveInterval,
   listHistoricalReceiptBatches: listHistoricalReceiptBatches,
+  listRawGoodsReplacements: listRawGoodsReplacements,
+  previewRawGoodsReplacement: previewRawGoodsReplacement,
+  confirmRawGoodsReplacement: confirmRawGoodsReplacement,
+  previewRemoveRawGoodsReplacement: previewRemoveRawGoodsReplacement,
+  confirmRemoveRawGoodsReplacement: confirmRemoveRawGoodsReplacement,
   createBatch: createBatch,
   listBatches: listBatches,
   getBatch: getBatch,
