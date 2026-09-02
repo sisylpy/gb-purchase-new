@@ -92,18 +92,9 @@
             <view wx:if="{{goods.isFirstInCategory}}" id="cat-dep-{{goods.gbDgDfgGoodsGrandId}}" class="goods-category-title-dep"></view>
             <view class="flex-row-default goods-item-dep p-20" id="{{goods.viewId}}" style="align-items: flex-start;">
               <view class="img-wrapper">
-                <!-- <image
-                  bindtap="showDialogBtnDep"
-                  data-item="{{goods}}"
-                  src="{{goods.gbDgNxFatherImg != null && goods.gbDgNxFatherImg !== '' ?  url+ goods.gbDgNxFatherImg : '/images/logo.png'}}"
-                  mode="aspectFill"
-                  class="logoimg"
-                  data-raw-path="{{goods.gbDgNxFatherImg}}"
-                  binderror="onGoodsFatherImgError"
-                /> -->
                 <image
-                  bindtap="showDialogBtnDep"
-                  data-item="{{goods}}"
+                  bindtap="showDialogBtn"
+                  data-index="{{depGoodsIndex}}"
                   src="{{ url + goods.gbDgNxFatherImg }}"
                   mode="aspectFill"
                   class="logoimg"
@@ -157,11 +148,11 @@
 
             <view class="flex-row border-top">
 
-              <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toGoods" data-id="{{goods.gbDistributerGoodsId}}" data-goods="{{goods}}" data-index="{{depGoodsIndex}}">
+              <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toGoods" data-id="{{goods.gbDistributerGoodsId}}" data-index="{{depGoodsIndex}}">
                 <image src="/images/shuiguoshucai-2.png" mode="aspectFill" class="icon" />
               </view>
 
-              <view class="quarter-row center-content flex-column-center p-20" bind:tap="toOrderList" data-id="{{goods.gbDistributerGoodsId}}" data-goods="{{goods}}" hover-class="hover">
+              <view class="quarter-row center-content flex-column-center p-20" bind:tap="toOrderList" data-id="{{goods.gbDistributerGoodsId}}" data-index="{{depGoodsIndex}}" hover-class="hover">
                   <image src="/images/time-2.png" mode="aspectFill" class="icon" />
                 </view>
 
@@ -169,7 +160,7 @@
                 <image src="/images/statistic.png" mode="aspectFill" class="icon" />
               </view>
 
-              <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toStock" data-id="{{goods.gbDistributerGoodsId}}" data-item="{{goods}}">
+              <view class="quarter-row center-content flex-column-center p-20" hover-class="hover" bind:tap="toStock" data-id="{{goods.gbDistributerGoodsId}}" data-index="{{depGoodsIndex}}">
                 <image src="{{goods.goodsStockWeightTotal > 0 ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFill" class="icon" />
               </view>
 
@@ -219,10 +210,10 @@
 <delWarnModal wx:if="{{showPopupWarn}}" type="{{popupType}}" warnContent="{{warnContent}}" bind:closeWarn="closeWarn" bind:confirmWarn="confirmWarn" />
 
 
-<myIndependent show="{{showInd}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
+<myIndependent wx:if="{{showInd}}" show="{{showInd}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
 
 
-<myIndependentNx show="{{showIndNx}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
+<myIndependentNx wx:if="{{showIndNx}}" show="{{showIndNx}}" url="{{url}}" item="{{item}}" windowHeight="{{windowHeight}}" windowWidth="{{windowWidth}}" />
 
 
 <myDismodalStand show="{{showStand}}" bindconfirm="confirm" bindcancle="cancle" applyStandardName="{{applyStandardName}}" applyNumber="{{applyNumber}}" applyRemark="{{applyRemark}}" editApply="{{editApply}}" bindchangeStandard="changeStandard" applyGoodsName="{{applyGoodsName}}" applyGoodsId="{{applyGoodsId}}" item="{{itemCom}}" applyStandardName="{{applyStandardName}}" applyPrice="{{applyPrice}}" applyStandardId="{{applyStandardId}}" expectPrice="{{expectPrice}}" applyStandardScale="{{applyStandardScale}}" applyStandardQuantity="{{applyStandardQuantity}}" />

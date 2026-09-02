@@ -9,8 +9,8 @@
  * queryDisGoodsByQuickSearchGb(data)     POST gbdistributergoods/queryDisGoodsByQuickSearchGb
  *
  * ====== 商品列表 resGoods ======
- * disGetDepGoodsCataGb(data)             POST gbdepartmentdisgoods/disGetDepGoodsCataGb
- * disGetDepGoodsGbPage(data)             POST gbdepartmentdisgoods/disGetDepGoodsGbPage
+ * disGetDepGoodsCataGbLite(data)         POST gbdepartmentdisgoods/disGetDepGoodsCataGbLite
+ * disGetDepGoodsGbPageLite(data)         POST gbdepartmentdisgoods/disGetDepGoodsGbPageLite
  *
  * ====== 商品详情 disGoodsDetail ======
  * gbDisGetGoodsDetail(id)               GET  gbdistributergoods/gbDisGetGoodsDetail/{id}
@@ -56,6 +56,22 @@ var gbDisDeleteStandard = depOrder.gbDisDeleteStandard;
 // ============================================================
 // 本子包专用
 // ============================================================
+
+var disGetDepGoodsCataGbLite = function (data) {
+  return request.post(
+    'gbdepartmentdisgoods/disGetDepGoodsCataGbLite',
+    data,
+    { useUrlParams: true }
+  );
+};
+
+var disGetDepGoodsGbPageLite = function (data) {
+  return request.post(
+    'gbdepartmentdisgoods/disGetDepGoodsGbPageLite',
+    data,
+    { useUrlParams: true }
+  );
+};
 
 var queryDisGoodsByQuickSearchGb = function (data) {
   return request.post(
@@ -171,6 +187,8 @@ module.exports = {
   queryDisGoodsByQuickSearchGb: queryDisGoodsByQuickSearchGb,
   disGetDepGoodsCataGb: disGetDepGoodsCataGb,
   disGetDepGoodsGbPage: disGetDepGoodsGbPage,
+  disGetDepGoodsCataGbLite: disGetDepGoodsCataGbLite,
+  disGetDepGoodsGbPageLite: disGetDepGoodsGbPageLite,
   gbDisGetGoodsDetail: gbDisGetGoodsDetail,
   gbDisGetAllNxDistributerAndSupplier: gbDisGetAllNxDistributerAndSupplier,
   disUpdateDisGoodsGb: disUpdateDisGoodsGb,

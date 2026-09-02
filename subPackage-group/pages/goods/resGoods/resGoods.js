@@ -4,7 +4,7 @@ var goodsApi = require('../../../services/api.js');
  * 来源：老项目 subPackage-goods/pages/goods/resGoods/
  * 迁移适配：import → require, ES6 → ES5, 路径调整
  *
- * 接口见 subPackage-goods/services/api.js（disGetDepGoodsCataGb、disGetDepGoodsGbPage）
+ * 接口见 subPackage-group/services/api.js（disGetDepGoodsCataGbLite、disGetDepGoodsGbPageLite）
  */
 
 var load = require('../../../../lib/load.js');
@@ -33,15 +33,24 @@ Page({
 
   },
 
+  onUnload() {
+    if (this._goodsScrollTimer) {
+      clearTimeout(this._goodsScrollTimer);
+      this._goodsScrollTimer = null;
+    }
+  },
+
 
   data: {
     goodsType: 99,
     statusBarHeight: "",
     windowHeight: "",
     windowWidth: "",
+    url: "",
    
     showInd: false,
-    item: "",
+    showIndNx: false,
+    item: {},
     depGoods: null,
 
     totalPages: 0,
@@ -49,6 +58,12 @@ Page({
     limit: 15,
     currentPage: 1,
     selectedSub: 0, // 选中的分类
+    disGoodsCataArr: [],
+    fatherArr: [],
+    disGoodsArrAi: [],
+    categoryPositionsDep: [],
+    activeGrandFilter: '',
+    isLoading: false,
     
     // 新增的部门商品相关状态
     showAllSubCatDep: false, // 是否展开二级分类
@@ -93,18 +108,21 @@ Page({
       disId: this.data.disId,
       goodsType: this.data.goodsType
     }
-    goodsApi.disGetDepGoodsCataGb(data).then(function(res) {
+    goodsApi.disGetDepGoodsCataGbLite(data).then(function(res) {
       load.hideLoading();
-      if (res.result.code === 0 && res.result.data.cataArr.length > 0) {
-        var firstSubCat = res.result.data.cataArr[0].fatherGoodsEntities[0];
+      var cataArr = res.result && res.result.data ? (res.result.data.cataArr || []) : [];
+      if (res.result.code === 0 && cataArr.length > 0 && cataArr[0].fatherGoodsEntities.length > 0) {
+        var firstSubCat = cataArr[0].fatherGoodsEntities[0];
+        this.buildCategoryMapsDep(cataArr);
         this.setData({
-          
-          disGoodsCataArr: res.result.data.cataArr,
-          sortDisGoodsArr: res.result.data.disGoodsArr,
+          disGoodsCataArr: cataArr,
           hasMoreGoods: true,
+          currentPage: 1,
+          selectedSub: 0,
+          activeGrandFilter: '',
           activeSubCatIdDep: firstSubCat.gbDistributerFatherGoodsId,
           subcatScrollIntoViewDep: 'subcat-dep-' + firstSubCat.gbDistributerFatherGoodsId,
-          fatherArr: res.result.data.cataArr[0].fatherGoodsEntities,
+          fatherArr: cataArr[0].fatherGoodsEntities,
           disGoodsArrAi: [],
         }, function() {
           this._getInitDataPageDep(true);
@@ -115,7 +133,10 @@ Page({
           disGoodsArrAi: []
         })
       }
-    }.bind(this));
+    }.bind(this)).catch(function() {
+      load.hideLoading();
+      wx.showToast({ title: '分类加载失败', icon: 'none' });
+    });
   },
 
 
@@ -123,76 +144,68 @@ Page({
 _getInitDataPageDep(isRefresh, callback) {
   if (isRefresh === undefined) isRefresh = false;
   if (this.data.isLoading) return;
+  var requestedPage = isRefresh ? 1 : this.data.currentPage;
   this.setData({
     isLoading: true
   });
   load.showLoading("加载商品…");
 
-  goodsApi.disGetDepGoodsGbPage({
+  var requestData = {
     limit: this.data.limit,
-    page: this.data.currentPage,
+    page: requestedPage,
     disId: this.data.disId,
     goodsType: this.data.goodsType
-  }).then(function(res) {
+  };
+  if (this.data.activeGrandFilter) {
+    requestData.grandId = this.data.activeGrandFilter;
+  }
+
+  goodsApi.disGetDepGoodsGbPageLite(requestData).then(function(res) {
     load.hideLoading();
-    this.setData({
-      isLoading: false
-    });
 
     if (res.result.code !== 0) {
+      this.setData({ isLoading: false });
       return wx.showToast({
         title: res.result.msg,
         icon: 'none'
       });
     }
 
-    // 1) 拿到这一页数据
     var list = res.result.page.list || [];
     var totalPages = res.result.page.totalPage || 1;
     var totalCount = res.result.page.totalCount || 0;
-
-    // 2) 生成 viewId，让 id 唯一且连续
     var base = isRefresh ? 0 : this.data.disGoodsArrAi.length;
-    for (var idx = 0; idx < list.length; idx++) {
-      list[idx].viewId = 'goods_' + (base + idx);
+    var previousGrandId = null;
+    if (!isRefresh && base > 0) {
+      previousGrandId = this.data.disGoodsArrAi[base - 1].gbDgDfgGoodsGrandId;
     }
-
-
-    // 3) 合并数据（ES5 concat）
-    var merged = this.data.disGoodsArrAi.concat(list);
-
-    // 4) 合并后按 sortDisGoodsArr 顺序排序
-    var idOrder = [];
-    if (this.data.sortDisGoodsArr) {
-      for (var oi = 0; oi < this.data.sortDisGoodsArr.length; oi++) {
-        idOrder.push(String(this.data.sortDisGoodsArr[oi]));
-      }
-    }
-    
-    var sortedArr = merged.slice().sort(function(a, b) {
-      var idxA = idOrder.indexOf(String(a.gbDistributerGoodsId));
-      var idxB = idOrder.indexOf(String(b.gbDistributerGoodsId));
-      if (idxA === -1) idxA = 99999;
-      if (idxB === -1) idxB = 99999;
-      return idxA - idxB;
-    });
-
-    // 5) 处理商品数据，添加 isFirstInCategory（对全量商品处理）
-    var finalArr = this.processGoodsListDep(sortedArr);
-
-    // 5) 写入并可回调滚动
-    this.setData({
-      disGoodsArrAi: finalArr,
+    var pageItems = this.processGoodsPageDep(list, previousGrandId, base);
+    var dataPatch = {
+      isLoading: false,
       totalPages: totalPages,
       totalCount: totalCount,
-      currentPage: this.data.currentPage,
+      currentPage: requestedPage,
+      hasMoreGoods: requestedPage < totalPages
+    };
 
-    }, function() {
+    if (isRefresh) {
+      dataPatch.disGoodsArrAi = pageItems;
+    } else {
+      for (var itemIndex = 0; itemIndex < pageItems.length; itemIndex++) {
+        dataPatch['disGoodsArrAi[' + (base + itemIndex) + ']'] = pageItems[itemIndex];
+      }
+    }
+
+    this.setData(dataPatch, function() {
       this.calculateCategoryPositionsDep();
       if (typeof callback === 'function') {
         setTimeout(callback, 50);
       }
     });
+  }.bind(this)).catch(function() {
+    load.hideLoading();
+    this.setData({ isLoading: false });
+    wx.showToast({ title: '商品加载失败', icon: 'none' });
   }.bind(this));
 },
 
@@ -204,6 +217,7 @@ _getInitDataPageDep(isRefresh, callback) {
   leftMenuClickDep(e) {
     var idx = e.currentTarget.dataset.index;
     var firstSubCat = this.data.disGoodsCataArr[idx].fatherGoodsEntities[0];
+    if (!firstSubCat) return;
     this.setData({
       selectedSub: idx,
       fatherArr: this.data.disGoodsCataArr[idx].fatherGoodsEntities,
@@ -225,8 +239,7 @@ _getInitDataPageDep(isRefresh, callback) {
           scrollIntoViewDep: 'cat-dep-' + firstSubCat.gbDistributerFatherGoodsId
         });
       } else {
-        // 直接调用loadGoodsBySubCatIdDep方法，请求特定分类的商品
-        this.loadGoodsBySubCatIdDep(firstSubCat.gbDistributerFatherGoodsId, this.data.currentPage + 1, goodsArr);
+        this.loadGoodsBySubCatIdDep(firstSubCat.gbDistributerFatherGoodsId);
       }
     }.bind(this));
   },
@@ -250,7 +263,6 @@ _getInitDataPageDep(isRefresh, callback) {
       showAllSubCatDep: false,
     });
 
-    // 修正：统计该二级分类商品数量
     var goodsArr = this.data.disGoodsArrAi;
     
     var hasGoods = false;
@@ -273,125 +285,22 @@ _getInitDataPageDep(isRefresh, callback) {
         }.bind(this))
         .exec();
     } else {
-      // 递归请求接口，page 参数递增
-      this.loadGoodsBySubCatIdDep(subCatId, this.data.currentPage + 1, goodsArr);
+      this.loadGoodsBySubCatIdDep(subCatId);
     }
   },
 
-  // 加载指定二级分类的商品
-  loadGoodsBySubCatIdDep(subCatId, page, accumulatedGoods) {
-    if (page === undefined) page = 1;
-    if (!accumulatedGoods) accumulatedGoods = [];
+  // 直接按二级分类查询，避免为了定位分类而递归下载中间所有分页。
+  loadGoodsBySubCatIdDep(subCatId) {
     if (this.data.isLoading) return;
-
     this.setData({
-      isLoading: true
-    });
-    load.showLoading("加载商品");
-    goodsApi.disGetDepGoodsGbPage({
-      disId: this.data.disId,
-      limit: this.data.limit,
-      page: page,
-      goodsType: this.data.goodsType
-    }).then(function(res) {
-      this.setData({
-        isLoading: false
-      });
-      load.hideLoading();
-      if (res.result.code == 0) {
-        // 1) 拿到这一页数据
-        var list = res.result.page.list || [];
-        var totalPages = res.result.page.totalPage || 1;
-        var totalCount = res.result.page.totalCount || 0;
-
-        // 2) 生成 viewId，让 id 唯一且连续
-        var base = this.data.disGoodsArrAi.length;
-        for (var i = 0; i < list.length; i++) {
-          list[i].viewId = 'goods_' + (base + i);
-        }
-
-        // 3) 合并数据
-        var merged = this.data.disGoodsArrAi.concat(list);
-
-        // 4) 合并后按 sortDisGoodsArr 顺序排序
-        var idOrder = [];
-        if (this.data.sortDisGoodsArr) {
-          for (var si = 0; si < this.data.sortDisGoodsArr.length; si++) {
-            idOrder.push(String(this.data.sortDisGoodsArr[si]));
-          }
-        }
-        
-        var mergedIds = [];
-        for (var mi = 0; mi < merged.length; mi++) {
-          mergedIds.push(merged[mi].gbDistributerGoodsId);
-        }
-        
-        var sortedArr = merged.slice().sort(function(a, b) {
-          var idxA = idOrder.indexOf(String(a.gbDistributerGoodsId));
-          var idxB = idOrder.indexOf(String(b.gbDistributerGoodsId));
-          if (idxA === -1) idxA = 99999;
-          if (idxB === -1) idxB = 99999;
-          return idxA - idxB;
-        });
-
-        // 5) 处理商品数据，添加 isFirstInCategory（对全量商品处理）
-        var finalArr = this.processGoodsListDep(sortedArr);
-
-        // 5) 写入并可回调滚动
-        this.setData({
-          disGoodsArrAi: finalArr,
-          currentPage: page,
-          totalPages: totalPages,
-          totalCount: totalCount,
-        }, function() {
-          // 新增：数据加载后自动滚动到目标分类商品
-          var goodsArr = this.data.disGoodsArrAi;
-          var idx = -1;
-          for (var fi = 0; fi < goodsArr.length; fi++) {
-            if (String(goodsArr[fi].gbDgDfgGoodsGrandId) === String(subCatId)) {
-              idx = fi;
-              break;
-            }
-            }
-        
-          if (idx !== -1) {
-            wx.createSelectorQuery()
-              .select('#cat-dep-' + subCatId)
-              .boundingClientRect(function(rect) {    
-                if (rect) {    
-                  this.setData({
-                    scrollIntoViewDep: 'cat-dep-'+subCatId 
-                  }, function() {});
-                } else {
-                  console.warn('[loadGoodsBySubCatIdDep] 未找到目标商品锚点', subCatId);
-                }
-              }.bind(this))
-              .exec();
-          } else {
-            // 如果还有下一页，继续请求
-            if (page < totalPages) {
-              // 递归调用自身，请求下一页
-              this.loadGoodsBySubCatIdDep(subCatId, page + 1, goodsArr);
-            } else {
-            }
-          }
-          this.calculateCategoryPositionsDep();
-        }.bind(this));
-
-      } else {
-        wx.showToast({
-          title: '商品加载失败',
-          icon: 'none'
-        });
-      }
-    }.bind(this)).catch(function(err) {
-      this.setData({
-        isLoading: false
-      });
-      wx.showToast({
-        title: '加载错误，请稍后再试',
-        icon: 'none'
-      });
+      activeGrandFilter: subCatId,
+      currentPage: 1,
+      scrollIntoViewDep: '',
+      disGoodsArrAi: []
+    }, function() {
+      this._getInitDataPageDep(true, function() {
+        this.setData({ scrollIntoViewDep: 'cat-dep-' + subCatId });
+      }.bind(this));
     }.bind(this));
   },
 
@@ -404,50 +313,55 @@ _getInitDataPageDep(isRefresh, callback) {
     });
   },
 
-  // 处理商品数据，添加分类信息
-  processGoodsListDep(list) {
-
-    var currentCategory = null;
+  // 只处理本次新增的一页，避免每次分页都复制和遍历全部已加载商品。
+  processGoodsPageDep(list, previousGrandId, baseIndex) {
+    var currentCategory = previousGrandId;
     var result = [];
     for (var li = 0; li < list.length; li++) {
       var item = list[li];
-      // 为每个商品项添加默认的展开状态属性
-      var baseItem = Object.assign({}, item, {
-        isSelected: false, // 默认收起状态
-        arrowRotated: false, // 默认箭头不旋转
-        animation: null // 动画对象
-      });
-
-      if (item.gbDgDfgGoodsGrandId !== currentCategory) {
-        currentCategory = item.gbDgDfgGoodsGrandId;
-        var obj = Object.assign({}, baseItem, {
-          isFirstInCategory: true,
-          categoryName: this.getCategoryNameDep(item.gbDgDfgGoodsGrandId)
-        });
-        result.push(obj);
-      } else {
-        var obj2 = Object.assign({}, baseItem, {
-          isFirstInCategory: false,
-          categoryName: this.getCategoryNameDep(item.gbDgDfgGoodsGrandId)
-        });
-        result.push(obj2);
-      }
+      var isFirstInCategory = String(item.gbDgDfgGoodsGrandId) !== String(currentCategory);
+      currentCategory = item.gbDgDfgGoodsGrandId;
+      result.push(Object.assign({}, item, {
+        viewId: 'goods_' + (baseIndex + li),
+        isFirstInCategory: isFirstInCategory
+      }));
     }
     return result;
   },
 
-  // 获取分类名称
+  // 分类映射保存在逻辑层，不进入 setData，滚动时可以 O(1) 查找。
+  buildCategoryMapsDep(cataArr) {
+    this._grandToGreatId = {};
+    this._greatIdToIndex = {};
+    for (var greatIndex = 0; greatIndex < cataArr.length; greatIndex++) {
+      var great = cataArr[greatIndex];
+      this._greatIdToIndex[String(great.gbDistributerFatherGoodsId)] = greatIndex;
+      var children = great.fatherGoodsEntities || [];
+      for (var childIndex = 0; childIndex < children.length; childIndex++) {
+        this._grandToGreatId[String(children[childIndex].gbDistributerFatherGoodsId)] = great.gbDistributerFatherGoodsId;
+      }
+    }
+  },
+
+  getGoodsByEventIndex(e) {
+    var index = Number(e.currentTarget.dataset.index);
+    if (isNaN(index) || !this.data.disGoodsArrAi[index]) {
+      return null;
+    }
+    return this.data.disGoodsArrAi[index];
+  },
+
   getCategoryNameDep(categoryId) {
-    var category = null;
-    if (this.data.fatherArr) {
-      for (var ci = 0; ci < this.data.fatherArr.length; ci++) {
-        if (this.data.fatherArr[ci].gbDistributerFatherGoodsId === categoryId) {
-          category = this.data.fatherArr[ci];
-          break;
+    var cataArr = this.data.disGoodsCataArr || [];
+    for (var greatIndex = 0; greatIndex < cataArr.length; greatIndex++) {
+      var children = cataArr[greatIndex].fatherGoodsEntities || [];
+      for (var childIndex = 0; childIndex < children.length; childIndex++) {
+        if (String(children[childIndex].gbDistributerFatherGoodsId) === String(categoryId)) {
+          return children[childIndex].gbDfgFatherGoodsName;
         }
       }
     }
-    return category ? category.gbDfgFatherGoodsName : '';
+    return '';
   },
 
   // 切换二级分类展开/收起状态
@@ -465,6 +379,15 @@ _getInitDataPageDep(isRefresh, callback) {
   // 部门端商品滚动时联动二级分类高亮
   onGoodsScrollDep(e) {
     var scrollTop = (e && e.detail && typeof e.detail.scrollTop === 'number') ? e.detail.scrollTop : 0;
+    this._pendingGoodsScrollTop = scrollTop;
+    if (this._goodsScrollTimer) return;
+    this._goodsScrollTimer = setTimeout(function() {
+      this._goodsScrollTimer = null;
+      this.applyGoodsScrollDep(this._pendingGoodsScrollTop || 0);
+    }.bind(this), 80);
+  },
+
+  applyGoodsScrollDep(scrollTop) {
     var positions = this.data.categoryPositionsDep || [];
     var activeId = '';
 
@@ -479,42 +402,25 @@ _getInitDataPageDep(isRefresh, callback) {
       activeId = positions[0].id;
     }
 
-    if (activeId && String(activeId) !== String(this.data.activeSubCatIdDep)) {
-      this.setData({
-        activeSubCatIdDep: activeId,
-        subcatScrollIntoViewDep: 'subcat-dep-' + activeId
-      });
+    if (!activeId) return;
+
+    var dataPatch = {};
+    if (String(activeId) !== String(this.data.activeSubCatIdDep)) {
+      dataPatch.activeSubCatIdDep = activeId;
+      dataPatch.subcatScrollIntoViewDep = 'subcat-dep-' + activeId;
     }
 
-    // 联动一级分类高亮
-    if (activeId && this.data.disGoodsCataArr) {
-      // 找到当前二级分类对应的一级分类id
-      var greatId = '';
-      // disGoodsArrAi 里找第一个 grandId=activeId 的商品，取其 greatId
-      var item = null;
-      for (var gi = 0; gi < this.data.disGoodsArrAi.length; gi++) {
-        if (String(this.data.disGoodsArrAi[gi].gbDgDfgGoodsGrandId) === String(activeId)) {
-          item = this.data.disGoodsArrAi[gi];
-          break;
-        }
-      }
-      if (item) {
-        greatId = item.gbDgDfgGoodsGreatId;
-      }
-      // 在 disGoodsCataArr 里找 greatId 的索引
-      var subIndex = -1;
-      for (var ci = 0; ci < this.data.disGoodsCataArr.length; ci++) {
-        if (String(this.data.disGoodsCataArr[ci].gbDistributerFatherGoodsId) === String(greatId)) {
-          subIndex = ci;
-          break;
-        }
-      }
-      if (subIndex !== -1 && subIndex !== this.data.selectedSub) {
-        this.setData({
-          selectedSub: subIndex,
-          fatherArr: this.data.disGoodsCataArr[subIndex].fatherGoodsEntities
-        });
-      }
+    var greatId = this._grandToGreatId ? this._grandToGreatId[String(activeId)] : null;
+    var subIndex = greatId != null && this._greatIdToIndex
+      ? this._greatIdToIndex[String(greatId)]
+      : null;
+    if (subIndex != null && subIndex !== this.data.selectedSub) {
+      dataPatch.selectedSub = subIndex;
+      dataPatch.fatherArr = this.data.disGoodsCataArr[subIndex].fatherGoodsEntities;
+    }
+
+    if (Object.keys(dataPatch).length > 0) {
+      this.setData(dataPatch);
     }
   },
 
@@ -567,16 +473,20 @@ _getInitDataPageDep(isRefresh, callback) {
 
 
   showDialogBtn: function (e) {
+    var goods = this.getGoodsByEventIndex(e);
+    if (!goods) return;
     this.setData({
-      item: e.currentTarget.dataset.item,
+      item: goods,
       showInd: true,
       showIndNx: false,
     })
   },
 
   showDialogBtnNx: function (e) {
+    var goods = this.getGoodsByEventIndex(e);
+    if (!goods) return;
     this.setData({
-      item: e.currentTarget.dataset.item,
+      item: goods,
       showIndNx: true,
       showInd: false,
     })
@@ -597,7 +507,8 @@ _getInitDataPageDep(isRefresh, callback) {
 
   toOrderList(e) {
     var id = e.currentTarget.dataset.id;
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
+    var goods = this.getGoodsByEventIndex(e);
+    if (goods) wx.setStorageSync('disGoods', goods);
     wx.navigateTo({
       url: '/subPackage-goods/pages/goodsOrderList/goodsOrderList?disGoodsId=' + id +'&type=1',
     })
@@ -612,7 +523,8 @@ _getInitDataPageDep(isRefresh, callback) {
   },
 
   toGoods(e){
-    wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
+    var goods = this.getGoodsByEventIndex(e);
+    if (goods) wx.setStorageSync('disGoods', goods);
     wx.navigateTo({
       url: '../disGoodsPage/disGoodsPage?disGoodsId=' + e.currentTarget.dataset.id + '&index=' + 
       e.currentTarget.dataset.index,
@@ -622,7 +534,8 @@ _getInitDataPageDep(isRefresh, callback) {
 
 
   toStock(e){
-     wx.setStorageSync('disGoods', e.currentTarget.dataset.item);
+    var goods = this.getGoodsByEventIndex(e);
+    if (goods) wx.setStorageSync('disGoods', goods);
     wx.navigateTo({
       url: '/subPackage-goods/pages/stockGoodsList/stockGoodsList?disGoodsId=' + e.currentTarget.dataset.id,
     })
