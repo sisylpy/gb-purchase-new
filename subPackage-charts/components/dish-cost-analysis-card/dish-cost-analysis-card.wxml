@@ -30,13 +30,13 @@
   <view class="dcac-cost-strip">
     <view class="dcac-cost-col">
       <text class="dcac-cost-cap">理论成本</text>
-      <text class="dcac-cost-val">{{cardData.theoryCostPerPortion || '0.00'}}</text>
+      <text class="dcac-cost-val">{{cardData.theoryCostPerPortion || '—'}}</text>
       <text class="dcac-cost-unit">元/份</text>
     </view>
     <view class="dcac-cost-div"></view>
     <view class="dcac-cost-col">
-      <text class="dcac-cost-cap">实际成本</text>
-      <text class="dcac-cost-val">{{cardData.actualCostPerPortion || '0.00'}}</text>
+      <text class="dcac-cost-cap">出库分摊成本</text>
+      <text class="dcac-cost-val">{{cardData.outboundAllocatedCostPerPortion || '—'}}</text>
       <text class="dcac-cost-unit">元/份</text>
     </view>
     <view class="dcac-cost-div"></view>

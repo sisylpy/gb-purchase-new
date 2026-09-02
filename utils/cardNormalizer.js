@@ -128,7 +128,12 @@ function resolveDisplayCard(card) {
         status: payload ? (payload.status || '') : '',
         diagnosisSummary: (diagnosis && diagnosis.headlineZh) || (payload && payload.summary) || '',
         currentPrice: _getMulti(pricing, margin, payload, ['salesUnitPrice', 'listPricePerPortion', 'currentPrice', 'salePrice']),
-        actualCostPerPortion123: _getMulti(margin, pricing, payload, ['actualCostPerPortion123', 'actualCostPerPortion', 'actualCost']),
+        outboundAllocatedCostPerPortion: _getMulti(
+          margin,
+          pricing,
+          payload,
+          ['outboundAllocatedCostPerPortion']
+        ),
         targetGrossMarginRate: _getMulti(sp, margin, payload, ['targetGrossMarginRate', 'grossMarginStandardTarget', 'targetMarginRate']),
         suggestedPrice: _getMulti(sp, payload, ['suggestedPricePerPortion', 'suggestedPrice', 'advisedPrice']),
         formulaId: _getMulti(sp, payload, ['formulaId', 'formula']) || '',
@@ -192,7 +197,7 @@ function resolveDisplayCard(card) {
       return {
         foodName: item.ingredientName || item.foodName || '',
         theoryCost: item.theoryUsage || item.theoryCost || '',
-        actualCost: item.actualUsage || item.actualCost || '',
+        actualUsage: item.actualUsage || '',
         diffUsage: item.diffUsage || '',
         diffCostAmount: item.diffCostAmount || '',
       };

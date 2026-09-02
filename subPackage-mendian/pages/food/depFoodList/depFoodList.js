@@ -19,10 +19,10 @@ function _enrichDishCard(food) {
   var cur = food.currentPeriod || {};
   var actualPct = _pctNum(cur.actualGrossMarginRate);
   var theoryPct = _pctNum(cur.theoreticalGrossMarginRate);
-  // 成本差异 = 实际成本/份 - 理论成本/份
-  var actualCost = parseFloat(String(cur.actualCostPerPortion || '0'));
+  // 成本差异 = 出库分摊成本/份 - 理论成本/份
+  var outboundAllocatedCost = parseFloat(String(cur.outboundAllocatedCostPerPortion || '0'));
   var theoryCost = parseFloat(String(cur.theoreticalCostPerPortion || '0'));
-  var costGap = isNaN(actualCost) || isNaN(theoryCost) ? NaN : actualCost - theoryCost;
+  var costGap = isNaN(outboundAllocatedCost) || isNaN(theoryCost) ? NaN : outboundAllocatedCost - theoryCost;
 
   // businessDiagnosis 是对象 {level, title, message, suggestedAction}
   var diagnosis = food.businessDiagnosis || {};
@@ -38,7 +38,7 @@ function _enrichDishCard(food) {
     salesCount: cur.salesCount || '0',
     salesAmount: cur.salesAmount || '0',
     actualProfitAmount: cur.actualProfitAmount || '0',
-    actualCostPerUnit: cur.actualCostPerPortion || '0',
+    outboundAllocatedCostPerUnit: cur.outboundAllocatedCostPerPortion || '0',
     theoreticalCostPerUnit: cur.theoreticalCostPerPortion || '0',
     // 毛利率显示
     actualGrossMarginRateDisplay: isNaN(actualPct) ? '—' : actualPct.toFixed(1),

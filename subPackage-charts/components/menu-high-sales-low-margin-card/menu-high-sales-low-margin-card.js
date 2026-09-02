@@ -8,7 +8,7 @@
  *   summary: "本月共发现 N 道畅销低利菜品...",
  *   dishes: [
  *     { dishName, salesCount, salesAmount, blendedGrossMarginRateOnListPrice,
- *       actualProfitAmount, actualCostTotalAmount123, riskReason, recommendedAction }
+ *       actualProfitAmount, outboundAllocatedCostAmount, riskReason, recommendedAction }
  *   ],
  *   empty: false   // payload.status === "EMPTY" 时为 true
  * }

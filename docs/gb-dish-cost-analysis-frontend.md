@@ -45,8 +45,8 @@
 | **`actualInboundQtyTotal`** | string | **销售子表实际原料用量合计**：`gb_dep_food_sales`（`gb_dfs_food_id`=本菜、本期、部门范围）关联 **`gb_dep_food_goods_sales`**，对各 `gb_dfgs_dis_goods_id` 的 **`gb_dfgs_goods_amount`** 汇总后再**按料加总**（与 `ingredientRows[].theoryQtyFromSales` 逐料之和一致；**不是**生产成本出库分摊 `outboundAllocatedQtyTotal`） |
 | `outboundAllocatedQtyTotal` | string | 生产成本出库按销售子表理论量比例摊到本菜的用量合计 |
 | `theoryCostAmount` | string | 理论成本（元，扣库均价推算） |
-| `actualCostAmount` | string | 实际成本（元） |
-| `diffCostAmount` | string | 实际 − 理论（元） |
+| `productionOutboundAllocatedCostAmount` | string | 生产出库分摊成本（元，仅 type1） |
+| `diffCostAmount` | string | 生产出库分摊成本 − 理论成本（元） |
 | `absDiffCostAmountSum` | string | 按原料绝对差异金额之和（排序用 `sortKey` 同源） |
 | `supportedPortionsBottleneck` | string | 整菜在「有生产成本出库」的原料上的可支撑份数取 min |
 | `bottleneckGoodsId` | number / null | 瓶颈分销商商品 ID |

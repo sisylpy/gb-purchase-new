@@ -5,12 +5,12 @@
  * { title, subtitle, payload: { timeLabel, timeDisplayText, metricLabel, rankingType, rows[], summary } }
  *
  * rows[] 字段：
- * rank, dishName, salesQuantity, actualRevenue, theoryCostAmount, actualCostAmount, blendedGrossMarginRateOnListPrice
+ * rank, dishName, salesQuantity, actualRevenue, theoryCostAmount, outboundAllocatedCostAmount, blendedGrossMarginRateOnListPrice
  */
 
 /** 金额格式化 */
 function fmtAmount(val) {
-  if (val === undefined || val === null || isNaN(val)) return '¥0';
+  if (val === undefined || val === null || val === '' || isNaN(val)) return '—';
   var num = Number(val);
   if (num >= 10000) return '¥' + (num / 10000).toFixed(1).replace(/\.0$/, '') + '万';
   var parts = num.toFixed(2).split('.');
@@ -93,14 +93,18 @@ Component({
       var formatted = rows.map(function (r) {
         var rankNum = Number(r.rank) || 0;
         var qty = Number(r.salesQuantity) || 0;
-        var actualCost = Number(r.actualCostAmount) || 0;
+        var outboundAllocatedCost = r.outboundAllocatedCostAmount === undefined
+          || r.outboundAllocatedCostAmount === null
+          || r.outboundAllocatedCostAmount === ''
+          ? null
+          : Number(r.outboundAllocatedCostAmount);
         var profitAmount = Number(r.grossProfitAmount) || 0;
         return {
           rank: rankNum,
           dishName: r.dishName || '未知菜品',
           salesQuantity: qty,
-          actualCostAmount: actualCost,
-          actualCostStr: fmtAmount(actualCost),
+          outboundAllocatedCostAmount: outboundAllocatedCost,
+          outboundAllocatedCostStr: fmtAmount(outboundAllocatedCost),
           marginRate: r.blendedGrossMarginRateOnListPrice,
           marginRateStr: fmtMarginRate(r.blendedGrossMarginRateOnListPrice),
           profitAmount: profitAmount,

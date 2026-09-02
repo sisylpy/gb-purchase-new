@@ -4,7 +4,7 @@
  * cardData（由 _resolveDisplayCard 预构建）：
  * {
  *   dishName, status, diagnosisSummary,
- *   currentPrice, actualCostPerPortion123, targetGrossMarginRate,
+ *   currentPrice, outboundAllocatedCostPerPortion, targetGrossMarginRate,
  *   suggestedPrice, formulaId,
  *   theoreticalCostPerPortion, costGapPerPortion, costGapRate,
  *   ingredientRows: [{ ingredientName, theoreticalQuantity, actualQuantity,
@@ -71,7 +71,7 @@ Component({
 
     // 价格建议
     currentPrice: null,
-    actualCostPerPortion123: null,
+    outboundAllocatedCostPerPortion: null,
     targetGrossMarginRate: null,
     suggestedPrice: null,
     formulaId: '',
@@ -117,7 +117,7 @@ Component({
         status: status,
         diagnosisSummary: newVal.diagnosisSummary || '',
         currentPrice: newVal.currentPrice !== undefined && newVal.currentPrice !== null ? newVal.currentPrice : null,
-        actualCostPerPortion123: newVal.actualCostPerPortion123 !== undefined && newVal.actualCostPerPortion123 !== null ? newVal.actualCostPerPortion123 : null,
+        outboundAllocatedCostPerPortion: newVal.outboundAllocatedCostPerPortion !== undefined && newVal.outboundAllocatedCostPerPortion !== null ? newVal.outboundAllocatedCostPerPortion : null,
         targetGrossMarginRate: newVal.targetGrossMarginRate !== undefined && newVal.targetGrossMarginRate !== null ? newVal.targetGrossMarginRate : null,
         suggestedPrice: newVal.suggestedPrice !== undefined && newVal.suggestedPrice !== null ? newVal.suggestedPrice : null,
         formulaId: newVal.formulaId || '',

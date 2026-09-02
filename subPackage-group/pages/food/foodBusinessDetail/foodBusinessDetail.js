@@ -89,12 +89,12 @@ Page({
     theoreticalGrossMarginRateDisplay: '—',
     grossMarginGapDisplay: '—',
     grossMarginGapClass: '',
-    actualCostDisplay: '—',
+    outboundAllocatedCostDisplay: '—',
     theoreticalCostDisplay: '—',
     costGapDisplay: '—',
     costGapClass: '',
     salesAmountDisplay: '—',
-    actualTotalCostDisplay: '—',
+    outboundAllocatedCostTotalDisplay: '—',
     actualProfitDisplay: '—',
     soldPortionsDisplay: '0',
 
@@ -278,9 +278,9 @@ Page({
     var theoryPct = _pctNum(_field(dish, d, 'theoreticalGrossMarginRate'));
     var gapNum = _pctNum(_field(dish, d, 'grossMarginGap'));
 
-    var actualCost = _toNum(_field(dish, d, 'actualCostPerPortion'));
+    var outboundAllocatedCost = _toNum(_field(dish, d, 'outboundAllocatedCostPerPortion'));
     var theoryCost = _toNum(_field(dish, d, 'theoreticalCostPerPortion'));
-    var costGap = isNaN(actualCost) || isNaN(theoryCost) ? NaN : actualCost - theoryCost;
+    var costGap = isNaN(outboundAllocatedCost) || isNaN(theoryCost) ? NaN : outboundAllocatedCost - theoryCost;
 
     // ===== 2. 目标区间 =====
     var tgtGrossMarginRate = _field(dish, d, 'targetGrossMarginRate');
@@ -313,13 +313,13 @@ Page({
       grossMarginGapDisplay: isNaN(gapNum) ? '—' : (gapNum >= 0 ? '+' : '') + gapNum.toFixed(1) + '%',
       grossMarginGapClass: isNaN(gapNum) ? '' : (gapNum < 0 ? 'is-down' : 'is-up'),
 
-      actualCostDisplay: isNaN(actualCost) ? '—' : actualCost.toFixed(2),
+      outboundAllocatedCostDisplay: isNaN(outboundAllocatedCost) ? '—' : outboundAllocatedCost.toFixed(2),
       theoreticalCostDisplay: isNaN(theoryCost) ? '—' : theoryCost.toFixed(2),
       costGapDisplay: isNaN(costGap) ? '—' : (costGap >= 0 ? '+' : '') + costGap.toFixed(2),
       costGapClass: _gapClass(costGap),
 
       salesAmountDisplay: _field(dish, d, 'salesAmount') || '—',
-      actualTotalCostDisplay: _field(dish, d, 'actualCostTotalAmount') || '—',
+      outboundAllocatedCostTotalDisplay: _field(dish, d, 'outboundAllocatedCostAmount') || '—',
       actualProfitDisplay: _field(dish, d, 'actualProfitAmount') || '—',
       soldPortionsDisplay: _field(dish, d, 'soldPortionsTotal') || '0',
 

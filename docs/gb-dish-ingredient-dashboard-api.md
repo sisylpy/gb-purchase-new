@@ -29,7 +29,7 @@
 | `trendStartDate` | 否 | 趋势曲线起点；省略时取 **`endDate` 往前 5 个自然月** 与主区间求交后的起点 |
 | `trendEndDate` | 否 | 趋势曲线终点；省略时为 **`endDate`**；与主区间求交，不会超过 `endDate` |
 | `trendGranularity` | 否 | 仅支持 **`month`**（自然月）；省略视为 `month`；其它值返回 `code != 0` |
-| `primaryDisGoodsId` | 否 | 趋势曲线聚焦的**分销商商品 id**（`gb_distributer_goods`）；省略时取主区间内 **`actualCostPerPortion` 最大** 的配料行 |
+| `primaryDisGoodsId` | 否 | 趋势曲线聚焦的**分销商商品 id**（`gb_distributer_goods`）；省略时取主区间内 **`outboundAllocatedCostPerPortion` 最大** 的配料行 |
 
 **参数校验失败**：返回 `R.error(-1, message)`，`data` 无业务负载。
 
@@ -55,7 +55,7 @@
 
 ## 4. `dish`（整菜块）
 
-**与 `ingredientRows[]` 的区分**：`dish` 为**整菜**汇总（标价/份、整菜理论·实际成本/份、净毛利等）；`ingredientRows` 上同名毛利率字段为**配料行**口径（含区间综合、按料摊标价份额等），二者不可混用。
+**与 `ingredientRows[]` 的区分**：`dish` 为**整菜**汇总（标价/份、整菜理论成本/份、出库分摊成本/份、净毛利等）；`ingredientRows` 上同名毛利率字段为**配料行**口径，二者不可混用。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -66,16 +66,16 @@
 | `salesAmount` | string | 主区间内实收销售额合计（两位小数） |
 | `salesUnitPrice` | string | 实收均价（两位小数） |
 | `theoryCostPerPortion` | string | 整菜理论成本/份 |
-| `actualCostPerPortion` | string | 整菜实际成本/份（type1+2+3 摊销金额合计÷份数，与配料分析整菜行一致） |
-| `diffCostPerPortion` | string | 实际 − 理论，每份（两位小数）；**不是**「标价 − 实际」净毛利 |
+| `outboundAllocatedCostPerPortion` | string | 整菜出库分摊成本/份（type1+2+3 摊销金额合计÷份数，与配料分析整菜行一致） |
+| `diffCostPerPortion` | string | 出库分摊成本 − 理论成本，每份（两位小数） |
 | **`comprehensiveGrossMarginRateOnListPrice`** | string / null | **区间综合毛利率（展示）**：`(Σ 报表内标价收入 − 区间 type1+2+3 出库金额) ÷ Σ 标价收入`，与 `ingredientRows[].comprehensiveGrossMarginRateOnListPrice`、经营分析 `businessInsightSummary` 同源；固定两位小数字符串，规则同 `marginRateOnListPriceString` |
-| **`grossMarginRateOnListPrice`** | string / null | **本菜综合实际毛利率（标价 vs 仅 type1 生产实摊）**：`(listPricePerPortion − Σ 配料 produceCostPerPortion) ÷ listPricePerPortion`；与部门经营分析单菜 `grossMarginRateOnListPrice` 同思路（标价用分销价字段）。若该式无法给出有效值且标价&gt;0，则回退为 **`grossMarginRateOnListPriceUsingActual123`** 同算式但成本用 **`actualCostPerPortion`（type1+2+3）** |
+| **`grossMarginRateOnListPrice`** | string / null | **本菜综合实际毛利率（标价 vs 仅 type1 生产实摊）**：`(listPricePerPortion − Σ 配料 produceCostPerPortion) ÷ listPricePerPortion`；与部门经营分析单菜 `grossMarginRateOnListPrice` 同思路（标价用分销价字段）。若该式无法给出有效值且标价&gt;0，则回退为 **`grossMarginRateOnListPriceUsingOutboundAllocation`** 同算式但成本用 **`outboundAllocatedCostPerPortion`（type1+2+3）** |
 | **`blendedGrossMarginRateOnListPrice`** | string / null | 与 **`grossMarginRateOnListPrice`** 同值（别名，便于前端按「blended」命名取用） |
-| **`grossMarginRateOnListPriceUsingActual123`** | string / null | **标价 vs type1+2+3 实际成本/份**：`(listPricePerPortion − actualCostPerPortion) ÷ listPricePerPortion` |
+| **`grossMarginRateOnListPriceUsingOutboundAllocation`** | string / null | **标价 vs type1+2+3 出库分摊成本/份**：`(listPricePerPortion − outboundAllocatedCostPerPortion) ÷ listPricePerPortion` |
 | **`grossMarginRateTheoryOnListPrice`** | string / null | **配料毛利率·理论（整菜）**：`(listPricePerPortion − theoryCostPerPortion) ÷ listPricePerPortion` |
 | **`blendedGrossMarginRateTheoryOnListPrice`** | string / null | 与 **`grossMarginRateTheoryOnListPrice`** 同值（别名） |
-| **`netGrossProfitPerPortion`** | string | **净菜品毛利/份（元）**：标价&gt;0 时为 `listPricePerPortion − actualCostPerPortion`（两位小数）；**无标价**时为 `0 − actualCostPerPortion`（即 `-actualCostPerPortion`） |
-| **`highMarginDish`** | boolean | **高毛利菜品**：标价&gt;0 时 `(listPricePerPortion − actualCostPerPortion) ÷ listPricePerPortion ≥ 50%`；**无标价**时用 **`comprehensiveGrossMarginRateOnListPrice`** 解析为百分数，若 **≥ 50** 亦为高毛利 |
+| **`netGrossProfitPerPortion`** | string | **净菜品毛利/份（元）**：标价&gt;0 时为 `listPricePerPortion − outboundAllocatedCostPerPortion`（两位小数）；**无标价**时为 `0 − outboundAllocatedCostPerPortion`（即 `-outboundAllocatedCostPerPortion`） |
+| **`highMarginDish`** | boolean | **高毛利菜品**：标价&gt;0 时 `(listPricePerPortion − outboundAllocatedCostPerPortion) ÷ listPricePerPortion ≥ 50%`；**无标价**时用 **`comprehensiveGrossMarginRateOnListPrice`** 解析为百分数，若 **≥ 50** 亦为高毛利 |
 | **`highMarginDishLevel`** | string | `HIGH` 或 `NORMAL`，与 `highMarginDish` 一致 |
 
 以上毛利率字段均为**不含 `%` 后缀的两位小数字符串**（如 `"12.34"` 表示 12.34%），与 wxml 自行拼接 `%` 的写法一致。
@@ -86,7 +86,7 @@
 
 ### 5.1 与 `/ingredientAnalysis` 中 `salesDishRows[].ingredientRows` 一致的字段
 
-包括但不限于：`disGoodsId`、`gbDgGoodsName`、主档鲜品/规格字段、`recipeUnitPerDish`、`theoryUsage`、`salesUsageFromOrders`、`actualUsage`、`actualProduceUsage`、`actualWasteUsage`、`actualLossUsage`、`allocatedOutboundPerSoldPortion`、`produceAllocatedPerSoldPortion`、`theoryCostPerPortion`、`actualCostPerPortion`、`produceCostPerPortion`、`wasteCostPerPortion`、`lossCostPerPortion`、`lossAndWasteCostPerPortion`、`devianceRate`、`deviance`、`unitPrice`。
+包括但不限于：`disGoodsId`、`gbDgGoodsName`、主档鲜品/规格字段、`recipeUnitPerDish`、`theoryUsage`、`salesUsageFromOrders`、`actualUsage`、`actualProduceUsage`、`actualWasteUsage`、`actualLossUsage`、`allocatedOutboundPerSoldPortion`、`produceAllocatedPerSoldPortion`、`theoryCostPerPortion`、`outboundAllocatedCostPerPortion`、`produceCostPerPortion`、`wasteCostPerPortion`、`lossCostPerPortion`、`lossAndWasteCostPerPortion`、`devianceRate`、`deviance`、`unitPrice`。
 
 **配料行上的三种毛利率**（与 §4 `dish` 不同）：`comprehensiveGrossMarginRateOnListPrice`（**整段报表区间**分子分母，各行**相同**）、`blendedGrossMarginRateTheoryOnListPrice`（**整菜**理论毛利率字符串，各行**相同**）、`blendedGrossMarginRateOnListPrice`（**按该行理论成本占整菜理论成本**摊标价收入后，与该行 **type1** 实摊比较）。详见 `GbDishCostAnalysisServiceImpl#buildIngredientAnalysisDishRow` 与 `GbDepFoodBusinessInsightServiceImpl` 说明。
 
@@ -97,7 +97,7 @@
 | **`usageDeviationRatio`** | string | 用量偏差比例：`(actualUsage − theoryUsage) ÷ theoryUsage`；`theoryUsage` 为 0 时为 `"0"` 去尾零展示 |
 | **`usageDeviationPercent`** | string | 上式×100，**固定两位小数**（如 `"30.00"` 表示 30%） |
 | **`usageStatus`** | string | `NORMAL` 或 `ABNORMAL`；当 **\|usageDeviationRatio\| > 0.15** 时为 `ABNORMAL` |
-| **`costShareOfDishActualPercent`** | string | **成本占比**：该行 `actualCostPerPortion` ÷ 本菜所有配料行 `actualCostPerPortion` 之和 ×100，两位小数 |
+| **`costShareOfDishOutboundPercent`** | string | **成本占比**：该行 `outboundAllocatedCostPerPortion` ÷ 本菜所有配料行 `outboundAllocatedCostPerPortion` 之和 ×100，两位小数 |
 | **`actualRevenueAllocatedPerPortion`** | string | 本菜标价收入（份数×`gb_df_food_price`）按该行理论成本占整菜理论成本占比摊到**每份**的标价份额（元，两位小数） |
 | **`grossProfitContributionPerPortion`** | string | **毛利贡献（元/份）**：`actualRevenueAllocatedPerPortion` − `produceCostPerPortion`（生产 type1 实摊/份） |
 | **`suggestionLevel`** | string | `FOCUS` \| `OPTIMIZE` \| `NORMAL`；规则：异常且成本占比≥25% 为 `FOCUS`；异常或占比≥15% 为 `OPTIMIZE`；否则 `NORMAL` |
@@ -109,8 +109,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `basis` | string | 固定为 `actualCostPerPortion`，表示占比按**单份实际成本（type1+2+3）**计算 |
-| `totalCostPerPortion` | string | 各配料行 `actualCostPerPortion` 之和（两位小数），应与 `dish.actualCostPerPortion` 一致 |
+| `basis` | string | 固定为 `outboundAllocatedCostPerPortion`，表示占比按**单份出库分摊成本（type1+2+3）**计算 |
+| `totalCostPerPortion` | string | 各配料行 `outboundAllocatedCostPerPortion` 之和（两位小数），应与 `dish.outboundAllocatedCostPerPortion` 一致 |
 | `otherMergeThresholdPercent` | string | 合并为「其他」的阈值，固定 **`5.00`**（小于该占比的配料合并） |
 | **`segments`** | array | 扇区列表；先按单份成本降序，**占比 < 5%** 的配料合并为一项 |
 
@@ -145,7 +145,7 @@
 | `periodStart` | string | 该点在区间内使用的起始日 `yyyy-MM-dd` |
 | `periodEnd` | string | 该点在区间内使用的结束日 `yyyy-MM-dd` |
 | `soldPortions` | string | 该月子区间内本菜实销份数 |
-| **`primaryIngredientCostPerPortion`** | string | 该月聚焦配料的 **`actualCostPerPortion`**（与当月 `ingredientAnalysis` 同行口径一致） |
+| **`primaryIngredientCostPerPortion`** | string | 该月聚焦配料的 **`outboundAllocatedCostPerPortion`**（与当月 `ingredientAnalysis` 同行口径一致） |
 
 **性能说明**：趋势按自然月**逐月**重复加载分摊数据；单月失败时该月跳过并打日志。最多处理 **18 个自然月**，超出部分截断。
 

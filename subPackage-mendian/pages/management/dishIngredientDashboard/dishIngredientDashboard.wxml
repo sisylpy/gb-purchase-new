@@ -90,8 +90,8 @@
         </view>
         <view class="dga-hero__kdiv" />
         <view class="dga-hero__kcell">
-          <text class="dga-hero__kpi-lab">实际成本/份</text>
-          <text class="dga-hero__kpi-amt">¥ {{dish.actualCostPerPortion}}</text>
+          <text class="dga-hero__kpi-lab">出库分摊成本/份</text>
+          <text class="dga-hero__kpi-amt">¥ {{dish.outboundAllocatedCostPerPortion}}</text>
         </view>
         <view class="dga-hero__kdiv" />
         <view class="dga-hero__kcell">

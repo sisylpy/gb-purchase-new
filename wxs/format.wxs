@@ -1115,9 +1115,9 @@ function marginStandardHintModDga(ins) {
   return 'dga-hero__margin--muted';
 }
 
-function calcActualProfit(actualRevenue, actualCostTotalAmount123) {
+function calcOutboundAllocatedProfit(actualRevenue, outboundAllocatedCostAmount) {
   var rev = parseFloat(actualRevenue);
-  var cost = parseFloat(actualCostTotalAmount123);
+  var cost = parseFloat(outboundAllocatedCostAmount);
   if (rev !== rev || cost !== cost) {
     return '—';
   }
@@ -1244,7 +1244,7 @@ module.exports = {
   marginStandardShowBlock: marginStandardShowBlock,
   marginStandardHintMod: marginStandardHintMod,
   marginStandardHintModDga: marginStandardHintModDga,
-  calcActualProfit: calcActualProfit,
+  calcOutboundAllocatedProfit: calcOutboundAllocatedProfit,
   perPortionDisplay: perPortionDisplay,
   perPortionDeviation: perPortionDeviation,
   remainingAfterOutbound: remainingAfterOutbound,

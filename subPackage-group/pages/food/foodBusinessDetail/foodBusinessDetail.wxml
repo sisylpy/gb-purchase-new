@@ -88,8 +88,8 @@
       <!-- 成本三列 -->
       <view class="fbd-kpi-grid fbd-kpi-grid--cost">
         <view class="fbd-kpi-cell">
-          <text class="fbd-kpi-cell__label">实际成本</text>
-          <text class="fbd-kpi-cell__value">¥{{actualCostDisplay}}/份</text>
+          <text class="fbd-kpi-cell__label">出库分摊成本</text>
+          <text class="fbd-kpi-cell__value">¥{{outboundAllocatedCostDisplay}}/份</text>
         </view>
         <view class="fbd-kpi-cell">
           <text class="fbd-kpi-cell__label">理论成本</text>
@@ -109,7 +109,7 @@
         </view>
         <view class="fbd-kpi-cell">
           <text class="fbd-kpi-cell__label">实际总成本</text>
-          <text class="fbd-kpi-cell__value fbd-kpi-cell__value--muted">¥{{actualTotalCostDisplay}}</text>
+          <text class="fbd-kpi-cell__value fbd-kpi-cell__value--muted">¥{{outboundAllocatedCostTotalDisplay}}</text>
         </view>
         <view class="fbd-kpi-cell">
           <text class="fbd-kpi-cell__label">实际利润</text>
@@ -155,7 +155,7 @@
       <!-- 单份成本差异 -->
       <view class="fbd-cost-diff" wx:if="{{costGapDisplay !== '—'}}">
         <text class="fbd-cost-diff__label">单份成本差异：</text>
-        <text class="fbd-cost-diff__value {{costGapClass}}">实际{{actualCostDisplay}} - 理论{{theoreticalCostDisplay}} = ¥{{costGapDisplay}}</text>
+        <text class="fbd-cost-diff__value {{costGapClass}}">分摊{{outboundAllocatedCostDisplay}} - 理论{{theoreticalCostDisplay}} = ¥{{costGapDisplay}}</text>
       </view>
     </view>
 

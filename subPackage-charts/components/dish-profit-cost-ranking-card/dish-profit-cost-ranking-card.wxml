@@ -14,7 +14,7 @@
       <text class="dpcr-th dpcr-th--rank">排名</text>
       <text class="dpcr-th dpcr-th--dish">菜品</text>
       <text class="dpcr-th dpcr-th--sales">销量（份）</text>
-      <text class="dpcr-th dpcr-th--cost {{costHighlight ? 'dpcr-th--cost-red' : ''}}">实际成本（元）</text>
+      <text class="dpcr-th dpcr-th--cost {{costHighlight ? 'dpcr-th--cost-red' : ''}}">出库分摊成本（元）</text>
       <text class="dpcr-th dpcr-th--margin {{profitHighlight ? 'dpcr-th--margin-red' : ''}}">{{marginLabel}}</text>
     </view>
 
@@ -42,9 +42,9 @@
         <text class="dpcr-sales-unit">份</text>
       </view>
 
-      <!-- 实际成本 -->
+      <!-- 出库分摊成本 -->
       <view class="dpcr-td dpcr-td--cost">
-        <text class="dpcr-cost-val {{costHighlight ? 'dpcr-cost-val--red' : ''}}">{{item.actualCostStr}}</text>
+        <text class="dpcr-cost-val {{costHighlight ? 'dpcr-cost-val--red' : ''}}">{{item.outboundAllocatedCostStr}}</text>
       </view>
 
       <!-- 毛利率 / 利润额 -->

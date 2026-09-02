@@ -60,9 +60,9 @@
         <view class="dga-hero__kcell">
           <text class="dga-hero__kpi-lab">综合实际毛利率</text>
           <view class="dga-hero__kpi-val-wrap">
-            <text class="dga-hero__kpi-val" wx:if="{{dish.grossMarginRateOnListPriceUsingActual123 == null || dish.grossMarginRateOnListPriceUsingActual123 === ''}}">—</text>
+            <text class="dga-hero__kpi-val" wx:if="{{dish.grossMarginRateOnListPriceUsingOutboundAllocation == null || dish.grossMarginRateOnListPriceUsingOutboundAllocation === ''}}">—</text>
             <text class="dga-hero__kpi-val" wx:else>
-              <text class="dga-hero__kpi-val--em">{{dish.grossMarginRateOnListPriceUsingActual123}}</text>
+              <text class="dga-hero__kpi-val--em">{{dish.grossMarginRateOnListPriceUsingOutboundAllocation}}</text>
               <text class="dga-hero__kpi-pct">%</text>
             </text>
           </view>
@@ -80,8 +80,8 @@
         </view>
         <view class="dga-hero__kdiv" />
         <view class="dga-hero__kcell">
-          <text class="dga-hero__kpi-lab">实际成本/份</text>
-          <text class="dga-hero__kpi-amt">¥ {{dish.actualCostPerPortion || '—'}}</text>
+          <text class="dga-hero__kpi-lab">出库分摊成本/份</text>
+          <text class="dga-hero__kpi-amt">¥ {{dish.outboundAllocatedCostPerPortion || '—'}}</text>
         </view>
         <view class="dga-hero__kdiv" />
         <view class="dga-hero__kcell">
@@ -204,10 +204,10 @@
               <text wx:else class="dga-pill dga-pill--ok">正常</text>
             </view>
 
-            <text class="dga-tbl__cell dga-td dga-td--cost">¥{{item.actualCostPerPortion || '—'}}</text>
+            <text class="dga-tbl__cell dga-td dga-td--cost">¥{{item.outboundAllocatedCostPerPortion || '—'}}</text>
            
             <view class="dga-tbl__cell dga-td dga-td--bar">
-              <text class="dga-td__sub">{{item.costShareBarPct != null && item.costShareBarPct !== '' ? item.costShareBarPct : (item.costShareOfDishActualPercent || '—')}}%</text>
+              <text class="dga-td__sub">{{item.costShareBarPct != null && item.costShareBarPct !== '' ? item.costShareBarPct : (item.costShareOfDishOutboundPercent || '—')}}%</text>
               <view class="dga-bar">
                 <view
                   class="dga-bar__in {{dga.highShareOrAbnormal(item.costShareBarPct, item.usageStatus) ? 'is-warn' : 'is-ok'}}"

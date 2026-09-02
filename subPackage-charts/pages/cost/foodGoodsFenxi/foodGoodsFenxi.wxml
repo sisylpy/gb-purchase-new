@@ -49,16 +49,16 @@
       <view class="food-fgf-sum-card food-fgf-sum-card--red">
         <view class="food-fgf-sum-hd">
           <view class="food-fgf-sum-ico">实</view>
-          <text class="food-fgf-sum-tit">实际总成本</text>
+          <text class="food-fgf-sum-tit">出库分摊总成本</text>
         </view>
-        <text class="food-fgf-sum-val">¥{{scopeSalesSubtotals.actualCostTotal || '0.00'}}</text>
+        <text class="food-fgf-sum-val">¥{{scopeSalesSubtotals.outboundAllocatedCostTotal || '—'}}</text>
       </view>
       <view class="food-fgf-sum-card food-fgf-sum-card--blue">
         <view class="food-fgf-sum-hd">
           <view class="food-fgf-sum-ico">理</view>
           <text class="food-fgf-sum-tit">理论总成本</text>
         </view>
-        <text class="food-fgf-sum-val">¥{{scopeSalesSubtotals.theoreticalCostTotal || '0.00'}}</text>
+        <text class="food-fgf-sum-val">¥{{scopeSalesSubtotals.theoreticalCostTotal || '—'}}</text>
       </view>
       <view class="food-fgf-sum-card food-fgf-sum-card--orange">
         <view class="food-fgf-sum-hd">
@@ -143,8 +143,8 @@
             </view> -->
             <view class="fgf-sec-card">
               <view class="food-fgf-cost-col">
-                <text class="food-fgf-cost-cap">实际成本</text>
-                <text class="food-fgf-cost-val">{{item.actualCostPerPortion || '00.00'}}</text>
+                <text class="food-fgf-cost-cap">出库分摊成本</text>
+                <text class="food-fgf-cost-val">{{item.outboundAllocatedCostPerPortion || '—'}}</text>
                 <text class="food-fgf-cost-unit">元/份</text>
               </view>
               <view class="food-fgf-cost-div"></view>
@@ -198,8 +198,8 @@
               </view> -->
               <view class="fgf-sec-card fgf-sec-card--3col">
                 <view class="food-fgf-cost-col">
-                  <text class="food-fgf-cost-cap">实际成本</text>
-                  <text class="food-fgf-cost-val">{{item.actualCostAmount || '00.00'}}</text>
+                  <text class="food-fgf-cost-cap">出库分摊成本</text>
+                  <text class="food-fgf-cost-val">{{item.outboundAllocatedCostAmount || '—'}}</text>
                   <text class="food-fgf-cost-unit">元</text>
                 </view>
                 <view class="food-fgf-cost-div"></view>
@@ -232,7 +232,7 @@
                     <text class="food-fgf-ing-td">偏差率</text>
                     <text class="food-fgf-ing-td">理论含量</text>
                     <text class="food-fgf-ing-td">分摊含量</text>
-                    <text class="food-fgf-ing-td">实际成本</text>
+                    <text class="food-fgf-ing-td">出库分摊成本</text>
                     <text class="food-fgf-ing-td">制作总量</text>
                     <text class="food-fgf-ing-td">损耗总量</text>
                   </view>
@@ -256,7 +256,7 @@
                       <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}/份</text>
                     </view>
                     <view class="food-fgf-ing-td food-fgf-ing-td--util">
-                      <text class="food-fgf-ing-line">{{ing.actualCostPerPortion}}</text>
+                      <text class="food-fgf-ing-line">{{ing.outboundAllocatedCostPerPortion}}</text>
                       <text class="food-fgf-ing-line food-fgf-ing-line--sub">元/份</text>
                     </view>
                     <view class="food-fgf-ing-td food-fgf-ing-td--util">

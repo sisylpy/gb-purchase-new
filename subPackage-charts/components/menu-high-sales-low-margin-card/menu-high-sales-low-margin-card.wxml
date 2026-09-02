@@ -56,7 +56,7 @@
         </view>
         <view class="hsml-metric">
           <text class="hsml-metric-label">成本合计</text>
-          <text class="hsml-metric-value">¥{{dish.actualCostTotalAmount123 || '—'}}</text>
+          <text class="hsml-metric-value">¥{{dish.outboundAllocatedCostAmount || '—'}}</text>
         </view>
       </view>
 

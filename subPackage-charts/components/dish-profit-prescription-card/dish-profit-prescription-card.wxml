@@ -74,8 +74,8 @@
           <text class="dpp-price-value">{{currentPrice !== null ? currentPrice + ' 元' : '—'}}</text>
         </view>
         <view class="dpp-price-item">
-          <text class="dpp-price-label">实际成本</text>
-          <text class="dpp-price-value">{{actualCostPerPortion123 !== null ? actualCostPerPortion123 + ' 元' : '—'}}</text>
+          <text class="dpp-price-label">出库分摊成本</text>
+          <text class="dpp-price-value">{{outboundAllocatedCostPerPortion !== null ? outboundAllocatedCostPerPortion + ' 元' : '—'}}</text>
         </view>
         <view class="dpp-price-item">
           <text class="dpp-price-label">目标毛利率</text>
@@ -93,7 +93,7 @@
     </view>
 
     <!-- 成本差异区 -->
-    <view class="dpp-section" wx:if="{{theoreticalCostPerPortion !== null || actualCostPerPortion123 !== null || costGapPerPortion !== null}}">
+    <view class="dpp-section" wx:if="{{theoreticalCostPerPortion !== null || outboundAllocatedCostPerPortion !== null || costGapPerPortion !== null}}">
       <text class="dpp-section-label">📉 成本差异</text>
       <view class="dpp-cost-grid">
         <view class="dpp-cost-card">
@@ -101,8 +101,8 @@
           <text class="dpp-cost-card-value">{{theoreticalCostPerPortion !== null ? theoreticalCostPerPortion + ' 元' : '—'}}</text>
         </view>
         <view class="dpp-cost-card">
-          <text class="dpp-cost-card-label">实际成本</text>
-          <text class="dpp-cost-card-value dpp-cost-actual">{{actualCostPerPortion123 !== null ? actualCostPerPortion123 + ' 元' : '—'}}</text>
+          <text class="dpp-cost-card-label">出库分摊成本</text>
+          <text class="dpp-cost-card-value dpp-cost-actual">{{outboundAllocatedCostPerPortion !== null ? outboundAllocatedCostPerPortion + ' 元' : '—'}}</text>
         </view>
         <view class="dpp-cost-card">
           <text class="dpp-cost-card-label">成本差异</text>

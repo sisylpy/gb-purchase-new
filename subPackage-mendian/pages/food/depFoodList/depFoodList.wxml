@@ -218,8 +218,8 @@
           <!-- 成本指标三列 -->
           <view class="dcl-cost-grid">
             <view class="dcl-cost-cell">
-              <text class="dcl-cost-cell__label">实际成本</text>
-              <text class="dcl-cost-cell__value">¥{{dish.actualCostPerUnit}}/份</text>
+              <text class="dcl-cost-cell__label">出库分摊成本</text>
+              <text class="dcl-cost-cell__value">¥{{dish.outboundAllocatedCostPerUnit}}/份</text>
             </view>
             <view class="dcl-cost-cell">
               <text class="dcl-cost-cell__label">理论成本</text>

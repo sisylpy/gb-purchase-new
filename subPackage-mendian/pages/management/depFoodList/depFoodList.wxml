@@ -121,11 +121,11 @@
         <view class="dfl-cost-formula__item">
           <view class="dfl-cost-card">
             <text class="dfl-cost-card__lab">菜品制作</text>
-            <text class="dfl-cost-card__val dfl-cost-card__val--blue">¥{{businessInsightSummary.totalActualCostAmount}}</text>
+            <text class="dfl-cost-card__val dfl-cost-card__val--blue">¥{{businessInsightSummary.totalProductionOutboundAllocatedCostAmount}}</text>
             <text class="dfl-cost-card__sub">菜品{{businessInsightSummary.dishRowCount}}个</text>
-            <view class="dfl-cost-card__trend" wx:if="{{businessInsightSummary.totalActualCostAmountMom !== undefined}}">
+            <view class="dfl-cost-card__trend" wx:if="{{businessInsightSummary.totalProductionOutboundAllocatedCostAmountMom !== undefined}}">
               <text>较上月</text>
-              <text class="dfl-cost-card__pct is-up">{{businessInsightSummary.totalActualCostAmountMom}}% ↑</text>
+              <text class="dfl-cost-card__pct is-up">{{businessInsightSummary.totalProductionOutboundAllocatedCostAmountMom}}% ↑</text>
             </view>
           </view>
         </view>
@@ -181,7 +181,7 @@
     </view>
 
     <view class="dfl-banner__meta" wx:if="{{businessInsightSummary}}">
-      <text>菜品 {{businessInsightSummary.dishRowCount}} 道 · 标价收入 ¥{{businessInsightSummary.totalActualRevenue}} · 实际成本 ¥{{businessInsightSummary.totalActualCostAmount}} · 理论成本 ¥{{businessInsightSummary.totalTheoryCostAmount}}</text>
+      <text>菜品 {{businessInsightSummary.dishRowCount}} 道 · 标价收入 ¥{{businessInsightSummary.totalActualRevenue}} · 出库分摊成本 ¥{{businessInsightSummary.totalOutboundAllocatedCostAmount}} · 理论成本 ¥{{businessInsightSummary.totalTheoryCostAmount}}</text>
     </view>
   </view>
 
@@ -316,14 +316,14 @@
                   <view class="dish-cost-formula__item">
                     <view class="dish-cost-card">
                       <text class="dish-cost-card__lab">制作总成本</text>
-                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.actualCostTotalAmount123}}</text>
+                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.outboundAllocatedCostAmount}}</text>
                     </view>
                   </view>
                   <text class="dish-cost-formula__op">=</text>
                   <view class="dish-cost-formula__item">
                     <view class="dish-cost-card">
                       <text class="dish-cost-card__lab">菜品制作</text>
-                      <text class="dish-cost-card__val dish-cost-card__val--blue">¥{{food.gbDfBusinessInsight.actualCostAmount}}</text>
+                      <text class="dish-cost-card__val dish-cost-card__val--blue">¥{{food.gbDfBusinessInsight.productionOutboundAllocatedCostAmount}}</text>
                     </view>
                   </view>
                   <text class="dish-cost-formula__op">+</text>
@@ -339,14 +339,14 @@
                   <view class="dish-cost-formula__item">
                     <view class="dish-cost-card">
                       <text class="dish-cost-card__lab">单份制作成本</text>
-                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.actualCostPerPortion123}}/份</text>
+                      <text class="dish-cost-card__val">¥{{food.gbDfBusinessInsight.outboundAllocatedCostPerPortion}}/份</text>
                     </view>
                   </view>
                   <text class="dish-cost-formula__op">=</text>
                   <view class="dish-cost-formula__item">
                     <view class="dish-cost-card">
                       <text class="dish-cost-card__lab">菜品制作</text>
-                      <text class="dish-cost-card__val dish-cost-card__val--blue">¥{{food.gbDfBusinessInsight.actualCostPerPortion}}/份</text>
+                      <text class="dish-cost-card__val dish-cost-card__val--blue">¥{{food.gbDfBusinessInsight.productionOutboundAllocatedCostPerPortion}}/份</text>
                     </view>
                   </view>
                   <text class="dish-cost-formula__op">+</text>

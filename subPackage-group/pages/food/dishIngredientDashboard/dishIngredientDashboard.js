@@ -104,25 +104,25 @@ function usageTipFourLevelsLines() {
 }
 
 /**
- * 成本占比条：每行 = 该行 actualCostPerPortion / 所有行 actualCostPerPortion 之和 ×100
+ * 成本占比条：每行 = 该行 outboundAllocatedCostPerPortion / 所有行 outboundAllocatedCostPerPortion 之和 ×100
  * （不是 actual / 自身。若 sum=0 则全为 0.00，调完可关日志）
  */
 function enrichIngredientRowsWithCostShare(rows) {
   var list = rows || [];
   var sum = 0;
   for (var i = 0; i < list.length; i++) {
-    sum += num(list[i] && list[i].actualCostPerPortion);
+    sum += num(list[i] && list[i].outboundAllocatedCostPerPortion);
   }
   if (sum === 0 && list.length) {
     console.warn(
-      '[dishIngredientDashboard][costShare] sum 为 0：请核对接口每行是否带 actualCostPerPortion。首行:',
+      '[dishIngredientDashboard][costShare] sum 为 0：请核对接口每行是否带 outboundAllocatedCostPerPortion。首行:',
       list[0]
     );
   }
   for (var j = 0; j < list.length; j++) {
     var r = list[j];
     if (!r) continue;
-    var a = num(r.actualCostPerPortion);
+    var a = num(r.outboundAllocatedCostPerPortion);
     if (sum > 0) {
       var pct = (a / sum) * 100;
       r.costShareBarPct = pct.toFixed(2);
