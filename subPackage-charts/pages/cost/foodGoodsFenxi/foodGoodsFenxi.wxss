@@ -1,801 +1,450 @@
-/**
- * 菜品销售 / 配料分析 — 三卡汇总 + 菜品明细卡片 + 配料横向表
- */
-
 page {
   height: 100%;
-  background-color: #eef0f4;
-  box-sizing: border-box;
+  background: #f3f5f4;
+  color: #1f2933;
 }
 
-.food-fgf-page {
+.cost-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 100vh;
-  box-sizing: border-box;
+  height: 100vh;
 }
 
-.food-fgf-search-top-ico {
-  opacity: 0.72;
-}
-
-.food-fgf-search-top-ico--on {
-  opacity: 1;
-}
-
-.food-fgf-search-panel {
-  padding: 12rpx 24rpx 16rpx;
-  flex-shrink: 0;
-}
-
-.food-fgf-search-inner {
+.cost-toolbar {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  background: #f3f4f6;
-  border-radius: 999rpx;
-  padding: 12rpx 20rpx;
+  justify-content: space-between;
+  padding: 14rpx 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #e7ece9;
+}
+
+.cost-date {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.cost-date__icon,
+.cost-search-button {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.cost-date__icon {
+  margin-right: 14rpx;
+}
+
+.cost-date__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.cost-date__name {
+  font-size: 30rpx;
+  line-height: 40rpx;
+  font-weight: 650;
+}
+
+.cost-date__range {
+  color: #77817d;
+  font-size: 23rpx;
+  line-height: 32rpx;
+}
+
+.cost-search-button {
+  padding: 16rpx;
+  opacity: .72;
+}
+
+.cost-search {
+  display: flex;
+  align-items: center;
+  margin: 14rpx 20rpx 0;
+  padding: 12rpx 18rpx;
   min-height: 72rpx;
   box-sizing: border-box;
+  border-radius: 18rpx;
+  background: #fff;
 }
 
-.food-fgf-search-inner-ico {
+.cost-search__icon {
   width: 32rpx;
   height: 32rpx;
+  opacity: .5;
   margin-right: 12rpx;
-  flex-shrink: 0;
-  opacity: 0.45;
 }
 
-.food-fgf-search-input {
+.cost-search__input {
   flex: 1;
-  min-width: 0;
+  height: 46rpx;
   font-size: 28rpx;
-  color: #111827;
-  height: 44rpx;
-  line-height: 44rpx;
 }
 
-.food-fgf-search-clear {
-  flex-shrink: 0;
-  width: 44rpx;
-  height: 44rpx;
-  line-height: 40rpx;
-  text-align: center;
-  font-size: 40rpx;
-  color: #9ca3af;
-  margin-left: 8rpx;
+.cost-search__clear {
+  padding: 0 8rpx;
+  font-size: 38rpx;
+  color: #98a19d;
 }
 
-.food-fgf-list-empty-local {
-  padding: 40rpx 28rpx 24rpx;
-  text-align: center;
-  font-size: 28rpx;
-  color: #6b7280;
-  line-height: 1.5;
-}
-
-.food-fgf-toolbar {
-  border-bottom: 1rpx solid #ececec;
-  flex-shrink: 0;
-}
-
-.food-fgf-cal {
-  width: 40rpx;
-  height: 40rpx;
-  margin-right: 12rpx;
-}
-
-.food-fgf-hanzi {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.food-fgf-date-pill {
-  margin-top: 6rpx;
-  font-size: 26rpx;
-  color: #888;
-}
-
-.food-fgf-sort-row {
-  gap: 12rpx;
-}
-
-.food-fgf-chip {
-  margin: 0;
-  padding: 10rpx 20rpx;
-  font-size: 26rpx;
-  line-height: 1.25;
-  background: #f5f6f8;
-  color: #333;
-  border-radius: 999rpx;
-  border: none;
-}
-
-.food-fgf-chip::after {
-  border: none;
-}
-
-.food-fgf-chip--on {
-  background: #e8f5ef;
-  color: #187e6e;
-  font-weight: 600;
-  border: 1rpx solid rgba(7, 193, 96, 0.35);
-}
-
-.food-fgf-scroll {
+.cost-scroll {
   flex: 1;
   height: 0;
-  min-height: 0;
-  box-sizing: border-box;
 }
 
-/* ========== 顶部三卡（浅粉 / 浅蓝 / 浅橙底 + 色边，与设计图一致） ========== */
-.food-fgf-sum-row {
+.cost-summary {
   display: flex;
-  flex-direction: row;
-  padding: 16rpx 16rpx 8rpx;
+  padding: 18rpx 16rpx 10rpx;
+  gap: 10rpx;
+}
+
+.cost-summary-card {
+  flex: 1;
+  min-width: 0;
+  padding: 20rpx 10rpx 16rpx;
+  border-radius: 18rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(26, 65, 52, .05);
+  text-align: center;
+}
+
+.cost-summary-card__label {
+  display: block;
+  min-height: 54rpx;
+  font-size: 23rpx;
+  line-height: 30rpx;
+  color: #64716c;
+}
+
+.cost-summary-card__value {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 32rpx;
+  line-height: 44rpx;
+  font-weight: 750;
+  color: #146f60;
+}
+
+.cost-summary-card__value--pending {
+  color: #c9771a;
+}
+
+.cost-summary-card__hint {
+  display: block;
+  margin-top: 4rpx;
+  min-height: 30rpx;
+  font-size: 21rpx;
+  line-height: 30rpx;
+  color: #8a9590;
+}
+
+.cost-warning {
+  display: flex;
+  flex-direction: column;
+  margin: 6rpx 16rpx 14rpx;
+  padding: 18rpx 20rpx;
+  border: 1rpx solid #f0d7ad;
+  border-radius: 16rpx;
+  background: #fff9ee;
+}
+
+.cost-warning__title {
+  color: #a85c0b;
+  font-size: 27rpx;
+  line-height: 38rpx;
+  font-weight: 650;
+}
+
+.cost-warning__text {
+  margin-top: 6rpx;
+  color: #846e53;
+  font-size: 23rpx;
+  line-height: 34rpx;
+}
+
+.cost-list-head {
+  margin: 0 16rpx 12rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
+  background: #fff;
+}
+
+.cost-list-head__title {
+  display: block;
+  margin-bottom: 14rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.cost-sort-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.cost-sort {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #f1f4f2;
+  color: #66716d;
+  font-size: 23rpx;
+}
+
+.cost-sort.is-active {
+  background: #e0f3ed;
+  color: #12806d;
+  font-weight: 650;
+}
+
+.cost-dish-list {
+  padding: 0 16rpx;
+}
+
+.cost-dish {
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  border-radius: 20rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(26, 65, 52, .05);
+}
+
+.cost-dish__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22rpx 20rpx 16rpx;
+  gap: 16rpx;
+}
+
+.cost-dish__name-wrap {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.cost-dish__index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42rpx;
+  height: 42rpx;
+  margin-right: 12rpx;
+  border-radius: 12rpx;
+  background: #e9f5f1;
+  color: #168472;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.cost-dish__title-wrap {
+  min-width: 0;
+}
+
+.cost-dish__title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 31rpx;
+  line-height: 42rpx;
+  font-weight: 700;
+}
+
+.cost-dish__sub {
+  display: block;
+  margin-top: 5rpx;
+  font-size: 23rpx;
+  line-height: 32rpx;
+  color: #7c8782;
+}
+
+.cost-status {
+  flex-shrink: 0;
+  padding: 7rpx 13rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  line-height: 30rpx;
+  color: #a85c0b;
+  background: #fff1d9;
+}
+
+.cost-status.is-complete {
+  color: #137965;
+  background: #ddf4ed;
+}
+
+.cost-status.is-running {
+  color: #356fa8;
+  background: #e5f0fb;
+}
+
+.cost-status--small {
+  font-size: 20rpx;
+  padding: 5rpx 10rpx;
+}
+
+.cost-dish__metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0 20rpx;
+  padding: 17rpx 0;
+  border-top: 1rpx solid #edf0ee;
+  border-bottom: 1rpx solid #edf0ee;
+}
+
+.cost-metric {
+  min-width: 0;
+  padding: 0 8rpx;
+  text-align: center;
+  border-right: 1rpx solid #edf0ee;
+}
+
+.cost-metric:last-child {
+  border-right: 0;
+}
+
+.cost-metric__label {
+  display: block;
+  min-height: 54rpx;
+  color: #74807b;
+  font-size: 21rpx;
+  line-height: 27rpx;
+}
+
+.cost-metric__value {
+  display: block;
+  margin-top: 4rpx;
+  color: #157b69;
+  font-size: 27rpx;
+  line-height: 38rpx;
+  font-weight: 700;
+}
+
+.cost-metric__value.is-empty {
+  color: #a5ada9;
+}
+
+.cost-partial {
+  display: flex;
+  justify-content: space-between;
+  margin: 14rpx 20rpx 0;
+  padding: 12rpx 15rpx;
+  border-radius: 12rpx;
+  background: #f4f8f6;
+  color: #557068;
+  font-size: 22rpx;
+}
+
+.cost-reasons {
+  margin: 14rpx 20rpx 0;
+  padding: 12rpx 15rpx;
+  border-radius: 12rpx;
+  background: #fff8ee;
+}
+
+.cost-reason {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 6rpx;
+}
+
+.cost-reason:last-child {
+  margin-bottom: 0;
+}
+
+.cost-reason__dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28rpx;
+  height: 28rpx;
+  margin: 2rpx 9rpx 0 0;
+  border-radius: 50%;
+  background: #e8a347;
+  color: #fff;
+  font-size: 18rpx;
+  font-weight: 700;
+}
+
+.cost-reason__text {
+  flex: 1;
+  color: #8f5d24;
+  font-size: 22rpx;
+  line-height: 33rpx;
+}
+
+.cost-expand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+  padding: 17rpx 22rpx;
+  border-top: 1rpx solid #edf0ee;
+  color: #257f70;
+  font-size: 24rpx;
+}
+
+.cost-days {
+  padding: 0 20rpx 18rpx;
+  background: #fbfcfb;
+}
+
+.cost-day {
+  padding: 17rpx 0;
+  border-bottom: 1rpx solid #e8ecea;
+}
+
+.cost-day:last-child {
+  border-bottom: 0;
+}
+
+.cost-day__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 12rpx;
 }
 
-.food-fgf-sum-card {
-  flex: 1;
-  min-width: 0;
-  border-radius: 20rpx;
-  padding: 18rpx 12rpx 14rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-}
-
-.food-fgf-sum-card--red {
-  background: #fff5f5;
-  border: 2rpx solid #ffcccc;
-}
-
-.food-fgf-sum-card--blue {
-  background: #f0f7ff;
-  border: 2rpx solid #d0e1fd;
-}
-
-.food-fgf-sum-card--orange {
-  background: #fff7ec;
-  border: 2rpx solid #fde8c9;
-}
-
-.food-fgf-sum-hd {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 12rpx;
-  width: 100%;
-  padding: 0 4rpx;
-}
-
-.food-fgf-sum-ico {
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 50%;
-  font-size: 22rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10rpx;
-  flex-shrink: 0;
-  color: #ffffff;
-}
-
-.food-fgf-sum-card--red .food-fgf-sum-ico {
-  background: #ef4444;
-}
-
-.food-fgf-sum-card--blue .food-fgf-sum-ico {
-  background: #3b82f6;
-}
-
-.food-fgf-sum-card--orange .food-fgf-sum-ico {
-  background: #fb923c;
-}
-
-.food-fgf-sum-tit {
-  flex: 1;
-  min-width: 0;
-  font-size: 22rpx;
-  color: #4b5563;
-  font-weight: 500;
-  text-align: left;
-  line-height: 1.35;
-}
-
-.food-fgf-sum-val {
-  font-size: 34rpx;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #111827;
-}
-
-.food-fgf-sum-unit {
-  font-size: 22rpx;
-  color: #6b7280;
-  margin-top: 4rpx;
-}
-
-.food-fgf-sum-sub {
-  margin-top: 6rpx;
-  font-size: 22rpx;
-  color: #6b7280;
-}
-
-
-
-/* ========== 列表头 ========== */
-.food-fgf-section-title-row {
-  padding: 16rpx 20rpx 8rpx;
-  background: #fff;
-}
-
-.food-fgf-list-title {
-  font-size: 34rpx;
-  font-weight: 700;
-  color: #111827;
-  margin-right: 16rpx;
-}
-
-.food-fgf-ab-pill {
-  padding: 6rpx 18rpx;
-  border-radius: 999rpx;
-  font-size: 26rpx;
-  color: #666;
-  background: #f3f4f6;
-  border: 1rpx solid #e5e7eb;
-}
-
-.food-fgf-ab-pill.is-on {
-  color: #dc2626;
-  background: #fef2f2;
-  border-color: #fecaca;
-  font-weight: 600;
-}
-
-/* ---------- 排序条（紧凑三选项） ---------- */
-.cog-sort-wrap {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 12rpx 16rpx 14rpx;
-  background: #fff;
-  border-bottom: 1rpx solid #eee;
-}
-
-.cog-sort-chips {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0;
-}
-
-.cog-sort-chip {
-  display: inline-flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 10rpx 20rpx;
-  border-radius: 999rpx;
-  font-size: 26rpx;
-  color: #333;
-  background: #f5f6f8;
-}
-
-.cog-sort-chip.is-on {
-  font-weight: 600;
-  color: #059669;
-  background: #ecfdf5;
-  border: 1rpx solid #a7f3d0;
-}
-
-.cog-sort-chip-arrow {
-  margin-left: 6rpx;
-  font-size: 24rpx;
-  color: inherit;
-}
-
-.cog-sort-sep {
-  font-size: 24rpx;
-  color: #d1d5db;
-  padding: 0 4rpx;
-}
-
-.food-fgf-list {
-  padding: 8rpx 16rpx 24rpx;
-}
-
-/* ========== 菜品卡 ========== */
-.food-fgf-dish-card {
-  background: #fff;
-  border-radius: 20rpx;
-  margin-bottom: 20rpx;
-  padding: 20rpx 18rpx 0;
-  border: 1rpx solid #e8e8e8;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-
-.food-fgf-dish-hd {
-  align-items: flex-start;
-  margin-bottom: 16rpx;
-}
-
-.food-fgf-dish-cover-wrap {
-  position: relative;
-  flex-shrink: 0;
-  margin-right: 16rpx;
-}
-
-.food-fgf-dish-cover {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 14rpx;
-  border: 1rpx solid #eee;
-  background: #f5f5f5;
-}
-
-.food-fgf-cover-badge {
-  position: absolute;
-  top: 6rpx;
-  left: 6rpx;
-  padding: 2rpx 10rpx;
-  border-radius: 8rpx;
-  font-size: 20rpx;
-  font-weight: 600;
-  color: #fff;
-}
-
-.food-fgf-cover-badge--bad {
-  background: rgba(220, 38, 38, 0.92);
-}
-
-.food-fgf-cover-badge--ok {
-  background: rgba(5, 150, 105, 0.9);
-}
-
-.food-fgf-dish-hd-main {
-  min-width: 0;
-}
-
-.food-fgf-dish-name-line {
-  align-items: flex-start;
-  margin-bottom: 10rpx;
-}
-
-
-.dfl-dish-head__idx {
-  flex-shrink: 0;
-  width: 40rpx;
-  margin-right: 8rpx;
-  font-size: 32rpx;
-  color: var(--gb-text-muted);
-  line-height: 44rpx;
-  text-align: center;
-}
-
-
-.food-fgf-dish-title {
-  flex: 1;
-  font-size: 38rpx;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.35;
-  margin-right: 8rpx;
-}
-
-.food-fgf-dish-util {
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.food-fgf-dish-util-lab {
-  font-size: 24rpx;
-  color: #9ca3af;
-  margin-right: 4rpx;
-}
-
-.food-fgf-dish-util-num {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #374151;
-}
-
-.food-fgf-dish-util-pct {
-  font-size: 24rpx;
-  color: #6b7280;
-  margin-right: 6rpx;
-}
-
-.food-fgf-dish-util-pill {
-  padding: 2rpx 10rpx;
-  border-radius: 999rpx;
-  background: #fff;
-  border: 1rpx solid #e5e7eb;
-}
-
-.food-fgf-dish-util-pill .util-text {
-  font-size: 22rpx;
-}
-
-.food-fgf-dish-sub {
-  font-size: 28rpx;
-  color: #4b5563;
-  line-height: 1.55;
-  font-weight: 500;
-}
-
-.food-fgf-dot {
-  margin: 0 8rpx;
-  color: #d1d5db;
-}
-
-/* ========== 分区标题栏 + 白色卡片（与 depFoodList 风格统一） ========== */
-.fgf-sec-block {
-  margin-bottom: 16rpx;
-}
-
-.fgf-sec-hd {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 4rpx;
-  margin-bottom: 12rpx;
-}
-
-.fgf-sec-icon {
-  width: 44rpx;
-  height: 44rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12rpx;
-  flex-shrink: 0;
-}
-
-.fgf-sec-icon--green {
-  background: #ecfdf5;
-}
-
-.fgf-sec-icon-txt {
-  font-size: 24rpx;
-  line-height: 1;
-}
-
-.fgf-sec-tit {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.35;
-}
-
-/* 卡片内容区（替代旧 food-fgf-cost-strip） */
-.fgf-sec-card {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 20rpx 12rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
-}
-
-.fgf-sec-card--3col .food-fgf-cost-col {
-  flex: 1;
-}
-
-/* 绿色强调文字（成本偏差 / 偏差率 / 成本差额） */
-.fgf-val-green {
-  color: #059669 !important;
-}
-
-.fgf-cap-green {
-  color: #059669 !important;
-  font-weight: 600 !important;
-}
-
-/* 配料区域内的 scroll-view */
-.fgf-ing-scroll {
-  width: 100%;
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 8rpx 0 12rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* 成本条：实际 / 理论 / 偏差 / 销售额 */
-
-.food-fgf-cost-col {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.food-fgf-cost-div {
-  width: 1rpx;
-  background: #e5e7eb;
-  align-self: stretch;
-  margin: 4rpx 0;
-}
-
-.food-fgf-cost-cap {
-  font-size: 24rpx;
-  color: #6b7280;
-  margin-bottom: 8rpx;
-  font-weight: 500;
-}
-
-.food-fgf-cost-cap--sort-active {
-  color: #059669;
-  font-weight: 600;
-}
-
-.food-fgf-cost-val {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #111827;
-}
-
-.food-fgf-cost-val--sort-active {
-  color: #059669;
-}
-
-.food-fgf-cost-unit {
-  font-size: 22rpx;
-  color: #6b7280;
-  margin-top: 4rpx;
-}
-
-.food-fgf-cost-unit--sort-active {
-  color: #059669;
-  font-weight: 500;
-}
-
-.food-fgf-cost-diff-line {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
-
-.food-fgf-diff-arrow {
-  margin-left: 6rpx;
-  font-size: 26rpx;
-  color: #9ca3af;
-}
-
-.food-fgf-diff-arrow.is-up {
-  color: #fa5151;
-}
-
-.food-fgf-diff-arrow.is-down {
-  color: #07c160;
-}
-
-.food-fgf-diff-arrow.food-fgf-diff-arrow--sort-active {
-  color: #059669;
-}
-
-/* signedNumber.wxs 输出 cog-diff */
-.cog-diff--pos {
-  color: #fa5151;
-}
-
-.cog-diff--neg {
-  color: #07c160;
-}
-
-.cog-diff--zero {
-  color: #6b7280;
-}
-
-.cog-diff--na {
-  color: #9ca3af;
-}
-
-/* ========== 配料表（横向滚动） ========== */
-.food-fgf-ing-sec {
-  padding-bottom: 8rpx;
-}
-
-.food-fgf-ing-sec-cap {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #4b5563;
-  margin-bottom: 10rpx;
-}
-
-.food-fgf-ing-scroll {
-  width: 100%;
-}
-
-.food-fgf-ing-table {
-  display: inline-block;
-  min-width: 100%;
-  padding-bottom: 8rpx;
-}
-
-.food-fgf-ing-tr {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  border-bottom: 1rpx solid #f3f4f6;
-  padding: 12rpx 8rpx;
-  box-sizing: border-box;
-}
-
-.food-fgf-ing-tr--head {
-  background: #f9fafb;
-  border-radius: 10rpx;
-  border-bottom: none;
-}
-
-/* 列宽：表头与表体同一套（仅直接子节点，避免单元格内多行 text 再套一列宽） */
-.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(1) {
-  width: 220rpx;
-}
-
-.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(2),
-.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(3),
-.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(4),
-.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(5) {
-  width: 152rpx;
-}
-
-.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(6),
-.food-fgf-ing-tr > .food-fgf-ing-td:nth-child(7) {
-  width: 132rpx;
-}
-
-.food-fgf-ing-td {
-  flex-shrink: 0;
-  box-sizing: border-box;
-  font-size: 26rpx;
-  color: #1f2937;
-  text-align: center;
-  padding: 0 6rpx;
-  word-break: break-all;
-  line-height: 1.45;
-}
-
-.food-fgf-ing-td--name {
-  text-align: left;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.food-fgf-ing-td--util {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4rpx;
-}
-
-/* 单元格内多行文案（不占列宽） */
-.food-fgf-ing-line {
+.cost-day__date {
   display: block;
-  width: 100%;
-  font-size: 28rpx;
-  color: #1f2937;
-  text-align: center;
-  line-height: 1.45;
-  word-break: break-all;
+  color: #33413c;
+  font-size: 25rpx;
+  line-height: 34rpx;
+  font-weight: 650;
 }
 
-.food-fgf-ing-line--sub {
-  font-size: 24rpx;
-  color: #5b616d;
-}
-
-.food-fgf-ing-ico {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 50%;
-  margin-right: 8rpx;
-  flex-shrink: 0;
-  border: 1rpx solid #eee;
-}
-
-.food-fgf-ing-name-txt {
-  flex: 1;
-  min-width: 0;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #111827;
-  line-height: 1.4;
-}
-
-.food-fgf-ing-tr--head .food-fgf-ing-td {
-  font-size: 24rpx;
-  color: #555a64;
-  font-weight: 600;
-}
-
-.food-fgf-ing-tag {
-  font-size: 20rpx;
-  padding: 2rpx 8rpx;
-  border-radius: 6rpx;
-  background: #f9fafb;
-  border: 1rpx solid #e5e7eb;
-}
-
-.food-fgf-dish-foot {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 20rpx 0 18rpx;
-  font-size: 28rpx;
-  color: #6b7280;
-  font-weight: 500;
-  border-top: 1rpx solid #f3f4f6;
-}
-
-.food-fgf-foot-arrow {
-  margin-left: 6rpx;
-  font-size: 32rpx;
-  line-height: 1;
-}
-
-.food-fgf-scroll-pad {
-  height: 32rpx;
-}
-
-.food-fgf-empty {
-  padding: 60rpx 32rpx;
-  text-align: center;
-  font-size: 30rpx;
-  color: #6b7280;
-  line-height: 1.5;
-}
-
-.min-w-0 {
-  min-width: 0;
-}
-
-/* ========== 展开按钮 ========== */
-.fgf-expand-btn {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 12rpx 0 16rpx;
-  gap: 8rpx;
-}
-
-.fgf-expand-btn__arrow {
-  font-size: 28rpx;
-  color: #059669;
-  line-height: 1;
-}
-
-.fgf-expand-btn__label {
-  font-size: 26rpx;
-  color: #059669;
-  font-weight: 500;
-}
-
-/* ========== 展开详情面板 ========== */
-.fgf-detail-panel {
-  display: none;
-}
-
-.fgf-detail-panel.is-open {
+.cost-day__sales {
   display: block;
+  margin-top: 2rpx;
+  color: #86908c;
+  font-size: 21rpx;
+}
+
+.cost-day__body {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 11rpx;
+  color: #557068;
+  font-size: 22rpx;
+}
+
+.cost-day__reason {
+  display: block;
+  margin-top: 9rpx;
+  color: #a16522;
+  font-size: 21rpx;
+  line-height: 31rpx;
+}
+
+.cost-empty {
+  padding: 120rpx 30rpx;
+  text-align: center;
+  color: #8a9490;
+  font-size: 27rpx;
+}
+
+.cost-bottom-space {
+  height: 48rpx;
 }

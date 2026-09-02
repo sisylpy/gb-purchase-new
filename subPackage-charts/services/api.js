@@ -15,6 +15,11 @@ var getGbGoodsCostStatistics = function (payload) {
   return request.post('gbdepartmentgoodsstockreduce/getGbGoodsCostStatistics', payload, { useUrlParams: true });
 };
 
+/** 当前有效销量输入对应的逐日历史理论成本报表。 */
+var getDishDailyCostReport = function (params) {
+  return request.get('cost-accounting/daily-costs/report', params);
+};
+
 var getGoodsCostBySearchDate = function (payload) {
   return request.post('gbdepartmentgoodsstockreduce/getGoodsCostBySearchDate', payload, { useUrlParams: true });
 };
@@ -240,6 +245,7 @@ module.exports = {
   getGoodsCostBySearchDate: getGoodsCostBySearchDate,
   getGoodsReduceWithDayData: getGoodsReduceWithDayData,
   getGbIngredientAnalysis: aiChatApi.getGbIngredientAnalysis,
+  getDishDailyCostReport: getDishDailyCostReport,
   outboundIngredientAnalysis: aiChatApi.outboundIngredientAnalysis,
   // 库存
   getGbStockPurGoods: getGbStockPurGoods,

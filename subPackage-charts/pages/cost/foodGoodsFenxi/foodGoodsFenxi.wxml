@@ -1,289 +1,141 @@
 <wxs src="/wxs/format.wxs" module="tool" />
-<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
-<wxs module="utilLv" src="/wxs/utilizationLevel.wxs" />
-<wxs module="num" src="/wxs/signedNumber.wxs" />
-<wxs module="fmt" src="/wxs/format.wxs" />
 
-<view class="flex flex-column food-fgf-page">
-  <back-navbar class="" style="height: {{navBarHeight}}rpx;" title="菜品分析" avatar="/images/back-gray.png"
-    button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+<view class="cost-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="菜品成本" avatar="/images/back-gray.png"
+    bindnavbuttontap="toBack"></back-navbar>
 
-
-  <!--  top -->
-  <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
-    <view class="flex-row">
-      <view class="p-20" bindtap="toDatePage">
-        <image src="../../../../images/calender.png" class="icon"></image>
-      </view>
-      <view class="flex-column pt-10">
-        <view class="font-yuan">{{hanzi}}</view>
-        <view class="flex-row" wx:if="{{startDate == stopDate}}">
-          <view class=" small" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
-        </view>
-        <view class="flex-row" wx:else>
-          <view class="" wx:if="{{startDate}}"> {{tool.transferDateString(startDate)}}</view>
-          <text class="plr-10">-</text>
-          <view class="" wx:if="{{stopDate}}">{{tool.transferDateString(stopDate)}}</view>
-        </view>
+  <view class="cost-toolbar">
+    <view class="cost-date" bindtap="toDatePage">
+      <image src="../../../../images/calender.png" class="cost-date__icon"></image>
+      <view class="cost-date__text">
+        <text class="cost-date__name">{{hanzi}}</text>
+        <text class="cost-date__range" wx:if="{{startDate == stopDate}}">{{tool.transferDateString(startDate)}}</text>
+        <text class="cost-date__range" wx:else>{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text>
       </view>
     </view>
-
-
-    <view class="flex-row p-20" bindtap="onToggleSearchBar">
-      <image src="/images/search-3.png"
-        class="icon mr-20 food-fgf-search-top-ico {{dishNameSearch ? 'food-fgf-search-top-ico--on' : ''}}"></image>
-    </view>
+    <image src="/images/search-3.png" class="cost-search-button" bindtap="onToggleSearchBar"></image>
   </view>
 
-  <view class="food-fgf-search-panel bg-white border-bottom" wx:if="{{searchBarOpen}}">
-    <view class="food-fgf-search-inner">
-      <image class="food-fgf-search-inner-ico" src="/images/search-3.png" mode="aspectFit" />
-      <input class="food-fgf-search-input" value="{{dishNameSearchDraft}}" placeholder="搜索菜品名称" confirm-type="search"
-        focus="{{searchInputFocus}}" bindinput="onDishNameSearchInput" bindconfirm="onDishNameSearchConfirm" />
-      <text class="food-fgf-search-clear" wx:if="{{dishNameSearchDraft}}" catchtap="onDishNameSearchClear">×</text>
-    </view>
+  <view class="cost-search" wx:if="{{searchBarOpen}}">
+    <image src="/images/search-3.png" class="cost-search__icon"></image>
+    <input class="cost-search__input" value="{{dishNameSearchDraft}}" placeholder="搜索菜品名称"
+      confirm-type="search" focus="{{searchInputFocus}}" bindinput="onDishNameSearchInput"
+      bindconfirm="onDishNameSearchConfirm" />
+    <text class="cost-search__clear" wx:if="{{dishNameSearchDraft}}" bindtap="onDishNameSearchClear">×</text>
   </view>
 
-  <scroll-view scroll-y class="food-fgf-scroll flex-1">
-    <view class="food-fgf-sum-row" wx:if="{{scopeSalesSubtotals && !dishNameSearch}}">
-      <view class="food-fgf-sum-card food-fgf-sum-card--red">
-        <view class="food-fgf-sum-hd">
-          <view class="food-fgf-sum-ico">实</view>
-          <text class="food-fgf-sum-tit">出库分摊总成本</text>
-        </view>
-        <text class="food-fgf-sum-val">¥{{scopeSalesSubtotals.outboundAllocatedCostTotal || '—'}}</text>
+  <scroll-view scroll-y class="cost-scroll">
+    <view class="cost-summary" wx:if="{{reportSummary}}">
+      <view class="cost-summary-card">
+        <text class="cost-summary-card__label">营业额</text>
+        <text class="cost-summary-card__value">¥{{reportSummary.totalRevenueText}}</text>
+        <text class="cost-summary-card__hint">销量 {{reportSummary.totalSalesQuantityText}} 份</text>
       </view>
-      <view class="food-fgf-sum-card food-fgf-sum-card--blue">
-        <view class="food-fgf-sum-hd">
-          <view class="food-fgf-sum-ico">理</view>
-          <text class="food-fgf-sum-tit">理论总成本</text>
-        </view>
-        <text class="food-fgf-sum-val">¥{{scopeSalesSubtotals.theoreticalCostTotal || '—'}}</text>
+      <view class="cost-summary-card">
+        <text class="cost-summary-card__label">历史理论成本</text>
+        <text class="cost-summary-card__value" wx:if="{{reportSummary.allComplete}}">¥{{reportSummary.totalCostText}}</text>
+        <text class="cost-summary-card__value cost-summary-card__value--pending" wx:else>待完善</text>
+        <text class="cost-summary-card__hint" wx:if="{{!reportSummary.allComplete}}">已完整 ¥{{reportSummary.resolvedCostText}}</text>
+        <text class="cost-summary-card__hint" wx:else>按营业日采购价</text>
       </view>
-      <view class="food-fgf-sum-card food-fgf-sum-card--orange">
-        <view class="food-fgf-sum-hd">
-          <view class="food-fgf-sum-ico">差</view>
-          <text class="food-fgf-sum-tit">成本偏差率</text>
-        </view>
-        <text
-          class="food-fgf-sum-val">{{scopeSalesSubtotals.costDeviationRate != null ? scopeSalesSubtotals.costDeviationRate : '-'}}%</text>
-        <text class="food-fgf-sum-sub"
-          wx:if="{{scopeSalesSubtotals.costDeviationTotal}}">{{scopeSalesSubtotals.costDeviationTotal}}</text>
+      <view class="cost-summary-card">
+        <text class="cost-summary-card__label">销量核算完整率</text>
+        <text class="cost-summary-card__value">{{reportSummary.salesCoverageRateText}}%</text>
+        <text class="cost-summary-card__hint">{{reportSummary.completedGrainCount}} / {{reportSummary.totalGrainCount}} 个营业日</text>
       </view>
     </view>
 
-    <block wx:if="{{salesDishRowsAll.length}}">
-      <view class="food-fgf-section-title-row" wx:if="{{!dishNameSearch}}">
-        <text class="food-fgf-list-title">菜品明细</text>
+    <view class="cost-warning" wx:if="{{reportSummary && !reportSummary.allComplete}}">
+      <text class="cost-warning__title">还有 {{reportSummary.pendingGrainCount}} 条营业日成本待完善</text>
+      <text class="cost-warning__text">缺失成本不会按 0 元计算。已知配料金额 ¥{{reportSummary.knownPartialCostText}} 只用于排查，不是最终菜品成本。</text>
+    </view>
+
+    <view class="cost-list-head" wx:if="{{dishRowsAll.length && !dishNameSearch}}">
+      <text class="cost-list-head__title">菜品明细（{{dishRowsAll.length}}）</text>
+      <view class="cost-sort-row">
+        <view class="cost-sort {{sortBy === 'status' ? 'is-active' : ''}}" data-sort="status" bindtap="onSort">待完善</view>
+        <view class="cost-sort {{sortBy === 'revenue' ? 'is-active' : ''}}" data-sort="revenue" bindtap="onSort">营业额</view>
+        <view class="cost-sort {{sortBy === 'sales' ? 'is-active' : ''}}" data-sort="sales" bindtap="onSort">销量</view>
+        <view class="cost-sort {{sortBy === 'completion' ? 'is-active' : ''}}" data-sort="completion" bindtap="onSort">完整率</view>
       </view>
-      <view class="cog-sort-wrap" wx:if="{{!dishNameSearch}}">
-        <view class="cog-sort-chips">
-          <view class="cog-sort-chip {{sortBy === 'diffCostPerPortion' ? 'is-on' : ''}}" bindtap="onIngredientSort"
-            data-sort="diffCostPerPortion">
-            <text>成本偏差</text>
-            <text class="cog-sort-chip-arrow"
-              wx:if="{{sortBy === 'diffCostPerPortion'}}">{{sortOrder === 'asc' ? '↑' : '↓'}}</text>
+    </view>
+
+    <view class="cost-empty" wx:if="{{!loading && !dishRows.length}}">
+      <text>{{dishNameSearch ? '没有找到相关菜品' : (emptyHint || '暂无成本数据')}}</text>
+    </view>
+
+    <view class="cost-dish-list" wx:if="{{dishRows.length}}">
+      <view class="cost-dish" wx:for="{{dishRows}}" wx:key="foodId">
+        <view class="cost-dish__head">
+          <view class="cost-dish__name-wrap">
+            <text class="cost-dish__index">{{index + 1}}</text>
+            <view class="cost-dish__title-wrap">
+              <text class="cost-dish__title">{{item.dishName}}</text>
+              <text class="cost-dish__sub">销量 {{item.salesQuantityText}} 份 · 营业额 ¥{{item.revenueAmountText}}</text>
+            </view>
           </view>
-          <text class="cog-sort-sep">｜</text>
-          <view class="cog-sort-chip {{sortBy === 'diffRate' ? 'is-on' : ''}}" bindtap="onIngredientSort"
-            data-sort="diffRate">
-            <text>偏差率</text>
-            <text class="cog-sort-chip-arrow"
-              wx:if="{{sortBy === 'diffRate'}}">{{sortOrder === 'asc' ? '↑' : '↓'}}</text>
+          <text class="cost-status {{item.allComplete ? 'is-complete' : (item.status === 'RECALCULATION_PENDING' ? 'is-running' : 'is-pending')}}">{{item.statusLabel}}</text>
+        </view>
+
+        <view class="cost-dish__metrics">
+          <view class="cost-metric">
+            <text class="cost-metric__label">历史理论成本</text>
+            <text class="cost-metric__value" wx:if="{{item.allComplete}}">¥{{item.totalCostText}}</text>
+            <text class="cost-metric__value is-empty" wx:else>—</text>
           </view>
-          <text class="cog-sort-sep">｜</text>
-          <view class="cog-sort-chip {{sortBy === 'ingredientCount' ? 'is-on' : ''}}" bindtap="onIngredientSort"
-            data-sort="ingredientCount">
-            <text>配料数量</text>
-            <text class="cog-sort-chip-arrow"
-              wx:if="{{sortBy === 'ingredientCount'}}">{{sortOrder === 'asc' ? '↑' : '↓'}}</text>
+          <view class="cost-metric">
+            <text class="cost-metric__label">单份成本</text>
+            <text class="cost-metric__value" wx:if="{{item.allComplete}}">¥{{item.costPerPortionText}}</text>
+            <text class="cost-metric__value is-empty" wx:else>—</text>
+          </view>
+          <view class="cost-metric">
+            <text class="cost-metric__label">理论毛利率</text>
+            <text class="cost-metric__value" wx:if="{{item.allComplete}}">{{item.grossMarginRateText}}%</text>
+            <text class="cost-metric__value is-empty" wx:else>—</text>
+          </view>
+          <view class="cost-metric">
+            <text class="cost-metric__label">销量完整率</text>
+            <text class="cost-metric__value">{{item.salesCoverageRateText}}%</text>
+          </view>
+        </view>
+
+        <view class="cost-partial" wx:if="{{!item.allComplete && item.hasKnownEvidence}}">
+          <text>已核算部分 ¥{{item.knownPartialCostText}}</text>
+          <text>配料证据完整率 {{item.evidenceCoverageRateText}}%</text>
+        </view>
+
+        <view class="cost-reasons" wx:if="{{item.missingReasons.length}}">
+          <view class="cost-reason" wx:for="{{item.missingReasons}}" wx:for-item="reason" wx:key="*this">
+            <text class="cost-reason__dot">!</text>
+            <text class="cost-reason__text">{{reason}}</text>
+          </view>
+        </view>
+
+        <view class="cost-expand" bindtap="onToggleDishDetail" data-index="{{index}}">
+          <text>{{item._expanded ? '收起营业日明细' : '查看营业日明细'}}</text>
+          <text>{{item._expanded ? '⌃' : '⌄'}}</text>
+        </view>
+
+        <view class="cost-days" wx:if="{{item._expanded}}">
+          <view class="cost-day" wx:for="{{item.dailyRows}}" wx:for-item="day" wx:key="salesInputVersionId">
+            <view class="cost-day__top">
+              <view>
+                <text class="cost-day__date">{{day.businessDate}}</text>
+                <text class="cost-day__sales">{{day.salesQuantityText}} 份 · ¥{{day.revenueAmountText}}</text>
+              </view>
+              <text class="cost-status cost-status--small {{day.isComplete ? 'is-complete' : (day.isCalculating ? 'is-running' : 'is-pending')}}">{{day.statusLabel}}</text>
+            </view>
+            <view class="cost-day__body">
+              <text>配方 {{day.recipeVersionText}}</text>
+              <text wx:if="{{day.isComplete}}">成本 ¥{{day.completeCostAmountText}}</text>
+              <text wx:elif="{{day.hasKnownEvidence}}">已知部分 ¥{{day.knownCostAmountText}}</text>
+              <text wx:else>成本 —</text>
+            </view>
+            <text class="cost-day__reason" wx:if="{{day.missingReasonText}}">{{day.missingReasonText}}</text>
           </view>
         </view>
       </view>
-      <view class="food-fgf-list-empty-local" wx:if="{{!salesDishRows.length && dishNameSearch}}">
-        <text>未找到「{{dishNameSearch}}」相关菜品</text>
-      </view>
-    </block>
-
-    <block wx:if="{{salesDishRows.length}}">
-      <view class="flex-column food-fgf-list">
-        <view class="food-fgf-dish-card" wx:for="{{salesDishRows}}" wx:for-item="item" wx:key="dishId">
-          <view class="food-fgf-dish-hd flex-row">
-            <view class="food-fgf-dish-cover-wrap">
-              <!-- <image class="food-fgf-dish-cover"
-                src="{{item.ingredientRows && item.ingredientRows.length ? (url + item.ingredientRows[0].gbDgGoodsFileImg || '/images/logo.png') : '/images/logo.png'}}"
-                mode="aspectFill" /> -->
-              <!-- <view class="food-fgf-cover-badge food-fgf-cover-badge--bad"
-                wx:if="{{num.signKind(item.diffCostPerPortion || '0') === 'pos' || num.signKind(item.diffCostPerPortion || '0') === 'neg'}}">异常</view>
-              <view class="food-fgf-cover-badge food-fgf-cover-badge--ok" wx:else>正常</view> -->
-            </view>
-            <view class="food-fgf-dish-hd-main flex-1 min-w-0">
-              <view class="flex-row-between food-fgf-dish-name-line">
-                <text class="dfl-dish-head__idx">{{index + 1}}.</text>
-
-                <text class="food-fgf-dish-title">{{item.dishName}}</text>
-              </view>
-              <view class="food-fgf-dish-sub">
-                <text>售价: {{item.salesUnitPrice || '00.00'}}元/份</text>
-                <text class="food-fgf-dot">·</text>
-                <text>销量: {{item.salesPortions || '00'}}份</text>
-                <text class="food-fgf-dot">·</text>
-                <text>配料 {{item.ingredientCount || '0'}} 种</text>
-              </view>
-            </view>
-          </view>
-
-          <!-- 单份成本对比 -->
-          <view class="fgf-sec-block">
-            <!-- <view class="fgf-sec-hd">
-              <view class="fgf-sec-icon fgf-sec-icon--green">
-                <text class="fgf-sec-icon-txt">📊</text>
-              </view>
-              <text class="fgf-sec-tit">单份成本对比</text>
-            </view> -->
-            <view class="fgf-sec-card">
-              <view class="food-fgf-cost-col">
-                <text class="food-fgf-cost-cap">出库分摊成本</text>
-                <text class="food-fgf-cost-val">{{item.outboundAllocatedCostPerPortion || '—'}}</text>
-                <text class="food-fgf-cost-unit">元/份</text>
-              </view>
-              <view class="food-fgf-cost-div"></view>
-              <view class="food-fgf-cost-col">
-                <text class="food-fgf-cost-cap">理论成本</text>
-                <text class="food-fgf-cost-val">{{item.theoryCostPerPortion}}</text>
-                <text class="food-fgf-cost-unit">元/份</text>
-              </view>
-              <view class="food-fgf-cost-div"></view>
-
-              <view class="food-fgf-cost-col">
-                <text
-                  class="food-fgf-cost-cap {{sortBy === 'diffCostPerPortion' ? 'food-fgf-cost-cap--sort-active' : ''}}">成本偏差</text>
-                <view class="food-fgf-cost-diff-line">
-                  <text
-                    class="food-fgf-cost-val fgf-val-green {{sortBy === 'diffCostPerPortion' ? 'food-fgf-cost-val--sort-active' : num.diffClass(item.diffCostPerPortion || '0')}}">{{num.formatSigned(item.diffCostPerPortion || '0')}}</text>
-                  <text
-                    class="food-fgf-diff-arrow {{num.signKind(item.diffCostPerPortion || '0') === 'pos' ? 'is-up' : ''}} {{num.signKind(item.diffCostPerPortion || '0') === 'neg' ? 'is-down' : ''}} {{sortBy === 'diffCostPerPortion' ? 'food-fgf-diff-arrow--sort-active' : ''}}">{{num.signKind(item.diffCostPerPortion || '0') === 'pos' ? '↑' : (num.signKind(item.diffCostPerPortion || '0') === 'neg' ? '↓' : '')}}</text>
-                </view>
-                <text
-                  class="food-fgf-cost-unit {{sortBy === 'diffCostPerPortion' ? 'food-fgf-cost-unit--sort-active' : ''}}">元/份</text>
-              </view>
-
-              <view class="food-fgf-cost-div"></view>
-              <view class="food-fgf-cost-col">
-                <text
-                  class="food-fgf-cost-cap {{sortBy === 'diffRate' ? 'food-fgf-cost-cap--sort-active' : ''}}">偏差率</text>
-                <text
-                  class="food-fgf-cost-val fgf-val-green {{sortBy === 'diffRate' ? 'food-fgf-cost-val--sort-active' : ''}}">{{item.diffRatePerPortion || '00.00'}}%</text>
-                <text
-                  class="food-fgf-cost-unit {{sortBy === 'diffRate' ? 'food-fgf-cost-unit--sort-active' : ''}}"></text>
-              </view>
-            </view>
-          </view>
-
-          <!-- 展开按钮 -->
-          <view class="fgf-expand-btn" bindtap="onToggleDishDetail" data-index="{{index}}">
-            <text class="fgf-expand-btn__arrow">{{item._expanded ? '∧' : '∨'}}</text>
-            <text class="fgf-expand-btn__label">{{item._expanded ? '收起详情' : '展开更多'}}</text>
-          </view>
-
-          <!-- 展开区域：总量成本对比 + 配料分析 + 底部链接 -->
-          <view class="fgf-detail-panel {{item._expanded ? 'is-open' : ''}}">
-            <!-- 总量成本对比 -->
-            <view class="fgf-sec-block">
-              <!-- <view class="fgf-sec-hd">
-                <view class="fgf-sec-icon fgf-sec-icon--green">
-                  <text class="fgf-sec-icon-txt">📋</text>
-                </view>
-                <text class="fgf-sec-tit">总量成本对比</text>
-              </view> -->
-              <view class="fgf-sec-card fgf-sec-card--3col">
-                <view class="food-fgf-cost-col">
-                  <text class="food-fgf-cost-cap">出库分摊成本</text>
-                  <text class="food-fgf-cost-val">{{item.outboundAllocatedCostAmount || '—'}}</text>
-                  <text class="food-fgf-cost-unit">元</text>
-                </view>
-                <view class="food-fgf-cost-div"></view>
-                <view class="food-fgf-cost-col">
-                  <text class="food-fgf-cost-cap">理论成本</text>
-                  <text class="food-fgf-cost-val">{{item.theoryCostTotal}}</text>
-                  <text class="food-fgf-cost-unit">元</text>
-                </view>
-                <view class="food-fgf-cost-div"></view>
-                <view class="food-fgf-cost-col">
-                  <text class="food-fgf-cost-cap fgf-cap-green">成本差额</text>
-                  <text class="food-fgf-cost-val fgf-val-green">{{item.costTotalDiff}}</text>
-                  <text class="food-fgf-cost-unit">元</text>
-                </view>
-              </view>
-            </view>
-
-            <!-- 主要配料分析 -->
-            <view class="fgf-sec-block">
-              <!-- <view class="fgf-sec-hd">
-                <view class="fgf-sec-icon fgf-sec-icon--green">
-                  <text class="fgf-sec-icon-txt">👥</text>
-                </view>
-                <text class="fgf-sec-tit">主要配料分析</text>
-              </view> -->
-              <view class="fgf-ing-scroll">
-                <view class="food-fgf-ing-table">
-                  <view class="food-fgf-ing-tr food-fgf-ing-tr--head">
-                    <text class="food-fgf-ing-td food-fgf-ing-td--name">配料</text>
-                    <text class="food-fgf-ing-td">偏差率</text>
-                    <text class="food-fgf-ing-td">理论含量</text>
-                    <text class="food-fgf-ing-td">分摊含量</text>
-                    <text class="food-fgf-ing-td">出库分摊成本</text>
-                    <text class="food-fgf-ing-td">制作总量</text>
-                    <text class="food-fgf-ing-td">损耗总量</text>
-                  </view>
-                  <view class="food-fgf-ing-tr" wx:for="{{item.ingredientRows}}" wx:for-item="ing" wx:key="disGoodsId">
-                    <view class="food-fgf-ing-td food-fgf-ing-td--name">
-                      <image class="food-fgf-ing-ico" src="{{(url + ing.gbDgGoodsFileImg || '/images/logo.png')}}"
-                        mode="aspectFill" />
-                      <text class="food-fgf-ing-name-txt">{{ing.gbDgGoodsName}}</text>
-                    </view>
-                    <view class="food-fgf-ing-td food-fgf-ing-td--util">
-                      <text>{{ing.devianceRate || '00'}}%</text>
-                      <text wx:if="{{ing.deviance}}"
-                        class="food-fgf-ing-tag {{utilLv.textClass(ing.deviance.level)}}">{{ing.deviance.labelZh}}</text>
-                    </view>
-                    <view class="food-fgf-ing-td food-fgf-ing-td--util">
-                      <text class="food-fgf-ing-line">{{ing.recipeUnitPerDish}}</text>
-                      <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}/份</text>
-                    </view>
-                    <view class="food-fgf-ing-td food-fgf-ing-td--util">
-                      <text class="food-fgf-ing-line">{{ing.produceAllocatedPerSoldPortion}}</text>
-                      <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}/份</text>
-                    </view>
-                    <view class="food-fgf-ing-td food-fgf-ing-td--util">
-                      <text class="food-fgf-ing-line">{{ing.outboundAllocatedCostPerPortion}}</text>
-                      <text class="food-fgf-ing-line food-fgf-ing-line--sub">元/份</text>
-                    </view>
-                    <view class="food-fgf-ing-td food-fgf-ing-td--util">
-                      <text class="food-fgf-ing-td">{{ing.actualProduceUsage}}</text>
-                      <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}</text>
-                    </view>
-                    <view class="food-fgf-ing-td food-fgf-ing-td--util">
-                      <text class="food-fgf-ing-td">{{ing.actualLossAndWasteUsage}}</text>
-                      <text class="food-fgf-ing-line food-fgf-ing-line--sub">{{ing.gbDgGoodsStandardname}}</text>
-                    </view>
-                  </view>
-                </view>
-              </view>
-            </view>
-
-            <view class="food-fgf-dish-foot" catchtap="onOpenIngredients" data-dish="{{item}}">
-              <text>查看配料成本分析</text>
-              <text class="food-fgf-foot-arrow">›</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </block>
-    <view wx:elif="{{!salesDishRowsAll.length}}" class="food-fgf-empty">{{emptyHint || '暂无数据'}}</view>
-    <view wx:elif="{{salesDishRowsAll.length && !salesDishRows.length && !dishNameSearch}}" class="food-fgf-empty">
-      无符合条件的菜品</view>
-
-    <view class="food-fgf-scroll-pad"></view>
+    </view>
+    <view class="cost-bottom-space"></view>
   </scroll-view>
 </view>

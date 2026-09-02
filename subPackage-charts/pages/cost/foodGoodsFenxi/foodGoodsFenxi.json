@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "菜品销售",
+  "navigationBarTitleText": "菜品成本",
   "usingComponents": {
     "back-navbar": "/components/back-navbar/back-navbar"
   }
