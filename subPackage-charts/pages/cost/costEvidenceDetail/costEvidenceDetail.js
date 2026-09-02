@@ -159,6 +159,7 @@ Page({
       .then(unwrapResponse)
       .then(function (view) { return that._decorateEvidence(view); })
       .then(function (view) {
+        var completionRate = Number(view.result && view.result.completionRate || 0);
         wx.hideLoading();
         that.setData({
           loading: false,
@@ -167,7 +168,8 @@ Page({
           resultStatusLabel: statusLabel(view.result && view.result.status),
           resultStatusClass: statusClass(view.result && view.result.status),
           completeCostText: moneyText(view.result && view.result.completeCostAmount),
-          knownCostText: moneyText(view.result && view.result.knownCostAmount),
+          knownCostText: completionRate > 0
+            ? moneyText(view.result && view.result.knownCostAmount) : '—',
           salesQuantityText: numberText(view.result && view.result.salesQuantity, 2),
           revenueAmountText: moneyText(view.result && view.result.revenueAmount),
           completionRateText: numberText(view.result && view.result.completionRate, 2),
@@ -215,7 +217,8 @@ Page({
         ingredient._priceText = ingredient.historicalBaseUnitPrice == null
           ? '—'
           : unitPriceText(ingredient.historicalBaseUnitPrice, ingredient.baseUnitCode);
-        ingredient._knownCostText = moneyText(ingredient.knownCostAmount);
+        ingredient._knownCostText = ingredient.historicalBaseUnitPrice != null
+          ? moneyText(ingredient.knownCostAmount) : '—';
         ingredient._completeCostText = moneyText(ingredient.completeCostAmount);
         ingredient._reason = cleanText(ingredient.missingReason);
         ingredient._batches = batches.length ? batches : hinted;

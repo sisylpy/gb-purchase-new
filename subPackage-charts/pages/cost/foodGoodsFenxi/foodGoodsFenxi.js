@@ -67,6 +67,8 @@ function _normalizeSummary(summary) {
   item.grossMarginRateText = _rate(item.completeGrossMarginRate);
   item.salesCoverageRateText = _rate(item.salesCoverageRate);
   item.evidenceCoverageRateText = _rate(item.evidenceCoverageRate);
+  item.hasResolvedCost = Number(item.completedGrainCount || 0) > 0;
+  item.hasKnownEvidence = Number(item.evidenceCoverageRate || 0) > 0;
   return item;
 }
 

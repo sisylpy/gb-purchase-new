@@ -35,7 +35,8 @@
         <text class="cost-summary-card__label">历史理论成本</text>
         <text class="cost-summary-card__value" wx:if="{{reportSummary.allComplete}}">¥{{reportSummary.totalCostText}}</text>
         <text class="cost-summary-card__value cost-summary-card__value--pending" wx:else>待完善</text>
-        <text class="cost-summary-card__hint" wx:if="{{!reportSummary.allComplete}}">已完整 ¥{{reportSummary.resolvedCostText}}</text>
+        <text class="cost-summary-card__hint" wx:if="{{!reportSummary.allComplete && reportSummary.hasResolvedCost}}">已完整 ¥{{reportSummary.resolvedCostText}}</text>
+        <text class="cost-summary-card__hint" wx:elif="{{!reportSummary.allComplete}}">已完整 —</text>
         <text class="cost-summary-card__hint" wx:else>按营业日采购价</text>
       </view>
       <view class="cost-summary-card">
@@ -47,7 +48,8 @@
 
     <view class="cost-warning" wx:if="{{reportSummary && !reportSummary.allComplete}}">
       <text class="cost-warning__title">还有 {{reportSummary.pendingGrainCount}} 条营业日成本待完善</text>
-      <text class="cost-warning__text">缺失成本不会按 0 元计算。已知配料金额 ¥{{reportSummary.knownPartialCostText}} 只用于排查，不是最终菜品成本。</text>
+      <text class="cost-warning__text" wx:if="{{reportSummary.hasKnownEvidence}}">缺失成本不会按 0 元计算。已知配料金额 ¥{{reportSummary.knownPartialCostText}} 只用于排查，不是最终菜品成本。</text>
+      <text class="cost-warning__text" wx:else>缺失成本不会按 0 元计算；当前没有可用于金额计算的完整配料证据。</text>
     </view>
 
     <view class="cost-list-head" wx:if="{{dishRowsAll.length && !dishNameSearch}}">
