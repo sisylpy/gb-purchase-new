@@ -702,7 +702,8 @@ Page({
     }
     var departmentId = this._ensureTemplateDepartmentId();
     var distributerId = this._resolveDistributerId();
-    if (!departmentId || !distributerId) return;
+    var operatorId = this._resolveOperatorId();
+    if (!departmentId || !distributerId || !operatorId) return;
     var that = this;
     wx.showModal({
       title: '确认导入',
@@ -770,10 +771,18 @@ Page({
         }
         wx.showModal({
           title: '确认上传',
-          content: '确定上传该合并模板 Excel（菜品销量 + 日营业额）？',
+          content: '系统会先核对菜品、销量、单价和营业额，确认无误后再写入。',
           success: function (modalRes) {
             if (modalRes.confirm) {
-              that._uploadCombinedExcelFile(f.path, departmentId, distributerId);
+              var operatorId = that._resolveOperatorId();
+              if (!operatorId) return;
+              that._analyzeAiRevenueFile(f.path, departmentId, distributerId, {
+                sourceSystem: '精彩账本标准模板',
+                templateType: '合并营业额模板',
+                templateVersion: 'v1',
+                importMode: 'PATCH',
+                operatorId: operatorId,
+              });
             }
           },
         });
@@ -786,29 +795,6 @@ Page({
         wx.showToast({ title: '未选择文件', icon: 'none' });
       },
     });
-  },
-
-  _uploadCombinedExcelFile: function (filePath, departmentId, distributerId) {
-    var that = this;
-    wx.showLoading({ title: '正在上传...', mask: true });
-    foodSalesExcelApi
-      .uploadCombinedDailyExcel(filePath, departmentId, distributerId)
-      .then(function (res) {
-        wx.hideLoading();
-        var code = res.result && res.result.code;
-        var msg = res.result && res.result.msg;
-        if (code === 0 || code === '0') {
-          wx.showToast({ title: '导入成功', icon: 'success' });
-          that._initData();
-        } else {
-          wx.showToast({ title: msg || '上传失败', icon: 'none' });
-        }
-      })
-      .catch(function (err) {
-        wx.hideLoading();
-        console.error('upload combined excel', err);
-        wx.showToast({ title: '网络请求失败', icon: 'none' });
-      });
   },
 
 })
