@@ -149,6 +149,12 @@
 .note-badge--work {
   background: #e0f2fe;
 }
+.note-badge--recipe {
+  background: #fff4df;
+}
+.note-badge--recipe .note-badge-text {
+  color: #b86500;
+}
 .note-badge-icon {
   font-size: 22rpx;
   margin-right: 6rpx;
@@ -221,6 +227,33 @@
 .note-time {
   font-size: 24rpx;
   color: #aaa;
+}
+
+.recipe-review-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 22rpx;
+}
+.recipe-review-btn {
+  flex: 1;
+  height: 72rpx;
+  margin: 0;
+  padding: 0 16rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  line-height: 72rpx;
+  font-weight: 600;
+}
+.recipe-review-btn::after {
+  border: none;
+}
+.recipe-review-btn--minor {
+  color: #666;
+  background: #f2f3f4;
+}
+.recipe-review-btn--primary {
+  color: #fff;
+  background: #148c78;
 }
 
 /* ========== 工作笔记卡片（与 workNoteList 一致） ========== */

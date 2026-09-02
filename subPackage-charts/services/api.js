@@ -228,6 +228,7 @@ module.exports = {
   saveBatchDailyTurnover: saveBatchDailyTurnover,
   uploadTurnoverExcel: uploadTurnoverExcel,
   getDailyBoard: aiChatApi.getDailyBoard,
+  ignoreNewGoodsRecipeReview: aiChatApi.ignoreNewGoodsRecipeReview,
   // 日看板 / 采购统计
   disGetPurchaseDate: aiChatApi.disGetPurchaseDate,
   disGetPurchaseDetailType: aiChatApi.disGetPurchaseDetailType,

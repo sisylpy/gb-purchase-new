@@ -74,8 +74,74 @@ Page({
     this.setData({ showRecipeDebug: !this.data.showRecipeDebug });
   },
 
+  onHandleRecipeReview: function (e) {
+    var rawGoodsId = e.currentTarget.dataset.rawGoodsId || '';
+    wx.showActionSheet({
+      itemList: ['调整菜品配方', '调整中间料配方'],
+      success: function (action) {
+        var url = action.tapIndex === 1
+          ? '/subPackage-preparation/pages/storeProducts/storeProducts?fromRecipeReview=1&rawGoodsId=' + rawGoodsId
+          : '/subPackage-group/pages/food/index/index?fromRecipeReview=1&rawGoodsId=' + rawGoodsId;
+        wx.navigateTo({ url: url });
+      },
+    });
+  },
+
+  onIgnoreRecipeReview: function (e) {
+    var that = this;
+    var taskId = e.currentTarget.dataset.taskId;
+    if (!taskId) return;
+    var reasons = [
+      { label: '包装或耗材', code: 'PACKAGING' },
+      { label: '直接销售商品', code: 'DIRECT_SALE' },
+      { label: '能源或燃料', code: 'ENERGY' },
+      { label: '其他原因', code: 'OTHER' },
+    ];
+    wx.showActionSheet({
+      itemList: reasons.map(function (item) { return item.label; }),
+      success: function (action) {
+        var selected = reasons[action.tapIndex];
+        if (!selected) return;
+        var scope = that._getStoreScope();
+        if (!scope) return;
+        wx.showLoading({ title: '正在处理', mask: true });
+        api.ignoreNewGoodsRecipeReview(taskId, {
+          userId: scope.userId,
+          departmentId: scope.departmentId,
+          distributerId: scope.distributerId,
+          reason: selected.code,
+        }).then(function () {
+          wx.hideLoading();
+          wx.showToast({ title: '以后不再提醒', icon: 'success' });
+          that._loadBoard();
+        }).catch(function (err) {
+          wx.hideLoading();
+          console.error('[公告牌] 忽略配方提醒失败', err);
+          wx.showToast({ title: '处理失败，请重试', icon: 'none' });
+        });
+      },
+    });
+  },
+
   toBack: function () {
     wx.navigateBack({ delta: 1 });
+  },
+
+  _getStoreScope: function () {
+    var userInfo = wx.getStorageSync('userInfo') || {};
+    var mendianInfo = wx.getStorageSync('mendianInfo') || {};
+    var userId = userInfo.gbDepartmentUserId;
+    var departmentId = mendianInfo.gbDepartmentId || userInfo.gbDuDepartmentId;
+    var distributerId = mendianInfo.gbDepartmentDisId || userInfo.gbDuDistributerId;
+    if (!userId || !departmentId || !distributerId) {
+      wx.showToast({ title: '门店信息缺失', icon: 'none' });
+      return null;
+    }
+    return {
+      userId: userId,
+      departmentId: departmentId,
+      distributerId: distributerId,
+    };
   },
 
   _loadBoard: function () {
@@ -287,6 +353,12 @@ function _mapNoteItem(note, index, categoryByName) {
   var sourceType = note.sourceType || '';
   var isWorkNote = sourceType === 'WORK_NOTE';
   var isWorkRecord = sourceType === 'WORK_RECORD';
+  var isRecipeReview = sourceType === 'RECIPE_REVIEW';
+  var rawGoodsId = '';
+  var sourceItemKey = note.sourceItemKey || '';
+  if (sourceItemKey.indexOf('rawGoodsId:') === 0) {
+    rawGoodsId = sourceItemKey.substring('rawGoodsId:'.length);
+  }
   var title = note.title || (isAi ? '智能消息' : '公告');
   var category = _resolveCategoryMeta(title, categoryByName);
   var displayTitle = title;
@@ -318,6 +390,9 @@ function _mapNoteItem(note, index, categoryByName) {
     publisherName: note.publisherName || '',
     publishedAt: _fmtTime(rawTime),
     sourceType: sourceType,
+    _isRecipeReview: isRecipeReview,
+    _recipeReviewId: isRecipeReview ? note.sourceId : '',
+    _rawGoodsId: rawGoodsId,
     categoryName: categoryName,
     categoryBg: categoryBg,
     categoryColor: categoryColor,

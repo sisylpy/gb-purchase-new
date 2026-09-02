@@ -1256,6 +1256,18 @@ var getDailyBoard = function (params) {
   });
 };
 
+/**
+ * 新入库商品明确不需要加入菜品/中间料配方。
+ * POST /store-announcements/recipe-review/{taskId}/ignore
+ */
+var ignoreNewGoodsRecipeReview = function (taskId, payload) {
+  return request.post(
+    'store-announcements/recipe-review/' + taskId + '/ignore',
+    payload,
+    { showErrorToast: false }
+  );
+};
+
 // ============================================================
 // 导出
 // ============================================================
@@ -1324,4 +1336,5 @@ module.exports = {
   // 店内公告栏
   listStoreAnnouncements: listStoreAnnouncements,
   getDailyBoard: getDailyBoard,
+  ignoreNewGoodsRecipeReview: ignoreNewGoodsRecipeReview,
 };

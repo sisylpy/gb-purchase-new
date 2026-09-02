@@ -108,6 +108,9 @@
           <view class="note-badge note-badge--work" wx:elif="{{item.sourceType === 'WORK_NOTE'}}">
             <text class="note-badge-text">工作笔记</text>
           </view>
+          <view class="note-badge note-badge--recipe" wx:elif="{{item._isRecipeReview}}">
+            <text class="note-badge-text">配方提醒</text>
+          </view>
 
           <text class="note-title">{{item.title}}</text>
 
@@ -139,6 +142,15 @@
               </block>
             </view>
           </block>
+
+          <view class="recipe-review-actions" wx:if="{{item._isRecipeReview && isManager}}">
+            <button class="recipe-review-btn recipe-review-btn--minor"
+              data-task-id="{{item._recipeReviewId}}"
+              bindtap="onIgnoreRecipeReview">不需要加入配方</button>
+            <button class="recipe-review-btn recipe-review-btn--primary"
+              data-raw-goods-id="{{item._rawGoodsId}}"
+              bindtap="onHandleRecipeReview">去调整配方</button>
+          </view>
 
           <view class="note-footer">
             <text class="note-author">{{item.publisherName}}</text>
