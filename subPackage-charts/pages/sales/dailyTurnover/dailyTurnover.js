@@ -530,7 +530,7 @@ Page({
           that._promptNonExcelChatFile(f);
           return;
         }
-        that._analyzeAiRevenueFile(f.path, departmentId, distributerId);
+        that._chooseAiImportSettings(f.path, departmentId, distributerId);
       },
       fail: function (err) {
         var msg = err && err.errMsg ? String(err.errMsg) : '';
@@ -541,11 +541,54 @@ Page({
     });
   },
 
-  _analyzeAiRevenueFile: function (filePath, departmentId, distributerId) {
+  _resolveOperatorId: function () {
+    var userInfo = wx.getStorageSync('userInfo') || {};
+    var operatorId = Number(userInfo.gbDepartmentUserId || 0);
+    if (!operatorId) {
+      wx.showToast({ title: '缺少当前操作人信息', icon: 'none' });
+      return 0;
+    }
+    return operatorId;
+  },
+
+  _chooseAiImportSettings: function (filePath, departmentId, distributerId) {
+    var that = this;
+    var lastSource = wx.getStorageSync('revenueImportSourceSystem') || '';
+    wx.showModal({
+      title: '填写报表来源',
+      content: lastSource,
+      editable: true,
+      placeholderText: '例如：美团收银、二维火、客如云',
+      confirmText: '下一步',
+      success: function (res) {
+        if (!res.confirm) return;
+        var sourceSystem = String(res.content || '').trim();
+        if (!sourceSystem) {
+          wx.showToast({ title: '请填写POS系统或文件来源', icon: 'none' });
+          return;
+        }
+        wx.setStorageSync('revenueImportSourceSystem', sourceSystem);
+        wx.showActionSheet({
+          itemList: ['只更新文件中的菜品（推荐）', '整段日期范围覆盖'],
+          success: function (modeRes) {
+            that._analyzeAiRevenueFile(filePath, departmentId, distributerId, {
+              sourceSystem: sourceSystem,
+              templateType: '经营日报',
+              importMode: modeRes.tapIndex === 1 ? 'RANGE_REPLACE' : 'PATCH',
+              operatorId: that._resolveOperatorId(),
+            });
+          },
+        });
+      },
+    });
+  },
+
+  _analyzeAiRevenueFile: function (filePath, departmentId, distributerId, options) {
+    if (!options || !options.operatorId) return;
     var that = this;
     wx.showLoading({ title: 'AI正在识别...', mask: true });
     foodSalesExcelApi
-      .analyzeAiRevenueExcel(filePath, departmentId, distributerId)
+      .analyzeAiRevenueExcel(filePath, departmentId, distributerId, options)
       .then(function (res) {
         wx.hideLoading();
         var result = res.result || {};
@@ -575,6 +618,52 @@ Page({
       });
   },
 
+  onConfirmAiDishCandidate: function (e) {
+    var preview = this.data.aiImportPreview;
+    if (!preview || this.data.aiImportSubmitting) return;
+    var rawDishName = e.currentTarget.dataset.rawname;
+    var foodId = Number(e.currentTarget.dataset.foodid || 0);
+    var foodName = e.currentTarget.dataset.foodname || '';
+    var departmentId = this._ensureTemplateDepartmentId();
+    var distributerId = this._resolveDistributerId();
+    var operatorId = this._resolveOperatorId();
+    if (!rawDishName || !foodId || !departmentId || !distributerId || !operatorId) return;
+    var that = this;
+    wx.showModal({
+      title: '确认菜品对应关系',
+      content: 'Excel中的“' + rawDishName + '”以后对应系统菜品“' + foodName + '”？',
+      confirmText: '确认对应',
+      success: function (res) {
+        if (!res.confirm) return;
+        that.setData({ aiImportSubmitting: true });
+        wx.showLoading({ title: '正在确认...', mask: true });
+        foodSalesExcelApi.confirmAiRevenueDishMapping(preview.jobId, {
+          departmentId: departmentId,
+          distributerId: distributerId,
+          rawDishName: rawDishName,
+          foodId: foodId,
+          operatorId: operatorId,
+          confirmationReason: '用户在营业额导入预览中确认',
+        }).then(function (result) {
+          wx.hideLoading();
+          var body = result.result || {};
+          that.setData({ aiImportSubmitting: false });
+          if (body.code === 0 || body.code === '0') {
+            that.setData({ aiImportPreview: body.data });
+            wx.showToast({ title: '已确认菜品', icon: 'success' });
+          } else {
+            wx.showModal({ title: '确认失败', content: body.msg || '请稍后重试', showCancel: false });
+          }
+        }).catch(function (err) {
+          wx.hideLoading();
+          that.setData({ aiImportSubmitting: false });
+          console.error('confirm ai dish mapping', err);
+          wx.showToast({ title: '确认请求失败', icon: 'none' });
+        });
+      },
+    });
+  },
+
   onCloseAiImportPreview: function () {
     if (this.data.aiImportSubmitting) return;
     this.setData({ showAiImportPreview: false });
@@ -593,7 +682,8 @@ Page({
     if (!preview || !preview.jobId) return;
     var departmentId = this._ensureTemplateDepartmentId();
     var distributerId = this._resolveDistributerId();
-    if (!departmentId || !distributerId) return;
+    var operatorId = this._resolveOperatorId();
+    if (!departmentId || !distributerId || !operatorId) return;
     wx.showLoading({ title: '生成明细...', mask: true });
     foodSalesExcelApi
       .openAiRevenueFailureReport(preview.jobId, departmentId, distributerId)
@@ -616,13 +706,15 @@ Page({
     var that = this;
     wx.showModal({
       title: '确认导入',
-      content: '确认按识别结果覆盖对应日期的菜品销量和营业额？',
+      content: preview.impact && preview.impact.explanation
+        ? preview.impact.explanation + '。确认继续吗？'
+        : '确认按识别结果更新菜品销量和营业额？',
       success: function (modalRes) {
         if (!modalRes.confirm) return;
         that.setData({ aiImportSubmitting: true });
         wx.showLoading({ title: '正在导入...', mask: true });
         foodSalesExcelApi
-          .commitAiRevenueImport(preview.jobId, departmentId, distributerId)
+          .commitAiRevenueImport(preview.jobId, departmentId, distributerId, operatorId)
           .then(function (res) {
             wx.hideLoading();
             var result = res.result || {};

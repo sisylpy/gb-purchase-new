@@ -710,7 +710,21 @@
 }
 
 .ai-import-candidates__label { color: #596267; }
-.ai-import-candidate { color: #168f7b; }
+.ai-import-candidate {
+  display: inline-flex;
+  margin: 10rpx 12rpx 0 0;
+  padding: 10rpx 18rpx;
+  color: #168f7b;
+  background: #edf9f6;
+  border: 1rpx solid #9ed9cc;
+  border-radius: 24rpx;
+}
+
+.ai-import-impact__desc,
+.ai-import-impact__date { color: #657176; font-size: 24rpx; line-height: 1.55; }
+.ai-import-impact__numbers { display: flex; gap: 28rpx; margin-top: 12rpx; font-size: 25rpx; color: #168f7b; }
+.ai-import-impact__numbers .is-delete { color: #d65b54; }
+.ai-import-impact__date { margin-top: 8rpx; }
 
 .ai-import-day,
 .ai-import-dish {

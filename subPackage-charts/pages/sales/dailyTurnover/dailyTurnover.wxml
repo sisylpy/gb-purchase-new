@@ -15,6 +15,7 @@
         <view class="flex-row" wx:if="{{startDate == stopDate}}">
           <view class="small" wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
         </view>
+
         <view class="flex-row" wx:else>
           <view wx:if="{{startDate}}">{{tool.transferDateString(startDate)}}</view>
           <text class="plr-10">-</text>
@@ -299,6 +300,19 @@
           </view>
         </view>
 
+        <view class="ai-import-section ai-import-impact" wx:if="{{aiImportPreview.impact}}">
+          <view class="ai-import-section__title">本次写入范围</view>
+          <view class="ai-import-impact__desc">{{aiImportPreview.impact.explanation}}</view>
+          <view class="ai-import-impact__numbers">
+            <text>新增 {{aiImportPreview.impact.insertDishDays}}</text>
+            <text>修改 {{aiImportPreview.impact.updateDishDays}}</text>
+            <text class="is-delete">删除 {{aiImportPreview.impact.deleteDishDays}}</text>
+          </view>
+          <view class="ai-import-impact__date" wx:if="{{aiImportPreview.impact.businessDateStart}}">
+            {{aiImportPreview.impact.businessDateStart}} 至 {{aiImportPreview.impact.businessDateEnd}}
+          </view>
+        </view>
+
         <view class="ai-import-section" wx:if="{{aiImportPreview.notices.length > 0}}">
           <view class="ai-import-section__title">识别说明</view>
           <view class="ai-import-notice" wx:for="{{aiImportPreview.notices}}" wx:key="*this">• {{item}}</view>
@@ -316,10 +330,12 @@
             <view class="ai-import-issue__message">{{problem.message}}</view>
             <view class="ai-import-issue__action">建议：{{problem.action}}</view>
             <view class="ai-import-candidates" wx:if="{{problem.candidates.length > 0}}">
-              <text class="ai-import-candidates__label">可能对应：</text>
-              <text class="ai-import-candidate" wx:for="{{problem.candidates}}" wx:key="foodId" wx:for-item="candidate">
-                {{candidate.foodName}}{{index < problem.candidates.length - 1 ? '、' : ''}}
-              </text>
+              <text class="ai-import-candidates__label">请选择正确菜品：</text>
+              <view class="ai-import-candidate" wx:for="{{problem.candidates}}" wx:key="foodId" wx:for-item="candidate"
+                data-rawname="{{problem.externalDishName}}" data-foodid="{{candidate.foodId}}"
+                data-foodname="{{candidate.foodName}}" bindtap="onConfirmAiDishCandidate">
+                {{candidate.foodName}}
+              </view>
             </view>
           </view>
         </view>
