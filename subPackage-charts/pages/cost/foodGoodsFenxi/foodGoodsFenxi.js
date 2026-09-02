@@ -207,6 +207,24 @@ Page({
     this.setData({ [key]: !this.data.dishRows[index]._expanded });
   },
 
+  onOpenCostEvidence: function (e) {
+    var data = (e && e.currentTarget && e.currentTarget.dataset) || {};
+    if (!data.resultId) {
+      wx.showToast({ title: '该营业日还没有成本证据', icon: 'none' });
+      return;
+    }
+    this.setData({ update: true });
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/cost/costEvidenceDetail/costEvidenceDetail'
+        + '?resultId=' + encodeURIComponent(data.resultId)
+        + '&distributerId=' + encodeURIComponent(this.data.disId || '')
+        + '&storeDepartmentId=' + encodeURIComponent(this.data.depFatherId || '')
+        + '&foodId=' + encodeURIComponent(data.foodId || '')
+        + '&businessDate=' + encodeURIComponent(data.businessDate || '')
+        + '&dishName=' + encodeURIComponent(data.dishName || ''),
+    });
+  },
+
   onSort: function (e) {
     var that = this;
     var sort = e.currentTarget.dataset.sort;

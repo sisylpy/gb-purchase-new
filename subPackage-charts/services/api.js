@@ -20,6 +20,12 @@ var getDishDailyCostReport = function (params) {
   return request.get('cost-accounting/daily-costs/report', params);
 };
 
+var getDishDailyCostResult = function (resultId, distributerId) {
+  return request.get('cost-accounting/daily-costs/results/' + resultId, {
+    distributerId: distributerId,
+  });
+};
+
 var getGoodsCostBySearchDate = function (payload) {
   return request.post('gbdepartmentgoodsstockreduce/getGoodsCostBySearchDate', payload, { useUrlParams: true });
 };
@@ -246,6 +252,7 @@ module.exports = {
   getGoodsReduceWithDayData: getGoodsReduceWithDayData,
   getGbIngredientAnalysis: aiChatApi.getGbIngredientAnalysis,
   getDishDailyCostReport: getDishDailyCostReport,
+  getDishDailyCostResult: getDishDailyCostResult,
   outboundIngredientAnalysis: aiChatApi.outboundIngredientAnalysis,
   // 库存
   getGbStockPurGoods: getGbStockPurGoods,

@@ -438,6 +438,19 @@ page {
   line-height: 31rpx;
 }
 
+.cost-day__evidence {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 13rpx;
+  padding: 13rpx 16rpx;
+  border-radius: 10rpx;
+  background: #edf8f5;
+  color: #168573;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
 .cost-empty {
   padding: 120rpx 30rpx;
   text-align: center;

@@ -1,0 +1,399 @@
+page {
+  height: 100%;
+  background: #f3f5f4;
+  color: #27332f;
+}
+
+.evidence-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.evidence-scroll {
+  flex: 1;
+  height: 0;
+  box-sizing: border-box;
+}
+
+.evidence-empty {
+  padding: 180rpx 40rpx;
+  color: #83908b;
+  font-size: 27rpx;
+  text-align: center;
+}
+
+.evidence-empty--error {
+  color: #a85d34;
+}
+
+.summary-card,
+.ingredient-section {
+  margin: 20rpx;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: #fff;
+  box-shadow: 0 5rpx 18rpx rgba(37, 67, 59, 0.05);
+}
+
+.summary-head,
+.section-head,
+.ingredient-head,
+.batch-head,
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.summary-title {
+  display: block;
+  font-size: 34rpx;
+  line-height: 46rpx;
+  font-weight: 700;
+}
+
+.summary-date,
+.section-sub,
+.modal-sub {
+  display: block;
+  margin-top: 5rpx;
+  color: #83908b;
+  font-size: 22rpx;
+}
+
+.status-pill,
+.batch-state {
+  flex-shrink: 0;
+  padding: 7rpx 14rpx;
+  border-radius: 22rpx;
+  background: #fff2de;
+  color: #9b611e;
+  font-size: 21rpx;
+}
+
+.status-pill.is-complete,
+.batch-state.is-complete {
+  background: #e6f6f1;
+  color: #14816f;
+}
+
+.status-pill.is-running {
+  background: #e9f3ff;
+  color: #367cb2;
+}
+
+.status-pill--small {
+  font-size: 20rpx;
+}
+
+.summary-grid,
+.ingredient-metrics,
+.batch-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18rpx 24rpx;
+  margin-top: 24rpx;
+}
+
+.summary-item,
+.ingredient-metrics view,
+.batch-grid view {
+  display: flex;
+  flex-direction: column;
+  gap: 5rpx;
+}
+
+.summary-label,
+.ingredient-metrics text,
+.batch-grid text {
+  color: #7e8a86;
+  font-size: 21rpx;
+}
+
+.summary-value,
+.ingredient-metrics .metric-value,
+.batch-grid .metric-value {
+  color: #1e796a;
+  font-size: 27rpx;
+  font-weight: 650;
+}
+
+.summary-note,
+.hint-note,
+.ingredient-reason,
+.batch-reason,
+.excluded-note,
+.preview-card {
+  display: block;
+  margin-top: 20rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 12rpx;
+  background: #f0f7f5;
+  color: #54736a;
+  font-size: 22rpx;
+  line-height: 33rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.ingredient-empty {
+  padding: 70rpx 20rpx;
+  color: #87928e;
+  font-size: 24rpx;
+  text-align: center;
+}
+
+.ingredient-card {
+  margin-top: 22rpx;
+  padding: 22rpx 0 0;
+  border-top: 1rpx solid #e8ecea;
+}
+
+.ingredient-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.ingredient-image {
+  flex-shrink: 0;
+  width: 76rpx;
+  height: 76rpx;
+  margin-right: 16rpx;
+  border-radius: 12rpx;
+  background: #f2f4f3;
+}
+
+.ingredient-image--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5f3ef;
+  color: #19816f;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.ingredient-name-wrap {
+  min-width: 0;
+}
+
+.ingredient-name {
+  display: block;
+  overflow: hidden;
+  color: #26342f;
+  font-size: 28rpx;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-spec {
+  display: block;
+  margin-top: 3rpx;
+  color: #89938f;
+  font-size: 21rpx;
+}
+
+.ingredient-reason,
+.batch-reason {
+  background: #fff7e9;
+  color: #936323;
+}
+
+.hint-note {
+  padding: 12rpx 15rpx;
+  background: #f6f7f6;
+  color: #77827e;
+}
+
+.batch-card {
+  margin-top: 16rpx;
+  padding: 19rpx;
+  border: 1rpx solid #dce8e4;
+  border-radius: 15rpx;
+  background: #fbfdfc;
+}
+
+.batch-title {
+  display: block;
+  font-size: 25rpx;
+  font-weight: 650;
+}
+
+.batch-date {
+  display: block;
+  margin-top: 3rpx;
+  color: #87918d;
+  font-size: 20rpx;
+}
+
+.batch-state.is-hint {
+  background: #edf2ff;
+  color: #526fa9;
+}
+
+.batch-action {
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #e4e9e7;
+  color: #168371;
+  font-size: 23rpx;
+  font-weight: 600;
+  text-align: right;
+}
+
+.evidence-bottom-space {
+  height: 60rpx;
+}
+
+.modal-mask {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.48);
+}
+
+.correction-modal {
+  width: 100%;
+  max-height: 88%;
+  padding: 30rpx 28rpx calc(28rpx + env(safe-area-inset-bottom));
+  border-radius: 26rpx 26rpx 0 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.modal-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.modal-close {
+  padding: 0 8rpx;
+  color: #7c8783;
+  font-size: 45rpx;
+  line-height: 42rpx;
+}
+
+.status-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-top: 26rpx;
+}
+
+.status-choice {
+  padding: 18rpx 12rpx;
+  border: 1rpx solid #dfe7e4;
+  border-radius: 12rpx;
+  color: #68746f;
+  font-size: 24rpx;
+  text-align: center;
+}
+
+.status-choice.is-selected {
+  border-color: #178a76;
+  background: #e9f7f3;
+  color: #137b69;
+  font-weight: 650;
+}
+
+.status-choice.is-danger {
+  border-color: #d98178;
+  background: #fff0ef;
+  color: #b64f46;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 150rpx 1fr;
+  align-items: center;
+  gap: 15rpx;
+  margin-top: 20rpx;
+}
+
+.form-label {
+  color: #4b5753;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.form-input,
+.reason-input {
+  padding: 17rpx 20rpx;
+  border: 1rpx solid #dfe6e3;
+  border-radius: 12rpx;
+  background: #f7f9f8;
+  color: #283531;
+  font-size: 25rpx;
+  box-sizing: border-box;
+}
+
+.reason-field {
+  margin-top: 23rpx;
+}
+
+.reason-input {
+  width: 100%;
+  height: 130rpx;
+  margin-top: 12rpx;
+}
+
+.excluded-note {
+  background: #fff2f0;
+  color: #9d554e;
+}
+
+.preview-card {
+  background: #eaf7f3;
+  color: #396f62;
+}
+
+.preview-card text {
+  display: block;
+  margin-top: 6rpx;
+}
+
+.preview-title {
+  margin-top: 0 !important;
+  color: #137c69;
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+  margin-top: 26rpx;
+}
+
+.modal-button {
+  padding: 20rpx 12rpx;
+  border-radius: 12rpx;
+  background: #168a75;
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 650;
+  text-align: center;
+}
+
+.modal-button--secondary {
+  background: #edf3f1;
+  color: #49645d;
+}
+
+.modal-button.is-disabled {
+  opacity: 0.45;
+}

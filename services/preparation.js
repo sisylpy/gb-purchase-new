@@ -300,6 +300,22 @@ function listHistoricalReceiptBatches(params) {
   return get('cost-accounting/historical-theory-prices/receipt-batches', params || {});
 }
 
+function previewHistoricalReceiptCorrection(stockBatchId, body) {
+  return post(
+    'cost-accounting/historical-theory-prices/receipt-batches/' + stockBatchId
+      + '/corrections/preview',
+    body
+  );
+}
+
+function confirmHistoricalReceiptCorrection(stockBatchId, body) {
+  return post(
+    'cost-accounting/historical-theory-prices/receipt-batches/' + stockBatchId
+      + '/corrections/confirm',
+    body
+  );
+}
+
 function listRawGoodsReplacements(params) {
   return get('cost-accounting/raw-goods-replacements', params || {});
 }
@@ -495,6 +511,8 @@ module.exports = {
   previewRemoveFoodEffectiveInterval: previewRemoveFoodEffectiveInterval,
   confirmRemoveFoodEffectiveInterval: confirmRemoveFoodEffectiveInterval,
   listHistoricalReceiptBatches: listHistoricalReceiptBatches,
+  previewHistoricalReceiptCorrection: previewHistoricalReceiptCorrection,
+  confirmHistoricalReceiptCorrection: confirmHistoricalReceiptCorrection,
   listRawGoodsReplacements: listRawGoodsReplacements,
   previewRawGoodsReplacement: previewRawGoodsReplacement,
   confirmRawGoodsReplacement: confirmRawGoodsReplacement,

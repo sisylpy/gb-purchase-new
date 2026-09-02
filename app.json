@@ -164,6 +164,7 @@
         "pages/cost/purGoodsFenxi/purGoodsFenxi",
         "pages/cost/costGoodsFenxi/costGoodsFenxi",
         "pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+        "pages/cost/costEvidenceDetail/costEvidenceDetail",
         "pages/cost/goodsFenxiCost/goodsFenxiCost",
         "pages/cost/goodsFenxiPurchase/goodsFenxiPurchase",
         "pages/sales/dailyTurnover/dailyTurnover",

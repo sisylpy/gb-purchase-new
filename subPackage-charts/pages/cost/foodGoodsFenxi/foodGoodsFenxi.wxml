@@ -132,6 +132,13 @@
               <text wx:else>成本 —</text>
             </view>
             <text class="cost-day__reason" wx:if="{{day.missingReasonText}}">{{day.missingReasonText}}</text>
+            <view class="cost-day__evidence" wx:if="{{day.resultId}}"
+              data-result-id="{{day.resultId}}" data-food-id="{{item.foodId}}"
+              data-business-date="{{day.businessDate}}" data-dish-name="{{item.dishName}}"
+              bindtap="onOpenCostEvidence">
+              <text>查看成本证据</text>
+              <text>›</text>
+            </view>
           </view>
         </view>
       </view>

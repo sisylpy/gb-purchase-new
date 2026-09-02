@@ -1,0 +1,149 @@
+<view class="evidence-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="成本证据" avatar="/images/back-gray.png"
+    bindnavbuttontap="toBack"></back-navbar>
+
+  <scroll-view scroll-y class="evidence-scroll">
+    <view class="evidence-empty" wx:if="{{loading}}">正在读取成本证据…</view>
+    <view class="evidence-empty evidence-empty--error" wx:elif="{{loadError}}">{{loadError}}</view>
+
+    <block wx:else>
+      <view class="summary-card">
+        <view class="summary-head">
+          <view>
+            <text class="summary-title">{{dishName}}</text>
+            <text class="summary-date">{{businessDate}} · {{salesQuantityText}} 份 · 营业额 {{revenueAmountText}}</text>
+          </view>
+          <text class="status-pill {{resultStatusClass}}">{{resultStatusLabel}}</text>
+        </view>
+        <view class="summary-grid">
+          <view class="summary-item">
+            <text class="summary-label">完整成本</text>
+            <text class="summary-value">{{completeCostText}}</text>
+          </view>
+          <view class="summary-item">
+            <text class="summary-label">已知部分</text>
+            <text class="summary-value">{{knownCostText}}</text>
+          </view>
+          <view class="summary-item">
+            <text class="summary-label">配方版本</text>
+            <text class="summary-value">{{recipeVersionText}}</text>
+          </view>
+          <view class="summary-item">
+            <text class="summary-label">证据完整率</text>
+            <text class="summary-value">{{completionRateText}}%</text>
+          </view>
+        </view>
+        <text class="summary-note">成本结果保留销量版本、配方版本、每项配料和入库批次证据。缺失部分不会按 0 元计算。</text>
+      </view>
+
+      <view class="ingredient-section">
+        <view class="section-head">
+          <text class="section-title">配料成本证据（{{ingredients.length}}）</text>
+          <text class="section-sub">按营业日逐项追溯</text>
+        </view>
+
+        <view class="ingredient-empty" wx:if="{{!ingredients.length}}">该成本结果没有可展示的配料证据，请先完善有效配方。</view>
+
+        <view class="ingredient-card" wx:for="{{ingredients}}" wx:key="_key"
+          wx:for-item="ingredient" wx:for-index="ingredientIndex">
+          <view class="ingredient-head">
+            <view class="ingredient-identity">
+              <image class="ingredient-image" wx:if="{{ingredient._imageUrl}}" src="{{ingredient._imageUrl}}" mode="aspectFill"></image>
+              <view class="ingredient-image ingredient-image--empty" wx:else>料</view>
+              <view class="ingredient-name-wrap">
+                <text class="ingredient-name">{{ingredient._name}}</text>
+                <text class="ingredient-spec" wx:if="{{ingredient._spec}}">{{ingredient._spec}}</text>
+                <text class="ingredient-spec">{{ingredient._quantityText}}</text>
+              </view>
+            </view>
+            <text class="status-pill status-pill--small {{ingredient._statusClass}}">{{ingredient._statusLabel}}</text>
+          </view>
+
+          <view class="ingredient-metrics">
+            <view><text>营业日基础单价</text><text class="metric-value">{{ingredient._priceText}}</text></view>
+            <view><text>已知成本</text><text class="metric-value">{{ingredient._knownCostText}}</text></view>
+            <view><text>完整成本</text><text class="metric-value">{{ingredient._completeCostText}}</text></view>
+          </view>
+          <text class="ingredient-reason" wx:if="{{ingredient._reason}}">{{ingredient._reason}}</text>
+          <text class="hint-note" wx:if="{{ingredient._usesReceiptHints}}">以下是营业日以前可供核对的入库批次，尚未代表价格证据已完整。</text>
+          <text class="hint-note" wx:if="{{!ingredient._batches.length}}">没有找到营业日以前可核对的有效入库批次。</text>
+
+          <view class="batch-card" wx:for="{{ingredient._batches}}" wx:key="stockBatchId"
+            wx:for-item="receipt" wx:for-index="batchIndex">
+            <view class="batch-head">
+              <view>
+                <text class="batch-title">入库批次 #{{receipt.stockBatchId}}</text>
+                <text class="batch-date">{{receipt._receiptDate}}</text>
+              </view>
+              <text class="batch-state {{receipt._statusClass}}">{{receipt._statusLabel}}</text>
+            </view>
+            <view class="batch-grid">
+              <view><text>原入库数量</text><text class="metric-value">{{receipt._quantityText}} {{receipt._unitText}}</text></view>
+              <view><text>原入库金额</text><text class="metric-value">{{receipt._amountText}}</text></view>
+              <view><text>换算后数量</text><text class="metric-value">{{receipt._convertedText}}</text></view>
+              <view><text>最终基础单价</text><text class="metric-value">{{receipt._unitPriceText}}</text></view>
+            </view>
+            <text class="batch-reason" wx:if="{{receipt._reason}}">{{receipt._reason}}</text>
+            <view class="batch-action" data-ingredient-index="{{ingredientIndex}}" data-batch-index="{{batchIndex}}"
+              bindtap="onOpenCorrection">核对并修正入库证据 ›</view>
+          </view>
+        </view>
+      </view>
+      <view class="evidence-bottom-space"></view>
+    </block>
+  </scroll-view>
+
+  <view class="modal-mask" wx:if="{{correctionOpen}}" catchtap="onCloseCorrection">
+    <view class="correction-modal" catchtap="noop">
+      <view class="modal-head">
+        <view>
+          <text class="modal-title">修正入库证据</text>
+          <text class="modal-sub">批次 #{{correctionBatch.stockBatchId}} · {{correctionBatch._receiptDate}}</text>
+        </view>
+        <text class="modal-close" bindtap="onCloseCorrection">×</text>
+      </view>
+
+      <view class="status-selector">
+        <view class="status-choice {{correctionStatus === 'VALID' ? 'is-selected' : ''}}"
+          data-status="VALID" bindtap="onSelectCorrectionStatus">修正后有效</view>
+        <view class="status-choice {{correctionStatus === 'EXCLUDED' ? 'is-selected is-danger' : ''}}"
+          data-status="EXCLUDED" bindtap="onSelectCorrectionStatus">排除该批次</view>
+      </view>
+
+      <block wx:if="{{correctionStatus === 'VALID'}}">
+        <view class="form-row">
+          <text class="form-label">入库数量</text>
+          <input class="form-input" type="digit" value="{{correctionQuantity}}" bindinput="onCorrectionQuantityInput" placeholder="请输入数量" />
+        </view>
+        <view class="form-row">
+          <text class="form-label">入库金额</text>
+          <input class="form-input" type="digit" value="{{correctionAmount}}" bindinput="onCorrectionAmountInput" placeholder="请输入金额" />
+        </view>
+        <view class="form-row">
+          <text class="form-label">入库单位</text>
+          <input class="form-input" value="{{correctionUnit}}" bindinput="onCorrectionUnitInput" placeholder="如 瓶、斤、KG" />
+        </view>
+      </block>
+      <view class="excluded-note" wx:else>该批次仍保留在库存原始记录中，但不再作为历史理论价格证据。</view>
+
+      <view class="reason-field">
+        <text class="form-label">修正原因</text>
+        <textarea class="reason-input" value="{{correctionReason}}" maxlength="500"
+          bindinput="onCorrectionReasonInput" placeholder="例如：核对采购票据后修正数量和金额"></textarea>
+      </view>
+
+      <view class="preview-card" wx:if="{{correctionPreview}}">
+        <text class="preview-title">影响范围已确认</text>
+        <text>{{correctionPreview._affectedRangeText}}</text>
+        <text>保存后只重算该门店、该采购商品在上述范围内被引用的菜品。</text>
+      </view>
+
+      <view class="modal-actions">
+        <view class="modal-button modal-button--secondary" bindtap="onPreviewCorrection">
+          {{correctionSaving ? '处理中…' : '预览影响'}}
+        </view>
+        <view class="modal-button {{correctionPreview ? '' : 'is-disabled'}}" bindtap="onConfirmCorrection">确认修正</view>
+      </view>
+    </view>
+  </view>
+</view>
