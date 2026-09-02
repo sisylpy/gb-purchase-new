@@ -1,4 +1,5 @@
 var api = require('../../services/supportTempGoods');
+var app = getApp();
 
 function messageOf(err, fallback) {
   if (err && err.data && err.data.msg) return err.data.msg;
@@ -43,12 +44,11 @@ Page({
   },
 
   onLoad: function (options) {
-    var windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-    var menu = wx.getMenuButtonBoundingClientRect();
+    var globalData = app.globalData || {};
     this.focusTaskId = options && options.taskId ? Number(options.taskId) : null;
     this.setData({
-      statusBarHeight: windowInfo.statusBarHeight || 20,
-      navHeight: menu.bottom + menu.top - (windowInfo.statusBarHeight || 20),
+      statusBarHeight: globalData.statusBarHeight || 20,
+      navHeight: globalData.navBarHeight || 68,
     });
     this.loadTasks();
   },

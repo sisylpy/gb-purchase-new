@@ -14,7 +14,7 @@ Component({
   },
 
   lifetimes: {
-    attached() {
+    attached: function () {
       this._calcHeight();
     },
   },
@@ -25,18 +25,18 @@ Component({
   },
 
   methods: {
-    _calcHeight() {
-      const app = getApp();
-      const gd = app?.globalData;
+    _calcHeight: function () {
+      var app = getApp();
+      var gd = app && app.globalData;
       if (!gd) return;
 
-      const sb = gd.statusBarHeight || 20;
-      const mb = gd.menuButtonInfo;
+      var sb = gd.statusBarHeight || 20;
+      var mb = gd.menuButtonInfo;
       if (!mb) return;
 
       // 导航栏内容高度 = 胶囊高度 + (胶囊顶部 - 状态栏) * 2
-      const navContentH = mb.height + (mb.top - sb) * 2;
-      const fullH = sb + navContentH;
+      var navContentH = mb.height + (mb.top - sb) * 2;
+      var fullH = sb + navContentH;
 
       this.setData({
         statusBarHeight: sb,
@@ -44,7 +44,7 @@ Component({
       });
     },
 
-    onNavButtonTap() {
+    onNavButtonTap: function () {
       this.triggerEvent('navbuttontap');
     },
   },
