@@ -15,7 +15,10 @@
       <view class="status-left">
         <view class="status-dot"></view>
         <text class="status-text">实时测算中</text>
-        <view class="status-days" bindtap="onPickCostDays" hover-class="status-days--hover">
+        <view class="status-days" wx:if="{{versionEditorMode}}">
+          <text>适用期加权平均</text>
+        </view>
+        <view class="status-days" wx:else bindtap="onPickCostDays" hover-class="status-days--hover">
           <text>{{costDaysLabel}}</text>
           <text class="status-days-arrow">▾</text>
         </view>
@@ -55,7 +58,7 @@
     </view>
 
     <view class="hint-bar cost-missing-hint" wx:if="{{totalCostComplete === false}}">
-      <view class="hint-left"><text class="hint-text">部分配料缺少可靠成本依据，完整理论成本和毛利暂不显示为 0。</text></view>
+      <view class="hint-left"><text class="hint-text">{{costMissingReason || '部分配料缺少可靠成本依据'}}，完整理论成本和毛利暂不显示为 0。</text></view>
     </view>
 
     <!-- 收益卡片 -->
@@ -92,7 +95,7 @@
     <view class="hint-bar" wx:if="{{versionEditorMode}}">
       <view class="hint-left">
         <image src="/images/icon.png" class="hint-icon" mode="aspectFit"></image>
-        <text class="hint-text">调整配料用量，成本和毛利将实时更新</text>
+        <text class="hint-text">按适用时间 {{versionCostScopeText}} 内的实际销量加权测算；调整日期、配料或用量后实时更新</text>
       </view>
       <view class="hint-right" bindtap="refreshData">
         <text class="hint-update">上次更新：刚刚</text>
@@ -297,7 +300,7 @@
                   <text class="raw-item-kind" wx:if="{{raw._isPreparation}}">中间料</text>
                   <text class="raw-item-name">{{raw.gbDfgGoodsName}}</text>
                 </view>
-                <text class="raw-item-price">{{raw._isPreparation ? raw._packPriceLabel : (raw._packPriceLabel === '成本待计算' ? raw._packPriceLabel : '¥' + raw._packPriceLabel)}}</text>
+                <text class="raw-item-price">{{raw._isPreparation || raw._isVersioned ? raw._packPriceLabel : (raw._packPriceLabel === '成本待计算' ? raw._packPriceLabel : '¥' + raw._packPriceLabel)}}</text>
               </view>
             </view>
             <view class="raw-item-action" wx:if="{{versionEditorMode}}">

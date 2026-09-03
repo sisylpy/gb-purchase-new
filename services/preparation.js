@@ -308,6 +308,14 @@ function listHistoricalReceiptBatches(params) {
   return get('cost-accounting/historical-theory-prices/receipt-batches', params || {});
 }
 
+function resolveHistoricalTheoryPrice(params) {
+  return get('cost-accounting/historical-theory-prices/resolve', params || {});
+}
+
+function getDishDailyCostReport(params) {
+  return get('cost-accounting/daily-costs/report', params || {});
+}
+
 function previewHistoricalReceiptCorrection(stockBatchId, body) {
   return post(
     'cost-accounting/historical-theory-prices/receipt-batches/' + stockBatchId
@@ -519,6 +527,8 @@ module.exports = {
   confirmFoodEffectiveIntervalWithReplacement: confirmFoodEffectiveIntervalWithReplacement,
   previewRemoveFoodEffectiveInterval: previewRemoveFoodEffectiveInterval,
   confirmRemoveFoodEffectiveInterval: confirmRemoveFoodEffectiveInterval,
+  resolveHistoricalTheoryPrice: resolveHistoricalTheoryPrice,
+  getDishDailyCostReport: getDishDailyCostReport,
   listHistoricalReceiptBatches: listHistoricalReceiptBatches,
   previewHistoricalReceiptCorrection: previewHistoricalReceiptCorrection,
   confirmHistoricalReceiptCorrection: confirmHistoricalReceiptCorrection,
