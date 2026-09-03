@@ -114,31 +114,48 @@
         </view>
 
         <view class="cost-expand" bindtap="onToggleDishDetail" data-index="{{index}}">
-          <text>{{item._expanded ? '收起营业日明细' : '查看营业日明细'}}</text>
+          <text>{{item._expanded ? '收起配料明细' : '查看配料明细'}}</text>
           <text>{{item._expanded ? '⌃' : '⌄'}}</text>
         </view>
 
-        <view class="cost-days" wx:if="{{item._expanded}}">
-          <view class="cost-day" wx:for="{{item.dailyRows}}" wx:for-item="day" wx:key="salesInputVersionId">
-            <view class="cost-day__top">
-              <view>
-                <text class="cost-day__date">{{day.businessDate}}</text>
-                <text class="cost-day__sales">{{day.salesQuantityText}} 份 · ¥{{day.revenueAmountText}}</text>
+        <view class="cost-ingredients" wx:if="{{item._expanded}}">
+          <view class="cost-ingredients__head">
+            <text>配料成本明细（{{item.ingredientSummaries.length}}）</text>
+            <text>按所选日期汇总</text>
+          </view>
+          <view class="cost-ingredients__empty" wx:if="{{!item.ingredientSummaries.length}}">
+            当前日期范围没有可汇总的配料证据，请先完善有效配方。
+          </view>
+          <view class="cost-ingredient" wx:for="{{item.ingredientSummaries}}" wx:for-item="ingredient" wx:key="_key">
+            <view class="cost-ingredient__head">
+              <view class="cost-ingredient__identity">
+                <image class="cost-ingredient__image" wx:if="{{ingredient._imageUrl}}" src="{{ingredient._imageUrl}}" mode="aspectFill"></image>
+                <view class="cost-ingredient__image cost-ingredient__image--empty" wx:else>料</view>
+                <view class="cost-ingredient__name-wrap">
+                  <text class="cost-ingredient__name">{{ingredient._name}}</text>
+                  <text class="cost-ingredient__spec" wx:if="{{ingredient._spec}}">{{ingredient._spec}}</text>
+                  <text class="cost-ingredient__spec">{{ingredient._versionText}} · {{ingredient._dateText}}</text>
+                </view>
               </view>
-              <text class="cost-status cost-status--small {{day.isComplete ? 'is-complete' : (day.isCalculating ? 'is-running' : 'is-pending')}}">{{day.statusLabel}}</text>
+              <text class="cost-status cost-status--small {{ingredient.allEvidenceComplete ? 'is-complete' : 'is-pending'}}">{{ingredient.statusLabel}}</text>
             </view>
-            <view class="cost-day__body">
-              <text>配方 {{day.recipeVersionText}}</text>
-              <text wx:if="{{day.isComplete}}">成本 ¥{{day.completeCostAmountText}}</text>
-              <text wx:elif="{{day.hasKnownEvidence}}">已知部分 ¥{{day.knownCostAmountText}}</text>
-              <text wx:else>成本 —</text>
+            <view class="cost-ingredient__metrics">
+              <view><text>单份配方用量</text><text>{{ingredient._portionText}}</text></view>
+              <view><text>累计理论用量</text><text>{{ingredient._totalQuantityText}}</text></view>
+              <view><text>历史基础单价</text><text>{{ingredient._priceText}}</text></view>
+              <view>
+                <text>历史理论成本</text>
+                <text wx:if="{{ingredient.completeCostAmount != null}}">{{ingredient._costText}}</text>
+                <text wx:elif="{{ingredient.knownCostAmount > 0}}">已知 {{ingredient._knownCostText}}</text>
+                <text wx:else>—</text>
+              </view>
             </view>
-            <text class="cost-day__reason" wx:if="{{day.missingReasonText}}">{{day.missingReasonText}}</text>
-            <view class="cost-day__evidence" wx:if="{{day.resultId}}"
-              data-result-id="{{day.resultId}}" data-food-id="{{item.foodId}}"
-              data-business-date="{{day.businessDate}}" data-dish-name="{{item.dishName}}"
+            <text class="cost-ingredient__reason" wx:if="{{ingredient._missingReasonText}}">{{ingredient._missingReasonText}}</text>
+            <view class="cost-ingredient__evidence" wx:if="{{ingredient.latestResultId}}"
+              data-result-id="{{ingredient.latestResultId}}" data-food-id="{{item.foodId}}"
+              data-business-date="{{ingredient.lastBusinessDate}}" data-dish-name="{{item.dishName}}"
               bindtap="onOpenCostEvidence">
-              <text>查看成本证据</text>
+              <text>查看最近营业日的成本证据</text>
               <text>›</text>
             </view>
           </view>

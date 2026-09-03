@@ -386,28 +386,86 @@ page {
   font-size: 24rpx;
 }
 
-.cost-days {
+.cost-ingredients {
   padding: 0 20rpx 18rpx;
   background: #fbfcfb;
 }
 
-.cost-day {
+.cost-ingredients__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 0 10rpx;
+  color: #384640;
+  font-size: 25rpx;
+  font-weight: 650;
+}
+
+.cost-ingredients__head text:last-child {
+  color: #87918d;
+  font-size: 21rpx;
+  font-weight: 400;
+}
+
+.cost-ingredients__empty {
+  padding: 24rpx 16rpx;
+  border-radius: 12rpx;
+  background: #f2f5f3;
+  color: #7f8985;
+  font-size: 22rpx;
+  line-height: 32rpx;
+}
+
+.cost-ingredient {
   padding: 17rpx 0;
   border-bottom: 1rpx solid #e8ecea;
 }
 
-.cost-day:last-child {
+.cost-ingredient:last-child {
   border-bottom: 0;
 }
 
-.cost-day__top {
+.cost-ingredient__head,
+.cost-ingredient__identity {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+}
+
+.cost-ingredient__head {
   justify-content: space-between;
   gap: 12rpx;
 }
 
-.cost-day__date {
+.cost-ingredient__identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.cost-ingredient__image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 70rpx;
+  height: 70rpx;
+  margin-right: 13rpx;
+  border-radius: 12rpx;
+  background: #eef3f1;
+  color: #7a8a84;
+  font-size: 22rpx;
+}
+
+.cost-ingredient__image--empty {
+  color: #168472;
+  background: #e5f4ef;
+  font-weight: 700;
+}
+
+.cost-ingredient__name-wrap {
+  min-width: 0;
+}
+
+.cost-ingredient__name {
   display: block;
   color: #33413c;
   font-size: 25rpx;
@@ -415,39 +473,60 @@ page {
   font-weight: 650;
 }
 
-.cost-day__sales {
+.cost-ingredient__spec {
   display: block;
   margin-top: 2rpx;
   color: #86908c;
   font-size: 21rpx;
+  line-height: 29rpx;
 }
 
-.cost-day__body {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 11rpx;
-  color: #557068;
-  font-size: 22rpx;
+.cost-ingredient__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12rpx 20rpx;
+  margin-top: 15rpx;
+  padding: 15rpx;
+  border-radius: 12rpx;
+  background: #f3f8f6;
 }
 
-.cost-day__reason {
+.cost-ingredient__metrics view {
+  min-width: 0;
+}
+
+.cost-ingredient__metrics text {
   display: block;
-  margin-top: 9rpx;
+  color: #7a8580;
+  font-size: 21rpx;
+  line-height: 29rpx;
+}
+
+.cost-ingredient__metrics text:last-child {
+  margin-top: 3rpx;
+  color: #177e6c;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.cost-ingredient__reason {
+  display: block;
+  margin-top: 10rpx;
   color: #a16522;
   font-size: 21rpx;
   line-height: 31rpx;
 }
 
-.cost-day__evidence {
+.cost-ingredient__evidence {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 13rpx;
-  padding: 13rpx 16rpx;
+  margin-top: 12rpx;
+  padding: 12rpx 15rpx;
   border-radius: 10rpx;
   background: #edf8f5;
   color: #168573;
-  font-size: 22rpx;
+  font-size: 21rpx;
   font-weight: 600;
 }
 
