@@ -25,10 +25,10 @@
         <text class="pd-time" wx:if="{{_timeLabel}}">{{_timeLabel}}</text>
       </view>
 
-      <!-- 原 AI 回答正文 -->
+      <!-- 原始内容 -->
       <view class="pd-answer" wx:if="{{sourceText}}">
         <view class="pd-section-label">
-          <text class="pd-section-label-text">AI 回答</text>
+          <text class="pd-section-label-text">原始内容</text>
         </view>
         <view class="pd-answer-body">
           <text class="pd-answer-text">{{sourceText}}</text>

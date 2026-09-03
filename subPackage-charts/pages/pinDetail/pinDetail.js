@@ -161,21 +161,6 @@ Page({
     return year + '-' + month + '-' + day;
   },
 
-  // ========== 查看原对话 ==========
-
-  onViewConversation: function () {
-    var conversationId = this.data.conversationId;
-    if (!conversationId) {
-      wx.showToast({ title: '来源对话信息缺失', icon: 'none' });
-      return;
-    }
-
-    console.log('[图钉详情] 查看原对话 conversationId=' + conversationId);
-    wx.navigateTo({
-      url: '/subPackage-charts/pages/aiChat/aiChat?loadConversationId=' + conversationId,
-    });
-  },
-
   // ========== 删除图钉 ==========
 
   onDeletePin: function () {

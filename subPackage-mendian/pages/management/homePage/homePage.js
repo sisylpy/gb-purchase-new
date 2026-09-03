@@ -182,9 +182,6 @@ Page({
   toFranchiseUpgrade() {
     wx.navigateTo({ url: '/subPackage-mendian/pages/management/franchiseUpgrade/franchiseUpgrade' });
   },
-  toAiChat() {
-    wx.navigateTo({ url: '/subPackage-charts/pages/aiChat/aiChat?advisorCode=ADV_BOSS' });
-  },
   toRestaurantProfile() {
     wx.navigateTo({ url: '/subPackage-ai/pages/restraunt/restaurantProfile/restaurantProfile' });
   },

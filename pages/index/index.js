@@ -1246,12 +1246,6 @@ Page({
   },
 
  
-  onNavTap: function () {
-    wx.navigateTo({
-      url: '/subPackage-charts/pages/aiChat/aiChat?advisorCode=ADV_BOSS',
-    })
-  },
-
   // ============================================
   // 十、UI 交互
   // ============================================

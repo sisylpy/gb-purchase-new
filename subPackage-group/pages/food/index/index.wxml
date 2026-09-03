@@ -8,9 +8,6 @@
         <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" bindtap="addFoodCategory">
           <text class="food-menu-action-btn__txt">+ 新建分类</text>
         </view>
-        <view class="food-menu-action-btn food-menu-action-btn--cat" hover-class="food-menu-action-btn--hover" bindtap="toMenuAi">
-          <text class="food-menu-action-btn__txt">菜单顾问</text>
-        </view>
       </view>
     </view>
 
