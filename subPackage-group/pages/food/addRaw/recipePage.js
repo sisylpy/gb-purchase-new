@@ -1226,53 +1226,15 @@ function createRecipePage(pageMode) {
         return Object.assign({}, component, { intermediateRecipe: recipe || {} });
       });
     })).then(function (resolvedComponents) {
-      var rawGoodsIds = [];
-      var seenIds = {};
-      var addRawGoodsId = function (value) {
-        var id = Number(value);
-        if (!(id > 0) || seenIds[String(id)]) return;
-        seenIds[String(id)] = true;
-        rawGoodsIds.push(id);
-      };
-      resolvedComponents.forEach(function (component) {
-        if (component.itemKind === 'RAW_GOODS') {
-          addRawGoodsId(component.rawGoodsId);
-          return;
+      // 正式配方接口已经随组件返回轻量 rawGoods（名称、规格、图片和均价）；
+      // 中间料配方接口也按同一结构返回其底层原料。直接消费这些数据，避免
+      // 再次逐商品请求完整详情，也不要依赖不存在的二次汇总接口。
+      return Promise.all(resolvedComponents.map(function (component, index) {
+        if (component.itemKind === 'INTERMEDIATE_PRODUCT') {
+          return that._decoratePreparationComponent(component, index);
         }
-        var recipe = component.intermediateRecipe || {};
-        (recipe.components || []).forEach(function (rawComponent) {
-          addRawGoodsId(rawComponent.rawGoodsId);
-        });
-      });
-      return preparationApi.listStoreRawGoodsSummaries(rawGoodsIds, that.data.costDays)
-        .catch(function () { return []; })
-        .then(function (summaries) {
-          var goodsById = {};
-          (summaries || []).forEach(function (goods) {
-            if (goods && Number(goods.gbDistributerGoodsId) > 0) {
-              goodsById[String(goods.gbDistributerGoodsId)] = goods;
-            }
-          });
-          return Promise.all(resolvedComponents.map(function (component, index) {
-            if (component.itemKind === 'INTERMEDIATE_PRODUCT') {
-              var recipe = component.intermediateRecipe || {};
-              var enrichedRecipe = Object.assign({}, recipe, {
-                components: (recipe.components || []).map(function (rawComponent) {
-                  return Object.assign({}, rawComponent, {
-                    rawGoods: Object.assign({}, rawComponent.rawGoods || {},
-                      goodsById[String(rawComponent.rawGoodsId)] || {}),
-                  });
-                }),
-              });
-              return that._decoratePreparationComponent(Object.assign({}, component, {
-                intermediateRecipe: enrichedRecipe,
-              }), index);
-            }
-            var goods = Object.assign({}, component.rawGoods || {},
-              goodsById[String(component.rawGoodsId)] || {});
-            return that._decorateRawComponent(component, index, goods);
-          }));
-        });
+        return that._decorateRawComponent(component, index, component.rawGoods || {});
+      }));
     });
   },
 
