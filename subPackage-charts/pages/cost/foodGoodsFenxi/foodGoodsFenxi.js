@@ -2,6 +2,7 @@ var load = require('../../../../lib/load.js');
 var globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
 var chartsApi = require('../../../services/api.js');
+var config = require('../../../../config/index.js');
 
 function _money(value) {
   if (value === null || value === undefined || value === '') return '—';
@@ -40,7 +41,7 @@ function _imageUrl(path) {
   if (!path) return '';
   var value = String(path);
   if (/^https?:\/\//i.test(value)) return value;
-  return String(globalData.server || '') + value;
+  return String(config.server || globalData.server || '') + value;
 }
 
 function _rangeText(minimum, maximum, suffix, digits) {
@@ -52,7 +53,35 @@ function _rangeText(minimum, maximum, suffix, digits) {
   return body + (suffix || '');
 }
 
-function _normalizeIngredient(row) {
+function _displayValue(value) {
+  return value === null || value === undefined || value === '' ? '—' : String(value);
+}
+
+/** 配料分析和历史成本报表都以经销商菜品ID作为唯一合并键。 */
+function _resolveDistributerFoodId(row) {
+  if (!row) return '';
+  if (row.foodId !== null && row.foodId !== undefined && row.foodId !== '') {
+    return String(row.foodId);
+  }
+  if (row.gbDfBusinessInsight && row.gbDfBusinessInsight.foodId !== null
+    && row.gbDfBusinessInsight.foodId !== undefined && row.gbDfBusinessInsight.foodId !== '') {
+    return String(row.gbDfBusinessInsight.foodId);
+  }
+  if (row.gbDistributerFoodEntity && row.gbDistributerFoodEntity.gbDistributerFoodId !== null
+    && row.gbDistributerFoodEntity.gbDistributerFoodId !== undefined) {
+    return String(row.gbDistributerFoodEntity.gbDistributerFoodId);
+  }
+  if (row.gbDistributerFoodId !== null && row.gbDistributerFoodId !== undefined
+    && row.gbDistributerFoodId !== '') {
+    return String(row.gbDistributerFoodId);
+  }
+  if (row.dishId !== null && row.dishId !== undefined && row.dishId !== '') {
+    return String(row.dishId);
+  }
+  return '';
+}
+
+function _normalizeHistoricalIngredient(row) {
   var item = Object.assign({}, row || {});
   var unit = _unit(item.baseUnitCode);
   var versions = (item.recipeVersionNos || []).map(function (version) { return 'V' + version; });
@@ -75,56 +104,36 @@ function _normalizeIngredient(row) {
   item._knownCostText = Number(item.knownCostAmount || 0) > 0 ? '¥' + _money(item.knownCostAmount) : '—';
   item._versionText = versions.length ? versions.join('、') : '配方版本待确认';
   item._dateText = item.firstBusinessDate
-    ? String(item.firstBusinessDate).slice(5) + ' 至 ' + String(item.lastBusinessDate || item.firstBusinessDate).slice(5)
+    ? String(item.firstBusinessDate).slice(5) + ' 至 '
+      + String(item.lastBusinessDate || item.firstBusinessDate).slice(5)
     : '';
   item._missingReasonText = (item.missingReasons || []).join('；');
   return item;
 }
 
-function _normalizeDaily(row) {
-  var item = Object.assign({}, row || {});
-  item.salesQuantityText = _quantity(item.salesQuantity);
-  item.revenueAmountText = _money(item.revenueAmount);
-  item.completeCostAmountText = _money(item.completeCostAmount);
-  item.knownCostAmountText = _money(item.knownCostAmount);
-  item.completionRateText = _rate(item.completionRate);
-  item.recipeVersionText = item.recipeVersionNo == null ? '无有效版本' : 'V' + item.recipeVersionNo;
-  item.missingReasonText = Array.isArray(item.missingReasons) ? item.missingReasons.join('；') : '';
-  item.isComplete = item.status === 'COMPLETED' && item.completeCostAmount != null;
-  item.isPartial = item.status === 'PARTIAL';
-  item.isCalculating = item.status === 'RECALCULATION_PENDING';
-  item.hasKnownEvidence = Number(item.completionRate || 0) > 0;
-  return item;
-}
-
-function _normalizeDish(row) {
+function _normalizeHistoricalDish(row) {
   var item = Object.assign({}, row || {});
   item.salesQuantityText = _quantity(item.salesQuantity);
   item.revenueAmountText = _money(item.revenueAmount);
   item.totalCostText = _money(item.totalHistoricalTheoreticalCostAmount);
+  item.completeCostDisplayText = item.allComplete ? '¥' + item.totalCostText : '—';
   item.resolvedCostText = _money(item.resolvedHistoricalTheoreticalCostAmount);
   item.knownPartialCostText = _money(item.knownPartialCostAmount);
   item.costPerPortionText = _money(item.completeCostPerPortion);
   item.grossMarginRateText = _rate(item.completeGrossMarginRate);
   item.salesCoverageRateText = _rate(item.salesCoverageRate);
   item.evidenceCoverageRateText = _rate(item.evidenceCoverageRate);
-  item.missingReasonText = Array.isArray(item.missingReasons) ? item.missingReasons.join('；') : '';
+  item.missingReasons = Array.isArray(item.missingReasons) ? item.missingReasons : [];
   item.hasKnownEvidence = Number(item.evidenceCoverageRate || 0) > 0;
-  item.ingredientSummaries = (item.ingredientSummaries || []).map(_normalizeIngredient);
-  item.dailyRows = (item.dailyRows || []).map(_normalizeDaily);
-  item._expanded = false;
+  item.ingredientSummaries = (item.ingredientSummaries || []).map(_normalizeHistoricalIngredient);
   return item;
 }
 
-function _normalizeSummary(summary) {
+function _normalizeHistoricalSummary(summary) {
   var item = Object.assign({}, summary || {});
-  item.totalSalesQuantityText = _quantity(item.totalSalesQuantity);
-  item.totalRevenueText = _money(item.totalRevenue);
   item.totalCostText = _money(item.totalHistoricalTheoreticalCostAmount);
   item.resolvedCostText = _money(item.resolvedHistoricalTheoreticalCostAmount);
   item.knownPartialCostText = _money(item.knownPartialCostAmount);
-  item.grossProfitText = _money(item.completeGrossProfitAmount);
-  item.grossMarginRateText = _rate(item.completeGrossMarginRate);
   item.salesCoverageRateText = _rate(item.salesCoverageRate);
   item.evidenceCoverageRateText = _rate(item.evidenceCoverageRate);
   item.hasResolvedCost = Number(item.completedGrainCount || 0) > 0;
@@ -132,29 +141,60 @@ function _normalizeSummary(summary) {
   return item;
 }
 
-function _filterDishRows(list, keyword) {
-  var rows = Array.isArray(list) ? list : [];
+function _normalizeOriginalDish(row, historicalByFoodId) {
+  var item = Object.assign({}, row || {});
+  item._foodId = _resolveDistributerFoodId(item);
+  item._expanded = false;
+  item._outboundCostPerPortionText = _displayValue(item.outboundAllocatedCostPerPortion);
+  item._theoryCostPerPortionText = _displayValue(item.theoryCostPerPortion);
+  item._outboundCostAmountText = _displayValue(item.outboundAllocatedCostAmount);
+  item._theoryCostTotalText = _displayValue(item.theoryCostTotal);
+  item._costTotalDiffText = _displayValue(item.costTotalDiff);
+  item.ingredientRows = (item.ingredientRows || []).map(function (ingredient) {
+    var normalized = Object.assign({}, ingredient);
+    normalized._imageUrl = _imageUrl(normalized.gbDgGoodsFileImg);
+    normalized._outboundCostText = _displayValue(normalized.outboundAllocatedCostPerPortion);
+    return normalized;
+  });
+  item._historical = historicalByFoodId[item._foodId] || null;
+  return item;
+}
+
+function _filterDishRowsByDishName(list, keyword) {
+  var arr = Array.isArray(list) ? list : [];
   var value = (keyword == null ? '' : String(keyword)).trim().toLowerCase();
-  if (!value) return rows.slice();
-  return rows.filter(function (row) {
-    return String(row.dishName || '').toLowerCase().indexOf(value) !== -1;
+  if (!value) return arr.slice();
+  return arr.filter(function (row) {
+    var first = row.dishName != null ? String(row.dishName) : '';
+    var second = row.gbDfFoodName != null ? String(row.gbDfFoodName) : '';
+    return first.toLowerCase().indexOf(value) !== -1
+      || second.toLowerCase().indexOf(value) !== -1;
   });
 }
 
 Page({
   data: {
-    dishRows: [],
-    dishRowsAll: [],
-    reportSummary: null,
+    salesDishRows: [],
+    salesDishRowsAll: [],
+    scopeSalesSubtotals: null,
+    historicalSummary: null,
+    historicalReportAvailable: false,
     loading: false,
     emptyHint: '',
     update: false,
-    sortBy: 'status',
+    searchDepId: '-1',
+    sortBy: 'diffCostPerPortion',
     sortOrder: 'desc',
+    abnormalFirst: false,
     searchBarOpen: false,
     searchInputFocus: false,
     dishNameSearch: '',
     dishNameSearchDraft: '',
+    mendianInfo: null,
+    activeSubDepIndex: 0,
+    activeSubDepId: '',
+    activeSubDepName: '',
+    subDepPickerRange: [],
   },
 
   onLoad: function (options) {
@@ -168,7 +208,9 @@ Page({
       windowWidth: globalData.windowWidth * globalData.rpxR,
       windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      url: config.server,
       disId: disId,
+      mendianInfo: mendianInfo || null,
       depFatherId: mendianInfo && mendianInfo.gbDepartmentId,
     });
     this._syncDatesFromMyDateStorage();
@@ -183,7 +225,10 @@ Page({
   },
 
   onUnload: function () {
-    if (this._dishSearchDebounceTimer) clearTimeout(this._dishSearchDebounceTimer);
+    if (this._dishSearchDebounceTimer) {
+      clearTimeout(this._dishSearchDebounceTimer);
+      this._dishSearchDebounceTimer = null;
+    }
   },
 
   _syncDatesFromMyDateStorage: function () {
@@ -213,60 +258,115 @@ Page({
     var that = this;
     if (!this.data.disId || !this.data.depFatherId || !this.data.startDate || !this.data.stopDate) {
       this.setData({
-        reportSummary: null,
-        dishRowsAll: [],
-        dishRows: [],
-        emptyHint: '缺少门店或日期信息，暂时无法核算',
+        scopeSalesSubtotals: null,
+        historicalSummary: null,
+        historicalReportAvailable: false,
+        salesDishRowsAll: [],
+        salesDishRows: [],
+        emptyHint: '缺少门店或日期信息，暂时无法查询',
       });
       return;
     }
-    load.showLoading('加载成本中');
-    this.setData({ loading: true, emptyHint: '' });
-    chartsApi.getDishDailyCostReport({
+
+    var originalRequest = {
+      startDate: this.data.startDate,
+      stopDate: this.data.stopDate,
+      endDate: this.data.stopDate,
+      disId: this.data.disId,
+      searchDepId: this.data.searchDepId,
+      depFatherId: this.data.depFatherId,
+      sortBy: this.data.sortBy || 'diffCostPerPortion',
+      sortOrder: this.data.sortOrder || 'desc',
+    };
+    if (this.data.activeSubDepId !== null && this.data.activeSubDepId !== '') {
+      originalRequest.subDepId = this.data.activeSubDepId;
+    }
+    var historicalRequest = {
       distributerId: this.data.disId,
       storeDepartmentId: this.data.depFatherId,
       startDate: this.data.startDate,
       endDate: this.data.stopDate,
-      sortBy: this.data.sortBy || 'status',
-      sortOrder: this.data.sortOrder || 'desc',
-    }).then(function (res) {
+      sortBy: 'status',
+      sortOrder: 'desc',
+    };
+
+    load.showLoading('加载中');
+    this.setData({ loading: true, emptyHint: '' });
+    var historicalPromise = chartsApi.getDishDailyCostReport(historicalRequest).catch(function () {
+      return null;
+    });
+
+    Promise.all([
+      chartsApi.getGbIngredientAnalysis(originalRequest),
+      historicalPromise,
+    ]).then(function (responses) {
       load.hideLoading();
-      var result = res.result || {};
-      if (result.code !== 0 || !result.data) {
-        throw new Error(result.msg || '成本报表加载失败');
+      var originalResult = responses[0] && responses[0].result;
+      if (!originalResult || originalResult.code !== 0 || !originalResult.data) {
+        throw new Error((originalResult && originalResult.msg) || '菜品分析加载失败');
       }
-      var data = result.data;
-      var rows = (data.dishes || []).map(_normalizeDish);
+      var originalData = originalResult.data;
+      var historicalResult = responses[1] && responses[1].result;
+      var historicalData = historicalResult && historicalResult.code === 0
+        ? historicalResult.data : null;
+      var historicalByFoodId = {};
+      if (historicalData && Array.isArray(historicalData.dishes)) {
+        historicalData.dishes.map(_normalizeHistoricalDish).forEach(function (dish) {
+          var foodId = _resolveDistributerFoodId(dish);
+          if (foodId) historicalByFoodId[foodId] = dish;
+        });
+      }
+      var rows = (originalData.salesDishRows || []).map(function (row) {
+        return _normalizeOriginalDish(row, historicalByFoodId);
+      });
+      var returnedOrder = originalData.sortOrder;
       that.setData({
         loading: false,
-        reportSummary: _normalizeSummary(data.summary),
-        dishRowsAll: rows,
-        emptyHint: rows.length ? '' : '当前日期范围还没有可核算的销量版本',
+        scopeSalesSubtotals: originalData.scopeSalesSubtotals || null,
+        historicalSummary: historicalData ? _normalizeHistoricalSummary(historicalData.summary) : null,
+        historicalReportAvailable: !!historicalData,
+        salesDishRowsAll: rows,
+        sortOrder: returnedOrder === 'asc' || returnedOrder === 'desc'
+          ? returnedOrder : that.data.sortOrder,
+        emptyHint: rows.length ? '' : '当前日期范围暂无菜品分析数据',
       });
       that._applyDishFilter(rows);
     }).catch(function (error) {
       load.hideLoading();
       that.setData({
         loading: false,
-        reportSummary: null,
-        dishRowsAll: [],
-        dishRows: [],
-        emptyHint: (error && error.message) || '成本报表加载失败',
+        scopeSalesSubtotals: null,
+        historicalSummary: null,
+        historicalReportAvailable: false,
+        salesDishRowsAll: [],
+        salesDishRows: [],
+        emptyHint: (error && error.message) || '菜品分析加载失败',
       });
     });
   },
 
-  _applyDishFilter: function (rows) {
-    this.setData({
-      dishRows: _filterDishRows(rows || this.data.dishRowsAll, this.data.dishNameSearch),
-    });
+  _applyDishFilter: function (allRows) {
+    var base = allRows || this.data.salesDishRowsAll || [];
+    var afterName = _filterDishRowsByDishName(base, this.data.dishNameSearch);
+    var output = afterName;
+    if (this.data.abnormalFirst) {
+      output = afterName.filter(function (dish) {
+        var value = parseFloat(String(
+          dish && dish.diffCostPerPortion !== null && dish.diffCostPerPortion !== undefined
+            ? dish.diffCostPerPortion : ''
+        ).trim());
+        return !isNaN(value) && Math.abs(value) > 1e-6;
+      });
+    }
+    this.setData({ salesDishRows: output });
   },
 
   onToggleDishDetail: function (e) {
     var index = e.currentTarget.dataset.index;
     if (index === undefined || index === null) return;
-    var key = 'dishRows[' + index + ']._expanded';
-    this.setData({ [key]: !this.data.dishRows[index]._expanded });
+    var key = 'salesDishRows[' + index + ']._expanded';
+    var row = this.data.salesDishRows[index];
+    this.setData({ [key]: !(row && row._expanded) });
   },
 
   onOpenCostEvidence: function (e) {
@@ -287,16 +387,6 @@ Page({
     });
   },
 
-  onSort: function (e) {
-    var that = this;
-    var sort = e.currentTarget.dataset.sort;
-    if (!sort) return;
-    var order = sort === this.data.sortBy && this.data.sortOrder === 'desc' ? 'asc' : 'desc';
-    this.setData({ sortBy: sort, sortOrder: order }, function () {
-      that._fetchReport();
-    });
-  },
-
   onToggleSearchBar: function () {
     var open = !this.data.searchBarOpen;
     this.setData({
@@ -314,7 +404,7 @@ Page({
     this._dishSearchDebounceTimer = setTimeout(function () {
       that.setData({ dishNameSearch: (that.data.dishNameSearchDraft || '').trim() });
       that._applyDishFilter();
-    }, 300);
+    }, 350);
   },
 
   onDishNameSearchConfirm: function (e) {
@@ -330,6 +420,26 @@ Page({
     this._applyDishFilter();
   },
 
+  onToggleAbnormal: function () {
+    this.setData({ abnormalFirst: !this.data.abnormalFirst });
+    this._applyDishFilter();
+  },
+
+  onIngredientSort: function (e) {
+    var that = this;
+    var sort = e.currentTarget.dataset.sort;
+    if (!sort) return;
+    if (sort === this.data.sortBy) {
+      this.setData({ sortOrder: this.data.sortOrder === 'asc' ? 'desc' : 'asc' }, function () {
+        that._fetchReport();
+      });
+      return;
+    }
+    this.setData({ sortBy: sort, sortOrder: 'desc' }, function () {
+      that._fetchReport();
+    });
+  },
+
   toDatePage: function () {
     this.setData({ update: true });
     wx.navigateTo({
@@ -341,5 +451,50 @@ Page({
 
   toBack: function () {
     wx.navigateBack({ delta: 1 });
+  },
+
+  onOpenIngredients: function (e) {
+    var dish = e.currentTarget.dataset.dish;
+    if (!dish) return;
+    var foodId = _resolveDistributerFoodId(dish);
+    if (!foodId) {
+      wx.showToast({ title: '缺少菜品ID，无法打开配料看板', icon: 'none' });
+      return;
+    }
+    var data = this.data;
+    if (!data.startDate || !data.stopDate) {
+      wx.showToast({ title: '请先在页顶选择有效日期', icon: 'none' });
+      return;
+    }
+    var disId = data.disId;
+    if (disId === null || disId === undefined || disId === '') {
+      var disInfo = wx.getStorageSync('disInfo');
+      if (disInfo && disInfo.gbDistributerId !== null && disInfo.gbDistributerId !== undefined) {
+        disId = disInfo.gbDistributerId;
+      }
+    }
+    if (disId === null || disId === undefined || disId === '') {
+      wx.showToast({ title: '缺少门店信息', icon: 'none' });
+      return;
+    }
+    if (data.depFatherId === null || data.depFatherId === undefined || data.depFatherId === '') {
+      wx.showToast({ title: '缺少父部门，无法查配料', icon: 'none' });
+      return;
+    }
+    var query = [
+      'foodId=' + encodeURIComponent(foodId),
+      'startDate=' + encodeURIComponent(data.startDate),
+      'stopDate=' + encodeURIComponent(data.stopDate),
+      'endDate=' + encodeURIComponent(data.stopDate),
+      'disId=' + encodeURIComponent(String(disId)),
+      'depFatherId=' + encodeURIComponent(String(data.depFatherId)),
+    ];
+    var name = dish.dishName || dish.gbDfFoodName;
+    if (name) query.push('foodName=' + encodeURIComponent(String(name)));
+    if (data.hanzi) query.push('hanzi=' + encodeURIComponent(String(data.hanzi)));
+    wx.navigateTo({
+      url: '/subPackage-mendian/pages/management/dishIngredientDashboard/dishIngredientDashboard?'
+        + query.join('&'),
+    });
   },
 });

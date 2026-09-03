@@ -540,3 +540,280 @@ page {
 .cost-bottom-space {
   height: 48rpx;
 }
+
+/* 历史理论核算是原菜品分析之上的附加验证，不替换原成本口径。 */
+.history-summary {
+  margin: 4rpx 16rpx 14rpx;
+  padding: 16rpx 20rpx;
+  border: 1rpx solid #cfe7df;
+  border-radius: 16rpx;
+  background: #f3faf7;
+}
+
+.history-summary__head,
+.history-strip__head,
+.history-strip__values,
+.history-detail__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14rpx;
+}
+
+.history-summary__title {
+  color: #315d53;
+  font-size: 25rpx;
+  line-height: 34rpx;
+  font-weight: 650;
+}
+
+.history-summary__rate {
+  color: #168472;
+  font-size: 22rpx;
+  line-height: 31rpx;
+}
+
+.history-summary__text {
+  display: block;
+  margin-top: 7rpx;
+  color: #65736e;
+  font-size: 22rpx;
+  line-height: 32rpx;
+}
+
+.original-metrics {
+  padding-top: 20rpx;
+  padding-bottom: 20rpx;
+}
+
+.cost-metric__unit {
+  display: block;
+  min-height: 28rpx;
+  margin-top: 2rpx;
+  color: #87918d;
+  font-size: 19rpx;
+  line-height: 28rpx;
+}
+
+.metric-deviation {
+  color: #0d987c;
+}
+
+.history-strip {
+  margin: 14rpx 20rpx 0;
+  padding: 14rpx 16rpx;
+  border-radius: 12rpx;
+  background: #f3f8f6;
+}
+
+.history-strip__head {
+  color: #43675f;
+  font-size: 22rpx;
+  line-height: 31rpx;
+  font-weight: 650;
+}
+
+.history-strip__values {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 8rpx;
+  color: #65736e;
+  font-size: 20rpx;
+  line-height: 29rpx;
+}
+
+.history-strip__reason {
+  display: block;
+  margin-top: 7rpx;
+  color: #a16522;
+  font-size: 21rpx;
+  line-height: 30rpx;
+}
+
+.legacy-detail {
+  padding: 0 20rpx 20rpx;
+  background: #fbfcfb;
+}
+
+.legacy-section {
+  padding: 18rpx 0;
+  border-top: 1rpx solid #e8ecea;
+}
+
+.legacy-section__title {
+  display: block;
+  margin-bottom: 13rpx;
+  color: #33413c;
+  font-size: 25rpx;
+  line-height: 34rpx;
+  font-weight: 650;
+}
+
+.legacy-total-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 18rpx 0;
+  border-radius: 14rpx;
+  background: #fff;
+}
+
+.legacy-total-metrics > view {
+  min-width: 0;
+  padding: 0 10rpx;
+  text-align: center;
+  border-right: 1rpx solid #e8ecea;
+}
+
+.legacy-total-metrics > view:last-child {
+  border-right: 0;
+}
+
+.legacy-total-metrics text {
+  display: block;
+  color: #78837e;
+  font-size: 21rpx;
+  line-height: 30rpx;
+}
+
+.legacy-total-metrics text:nth-child(2) {
+  margin-top: 6rpx;
+  color: #27352f;
+  font-size: 29rpx;
+  line-height: 40rpx;
+  font-weight: 700;
+}
+
+.legacy-total-metrics text:nth-child(3) {
+  margin-top: 2rpx;
+  color: #929b97;
+  font-size: 19rpx;
+}
+
+.legacy-total-metrics text.metric-deviation {
+  color: #0d987c;
+}
+
+.legacy-ingredient-scroll {
+  width: 100%;
+  border: 1rpx solid #e4eae7;
+  border-radius: 14rpx;
+  background: #fff;
+}
+
+.legacy-ingredient-table {
+  width: 1350rpx;
+}
+
+.legacy-ingredient-row {
+  display: grid;
+  grid-template-columns: 300rpx repeat(6, 175rpx);
+  align-items: stretch;
+  min-height: 104rpx;
+  border-bottom: 1rpx solid #edf0ee;
+}
+
+.legacy-ingredient-row:last-child {
+  border-bottom: 0;
+}
+
+.legacy-ingredient-row.is-head {
+  min-height: 62rpx;
+  background: #f5f8f6;
+}
+
+.legacy-ingredient-row > text,
+.legacy-ingredient-cell,
+.legacy-ingredient-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 12rpx 10rpx;
+  box-sizing: border-box;
+  color: #5f6c67;
+  font-size: 22rpx;
+  line-height: 30rpx;
+  text-align: center;
+}
+
+.legacy-ingredient-row.is-head > text {
+  color: #79847f;
+  font-size: 21rpx;
+  font-weight: 600;
+}
+
+.legacy-ingredient-name {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.legacy-ingredient-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 68rpx;
+  height: 68rpx;
+  margin-right: 13rpx;
+  border-radius: 10rpx;
+  background: #edf2ef;
+  color: #168472;
+  font-size: 20rpx;
+}
+
+.legacy-ingredient-image.is-empty {
+  background: #e5f4ef;
+  font-weight: 700;
+}
+
+.legacy-ingredient-cell {
+  flex-direction: column;
+}
+
+.legacy-ingredient-cell > text:last-child:not(:first-child) {
+  margin-top: 3rpx;
+  color: #929b97;
+  font-size: 19rpx;
+}
+
+.legacy-ingredient-tag {
+  padding: 2rpx 7rpx;
+  border-radius: 7rpx;
+  background: #edf7f4;
+}
+
+.history-detail {
+  margin-top: 2rpx;
+}
+
+.history-detail__head {
+  align-items: flex-start;
+  margin-bottom: 4rpx;
+  color: #87918d;
+  font-size: 20rpx;
+}
+
+.history-detail__head .legacy-section__title {
+  margin-bottom: 2rpx;
+}
+
+.history-detail__hint {
+  display: block;
+  color: #87918d;
+  font-size: 20rpx;
+  line-height: 29rpx;
+}
+
+.legacy-ingredient-dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  margin: 2rpx -20rpx -20rpx;
+  padding: 19rpx 20rpx;
+  border-top: 1rpx solid #e2e8e5;
+  background: #fff;
+  color: #257f70;
+  font-size: 24rpx;
+  font-weight: 600;
+}
