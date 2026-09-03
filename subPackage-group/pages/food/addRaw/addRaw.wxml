@@ -539,7 +539,7 @@
           <view class="raw-add-modal__picked-info">
             <text class="raw-add-modal__picked-name">{{modalGoods.gbDgGoodsName}}</text>
             <text class="raw-add-modal__picked-spec">{{modalPackLabel}}</text>
-            <text class="raw-add-modal__picked-price">{{modalPackPriceLabel}}</text>
+            <text class="raw-add-modal__picked-price">{{modalPackPriceTitle}} {{modalPackPriceLabel}}</text>
           </view>
         </view>
 
@@ -556,10 +556,11 @@
             <text class="raw-add-modal__arrow">›</text>
           </view>
           <view class="raw-add-modal__row">
-            <text class="raw-add-modal__label">采购单价</text>
+            <text class="raw-add-modal__label">{{modalPackPriceTitle || '采购单价'}}</text>
             <text class="raw-add-modal__value raw-add-modal__value--price">{{modalPackPriceLabel}}</text>
             <text class="raw-add-modal__arrow">›</text>
           </view>
+          <text class="raw-add-modal__price-note" wx:if="{{modalPriceReferenceOnly}}">商品参考价仅用于本页估算；正式历史理论成本仍按营业日的入库批次和单位换算证据核算。</text>
           <view class="raw-add-modal__row raw-add-modal__row--dosage">
             <text class="raw-add-modal__label">每份用量</text>
             <view class="raw-add-modal__dosage">
@@ -622,7 +623,7 @@
             <view class="raw-add-modal__summary-cell">
               <text class="raw-add-modal__summary-icon">🧮</text>
               <view class="raw-add-modal__summary-text">
-                <text class="raw-add-modal__summary-label">每份成本 ≈</text>
+                <text class="raw-add-modal__summary-label">{{modalPriceReferenceOnly ? '每份参考成本 ≈' : '每份成本 ≈'}}</text>
                 <text class="raw-add-modal__summary-num">¥ {{modalCostPerPortion}}</text>
               </view>
             </view>

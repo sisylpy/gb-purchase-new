@@ -1540,6 +1540,14 @@
   font-weight: 600;
 }
 
+.raw-add-modal__price-note {
+  display: block;
+  margin: -8rpx 0 10rpx 160rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: var(--gb-text-muted, #999);
+}
+
 .raw-add-modal__arrow {
   margin-left: 8rpx;
   font-size: 32rpx;

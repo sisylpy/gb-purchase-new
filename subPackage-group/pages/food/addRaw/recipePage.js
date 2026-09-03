@@ -388,6 +388,15 @@ function _isDozenPackUnit(packUnit) {
 
 function _suggestMinUnit(packUnit, parsedQty, goods) {
   var u = (packUnit || '').trim();
+  if (_isDozenPackUnit(u)) return '个';
+  if (_isCountPerPackGoods(goods, u, parsedQty)) return '个';
+  // 采购单位可能只是通用包装名（如“件”），真正的配方计量单位应从明确规格中确定。
+  // 例如 10000g/件默认按 g 录入，不能让用户误填成 5件/份。
+  var specificationUnit = _minUnitFromWeightStr(
+    goods && goods.gbDgGoodsStandardWeight,
+    u
+  );
+  if (specificationUnit) return specificationUnit;
   // 瓶/桶/罐 等容器：优先检查标准规格是重量还是体积
   if (/瓶|罐|桶|升/i.test(u)) {
     var g = goods || {};
@@ -397,8 +406,6 @@ function _suggestMinUnit(packUnit, parsedQty, goods) {
     // 否则按体积换算用 ml
     return 'ml';
   }
-  if (_isDozenPackUnit(u)) return '个';
-  if (_isCountPerPackGoods(goods, u, parsedQty)) return '个';
   if (u === '斤' || u === '公斤' || u === 'kg' || u === 'KG') return 'g';
   if (/个|只|张|枚/.test(u) && (!parsedQty || parsedQty <= 1)) return '个';
   if (/盒|包|袋|箱/.test(u)) {
@@ -551,23 +558,43 @@ function _goodsImageUrl(baseUrl, goods) {
 
 function _decorateGoodsSearchPrice(goods) {
   var row = Object.assign({}, goods || {});
-  var averagePrice = Number(row.gbDgGoodsAveragePrice);
-  var referencePrice = Number(row.gbDgGoodsPrice);
-  var unit = String(row.gbDgGoodsStandardname || '').trim();
-  if (averagePrice > 0) {
-    row._searchPriceLabel = '近期采购均价';
-    row._searchPriceText = '¥' + averagePrice.toFixed(2) + (unit ? '/' + unit : '');
-    row._searchPriceSource = 'PURCHASE_AVERAGE';
-  } else if (referencePrice > 0) {
-    row._searchPriceLabel = '商品参考价';
-    row._searchPriceText = '¥' + referencePrice.toFixed(2) + (unit ? '/' + unit : '');
-    row._searchPriceSource = 'GOODS_REFERENCE';
-  } else {
-    row._searchPriceLabel = '单价';
-    row._searchPriceText = '';
-    row._searchPriceSource = 'MISSING';
-  }
+  var priceContext = _goodsDisplayPriceContext(row);
+  row._searchPriceLabel = priceContext.title;
+  row._searchPriceText = priceContext.displayText;
+  row._searchPriceSource = priceContext.source;
   return row;
+}
+
+/**
+ * 配料选择界面的价格只用于帮助识别商品和估算用量。
+ * 正式历史理论成本仍由营业日入库批次和单位换算证据解析，不使用商品参考价兜底。
+ */
+function _goodsDisplayPriceContext(goods) {
+  var g = _getGoodsEntity(goods);
+  var averagePrice = Number(g.gbDgGoodsAveragePrice);
+  var referencePrice = Number(g.gbDgGoodsPrice);
+  var unit = String(g.gbDgGoodsStandardname || '').trim();
+  var price = 0;
+  var title = '单价';
+  var source = 'MISSING';
+  if (averagePrice > 0) {
+    price = averagePrice;
+    title = '近期采购均价';
+    source = 'PURCHASE_AVERAGE';
+  } else if (referencePrice > 0) {
+    price = referencePrice;
+    title = '商品参考价';
+    source = 'GOODS_REFERENCE';
+  }
+  return {
+    price: price,
+    title: title,
+    source: source,
+    referenceOnly: source === 'GOODS_REFERENCE',
+    displayText: price > 0
+      ? ('¥' + price.toFixed(2) + (unit ? '/' + unit : ''))
+      : '',
+  };
 }
 
 function _defaultPortionAmount(minUnit) {
@@ -606,7 +633,8 @@ function _buildUnitContext(goods, opts) {
       packLabel = '1' + packUnit;
     }
   }
-  var price = parseFloat(g.gbDgGoodsAveragePrice) || 0;
+  var priceContext = _goodsDisplayPriceContext(g);
+  var price = priceContext.price;
   var convHint = _conventionalPackRatio(packUnit, minUnit, rawAmt);
   var conversionPlaceholder = '如500';
   if (_isCountMinUnit(minUnit)) {
@@ -614,17 +642,18 @@ function _buildUnitContext(goods, opts) {
   } else if (convHint > 0) {
     conversionPlaceholder = String(convHint);
   }
-  var packPriceLabel = price > 0
-    ? ('¥ ' + price.toFixed(2) + '/' + packUnit)
-    : '最近无采购价';
+  var packPriceLabel = priceContext.displayText || '暂无单价';
   var conversionRequired = _needsManualConversion(g, minUnit);
   return {
     packUnit: packUnit,
     packQtyInMin: packQtyInMin,
     minUnit: minUnit,
     packLabel: packLabel,
+    packPriceTitle: priceContext.title,
     packPriceLabel: packPriceLabel,
     packPrice: price,
+    priceSource: priceContext.source,
+    priceReferenceOnly: priceContext.referenceOnly,
     conversionPlaceholder: conversionPlaceholder,
     conversionRequired: conversionRequired,
     hasGoodsDefaultSpec: _hasGoodsDefaultSpec(g, minUnit),
@@ -1062,7 +1091,9 @@ function createRecipePage(pageMode) {
     modalMinUnit: 'ml',
     modalPackUnit: '',
     modalPackLabel: '',
+    modalPackPriceTitle: '',
     modalPackPriceLabel: '',
+    modalPriceReferenceOnly: false,
     modalCostPerPortion: '0.00',
     modalPortionsPerPack: '0',
     modalDemoText: '',
@@ -3011,7 +3042,9 @@ function createRecipePage(pageMode) {
       modalMinUnit: 'ml',
       modalPackUnit: '',
       modalPackLabel: '',
+      modalPackPriceTitle: '',
       modalPackPriceLabel: '',
+      modalPriceReferenceOnly: false,
       modalCostPerPortion: '0.00',
       modalPortionsPerPack: '0',
       modalDemoText: '',
@@ -3068,7 +3101,9 @@ function createRecipePage(pageMode) {
       minUnitOptions: minUnitOpts,
       modalPackUnit: ctx.packUnit,
       modalPackLabel: ctx.packLabel,
+      modalPackPriceTitle: ctx.packPriceTitle,
       modalPackPriceLabel: ctx.packPriceLabel,
+      modalPriceReferenceOnly: ctx.priceReferenceOnly,
       modalPackQtyInMin: packQtyStr,
       modalConversionPlaceholder: ctx.conversionPlaceholder,
       modalConversionRequired: ctx.conversionRequired,
@@ -3169,6 +3204,9 @@ function createRecipePage(pageMode) {
       ? ('每份约 ' + _formatPackAmountDisplay(parseFloat(packEquiv.amount)) + ctx.packUnit)
       : '';
     this.setData({
+      modalPackPriceTitle: ctx.packPriceTitle,
+      modalPackPriceLabel: ctx.packPriceLabel,
+      modalPriceReferenceOnly: ctx.priceReferenceOnly,
       modalCostPerPortion: canCalcCost ? cost.toFixed(2) : '—',
       modalPortionsPerPack: portionsLabel,
       modalDemoText: '卖出 ' + demoPortions + ' 份，将消耗 ' + demoConsume + minUnit
