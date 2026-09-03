@@ -1,6 +1,6 @@
 <view class="flex flex-column page-bg">
 
-  <back-navbar title="{{versionEditorMode ? '编辑配方版本' : foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="{{versionEditorMode ? (currentRecipeVersionView ? '编辑配方版本' : '新建配方版本') : foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
   <scroll-view scroll-y class="content-scroll">
     <view class="version-editor-intro" wx:if="{{versionEditorMode}}">

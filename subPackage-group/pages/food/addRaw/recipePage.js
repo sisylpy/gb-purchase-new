@@ -1038,6 +1038,8 @@ function createRecipePage(pageMode) {
       manageVersionId: Number(options && options.manageVersionId) || null,
       returnToManage: String(options && options.returnToManage || '') === '1',
       versionedMode: foodItem.gbDfRecipeModel === 'VERSIONED',
+      versionUsageStart: this.data.versionEditorMode ? _todayText() : '',
+      versionUsageReason: this.data.versionEditorMode ? '新建配方版本并设置门店使用时间' : '',
     })
 
     // Food 是跨页缓存，配方模式和 rowVersion 必须以后台最新数据为准。
