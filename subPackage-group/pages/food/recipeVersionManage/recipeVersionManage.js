@@ -1,7 +1,6 @@
 var preparationApi = require('../../../../services/preparation');
 var preparationUtil = require('../../../../utils/preparation');
 var RECIPE_REPLACEMENT_CONTEXT_PREFIX = 'foodRecipeReplacementContext:';
-var RECIPE_PENDING_USAGE_PREFIX = 'foodRecipePendingUsage:';
 
 function localDateText(date) {
   var value = date || new Date();
@@ -350,8 +349,6 @@ Page({
             recentAdjustments: (timelinePayload.recentAdjustments || []).map(adjustmentView),
             currentVersion: versions.find(function (row) { return row._isCurrent; }) || null,
             draftVersion: versions.find(function (row) { return row._isDraft; }) || null,
-          }, function () {
-            that.consumePendingVersionUsage(versions);
           });
         });
       }).catch(function (error) {
@@ -375,6 +372,19 @@ Page({
     wx.navigateTo({ url: '../recipeVersionEdit/recipeVersionEdit?' + params.join('&') });
   },
 
+  editVersion: function (event) {
+    var versionId = Number(event && event.currentTarget && event.currentTarget.dataset.versionId || 0);
+    var params = [
+      'foodId=' + encodeURIComponent(String(this.data.foodId)),
+      'returnToManage=1',
+    ];
+    if (versionId > 0) {
+      params.push('baseVersionId=' + encodeURIComponent(String(versionId)));
+      params.push('manageVersionId=' + encodeURIComponent(String(versionId)));
+    }
+    wx.navigateTo({ url: '../recipeVersionEdit/recipeVersionEdit?' + params.join('&') });
+  },
+
   openIntervalEditor: function (event) {
     this._pendingUsageStorageKey = null;
     var versionId = Number(event.currentTarget.dataset.versionId);
@@ -382,19 +392,6 @@ Page({
     var operation = String(event.currentTarget.dataset.operation || '').toUpperCase();
     var version = this.data.versions.find(function (row) { return Number(row.id) === versionId; });
     this.openIntervalEditorForVersion(version, intervalId, operation, null);
-  },
-
-  consumePendingVersionUsage: function (versions) {
-    if (this.data.showIntervalEditor) return;
-    var key = RECIPE_PENDING_USAGE_PREFIX + String(this.data.foodId);
-    var pending = wx.getStorageSync(key);
-    if (!pending || Number(pending.foodId) !== Number(this.data.foodId)) return;
-    var version = (versions || []).find(function (row) {
-      return Number(row.id) === Number(pending.recipeVersionId);
-    });
-    if (!version) return;
-    this._pendingUsageStorageKey = key;
-    this.openIntervalEditorForVersion(version, 0, pending.operation, pending);
   },
 
   openIntervalEditorForVersion: function (version, intervalId, operation, preset) {

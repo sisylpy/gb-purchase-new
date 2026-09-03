@@ -11,9 +11,9 @@
         <view class="version-summary__current" wx:if="{{currentVersion}}">当前 V{{currentVersion.versionNo}}</view>
         <view class="version-summary__missing" wx:else>今天无适用配方</view>
       </view>
-      <text class="version-summary__tip">先保存不可变的配方内容版本，再单独设置门店的使用日期。营业成本只按“门店＋菜品＋营业日”命中的唯一适用区间核算。</text>
-      <view class="version-summary__create" bindtap="createVersion">
-        {{draftVersion ? '继续编辑草稿 V' + draftVersion.versionNo : '+ 更新配方版本'}}
+      <text class="version-summary__tip">点击每个版本唯一的“编辑”入口，可在同一页面调整配料、用量和门店使用日期，并统一预览成本影响。</text>
+      <view class="version-summary__create" wx:if="{{!versions.length}}" bindtap="editVersion">
+        + 新建第一个配方版本
       </view>
     </view>
 
@@ -59,20 +59,13 @@
           </view>
           <text class="version-card__date">{{version._publishedText ? version._publishedText + (version._isDraft ? ' 创建' : ' 发布') : ''}}</text>
         </view>
-        <view class="version-card__use">
-          <view wx:if="{{version._isCurrent}}" class="version-card__use-current">✓ 今天正在使用</view>
-          <view wx:elif="{{version._canApply}}" class="version-card__use-button"
-            data-version-id="{{version.id}}" data-operation="SET_CURRENT" bindtap="openIntervalEditor">设为当前使用</view>
-          <view wx:else class="version-card__use-disabled">草稿发布后才能使用</view>
+        <view class="version-card__use" wx:if="{{version._isCurrent}}">
+          <view class="version-card__use-current">✓ 今天正在使用</view>
         </view>
         <text class="version-card__reason" wx:if="{{version._changeReasonText}}">本版说明：{{version._changeReasonText}}</text>
 
         <view class="version-periods">
-          <view class="version-periods__head">
-            <text class="version-section-title">当前门店适用时间</text>
-            <view wx:if="{{version._canApply}}" class="version-periods__add" data-version-id="{{version.id}}"
-              data-operation="ADD_INTERVAL" bindtap="openIntervalEditor">+ 新增时间段</view>
-          </view>
+          <view class="version-periods__head"><text class="version-section-title">当前门店适用时间</text></view>
           <view wx:if="{{!version._intervals.length}}" class="version-periods__empty">
             {{version._isDraft ? '草稿不能用于成本核算' : '尚未设置，不会自动应用到任何营业日'}}
           </view>
@@ -80,11 +73,6 @@
             <view>
               <text class="version-period-row__text">{{interval._periodText}}</text>
               <text class="version-period-row__hint">结束日期当天不再使用本版本</text>
-            </view>
-            <view class="version-period-row__actions">
-              <text class="version-period-row__edit" data-version-id="{{version.id}}" data-interval-id="{{interval.id}}"
-                catchtap="openIntervalEditor">编辑</text>
-              <text class="version-period-row__remove" data-interval-id="{{interval.id}}" catchtap="removeInterval">移除</text>
             </view>
           </view>
         </view>
@@ -116,10 +104,10 @@
           </view>
           <view class="version-recipe__empty" wx:if="{{!version._components.length}}">该版本没有可展示的配料快照</view>
         </view>
-        <view class="version-card__actions">
-          <view class="version-card__action" data-version-id="{{version.id}}" bindtap="createVersion">基于此版本更新</view>
-          <view wx:if="{{version._canApply}}" class="version-card__action version-card__action--history"
-            data-version-id="{{version.id}}" data-operation="HISTORICAL_CORRECTION" bindtap="openIntervalEditor">修正历史配方</view>
+        <view class="version-card__actions version-card__actions--single">
+          <view class="version-card__action version-card__action--primary" data-version-id="{{version.id}}" bindtap="editVersion">
+            {{version._isDraft ? '编辑草稿' : '编辑'}}
+          </view>
         </view>
       </view>
     </block>
@@ -141,118 +129,4 @@
     <view class="version-page__safe"></view>
   </scroll-view>
 
-  <view class="interval-mask" wx:if="{{showIntervalEditor}}" catchtap="closeIntervalEditor">
-    <view class="interval-panel" catchtap="stopPropagation">
-      <view class="interval-panel__head">
-        <view>
-          <text class="interval-panel__title">{{intervalOperationText}} · V{{intervalVersion.versionNo}}</text>
-          <text class="interval-panel__sub">按自然日生效；结束日期当天不再使用</text>
-        </view>
-        <text class="interval-panel__close" bindtap="closeIntervalEditor">关闭</text>
-      </view>
-
-      <view class="interval-form-row">
-        <text class="interval-form-row__label">启用营业日</text>
-        <picker mode="date" value="{{intervalStart}}" bindchange="onIntervalStartChange">
-          <view class="interval-form-row__value">{{intervalStart}} ›</view>
-        </picker>
-      </view>
-      <view class="interval-batches" wx:if="{{intervalVersion._changedRawGoods.length}}">
-        <text class="interval-form-row__label">新配料入库批次参考</text>
-        <text class="interval-form-row__hint">选择后自动把入库日带入启用日期；仍可手工调整</text>
-        <view class="interval-batches__loading" wx:if="{{intervalBatchLoading}}">正在读取当前门店入库批次…</view>
-        <view class="interval-batches__empty" wx:elif="{{!intervalBatchHints.length}}">这些新配料暂无可用入库批次，可直接填写实际启用日期。</view>
-        <scroll-view wx:else scroll-x class="interval-batches__scroll">
-          <view class="interval-batches__track">
-            <view wx:for="{{intervalBatchHints}}" wx:for-item="batch" wx:key="_key" class="interval-batch {{intervalSelectedBatchId == batch.stockBatchId ? 'is-selected' : ''}}" data-key="{{batch._key}}" bindtap="chooseIntervalBatch">
-              <text class="interval-batch__goods">{{batch._goodsName}}</text>
-              <text class="interval-batch__date">{{batch._dateText}} 入库</text>
-              <text class="interval-batch__meta">批次 #{{batch.stockBatchId}} · {{batch._quantityText}}</text>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
-      <view class="replacement-box" wx:if="{{intervalReplacementCandidate}}">
-        <view class="replacement-box__switch">
-          <view>
-            <text class="interval-form-row__label">同时记录采购包装升级</text>
-            <text class="interval-form-row__hint">
-              {{intervalReplacementCandidate.explicitlyReplaced ? '这是新版本中明确执行的商品更换' : '检测到新旧版本各替换了1种采购商品，请确认是否属于包装升级'}}
-            </text>
-          </view>
-          <switch color="#168d79" checked="{{intervalRecordReplacement}}" bindchange="onReplacementSwitch" />
-        </view>
-        <view class="replacement-box__route">
-          <view class="replacement-box__goods">
-            <text class="replacement-box__tag">原包装</text>
-            <text class="replacement-box__name">{{intervalReplacementCandidate.replacedName}}</text>
-            <text class="replacement-box__spec">{{intervalReplacementCandidate.replacedSpec || '规格待完善'}}</text>
-          </view>
-          <text class="replacement-box__arrow">→</text>
-          <view class="replacement-box__goods replacement-box__goods--new">
-            <text class="replacement-box__tag">新包装</text>
-            <text class="replacement-box__name">{{intervalReplacementCandidate.replacementName}}</text>
-            <text class="replacement-box__spec">{{intervalReplacementCandidate.replacementSpec || '规格待完善'}}</text>
-          </view>
-        </view>
-        <text class="replacement-box__note" wx:if="{{intervalRecordReplacement}}">商品替代采用与本配方使用相同的营业日起止日期，并保存新旧包装换算证据。</text>
-      </view>
-      <view class="interval-duration">
-        <text class="interval-form-row__label">使用期限</text>
-        <view class="interval-duration__options">
-          <view class="interval-duration__option {{!intervalHasEnd ? 'is-selected' : ''}}"
-            data-has-end="0" bindtap="chooseIntervalDuration">
-            <text class="interval-duration__title">持续使用</text>
-            <text class="interval-duration__hint">不设置停止日期</text>
-          </view>
-          <view class="interval-duration__option {{intervalHasEnd ? 'is-selected' : ''}}"
-            data-has-end="1" bindtap="chooseIntervalDuration">
-            <text class="interval-duration__title">设置停止日期</text>
-            <text class="interval-duration__hint">到指定营业日前</text>
-          </view>
-        </view>
-      </view>
-      <view class="interval-form-row" wx:if="{{intervalHasEnd}}">
-        <text class="interval-form-row__label">停止营业日</text>
-        <picker mode="date" value="{{intervalEnd}}" bindchange="onIntervalEndChange">
-          <view class="interval-form-row__value">{{intervalEnd}} ›</view>
-        </picker>
-      </view>
-      <view class="interval-reason">
-        <text class="interval-form-row__label">调整原因</text>
-        <input class="interval-reason__input" value="{{intervalReason}}" maxlength="200" bindinput="onIntervalReasonInput" placeholder="例如：开始使用1.9L大瓶生抽" />
-      </view>
-
-      <view class="interval-preview" wx:if="{{intervalPreview}}">
-        <text class="interval-preview__title">影响预览</text>
-        <text class="interval-preview__line">影响营业日：{{intervalPreview._affectedText}}</text>
-        <text class="interval-preview__line">将替换 {{intervalPreview.supersededIntervalIds.length}} 段旧区间，形成 {{intervalPreview._afterTimeline.length}} 段有效时间</text>
-        <text class="interval-preview__warning" wx:if="{{intervalPreview._gapCount}}">调整后存在 {{intervalPreview._gapCount}} 个时间空档，空档日期会待核算。</text>
-        <text class="interval-preview__line" wx:if="{{replacementPreview}}">采购包装升级也已完成预览，将与配方适用时间在同一事务中保存。</text>
-        <view wx:for="{{intervalPreview._afterTimeline}}" wx:for-item="row" wx:key="_key" class="interval-preview__row">
-          <text>{{row._versionLabel}}</text>
-          <text>{{row._periodText}}</text>
-        </view>
-        <view class="cost-impact" wx:if="{{intervalPreview.costImpact}}">
-          <view class="cost-impact__head">
-            <text class="cost-impact__title">历史理论成本影响</text>
-            <text class="cost-impact__count">{{intervalPreview.costImpact.affectedSalesRecordCount}} 条销量记录</text>
-          </view>
-          <text class="cost-impact__date">{{intervalPreview.costImpact._dateText}} · 共 {{intervalPreview.costImpact._salesText}}</text>
-          <view class="cost-impact__grid">
-            <view><text>原完整成本</text><text class="cost-impact__value">{{intervalPreview.costImpact._oldCostText}}</text></view>
-            <view><text>新完整成本</text><text class="cost-impact__value">{{intervalPreview.costImpact._newCostText}}</text></view>
-            <view><text>成本差额</text><text class="cost-impact__value cost-impact__value--diff">{{intervalPreview.costImpact._differenceText}}</text></view>
-          </view>
-          <text class="interval-preview__warning" wx:if="{{intervalPreview.costImpact._hasIncomplete}}">部分日期缺少配方、历史价格或换算，完整成本保持“—”，不会按0元计算。</text>
-          <text class="cost-impact__note">确认后只重算上述门店、菜品和营业日期，并保留修改前后成本证据。</text>
-        </view>
-      </view>
-
-      <view class="interval-actions">
-        <view class="interval-actions__secondary" bindtap="previewInterval">{{intervalPreview ? '重新预览' : '预览影响'}}</view>
-        <view class="interval-actions__primary {{intervalPreview ? '' : 'is-disabled'}}" bindtap="confirmInterval">确认调整</view>
-      </view>
-    </view>
-  </view>
 </view>

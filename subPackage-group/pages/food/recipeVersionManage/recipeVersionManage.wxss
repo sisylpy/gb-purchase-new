@@ -80,6 +80,8 @@
 .version-card__actions { display: flex; gap: 14rpx; margin-top: 20rpx; padding-top: 18rpx; border-top: 1rpx solid #e7eae9; }
 .version-card__action { flex: 1; height: 66rpx; color: #53615d; font-size: 24rpx; line-height: 66rpx; text-align: center; background: #f0f3f2; border-radius: 10rpx; }
 .version-card__action--history { color: #147966; background: #eaf7f3; }
+.version-card__actions--single { display: block; }
+.version-card__action--primary { color: #fff; background: #168d79; }
 .adjustment-card { margin-top: 18rpx; padding: 0 20rpx 10rpx; }
 .adjustment-card__head { padding-left: 0; padding-right: 0; }
 .adjustment-row { padding: 16rpx 2rpx; border-top: 1rpx solid #edf0ef; }

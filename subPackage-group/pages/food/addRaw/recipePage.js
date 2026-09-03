@@ -29,7 +29,6 @@ var MODAL_PAD_TOP_RATIO_SEARCH = 0.23;
 var MODAL_PAD_TOP_RATIO_PICKED = 0.08;
 var PREPARATION_MIGRATION_CACHE_PREFIX = 'preparationFoodRecipeMigration:';
 var RECIPE_REPLACEMENT_CONTEXT_PREFIX = 'foodRecipeReplacementContext:';
-var RECIPE_PENDING_USAGE_PREFIX = 'foodRecipePendingUsage:';
 var P1_STANDARD_UNITS = ['G', 'KG', 'JIN', 'ML', 'L', 'EA'];
 
 function _todayText() {
@@ -46,6 +45,24 @@ function _offsetDateText(value, days) {
   var month = String(date.getMonth() + 1).padStart(2, '0');
   var day = String(date.getDate()).padStart(2, '0');
   return date.getFullYear() + '-' + month + '-' + day;
+}
+
+function _recipeMoneyText(value) {
+  if (value === null || typeof value === 'undefined' || value === '') return '—';
+  var amount = Number(value);
+  return isNaN(amount) ? '—' : '¥' + amount.toFixed(2);
+}
+
+function _recipeNumberText(value) {
+  var amount = Number(value || 0);
+  if (isNaN(amount)) return '0';
+  return Math.abs(amount - Math.round(amount)) < 0.000001
+    ? String(Math.round(amount))
+    : amount.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function _recipeDateText(value) {
+  return value ? String(value).slice(0, 10) : '';
 }
 
 function _toP1Unit(unit) {
@@ -957,6 +974,7 @@ function createRecipePage(pageMode) {
     currentRecipeVersionView: null,
     recipeTimeline: [],
     baseVersionId: null,
+    manageVersionId: null,
     returnToManage: false,
     showPreparation: false,
     preparationLoading: false,
@@ -970,12 +988,23 @@ function createRecipePage(pageMode) {
     preparationModalType: 'add',
     preparationEditIndex: -1,
     recipeSaving: false,
-    showVersionUsageChoice: false,
     versionUsageMode: 'FROM_DATE',
     versionUsageStart: '',
     versionUsageEnd: '',
     versionUsageHasEnd: false,
     versionUsageReason: '',
+    versionUsageInitialized: false,
+    versionUsageDirty: false,
+    managedVersionIntervals: [],
+    managedIntervalId: null,
+    managedIntervalOriginalStart: '',
+    managedIntervalOriginalEnd: '',
+    versionUsagePreview: null,
+    versionUsagePreviewRequest: null,
+    versionUsagePreviewVersionId: null,
+    versionUsageReplacementPreview: null,
+    versionUsageReplacementRequest: null,
+    versionUsageConfirming: false,
   },
 
 
@@ -1006,6 +1035,7 @@ function createRecipePage(pageMode) {
       foodItem: foodItem,
       foodId: foodId,
       baseVersionId: Number(options && options.baseVersionId) || null,
+      manageVersionId: Number(options && options.manageVersionId) || null,
       returnToManage: String(options && options.returnToManage || '') === '1',
       versionedMode: foodItem.gbDfRecipeModel === 'VERSIONED',
     })
@@ -1153,11 +1183,12 @@ function createRecipePage(pageMode) {
         });
         var selectedVersionId = null;
         if (that.data.versionEditorMode) {
-          selectedVersionId = draft ? Number(draft.id)
-            : (Number(that.data.baseVersionId) || effectiveVersionId
+          selectedVersionId = Number(that.data.manageVersionId)
+            || (draft ? Number(draft.id)
+              : (Number(that.data.baseVersionId) || effectiveVersionId
               || Number(((versions || []).find(function (row) {
                 return String(row.status || '').toUpperCase() === 'PUBLISHED';
-              }) || {}).id));
+              }) || {}).id)));
         } else {
           selectedVersionId = effectiveVersionId;
         }
@@ -1207,7 +1238,11 @@ function createRecipePage(pageMode) {
       var currentVersion = versionHistory.find(function (version) {
         return version._isCurrent;
       }) || null;
-      var primaryVersion = currentVersion || versionHistory[0] || null;
+      var selectedVersionId = detail.version && Number(detail.version.id);
+      var selectedVersion = versionHistory.find(function (version) {
+        return Number(version.id) === selectedVersionId;
+      }) || null;
+      var primaryVersion = selectedVersion || currentVersion || versionHistory[0] || null;
       var cached = wx.getStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
       if (!components.length && cached && Array.isArray(cached.components)) {
         components = cached.components;
@@ -1220,14 +1255,85 @@ function createRecipePage(pageMode) {
           versionedComponents: components,
           recipeVersionHistory: versionHistory,
           recipeVersionPrimary: primaryVersion,
-          currentRecipeVersionView: currentVersion,
+          currentRecipeVersionView: that.data.versionEditorMode ? primaryVersion : currentVersion,
           recipeTimeline: detail.recipeTimeline || [],
+        }, function () {
+          that._initializeUnifiedVersionEditor(detail, primaryVersion);
         });
         that._processRawArr(displayRows);
       });
     }).catch(function (error) {
       if (opts.showLoading) load.hideLoading();
       preparationUtil.showError(error);
+    });
+  },
+
+  _initializeUnifiedVersionEditor(detail, selectedVersion) {
+    if (!this.data.versionEditorMode || this.data.versionUsageInitialized || !selectedVersion) return;
+    var today = _todayText();
+    var selectedId = Number(selectedVersion.id);
+    var intervals = (detail.recipeTimeline || []).filter(function (row) {
+      return Number(row.recipeVersionId) === selectedId;
+    }).sort(function (left, right) {
+      return String(left.effectiveStart).localeCompare(String(right.effectiveStart));
+    }).map(function (row) {
+      var item = Object.assign({}, row);
+      item._periodText = _recipeDateText(item.effectiveStart) + ' 起 · '
+        + (item.effectiveEnd ? _recipeDateText(item.effectiveEnd) + ' 起停止' : '持续使用');
+      return item;
+    });
+    var preferred = intervals.find(function (row) {
+      return row.effectiveStart <= today && (!row.effectiveEnd || today < row.effectiveEnd);
+    }) || intervals[intervals.length - 1] || null;
+    var start = preferred && _recipeDateText(preferred.effectiveStart);
+    if (!start) {
+      var latestBoundary = (detail.recipeTimeline || []).filter(function (row) {
+        return row.effectiveEnd && row.effectiveEnd <= today;
+      }).sort(function (left, right) {
+        return String(right.effectiveEnd).localeCompare(String(left.effectiveEnd));
+      })[0];
+      start = latestBoundary ? _recipeDateText(latestBoundary.effectiveEnd) : today;
+    }
+    var end = preferred ? _recipeDateText(preferred.effectiveEnd) : '';
+    this.setData({
+      versionUsageInitialized: true,
+      managedVersionIntervals: intervals,
+      managedIntervalId: preferred ? Number(preferred.id) : null,
+      managedIntervalOriginalStart: preferred ? start : '',
+      managedIntervalOriginalEnd: preferred ? end : '',
+      versionUsageMode: start < today ? 'HISTORICAL_CORRECTION' : 'FROM_DATE',
+      versionUsageStart: start,
+      versionUsageEnd: end,
+      versionUsageHasEnd: !!end,
+      versionUsageReason: '编辑 V' + (selectedVersion.versionNo || '') + ' 配方内容与使用时间',
+      versionUsageDirty: false,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
+    });
+  },
+
+  selectManagedInterval(event) {
+    if (this.data.recipeSaving || this.data.versionUsageConfirming) return;
+    var intervalId = Number(event.currentTarget.dataset.intervalId || 0);
+    var interval = (this.data.managedVersionIntervals || []).find(function (row) {
+      return Number(row.id) === intervalId;
+    });
+    if (!interval) return;
+    var start = _recipeDateText(interval.effectiveStart);
+    var end = _recipeDateText(interval.effectiveEnd);
+    this.setData({
+      managedIntervalId: intervalId,
+      managedIntervalOriginalStart: start,
+      managedIntervalOriginalEnd: end,
+      versionUsageStart: start,
+      versionUsageEnd: end,
+      versionUsageHasEnd: !!end,
+      versionUsageMode: start < _todayText() ? 'HISTORICAL_CORRECTION' : 'FROM_DATE',
+      versionUsageDirty: false,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
     });
   },
 
@@ -1891,7 +1997,11 @@ function createRecipePage(pageMode) {
     this.setData({
       versionedComponents: components,
       versionDraftDirty: true,
+      versionUsageDirty: true,
       versionDraftChangeContext: nextContext,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
     });
     this.cancelPreparation();
     this._closeRawModal();
@@ -1903,46 +2013,42 @@ function createRecipePage(pageMode) {
   },
 
   saveNewRecipeVersion() {
-    if (!this.data.versionEditorMode || this.data.recipeSaving) return;
-    if (!this.data.versionDraftDirty) {
-      wx.showToast({ title: '请先调整配方内容', icon: 'none' });
+    if (!this.data.versionEditorMode || this.data.recipeSaving || this.data.versionUsageConfirming) return;
+    if (this.data.versionUsagePreview) {
+      this.confirmUnifiedVersionEdit();
       return;
     }
-    var today = _todayText();
+    var usagePlan = this._buildUnifiedUsagePlan();
+    if (!usagePlan) return;
+    var detail = this.data.versionedDetail || {};
+    var version = detail.version || {};
     var context = this.data.versionDraftChangeContext || { changeType: 'QUANTITY' };
-    this._pendingVersionSave = {
-      components: this._currentP1Components(),
-      changeContext: context,
-    };
-    this.setData({
-      showVersionUsageChoice: true,
-      versionUsageMode: 'FROM_DATE',
-      versionUsageStart: today,
-      versionUsageEnd: '',
-      versionUsageHasEnd: false,
-      versionUsageReason: context.changeType === 'ADD'
-        ? '从指定营业日开始加入新配料'
-        : '从指定营业日开始使用更新后的配方',
-    });
-  },
-
-  closeVersionUsageChoice() {
-    if (this.data.recipeSaving) return;
-    this._pendingVersionSave = null;
-    this.setData({ showVersionUsageChoice: false });
+    var needsContentVersion = this.data.versionDraftDirty
+      || !version.id
+      || String(version.status || '').toUpperCase() !== 'PUBLISHED';
+    if (needsContentVersion) {
+      this._saveAndPublishComponents(
+        this._currentP1Components(),
+        '保存配方内容',
+        context,
+        usagePlan
+      );
+      return;
+    }
+    this._previewUnifiedVersionUsage(detail, usagePlan, context);
   },
 
   chooseVersionUsageMode(event) {
     var mode = String(event.currentTarget.dataset.mode || 'FROM_DATE');
-    var today = _todayText();
     this.setData({
       versionUsageMode: mode,
-      versionUsageStart: mode === 'HISTORICAL_CORRECTION' ? _offsetDateText(today, -30) : today,
-      versionUsageEnd: mode === 'HISTORICAL_CORRECTION' ? today : '',
-      versionUsageHasEnd: mode === 'HISTORICAL_CORRECTION',
       versionUsageReason: mode === 'HISTORICAL_CORRECTION'
         ? '修正过去遗漏或错误的配方内容'
         : '从指定营业日开始使用更新后的配方',
+      versionUsageDirty: true,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
     });
   },
 
@@ -1950,57 +2056,260 @@ function createRecipePage(pageMode) {
     var start = event.detail.value;
     var end = this.data.versionUsageEnd;
     if (this.data.versionUsageHasEnd && (!end || end <= start)) end = _offsetDateText(start, 1);
-    this.setData({ versionUsageStart: start, versionUsageEnd: end });
+    this.setData({
+      versionUsageStart: start,
+      versionUsageEnd: end,
+      versionUsageDirty: true,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
+    });
   },
 
   onVersionUsageEndChange(event) {
-    this.setData({ versionUsageEnd: event.detail.value });
+    this.setData({
+      versionUsageEnd: event.detail.value,
+      versionUsageDirty: true,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
+    });
   },
 
-  onVersionUsageEndSwitch(event) {
-    var enabled = !!event.detail.value;
+  chooseVersionUsageDuration(event) {
+    var enabled = String(event.currentTarget.dataset.hasEnd || '') === '1';
     this.setData({
       versionUsageHasEnd: enabled,
       versionUsageEnd: enabled
         ? (this.data.versionUsageEnd > this.data.versionUsageStart
           ? this.data.versionUsageEnd : _offsetDateText(this.data.versionUsageStart, 1))
         : '',
+      versionUsageDirty: true,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
     });
   },
 
   onVersionUsageReasonInput(event) {
-    this.setData({ versionUsageReason: event.detail.value });
+    this.setData({
+      versionUsageReason: event.detail.value,
+      versionUsageDirty: true,
+      versionUsagePreview: null,
+      versionUsagePreviewRequest: null,
+      versionUsagePreviewVersionId: null,
+    });
   },
 
-  confirmVersionUsageChoice() {
-    if (this.data.recipeSaving) return;
-    var pending = this._pendingVersionSave;
+  _buildUnifiedUsagePlan() {
     var reason = String(this.data.versionUsageReason || '').trim();
     var end = this.data.versionUsageHasEnd ? this.data.versionUsageEnd : null;
-    if (!pending) return;
+    var start = this.data.versionUsageStart;
+    if (!start) {
+      wx.showToast({ title: '请选择开始营业日', icon: 'none' });
+      return null;
+    }
     if (!reason) {
-      wx.showToast({ title: '请填写本次更新原因', icon: 'none' });
-      return;
+      wx.showToast({ title: '请填写本次修改原因', icon: 'none' });
+      return null;
     }
-    if (end && end <= this.data.versionUsageStart) {
+    if (end && end <= start) {
       wx.showToast({ title: '停止日期必须晚于开始日期', icon: 'none' });
-      return;
+      return null;
     }
-    var usagePlan = {
-      operation: this.data.versionUsageMode === 'HISTORICAL_CORRECTION'
+    var targetIntervalId = this.data.versionDraftDirty ? null : this.data.managedIntervalId;
+    if (!this.data.versionDraftDirty && targetIntervalId
+      && start === this.data.managedIntervalOriginalStart
+      && (end || '') === (this.data.managedIntervalOriginalEnd || '')) {
+      wx.showToast({ title: '请先修改使用时间或配料', icon: 'none' });
+      return null;
+    }
+    var operation = targetIntervalId
+      ? 'ADJUST_INTERVAL'
+      : (this.data.versionUsageMode === 'HISTORICAL_CORRECTION'
         ? 'HISTORICAL_CORRECTION'
-        : (this.data.versionUsageStart === _todayText() ? 'SET_CURRENT' : 'ADD_INTERVAL'),
-      effectiveStart: this.data.versionUsageStart,
+        : (start <= _todayText() && !end ? 'SET_CURRENT' : 'ADD_INTERVAL'));
+    return {
+      operation: operation,
+      targetIntervalId: targetIntervalId || null,
+      effectiveStart: start,
       effectiveEnd: end,
       reason: reason,
     };
-    this.setData({ showVersionUsageChoice: false });
-    this._saveAndPublishComponents(
-      pending.components,
-      '发布新配方版本',
-      pending.changeContext,
-      usagePlan
-    );
+  },
+
+  _previewUnifiedVersionUsage(detail, usagePlan, changeContext) {
+    var that = this;
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    var version = detail && detail.version;
+    var recipe = detail && detail.recipe;
+    if (!version || !recipe) {
+      wx.showToast({ title: '配方版本信息不完整', icon: 'none' });
+      return;
+    }
+    var request = {
+      distributerId: identity.distributerId,
+      storeDepartmentId: identity.currentStoreId,
+      targetIntervalId: usagePlan.targetIntervalId || null,
+      effectiveStart: usagePlan.effectiveStart,
+      effectiveEnd: usagePlan.effectiveEnd || null,
+      businessOperation: usagePlan.operation,
+      adjustmentReason: usagePlan.reason,
+      operatorId: identity.operatorId,
+    };
+    this.setData({ recipeSaving: true });
+    wx.showLoading({ title: '计算影响范围', mask: true });
+    var replacementRequest = null;
+    if (changeContext && changeContext.changeType === 'REPLACE') {
+      var oldEvidence = changeContext.oldGoods && changeContext.oldGoods.evidence;
+      var newEvidence = changeContext.newGoods && changeContext.newGoods.evidence;
+      if (!oldEvidence || !newEvidence
+        || !oldEvidence.purchaseUnitCode || !newEvidence.purchaseUnitCode) {
+        wx.hideLoading();
+        this.setData({ recipeSaving: false });
+        wx.showToast({ title: '新旧商品包装规格不完整', icon: 'none' });
+        return;
+      }
+      replacementRequest = {
+        distributerId: identity.distributerId,
+        storeDepartmentId: identity.currentStoreId,
+        replacedRawGoodsId: Number(changeContext.replacedRawGoodsId),
+        replacementRawGoodsId: Number(changeContext.newRawGoodsId),
+        effectiveStart: usagePlan.effectiveStart,
+        effectiveEnd: usagePlan.effectiveEnd || null,
+        replacedPurchaseUnitCode: oldEvidence.purchaseUnitCode,
+        replacementPurchaseUnitCode: newEvidence.purchaseUnitCode,
+        sourceRecipeVersionId: Number(version.id),
+        adjustmentReason: usagePlan.reason,
+        operatorId: identity.operatorId,
+      };
+    }
+    Promise.all([
+      preparationApi.previewFoodEffectiveInterval(recipe.id, version.id, request),
+      replacementRequest
+        ? preparationApi.previewRawGoodsReplacement(replacementRequest)
+        : Promise.resolve(null),
+    ]).then(function (results) {
+        var preview = results[0];
+        var replacementPreview = results[1];
+        preview.supersededIntervalIds = preview.supersededIntervalIds || [];
+        wx.hideLoading();
+        var versionById = {};
+        (that.data.recipeVersionHistory || []).forEach(function (row) {
+          versionById[String(row.id)] = row;
+        });
+        versionById[String(version.id)] = version;
+        var afterTimeline = (preview.afterTimeline || []).map(function (row, index) {
+          var matched = versionById[String(row.recipeVersionId)] || {};
+          return Object.assign({}, row, {
+            _key: String(row.id || 'new') + ':' + index,
+            _versionLabel: 'V' + (row.versionNo || matched.versionNo || '?'),
+            _periodText: _recipeDateText(row.effectiveStart) + ' 起 · '
+              + (row.effectiveEnd ? _recipeDateText(row.effectiveEnd) + ' 起停止' : '持续使用'),
+          });
+        });
+        var impact = preview.costImpact || {};
+        impact._salesText = _recipeNumberText(impact.salesQuantity) + ' 份';
+        impact._oldCostText = _recipeMoneyText(impact.oldCompleteCostAmount);
+        impact._newCostText = _recipeMoneyText(impact.newCompleteCostAmount);
+        impact._differenceText = _recipeMoneyText(impact.completeCostDifference);
+        impact._hasIncomplete = Number(impact.oldIncompleteRecordCount || 0) > 0
+          || Number(impact.newIncompleteRecordCount || 0) > 0;
+        impact._dateText = impact.actualBusinessDateStart
+          ? _recipeDateText(impact.actualBusinessDateStart) + ' 至 '
+            + _recipeDateText(impact.actualBusinessDateEnd) + '（不含）'
+          : '该范围内暂无已导入销量';
+        preview.costImpact = impact;
+        preview._affectedText = _recipeDateText(preview.affectedEffectiveStart) + ' 至 '
+          + (preview.affectedEffectiveEnd
+            ? _recipeDateText(preview.affectedEffectiveEnd) + '（不含）' : '以后');
+        preview._afterTimeline = afterTimeline;
+        preview._gapCount = (preview.gaps || []).length;
+        that.setData({
+          recipeSaving: false,
+          versionUsagePreview: preview,
+          versionUsagePreviewRequest: request,
+          versionUsagePreviewVersionId: Number(version.id),
+          versionUsageReplacementPreview: replacementPreview,
+          versionUsageReplacementRequest: replacementRequest,
+          versionedDetail: detail,
+          versionDraftChangeContext: changeContext || null,
+        });
+      }).catch(function (error) {
+        wx.hideLoading();
+        that.setData({ recipeSaving: false });
+        preparationUtil.showError(error);
+      });
+  },
+
+  confirmUnifiedVersionEdit() {
+    var that = this;
+    var preview = this.data.versionUsagePreview;
+    var request = this.data.versionUsagePreviewRequest;
+    var replacementPreview = this.data.versionUsageReplacementPreview;
+    var replacementRequest = this.data.versionUsageReplacementRequest;
+    var detail = this.data.versionedDetail || {};
+    var versionId = Number(this.data.versionUsagePreviewVersionId || 0);
+    if (!preview || !preview.previewToken || !request || !detail.recipe || !versionId) {
+      wx.showToast({ title: '请先预览影响', icon: 'none' });
+      return;
+    }
+    this.setData({ versionUsageConfirming: true });
+    wx.showLoading({ title: '保存并更新成本', mask: true });
+    var recipeConfirmRequest = Object.assign({}, request, {
+      expectedTimelineRevision: preview.timelineRevision,
+      expectedPreviewToken: preview.previewToken,
+    });
+    var confirmPromise;
+    if (replacementRequest) {
+      if (!replacementPreview || !replacementPreview.previewToken) {
+        this.setData({ versionUsageConfirming: false, versionUsagePreview: null });
+        wx.hideLoading();
+        wx.showToast({ title: '请重新预览包装替换影响', icon: 'none' });
+        return;
+      }
+      confirmPromise = preparationApi.confirmFoodEffectiveIntervalWithReplacement(
+        detail.recipe.id,
+        versionId,
+        {
+          recipeInterval: recipeConfirmRequest,
+          rawGoodsReplacement: Object.assign({}, replacementRequest, {
+            expectedTimelineRevision: replacementPreview.timelineRevision,
+            expectedPreviewToken: replacementPreview.previewToken,
+          }),
+        }
+      );
+    } else {
+      confirmPromise = preparationApi.confirmFoodEffectiveInterval(
+        detail.recipe.id,
+        versionId,
+        recipeConfirmRequest
+      );
+    }
+    confirmPromise.then(function () {
+      wx.hideLoading();
+      if (replacementRequest) {
+        wx.removeStorageSync(RECIPE_REPLACEMENT_CONTEXT_PREFIX + String(versionId));
+      }
+      that.setData({ versionUsageConfirming: false, versionUsageDirty: false });
+      var affected = preview.costImpact && Number(preview.costImpact.affectedSalesRecordCount || 0);
+      wx.showToast({
+        title: affected ? '已保存并重算' + affected + '条' : '配方已保存',
+        icon: 'success',
+      });
+      setTimeout(function () { wx.navigateBack({ delta: 1 }); }, 450);
+    }).catch(function (error) {
+      wx.hideLoading();
+      that.setData({
+        versionUsageConfirming: false,
+        versionUsagePreview: null,
+        versionUsagePreviewRequest: null,
+        versionUsagePreviewVersionId: null,
+        versionUsageReplacementPreview: null,
+        versionUsageReplacementRequest: null,
+      });
+      preparationUtil.showError(error);
+    });
   },
 
   _validateP1Components(components) {
@@ -2286,18 +2595,6 @@ function createRecipePage(pageMode) {
           })
         );
       }
-      if (usagePlan && that.data.versionEditorMode) {
-        wx.setStorageSync(RECIPE_PENDING_USAGE_PREFIX + String(that.data.foodId), {
-          foodId: Number(that.data.foodId),
-          recipeId: Number(publishedDetail.recipe.id),
-          recipeVersionId: Number(publishedDetail.version.id),
-          operation: usagePlan.operation,
-          effectiveStart: usagePlan.effectiveStart,
-          effectiveEnd: usagePlan.effectiveEnd || null,
-          reason: usagePlan.reason,
-          savedAt: Date.now(),
-        });
-      }
       wx.setStorageSync('Food', foodItem);
       that.setData({
         foodItem: foodItem,
@@ -2311,23 +2608,11 @@ function createRecipePage(pageMode) {
       that.cancelPreparation();
       that._closeRawModal();
       load.hideLoading();
-      wx.showToast({
-        title: that.data.versionEditorMode ? '版本已发布，正在预览影响' : '保存成功',
-        icon: 'success',
-      });
-      if (that.data.versionEditorMode) {
-        setTimeout(function () {
-          if (that.data.returnToManage) {
-            wx.navigateBack({ delta: 1 });
-          } else {
-            wx.redirectTo({
-              url: '../recipeVersionManage/recipeVersionManage?foodId='
-                + encodeURIComponent(String(that.data.foodId)),
-            });
-          }
-        }, 450);
+      if (that.data.versionEditorMode && usagePlan) {
+        that._previewUnifiedVersionUsage(publishedDetail, usagePlan, activeChangeContext);
         return null;
       }
+      wx.showToast({ title: '保存成功', icon: 'success' });
       return that._fetchVersionedRecipe();
     }).catch(function (error) {
       that.setData({ recipeSaving: false });
@@ -3084,10 +3369,14 @@ function createRecipePage(pageMode) {
   },
 
   toBack() {
-    if (this.data.versionEditorMode && this.data.versionDraftDirty) {
+    if (this.data.versionEditorMode
+      && (this.data.versionDraftDirty || this.data.versionUsageDirty || this.data.versionUsagePreview)) {
+      var contentSaved = !!this.data.versionUsagePreview && !this.data.versionDraftDirty;
       wx.showModal({
-        title: '放弃新版本？',
-        content: '当前调整尚未保存为新版本，返回后本次修改不会保留。',
+        title: '放弃本次编辑？',
+        content: contentSaved
+          ? '新配方内容版本已保留，但使用时间和成本尚未确认更新。'
+          : '当前内容或使用时间尚未确认保存。',
         confirmText: '放弃修改',
         confirmColor: '#d84d4d',
         success: function (res) {
