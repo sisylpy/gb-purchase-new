@@ -165,7 +165,8 @@ function decorateVersions(versions, timeline, baseUrl, businessToday) {
       return componentView(component, index, baseUrl);
     });
     row._intervals = (timeline || []).filter(function (interval) {
-      return Number(interval.recipeVersionId) === Number(row.id);
+      return Number(interval.recipeVersionId) === Number(row.id)
+        || Number(interval._versionNo) === Number(row.versionNo);
     });
     row._isCurrent = row._intervals.some(function (interval) {
       return intervalContains(interval, today);

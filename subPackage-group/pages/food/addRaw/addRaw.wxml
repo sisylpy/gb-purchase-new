@@ -6,7 +6,7 @@
     <view class="version-editor-intro" wx:if="{{versionEditorMode}}">
       <view>
         <text class="version-editor-intro__dish">{{foodItem.dishName}}</text>
-        <text class="version-editor-intro__sub">正在编辑 V{{currentRecipeVersionView.versionNo || '-'}}；改配料会保留旧版本，只改时间则调整适用区间</text>
+        <text class="version-editor-intro__sub">正在编辑 V{{currentRecipeVersionView.versionNo || '-'}}；保存后仍是本版本，后台保留修改前修订和核算证据</text>
       </view>
       <text class="version-editor-intro__status">编辑中</text>
     </view>

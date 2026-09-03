@@ -11,7 +11,7 @@
         <view class="version-summary__current" wx:if="{{currentVersion}}">当前 V{{currentVersion.versionNo}}</view>
         <view class="version-summary__missing" wx:else>今天无适用配方</view>
       </view>
-      <text class="version-summary__tip">点击每个版本唯一的“编辑”入口，可在同一页面调整配料、用量和门店使用日期，并统一预览成本影响。</text>
+      <text class="version-summary__tip">点击每个版本唯一的“编辑”入口，可调整配料、用量和门店使用日期；保存后版本编号不变，修改前内容仍可追溯。</text>
       <view class="version-summary__create" wx:if="{{!versions.length}}" bindtap="editVersion">
         + 新建第一个配方版本
       </view>

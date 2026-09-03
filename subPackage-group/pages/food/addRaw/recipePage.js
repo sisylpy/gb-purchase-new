@@ -2946,7 +2946,7 @@ function createRecipePage(pageMode) {
       return preparationApi.foodVersionAction(
         detail.recipe.id,
         detail.version.id,
-        'copy',
+        that.data.versionEditorMode && Number(that.data.manageVersionId) > 0 ? 'revise' : 'copy',
         that._versionActionBody(detail)
       );
     }).then(function (draftDetail) {
