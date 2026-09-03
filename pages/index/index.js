@@ -98,11 +98,10 @@ Page({
   onLoad: function (options) {
     var week = dateUtils.getWhatDay(0);
     var date = dateUtils.getOnlyHao(0);
-    var windowInfo = wx.getWindowInfo();
     var globalData = app.globalData;
     this.setData({
-      windowWidth: windowInfo.windowWidth * globalData.rpxR,
-      windowHeight: windowInfo.windowHeight * globalData.rpxR,
+      windowWidth: globalData.windowWidth * globalData.rpxR,
+      windowHeight: globalData.windowHeight * globalData.rpxR,
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       week: week,
       date: date,
