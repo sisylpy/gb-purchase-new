@@ -511,9 +511,9 @@
                 </block>
               </view>
               <view class="flex-row">
-                <text class="text-secondary">均价:</text>
-                <text wx:if="{{goods.gbDgGoodsAveragePrice > 0}}">¥{{goods.gbDgGoodsAveragePrice}}/{{goods.gbDgGoodsStandardname}}</text>
-                <text wx:else class="text-secondary">最近无采购</text>
+                <text class="text-secondary">{{goods._searchPriceLabel}}:</text>
+                <text wx:if="{{goods._searchPriceText}}">{{goods._searchPriceText}}</text>
+                <text wx:else class="text-secondary">暂无单价</text>
               </view>
             </view>
             <view

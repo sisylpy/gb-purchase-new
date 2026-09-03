@@ -549,6 +549,27 @@ function _goodsImageUrl(baseUrl, goods) {
   return String(baseUrl || '') + String(path);
 }
 
+function _decorateGoodsSearchPrice(goods) {
+  var row = Object.assign({}, goods || {});
+  var averagePrice = Number(row.gbDgGoodsAveragePrice);
+  var referencePrice = Number(row.gbDgGoodsPrice);
+  var unit = String(row.gbDgGoodsStandardname || '').trim();
+  if (averagePrice > 0) {
+    row._searchPriceLabel = '近期采购均价';
+    row._searchPriceText = '¥' + averagePrice.toFixed(2) + (unit ? '/' + unit : '');
+    row._searchPriceSource = 'PURCHASE_AVERAGE';
+  } else if (referencePrice > 0) {
+    row._searchPriceLabel = '商品参考价';
+    row._searchPriceText = '¥' + referencePrice.toFixed(2) + (unit ? '/' + unit : '');
+    row._searchPriceSource = 'GOODS_REFERENCE';
+  } else {
+    row._searchPriceLabel = '单价';
+    row._searchPriceText = '';
+    row._searchPriceSource = 'MISSING';
+  }
+  return row;
+}
+
 function _defaultPortionAmount(minUnit) {
   if (_isCountMinUnit(minUnit)) return '1';
   if ((minUnit || '').trim() === '斤') return '0.2';
@@ -3422,7 +3443,7 @@ function createRecipePage(pageMode) {
         .then(function (rows) {
           load.hideLoading();
           thatVersioned.setData({
-            strArr: rows || [],
+            strArr: (rows || []).map(_decorateGoodsSearchPrice),
             isSearching: true,
           }, function () {
             thatVersioned._syncFoodSearchModalLayout();
@@ -3456,7 +3477,8 @@ function createRecipePage(pageMode) {
         load.hideLoading();
         if (res.result.code == 0) {
           that.setData({
-            strArr: res.result.data && res.result.data.length > 0 ? res.result.data : [],
+            strArr: res.result.data && res.result.data.length > 0
+              ? res.result.data.map(_decorateGoodsSearchPrice) : [],
             isSearching: true,
           }, function () {
             that._syncFoodSearchModalLayout();
