@@ -128,6 +128,16 @@ function intervalContains(row, date) {
   return row && row.effectiveStart <= date && (!row.effectiveEnd || date < row.effectiveEnd);
 }
 
+function latestEndedInterval(timeline, businessToday) {
+  return (timeline || []).filter(function (row) {
+    return row && row.effectiveStart <= businessToday
+      && row.effectiveEnd && row.effectiveEnd <= businessToday;
+  }).sort(function (left, right) {
+    var byEnd = String(right.effectiveEnd).localeCompare(String(left.effectiveEnd));
+    return byEnd || String(right.effectiveStart).localeCompare(String(left.effectiveStart));
+  })[0] || null;
+}
+
 function intervalText(row) {
   if (!row) return '';
   return dateText(row.effectiveStart) + ' 起 · '
@@ -396,7 +406,18 @@ Page({
     var existing = intervalId ? this.data.timeline.find(function (row) {
       return Number(row.id) === intervalId;
     }) : null;
-    if (existing) operation = 'ADJUST_INTERVAL';
+    var explicitlyEditingInterval = !!existing;
+    var setCurrentStart = today;
+    if (!existing && operation === 'SET_CURRENT' && !preset) {
+      var previous = latestEndedInterval(this.data.timeline, today);
+      if (previous && Number(previous.recipeVersionId) === Number(version.id)) {
+        existing = previous;
+        setCurrentStart = dateText(previous.effectiveStart);
+      } else if (previous && previous.effectiveEnd) {
+        setCurrentStart = dateText(previous.effectiveEnd);
+      }
+    }
+    if (explicitlyEditingInterval) operation = 'ADJUST_INTERVAL';
     if (!operation) operation = 'ADD_INTERVAL';
     var operationText = {
       SET_CURRENT: '设为当前使用',
@@ -406,8 +427,10 @@ Page({
     }[operation] || '设置使用时间';
     var start = preset && preset.effectiveStart ? dateText(preset.effectiveStart)
       : existing ? dateText(existing.effectiveStart)
-      : operation === 'HISTORICAL_CORRECTION' ? offsetDateText(today, -30) : today;
-    var end = preset && preset.effectiveEnd ? dateText(preset.effectiveEnd)
+      : operation === 'HISTORICAL_CORRECTION' ? offsetDateText(today, -30)
+      : operation === 'SET_CURRENT' ? setCurrentStart : today;
+    var end = operation === 'SET_CURRENT' ? ''
+      : preset && preset.effectiveEnd ? dateText(preset.effectiveEnd)
       : existing ? dateText(existing.effectiveEnd)
       : operation === 'HISTORICAL_CORRECTION' ? today : '';
     this.setData({
@@ -507,6 +530,18 @@ Page({
     this.setData({
       intervalHasEnd: !!event.detail.value,
       intervalEnd: event.detail.value
+        ? (this.data.intervalEnd > this.data.intervalStart
+          ? this.data.intervalEnd : offsetDateText(this.data.intervalStart, 1)) : '',
+      intervalPreview: null,
+      replacementPreview: null,
+    });
+  },
+
+  chooseIntervalDuration: function (event) {
+    var hasEnd = String(event.currentTarget.dataset.hasEnd) === '1';
+    this.setData({
+      intervalHasEnd: hasEnd,
+      intervalEnd: hasEnd
         ? (this.data.intervalEnd > this.data.intervalStart
           ? this.data.intervalEnd : offsetDateText(this.data.intervalStart, 1)) : '',
       intervalPreview: null,

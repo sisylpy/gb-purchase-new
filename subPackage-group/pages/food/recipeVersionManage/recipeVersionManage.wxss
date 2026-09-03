@@ -99,6 +99,14 @@
 .interval-form-row__label { color: #303836; font-size: 27rpx; font-weight: 600; }
 .interval-form-row__hint { margin-top: 4rpx; color: #89928f; font-size: 21rpx; font-weight: 400; }
 .interval-form-row__value { padding: 16rpx 0 16rpx 24rpx; color: #158773; font-size: 27rpx; }
+.interval-duration { padding: 20rpx 0; border-top: 1rpx solid #edf0ef; }
+.interval-duration__options { display: flex; gap: 14rpx; margin-top: 14rpx; }
+.interval-duration__option { flex: 1; box-sizing: border-box; padding: 16rpx 18rpx; border: 2rpx solid #e5e9e7; border-radius: 12rpx; background: #f7f8f8; }
+.interval-duration__option.is-selected { border-color: #67bcae; background: #edf8f5; }
+.interval-duration__title, .interval-duration__hint { display: block; }
+.interval-duration__title { color: #303836; font-size: 25rpx; font-weight: 600; }
+.interval-duration__hint { margin-top: 5rpx; color: #89928f; font-size: 20rpx; }
+.interval-duration__option.is-selected .interval-duration__title { color: #158773; }
 .interval-batches { padding: 18rpx 0; border-top: 1rpx solid #edf0ef; }
 .interval-batches__loading, .interval-batches__empty { margin-top: 12rpx; padding: 15rpx; color: #7a8481; font-size: 23rpx; line-height: 1.45; background: #f5f7f6; border-radius: 10rpx; }
 .interval-batches__scroll { width: 100%; margin-top: 14rpx; white-space: nowrap; }

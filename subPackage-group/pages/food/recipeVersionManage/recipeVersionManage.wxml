@@ -197,12 +197,20 @@
         </view>
         <text class="replacement-box__note" wx:if="{{intervalRecordReplacement}}">商品替代采用与本配方使用相同的营业日起止日期，并保存新旧包装换算证据。</text>
       </view>
-      <view class="interval-form-row">
-        <view>
-          <text class="interval-form-row__label">设置停止日期</text>
-          <text class="interval-form-row__hint">关闭后表示持续使用</text>
+      <view class="interval-duration">
+        <text class="interval-form-row__label">使用期限</text>
+        <view class="interval-duration__options">
+          <view class="interval-duration__option {{!intervalHasEnd ? 'is-selected' : ''}}"
+            data-has-end="0" bindtap="chooseIntervalDuration">
+            <text class="interval-duration__title">持续使用</text>
+            <text class="interval-duration__hint">不设置停止日期</text>
+          </view>
+          <view class="interval-duration__option {{intervalHasEnd ? 'is-selected' : ''}}"
+            data-has-end="1" bindtap="chooseIntervalDuration">
+            <text class="interval-duration__title">设置停止日期</text>
+            <text class="interval-duration__hint">到指定营业日前</text>
+          </view>
         </view>
-        <switch color="#168d79" checked="{{intervalHasEnd}}" bindchange="onIntervalEndSwitch" />
       </view>
       <view class="interval-form-row" wx:if="{{intervalHasEnd}}">
         <text class="interval-form-row__label">停止营业日</text>
