@@ -429,8 +429,8 @@ Page({
       : existing ? dateText(existing.effectiveStart)
       : operation === 'HISTORICAL_CORRECTION' ? offsetDateText(today, -30)
       : operation === 'SET_CURRENT' ? setCurrentStart : today;
-    var end = operation === 'SET_CURRENT' ? ''
-      : preset && preset.effectiveEnd ? dateText(preset.effectiveEnd)
+    var end = preset && preset.effectiveEnd ? dateText(preset.effectiveEnd)
+      : operation === 'SET_CURRENT' ? ''
       : existing ? dateText(existing.effectiveEnd)
       : operation === 'HISTORICAL_CORRECTION' ? today : '';
     this.setData({
