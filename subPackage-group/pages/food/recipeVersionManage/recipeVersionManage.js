@@ -1,6 +1,7 @@
 var preparationApi = require('../../../../services/preparation');
 var preparationUtil = require('../../../../utils/preparation');
 var RECIPE_REPLACEMENT_CONTEXT_PREFIX = 'foodRecipeReplacementContext:';
+var RECIPE_PENDING_USAGE_PREFIX = 'foodRecipePendingUsage:';
 
 function localDateText(date) {
   var value = date || new Date();
@@ -8,6 +9,13 @@ function localDateText(date) {
   var month = String(value.getMonth() + 1).padStart(2, '0');
   var day = String(value.getDate()).padStart(2, '0');
   return year + '-' + month + '-' + day;
+}
+
+function offsetDateText(value, days) {
+  var parts = String(value || localDateText()).split('-').map(Number);
+  var date = new Date(parts[0], parts[1] - 1, parts[2]);
+  date.setDate(date.getDate() + Number(days || 0));
+  return localDateText(date);
 }
 
 function dateText(value) {
@@ -19,6 +27,12 @@ function numberText(value) {
   if (isNaN(n)) return String(value || '');
   if (Math.abs(n - Math.round(n)) < 0.000001) return String(Math.round(n));
   return n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function moneyText(value) {
+  if (value === null || typeof value === 'undefined' || value === '') return '—';
+  var amount = Number(value);
+  return isNaN(amount) ? '—' : '¥' + amount.toFixed(2);
 }
 
 function unitText(value) {
@@ -126,13 +140,14 @@ function normalizeTimeline(payload) {
     interval._versionNo = wrapper.versionNo;
     interval._versionStatus = wrapper.versionStatus;
     interval._displayState = wrapper.displayState;
+    interval._isCurrentToday = !!wrapper.isCurrentToday;
     interval._periodText = intervalText(interval);
     return interval;
   });
 }
 
-function decorateVersions(versions, timeline, baseUrl) {
-  var today = localDateText();
+function decorateVersions(versions, timeline, baseUrl, businessToday) {
+  var today = businessToday || localDateText();
   var rows = (versions || []).slice().sort(function (left, right) {
     return Number(right.versionNo || 0) - Number(left.versionNo || 0);
   }).map(function (version) {
@@ -154,6 +169,7 @@ function decorateVersions(versions, timeline, baseUrl) {
     row._statusClass = row._isDraft ? 'draft' : (row._isCurrent ? 'current' : 'published');
     if (retired) row._statusClass = 'retired';
     row._publishedText = dateText(row.publishedAt || row.createdAt);
+    row._changeReasonText = cleanText(row.changeReason);
     return row;
   });
   var byId = {};
@@ -171,6 +187,55 @@ function decorateVersions(versions, timeline, baseUrl) {
     row._replacementCandidate = replacementCandidate(row, base, pending);
   });
   return rows;
+}
+
+function buildTimelineItems(timeline, versions, businessToday) {
+  var versionById = {};
+  (versions || []).forEach(function (row) { versionById[String(row.id)] = row; });
+  var rows = (timeline || []).slice().sort(function (left, right) {
+    return String(left.effectiveStart).localeCompare(String(right.effectiveStart));
+  });
+  var items = [];
+  rows.forEach(function (row, index) {
+    if (index > 0) {
+      var previous = rows[index - 1];
+      if (previous.effectiveEnd && previous.effectiveEnd < row.effectiveStart) {
+        items.push({
+          _key: 'gap:' + previous.effectiveEnd + ':' + row.effectiveStart,
+          _isGap: true,
+          _periodText: previous.effectiveEnd + ' 起 · ' + row.effectiveStart + ' 起停止',
+          _isToday: previous.effectiveEnd <= businessToday && businessToday < row.effectiveStart,
+        });
+      }
+    }
+    var version = versionById[String(row.recipeVersionId)] || {};
+    items.push({
+      _key: 'interval:' + row.id,
+      _isGap: false,
+      _isToday: intervalContains(row, businessToday),
+      _versionLabel: 'V' + (version.versionNo || row._versionNo || ''),
+      _periodText: row._periodText,
+      _changeReasonText: version._changeReasonText || '',
+    });
+  });
+  return items;
+}
+
+function adjustmentView(row) {
+  var source = Object.assign({}, row || {});
+  var labels = {
+    SET_CURRENT: '设为当前使用',
+    ADD_INTERVAL: '新增使用时间段',
+    ADJUST_INTERVAL: '调整使用时间段',
+    HISTORICAL_CORRECTION: '修正历史配方',
+    REMOVE_INTERVAL: '移除使用时间段',
+  };
+  source._operationText = labels[source.businessOperation]
+    || (source.actionType === 'REMOVE' ? '移除使用时间段' : '调整使用时间段');
+  source._rangeText = dateText(source.affectedEffectiveStart) + ' 至 '
+    + (source.affectedEffectiveEnd ? dateText(source.affectedEffectiveEnd) + '（不含）' : '以后');
+  source._timeText = cleanText(source.operatedAt).replace('T', ' ').slice(0, 16);
+  return source;
 }
 
 function previewIntervalView(row, index, versions) {
@@ -194,10 +259,16 @@ Page({
     timeline: [],
     currentVersion: null,
     draftVersion: null,
+    businessToday: '',
+    timelineItems: [],
+    recentAdjustments: [],
     loading: true,
     serverUrl: '',
     showIntervalEditor: false,
     intervalVersion: null,
+    intervalTargetId: null,
+    intervalOperation: 'ADD_INTERVAL',
+    intervalOperationText: '新增使用时间段',
     intervalStart: '',
     intervalEnd: '',
     intervalHasEnd: false,
@@ -255,15 +326,22 @@ Page({
             identity.currentStoreId
           ),
         ]).then(function (results) {
-          var timeline = normalizeTimeline(results[1]);
-          var versions = decorateVersions(results[0], timeline, that.data.serverUrl);
+          var timelinePayload = results[1] || {};
+          var businessToday = dateText(timelinePayload.businessToday) || localDateText();
+          var timeline = normalizeTimeline(timelinePayload);
+          var versions = decorateVersions(results[0], timeline, that.data.serverUrl, businessToday);
           that.setData({
             loading: false,
             recipe: detail.recipe,
             versions: versions,
             timeline: timeline,
+            businessToday: businessToday,
+            timelineItems: buildTimelineItems(timeline, versions, businessToday),
+            recentAdjustments: (timelinePayload.recentAdjustments || []).map(adjustmentView),
             currentVersion: versions.find(function (row) { return row._isCurrent; }) || null,
             draftVersion: versions.find(function (row) { return row._isDraft; }) || null,
+          }, function () {
+            that.consumePendingVersionUsage(versions);
           });
         });
       }).catch(function (error) {
@@ -273,7 +351,10 @@ Page({
   },
 
   createVersion: function () {
-    var baseVersion = this.data.currentVersion
+    var event = arguments[0] || {};
+    var requestedId = Number(event.currentTarget && event.currentTarget.dataset.versionId || 0);
+    var baseVersion = this.data.versions.find(function (row) { return Number(row.id) === requestedId; })
+      || this.data.currentVersion
       || this.data.versions.find(function (row) { return !row._isDraft; })
       || this.data.draftVersion;
     var params = [
@@ -285,20 +366,61 @@ Page({
   },
 
   openIntervalEditor: function (event) {
+    this._pendingUsageStorageKey = null;
     var versionId = Number(event.currentTarget.dataset.versionId);
+    var intervalId = Number(event.currentTarget.dataset.intervalId || 0);
+    var operation = String(event.currentTarget.dataset.operation || '').toUpperCase();
     var version = this.data.versions.find(function (row) { return Number(row.id) === versionId; });
+    this.openIntervalEditorForVersion(version, intervalId, operation, null);
+  },
+
+  consumePendingVersionUsage: function (versions) {
+    if (this.data.showIntervalEditor) return;
+    var key = RECIPE_PENDING_USAGE_PREFIX + String(this.data.foodId);
+    var pending = wx.getStorageSync(key);
+    if (!pending || Number(pending.foodId) !== Number(this.data.foodId)) return;
+    var version = (versions || []).find(function (row) {
+      return Number(row.id) === Number(pending.recipeVersionId);
+    });
+    if (!version) return;
+    this._pendingUsageStorageKey = key;
+    this.openIntervalEditorForVersion(version, 0, pending.operation, pending);
+  },
+
+  openIntervalEditorForVersion: function (version, intervalId, operation, preset) {
     if (!version || !version._canApply) {
       wx.showToast({ title: '只有已发布版本可以设置使用时间', icon: 'none' });
       return;
     }
-    var today = localDateText();
+    var today = this.data.businessToday || localDateText();
+    var existing = intervalId ? this.data.timeline.find(function (row) {
+      return Number(row.id) === intervalId;
+    }) : null;
+    if (existing) operation = 'ADJUST_INTERVAL';
+    if (!operation) operation = 'ADD_INTERVAL';
+    var operationText = {
+      SET_CURRENT: '设为当前使用',
+      ADD_INTERVAL: '新增使用时间段',
+      ADJUST_INTERVAL: '调整现有时间段',
+      HISTORICAL_CORRECTION: '修正历史配方',
+    }[operation] || '设置使用时间';
+    var start = preset && preset.effectiveStart ? dateText(preset.effectiveStart)
+      : existing ? dateText(existing.effectiveStart)
+      : operation === 'HISTORICAL_CORRECTION' ? offsetDateText(today, -30) : today;
+    var end = preset && preset.effectiveEnd ? dateText(preset.effectiveEnd)
+      : existing ? dateText(existing.effectiveEnd)
+      : operation === 'HISTORICAL_CORRECTION' ? today : '';
     this.setData({
       showIntervalEditor: true,
       intervalVersion: version,
-      intervalStart: today,
-      intervalEnd: '',
-      intervalHasEnd: false,
-      intervalReason: '设置 V' + version.versionNo + ' 门店适用时间',
+      intervalTargetId: existing ? existing.id : null,
+      intervalOperation: operation,
+      intervalOperationText: operationText,
+      intervalStart: start,
+      intervalEnd: end,
+      intervalHasEnd: !!end,
+      intervalReason: preset && preset.reason
+        ? String(preset.reason) : operationText + '：V' + version.versionNo,
       intervalPreview: null,
       intervalBatchLoading: true,
       intervalBatchHints: [],
@@ -371,7 +493,10 @@ Page({
   stopPropagation: function () {},
 
   onIntervalStartChange: function (event) {
-    this.setData({ intervalStart: event.detail.value, intervalPreview: null, replacementPreview: null });
+    var start = event.detail.value;
+    var end = this.data.intervalEnd;
+    if (this.data.intervalHasEnd && (!end || end <= start)) end = offsetDateText(start, 1);
+    this.setData({ intervalStart: start, intervalEnd: end, intervalPreview: null, replacementPreview: null });
   },
 
   onIntervalEndChange: function (event) {
@@ -381,7 +506,9 @@ Page({
   onIntervalEndSwitch: function (event) {
     this.setData({
       intervalHasEnd: !!event.detail.value,
-      intervalEnd: event.detail.value ? (this.data.intervalEnd || this.data.intervalStart) : '',
+      intervalEnd: event.detail.value
+        ? (this.data.intervalEnd > this.data.intervalStart
+          ? this.data.intervalEnd : offsetDateText(this.data.intervalStart, 1)) : '',
       intervalPreview: null,
       replacementPreview: null,
     });
@@ -404,8 +531,10 @@ Page({
     return {
       distributerId: identity.distributerId,
       storeDepartmentId: identity.currentStoreId,
+      targetIntervalId: this.data.intervalTargetId || null,
       effectiveStart: this.data.intervalStart,
       effectiveEnd: this.data.intervalHasEnd ? this.data.intervalEnd : null,
+      businessOperation: this.data.intervalOperation,
       adjustmentReason: String(this.data.intervalReason || '').trim(),
       operatorId: identity.operatorId,
     };
@@ -474,6 +603,18 @@ Page({
           return previewIntervalView(row, index, that.data.versions);
         });
         preview._gapCount = (preview.gaps || []).length;
+        var impact = preview.costImpact || {};
+        impact._salesText = numberText(impact.salesQuantity || 0) + ' 份';
+        impact._oldCostText = moneyText(impact.oldCompleteCostAmount);
+        impact._newCostText = moneyText(impact.newCompleteCostAmount);
+        impact._differenceText = moneyText(impact.completeCostDifference);
+        impact._hasIncomplete = Number(impact.oldIncompleteRecordCount || 0) > 0
+          || Number(impact.newIncompleteRecordCount || 0) > 0;
+        impact._dateText = impact.actualBusinessDateStart
+          ? dateText(impact.actualBusinessDateStart) + ' 至 '
+            + dateText(impact.actualBusinessDateEnd) + '（不含）'
+          : '该范围内暂无已导入销量';
+        preview.costImpact = impact;
         that.setData({ intervalPreview: preview, replacementPreview: replacementPreview });
       }).catch(function (error) {
         wx.hideLoading();
@@ -525,7 +666,11 @@ Page({
       confirmPromise = preparationApi.confirmFoodEffectiveInterval(this.data.recipe.id, version.id, request);
     }
     confirmPromise
-      .then(function () {
+      .then(function (result) {
+        if (that._pendingUsageStorageKey) {
+          wx.removeStorageSync(that._pendingUsageStorageKey);
+          that._pendingUsageStorageKey = null;
+        }
         if (that.data.intervalReplacementCandidate) {
           wx.removeStorageSync(RECIPE_REPLACEMENT_CONTEXT_PREFIX + String(version.id));
         }
@@ -536,7 +681,14 @@ Page({
           intervalPreview: null,
           replacementPreview: null,
         });
-        wx.showToast({ title: '适用时间已更新', icon: 'success' });
+        var intervalResult = result && result.recipeInterval ? result.recipeInterval : result;
+        var requestId = intervalResult && intervalResult.recalculationRequestId;
+        var affected = preview.costImpact && preview.costImpact.affectedSalesRecordCount;
+        wx.showToast({
+          title: affected ? '已更新并重算' + affected + '条' : '适用时间已更新',
+          icon: 'success',
+        });
+        if (requestId) console.log('[配方版本] 成本重算请求', requestId);
         return that.loadVersions();
       }).catch(function (error) {
         wx.hideLoading();

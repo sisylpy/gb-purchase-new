@@ -251,6 +251,65 @@
   </view>
 </view>
 
+<!-- 新配方内容发布前先明确使用日期；发布后进入同一套影响预览与确认流程 -->
+<view class="version-usage-mask" wx:if="{{showVersionUsageChoice}}" catchtap="closeVersionUsageChoice">
+  <view class="version-usage-panel" catchtap="stopTap">
+    <view class="version-usage-head">
+      <view>
+        <text class="version-usage-title">新版本从哪天开始使用？</text>
+        <text class="version-usage-sub">旧版本内容会永久保留；日期确认后才重算受影响的历史成本</text>
+      </view>
+      <text class="version-usage-close" bindtap="closeVersionUsageChoice">关闭</text>
+    </view>
+
+    <view class="version-usage-options">
+      <view class="version-usage-option {{versionUsageMode == 'FROM_DATE' ? 'is-selected' : ''}}"
+        data-mode="FROM_DATE" bindtap="chooseVersionUsageMode">
+        <view class="version-usage-option__radio"></view>
+        <view>
+          <text class="version-usage-option__title">从指定日期开始使用</text>
+          <text class="version-usage-option__desc">适合以后正式加入盐等配料，之前的成本不变</text>
+        </view>
+      </view>
+      <view class="version-usage-option {{versionUsageMode == 'HISTORICAL_CORRECTION' ? 'is-selected' : ''}}"
+        data-mode="HISTORICAL_CORRECTION" bindtap="chooseVersionUsageMode">
+        <view class="version-usage-option__radio"></view>
+        <view>
+          <text class="version-usage-option__title">修正历史配方</text>
+          <text class="version-usage-option__desc">补录过去遗漏内容，先预览原成本、新成本和差额</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="version-usage-row">
+      <text class="version-usage-row__label">开始营业日</text>
+      <picker mode="date" value="{{versionUsageStart}}" bindchange="onVersionUsageStartChange">
+        <view class="version-usage-row__value">{{versionUsageStart}} ›</view>
+      </picker>
+    </view>
+    <view class="version-usage-row">
+      <view>
+        <text class="version-usage-row__label">设置停止日期</text>
+        <text class="version-usage-row__hint">关闭表示持续使用</text>
+      </view>
+      <switch color="#168d79" checked="{{versionUsageHasEnd}}" bindchange="onVersionUsageEndSwitch" />
+    </view>
+    <view class="version-usage-row" wx:if="{{versionUsageHasEnd}}">
+      <text class="version-usage-row__label">停止营业日</text>
+      <picker mode="date" value="{{versionUsageEnd}}" bindchange="onVersionUsageEndChange">
+        <view class="version-usage-row__value">{{versionUsageEnd}} ›</view>
+      </picker>
+    </view>
+    <view class="version-usage-reason">
+      <text class="version-usage-row__label">更新原因</text>
+      <input class="version-usage-reason__input" value="{{versionUsageReason}}" maxlength="200"
+        bindinput="onVersionUsageReasonInput" placeholder="例如：从今天起正式加入盐" />
+    </view>
+    <text class="version-usage-warning" wx:if="{{versionUsageMode == 'HISTORICAL_CORRECTION'}}">历史修正不会直接落账。新版本发布后，还必须在版本管理页预览受影响日期、销量和成本差额，再确认调整。</text>
+    <view class="version-usage-confirm" bindtap="confirmVersionUsageChoice">发布版本并预览影响</view>
+  </view>
+</view>
+
 <!-- 添加 / 编辑中间料：中间料作为一个整体使用，只填写菜品每份用量 -->
 <view class="food-search-modal" wx:if="{{showPreparation}}" catchtouchmove="stopMove" bindtap="dismissKeyboard">
   <view class="food-search-modal__panel preparation-modal__panel" catchtap="stopTap">

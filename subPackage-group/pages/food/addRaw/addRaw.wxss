@@ -2038,3 +2038,64 @@
 .raw-item-replace--hover {
   background: #edf8f5;
 }
+
+/* 新内容版本发布前的业务日期选择 */
+.version-usage-mask {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.46);
+}
+
+.version-usage-panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 90vh;
+  padding: 28rpx 28rpx calc(26rpx + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 28rpx 28rpx 0 0;
+}
+
+.version-usage-head,
+.version-usage-row,
+.version-usage-option {
+  display: flex;
+  align-items: center;
+}
+
+.version-usage-head,
+.version-usage-row {
+  justify-content: space-between;
+}
+
+.version-usage-title,
+.version-usage-sub,
+.version-usage-option__title,
+.version-usage-option__desc,
+.version-usage-row__label,
+.version-usage-row__hint,
+.version-usage-warning {
+  display: block;
+}
+
+.version-usage-title { color: #222c29; font-size: 33rpx; font-weight: 650; }
+.version-usage-sub { margin-top: 6rpx; color: #78827f; font-size: 22rpx; line-height: 1.45; }
+.version-usage-close { flex-shrink: 0; margin-left: 20rpx; color: #69736f; font-size: 25rpx; }
+.version-usage-options { margin-top: 22rpx; }
+.version-usage-option { gap: 16rpx; margin-top: 12rpx; padding: 20rpx; border: 1rpx solid #e2e7e5; border-radius: 14rpx; }
+.version-usage-option.is-selected { border-color: #71c2af; background: #edf8f5; }
+.version-usage-option__radio { box-sizing: border-box; width: 28rpx; height: 28rpx; flex-shrink: 0; border: 3rpx solid #b8c1be; border-radius: 50%; }
+.version-usage-option.is-selected .version-usage-option__radio { border: 8rpx solid #168d79; }
+.version-usage-option__title { color: #2a3431; font-size: 27rpx; font-weight: 650; }
+.version-usage-option__desc { margin-top: 5rpx; color: #74807c; font-size: 22rpx; line-height: 1.45; }
+.version-usage-row { min-height: 92rpx; border-top: 1rpx solid #edf0ef; }
+.version-usage-row__label { color: #303936; font-size: 27rpx; font-weight: 600; }
+.version-usage-row__hint { margin-top: 4rpx; color: #89928f; font-size: 21rpx; }
+.version-usage-row__value { padding: 16rpx 0 16rpx 24rpx; color: #158773; font-size: 27rpx; }
+.version-usage-reason { padding: 18rpx 0; border-top: 1rpx solid #edf0ef; }
+.version-usage-reason__input { box-sizing: border-box; height: 76rpx; margin-top: 12rpx; padding: 0 18rpx; font-size: 25rpx; background: #f5f7f6; border-radius: 10rpx; }
+.version-usage-warning { padding: 15rpx 17rpx; color: #9a5b13; font-size: 22rpx; line-height: 1.5; background: #fff4e5; border-radius: 10rpx; }
+.version-usage-confirm { height: 82rpx; margin-top: 22rpx; color: #fff; font-size: 28rpx; font-weight: 650; line-height: 82rpx; text-align: center; background: #168d79; border-radius: 12rpx; }

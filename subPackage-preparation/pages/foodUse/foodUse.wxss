@@ -15,3 +15,5 @@
 .cost-total { color: #187e6e; font-size: 54rpx; font-weight: 700; margin: 10rpx 0 20rpx; }
 .compact { min-height: 90rpx; padding: 18rpx; }
 .prep-inline picker { flex: 1; }
+.prep-picker--readonly { color: #187e6e; background: #eef8f5; }
+.prep-tip-warn { color: #94601d; background: #fff5e6; }

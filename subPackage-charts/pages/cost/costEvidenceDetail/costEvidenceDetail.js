@@ -175,6 +175,7 @@ Page({
           completionRateText: numberText(view.result && view.result.completionRate, 2),
           recipeVersionText: view.result && view.result.recipeVersionId
             ? '#' + view.result.recipeVersionId : '—',
+          previousResultId: Number(view.result && view.result.previousResultId || 0),
           ingredients: view.ingredients || [],
           businessDate: cleanText(view.result && view.result.businessDate) || that.data.businessDate,
         });
@@ -185,6 +186,19 @@ Page({
           loadError: (error && error.message) || '成本证据加载失败',
         });
       });
+  },
+
+  viewPreviousEvidence: function () {
+    if (!this.data.previousResultId) return;
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/cost/costEvidenceDetail/costEvidenceDetail'
+        + '?resultId=' + encodeURIComponent(String(this.data.previousResultId))
+        + '&distributerId=' + encodeURIComponent(String(this.data.distributerId))
+        + '&storeDepartmentId=' + encodeURIComponent(String(this.data.storeDepartmentId))
+        + '&foodId=' + encodeURIComponent(String(this.data.foodId))
+        + '&businessDate=' + encodeURIComponent(String(this.data.businessDate || ''))
+        + '&dishName=' + encodeURIComponent(String(this.data.dishName || '菜品成本')),
+    });
   },
 
   _decorateEvidence: function (view) {

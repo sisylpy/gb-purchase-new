@@ -256,6 +256,14 @@ function listFoodEffectiveIntervals(recipeId, distributerId, storeDepartmentId) 
   });
 }
 
+function selectFoodEffectiveVersion(storeDepartmentId, foodId, businessDate) {
+  return get('preparation/p1/food-recipes/effective-selection', {
+    storeDepartmentId: storeDepartmentId,
+    foodId: foodId,
+    businessDate: businessDate,
+  });
+}
+
 function previewFoodEffectiveInterval(recipeId, versionId, body) {
   return post(
     'preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId
@@ -505,6 +513,7 @@ module.exports = {
   saveFoodDraft: saveFoodDraft,
   foodVersionAction: foodVersionAction,
   listFoodEffectiveIntervals: listFoodEffectiveIntervals,
+  selectFoodEffectiveVersion: selectFoodEffectiveVersion,
   previewFoodEffectiveInterval: previewFoodEffectiveInterval,
   confirmFoodEffectiveInterval: confirmFoodEffectiveInterval,
   confirmFoodEffectiveIntervalWithReplacement: confirmFoodEffectiveIntervalWithReplacement,

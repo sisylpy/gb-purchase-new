@@ -6,7 +6,8 @@
     <block wx:if="{{!completed}}">
       <view class="prep-section">
         <view class="prep-form-row"><text class="prep-form-label prep-required">1. VERSIONED 菜品</text><view class="prep-picker {{foodIndex < 0 ? 'prep-placeholder' : ''}}" bindtap="openFoodPicker">{{foodIndex < 0 ? '搜索并选择菜品' : foods[foodIndex].foodName}}</view></view>
-        <view class="prep-form-row"><text class="prep-form-label prep-required">2. 已发布菜品配方</text><picker range="{{versions}}" range-key="label" value="{{versionIndex < 0 ? 0 : versionIndex}}" bindchange="onVersionChange" disabled="{{versions.length === 0}}"><view class="prep-picker">{{versionIndex < 0 ? '请先选择菜品' : versions[versionIndex].label + '（PUBLISHED）'}}</view></picker></view>
+        <view class="prep-form-row"><text class="prep-form-label prep-required">2. 营业日适用配方</text><view class="prep-picker prep-picker--readonly">{{versionIndex < 0 ? (foodIndex < 0 ? '请先选择菜品' : '该营业日没有适用配方') : versions[versionIndex].label + '（由制作日期确定）'}}</view></view>
+        <view class="prep-tip prep-tip-warn" wx:if="{{foodIndex >= 0 && versionIndex < 0}}">{{versionSelectionMessage}}。系统不会回退到首版、最新版本或所谓当前版本。</view>
         <view class="prep-form-row"><text class="prep-form-label prep-required">3. 实际制作份数</text><input class="prep-input" type="digit" value="{{portions}}" bindinput="onPortionsInput" placeholder="实际完成份数" /></view>
         <view class="prep-form-row"><text class="prep-form-label prep-required">制作时间</text><view class="prep-inline"><picker mode="date" value="{{producedDate}}" bindchange="onDateChange"><view class="prep-picker">{{producedDate}}</view></picker><picker mode="time" value="{{producedTime}}" bindchange="onTimeChange"><view class="prep-picker">{{producedTime}}</view></picker></view></view>
       </view>

@@ -15,6 +15,8 @@ Page({
     showFoodPicker: false,
     versions: [],
     versionIndex: -1,
+    versionSelectionStatus: '',
+    versionSelectionMessage: '',
     recipe: null,
     components: [],
     portions: '',
@@ -70,15 +72,43 @@ Page({
   loadFoodRecipe: function (food) {
     var that = this;
     api.getFoodRecipeByFood(food.foodId, this.identity.distributerId).then(function (detail) {
-      return api.listFoodVersions(detail.recipe.id, that.identity.distributerId).then(function (versions) {
-        versions = (versions || []).filter(function (row) { return row.status === 'PUBLISHED'; });
-        if (!versions.length) throw { preparationError: true, status: 409, message: '该 VERSIONED 菜品没有已发布配方版本' };
-        var currentIndex = versions.findIndex(function (row) { return String(row.id) === String(detail.recipe.currentPublishedVersionId); });
-        if (currentIndex < 0) currentIndex = 0;
+      return Promise.all([
+        api.listFoodVersions(detail.recipe.id, that.identity.distributerId),
+        api.selectFoodEffectiveVersion(
+          that.identity.currentStoreId,
+          food.foodId,
+          that.data.producedDate
+        ),
+      ]).then(function (results) {
+        var versions = (results[0] || []).filter(function (row) {
+          return row.status === 'PUBLISHED' || row.status === 'RETIRED';
+        });
+        var selection = results[1] || {};
+        if (selection.status !== 'RESOLVED' || !selection.recipeVersion) {
+          that.setData({
+            loading: false,
+            versions: versions,
+            versionIndex: -1,
+            recipe: detail.recipe,
+            components: [],
+            versionSelectionStatus: selection.status || 'MISSING_EFFECTIVE_RECIPE',
+            versionSelectionMessage: selection.message || '该营业日没有适用的已发布配方',
+          });
+          return null;
+        }
+        var currentIndex = versions.findIndex(function (row) {
+          return String(row.id) === String(selection.recipeVersion.id);
+        });
+        if (currentIndex < 0) {
+          versions.push(selection.recipeVersion);
+          currentIndex = versions.length - 1;
+        }
         that.setData({
           versions: versions.map(function (row) { return Object.assign({}, row, { label: 'V' + row.versionNo }); }),
           versionIndex: currentIndex,
           recipe: detail.recipe,
+          versionSelectionStatus: 'RESOLVED',
+          versionSelectionMessage: '',
         });
         return that.loadVersion(detail.recipe.id, versions[currentIndex].id);
       });
@@ -153,7 +183,14 @@ Page({
     this.setData({ ['components[' + component + '].lines[' + line + '].usedQuantity']: event.detail.value });
     this.recalculate();
   },
-  onDateChange: function (event) { this.setData({ producedDate: event.detail.value }); },
+  onDateChange: function (event) {
+    var date = event.detail.value;
+    this.setData({ producedDate: date });
+    if (this.data.foodIndex >= 0) {
+      this.setData({ loading: true, components: [], versionIndex: -1 });
+      this.loadFoodRecipe(this.data.foods[this.data.foodIndex]);
+    }
+  },
   onTimeChange: function (event) { this.setData({ producedTime: event.detail.value }); },
 
   recalculate: function () {

@@ -34,6 +34,9 @@
           </view>
         </view>
         <text class="summary-note">成本结果保留销量版本、配方版本、每项配料和入库批次证据。缺失部分不会按 0 元计算。</text>
+        <view class="previous-evidence" wx:if="{{previousResultId}}" bindtap="viewPreviousEvidence">
+          查看本次重算前的成本证据 ›
+        </view>
       </view>
 
       <view class="ingredient-section">
