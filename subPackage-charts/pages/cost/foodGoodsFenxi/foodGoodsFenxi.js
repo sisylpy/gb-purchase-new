@@ -57,6 +57,22 @@ function _displayValue(value) {
   return value === null || value === undefined || value === '' ? '—' : String(value);
 }
 
+function _decimal(value) {
+  if (value === null || value === undefined || value === '') return null;
+  var number = Number(value);
+  return isNaN(number) ? null : number;
+}
+
+function _fixed(value, digits) {
+  var number = _decimal(value);
+  if (number === null) return '—';
+  var scale = digits == null ? 2 : digits;
+  var factor = Math.pow(10, scale);
+  var roundedAbsolute = Math.round((Math.abs(number) + 1e-12) * factor) / factor;
+  var rounded = number < 0 ? -roundedAbsolute : roundedAbsolute;
+  return rounded.toFixed(scale);
+}
+
 /** 配料分析和历史成本报表都以经销商菜品ID作为唯一合并键。 */
 function _resolveDistributerFoodId(row) {
   if (!row) return '';
@@ -145,19 +161,110 @@ function _normalizeOriginalDish(row, historicalByFoodId) {
   var item = Object.assign({}, row || {});
   item._foodId = _resolveDistributerFoodId(item);
   item._expanded = false;
-  item._outboundCostPerPortionText = _displayValue(item.outboundAllocatedCostPerPortion);
-  item._theoryCostPerPortionText = _displayValue(item.theoryCostPerPortion);
-  item._outboundCostAmountText = _displayValue(item.outboundAllocatedCostAmount);
-  item._theoryCostTotalText = _displayValue(item.theoryCostTotal);
-  item._costTotalDiffText = _displayValue(item.costTotalDiff);
+  item._historical = historicalByFoodId[item._foodId] || null;
+  item._theoryCostPerPortionText = '—';
+  item._theoryCostTotalText = '—';
+  item._costDiffPerPortionText = '—';
+  item._costDiffRateText = '—';
+  item._costDiffRateDisplayText = '—';
+  item._costTotalDiffText = '—';
+
+  var historicalTotal = item._historical && item._historical.allComplete
+    ? _decimal(item._historical.totalHistoricalTheoreticalCostAmount) : null;
+  var historicalPerPortion = item._historical && item._historical.allComplete
+    ? _decimal(item._historical.completeCostPerPortion) : null;
+  var outboundTotal = _decimal(item.outboundAllocatedCostAmount);
+  var salesPortions = _decimal(item.salesPortions);
+  if (historicalTotal !== null && historicalPerPortion !== null) {
+    item._theoryCostPerPortionText = _fixed(historicalPerPortion, 2);
+    item._theoryCostTotalText = _fixed(historicalTotal, 2);
+    if (outboundTotal !== null) {
+      var totalDifference = outboundTotal - historicalTotal;
+      item._costTotalDiffText = _fixed(totalDifference, 2);
+      if (salesPortions !== null && salesPortions > 0) {
+        item._costDiffPerPortionText = _fixed(totalDifference / salesPortions, 2);
+      }
+      if (historicalTotal > 0) {
+        item._costDiffRateText = _fixed(totalDifference * 100 / historicalTotal, 2);
+        item._costDiffRateDisplayText = item._costDiffRateText + '%';
+      }
+    }
+  }
+
+  var historicalIngredients = {};
+  if (item._historical && Array.isArray(item._historical.ingredientSummaries)) {
+    item._historical.ingredientSummaries.forEach(function (ingredient) {
+      historicalIngredients[String(ingredient.rawGoodsId || '')] = ingredient;
+    });
+  }
   item.ingredientRows = (item.ingredientRows || []).map(function (ingredient) {
     var normalized = Object.assign({}, ingredient);
+    var historicalIngredient = historicalIngredients[String(normalized.disGoodsId || '')] || null;
     normalized._imageUrl = _imageUrl(normalized.gbDgGoodsFileImg);
-    normalized._outboundCostText = _displayValue(normalized.outboundAllocatedCostPerPortion);
+    normalized._hasOutboundEvidence = (_decimal(normalized.actualUsage) || 0) !== 0
+      || (_decimal(normalized.actualProduceUsage) || 0) !== 0
+      || (_decimal(normalized.actualLossAndWasteUsage) || 0) !== 0
+      || (_decimal(normalized.outboundAllocatedCostPerPortion) || 0) !== 0;
+    normalized._outboundCostText = normalized._hasOutboundEvidence
+      ? _displayValue(normalized.outboundAllocatedCostPerPortion) : '—';
+    normalized._historical = historicalIngredient;
+    normalized._theoryQuantityText = historicalIngredient
+      ? historicalIngredient._portionText : '—';
+    normalized._devianceText = historicalIngredient ? '—' : _displayValue(normalized.devianceRate);
+    normalized._devianceHint = historicalIngredient ? '单位口径不同' : '';
+    var actualProduceUsage = _decimal(normalized.actualProduceUsage);
+    normalized._allocatedQuantityText = normalized._hasOutboundEvidence && actualProduceUsage !== null
+      && salesPortions !== null && salesPortions > 0
+      ? _fixed(actualProduceUsage / salesPortions, 4) + ' '
+        + (normalized.gbDgGoodsStandardname || '') + '/份'
+      : '—';
     return normalized;
   });
-  item._historical = historicalByFoodId[item._foodId] || null;
+  item._hasOutboundEvidence = item.ingredientRows.some(function (ingredient) {
+    return (_decimal(ingredient.actualUsage) || 0) !== 0
+      || (_decimal(ingredient.actualProduceUsage) || 0) !== 0
+      || (_decimal(ingredient.actualLossAndWasteUsage) || 0) !== 0
+      || (_decimal(ingredient.outboundAllocatedCostPerPortion) || 0) !== 0;
+  });
+  item._outboundCostPerPortionText = item._hasOutboundEvidence
+    ? _displayValue(item.outboundAllocatedCostPerPortion) : '—';
+  item._outboundCostAmountText = item._hasOutboundEvidence
+    ? _displayValue(item.outboundAllocatedCostAmount) : '—';
+  if (!item._hasOutboundEvidence) {
+    item._costDiffPerPortionText = '—';
+    item._costDiffRateText = '—';
+    item._costDiffRateDisplayText = '—';
+    item._costTotalDiffText = '—';
+  }
   return item;
+}
+
+function _buildScopeDisplay(originalScope, historicalSummary) {
+  var original = Object.assign({}, originalScope || {});
+  original.outboundAllocatedCostTotal = _displayValue(original.outboundAllocatedCostTotal);
+  original.theoreticalCostTotal = '—';
+  original.costDeviationTotal = '—';
+  original.costDeviationRate = '—';
+  original.costDeviationRateDisplay = '—';
+  original._theoreticalHint = '历史理论成本尚未完整';
+  original._deviationHint = '缺失成本不按 0 元计算';
+  if (!historicalSummary || !historicalSummary.allComplete) return original;
+
+  var theoreticalTotal = _decimal(historicalSummary.totalHistoricalTheoreticalCostAmount);
+  var outboundTotal = _decimal(originalScope && originalScope.outboundAllocatedCostTotal);
+  if (theoreticalTotal === null) return original;
+  original.theoreticalCostTotal = _fixed(theoreticalTotal, 2);
+  original._theoreticalHint = '按营业日有效配方和历史入库价';
+  if (outboundTotal !== null) {
+    var difference = outboundTotal - theoreticalTotal;
+    original.costDeviationTotal = _fixed(difference, 2);
+    original.costDeviationRate = theoreticalTotal > 0
+      ? _fixed(difference * 100 / theoreticalTotal, 2) : '—';
+    original.costDeviationRateDisplay = original.costDeviationRate === '—'
+      ? '—' : original.costDeviationRate + '%';
+    original._deviationHint = '与历史理论成本同范围比较';
+  }
+  return original;
 }
 
 function _filterDishRowsByDishName(list, keyword) {
@@ -322,7 +429,10 @@ Page({
       var returnedOrder = originalData.sortOrder;
       that.setData({
         loading: false,
-        scopeSalesSubtotals: originalData.scopeSalesSubtotals || null,
+        scopeSalesSubtotals: _buildScopeDisplay(
+          originalData.scopeSalesSubtotals,
+          historicalData ? _normalizeHistoricalSummary(historicalData.summary) : null
+        ),
         historicalSummary: historicalData ? _normalizeHistoricalSummary(historicalData.summary) : null,
         historicalReportAvailable: !!historicalData,
         salesDishRowsAll: rows,
@@ -348,16 +458,29 @@ Page({
   _applyDishFilter: function (allRows) {
     var base = allRows || this.data.salesDishRowsAll || [];
     var afterName = _filterDishRowsByDishName(base, this.data.dishNameSearch);
-    var output = afterName;
+    var output = afterName.slice();
     if (this.data.abnormalFirst) {
       output = afterName.filter(function (dish) {
-        var value = parseFloat(String(
-          dish && dish.diffCostPerPortion !== null && dish.diffCostPerPortion !== undefined
-            ? dish.diffCostPerPortion : ''
-        ).trim());
+        var value = _decimal(dish && dish._costDiffPerPortionText);
         return !isNaN(value) && Math.abs(value) > 1e-6;
       });
     }
+    var sortBy = this.data.sortBy;
+    var direction = this.data.sortOrder === 'asc' ? 1 : -1;
+    output.sort(function (left, right) {
+      var leftValue = sortBy === 'ingredientCount'
+        ? _decimal(left && left.ingredientCount)
+        : _decimal(left && (sortBy === 'diffRate'
+          ? left._costDiffRateText : left._costDiffPerPortionText));
+      var rightValue = sortBy === 'ingredientCount'
+        ? _decimal(right && right.ingredientCount)
+        : _decimal(right && (sortBy === 'diffRate'
+          ? right._costDiffRateText : right._costDiffPerPortionText));
+      if (leftValue === null && rightValue === null) return 0;
+      if (leftValue === null) return 1;
+      if (rightValue === null) return -1;
+      return (leftValue - rightValue) * direction;
+    });
     this.setData({ salesDishRows: output });
   },
 
@@ -426,18 +549,15 @@ Page({
   },
 
   onIngredientSort: function (e) {
-    var that = this;
     var sort = e.currentTarget.dataset.sort;
     if (!sort) return;
     if (sort === this.data.sortBy) {
-      this.setData({ sortOrder: this.data.sortOrder === 'asc' ? 'desc' : 'asc' }, function () {
-        that._fetchReport();
-      });
+      this.setData({ sortOrder: this.data.sortOrder === 'asc' ? 'desc' : 'asc' });
+      this._applyDishFilter();
       return;
     }
-    this.setData({ sortBy: sort, sortOrder: 'desc' }, function () {
-      that._fetchReport();
-    });
+    this.setData({ sortBy: sort, sortOrder: 'desc' });
+    this._applyDishFilter();
   },
 
   toDatePage: function () {

@@ -31,18 +31,18 @@
     <view class="cost-summary" wx:if="{{scopeSalesSubtotals && !dishNameSearch}}">
       <view class="cost-summary-card">
         <text class="cost-summary-card__label">出库分摊总成本</text>
-        <text class="cost-summary-card__value">¥{{scopeSalesSubtotals.outboundAllocatedCostTotal != null ? scopeSalesSubtotals.outboundAllocatedCostTotal : '—'}}</text>
+        <text class="cost-summary-card__value">¥{{scopeSalesSubtotals.outboundAllocatedCostTotal}}</text>
         <text class="cost-summary-card__hint">库存出库归集与分摊</text>
       </view>
       <view class="cost-summary-card">
         <text class="cost-summary-card__label">理论总成本</text>
-        <text class="cost-summary-card__value">¥{{scopeSalesSubtotals.theoreticalCostTotal != null ? scopeSalesSubtotals.theoreticalCostTotal : '—'}}</text>
-        <text class="cost-summary-card__hint">原配料分析口径</text>
+        <text class="cost-summary-card__value">¥{{scopeSalesSubtotals.theoreticalCostTotal}}</text>
+        <text class="cost-summary-card__hint">{{scopeSalesSubtotals._theoreticalHint}}</text>
       </view>
       <view class="cost-summary-card">
         <text class="cost-summary-card__label">成本偏差率</text>
-        <text class="cost-summary-card__value">{{scopeSalesSubtotals.costDeviationRate != null ? scopeSalesSubtotals.costDeviationRate : '—'}}%</text>
-        <text class="cost-summary-card__hint">{{scopeSalesSubtotals.costDeviationTotal != null ? scopeSalesSubtotals.costDeviationTotal : '—'}}</text>
+        <text class="cost-summary-card__value">{{scopeSalesSubtotals.costDeviationRateDisplay}}</text>
+        <text class="cost-summary-card__hint">差额 {{scopeSalesSubtotals.costDeviationTotal}} 元</text>
       </view>
     </view>
 
@@ -107,15 +107,15 @@
           </view>
           <view class="cost-metric">
             <text class="cost-metric__label">成本偏差</text>
-            <text class="cost-metric__value metric-deviation {{num.diffClass(item.diffCostPerPortion || '0')}}">
-              {{num.formatSigned(item.diffCostPerPortion || '0')}}
-              {{num.signKind(item.diffCostPerPortion || '0') === 'pos' ? '↑' : (num.signKind(item.diffCostPerPortion || '0') === 'neg' ? '↓' : '')}}
+            <text class="cost-metric__value metric-deviation {{num.diffClass(item._costDiffPerPortionText)}}">
+              {{num.formatSigned(item._costDiffPerPortionText)}}
+              {{num.signKind(item._costDiffPerPortionText) === 'pos' ? '↑' : (num.signKind(item._costDiffPerPortionText) === 'neg' ? '↓' : '')}}
             </text>
             <text class="cost-metric__unit">元/份</text>
           </view>
           <view class="cost-metric">
             <text class="cost-metric__label">偏差率</text>
-            <text class="cost-metric__value metric-deviation">{{item.diffRatePerPortion != null ? item.diffRatePerPortion : '—'}}%</text>
+            <text class="cost-metric__value metric-deviation">{{item._costDiffRateDisplayText}}</text>
             <text class="cost-metric__unit"></text>
           </view>
         </view>
@@ -187,16 +187,16 @@
                     <text>{{ingredient.gbDgGoodsName}}</text>
                   </view>
                   <view class="legacy-ingredient-cell">
-                    <text>{{ingredient.devianceRate != null ? ingredient.devianceRate : '—'}}%</text>
-                    <text class="legacy-ingredient-tag {{utilLv.textClass(ingredient.deviance.level)}}" wx:if="{{ingredient.deviance}}">{{ingredient.deviance.labelZh}}</text>
+                    <text>{{ingredient._devianceText}}{{ingredient._devianceText === '—' ? '' : '%'}}</text>
+                    <text class="legacy-ingredient-tag" wx:if="{{ingredient._devianceHint}}">{{ingredient._devianceHint}}</text>
+                    <text class="legacy-ingredient-tag {{utilLv.textClass(ingredient.deviance.level)}}"
+                      wx:elif="{{ingredient.deviance}}">{{ingredient.deviance.labelZh}}</text>
                   </view>
                   <view class="legacy-ingredient-cell">
-                    <text>{{ingredient.recipeUnitPerDish != null ? ingredient.recipeUnitPerDish : '—'}}</text>
-                    <text>{{ingredient.gbDgGoodsStandardname}}/份</text>
+                    <text>{{ingredient._theoryQuantityText}}</text>
                   </view>
                   <view class="legacy-ingredient-cell">
-                    <text>{{ingredient.produceAllocatedPerSoldPortion != null ? ingredient.produceAllocatedPerSoldPortion : '—'}}</text>
-                    <text>{{ingredient.gbDgGoodsStandardname}}/份</text>
+                    <text>{{ingredient._allocatedQuantityText}}</text>
                   </view>
                   <view class="legacy-ingredient-cell">
                     <text>{{ingredient._outboundCostText}}</text>
