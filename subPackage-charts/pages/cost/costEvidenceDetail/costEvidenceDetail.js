@@ -315,11 +315,11 @@ Page({
 
   _validateCorrection: function (request) {
     if (!request.operatorId) return '当前登录人缺少操作身份，请重新登录后再试';
-    if (!request.correctionReason) return '请填写修正原因';
+    if (!request.correctionReason) return '请填写调整原因';
     if (request.evidenceStatus === 'VALID') {
-      if (!(request.correctedQuantity > 0)) return '修正后的入库数量必须大于 0';
-      if (isNaN(request.correctedAmount) || request.correctedAmount < 0) return '修正后的入库金额不能小于 0';
-      if (!request.correctedUnitCode) return '请填写修正后的入库单位';
+      if (!(request.correctedQuantity > 0)) return '更正后的数量必须大于 0';
+      if (isNaN(request.correctedAmount) || request.correctedAmount < 0) return '更正后的金额不能小于 0';
+      if (!request.correctedUnitCode) return '请填写更正后的单位';
     }
     return '';
   },
@@ -350,16 +350,16 @@ Page({
     if (this.data.correctionSaving) return;
     var request = this._correctionRequest(true);
     if (!request.expectedPreviewToken) {
-      wx.showToast({ title: '请先预览本次修正影响', icon: 'none' });
+      wx.showToast({ title: '请先预览本次调整影响', icon: 'none' });
       return;
     }
     var endText = this.data.correctionPreview.affectedEnd
       ? this.data.correctionPreview.affectedEnd + ' 起停止影响'
       : '影响后续全部营业日';
     preparationUtil.confirm(
-      '将保留原入库数据，并新增修正证据。影响范围：'
+      '仅调整理论成本核算依据，不修改原入库单和库存。影响范围：'
         + this.data.correctionPreview.affectedStart + ' 起，' + endText + '。',
-      '确认修正入库证据'
+      '确认调整成本核算依据'
     ).then(function (confirmed) {
       if (!confirmed) return;
       that.setData({ correctionSaving: true });
@@ -369,8 +369,8 @@ Page({
           var pages = getCurrentPages();
           if (pages.length > 1) pages[pages.length - 2].setData({ update: true });
           wx.showModal({
-            title: '修正已保存',
-            content: '系统已保留原始入库记录，并提交受影响日期的成本重新核算。',
+            title: '调整已保存',
+            content: '原入库单和库存保持不变，系统已提交受影响日期的成本重新核算。',
             showCancel: false,
             success: function () { wx.navigateBack({ delta: 1 }); },
           });

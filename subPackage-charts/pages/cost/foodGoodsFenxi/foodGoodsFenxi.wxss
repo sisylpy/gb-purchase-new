@@ -541,7 +541,7 @@ page {
   height: 48rpx;
 }
 
-/* 历史理论核算是原菜品分析之上的附加验证，不替换原成本口径。 */
+/* 理论成本核算是原菜品分析之上的附加验证，不替换原成本口径。 */
 .history-summary {
   margin: 4rpx 16rpx 14rpx;
   padding: 16rpx 20rpx;
@@ -630,6 +630,14 @@ page {
   line-height: 30rpx;
 }
 
+.history-strip__breakdown {
+  display: block;
+  margin-top: 8rpx;
+  color: #3e665d;
+  font-size: 20rpx;
+  line-height: 30rpx;
+}
+
 .legacy-detail {
   padding: 0 20rpx 20rpx;
   background: #fbfcfb;
@@ -701,12 +709,12 @@ page {
 }
 
 .legacy-ingredient-table {
-  width: 1350rpx;
+  width: 1525rpx;
 }
 
 .legacy-ingredient-row {
   display: grid;
-  grid-template-columns: 300rpx repeat(6, 175rpx);
+  grid-template-columns: 300rpx repeat(7, 175rpx);
   align-items: stretch;
   min-height: 104rpx;
   border-bottom: 1rpx solid #edf0ee;

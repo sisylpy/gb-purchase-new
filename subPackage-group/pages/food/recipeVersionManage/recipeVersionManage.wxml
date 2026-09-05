@@ -2,53 +2,16 @@
   <back-navbar title="配方版本管理" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
   <scroll-view scroll-y class="version-page__scroll">
-    <view class="version-summary">
-      <view class="version-summary__top">
-        <view>
-          <text class="version-summary__dish">{{foodItem.dishName || foodItem.gbDfFoodName}}</text>
-          <text class="version-summary__meta">当前门店 · 共 {{versions.length}} 个内容版本</text>
-        </view>
-        <view class="version-summary__current" wx:if="{{currentVersion}}">当前 V{{currentVersion.versionNo}}</view>
-        <view class="version-summary__missing" wx:else>今天无适用配方</view>
-      </view>
-      <text class="version-summary__tip">点击每个版本唯一的“编辑”入口，可调整配料、用量和门店使用日期；保存后版本编号不变，修改前内容仍可追溯。</text>
-      <view class="version-summary__create" wx:if="{{!versions.length}}" bindtap="editVersion">
-        + 新建第一个配方版本
-      </view>
-    </view>
-
-    <view class="timeline-card">
-      <view class="timeline-card__head">
-        <view>
-          <text class="timeline-card__title">当前门店版本时间轴</text>
-          <text class="timeline-card__sub">今天 {{businessToday}} · 结束日期当天不再使用前一版本</text>
-        </view>
-        <text class="timeline-card__state {{currentVersion ? 'is-current' : 'is-missing'}}">
-          {{currentVersion ? 'V' + currentVersion.versionNo + ' 使用中' : '今天无配方'}}
-        </text>
-      </view>
-      <view class="timeline-empty" wx:if="{{!timelineItems.length}}">尚未设置任何门店使用时间，营业日成本保持“—”。</view>
-      <view class="timeline-row {{item._isGap ? 'is-gap' : ''}} {{item._isToday ? 'is-today' : ''}}"
-        wx:for="{{timelineItems}}" wx:key="_key">
-        <view class="timeline-row__rail"><view class="timeline-row__dot"></view></view>
-        <view class="timeline-row__main">
-          <view class="timeline-row__top">
-            <text class="timeline-row__version">{{item._isGap ? '无有效配方' : item._versionLabel}}</text>
-            <text class="timeline-row__today" wx:if="{{item._isToday}}">今天</text>
-          </view>
-          <text class="timeline-row__period">{{item._periodText}}</text>
-          <text class="timeline-row__reason" wx:if="{{item._changeReasonText}}">{{item._changeReasonText}}</text>
-        </view>
-      </view>
-    </view>
-
     <view class="version-list-head">
       <text class="version-list-head__title">全部版本</text>
-      <text class="version-list-head__hint">内容与适用时间分开管理</text>
+      <view class="version-list-head__create" bindtap="createVersion">+ 添加新配方版本</view>
     </view>
 
     <view class="version-loading" wx:if="{{loading}}">正在读取配方版本…</view>
-    <view class="version-empty" wx:elif="{{!versions.length}}">还没有配方版本</view>
+    <view class="version-empty" wx:elif="{{!versions.length}}">
+      <text>还没有配方版本</text>
+      <view class="version-empty__create" bindtap="createVersion">+ 新建第一个配方版本</view>
+    </view>
 
     <block wx:else>
       <view wx:for="{{versions}}" wx:for-item="version" wx:key="id" class="version-card {{version._isCurrent ? 'version-card--current' : ''}}">
@@ -77,14 +40,23 @@
           </view>
         </view>
 
+        <view class="version-cost-summary">
+          <view>
+            <text class="version-cost-summary__label">该版本每份成本合计</text>
+            <text class="version-cost-summary__hint">按适用期营业日销量加权的采购价计算</text>
+          </view>
+          <text class="version-cost-summary__value {{version._costComplete ? '' : 'is-empty'}}">{{version._costPerPortionText || '—'}}</text>
+        </view>
+        <text class="version-cost-summary__scope">{{version._costStatusText}}</text>
+
         <view class="version-recipe">
           <view class="version-recipe__head">
             <text class="version-section-title">配方内容</text>
             <text class="version-recipe__count">{{version._components.length}} 种配料 · 每份用量</text>
           </view>
           <view class="version-recipe__columns" wx:if="{{version._components.length}}">
-            <text>配料名称与采购规格</text>
-            <text>用量</text>
+            <text>配料与时期平均采购价</text>
+            <text>用量 / 每份成本</text>
           </view>
           <view wx:for="{{version._components}}" wx:for-item="component" wx:key="_key" class="version-ingredient">
             <view class="version-ingredient__main">
@@ -98,9 +70,14 @@
                   <text class="version-ingredient__name">{{component.name}}</text>
                 </view>
                 <text class="version-ingredient__spec" wx:if="{{component._specText}}">规格：{{component._specText}}</text>
+                <text class="version-ingredient__price {{component._costComplete ? '' : 'is-empty'}}">{{component._averagePriceText || '—'}}</text>
+                <text class="version-ingredient__base-price" wx:if="{{component._averageBasePriceText}}">{{component._averageBasePriceText}}</text>
               </view>
             </view>
-            <text class="version-ingredient__amount">{{component._amountText}}</text>
+            <view class="version-ingredient__figures">
+              <text class="version-ingredient__amount">{{component._amountText}}</text>
+              <text class="version-ingredient__cost {{component._costComplete ? '' : 'is-empty'}}">每份 {{component._portionCostText || '—'}}</text>
+            </view>
           </view>
           <view class="version-recipe__empty" wx:if="{{!version._components.length}}">该版本没有可展示的配料快照</view>
         </view>
@@ -112,20 +89,6 @@
       </view>
     </block>
 
-    <view class="adjustment-card" wx:if="{{recentAdjustments.length}}">
-      <view class="version-list-head adjustment-card__head">
-        <text class="version-list-head__title">最近调整记录</text>
-        <text class="version-list-head__hint">用于追溯，不限制正常修改</text>
-      </view>
-      <view class="adjustment-row" wx:for="{{recentAdjustments}}" wx:key="id">
-        <view class="adjustment-row__top">
-          <text class="adjustment-row__operation">{{item._operationText}}</text>
-          <text class="adjustment-row__time">{{item._timeText}}</text>
-        </view>
-        <text class="adjustment-row__range">{{item._rangeText}}</text>
-        <text class="adjustment-row__reason">{{item.adjustmentReason}}</text>
-      </view>
-    </view>
     <view class="version-page__safe"></view>
   </scroll-view>
 

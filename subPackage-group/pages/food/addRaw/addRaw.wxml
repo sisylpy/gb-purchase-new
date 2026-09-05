@@ -3,31 +3,6 @@
   <back-navbar title="{{versionEditorMode ? (currentRecipeVersionView ? '编辑配方版本' : '新建配方版本') : foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
   <scroll-view scroll-y class="content-scroll">
-    <view class="version-editor-intro" wx:if="{{versionEditorMode}}">
-      <view>
-        <text class="version-editor-intro__dish">{{foodItem.dishName}}</text>
-        <text class="version-editor-intro__sub">正在编辑 V{{currentRecipeVersionView.versionNo || '-'}}；保存后仍是本版本，后台保留修改前修订和核算证据</text>
-      </view>
-      <text class="version-editor-intro__status">编辑中</text>
-    </view>
-    <!-- 顶部状态栏 -->
-    <view class="status-bar">
-      <view class="status-left">
-        <view class="status-dot"></view>
-        <text class="status-text">实时测算中</text>
-        <view class="status-days" wx:if="{{versionEditorMode}}">
-          <text>适用期加权平均</text>
-        </view>
-        <view class="status-days" wx:else bindtap="onPickCostDays" hover-class="status-days--hover">
-          <text>{{costDaysLabel}}</text>
-          <text class="status-days-arrow">▾</text>
-        </view>
-      </view>
-      <view class="status-right" bindtap="toChangePrice" hover-class="status-right--hover">
-        <text>更换售价</text>
-      </view>
-    </view>
-
     <!-- 售价/成本/毛利率卡片 -->
     <view class="kpi-card">
       <view class="kpi-row">
@@ -41,7 +16,7 @@
         </view>
         <view class="kpi-divider"></view>
         <view class="kpi-cell">
-          <text class="kpi-label">理论成本（每份）</text>
+          <text class="kpi-label">当前配方成本（每份）</text>
           <view class="kpi-value-wrap">
             <text class="kpi-symbol kpi-symbol--cost">¥</text>
             <text class="kpi-value kpi-value--cost">{{totalCostComplete === false ? '—' : (totalCost || '0.00')}}</text>
@@ -95,7 +70,7 @@
     <view class="hint-bar" wx:if="{{versionEditorMode}}">
       <view class="hint-left">
         <image src="/images/icon.png" class="hint-icon" mode="aspectFit"></image>
-        <text class="hint-text">按适用时间 {{versionCostScopeText}} 内的实际销量加权测算；调整日期、配料或用量后实时更新</text>
+        <text class="hint-text">按适用时间 {{versionCostScopeText}} 内的真实入库加权测算；有效期内无入库则不显示成本</text>
       </view>
       <view class="hint-right" bindtap="refreshData">
         <text class="hint-update">上次更新：刚刚</text>
@@ -126,28 +101,11 @@
       </scroll-view>
       <text class="managed-intervals__empty" wx:else>该版本尚未设置门店使用时间</text>
 
-      <view class="version-usage-options version-usage-options--inline">
-        <view class="version-usage-option {{versionUsageMode == 'FROM_DATE' ? 'is-selected' : ''}}"
-          data-mode="FROM_DATE" bindtap="chooseVersionUsageMode">
-          <view class="version-usage-option__radio"></view>
-          <view>
-            <text class="version-usage-option__title">从指定日期开始使用</text>
-            <text class="version-usage-option__desc">适合新配方从现在或未来开始使用</text>
-          </view>
-        </view>
-        <view class="version-usage-option {{versionUsageMode == 'HISTORICAL_CORRECTION' ? 'is-selected' : ''}}"
-          data-mode="HISTORICAL_CORRECTION" bindtap="chooseVersionUsageMode">
-          <view class="version-usage-option__radio"></view>
-          <view>
-            <text class="version-usage-option__title">修正历史配方</text>
-            <text class="version-usage-option__desc">修正过去的起止日期、遗漏配料或用量</text>
-          </view>
-        </view>
-      </view>
-
       <view class="version-usage-row">
         <text class="version-usage-row__label">开始营业日</text>
-        <picker mode="date" value="{{versionUsageStart}}" bindchange="onVersionUsageStartChange">
+        <picker mode="date" value="{{versionUsageStart}}"
+          start="{{!manageVersionId ? minimumNewVersionStart : ''}}"
+          bindchange="onVersionUsageStartChange">
           <view class="version-usage-row__value">{{versionUsageStart}} ›</view>
         </picker>
       </view>
@@ -177,8 +135,6 @@
         <input class="version-usage-reason__input" value="{{versionUsageReason}}" maxlength="200"
           bindinput="onVersionUsageReasonInput" placeholder="例如：从今天起加入盐" />
       </view>
-      <text class="version-usage-warning" wx:if="{{versionUsageMode == 'HISTORICAL_CORRECTION'}}">确认前会先预览受影响日期、销量、原成本、新成本和差额。配料有变化时会先保存不可变的新内容版本，只有点击“确认保存”才会调整适用时间和重算成本。</text>
-
       <view class="unified-impact" wx:if="{{versionUsagePreview}}">
         <text class="unified-impact__title">影响预览</text>
         <text class="unified-impact__line">影响营业日：{{versionUsagePreview._affectedText}}</text>
@@ -206,8 +162,12 @@
 
     <!-- 配料清单 -->
     <view class="raw-section">
-      <view class="raw-section-header">
-        <text class="raw-section-title">{{versionEditorMode ? '配方内容' : (versionedMode ? (currentRecipeVersionView ? '当前配方 V' + currentRecipeVersionView.versionNo : '当前无适用配方') : '原配料清单')}}（{{rawArr.length}}）</text>
+      <view class="raw-section-header" bindtap="onRecipeHeaderTap"
+        hover-class="{{!versionEditorMode ? 'raw-section-header--hover' : 'none'}}">
+        <view class="raw-section-title-wrap">
+          <text class="raw-section-title">{{versionEditorMode ? '配方内容（' + rawArr.length + '）' : (versionedMode ? (currentRecipeVersionView ? '当前配方 V' + currentRecipeVersionView.versionNo : '当前无适用配方') : '原配料清单（' + rawArr.length + '）')}}</text>
+          <text class="raw-section-period" wx:if="{{!versionEditorMode && versionedMode && currentRecipeVersionView && versionCostBasisDate}}">开始日期：{{versionCostBasisDate}}</text>
+        </view>
         <view class="raw-section-actions" wx:if="{{versionEditorMode}}">
           <view class="raw-section-add raw-section-add--preparation" bindtap="toAddPreparation" hover-class="raw-section-add--hover">
             <text class="raw-section-add-plus">+</text>
@@ -221,16 +181,14 @@
         <view
           class="raw-section-version"
           wx:elif="{{versionedMode}}"
-          bindtap="toRecipeVersionManage"
           hover-class="raw-section-version--hover"
         >
-          <text>版本管理（{{recipeVersionHistory.length}}）</text>
+          <text>配方版本管理</text>
           <text class="raw-section-version__arrow">›</text>
         </view>
         <view
           class="raw-section-version"
           wx:else
-          bindtap="toCreateFirstRecipeVersion"
           hover-class="raw-section-version--hover"
         >
           <text>建立配方版本</text>
@@ -304,13 +262,6 @@
               </view>
             </view>
             <view class="raw-item-action" wx:if="{{versionEditorMode}}">
-              <view
-                wx:if="{{raw._isVersioned && !raw._isPreparation}}"
-                class="raw-item-replace"
-                bindtap="replaceGoods"
-                data-item="{{raw}}"
-                hover-class="raw-item-replace--hover"
-              >更换</view>
               <!-- <view class="action-btn" bindtap="editGoods" data-item="{{raw}}" hover-class="action-btn--hover">
                 <image src="/images/edit.png" class="action-icon" mode="aspectFit"></image>
               </view> -->
@@ -340,12 +291,21 @@
         </view>
       </view>
     </view>
+    <view class="version-delete-card" wx:if="{{versionEditorMode && manageVersionId}}">
+      <view>
+        <text class="version-delete-card__title">删除这个版本</text>
+        <text class="version-delete-card__hint">用于删除尚未投入使用的误建版本；已被新版本完整覆盖的旧版本会在成本重算成功后自动清理。</text>
+      </view>
+      <view class="version-delete-card__button {{versionDeleting ? 'is-disabled' : ''}}" bindtap="deleteRecipeVersion">
+        {{versionDeleting ? '删除中…' : '删除版本'}}
+      </view>
+    </view>
     <view class="page-bottom-pad {{versionEditorMode ? 'page-bottom-pad--editor' : ''}}"></view>
   </scroll-view>
   <view class="version-editor-footer" wx:if="{{versionEditorMode}}">
     <view class="version-editor-footer__summary">
       <text class="version-editor-footer__title">{{versionUsagePreview ? '影响已预览' : '编辑配方 V' + (currentRecipeVersionView.versionNo || '-')}}</text>
-      <text class="version-editor-footer__sub">{{rawArr.length}} 项配料{{versionDraftDirty ? ' · 内容已修改，将生成新版本' : ' · 可只修改使用时间'}}</text>
+      <text class="version-editor-footer__sub">{{rawArr.length}} 项配料{{versionDraftDirty ? ' · 内容已修改，将保存为本版本的新修订' : ' · 可只修改使用时间'}}</text>
     </view>
     <view class="version-editor-footer__save" bindtap="saveNewRecipeVersion">
       {{versionUsageConfirming ? '确认中…' : (recipeSaving ? '预览中…' : (versionUsagePreview ? '确认保存' : '预览并保存'))}}
@@ -456,7 +416,7 @@
     catchtap="stopTap"
   >
     <view class="food-search-modal__head">
-      <text class="food-search-modal__title">{{modalType == 'edit' ? '编辑原料' : (modalType == 'replace' ? '更换原料' : '添加原料')}}</text>
+      <text class="food-search-modal__title">{{modalType == 'edit' ? '编辑原料' : '添加原料'}}</text>
     </view>
 
     <scroll-view scroll-y class="raw-add-modal__scroll" catchtouchmove="stopMove" bindscroll="dismissKeyboard">
@@ -663,7 +623,7 @@
     <view class="food-search-modal__footer">
       <view class="food-search-modal__actions">
         <view class="cancel-btn" bindtap="cancle" hover-class="hoverBtn">取消</view>
-        <view class="confirm-btn" catchtap="confirm" hover-class="hoverBtn">{{modalType == 'edit' ? '确认保存' : (modalType == 'replace' ? '确认更换' : '确认添加')}}</view>
+        <view class="confirm-btn" catchtap="confirm" hover-class="hoverBtn">{{modalType == 'edit' ? '确认保存' : '确认添加'}}</view>
       </view>
     </view>
   </view>

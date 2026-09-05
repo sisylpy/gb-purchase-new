@@ -312,8 +312,43 @@ function resolveHistoricalTheoryPrice(params) {
   return get('cost-accounting/historical-theory-prices/resolve', params || {});
 }
 
+function resolveHistoricalTheoryPriceForInterval(params) {
+  return get('cost-accounting/historical-theory-prices/resolve-interval', params || {});
+}
+
 function getDishDailyCostReport(params) {
   return get('cost-accounting/daily-costs/report', params || {});
+}
+
+function getDishCostRecalculationRequest(requestId, distributerId) {
+  return get('cost-accounting/recalculation-requests/' + requestId, {
+    distributerId: distributerId,
+  });
+}
+
+function waitForDishCostRecalculation(requestId, distributerId, maxAttempts) {
+  if (!Number(requestId)) return Promise.resolve(null);
+  var remaining = Number(maxAttempts || 30);
+  function poll() {
+    return getDishCostRecalculationRequest(requestId, distributerId).then(function (row) {
+      var status = String(row && row.status || '');
+      if (status === 'COMPLETED' || status === 'COMPLETED_WITH_FAILURES' || status === 'FAILED') {
+        return row;
+      }
+      remaining -= 1;
+      if (remaining <= 0) {
+        row = row || {};
+        row.pollTimedOut = true;
+        return row;
+      }
+      return new Promise(function (resolve) {
+        setTimeout(resolve, 500);
+      }).then(poll);
+    });
+  }
+  return poll().catch(function (error) {
+    return { status: 'QUERY_FAILED', queryError: error };
+  });
 }
 
 function previewHistoricalReceiptCorrection(stockBatchId, body) {
@@ -528,7 +563,10 @@ module.exports = {
   previewRemoveFoodEffectiveInterval: previewRemoveFoodEffectiveInterval,
   confirmRemoveFoodEffectiveInterval: confirmRemoveFoodEffectiveInterval,
   resolveHistoricalTheoryPrice: resolveHistoricalTheoryPrice,
+  resolveHistoricalTheoryPriceForInterval: resolveHistoricalTheoryPriceForInterval,
   getDishDailyCostReport: getDishDailyCostReport,
+  getDishCostRecalculationRequest: getDishCostRecalculationRequest,
+  waitForDishCostRecalculation: waitForDishCostRecalculation,
   listHistoricalReceiptBatches: listHistoricalReceiptBatches,
   previewHistoricalReceiptCorrection: previewHistoricalReceiptCorrection,
   confirmHistoricalReceiptCorrection: confirmHistoricalReceiptCorrection,

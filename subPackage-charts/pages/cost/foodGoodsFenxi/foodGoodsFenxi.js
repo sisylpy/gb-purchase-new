@@ -2,6 +2,7 @@ var load = require('../../../../lib/load.js');
 var globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
 var chartsApi = require('../../../services/api.js');
+var preparationApi = require('../../../../services/preparation.js');
 var config = require('../../../../config/index.js');
 
 function _money(value) {
@@ -73,7 +74,146 @@ function _fixed(value, digits) {
   return rounded.toFixed(scale);
 }
 
-/** 配料分析和历史成本报表都以经销商菜品ID作为唯一合并键。 */
+function _canonicalUnitCode(value) {
+  var text = String(value || '').trim();
+  var lower = text.toLowerCase();
+  var aliases = {
+    g: 'G', '克': 'G', kg: 'KG', '公斤': 'KG', '千克': 'KG', '斤': 'JIN',
+    ml: 'ML', '毫升': 'ML', l: 'L', '升': 'L',
+    ea: 'EA', '个': 'EA', '只': 'EA', '枚': 'EA', '颗': 'EA', '张': 'EA',
+  };
+  return aliases[lower] || aliases[text] || text.toUpperCase();
+}
+
+function _baseDimension(baseUnitCode) {
+  var code = _canonicalUnitCode(baseUnitCode);
+  if (code === 'G') return 'MASS';
+  if (code === 'ML') return 'VOLUME';
+  if (code === 'EA') return 'COUNT';
+  return '';
+}
+
+function _standardFactorToBase(unitCode, baseUnitCode) {
+  var unit = _canonicalUnitCode(unitCode);
+  var base = _canonicalUnitCode(baseUnitCode);
+  if (unit === base) return 1;
+  if (base === 'G') {
+    if (unit === 'KG') return 1000;
+    if (unit === 'JIN') return 500;
+  }
+  if (base === 'ML' && unit === 'L') return 1000;
+  return 0;
+}
+
+function _conversionKey(rawGoodsId, unitCode) {
+  return String(rawGoodsId || '') + ':' + _canonicalUnitCode(unitCode);
+}
+
+function _buildConversionMap(rows) {
+  var result = {};
+  (rows || []).forEach(function (row) {
+    if (Number(row.enabled) === 0 || !(Number(row.factorToBase) > 0)) return;
+    result[_conversionKey(row.rawGoodsId, row.unitCode)] = row;
+  });
+  return result;
+}
+
+function _specificationFactorToBase(specification, baseUnitCode) {
+  var text = String(specification || '').trim();
+  if (!text || text === 'null') return 0;
+  var matched = text.match(/(\d+(?:\.\d+)?)\s*(kg|公斤|千克|斤|g|克|ml|毫升|l|升)/i);
+  if (!matched) return 0;
+  var amount = Number(matched[1]);
+  var unit = _canonicalUnitCode(matched[2]);
+  var factor = _standardFactorToBase(unit, baseUnitCode);
+  return amount > 0 && factor > 0 ? amount * factor : 0;
+}
+
+function _purchaseFactorToRecipeBase(ingredient, theoreticalIngredient, conversionByKey) {
+  if (!theoreticalIngredient) return 0;
+  var purchaseUnit = ingredient.gbDgGoodsStandardname;
+  var baseUnit = theoreticalIngredient.baseUnitCode;
+  var standardFactor = _standardFactorToBase(purchaseUnit, baseUnit);
+  if (standardFactor > 0) return standardFactor;
+
+  var conversion = conversionByKey[_conversionKey(ingredient.disGoodsId, purchaseUnit)];
+  var expectedDimension = _baseDimension(baseUnit);
+  if (conversion && (!expectedDimension
+    || String(conversion.dimension || '').toUpperCase() === expectedDimension)) {
+    var configuredFactor = Number(conversion.factorToBase);
+    if (configuredFactor > 0) return configuredFactor;
+  }
+
+  // 兼容旧商品：正式换算记录尚未返回时，明确的“1.9L / 10000g”规格仍可作为展示兜底。
+  return _specificationFactorToBase(
+    ingredient.gbDgGoodsStandardWeight || theoreticalIngredient.rawGoodsStandardWeight,
+    baseUnit
+  );
+}
+
+function _allocatedQuantityDisplay(ingredient, theoreticalIngredient, salesPortions, conversionByKey) {
+  var actualProduceUsage = _decimal(ingredient.actualProduceUsage);
+  if (actualProduceUsage === null || salesPortions === null || !(salesPortions > 0)) {
+    return { text: '—', hint: '' };
+  }
+  if (!theoreticalIngredient) {
+    return {
+      text: _fixed(actualProduceUsage / salesPortions, 4) + ' '
+        + (ingredient.gbDgGoodsStandardname || '') + '/份',
+      hint: '',
+    };
+  }
+  var factor = _purchaseFactorToRecipeBase(
+    ingredient, theoreticalIngredient, conversionByKey || {}
+  );
+  if (!(factor > 0)) return { text: '—', hint: '缺少包装换算' };
+  return {
+    text: _fixed(actualProduceUsage * factor / salesPortions, 4) + ' '
+      + _unit(theoreticalIngredient.baseUnitCode) + '/份',
+    hint: '',
+  };
+}
+
+/**
+ * 配料数量可能分别使用“件/瓶”和“克/毫升”，不能直接相除。
+ * 生产出库分摊量与其采购单价属于同一包装单位，先相乘为元，再与
+ * 按营业日有效配方得到的理论成本总额比较，得到统一金额口径的偏差率。
+ */
+function _ingredientCostDeviation(ingredient, theoreticalIngredient, salesPortions) {
+  if (!theoreticalIngredient) {
+    return { text: '—', hint: '理论成本不完整' };
+  }
+  var theoreticalCost = _decimal(theoreticalIngredient.completeCostAmount);
+  if (theoreticalCost === null) {
+    return { text: '—', hint: '理论成本不完整' };
+  }
+  if (theoreticalCost <= 0) {
+    return { text: '—', hint: '理论成本为0' };
+  }
+
+  var produceUsage = _decimal(ingredient.actualProduceUsage);
+  var purchaseUnitPrice = _decimal(ingredient.unitPrice);
+  var actualProduceCost = produceUsage !== null && purchaseUnitPrice !== null
+    ? produceUsage * purchaseUnitPrice : null;
+
+  // 老接口的单份生产成本可作为兼容兜底，但优先使用未按单份取整的总量×单价。
+  if (actualProduceCost === null) {
+    var produceCostPerPortion = _decimal(ingredient.produceCostPerPortion);
+    actualProduceCost = produceCostPerPortion !== null
+      && salesPortions !== null && salesPortions > 0
+      ? produceCostPerPortion * salesPortions : null;
+  }
+  if (actualProduceCost === null) {
+    return { text: '—', hint: '暂无生产出库成本' };
+  }
+
+  return {
+    text: _fixed((actualProduceCost - theoreticalCost) * 100 / theoreticalCost, 2),
+    hint: '生产成本口径',
+  };
+}
+
+/** 配料分析和理论成本报表都以经销商菜品ID作为唯一合并键。 */
 function _resolveDistributerFoodId(row) {
   if (!row) return '';
   if (row.foodId !== null && row.foodId !== undefined && row.foodId !== '') {
@@ -97,8 +237,13 @@ function _resolveDistributerFoodId(row) {
   return '';
 }
 
+function _businessText(value) {
+  return value == null ? '' : String(value).replace(/历史/g, '');
+}
+
 function _normalizeHistoricalIngredient(row) {
   var item = Object.assign({}, row || {});
+  item.statusLabel = _businessText(item.statusLabel);
   var unit = _unit(item.baseUnitCode);
   var versions = (item.recipeVersionNos || []).map(function (version) { return 'V' + version; });
   item._key = String(item.rawGoodsId || '') + ':' + String(item.baseUnitCode || '');
@@ -116,6 +261,11 @@ function _normalizeHistoricalIngredient(row) {
     : '¥' + _rangeText(
       item.minimumHistoricalBaseUnitPrice, item.maximumHistoricalBaseUnitPrice, '/' + unit, 8
     );
+  item._portionCostText = item.minimumTheoreticalCostPerPortion == null
+    ? '—'
+    : '¥' + _rangeText(
+      item.minimumTheoreticalCostPerPortion, item.maximumTheoreticalCostPerPortion, '/份', 2
+    );
   item._costText = item.completeCostAmount == null ? '—' : '¥' + _money(item.completeCostAmount);
   item._knownCostText = Number(item.knownCostAmount || 0) > 0 ? '¥' + _money(item.knownCostAmount) : '—';
   item._versionText = versions.length ? versions.join('、') : '配方版本待确认';
@@ -123,12 +273,45 @@ function _normalizeHistoricalIngredient(row) {
     ? String(item.firstBusinessDate).slice(5) + ' 至 '
       + String(item.lastBusinessDate || item.firstBusinessDate).slice(5)
     : '';
-  item._missingReasonText = (item.missingReasons || []).join('；');
+  item._missingReasonText = (item.missingReasons || []).map(_businessText).join('；');
   return item;
+}
+
+function _historicalVersionBreakdown(rows) {
+  var groups = {};
+  (rows || []).forEach(function (row) {
+    if (row.recipeVersionNo === null || row.recipeVersionNo === undefined) return;
+    var key = String(row.recipeVersionNo);
+    var group = groups[key] || {
+      versionNo: Number(row.recipeVersionNo),
+      salesQuantity: 0,
+      completeCostAmount: 0,
+      complete: true,
+    };
+    group.salesQuantity += Number(row.salesQuantity) || 0;
+    if (row.completeCostAmount === null || row.completeCostAmount === undefined) {
+      group.complete = false;
+    } else {
+      group.completeCostAmount += Number(row.completeCostAmount) || 0;
+    }
+    groups[key] = group;
+  });
+  return Object.keys(groups).map(function (key) { return groups[key]; })
+    .sort(function (left, right) { return left.versionNo - right.versionNo; })
+    .map(function (group) {
+      var salesText = _quantity(group.salesQuantity);
+      if (!group.complete || !(group.salesQuantity > 0)) {
+        return 'V' + group.versionNo + '：' + salesText + '份，成本—';
+      }
+      return 'V' + group.versionNo + '：' + salesText + '份，成本¥'
+        + _money(group.completeCostAmount) + '（¥'
+        + _money(group.completeCostAmount / group.salesQuantity) + '/份）';
+    }).join('；');
 }
 
 function _normalizeHistoricalDish(row) {
   var item = Object.assign({}, row || {});
+  item.statusLabel = _businessText(item.statusLabel);
   item.salesQuantityText = _quantity(item.salesQuantity);
   item.revenueAmountText = _money(item.revenueAmount);
   item.totalCostText = _money(item.totalHistoricalTheoreticalCostAmount);
@@ -139,9 +322,11 @@ function _normalizeHistoricalDish(row) {
   item.grossMarginRateText = _rate(item.completeGrossMarginRate);
   item.salesCoverageRateText = _rate(item.salesCoverageRate);
   item.evidenceCoverageRateText = _rate(item.evidenceCoverageRate);
-  item.missingReasons = Array.isArray(item.missingReasons) ? item.missingReasons : [];
+  item.missingReasons = Array.isArray(item.missingReasons)
+    ? item.missingReasons.map(_businessText) : [];
   item.hasKnownEvidence = Number(item.evidenceCoverageRate || 0) > 0;
   item.ingredientSummaries = (item.ingredientSummaries || []).map(_normalizeHistoricalIngredient);
+  item.versionCostBreakdownText = _historicalVersionBreakdown(item.dailyRows);
   return item;
 }
 
@@ -157,7 +342,7 @@ function _normalizeHistoricalSummary(summary) {
   return item;
 }
 
-function _normalizeOriginalDish(row, historicalByFoodId) {
+function _normalizeOriginalDish(row, historicalByFoodId, conversionByKey) {
   var item = Object.assign({}, row || {});
   item._foodId = _resolveDistributerFoodId(item);
   item._expanded = false;
@@ -168,6 +353,7 @@ function _normalizeOriginalDish(row, historicalByFoodId) {
   item._costDiffRateText = '—';
   item._costDiffRateDisplayText = '—';
   item._costTotalDiffText = '—';
+  item._ingredientDeviationTitle = item._historical ? '成本偏差率' : '偏差率';
 
   var historicalTotal = item._historical && item._historical.allComplete
     ? _decimal(item._historical.totalHistoricalTheoreticalCostAmount) : null;
@@ -191,15 +377,46 @@ function _normalizeOriginalDish(row, historicalByFoodId) {
     }
   }
 
-  var historicalIngredients = {};
+  var originalIngredientRows = Array.isArray(item.ingredientRows) ? item.ingredientRows : [];
+  var ingredientSources = originalIngredientRows.map(function (ingredient) {
+    return { original: ingredient, historical: null };
+  });
   if (item._historical && Array.isArray(item._historical.ingredientSummaries)) {
-    item._historical.ingredientSummaries.forEach(function (ingredient) {
-      historicalIngredients[String(ingredient.rawGoodsId || '')] = ingredient;
+    var originalIngredientsById = {};
+    originalIngredientRows.forEach(function (ingredient) {
+      var key = String(ingredient.disGoodsId || '');
+      if (!originalIngredientsById[key]) originalIngredientsById[key] = [];
+      originalIngredientsById[key].push(ingredient);
+    });
+
+    // “主要配料”必须以所选营业日期内实际命中的配方证据为准。
+    // 旧分析接口的 ingredientRows 来自当前配方，会把查询区间外才生效的配料带进来；
+    // 这里只复用同一配料的出库字段，不允许它决定本期应展示哪些配料。
+    ingredientSources = item._historical.ingredientSummaries.map(function (historicalIngredient) {
+      var key = String(historicalIngredient.rawGoodsId || '');
+      var candidates = originalIngredientsById[key] || [];
+      return {
+        original: candidates.length ? candidates.shift() : {},
+        historical: historicalIngredient,
+      };
     });
   }
-  item.ingredientRows = (item.ingredientRows || []).map(function (ingredient) {
-    var normalized = Object.assign({}, ingredient);
-    var historicalIngredient = historicalIngredients[String(normalized.disGoodsId || '')] || null;
+  item.ingredientRows = ingredientSources.map(function (source, ingredientIndex) {
+    var historicalIngredient = source.historical;
+    var normalized = Object.assign({}, source.original || {});
+    if (historicalIngredient) {
+      normalized.disGoodsId = historicalIngredient.rawGoodsId;
+      normalized.gbDgGoodsName = normalized.gbDgGoodsName
+        || historicalIngredient.rawGoodsName || historicalIngredient._name;
+      normalized.gbDgGoodsFileImg = normalized.gbDgGoodsFileImg
+        || historicalIngredient.rawGoodsImage;
+      normalized.gbDgGoodsStandardname = normalized.gbDgGoodsStandardname
+        || historicalIngredient.rawGoodsStandardName || _unit(historicalIngredient.baseUnitCode);
+      normalized.gbDgGoodsStandardWeight = normalized.gbDgGoodsStandardWeight
+        || historicalIngredient.rawGoodsStandardWeight;
+    }
+    normalized._intervalKey = historicalIngredient && historicalIngredient._key
+      ? historicalIngredient._key : String(normalized.disGoodsId || ingredientIndex);
     normalized._imageUrl = _imageUrl(normalized.gbDgGoodsFileImg);
     normalized._hasOutboundEvidence = (_decimal(normalized.actualUsage) || 0) !== 0
       || (_decimal(normalized.actualProduceUsage) || 0) !== 0
@@ -208,18 +425,28 @@ function _normalizeOriginalDish(row, historicalByFoodId) {
     normalized._outboundCostText = normalized._hasOutboundEvidence
       ? _displayValue(normalized.outboundAllocatedCostPerPortion) : '—';
     normalized._historical = historicalIngredient;
+    normalized._theoryCostText = historicalIngredient
+      ? historicalIngredient._portionCostText : '—';
     normalized._theoryQuantityText = historicalIngredient
       ? historicalIngredient._portionText : '—';
-    normalized._devianceText = historicalIngredient ? '—' : _displayValue(normalized.devianceRate);
-    normalized._devianceHint = historicalIngredient ? '单位口径不同' : '';
-    var actualProduceUsage = _decimal(normalized.actualProduceUsage);
-    normalized._allocatedQuantityText = normalized._hasOutboundEvidence && actualProduceUsage !== null
-      && salesPortions !== null && salesPortions > 0
-      ? _fixed(actualProduceUsage / salesPortions, 4) + ' '
-        + (normalized.gbDgGoodsStandardname || '') + '/份'
-      : '—';
+    if (item._historical) {
+      var costDeviation = _ingredientCostDeviation(normalized, historicalIngredient, salesPortions);
+      normalized._devianceText = costDeviation.text;
+      normalized._devianceHint = costDeviation.hint;
+    } else {
+      normalized._devianceText = _displayValue(normalized.devianceRate);
+      normalized._devianceHint = '';
+    }
+    var allocatedQuantity = _allocatedQuantityDisplay(
+      normalized, historicalIngredient, salesPortions, conversionByKey || {}
+    );
+    normalized._allocatedQuantityText = normalized._hasOutboundEvidence
+      ? allocatedQuantity.text : '—';
+    normalized._allocatedQuantityHint = normalized._hasOutboundEvidence
+      ? allocatedQuantity.hint : '';
     return normalized;
   });
+  item.ingredientCount = item.ingredientRows.length;
   item._hasOutboundEvidence = item.ingredientRows.some(function (ingredient) {
     return (_decimal(ingredient.actualUsage) || 0) !== 0
       || (_decimal(ingredient.actualProduceUsage) || 0) !== 0
@@ -246,7 +473,7 @@ function _buildScopeDisplay(originalScope, historicalSummary) {
   original.costDeviationTotal = '—';
   original.costDeviationRate = '—';
   original.costDeviationRateDisplay = '—';
-  original._theoreticalHint = '历史理论成本尚未完整';
+  original._theoreticalHint = '部分菜品尚未完整核算';
   original._deviationHint = '缺失成本不按 0 元计算';
   if (!historicalSummary || !historicalSummary.allComplete) return original;
 
@@ -254,7 +481,7 @@ function _buildScopeDisplay(originalScope, historicalSummary) {
   var outboundTotal = _decimal(originalScope && originalScope.outboundAllocatedCostTotal);
   if (theoreticalTotal === null) return original;
   original.theoreticalCostTotal = _fixed(theoreticalTotal, 2);
-  original._theoreticalHint = '按营业日有效配方和历史入库价';
+  original._theoreticalHint = '按营业日有效配方和当日有效入库价';
   if (outboundTotal !== null) {
     var difference = outboundTotal - theoreticalTotal;
     original.costDeviationTotal = _fixed(difference, 2);
@@ -262,7 +489,7 @@ function _buildScopeDisplay(originalScope, historicalSummary) {
       ? _fixed(difference * 100 / theoreticalTotal, 2) : '—';
     original.costDeviationRateDisplay = original.costDeviationRate === '—'
       ? '—' : original.costDeviationRate + '%';
-    original._deviationHint = '与历史理论成本同范围比较';
+    original._deviationHint = '与理论总成本同范围比较';
   }
   return original;
 }
@@ -402,10 +629,17 @@ Page({
     var historicalPromise = chartsApi.getDishDailyCostReport(historicalRequest).catch(function () {
       return null;
     });
+    var conversionPromise = preparationApi.listConversions({
+      distributerId: this.data.disId,
+      itemKind: 'RAW_GOODS',
+    }).catch(function () {
+      return [];
+    });
 
     Promise.all([
       chartsApi.getGbIngredientAnalysis(originalRequest),
       historicalPromise,
+      conversionPromise,
     ]).then(function (responses) {
       load.hideLoading();
       var originalResult = responses[0] && responses[0].result;
@@ -423,8 +657,9 @@ Page({
           if (foodId) historicalByFoodId[foodId] = dish;
         });
       }
+      var conversionByKey = _buildConversionMap(responses[2]);
       var rows = (originalData.salesDishRows || []).map(function (row) {
-        return _normalizeOriginalDish(row, historicalByFoodId);
+        return _normalizeOriginalDish(row, historicalByFoodId, conversionByKey);
       });
       var returnedOrder = originalData.sortOrder;
       that.setData({

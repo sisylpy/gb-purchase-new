@@ -49,16 +49,16 @@
     <!-- 新核算校验仅作为附加信息，不替换原菜品分析。 -->
     <view class="history-summary" wx:if="{{historicalSummary && !dishNameSearch}}">
       <view class="history-summary__head">
-        <text class="history-summary__title">历史理论核算验证</text>
+        <text class="history-summary__title">理论成本核算</text>
         <text class="history-summary__rate">销量完整率 {{historicalSummary.salesCoverageRateText}}%</text>
       </view>
       <text class="history-summary__text" wx:if="{{historicalSummary.allComplete}}">
-        按营业日有效配方和历史入库价核算：¥{{historicalSummary.totalCostText}}
+        按营业日有效配方和当日有效入库价核算：¥{{historicalSummary.totalCostText}}
       </text>
       <text class="history-summary__text" wx:elif="{{historicalSummary.hasResolvedCost}}">
-        完整金额 ¥{{historicalSummary.resolvedCostText}}；缺失部分保持“—”，不按 0 元计算
+        已完整核算 ¥{{historicalSummary.resolvedCostText}}；其余部分保持“—”，不按 0 元计算
       </text>
-      <text class="history-summary__text" wx:else>当前没有完整历史成本；缺失数据保持“—”，不按 0 元计算</text>
+      <text class="history-summary__text" wx:else>当前没有完整理论成本；缺失数据保持“—”，不按 0 元计算</text>
     </view>
 
     <view class="cost-list-head" wx:if="{{salesDishRowsAll.length && !dishNameSearch}}">
@@ -103,7 +103,7 @@
           <view class="cost-metric">
             <text class="cost-metric__label">理论成本</text>
             <text class="cost-metric__value {{item._theoryCostPerPortionText === '—' ? 'is-empty' : ''}}">{{item._theoryCostPerPortionText}}</text>
-            <text class="cost-metric__unit">元/份</text>
+            <text class="cost-metric__unit">元/份·销量加权</text>
           </view>
           <view class="cost-metric">
             <text class="cost-metric__label">成本偏差</text>
@@ -123,16 +123,19 @@
         <!-- 附加校验：不替代上面的原成本字段。 -->
         <view class="history-strip" wx:if="{{item._historical}}">
           <view class="history-strip__head">
-            <text>历史理论核算验证</text>
+            <text>理论成本核算</text>
             <text class="cost-status {{item._historical.allComplete ? 'is-complete' : (item._historical.status === 'RECALCULATION_PENDING' ? 'is-running' : 'is-pending')}}">
               {{item._historical.statusLabel}}
             </text>
           </view>
           <view class="history-strip__values">
-            <text>完整成本 {{item._historical.completeCostDisplayText}}</text>
+            <text>本期完整成本 {{item._historical.completeCostDisplayText}}</text>
             <text>销量完整率 {{item._historical.salesCoverageRateText}}%</text>
             <text>证据完整率 {{item._historical.evidenceCoverageRateText}}%</text>
           </view>
+          <text class="history-strip__breakdown" wx:if="{{item._historical.versionCostBreakdownText}}">
+            {{item._historical.versionCostBreakdownText}}
+          </text>
           <text class="history-strip__reason" wx:if="{{item._historical.missingReasons.length}}">
             {{item._historical.missingReasons[0]}}
           </text>
@@ -154,7 +157,7 @@
                 <text>元</text>
               </view>
               <view>
-                <text>理论成本</text>
+                <text>理论总成本</text>
                 <text>{{item._theoryCostTotalText}}</text>
                 <text>元</text>
               </view>
@@ -173,18 +176,23 @@
               <view class="legacy-ingredient-table">
                 <view class="legacy-ingredient-row is-head">
                   <text class="legacy-ingredient-name">配料</text>
-                  <text>偏差率</text>
+                  <text>理论成本</text>
+                  <text>{{item._ingredientDeviationTitle}}</text>
                   <text>理论含量</text>
                   <text>分摊含量</text>
                   <text>出库分摊成本</text>
                   <text>制作总量</text>
                   <text>损耗总量</text>
                 </view>
-                <view class="legacy-ingredient-row" wx:for="{{item.ingredientRows}}" wx:for-item="ingredient" wx:key="disGoodsId">
+                <view class="legacy-ingredient-row" wx:for="{{item.ingredientRows}}" wx:for-item="ingredient" wx:key="_intervalKey">
                   <view class="legacy-ingredient-name">
                     <image class="legacy-ingredient-image" wx:if="{{ingredient._imageUrl}}" src="{{ingredient._imageUrl}}" mode="aspectFill"></image>
                     <view class="legacy-ingredient-image is-empty" wx:else>料</view>
                     <text>{{ingredient.gbDgGoodsName}}</text>
+                  </view>
+                  <view class="legacy-ingredient-cell">
+                    <text>{{ingredient._theoryCostText}}</text>
+                    <text class="legacy-ingredient-tag" wx:if="{{ingredient._theoryCostText !== '—'}}">有效期内每份</text>
                   </view>
                   <view class="legacy-ingredient-cell">
                     <text>{{ingredient._devianceText}}{{ingredient._devianceText === '—' ? '' : '%'}}</text>
@@ -197,6 +205,7 @@
                   </view>
                   <view class="legacy-ingredient-cell">
                     <text>{{ingredient._allocatedQuantityText}}</text>
+                    <text class="legacy-ingredient-tag" wx:if="{{ingredient._allocatedQuantityHint}}">{{ingredient._allocatedQuantityHint}}</text>
                   </view>
                   <view class="legacy-ingredient-cell">
                     <text>{{ingredient._outboundCostText}}</text>
@@ -220,13 +229,13 @@
           <view class="legacy-section history-detail" wx:if="{{item._historical}}">
             <view class="history-detail__head">
               <view>
-                <text class="legacy-section__title">历史理论成本验证</text>
-                <text class="history-detail__hint">按所选营业日期汇总，不改变上方原配料分析</text>
+                <text class="legacy-section__title">理论成本明细</text>
+                <text class="history-detail__hint">按所选营业日期及有效配方汇总</text>
               </view>
               <text>{{item._historical.ingredientSummaries.length}} 种配料</text>
             </view>
             <view class="cost-ingredients__empty" wx:if="{{!item._historical.ingredientSummaries.length}}">
-              当前日期范围没有可汇总的历史成本证据
+              当前日期范围没有可汇总的成本证据
             </view>
             <view class="cost-ingredient" wx:for="{{item._historical.ingredientSummaries}}"
               wx:for-item="historyIngredient" wx:key="_key">
@@ -248,9 +257,9 @@
               <view class="cost-ingredient__metrics">
                 <view><text>单份配方用量</text><text>{{historyIngredient._portionText}}</text></view>
                 <view><text>累计理论用量</text><text>{{historyIngredient._totalQuantityText}}</text></view>
-                <view><text>历史基础单价</text><text>{{historyIngredient._priceText}}</text></view>
+                <view><text>基础单价</text><text>{{historyIngredient._priceText}}</text></view>
                 <view>
-                  <text>历史理论成本</text>
+                  <text>理论成本</text>
                   <text wx:if="{{historyIngredient.completeCostAmount != null}}">{{historyIngredient._costText}}</text>
                   <text wx:elif="{{historyIngredient.knownCostAmount > 0}}">已知 {{historyIngredient._knownCostText}}</text>
                   <text wx:else>—</text>

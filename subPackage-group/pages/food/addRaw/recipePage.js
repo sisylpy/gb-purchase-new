@@ -47,34 +47,6 @@ function _offsetDateText(value, days) {
   return date.getFullYear() + '-' + month + '-' + day;
 }
 
-function _dateRangeChunks(start, end) {
-  var chunks = [];
-  var cursor = start;
-  while (cursor && end && cursor <= end) {
-    var chunkEnd = _offsetDateText(cursor, 365);
-    if (chunkEnd > end) chunkEnd = end;
-    chunks.push({ startDate: cursor, endDate: chunkEnd });
-    cursor = _offsetDateText(chunkEnd, 1);
-  }
-  return chunks;
-}
-
-function _mapInBatches(items, size, worker) {
-  var rows = items || [];
-  var result = [];
-  var chain = Promise.resolve();
-  for (var offset = 0; offset < rows.length; offset += size) {
-    (function (batch) {
-      chain = chain.then(function () {
-        return Promise.all(batch.map(worker)).then(function (values) {
-          result = result.concat(values);
-        });
-      });
-    })(rows.slice(offset, offset + size));
-  }
-  return chain.then(function () { return result; });
-}
-
 function _recipeMoneyText(value) {
   if (value === null || typeof value === 'undefined' || value === '') return '—';
   var amount = Number(value);
@@ -164,11 +136,11 @@ function _historicalPriceMissingText(resolution) {
   var row = resolution || {};
   if (row.missingReason) return String(row.missingReason);
   var labels = {
-    MISSING_HISTORICAL_PRICE: '该营业日以前没有合格入库价',
+    MISSING_HISTORICAL_PRICE: '配方有效期内没有合格入库价',
     MISSING_UNIT_CONVERSION: '缺少可靠单位换算',
-    INCOMPLETE_PRICE_EVIDENCE: '历史价格证据不完整',
+    INCOMPLETE_PRICE_EVIDENCE: '适用期价格证据不完整',
   };
-  return labels[String(row.status || '')] || '历史价格暂时无法解析';
+  return labels[String(row.status || '')] || '适用期价格暂时无法解析';
 }
 
 function _managedVersionUsageState(detail, selectedVersion) {
@@ -205,6 +177,25 @@ function _managedVersionUsageState(detail, selectedVersion) {
     start: start,
     end: end,
   };
+}
+
+function _nextRecipeVersionStart(timeline, today) {
+  var nextStart = '';
+  (timeline || []).forEach(function (row) {
+    var candidate = row.effectiveEnd
+      ? _recipeDateText(row.effectiveEnd)
+      : _offsetDateText(today, 1);
+    if (row.effectiveStart && row.effectiveStart > today && candidate < row.effectiveStart) {
+      candidate = _recipeDateText(row.effectiveStart);
+    }
+    if (candidate && (!nextStart || candidate > nextStart)) nextStart = candidate;
+  });
+  return nextStart || today;
+}
+
+function _recipeIntervalsOverlap(start, end, otherStart, otherEnd) {
+  if (!start || !otherStart) return false;
+  return (!end || otherStart < end) && (!otherEnd || start < otherEnd);
 }
 
 /**
@@ -1129,7 +1120,6 @@ function createRecipePage(pageMode) {
     preparationModalType: 'add',
     preparationEditIndex: -1,
     recipeSaving: false,
-    versionUsageMode: 'FROM_DATE',
     versionUsageStart: '',
     versionUsageEnd: '',
     versionUsageHasEnd: false,
@@ -1140,12 +1130,14 @@ function createRecipePage(pageMode) {
     managedIntervalId: null,
     managedIntervalOriginalStart: '',
     managedIntervalOriginalEnd: '',
+    minimumNewVersionStart: '',
     versionUsagePreview: null,
     versionUsagePreviewRequest: null,
     versionUsagePreviewVersionId: null,
     versionUsageReplacementPreview: null,
     versionUsageReplacementRequest: null,
     versionUsageConfirming: false,
+    versionDeleting: false,
     versionCostBasisDate: '',
     versionCostScopeText: '',
     costMissingReason: '',
@@ -1394,16 +1386,9 @@ function createRecipePage(pageMode) {
       if (!components.length && cached && Array.isArray(cached.components)) {
         components = cached.components;
       }
-      var costContextPromise = that.data.versionEditorMode
-        ? that._loadVersionCostContext(usageState, primaryVersion)
-        : Promise.resolve({
-          start: usageState.start,
-          endExclusive: usageState.end,
-          salesRows: [],
-          ingredients: {},
-          pricePromises: {},
-          scopeText: '',
-        });
+      // 版本配方的成本必须来自该版本门店适用区间内的正式历史成本证据。
+      // 详情页和编辑页使用同一份上下文，不能在详情页退回商品档案价或近期均价。
+      var costContextPromise = that._loadVersionCostContext(usageState, primaryVersion);
       return costContextPromise.then(function (costContext) {
         that._activeVersionCostContext = costContext;
         return that._decorateVersionedComponents(components, costContext);
@@ -1433,27 +1418,36 @@ function createRecipePage(pageMode) {
   _initializeUnifiedVersionEditor(detail, selectedVersion) {
     if (!this.data.versionEditorMode || this.data.versionUsageInitialized || !selectedVersion) return;
     var state = _managedVersionUsageState(detail, selectedVersion);
+    var creatingVersion = !Number(this.data.manageVersionId);
     var today = state.today;
-    var intervals = state.intervals;
-    var preferred = state.preferred;
-    var start = state.start;
-    var end = state.end;
+    var intervals = creatingVersion ? [] : state.intervals;
+    var preferred = creatingVersion ? null : state.preferred;
+    var start = creatingVersion
+      ? _nextRecipeVersionStart((detail && detail.recipeTimeline) || [], today)
+      : state.start;
+    var end = creatingVersion ? '' : state.end;
+    var that = this;
     this.setData({
       versionUsageInitialized: true,
       managedVersionIntervals: intervals,
       managedIntervalId: preferred ? Number(preferred.id) : null,
       managedIntervalOriginalStart: preferred ? start : '',
       managedIntervalOriginalEnd: preferred ? end : '',
-      versionUsageMode: start < today ? 'HISTORICAL_CORRECTION' : 'FROM_DATE',
+      minimumNewVersionStart: creatingVersion ? start : '',
       versionUsageStart: start,
       versionUsageEnd: end,
       versionUsageHasEnd: !!end,
       versionCostBasisDate: start,
-      versionUsageReason: '编辑 V' + (selectedVersion.versionNo || '') + ' 配方内容与使用时间',
-      versionUsageDirty: false,
+      versionUsageReason: creatingVersion
+        ? '新增配方版本并设置门店使用时间'
+        : '编辑 V' + (selectedVersion.versionNo || '') + ' 配方内容与使用时间',
+      versionDraftDirty: creatingVersion,
+      versionUsageDirty: creatingVersion,
       versionUsagePreview: null,
       versionUsagePreviewRequest: null,
       versionUsagePreviewVersionId: null,
+    }, function () {
+      if (creatingVersion) that._refreshVersionedCostPreview(start, end);
     });
   },
 
@@ -1475,7 +1469,6 @@ function createRecipePage(pageMode) {
       versionUsageEnd: end,
       versionUsageHasEnd: !!end,
       versionCostBasisDate: start,
-      versionUsageMode: start < _todayText() ? 'HISTORICAL_CORRECTION' : 'FROM_DATE',
       versionUsageDirty: false,
       versionUsagePreview: null,
       versionUsagePreviewRequest: null,
@@ -1505,61 +1498,10 @@ function createRecipePage(pageMode) {
       scopeText: start + ' 至 ' + (endExclusive ? endInclusive : '今天'),
       futureOnly: futureOnly,
     };
-    if (!identity.distributerId || !identity.currentStoreId || !this.data.foodId) {
+    if (!identity.distributerId || !identity.currentStoreId) {
       context.loadError = '当前门店或菜品信息不完整';
-      return Promise.resolve(context);
     }
-    var chunks = _dateRangeChunks(start, endInclusive);
-    return Promise.all(chunks.map(function (chunk) {
-      return preparationApi.getDishDailyCostReport({
-        distributerId: identity.distributerId,
-        storeDepartmentId: identity.currentStoreId,
-        startDate: chunk.startDate,
-        endDate: chunk.endDate,
-        sortBy: 'status',
-        sortOrder: 'desc',
-      });
-    })).then(function (reports) {
-      var salesByDate = {};
-      reports.forEach(function (report) {
-        var dish = ((report && report.dishes) || []).find(function (item) {
-          return Number(item.foodId) === Number(context.foodId || this.data.foodId);
-        }, this);
-        if (!dish) return;
-        (dish.dailyRows || []).forEach(function (daily) {
-          var quantity = Number(daily.salesQuantity);
-          if (!(quantity > 0) || !daily.businessDate) return;
-          var key = _recipeDateText(daily.businessDate);
-          salesByDate[key] = (salesByDate[key] || 0) + quantity;
-        });
-        (dish.ingredientSummaries || []).forEach(function (ingredient) {
-          var key = Number(ingredient.rawGoodsId) + ':' + String(ingredient.baseUnitCode || '');
-          var aggregate = context.ingredients[key] || {
-            knownCostAmount: 0,
-            totalBaseQuantity: 0,
-            evidenceDateCount: 0,
-            allEvidenceComplete: true,
-          };
-          aggregate.knownCostAmount += Number(ingredient.knownCostAmount) || 0;
-          aggregate.totalBaseQuantity += Number(ingredient.totalBaseQuantity) || 0;
-          aggregate.evidenceDateCount += Number(ingredient.evidenceDateCount) || 0;
-          aggregate.allEvidenceComplete = aggregate.allEvidenceComplete
-            && ingredient.allEvidenceComplete === true;
-          context.ingredients[key] = aggregate;
-        });
-      }, this);
-      context.salesRows = Object.keys(salesByDate).sort().map(function (date) {
-        return { businessDate: date, salesQuantity: salesByDate[date] };
-      });
-      context.scopeText += context.salesRows.length
-        ? (' · ' + context.salesRows.length + '个营业日')
-        : ' · 暂无营业销量';
-      return context;
-    }.bind(this)).catch(function (error) {
-      context.loadError = (error && error.message) || '适用期营业数据读取失败';
-      context.scopeText += ' · 暂时无法测算';
-      return context;
-    });
+    return Promise.resolve(context);
   },
 
   _resolveComponentIntervalPrice(component, context) {
@@ -1567,66 +1509,19 @@ function createRecipePage(pageMode) {
     var baseCode = _baseUnitCode(component.inputUnitCode);
     var key = Number(component.rawGoodsId) + ':' + baseCode;
     if (context.pricePromises[key]) return context.pricePromises[key];
-    var summary = context.ingredients[key];
-    if (!context.loadError && context.salesRows.length && summary
-      && summary.allEvidenceComplete
-      && summary.evidenceDateCount >= context.salesRows.length
-      && summary.totalBaseQuantity > 0) {
-      context.pricePromises[key] = Promise.resolve({
-        status: 'RESOLVED',
-        amountPerBaseUnit: summary.knownCostAmount / summary.totalBaseQuantity,
-        basisType: 'SALES_WEIGHTED_INTERVAL',
-        evidenceDateCount: summary.evidenceDateCount,
-      });
-      return context.pricePromises[key];
-    }
-    if (context.loadError) {
-      context.pricePromises[key] = Promise.resolve({
-        status: 'INCOMPLETE_PRICE_EVIDENCE',
-        missingReason: context.loadError,
-      });
-      return context.pricePromises[key];
-    }
-    var priceAt = function (row) {
-      return preparationApi.resolveHistoricalTheoryPrice({
-        distributerId: identity.distributerId,
-        storeDepartmentId: identity.currentStoreId,
-        rawGoodsId: component.rawGoodsId,
-        businessDate: row.businessDate,
-        baseUnitCode: baseCode,
-      }).then(function (resolution) {
-        return { resolution: resolution || {}, weight: Number(row.salesQuantity) || 0 };
-      });
-    };
-    if (!context.salesRows.length) {
-      context.pricePromises[key] = priceAt({ businessDate: context.start, salesQuantity: 1 })
-        .then(function (result) {
-          var resolution = result.resolution;
-          resolution.basisType = 'START_DATE_ESTIMATE';
-          resolution.evidenceDateCount = 0;
-          return resolution;
-        });
-      return context.pricePromises[key];
-    }
-    context.pricePromises[key] = _mapInBatches(context.salesRows, 8, priceAt).then(function (results) {
-      var failed = results.find(function (item) {
-        return item.resolution.status !== 'RESOLVED'
-          || isNaN(Number(item.resolution.amountPerBaseUnit));
-      });
-      if (failed) return failed.resolution;
-      var totalWeight = 0;
-      var weightedPrice = 0;
-      results.forEach(function (item) {
-        totalWeight += item.weight;
-        weightedPrice += Number(item.resolution.amountPerBaseUnit) * item.weight;
-      });
-      return {
-        status: totalWeight > 0 ? 'RESOLVED' : 'MISSING_HISTORICAL_PRICE',
-        amountPerBaseUnit: totalWeight > 0 ? weightedPrice / totalWeight : null,
-        basisType: 'SALES_WEIGHTED_INTERVAL',
-        evidenceDateCount: results.length,
-        missingReason: totalWeight > 0 ? null : '适用期没有可用销量',
-      };
+    // 当前版本页面只采用自身适用期内真实入库的加权均价。
+    // 禁止调用“营业日以前最近价格”兜底，否则新版本会错误继承旧版本时期的采购价。
+    context.pricePromises[key] = preparationApi.resolveHistoricalTheoryPriceForInterval({
+      distributerId: identity.distributerId,
+      storeDepartmentId: identity.currentStoreId,
+      rawGoodsId: component.rawGoodsId,
+      startDate: context.start,
+      endDate: context.endInclusive,
+      baseUnitCode: baseCode,
+    }).then(function (resolution) {
+      var result = resolution || {};
+      result.basisType = 'EFFECTIVE_INTERVAL_RECEIPT_WEIGHTED';
+      return result;
     });
     return context.pricePromises[key];
   },
@@ -1642,9 +1537,9 @@ function createRecipePage(pageMode) {
         return Object.assign({}, component, { intermediateRecipe: recipe || {} });
       });
     })).then(function (resolvedComponents) {
-      // 正式配方接口已经随组件返回轻量 rawGoods（名称、规格、图片和均价）；
+      // 正式配方接口已经随组件返回轻量 rawGoods（名称、规格和图片）；
       // 中间料配方接口也按同一结构返回其底层原料。直接消费这些数据，避免
-      // 再次逐商品请求完整详情，也不要依赖不存在的二次汇总接口。
+      // 再次逐商品请求完整详情。价格和每份成本统一取正式历史成本接口。
       return Promise.all(resolvedComponents.map(function (component, index) {
         if (component.itemKind === 'INTERMEDIATE_PRODUCT') {
           return that._decoratePreparationComponent(component, index, costContext);
@@ -1681,17 +1576,6 @@ function createRecipePage(pageMode) {
       return row;
     };
     var row = buildRow(embeddedGoods || {});
-    if (!this.data.versionEditorMode) {
-      var currentPrice = _getRawLinePrice(row, row.gbDistributerGoodsEntity);
-      var currentCost = _calcRawLineCost(row);
-      row._cost = currentCost.toFixed(2);
-      row._costAvailable = currentCost > 0;
-      row._packPriceLabel = currentPrice > 0
-        && row.gbDistributerGoodsEntity.gbDgGoodsStandardname
-        ? (currentPrice.toFixed(2) + '/' + row.gbDistributerGoodsEntity.gbDgGoodsStandardname)
-        : '成本待计算';
-      return Promise.resolve(row);
-    }
     var identity = this.preparationIdentity || preparationUtil.getIdentity();
     var base = _baseUnitInfo(component.inputUnitCode);
     var baseCode = _baseUnitCode(component.inputUnitCode);
@@ -1734,16 +1618,13 @@ function createRecipePage(pageMode) {
       }
       var cost = baseQuantity * price;
       row._cost = cost.toFixed(2);
+      row._costValue = cost;
       row._costAvailable = true;
       row._historicalPriceResolution = resolved;
       row._historicalPriceBusinessDate = date;
       row._historicalPriceBaseQuantity = baseQuantity;
-      row._packPriceLabel = (resolved.basisType === 'START_DATE_ESTIMATE'
-        ? '开始日历史价 '
-        : '适用期销量加权价 ')
-        + '¥' + _trimDecimal(price, 8) + '/' + _baseUnitLabel(baseCode)
-        + (resolved.basisType === 'START_DATE_ESTIMATE' && resolved.receiptBusinessDate
-          ? ' · ' + _recipeDateText(resolved.receiptBusinessDate) : '');
+      row._packPriceLabel = '适用期采购均价 '
+        + '¥' + _trimDecimal(price, 8) + '/' + _baseUnitLabel(baseCode);
       return row;
     }).catch(function (error) {
       row._cost = '';
@@ -1881,7 +1762,10 @@ function createRecipePage(pageMode) {
       if (raw._isVersioned) {
         var versionedAvailable = raw._costAvailable !== false && raw._cost !== ''
           && raw._cost !== null && typeof raw._cost !== 'undefined';
-        var versionedCost = versionedAvailable ? (parseFloat(raw._cost) || 0) : 0;
+        var preciseVersionedCost = Number(raw._costValue);
+        var versionedCost = versionedAvailable
+          ? (!isNaN(preciseVersionedCost) ? preciseVersionedCost : (parseFloat(raw._cost) || 0))
+          : 0;
         raw._cost = versionedAvailable ? versionedCost.toFixed(2) : '';
         raw._packPriceLabel = raw._packPriceLabel || '成本待计算';
         raw._ratio = versionedAvailable && salePrice > 0
@@ -2108,22 +1992,6 @@ function createRecipePage(pageMode) {
       item
     );
     this._setModalGoods(entity, display.portion, display.minUnit, display.packQtyInMin);
-  },
-
-  replaceGoods(e) {
-    var item = e.currentTarget.dataset.item;
-    if (!item || item._isPreparation || !item._isVersioned) return;
-    this._resetModalForm();
-    this.setData({
-      modalType: 'replace',
-      editGoods: item,
-      showFood: true,
-      isSearching: false,
-      strArr: [],
-      searchKeyword: '',
-      goodsName: '',
-    });
-    this._syncFoodSearchModalLayout();
   },
 
   toAddGoods(e) {
@@ -2404,23 +2272,20 @@ function createRecipePage(pageMode) {
     this._previewUnifiedVersionUsage(detail, usagePlan, context);
   },
 
-  chooseVersionUsageMode(event) {
-    var mode = String(event.currentTarget.dataset.mode || 'FROM_DATE');
-    this.setData({
-      versionUsageMode: mode,
-      versionUsageReason: mode === 'HISTORICAL_CORRECTION'
-        ? '修正过去遗漏或错误的配方内容'
-        : '从指定营业日开始使用更新后的配方',
-      versionUsageDirty: true,
-      versionUsagePreview: null,
-      versionUsagePreviewRequest: null,
-      versionUsagePreviewVersionId: null,
-    });
-  },
-
   onVersionUsageStartChange(event) {
     var that = this;
     var start = event.detail.value;
+    if (!Number(this.data.manageVersionId)
+      && this.data.minimumNewVersionStart
+      && start < this.data.minimumNewVersionStart) {
+      wx.showModal({
+        title: '时间范围冲突',
+        content: '新版本开始日期不能早于 ' + this.data.minimumNewVersionStart
+          + '，否则会与已有版本重复。',
+        showCancel: false,
+      });
+      return;
+    }
     var end = this.data.versionUsageEnd;
     if (this.data.versionUsageHasEnd && (!end || end <= start)) end = _offsetDateText(start, 1);
     this.setData({
@@ -2477,10 +2342,9 @@ function createRecipePage(pageMode) {
   chooseVersionUsageDuration(event) {
     var that = this;
     var enabled = String(event.currentTarget.dataset.hasEnd || '') === '1';
-    var end = enabled
-      ? (this.data.versionUsageEnd > this.data.versionUsageStart
-        ? this.data.versionUsageEnd : _offsetDateText(this.data.versionUsageStart, 1))
-      : '';
+    var today = _todayText();
+    var earliestEnd = _offsetDateText(this.data.versionUsageStart, 1);
+    var end = enabled ? (today > this.data.versionUsageStart ? today : earliestEnd) : '';
     this.setData({
       versionUsageHasEnd: enabled,
       versionUsageEnd: end,
@@ -2519,6 +2383,41 @@ function createRecipePage(pageMode) {
       wx.showToast({ title: '停止日期必须晚于开始日期', icon: 'none' });
       return null;
     }
+    var creatingVersion = !Number(this.data.manageVersionId);
+    var minimumStart = this.data.minimumNewVersionStart;
+    if (creatingVersion && minimumStart && start < minimumStart) {
+      wx.showModal({
+        title: '时间范围冲突',
+        content: '新版本开始日期不能早于 ' + minimumStart
+          + '，否则会与已有版本重复。',
+        showCancel: false,
+      });
+      return null;
+    }
+    if (!creatingVersion) {
+      var managedIntervalId = Number(this.data.managedIntervalId || 0);
+      var conflict = (this.data.recipeTimeline || []).find(function (row) {
+        if (Number(row.id) === managedIntervalId) return false;
+        return _recipeIntervalsOverlap(
+          start,
+          end,
+          _recipeDateText(row.effectiveStart),
+          _recipeDateText(row.effectiveEnd)
+        );
+      });
+      if (conflict) {
+        var conflictVersion = (this.data.recipeVersionHistory || []).find(function (row) {
+          return Number(row.id) === Number(conflict.recipeVersionId);
+        });
+        wx.showModal({
+          title: '时间范围冲突',
+          content: '所选时间与 V' + ((conflictVersion && conflictVersion.versionNo) || '?')
+            + ' 的使用时间重复，请调整开始日期或停止日期。',
+          showCancel: false,
+        });
+        return null;
+      }
+    }
     var targetIntervalId = this.data.versionDraftDirty ? null : this.data.managedIntervalId;
     if (!this.data.versionDraftDirty && targetIntervalId
       && start === this.data.managedIntervalOriginalStart
@@ -2526,11 +2425,14 @@ function createRecipePage(pageMode) {
       wx.showToast({ title: '请先修改使用时间或配料', icon: 'none' });
       return null;
     }
-    var operation = targetIntervalId
-      ? 'ADJUST_INTERVAL'
-      : (this.data.versionUsageMode === 'HISTORICAL_CORRECTION'
-        ? 'HISTORICAL_CORRECTION'
-        : (start <= _todayText() && !end ? 'SET_CURRENT' : 'ADD_INTERVAL'));
+    var today = _todayText();
+    var originalStart = targetIntervalId ? this.data.managedIntervalOriginalStart : '';
+    var affectsPast = start < today || (originalStart && originalStart < today);
+    var operation = affectsPast
+      ? 'HISTORICAL_CORRECTION'
+      : (targetIntervalId
+        ? 'ADJUST_INTERVAL'
+        : (start <= today && !end ? 'SET_CURRENT' : 'ADD_INTERVAL'));
     return {
       operation: operation,
       targetIntervalId: targetIntervalId || null,
@@ -2688,18 +2590,49 @@ function createRecipePage(pageMode) {
         recipeConfirmRequest
       );
     }
-    confirmPromise.then(function () {
-      wx.hideLoading();
+    confirmPromise.then(function (result) {
+      var intervalResult = result && result.recipeInterval ? result.recipeInterval : result;
+      var requestId = intervalResult && intervalResult.recalculationRequestId;
+      var identity = that.preparationIdentity || preparationUtil.getIdentity();
+      return preparationApi.waitForDishCostRecalculation(
+        requestId,
+        identity.distributerId,
+        30
+      ).then(function (recalculation) {
+        wx.hideLoading();
+        var status = String(recalculation && recalculation.status || '');
+        var failed = Number(recalculation && recalculation.failedGrainCount || 0);
+        if (status === 'FAILED' || status === 'COMPLETED_WITH_FAILURES') {
+          that.setData({ versionUsageConfirming: false, versionUsageDirty: false });
+          wx.showModal({
+            title: '成本更新未全部完成',
+            content: '配方使用时间已保存，但有 ' + failed + ' 条成本更新失败，被替代的旧版本暂未删除。',
+            showCancel: false,
+            success: function () { wx.navigateBack({ delta: 1 }); },
+          });
+          return;
+        }
+        if (recalculation && (recalculation.pollTimedOut || status === 'QUERY_FAILED')) {
+          that.setData({ versionUsageConfirming: false, versionUsageDirty: false });
+          wx.showModal({
+            title: '成本仍在更新',
+            content: '配方使用时间已保存，系统尚未确认成本全部完成，旧版本暂不删除，请稍后刷新查看。',
+            showCancel: false,
+            success: function () { wx.navigateBack({ delta: 1 }); },
+          });
+          return;
+        }
       if (replacementRequest) {
         wx.removeStorageSync(RECIPE_REPLACEMENT_CONTEXT_PREFIX + String(versionId));
       }
       that.setData({ versionUsageConfirming: false, versionUsageDirty: false });
-      var affected = preview.costImpact && Number(preview.costImpact.affectedSalesRecordCount || 0);
+      var completed = Number(recalculation && recalculation.completedGrainCount || 0);
       wx.showToast({
-        title: affected ? '已保存并重算' + affected + '条' : '配方已保存',
+        title: completed ? '已保存并重算' + completed + '条' : '配方已保存',
         icon: 'success',
       });
       setTimeout(function () { wx.navigateBack({ delta: 1 }); }, 450);
+      });
     }).catch(function (error) {
       wx.hideLoading();
       that.setData({
@@ -3323,6 +3256,15 @@ function createRecipePage(pageMode) {
     });
   },
 
+  onRecipeHeaderTap() {
+    if (this.data.versionEditorMode) return;
+    if (this.data.versionedMode) {
+      this.toRecipeVersionManage();
+      return;
+    }
+    this.toCreateFirstRecipeVersion();
+  },
+
   refreshData() {
     if (this.data.versionEditorMode && this.data.versionDraftDirty) {
       wx.showToast({ title: '请先保存或放弃当前新版本', icon: 'none' });
@@ -3779,6 +3721,59 @@ function createRecipePage(pageMode) {
     }).catch(function () {
       load.hideLoading();
       wx.showToast({ title: '保存失败，请重试', icon: 'none' });
+    });
+  },
+
+  deleteRecipeVersion() {
+    var that = this;
+    if (!this.data.versionEditorMode || !Number(this.data.manageVersionId)) return;
+    if (this.data.recipeSaving || this.data.versionUsageConfirming || this.data.versionDeleting) return;
+    var detail = this.data.versionedDetail;
+    if (!detail || !detail.recipe || !detail.version) {
+      wx.showToast({ title: '配方版本信息不完整', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '输入删除 V' + (detail.version.versionNo || '') + ' 的原因',
+      content: '',
+      editable: true,
+      placeholderText: '例如：误建版本',
+      confirmText: '确认删除',
+      confirmColor: '#d84d4d',
+      success: function (modalResult) {
+        if (!modalResult.confirm) return;
+        var reason = String(modalResult.content || '').trim();
+        if (!reason) {
+          wx.showToast({ title: '请填写删除原因', icon: 'none' });
+          return;
+        }
+        var identity = that.preparationIdentity || preparationUtil.getIdentity();
+        that.setData({ versionDeleting: true });
+        load.showLoading('删除版本');
+        preparationApi.foodVersionAction(
+          detail.recipe.id,
+          detail.version.id,
+          'delete',
+          {
+            distributerId: identity.distributerId,
+            recipeRowVersion: detail.recipe.rowVersion,
+            versionRowVersion: detail.version.rowVersion,
+            operatorId: identity.operatorId,
+            deletionReason: reason,
+          }
+        ).then(function () {
+          load.hideLoading();
+          that.setData({ versionDeleting: false });
+          wx.showToast({ title: '版本已删除', icon: 'success' });
+          setTimeout(function () {
+            wx.navigateBack({ delta: 1 });
+          }, 500);
+        }).catch(function (error) {
+          load.hideLoading();
+          that.setData({ versionDeleting: false });
+          preparationUtil.showError(error);
+        });
+      },
     });
   },
 

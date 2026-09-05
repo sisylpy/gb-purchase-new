@@ -124,6 +124,7 @@ page {
 .hint-note,
 .ingredient-reason,
 .batch-reason,
+.modal-scope-note,
 .excluded-note,
 .preview-card {
   display: block;
@@ -134,6 +135,11 @@ page {
   color: #54736a;
   font-size: 22rpx;
   line-height: 33rpx;
+}
+
+.modal-scope-note {
+  background: #f0f7f5;
+  color: #426d63;
 }
 
 .previous-evidence {

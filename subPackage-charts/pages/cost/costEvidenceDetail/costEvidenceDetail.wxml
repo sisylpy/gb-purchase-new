@@ -88,7 +88,7 @@
             </view>
             <text class="batch-reason" wx:if="{{receipt._reason}}">{{receipt._reason}}</text>
             <view class="batch-action" data-ingredient-index="{{ingredientIndex}}" data-batch-index="{{batchIndex}}"
-              bindtap="onOpenCorrection">核对并修正入库证据 ›</view>
+              bindtap="onOpenCorrection">调整成本核算依据 ›</view>
           </view>
         </view>
       </view>
@@ -100,39 +100,41 @@
     <view class="correction-modal" catchtap="noop">
       <view class="modal-head">
         <view>
-          <text class="modal-title">修正入库证据</text>
+          <text class="modal-title">调整成本核算依据</text>
           <text class="modal-sub">批次 #{{correctionBatch.stockBatchId}} · {{correctionBatch._receiptDate}}</text>
         </view>
         <text class="modal-close" bindtap="onCloseCorrection">×</text>
       </view>
 
+      <text class="modal-scope-note">仅调整理论成本采用的数据，不修改原入库单、库存数量和采购记录。</text>
+
       <view class="status-selector">
         <view class="status-choice {{correctionStatus === 'VALID' ? 'is-selected' : ''}}"
-          data-status="VALID" bindtap="onSelectCorrectionStatus">修正后有效</view>
+          data-status="VALID" bindtap="onSelectCorrectionStatus">更正核算数据</view>
         <view class="status-choice {{correctionStatus === 'EXCLUDED' ? 'is-selected is-danger' : ''}}"
-          data-status="EXCLUDED" bindtap="onSelectCorrectionStatus">排除该批次</view>
+          data-status="EXCLUDED" bindtap="onSelectCorrectionStatus">不用于成本核算</view>
       </view>
 
       <block wx:if="{{correctionStatus === 'VALID'}}">
         <view class="form-row">
-          <text class="form-label">入库数量</text>
-          <input class="form-input" type="digit" value="{{correctionQuantity}}" bindinput="onCorrectionQuantityInput" placeholder="请输入数量" />
+          <text class="form-label">更正后数量</text>
+          <input class="form-input" type="digit" value="{{correctionQuantity}}" bindinput="onCorrectionQuantityInput" placeholder="请输入更正后数量" />
         </view>
         <view class="form-row">
-          <text class="form-label">入库金额</text>
-          <input class="form-input" type="digit" value="{{correctionAmount}}" bindinput="onCorrectionAmountInput" placeholder="请输入金额" />
+          <text class="form-label">更正后金额</text>
+          <input class="form-input" type="digit" value="{{correctionAmount}}" bindinput="onCorrectionAmountInput" placeholder="请输入更正后金额" />
         </view>
         <view class="form-row">
-          <text class="form-label">入库单位</text>
+          <text class="form-label">更正后单位</text>
           <input class="form-input" value="{{correctionUnit}}" bindinput="onCorrectionUnitInput" placeholder="如 瓶、斤、KG" />
         </view>
       </block>
-      <view class="excluded-note" wx:else>该批次仍保留在库存原始记录中，但不再作为历史理论价格证据。</view>
+      <view class="excluded-note" wx:else>原入库单和库存记录保持不变，本批次不再用于理论成本核算。</view>
 
       <view class="reason-field">
-        <text class="form-label">修正原因</text>
+        <text class="form-label">调整原因</text>
         <textarea class="reason-input" value="{{correctionReason}}" maxlength="500"
-          bindinput="onCorrectionReasonInput" placeholder="例如：核对采购票据后修正数量和金额"></textarea>
+          bindinput="onCorrectionReasonInput" placeholder="例如：核对采购票据后，更正数量和金额"></textarea>
       </view>
 
       <view class="preview-card" wx:if="{{correctionPreview}}">
@@ -145,7 +147,7 @@
         <view class="modal-button modal-button--secondary" bindtap="onPreviewCorrection">
           {{correctionSaving ? '处理中…' : '预览影响'}}
         </view>
-        <view class="modal-button {{correctionPreview ? '' : 'is-disabled'}}" bindtap="onConfirmCorrection">确认修正</view>
+        <view class="modal-button {{correctionPreview ? '' : 'is-disabled'}}" bindtap="onConfirmCorrection">确认调整</view>
       </view>
     </view>
   </view>
