@@ -6,7 +6,7 @@ Page({
   data: {
     navBarHeight: 0, loading: true, actionLoading: false, taskId: 0, identity: null, store: null,
     task: null, issue: null, submissions: [], reviews: [], timeline: [], originalMedia: [], taskMedia: [],
-    canAccept: false, canEdit: false,
+    canAccept: false, canEdit: false, nextStepText: '',
     form: { reason: '', measures: '', description: '', supplement: '' },
     currentMedia: [], mediaUploading: false,
     draftDirty: false,
@@ -99,6 +99,24 @@ Page({
           });
           if (sequence !== that.detailRequestSequence) return;
           var isAssignee = Number(identity.userId) === Number(task.assigneeUserId);
+          var canAccept = isAssignee && task.status === 'PENDING_ACCEPTANCE';
+          var canEdit = isAssignee && (task.status === 'IN_PROGRESS' || task.status === 'REJECTED');
+          var nextStepText = '';
+          if (!isAssignee) {
+            nextStepText = '该任务当前由其他负责人处理，如需执行请联系总部调整负责人。';
+          } else if (task.status === 'PENDING_ACCEPTANCE') {
+            nextStepText = '请先接受整改任务。接受后可填写整改内容并上传完成照片。';
+          } else if (task.status === 'IN_PROGRESS') {
+            nextStepText = '请填写本轮整改内容、上传整改完成照片，再提交总部复核。';
+          } else if (task.status === 'REJECTED') {
+            nextStepText = '上一轮复核未通过，请按总部意见补充整改内容和照片后重新提交。';
+          } else if (task.status === 'PENDING_REVIEW') {
+            nextStepText = '整改已提交，正在等待总部复核，当前无需继续操作。';
+          } else if (task.status === 'COMPLETED') {
+            nextStepText = '该整改任务已完成，历史提交和复核记录可在下方查看。';
+          } else {
+            nextStepText = '当前状态暂无可执行操作。';
+          }
           var acceptScope = 'rectification-accept:' + task.rectificationTaskId;
           if (task.status !== 'PENDING_ACCEPTANCE') {
             util.clearPersistentKey(acceptScope);
@@ -127,8 +145,9 @@ Page({
             timeline: timeline,
             originalMedia: originalMedia,
             taskMedia: taskMedia,
-            canAccept: isAssignee && util.hasAction(identity, 'RECTIFICATION_ACCEPT') && task.status === 'PENDING_ACCEPTANCE',
-            canEdit: isAssignee && util.hasAction(identity, 'RECTIFICATION_SAVE_DRAFT') && (task.status === 'IN_PROGRESS' || task.status === 'REJECTED'),
+            canAccept: canAccept,
+            canEdit: canEdit,
+            nextStepText: nextStepText,
             form: currentDraft ? util.parseRectification(currentDraft.content) : { reason: '', measures: '', description: '', supplement: '' },
             currentMedia: currentDraft ? (currentDraft.media || []) : [],
             lastReview: reviews.length ? reviews[reviews.length - 1] : null,

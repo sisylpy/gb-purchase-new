@@ -12,6 +12,13 @@
       <view class="row"><text class="row-label">当前轮次</text><text class="row-value">第 {{task.currentRound}} 轮</text></view>
     </view>
 
+    <view class="next-step-card">
+      <view class="next-step-title">下一步</view>
+      <text class="next-step-text">{{nextStepText}}</text>
+    </view>
+
+    <view class="tip tip-red" wx:if="{{canAccept && acceptConflict}}">上次接受请求的版本已过期，原幂等键仍被保留。<text class="retry-link" bindtap="resetAcceptCommand">确认后基于最新版本重新发起</text></view>
+
     <view class="inspection-section">
       <view class="section-title">总部发现的问题</view>
       <view class="fact-block"><text class="fact-label">现场事实</text><text>{{issue.description}}</text></view>
@@ -22,9 +29,6 @@
     </view>
 
     <view class="tip tip-red" wx:if="{{task.status === 'REJECTED' && lastReview}}">上一轮已被退回：{{lastReview.reviewComment}}</view>
-
-    <button class="accept-button" wx:if="{{canAccept}}" disabled="{{actionLoading}}" bindtap="acceptTask">{{actionLoading ? '处理中…' : '接受整改任务'}}</button>
-    <view class="tip tip-red" wx:if="{{canAccept && acceptConflict}}">上次接受请求的版本已过期，原幂等键仍被保留。<text class="retry-link" bindtap="resetAcceptCommand">确认后基于最新版本重新发起</text></view>
 
     <view class="inspection-section" wx:if="{{canEdit}}">
       <view class="section-title">第 {{task.currentRound}} 轮整改</view>
@@ -67,5 +71,11 @@
     </view>
   </scroll-view>
 
-  <view class="bottom-actions" wx:if="{{canEdit}}"><button class="button button-secondary" disabled="{{actionLoading || mediaUploading}}" bindtap="saveDraft">保存草稿</button><button class="button button-primary" disabled="{{actionLoading || mediaUploading}}" bindtap="submitRectification">提交复核</button></view>
+  <view class="bottom-actions" wx:if="{{canAccept || canEdit}}">
+    <button class="button button-primary" wx:if="{{canAccept}}" disabled="{{actionLoading}}" bindtap="acceptTask">{{actionLoading ? '处理中…' : '接受整改任务'}}</button>
+    <block wx:else>
+      <button class="button button-secondary" disabled="{{actionLoading || mediaUploading}}" bindtap="saveDraft">保存草稿</button>
+      <button class="button button-primary" disabled="{{actionLoading || mediaUploading}}" bindtap="submitRectification">提交复核</button>
+    </block>
+  </view>
 </view>
