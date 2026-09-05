@@ -16,7 +16,7 @@ var PAGE_SIZE = 20;
 // noteType 显示映射
 var NOTE_TYPE_LABELS = {
   MANUAL: '手动记录',
-  FROM_RUN: '经营建议',
+  FROM_RUN: 'AI 建议',
   FROM_PIN: '图钉升级',
   FROM_SELECTION: '选中文本',
   FROM_MESSAGE: '消息记录',
@@ -240,9 +240,16 @@ Page({
 
   onViewNote: function (e) {
     var noteId = e.currentTarget.dataset.noteId;
-    this._toggleDetail(e);
-
-    console.log('[工作笔记列表] 查看笔记', { noteId: noteId });
+    var conversationId = e.currentTarget.dataset.conversationId;
+    var runId = e.currentTarget.dataset.runId;
+    if (conversationId) {
+      var url = '/subPackage-charts/pages/aiChat/aiChat?loadConversationId=' + conversationId;
+      if (runId) url += '&loadRunId=' + runId;
+      wx.navigateTo({ url: url });
+    } else {
+      this._toggleDetail(e);
+    }
+    console.log('[工作笔记列表] 查看笔记', { noteId: noteId, conversationId: conversationId });
   },
 
   // ========== 内联展开/收起笔记内容 ==========

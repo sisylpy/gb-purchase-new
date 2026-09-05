@@ -58,6 +58,8 @@ Page({
       { icon: '🏪', iconBg: '#E6F7EE', name: '门店管理', sub: '门店与设置', bind: 'toMendian' },
       { icon: '💰', iconBg: '#FFF3E0', name: '营业额', sub: '营业额录入', bind: 'toDaily' },
       { icon: '⬆️', iconBg: '#F2EAFE', name: '升级加盟', sub: '保留本店数据升级', bind: 'toFranchiseUpgrade' },
+      { icon: '✨', iconBg: '#E8F4FD', name: 'AI 经营顾问', sub: '经营问答与建议', bind: 'toAiChat' },
+      { icon: '🧭', iconBg: '#EAF8F3', name: '餐厅画像', sub: '完善 AI 经营上下文', bind: 'toRestaurantProfile' },
     ];
     if (mendianList.length > 1) {
       baseItems.unshift({ icon: '🔀', iconBg: '#E8F4FD', name: '选择分店', sub: '切换分店', bind: 'showMendianPicker' });
@@ -181,6 +183,9 @@ Page({
   },
   toFranchiseUpgrade() {
     wx.navigateTo({ url: '/subPackage-mendian/pages/management/franchiseUpgrade/franchiseUpgrade' });
+  },
+  toAiChat() {
+    wx.navigateTo({ url: '/subPackage-charts/pages/aiChat/aiChat?advisorCode=ADV_BOSS' });
   },
   toRestaurantProfile() {
     wx.navigateTo({ url: '/subPackage-ai/pages/restraunt/restaurantProfile/restaurantProfile' });

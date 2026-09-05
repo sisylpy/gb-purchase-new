@@ -1,24 +1,9 @@
 
 <!-- Gemini 风格：自定义顶栏 + 主内容 + 底部输入面板 -->
 <view class="gem-page" style="height: {{windowHeight}}px;">
-  <!-- 顶栏 -->
-  <view class="gem-nav" style="padding-top: {{statusBarHeight + 20}}px;">
-   
-
-<back-navbar style="height: {{navBarHeight}}rpx;" title="{{pageTitle || 'AI助手'}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
-     
-  </view>
-
-  <!-- 人工智能生成内容显著标识：始终保持在对话页可见 -->
-  <view class="gem-ai-disclosure" aria-label="本服务为AI生成内容，结果仅供参考">
-    <text class="gem-ai-disclosure-badge">AI生成</text>
-    <text class="gem-ai-disclosure-text">本服务为AI生成内容，结果仅供参考</text>
-  </view>
-
-  <!-- Debug 切换按钮 -->
-  <view class="gem-debug-toggle" catchtap="toggleDebugJson">
-    <text class="gem-debug-toggle-text">🐞 {{showDebugJson ? 'ON' : 'OFF'}}</text>
-  </view>
+  <!-- 固定导航栏不参与文档流，以下占位高度必须与其实际高度保持一致。 -->
+  <back-navbar title="{{pageTitle || 'AI助手'}}" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+  <view class="gem-nav-spacer" style="height: {{navBarHeight}}px;"></view>
 
   <!-- 主区域 -->
   <scroll-view
@@ -85,6 +70,9 @@
               <view wx:else class="gem-sublist-empty">暂无具体问题</view>
             </view>
           </view>
+        </view>
+        <view class="gem-ai-disclosure" aria-label="本服务为AI生成内容，结果仅供参考">
+          <text class="gem-ai-disclosure-text">AI 生成内容，仅供参考</text>
         </view>
         <view class="gem-human-hint">
           <text>需要人工帮助？对我说“转人工”即可</text>

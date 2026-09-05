@@ -1466,12 +1466,8 @@ Page({
   /** 跳转到 AI 添加商品页（预填搜索关键词为商品名称） */
   toAddGoods: function () {
     wx.navigateTo({
-      url: '../disAddGoods/disAddGoods?goodsName=' + this.data.placeHolder,
+      url: '../aiAddGoods/aiAddGoods?goodsName=' + encodeURIComponent(this.data.placeHolder || ''),
     });
-    
-    // wx.navigateTo({
-    //   url: '../aiAddGoods/aiAddGoods?goodsName=' + encodeURIComponent(name),
-    // });
   },
 
   /** 跳转到商品业务详情页面 */

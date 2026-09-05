@@ -1236,6 +1236,12 @@ Page({
     })
   },
 
+  onNavTap: function () {
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/aiChat/aiChat?advisorCode=ADV_BOSS',
+    })
+  },
+
   noopForSheet: function () {},
 
 

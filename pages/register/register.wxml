@@ -96,8 +96,8 @@
       <view class="terms-section">
         <view class="terms-title">二、充值及费用使用</view>
         <text class="terms-text">用户可选择充值任意金额，系统将自动折算为可使用额度。</text>
-        <text class="terms-text">充值金额用于系统功能使用、账本管理、报表导出和经营工具等服务费用。</text>
-        <text class="terms-text">系统按使用量自动扣费，每次下单、生成账单或使用相关功能时会显示扣费明细。</text>
+        <text class="terms-text">充值金额用于系统功能使用、账本管理、报表导出、AI助手等服务费用。</text>
+        <text class="terms-text">系统按使用量自动扣费，每次下单、生成账单或调用智能功能时会显示扣费明细。</text>
       </view>
       
       <view class="terms-section">

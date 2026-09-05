@@ -25,10 +25,10 @@
         <text class="pd-time" wx:if="{{_timeLabel}}">{{_timeLabel}}</text>
       </view>
 
-      <!-- 原始内容 -->
+      <!-- 原 AI 回答正文 -->
       <view class="pd-answer" wx:if="{{sourceText}}">
         <view class="pd-section-label">
-          <text class="pd-section-label-text">原始内容</text>
+          <text class="pd-section-label-text">AI 回答</text>
         </view>
         <view class="pd-answer-body">
           <text class="pd-answer-text">{{sourceText}}</text>
@@ -58,7 +58,9 @@
 
     <!-- 底部操作栏 -->
     <view class="pd-bar">
-      
+      <view class="pd-bar-btn pd-bar-btn--conv" wx:if="{{conversationId}}" catchtap="onViewConversation">
+        <text class="pd-bar-btn-text">查看原对话</text>
+      </view>
       <view class="pd-bar-btn pd-bar-btn--delete" catchtap="onDeletePin">
         <text class="pd-bar-btn-text">删除图钉</text>
       </view>

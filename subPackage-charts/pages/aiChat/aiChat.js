@@ -41,6 +41,7 @@ Page({
   data: {
     windowHeight: 600,
     statusBarHeight: 20,
+    navBarHeight: 64,
     departmentId: 0,
     userId: 0,
     userInitial: '?',
@@ -82,7 +83,7 @@ Page({
     /** 智能体稳定业务键；数据库重建后仍保持不变 */
     advisorCode: DEFAULT_ADVISOR_CODE,
     /** 是否展示调试 JSON */
-    showDebugJson: true,
+    showDebugJson: false,
     /** 已记入店长日志的卡片 key 集合（防重复） */
     _recordedCardKeys: {},
     /** 记入店长日志请求中 */
@@ -156,6 +157,8 @@ Page({
 
     var sys = wx.getSystemInfoSync();
     var sb = sys.statusBarHeight || 20;
+    var appGlobal = getApp().globalData || {};
+    var navBarHeight = Number(appGlobal.navBarHeight) || (sb + 44);
     var drawerPad = sb + 44;
     var drawerHeadApprox = 52;
     that.setData({
@@ -168,6 +171,7 @@ Page({
       heroSubtitle: heroSubtitle,
       windowHeight: sys.windowHeight,
       statusBarHeight: sb,
+      navBarHeight: navBarHeight,
       drawerPaddingTop: drawerPad,
       drawerScrollHeight: Math.max(200, sys.windowHeight - drawerPad - drawerHeadApprox),
       runPayloadBase: payload,

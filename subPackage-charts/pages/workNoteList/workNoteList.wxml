@@ -22,7 +22,7 @@
     <view class="wn-empty" wx:elif="{{!loading && notes.length === 0}}">
       <image class="wn-empty-img" src="/images/xiuxi.png" mode="aspectFit"></image>
       <text class="wn-empty-text">暂无工作笔记</text>
-      <text class="wn-empty-sub">保存的工作笔记，可在此集中查看</text>
+      <text class="wn-empty-sub">在 AI 对话中保存的笔记，可在此集中查看</text>
     </view>
 
     <!-- 笔记列表 -->

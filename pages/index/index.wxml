@@ -8,6 +8,7 @@
     title="{{mendianInfo.gbDepartmentName}}"
     live-pulse="{{true}}"
     button-text="设置"
+    bindnavbuttontap="onNavTap"
   ></navbar-dual>
 
   <view class="flex-column" style="margin-top: {{navBarHeight}}rpx;">

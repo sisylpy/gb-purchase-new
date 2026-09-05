@@ -12,43 +12,24 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- 顶栏 ---------- */
-.gem-nav {
+/* 固定导航栏对应的布局占位，防止首屏内容被导航栏覆盖。 */
+.gem-nav-spacer {
   flex-shrink: 0;
-  background: #ffffff;
-  z-index: 50;
+  width: 100%;
 }
 
-/* 人工智能生成内容常驻披露：足够显著，但不打断主交互 */
+/* 首页底部的 AI 内容提示，避免抢占主视觉。 */
 .gem-ai-disclosure {
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  margin: 12rpx 24rpx 4rpx;
-  padding: 12rpx 16rpx;
-  border: 1rpx solid #f0dca8;
-  border-radius: 10rpx;
-  background: #fff9e9;
+  margin: 22rpx 24rpx 0;
+  text-align: center;
   box-sizing: border-box;
-  z-index: 40;
-}
-
-.gem-ai-disclosure-badge {
-  flex-shrink: 0;
-  margin-right: 12rpx;
-  padding: 3rpx 10rpx;
-  border-radius: 6rpx;
-  background: #f2d47f;
-  color: #5e4713;
-  font-size: 22rpx;
-  font-weight: 600;
-  line-height: 1.4;
 }
 
 .gem-ai-disclosure-text {
-  color: #6d581f;
-  font-size: 24rpx;
-  line-height: 1.5;
+  color: #a0a7b1;
+  font-size: 22rpx;
+  line-height: 1.4;
 }
 
 .gem-nav-inner {
@@ -275,7 +256,7 @@
 }
 
 .gem-human-hint {
-  margin-top: 30rpx;
+  margin-top: 6rpx;
   color: #8a9298;
   font-size: 24rpx;
   line-height: 1.5;

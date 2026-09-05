@@ -231,6 +231,12 @@ Page({
     });
   },
 
+  toMenuAi() {
+    wx.navigateTo({
+      url: '/subPackage-charts/pages/aiChat/aiChat?advisorCode=MENU_OPERATION',
+    });
+  },
+
   toBack() {
     wx.navigateBack({ delta: 1 });
   },
