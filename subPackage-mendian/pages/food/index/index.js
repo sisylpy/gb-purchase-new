@@ -244,9 +244,10 @@ Page({
     });
   },
 
+  //13 
   toMenuAi() {
     wx.navigateTo({
-      url: '/subPackage-charts/pages/aiChat/aiChat?advisorId=13',
+      url: '/subPackage-charts/pages/aiChat/aiChat?advisorId=48',
     });
   },
 

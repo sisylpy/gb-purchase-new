@@ -1,5 +1,5 @@
 import load from '../../../../lib/load';
-const { depPasteSearchGoods } = require('../../../../services/depOrder');
+const { depPasteSearchGoods, deleteOrderGb } = require('../../../../services/depOrder');
 import { parseOrderFromText } from '../../../../lib/orderParser';
 import pasteDepListCache from '../../../../lib/pasteDepListCache';
 
@@ -303,11 +303,13 @@ Page({
   },
 
   openOperationLinshi(e) {
+    const index = e.currentTarget.dataset.index;
     this.setData({
       showOperationLinshi: true,
       applyItem: e.currentTarget.dataset.order,
       goodsName: e.currentTarget.dataset.name,
-      orderArrIndex: e.currentTarget.dataset.index,
+      orderArrIndex: index,
+      orderPasteIndex: index,
     });
   },
 
@@ -321,23 +323,59 @@ Page({
       this.hideMaskLinshi();
       return;
     }
-    const arr = this.data.orderArr.slice();
-    arr.splice(index, 1);
-    this.setData({ orderArr: arr, showOperationLinshi: false });
-    this._updateNewGoodsCount(arr);
-    this._saveToStorage(arr);
+
+    const applyItem = (this.data.orderArr[index] || this.data.applyItem);
+    const removeFromList = () => {
+      const arr = this.data.orderArr.slice();
+      arr.splice(index, 1);
+      const savedCount = arr.filter(item => item.gbDoStatus !== -2).length;
+      const updates = {
+        orderArr: arr,
+        showOperationLinshi: false,
+        saveCount: arr.length === 0 ? null : (savedCount > 0 ? savedCount : this.data.saveCount),
+      };
+      this.setData(updates);
+      this._updateNewGoodsCount(arr);
+      this._updateHasUnsavedOrders(arr);
+      this._saveToStorage(arr);
+      wx.setStorageSync('needRefreshOrderData', true);
+    };
+
+    const orderId = applyItem && applyItem.gbDepartmentOrdersId;
+    if (orderId) {
+      load.showLoading('删除中');
+      deleteOrderGb(orderId).then(res => {
+        load.hideLoading();
+        if (res.result.code != 0) {
+          wx.showToast({ title: res.result.msg || '删除失败', icon: 'none' });
+          return;
+        }
+        removeFromList();
+      }).catch(() => {
+        load.hideLoading();
+        wx.showToast({ title: '网络错误', icon: 'none' });
+      });
+      return;
+    }
+
+    removeFromList();
   },
 
   toPasteFromGoods(e) {
+    const index = e.currentTarget.dataset.index != null
+      ? e.currentTarget.dataset.index
+      : this.data.orderArrIndex;
+    const order = e.currentTarget.dataset.order || (this.data.orderArr[index]);
     this.setData({
-      applyItem: e.currentTarget.dataset.order,
-      goodsName: e.currentTarget.dataset.name,
-      orderArrIndex: e.currentTarget.dataset.index,
+      applyItem: order,
+      goodsName: order && order.gbDoGoodsName,
+      orderArrIndex: index,
+      orderPasteIndex: index,
     });
-    wx.setStorageSync('applyItem', e.currentTarget.dataset.order);
+    wx.setStorageSync('applyItem', order);
     this.hideMaskLinshi();
     wx.navigateTo({
-      url: '../editDepApplyGoods/editDepApplyGoods?from=paste&orderPasteIndex=' + this.data.orderArrIndex,
+      url: '../editDepApplyGoods/editDepApplyGoods?from=paste&orderPasteIndex=' + index,
     });
   },
 });

@@ -1,0 +1,211 @@
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+<wxs module="price" src="../../utils/price.wxs" />
+
+<view class="platform-tab-page page-category-goods">
+  <view class="platform-tab-header platform-tab-header--fixed platform-tab-header--beige">
+    <navbar-dual title="{{pageTitle}}" avatar="/images/user.png" />
+  </view>
+
+  <view
+    class="platform-tab-body"
+    style="padding-top: {{scrollTopPadding}}px; height: {{bodyHeight}}rpx;"
+  >
+    <view class="main-body flex-row-default">
+      <view class="left">
+        <scroll-view
+          id="leftScroll"
+          scroll-y="true"
+          style="height: {{listHeight}}rpx;"
+          scroll-top="{{leftScrollTopNx}}"
+          scroll-with-animation
+          show-scrollbar="false"
+        >
+          <view
+            class="left-item {{leftIndex == index ? 'left-active' : ''}}"
+            wx:for="{{grandList}}"
+            wx:key="nxGoodsId"
+            id="left-cat-{{grand.nxGoodsId}}"
+            wx:for-item="grand"
+            bindtap="changeGreatGrandDis"
+            data-index="{{index}}"
+            data-id="{{grand.nxGoodsId}}"
+            data-name="{{grand.nxGoodsName}}"
+          >
+            <view class="font-sl text_center">
+              <text>{{grand.nxGoodsName}}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="right-panel">
+        <view wx:if="{{showAllSubCat}}">
+          <view class="subcat-popup" style="top: {{scrollTopPadding}}px;">
+            <view class="subcat-bar expand">
+              <view
+                class="subcat-tag {{activeSubCatId == subCat.nxGoodsId ? 'active' : ''}}"
+                wx:for="{{fatherArrDis}}"
+                wx:for-item="subCat"
+                wx:key="nxGoodsId"
+                bindtap="onSubCatTapDis"
+                data-id="{{subCat.nxGoodsId}}"
+              >
+                {{subCat.nxGoodsName}}
+              </view>
+            </view>
+          </view>
+          <view class="subcat-mask" catchtouchmove="stopScroll" bindtap="toggleSubCatDis"></view>
+        </view>
+
+        <view class="flex-row subcat-row" style="width: {{windowWidth - 140}}rpx;" wx:else>
+          <scroll-view
+            class="subcat-bar-scroll"
+            scroll-x="true"
+            scroll-into-view="{{subcatScrollIntoView}}"
+            scroll-with-animation
+            show-scrollbar="false"
+            style="width:{{windowWidth - 240}}rpx; margin-right: 20rpx;"
+          >
+            <block wx:for="{{fatherArrDis}}" wx:for-item="subCat" wx:key="nxGoodsId">
+              <view
+                class="subcat-tag {{activeSubCatId == subCat.nxGoodsId ? 'active' : ''}}"
+                id="subcat-{{subCat.nxGoodsId}}"
+                bindtap="onSubCatTapDis"
+                data-id="{{subCat.nxGoodsId}}"
+              >
+                {{subCat.nxGoodsName}}
+              </view>
+            </block>
+          </scroll-view>
+          <view class="subcat-toggle" bindtap="toggleSubCatDis">
+            <image src="/images/arrow-down.svg" class="toggle-icon" />
+          </view>
+        </view>
+
+        <scroll-view
+          class="goods-list"
+          scroll-y="true"
+          style="width: {{windowWidth - 180}}rpx; height: {{goodsListHeight}}rpx;"
+          bindscroll="onGoodsScrollDis"
+          bindscrolltolower="onScrollToLowerDis"
+          scroll-with-animation
+          scroll-into-view="{{scrollIntoView}}"
+          show-scrollbar="false"
+        >
+          <block wx:for="{{goodsList}}" wx:for-item="sons" wx:key="nxGoodsId" wx:for-index="goodsIndex">
+            <view wx:if="{{sons.isFirstInCategory}}" class="goods-category-title"></view>
+            <view
+              class="flex-row-default product-item p-10 {{sons.isFirstInCategory ? 'dis-cat-anchor' : ''}}"
+              id="{{sons.isFirstInCategory ? 'cat-' + sons.nxGoodsGrandId : 'goods-row-' + sons.nxGoodsId}}"
+            >
+              <view class="flex-row-default">
+                <image
+                  bindtap="showImageModal"
+                  data-goods="{{sons}}"
+                  src="{{sons.nxGoodsFile ? url + sons.nxGoodsFile : '/images/logo.jpg'}}"
+                  mode="aspectFill"
+                  class="goods_item mr-20"
+                />
+                <view class="flex-row-default">
+                  <view class="flex-column goods-info-col" style="width: {{windowWidth - 480}}rpx;">
+                    <view class="flex-row middle">
+                      <text class="{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? 'brand' : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? sons.nxGoodsBrand : ''}}</text>
+                      <view class="font-xl">{{sons.nxGoodsName}}</view>
+                    </view>
+                    <view class="flex-row font-sl" wx:if="{{sons.nxGoodsStandardWeight !== null && sons.nxGoodsStandardWeight !== ''}}">
+                      <view class="flex-row-wrap">
+                        <text class="gray">规格:</text>
+                        <view>{{sons.nxGoodsStandardWeight}}/{{sons.nxGoodsStandardname}}</view>
+                        <view class="ml-10" wx:if="{{sons.nxGoodsItemsPerCarton != ''}}">{{sons.nxGoodsItemsPerCarton}}{{sons.nxGoodsStandardname}}*{{sons.nxGoodsCartonUnit}}</view>
+                      </view>
+                    </view>
+                    <view class="flex-row font-sl" wx:else>
+                      <view class="flex-row">
+                        <text class="text-secondary">规格:</text>
+                        <view>{{sons.nxGoodsStandardname}}</view>
+                      </view>
+                    </view>
+                    <view class="flex-row font-sl price-row">
+                      <text wx:if="{{price.isValidDisplayPrice(sons.nxDgWillPrice)}}" class="price-ref">{{price.formatReferencePrice(sons.nxDgWillPrice, sons.nxGoodsStandardname)}}</text>
+                      <text wx:else class="price-pending">待确认价</text>
+                      <text wx:if="{{!price.isValidDisplayPrice(sons.nxDgWillPrice)}}" class="price-pending-hint">（价格以出库确认为准）</text>
+                    </view>
+                  </view>
+                  <view class="flex-">
+                    <view
+                      class="flex-row"
+                      catch:tap="toEditPlatformOrder"
+                      data-order="{{sons.platformOrder}}"
+                      data-item="{{sons}}"
+                      data-index="{{goodsIndex}}"
+                      wx:if="{{sons.platformOrder}}"
+                    >
+                      <text class="five-weight save_btn has_order">{{sons.platformOrder.quantity}}{{sons.platformOrder.standard}}</text>
+                    </view>
+                    <view
+                      class="flex-row"
+                      wx:else
+                      catch:tap="applyGoods"
+                      data-index="{{goodsIndex}}"
+                      data-item="{{sons}}"
+                      hover-class="hover"
+                    >
+                      <view class="save_btn">
+                        <text>订货</text>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+          <view
+            class="flex-column-center text-secondary extremeSmall list-footer"
+            wx:if="{{totalPageDis == currentPageDis && goodsList.length > 0}}"
+          >
+            "{{greatName}}"共{{goodsList.length}}个商品
+          </view>
+          <view class="empty-hint" wx:if="{{!categoriesLoading && grandList.length === 0}}">
+            <text>暂无分类数据</text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+  <platform-tab-bar active="categoryGoods" cartBadge="{{cartBadge}}" />
+</view>
+
+<myDismodalNx
+  show="{{show}}"
+  bindconfirm="confirm"
+  bindcancle="cancle"
+  binddelApply="delApply"
+  applyStandardName="{{applyStandardName}}"
+  applyNumber="{{applyNumber}}"
+  applySubtotal="{{applySubtotal}}"
+  applyRemark="{{applyRemark}}"
+  editApply="{{editApply}}"
+  navBarHeight="{{navBarHeight}}"
+  windowWidth="{{windowWidth}}"
+  bindchangeStandard="changeStandard"
+  item="{{nxGoods}}"
+  canSave="{{canSave}}"
+  windowHeight="{{windowHeight}}"
+/>
+
+<view class="image-modal" wx:if="{{showImageModal}}" bindtap="hideImageModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">商品图片</text>
+      <view class="close-btn" bindtap="hideImageModal">×</view>
+    </view>
+    <view class="modal-body">
+      <image src="{{currentImage}}" mode="aspectFit" class="modal-image" />
+      <view class="image-info" wx:if="{{currentGoods}}">
+        <text class="goods-name">{{currentGoods.nxGoodsName}}</text>
+        <text class="goods-standard" wx:if="{{currentGoods.nxGoodsStandardname}}">规格: {{currentGoods.nxGoodsStandardname}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+

@@ -7,6 +7,7 @@ var pageLayout = require('../../lib/pageLayout.js');
 var catalogApi = require('../../services/platformCatalog.js');
 var platformOrderApi = require('../../services/platformOrder.js');
 var platformCart = require('../../utils/platformCart.js');
+var platformAuth = require('../../services/platformAuth.js');
 
 var STORAGE_INIT_KEY = 'platformCategoryGoodsInit';
 
@@ -123,11 +124,7 @@ Page({
       }
     }
 
-    if (!this._syncDepartmentContext()) {
-      wx.showToast({ title: '请先登录并选择饭店', icon: 'none' });
-      return;
-    }
-
+    this._syncDepartmentContext();
     this._refreshPlatformTabBadge();
 
     if (!this.data.grandList.length) {
@@ -141,10 +138,6 @@ Page({
 
   initDisData: function (presetCategoryId) {
     var that = this;
-    if (!this.data.depId) {
-      wx.showToast({ title: '未获取到饭店部门，请重新登录', icon: 'none' });
-      return;
-    }
     if (this._loadingCategories) return;
     this._loadingCategories = true;
     this.setData({ categoriesLoading: true });
@@ -615,21 +608,26 @@ Page({
   },
 
   applyGoods: function (e) {
-    var item = e.currentTarget.dataset.item;
-    if (!item || !item.nxGoodsId) {
-      wx.showToast({ title: '商品信息异常', icon: 'none' });
-      return;
-    }
-    this.setData({
-      index: e.currentTarget.dataset.index,
-      nxGoods: item,
-      show: true,
-      applyStandardName: item.nxGoodsStandardname || '',
-      applySubtotal: '',
-      canSave: false,
-      editApply: false,
-      applyNumber: '',
-      applyRemark: ''
+    var that = this;
+    platformAuth.ensureRegisteredForGoods().then(function (ok) {
+      if (!ok) return;
+      that._syncDepartmentContext();
+      var item = e.currentTarget.dataset.item;
+      if (!item || !item.nxGoodsId) {
+        wx.showToast({ title: '商品信息异常', icon: 'none' });
+        return;
+      }
+      that.setData({
+        index: e.currentTarget.dataset.index,
+        nxGoods: item,
+        show: true,
+        applyStandardName: item.nxGoodsStandardname || '',
+        applySubtotal: '',
+        canSave: false,
+        editApply: false,
+        applyNumber: '',
+        applyRemark: ''
+      });
     });
   },
 

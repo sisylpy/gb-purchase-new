@@ -148,54 +148,60 @@
     </view>
   </block>
 
-  <!-- 今日正式订货 -->
+  <!-- 今日正式订货（按采购单分组） -->
   <block wx:else>
     <scroll-view scroll-y class="platform-tab-scroll" style="padding-top: {{scrollTopPadding + 44}}px;">
-      <view class="cart-empty" wx:if="{{formalEmpty}}">
+      <view class="cart-loading" wx:if="{{formalLoading}}">
+        <text>加载中...</text>
+      </view>
+
+      <view class="cart-empty" wx:elif="{{formalEmpty}}">
         <image class="cart-empty-icon" src="/images/orderlisto.png" mode="aspectFit" />
         <text class="cart-empty-text">今日暂无正式订货</text>
-        <text class="cart-empty-hint">购物车结算后将在此展示</text>
+        <text class="cart-empty-hint">购物车结算后将在此展示采购单</text>
       </view>
 
       <view class="section-block" wx:else>
         <view class="section-head">
-          <text class="section-title">今日订货</text>
-          <text class="section-count">{{platformLines.length}}项</text>
+          <text class="section-title">今日采购单</text>
+          <text class="section-count">{{todayBillCount}}笔 · {{todayLineCount}}项</text>
         </view>
 
-        <view class="order-card" wx:for="{{platformLines}}" wx:key="orderId">
-          <view class="order-card-body">
-            <block wx:if="{{item.titleLine || item.priceLine || item.supplierLine}}">
-              <view class="order-line order-line-title" wx:if="{{item.titleLine}}">{{item.titleLine}}</view>
-              <view class="order-line order-line-price" wx:if="{{item.priceLine}}">{{item.priceLine}}</view>
-              <view class="order-line order-line-supplier status-{{item.statusCode}}" wx:if="{{item.supplierLine}}">{{item.supplierLine}}</view>
-            </block>
-            <block wx:else>
-              <view class="order-line order-line-title">
-                <text wx:if="{{item.goodsBrand}}">{{item.goodsBrand}} </text>
-                <text>{{item.goodsName}}</text>
-              </view>
-              <view class="order-line order-line-meta">
-                <text wx:if="{{item.quantity}}">订货: {{item.quantity}}{{item.standard}}</text>
-              </view>
-              <view class="order-line order-line-meta" wx:if="{{item.orderPrice}}">
-                <text>单价: {{item.orderPrice}}/{{item.standard}}</text>
-              </view>
-              <view class="order-line order-line-meta" wx:if="{{item.orderSubtotal}}">
-                <text>小计: {{item.orderSubtotal}}元</text>
-              </view>
-              <view class="order-line order-line-meta pending-hint" wx:elif="{{item.priceConfirmStatus === 'PENDING' || !item.orderSubtotal}}">
-                <text>价格待称重确认 · 后续可能补款</text>
-              </view>
-              <view class="order-line order-line-supplier status-{{item.statusCode}}">
-                <text wx:if="{{item.statusText}}">{{item.statusText}}</text>
-                <text wx:if="{{item.assignedDistributerName}}"> · {{item.assignedDistributerName}}</text>
-              </view>
-            </block>
-            <view class="order-line order-line-remark" wx:if="{{item.remark}}">备注: {{item.remark}}</view>
+        <view class="bill-card" wx:for="{{todayBills}}" wx:key="billId" wx:for-index="billIndex">
+          <view class="bill-card-head" data-bill-id="{{item.billId}}" data-index="{{billIndex}}" bindtap="onToggleBillExpand">
+            <view class="bill-card-title-row">
+              <text class="bill-card-title">采购单 #{{item.billId}}</text>
+              <text class="bill-card-toggle">{{item.expanded ? '收起' : '展开'}}</text>
+            </view>
+            <text class="bill-card-summary">{{item.summaryText}}</text>
+            <view class="bill-card-meta">
+              <text class="bill-tag">{{item.payStatusText}}</text>
+              <text class="bill-tag bill-tag-muted" wx:if="{{item.priceConfirmStatus === 'PENDING' || item.priceConfirmStatus === 'PARTIAL_PENDING'}}">含待确认价</text>
+              <text class="bill-tag bill-tag-muted">{{item.lineCount}} 项商品</text>
+            </view>
           </view>
-          <view class="order-card-menu" wx:if="{{item.editable}}" catchtap="onEditPlatformLine" data-index="{{index}}">
-            <text class="order-menu-dots">···</text>
+
+          <view class="bill-preview-list" wx:if="{{!item.expanded}}">
+            <view class="bill-preview-line" wx:for="{{item.linesPreview}}" wx:for-item="preview" wx:key="orderId">
+              <text>- {{preview.previewText}}</text>
+            </view>
+          </view>
+
+          <view class="bill-detail-block" wx:if="{{item.expanded}}">
+            <view class="bill-detail-loading" wx:if="{{item.detailLoading}}">明细加载中...</view>
+            <block wx:else>
+              <view class="bill-line-row" wx:for="{{item.detailLines}}" wx:for-item="line" wx:key="orderId">
+                <view class="bill-line-main">
+                  <text class="bill-line-name">{{line.goodsName}}</text>
+                  <text class="bill-line-qty">{{line.quantity}}{{line.standard}}</text>
+                </view>
+                <text class="bill-line-status">{{line.lineStatusText}}</text>
+                <view class="bill-line-menu" wx:if="{{line.editable}}" data-order-id="{{line.orderId}}" catchtap="onEditBillLine">···</view>
+              </view>
+            </block>
+            <view class="bill-action-row">
+              <view class="bill-action-btn" data-bill-id="{{item.billId}}" catchtap="onGoBillPending">{{item.actionText || '查看明细'}}</view>
+            </view>
           </view>
         </view>
       </view>

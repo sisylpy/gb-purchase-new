@@ -132,6 +132,13 @@ function fetchGoodsCategories(params) {
   return requestUtil.post('platform/customer/goods/categories', params || {}, NX_OPTS);
 }
 
+function fetchOutstanding(params) {
+  if (!params || !params.departmentId) {
+    return Promise.resolve(null);
+  }
+  return requestUtil.post('platform/customer/bills/outstanding', params, NX_OPTS);
+}
+
 function loadHomePageData() {
   var params = buildParams();
   var fallbackDeptName = (wx.getStorageSync('mendianInfo') || {}).gbDepartmentName;
@@ -139,15 +146,18 @@ function loadHomePageData() {
   return Promise.all([
     fetchHomeInit(params).catch(function () { return null; }),
     fetchMarketSuppliers(params).catch(function () { return null; }),
-    fetchGoodsCategories(params).catch(function () { return null; })
+    fetchGoodsCategories(params).catch(function () { return null; }),
+    fetchOutstanding(params).catch(function () { return null; })
   ]).then(function (results) {
     var initRes = results[0];
     var suppliersRes = results[1];
     var categoriesRes = results[2];
+    var outstandingRes = results[3];
 
     var initBody = parseResultBody(initRes);
     var suppliersBody = parseResultBody(suppliersRes);
     var categoriesBody = parseResultBody(categoriesRes);
+    var outstandingBody = parseResultBody(outstandingRes);
 
     var initData = isOk(initBody) ? getPayload(initBody) : null;
     var initFromApi = !!initData;
@@ -181,13 +191,21 @@ function loadHomePageData() {
       };
     }
 
+    var outstandingData = isOk(outstandingBody) ? getPayload(outstandingBody) : null;
+    var outstandingBill = outstandingData && outstandingData.mostUrgent
+      ? outstandingData.mostUrgent
+      : (initData && initData.outstandingBill ? initData.outstandingBill : null);
+    var hasOutstandingBill = !!(outstandingData && outstandingData.hasOutstanding)
+      || (initData && initData.hasOutstandingBill === true);
+
     return {
       market: market,
       currentDepartment: currentDepartment,
       searchPlaceholder: searchPlaceholder,
       summary: initData && initData.summary ? initData.summary : null,
-      hasOutstandingBill: initData && initData.hasOutstandingBill === true,
-      outstandingBill: initData && initData.outstandingBill ? initData.outstandingBill : null,
+      hasOutstandingBill: hasOutstandingBill,
+      outstandingBill: outstandingBill,
+      outstandingSummary: outstandingData,
       suppliers: suppliers,
       categories: categories,
       initFromApi: initFromApi,

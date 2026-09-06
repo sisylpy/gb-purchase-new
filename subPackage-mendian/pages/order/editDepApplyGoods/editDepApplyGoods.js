@@ -397,6 +397,34 @@ Page({
     });
   },
 
+  _buildFormalOrder(original) {
+    const savedOrder = this.data.orderItem;
+    if (!savedOrder) {
+      return Object.assign({}, original, { gbDoStatus: 0 });
+    }
+    return Object.assign({}, original, savedOrder, {
+      gbDoStatus: savedOrder.gbDoStatus != null ? savedOrder.gbDoStatus : 0,
+    });
+  },
+
+  _replaceMatchedOrder(orderArr) {
+    const applyItem = this.data.applyItem;
+    if (!applyItem) return orderArr || [];
+
+    const arr = (orderArr || []).slice();
+    const index = Number(this.data.orderPasteIndex);
+    if (index >= 0 && index < arr.length && isSameOrder(arr[index], applyItem)) {
+      arr[index] = this._buildFormalOrder(arr[index]);
+      return arr;
+    }
+
+    const pos = arr.findIndex(o => isSameOrder(o, applyItem));
+    if (pos >= 0) {
+      arr[pos] = this._buildFormalOrder(arr[pos]);
+    }
+    return arr;
+  },
+
   _syncPastePageAfterMatch() {
     const applyItem = this.data.applyItem;
     if (!applyItem) return;
@@ -406,7 +434,12 @@ Page({
     const pastePage = pages.find(p => (p.route || '').indexOf('order/paste/paste') !== -1);
 
     const syncPage = (page, orderArr) => {
-      const updates = { orderArr, pasteDepList };
+      const savedCount = orderArr.filter(item => item.gbDoStatus !== -2).length;
+      const updates = {
+        orderArr,
+        pasteDepList,
+        saveCount: savedCount > 0 ? savedCount : page.data.saveCount,
+      };
       if (orderArr.length === 0) {
         updates.saveCount = null;
         updates.pasteDepIndex = -1;
@@ -424,20 +457,14 @@ Page({
     };
 
     if (pastePage) {
-      const orderArr = (pastePage.data.orderArr || []).filter(o => !isSameOrder(o, applyItem));
-      syncPage(pastePage, orderArr);
+      syncPage(pastePage, this._replaceMatchedOrder(pastePage.data.orderArr));
       return;
     }
 
     if (this.data.from === 'paste') {
       const prevPage = pages[pages.length - 2];
       if (!prevPage) return;
-      const index = Number(this.data.orderPasteIndex);
-      const orderArr = (prevPage.data.orderArr || []).slice();
-      if (index >= 0 && index < orderArr.length) {
-        orderArr.splice(index, 1);
-      }
-      syncPage(prevPage, orderArr);
+      syncPage(prevPage, this._replaceMatchedOrder(prevPage.data.orderArr));
     }
   },
 

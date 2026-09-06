@@ -1,0 +1,25 @@
+<view class="platform-tab-bar">
+  <view class="tab-item {{active === 'home' ? 'tab-item--active' : ''}}" data-tab="home" bindtap="onTabTap">
+    <image class="tab-icon" src="{{active === 'home' ? '/images/tab/home-active.png' : '/images/tab/home.png'}}" mode="aspectFit" />
+    <text class="tab-text">首页</text>
+  </view>
+  <view class="tab-item {{active === 'categoryGoods' ? 'tab-item--active' : ''}}" data-tab="categoryGoods" bindtap="onTabTap">
+    <image class="tab-icon" src="{{active === 'categoryGoods' ? '/images/dish.png' : '/images/book.png'}}" mode="aspectFit" />
+    <text class="tab-text">全部类别</text>
+  </view>
+  <view class="tab-item {{active === 'snapshotGoods' ? 'tab-item--active' : ''}}" data-tab="snapshotGoods" bindtap="onTabTap">
+    <image class="tab-icon" src="{{active === 'snapshotGoods' ? '/images/goods.png' : '/images/goods-3.png'}}" mode="aspectFit" />
+    <text class="tab-text">快照商品</text>
+  </view>
+  <view class="tab-item {{active === 'orders' ? 'tab-item--active' : ''}}" data-tab="orders" bindtap="onTabTap">
+    <view class="tab-icon-wrap">
+      <image class="tab-icon" src="{{active === 'orders' ? '/images/tab/orders-active.png' : '/images/tab/orders.png'}}" mode="aspectFit" />
+      <view wx:if="{{cartBadge}}" class="tab-badge">{{cartBadge}}</view>
+    </view>
+    <text class="tab-text">订货</text>
+  </view>
+  <view class="tab-item {{active === 'mine' ? 'tab-item--active' : ''}}" data-tab="mine" bindtap="onTabTap">
+    <image class="tab-icon" src="{{active === 'mine' ? '/images/tab/mine-active.png' : '/images/tab/mine.png'}}" mode="aspectFit" />
+    <text class="tab-text">我的</text>
+  </view>
+</view>

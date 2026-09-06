@@ -8,6 +8,7 @@ var pageLayout = require('../../lib/pageLayout.js');
 var snapshotApi = require('../../services/platformSnapshot.js');
 var platformOrderApi = require('../../services/platformOrder.js');
 var platformCart = require('../../utils/platformCart.js');
+var platformAuth = require('../../services/platformAuth.js');
 
 function encodePathJoin(base, rel) {
   var r = rel == null ? '' : String(rel).replace(/^\s+|\s+$/g, '');
@@ -68,11 +69,7 @@ Page({
       subcatRowRpx: 0
     });
 
-    if (!this._syncDepartmentContext()) {
-      wx.showToast({ title: '请先登录并选择饭店', icon: 'none' });
-      return;
-    }
-
+    this._syncDepartmentContext();
     this._refreshPlatformTabBadge();
     this._loadSnapshotGoods(true);
   },
@@ -161,23 +158,28 @@ Page({
   },
 
   applyGoods: function (e) {
-    var item = e.currentTarget.dataset.item;
-    if (!item || !item.nxGoodsId) {
-      wx.showToast({ title: '商品信息异常', icon: 'none' });
-      return;
-    }
-    var defaultQty = item.lastOrderQuantity ? String(item.lastOrderQuantity) : '';
-    var defaultStd = item.lastOrderStandard || item.nxGoodsStandardname || '';
-    this.setData({
-      index: e.currentTarget.dataset.index,
-      nxGoods: item,
-      show: true,
-      applyStandardName: defaultStd,
-      applySubtotal: '',
-      canSave: !!defaultQty,
-      editApply: false,
-      applyNumber: defaultQty,
-      applyRemark: ''
+    var that = this;
+    platformAuth.ensureRegisteredForGoods().then(function (ok) {
+      if (!ok) return;
+      that._syncDepartmentContext();
+      var item = e.currentTarget.dataset.item;
+      if (!item || !item.nxGoodsId) {
+        wx.showToast({ title: '商品信息异常', icon: 'none' });
+        return;
+      }
+      var defaultQty = item.lastOrderQuantity ? String(item.lastOrderQuantity) : '';
+      var defaultStd = item.lastOrderStandard || item.nxGoodsStandardname || '';
+      that.setData({
+        index: e.currentTarget.dataset.index,
+        nxGoods: item,
+        show: true,
+        applyStandardName: defaultStd,
+        applySubtotal: '',
+        canSave: !!defaultQty,
+        editApply: false,
+        applyNumber: defaultQty,
+        applyRemark: ''
+      });
     });
   },
 

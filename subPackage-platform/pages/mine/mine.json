@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "我的",
+  "navigationBarBackgroundColor": "#187e6e",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "platform-tab-bar": "../../components/platform-tab-bar/index"
+  }
+}

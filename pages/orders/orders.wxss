@@ -799,3 +799,134 @@
 .bottom-spacer {
   height: 40rpx;
 }
+
+.bill-card {
+  margin: 0 24rpx 24rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.bill-card-head {
+  padding-bottom: 12rpx;
+}
+
+.bill-card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bill-card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.bill-card-toggle {
+  font-size: 24rpx;
+  color: #187e6e;
+}
+
+.bill-card-summary {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.bill-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.bill-tag {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  background: #eef7f5;
+  color: #187e6e;
+}
+
+.bill-tag-muted {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.bill-preview-list {
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.bill-preview-line {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+.bill-detail-block {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.bill-detail-loading {
+  font-size: 26rpx;
+  color: #888;
+  padding: 12rpx 0;
+}
+
+.bill-line-row {
+  position: relative;
+  padding: 16rpx 48rpx 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.bill-line-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.bill-line-name {
+  font-size: 28rpx;
+  color: #222;
+}
+
+.bill-line-qty {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.bill-line-status {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #888;
+}
+
+.bill-line-menu {
+  position: absolute;
+  right: 0;
+  top: 16rpx;
+  padding: 8rpx 12rpx;
+  color: #999;
+  font-size: 32rpx;
+}
+
+.bill-action-row {
+  margin-top: 16rpx;
+}
+
+.bill-action-btn {
+  display: inline-block;
+  padding: 12rpx 24rpx;
+  font-size: 26rpx;
+  color: #187e6e;
+  border: 1rpx solid #187e6e;
+  border-radius: 999rpx;
+}

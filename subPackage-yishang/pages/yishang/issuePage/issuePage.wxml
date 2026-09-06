@@ -127,20 +127,6 @@
           <text>合计:</text>
           <text class="total ">{{bill.gbDbTotal}}元</text>
         </view>
-        <view class="section_head flex-row-between  " style="width: {{(windowWidth - 44 ) / 2}}rpx; margin-left: {{(windowWidth - 80 ) / 2}}rpx;" wx:if="{{bill.gbDbUserCouponId !== null}}">
-                    
-                    <text>优惠:</text>
-                  <text class="total ">-{{bill.gbDbUserCouponTotal}}元</text>
-                
-              </view>
-
-              <view class="section_head flex-row-between  " style="width: {{(windowWidth - 44 ) / 2}}rpx; margin-left: {{(windowWidth - 80 ) / 2}}rpx;" wx:if="{{bill.gbDbUserCouponId !== null}}">
-                  
-                  <text>实付款:</text>
-                <text class="total ">{{bill.gbDbPayTotal}}元</text>                
-            </view>
-
-
         <view class="section_head flex-row-between  " style="width: {{(windowWidth - 44 ) / 2}}rpx; margin-left: {{(windowWidth - 80 ) / 2}}rpx; margin-top: 20rpx;" wx:if="{{haveReturnSubtotal > 0}}">
           <text>退货合计:</text>
           <text class="total ">{{haveReturnSubtotal}}元</text>

@@ -1,0 +1,23 @@
+.page { min-height: 100vh; background: #f5f5f5; }
+.form-container { padding: 24rpx 30rpx 0; }
+.form-item { display: flex; align-items: center; background: #fff; margin-bottom: 20rpx; padding: 20rpx; border-radius: 10rpx; }
+.form-label { width: 160rpx; font-size: 32rpx; color: #333; }
+.form-input { flex: 1; font-size: 34rpx; }
+.avatar-preview-wrap { display: flex; align-items: center; font-size: 28rpx; color: #666; margin-top: 12rpx; }
+.avatar-preview { width: 96rpx; height: 96rpx; margin-left: 16rpx; border-radius: 50%; }
+.agreement-section { padding: 20rpx 30rpx; }
+.agreement-label { display: flex; align-items: center; font-size: 28rpx; }
+.agreement-link { color: #ff7200; margin-left: 8rpx; }
+.submit-section { padding: 0 40rpx 40rpx; }
+.submit-btn { width: 100%; border-radius: 12rpx; font-size: 34rpx; }
+.submit-btn-active { background: #ff7200; color: #fff; }
+.submit-btn-disabled { background: #ccc; color: #999; }
+.terms-modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 99; }
+.terms-modal-content { width: 85%; max-height: 70%; background: #fff; border-radius: 16rpx; overflow: hidden; display: flex; flex-direction: column; }
+.terms-modal-header { display: flex; justify-content: space-between; padding: 24rpx 30rpx; border-bottom: 1px solid #eee; }
+.terms-modal-title { font-size: 32rpx; font-weight: 600; }
+.terms-modal-close { font-size: 48rpx; color: #999; }
+.terms-modal-body { flex: 1; padding: 24rpx 30rpx; }
+.terms-text { font-size: 28rpx; color: #666; line-height: 1.7; }
+.terms-modal-footer { padding: 20rpx 30rpx 30rpx; }
+.terms-confirm-btn { background: #ff7200; color: #fff; }

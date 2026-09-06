@@ -120,8 +120,8 @@
                 </view>
                 <text style="width: {{windowWidth / 6}}rpx; text-align: center;">{{item.gbDoQuantity}}</text>
                 <text style="width: {{windowWidth / 6}}rpx; text-align: center;">{{item.gbDoStandard}}</text>
-                <view bindtap="toPasteFromGoods" data-order="{{item}}" data-index="{{orderIndex}}" hover-class="hover" class="bg-danger radius-10" style="width: {{windowWidth / 6}}rpx; text-align: center;" wx:if="{{item.gbDoStatus == -2}}">
-                  <view class="font-yuan p-10">查找商品</view>
+                <view wx:if="{{item.gbDoStatus == -2}}" class="button-container paste-op-btn" style="width: {{windowWidth / 6}}rpx;" bindtap="openOperationLinshi" data-order="{{item}}" data-name="{{item.gbDoGoodsName}}" data-index="{{orderIndex}}">
+                  <image src="/images/points.png" mode="aspectFill" class="icon" />
                 </view>
               </view>
               <view class="flex-row p-10" wx:if="{{item.gbDoRemark.length > 0}}">

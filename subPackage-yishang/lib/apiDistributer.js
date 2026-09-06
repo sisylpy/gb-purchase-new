@@ -194,32 +194,6 @@ export const markGbPurGoodsFinish = (data) => {
 
 
 
-export const disGetCouponList = (data) => {
-  return new Promise((resolve, reject) => {
-    wx.request({
-      url: apiUrl.apiUrl + 'nxgbdistibuterusercoupon/disGetCouponList',
-      method: 'POST',
-      data: {
-        disId: data.disId,
-       },
-       header: {
-         "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-       },
-      success: (res) => {
-        resolve({ result: res.data })
-      },
-      fail: (e) => {
-        reject(e);
-        load.hideLoading();
-        wx.showToast({
-          title: '请检查网络',
-        })
-      }
-    })
-  })
-}
-
-
 export const disGetPayList = (data) => {
   return new Promise((resolve, reject) => {
     wx.request({
@@ -736,15 +710,12 @@ export const getCustomerCommerceEveryDay = (data) => {
 export const getSalesEveryDay = (data) => {
   return new Promise((resolve, reject) => {
     wx.request({
-      url: apiUrl.apiUrl + 'nxorders/getSalesEveryDay',
-      method: 'POST',
+      url: apiUrl.apiUrl + 'nxcommunity/marketing/order/sales-every-day',
+      method: 'GET',
       data: {
-        commId: data.commId,
+        communityId: data.commId,
         startDate: data.startDate,
         stopDate: data.stopDate,
-      },
-      header: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
       },
       success: (res) => {
         resolve({ result: res.data })

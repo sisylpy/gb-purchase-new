@@ -44,7 +44,7 @@ Page({
       headerKind: 'home'
     });
     this._applyDepartmentFromStorage();
-    if (wx.getStorageSync('userInfo')) {
+    if (wx.getStorageSync('userInfo') || this.data.pageReady) {
       this._loadHomeData();
     }
   },
@@ -79,7 +79,7 @@ Page({
             try { body = JSON.parse(body); } catch (e) { body = {}; }
           }
           if (body.code === -1) {
-            wx.redirectTo({ url: '/pages/tro/tro' });
+            that._loadHomeData();
             return;
           }
           if (body.data === 'noBuyer') {
@@ -91,6 +91,8 @@ Page({
           wx.setStorageSync('disInfo', body.data.disInfo);
           wx.setStorageSync('userInfo', body.data.depUserInfo);
           wx.setStorageSync('mendianInfo', body.data.depInfo);
+          wx.setStorageSync('marketId', 1);
+          wx.setStorageSync('platformMarketId', 1);
           if (body.data.orderDepInfo) {
             wx.setStorageSync('orderDepInfo', body.data.orderDepInfo);
           } else {
@@ -214,6 +216,11 @@ Page({
   },
 
   onOutstandingBannerTap: function () {
-    wx.navigateTo({ url: '/pages/billPending/billPending?from=block' });
+    var billId = this.data.outstandingBanner && this.data.outstandingBanner.billId;
+    var url = '/pages/billPending/billPending?from=block';
+    if (billId) {
+      url += '&billId=' + billId;
+    }
+    wx.navigateTo({ url: url });
   }
 });

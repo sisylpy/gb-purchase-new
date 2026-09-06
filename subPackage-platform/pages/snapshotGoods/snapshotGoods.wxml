@@ -1,0 +1,128 @@
+<wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
+
+<view class="platform-tab-page page-snapshot-goods">
+  <view class="platform-tab-header platform-tab-header--fixed platform-tab-header--beige">
+    <navbar-dual title="快照商品" avatar="/images/user.png" />
+    <view class="platform-title-block snapshot-title-block">
+      <text class="platform-title-sub">饭店历史订货商品，一键复购</text>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="platform-tab-scroll" style="padding-top: {{scrollTopPadding}}px;">
+    <view class="snapshot-loading" wx:if="{{loading && goodsList.length === 0}}">
+      <text>加载中...</text>
+    </view>
+
+    <view class="snapshot-empty" wx:elif="{{!loading && goodsList.length === 0}}">
+      <image class="snapshot-empty-icon" src="/images/orderlisto.png" mode="aspectFit" />
+      <text class="snapshot-empty-text">暂无快照商品</text>
+      <text class="snapshot-empty-hint">订货后会自动出现在这里，方便下次复购</text>
+    </view>
+
+    <block wx:else>
+      <view
+        class="flex-row-default product-item p-10"
+        wx:for="{{goodsList}}"
+        wx:for-item="sons"
+        wx:key="nxGoodsId"
+        wx:for-index="goodsIndex"
+      >
+        <view class="flex-row-default">
+          <image
+            bindtap="showImageModal"
+            data-goods="{{sons}}"
+            src="{{sons.nxGoodsFile ? url + sons.nxGoodsFile : '/images/logo.jpg'}}"
+            mode="aspectFill"
+            class="goods_item mr-20"
+          />
+          <view class="flex-row-default flex-1">
+            <view class="flex-column goods-info-col">
+              <view class="flex-row middle">
+                <text class="{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? 'brand' : ''}}">{{sons.nxGoodsBrand !== null && sons.nxGoodsBrand !== '' ? sons.nxGoodsBrand : ''}}</text>
+                <view class="font-xl">{{sons.nxGoodsName}}</view>
+              </view>
+              <view class="flex-row font-sl" wx:if="{{sons.nxGoodsStandardWeight !== null && sons.nxGoodsStandardWeight !== ''}}">
+                <view class="flex-row-wrap">
+                  <text class="gray">规格:</text>
+                  <view>{{sons.nxGoodsStandardWeight}}/{{sons.nxGoodsStandardname}}</view>
+                </view>
+              </view>
+              <view class="flex-row font-sl" wx:else>
+                <view class="flex-row">
+                  <text class="text-secondary">规格:</text>
+                  <view>{{sons.nxGoodsStandardname}}</view>
+                </view>
+              </view>
+              <view class="snapshot-meta" wx:if="{{sons.lastOrderQuantity || sons.lastOrderDate}}">
+                <text wx:if="{{sons.lastOrderQuantity}}">上次 {{sons.lastOrderQuantity}}{{sons.lastOrderStandard || sons.nxGoodsStandardname}}</text>
+                <text wx:if="{{sons.lastOrderDate}}" class="snapshot-date">{{sons.lastOrderDate}}</text>
+              </view>
+            </view>
+            <view class="flex-">
+              <view
+                class="flex-row"
+                catch:tap="toEditPlatformOrder"
+                data-order="{{sons.platformOrder}}"
+                data-item="{{sons}}"
+                data-index="{{goodsIndex}}"
+                wx:if="{{sons.platformOrder}}"
+              >
+                <text class="five-weight save_btn has_order">{{sons.platformOrder.quantity}}{{sons.platformOrder.standard}}</text>
+              </view>
+              <view
+                class="flex-row"
+                wx:else
+                catch:tap="applyGoods"
+                data-index="{{goodsIndex}}"
+                data-item="{{sons}}"
+                hover-class="hover"
+              >
+                <view class="save_btn"><text>订货</text></view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="list-footer" wx:if="{{totalPage === currentPage && goodsList.length > 0}}">
+        共 {{totalCount}} 个快照商品
+      </view>
+      <view class="list-loading" wx:if="{{loading && goodsList.length > 0}}">
+        <text>加载更多...</text>
+      </view>
+    </block>
+
+    <view class="platform-tab-bottom-spacer"></view>
+  </scroll-view>
+</view>
+
+<myDismodalNx
+  show="{{show}}"
+  bindconfirm="confirm"
+  bindcancle="cancle"
+  binddelApply="delApply"
+  applyStandardName="{{applyStandardName}}"
+  applyNumber="{{applyNumber}}"
+  applySubtotal="{{applySubtotal}}"
+  applyRemark="{{applyRemark}}"
+  editApply="{{editApply}}"
+  navBarHeight="{{navBarHeight}}"
+  windowWidth="{{windowWidth}}"
+  bindchangeStandard="changeStandard"
+  item="{{nxGoods}}"
+  canSave="{{canSave}}"
+  windowHeight="{{windowHeight}}"
+/>
+
+<view class="image-modal" wx:if="{{showImageModal}}" bindtap="hideImageModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">商品图片</text>
+      <view class="close-btn" bindtap="hideImageModal">×</view>
+    </view>
+    <view class="modal-body">
+      <image src="{{currentImage}}" mode="aspectFit" class="modal-image" />
+    </view>
+  </view>
+  <platform-tab-bar active="snapshotGoods" cartBadge="{{cartBadge}}" />
+</view>

@@ -311,6 +311,12 @@ textarea {
   visibility: visible;
 }
 
+.paste-op-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .overlay.hide {
   opacity: 0;
   visibility: hidden;

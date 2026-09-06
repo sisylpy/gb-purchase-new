@@ -1,0 +1,6 @@
+{
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "platform-tab-bar": "../../components/platform-tab-bar/index"
+  }
+}

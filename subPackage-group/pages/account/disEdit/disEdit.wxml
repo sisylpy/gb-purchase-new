@@ -85,13 +85,6 @@
       </view>
     </view>
 
-    <!-- <view class="flex-row-between p-30 border-bottom"  bindtap="toCouponList"    hover-class="hover"  wx:if="{{disInfo.nxDistributerEntity !== null}}">
-      <text>京京送货优惠卷</text>
-      <view class="flex-row">
-        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
-      </view>
-    </view> -->
-
     <view class="flex-row-between p-30 border-bottom" bindtap="requestSubscribeMessage" hover-class="hover">
 
       <view class="flex-row">

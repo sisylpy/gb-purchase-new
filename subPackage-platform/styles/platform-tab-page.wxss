@@ -1,0 +1,107 @@
+/* 京采市场 Tab 页统一壳：固定顶栏 + 中间 scroll-view（与 home 一致） */
+
+.platform-tab-page {
+  min-height: 100vh;
+  background: #f4f6f5;
+  box-sizing: border-box;
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+}
+
+.platform-tab-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.platform-tab-header--white {
+  background: #ffffff;
+  border-bottom: 1rpx solid #eef0ef;
+}
+
+.platform-tab-header--beige {
+  background: #fdf9ee;
+}
+
+.platform-tab-scroll {
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.platform-tab-body {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.platform-tab-bottom-spacer {
+  height: calc(40rpx + env(safe-area-inset-bottom));
+  padding-bottom: 100rpx;
+}
+
+/* 订货 / 快照 标题区 */
+.platform-title-block {
+  padding: 16rpx 28rpx 24rpx;
+}
+
+.platform-title-main {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.platform-title-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #888;
+  line-height: 1.5;
+}
+
+/* 我的：顶栏资料卡 */
+.platform-profile-header {
+  padding: 16rpx 24rpx 24rpx;
+}
+
+.platform-profile-card {
+  display: flex;
+  align-items: center;
+  padding: 36rpx 28rpx;
+  background: linear-gradient(135deg, #187e6e 0%, #145a50 100%);
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(20, 90, 80, 0.2);
+}
+
+.platform-profile-avatar-wrap {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4rpx solid rgba(255, 255, 255, 0.4);
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.platform-profile-avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.platform-profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.platform-profile-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8rpx;
+}
+
+.platform-profile-dept {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.85);
+}

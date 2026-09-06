@@ -460,13 +460,6 @@ toPayList(){
   })
 },
 
-toCouponList(){
-  wx.navigateTo({
-    url: '../couponList/couponList',
-  })
-},
-
-
 toGroupGoods(){
   wx.navigateTo({
     url: '/subPackage-group/pages/goods/resGoods/resGoods',

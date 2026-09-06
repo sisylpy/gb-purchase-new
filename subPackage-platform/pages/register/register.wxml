@@ -1,0 +1,55 @@
+<view class="page">
+  <view class="form-container">
+    <view class="form-item">
+      <text class="form-label">餐厅名称</text>
+      <input class="form-input" placeholder="请输入餐厅/饭店名称" bindinput="onRestaurantNameInput" value="{{restaurantName}}" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">业务电话</text>
+      <input class="form-input" placeholder="请输入手机或座机号码" type="number" bindinput="onPhoneInput" value="{{phone}}" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">公司地址</text>
+      <input class="form-input" placeholder="选填" bindinput="onAddressInput" value="{{address}}" />
+    </view>
+    <view wx:if="{{avatarUrl}}" class="avatar-preview-wrap">
+      <text>已选头像</text>
+      <image src="{{avatarUrl}}" class="avatar-preview" />
+    </view>
+  </view>
+
+  <view class="agreement-section">
+    <checkbox-group bindchange="onAgreementChange">
+      <label class="agreement-label">
+        <checkbox value="agree" checked="{{agreed}}" color="#ff7200" />
+        <text class="agreement-text">我已阅读并同意</text>
+        <text class="agreement-link" bindtap="showTermsModal">《京采平台饭店注册条款》</text>
+      </label>
+    </checkbox-group>
+  </view>
+
+  <view class="submit-section">
+    <button
+      class="submit-btn {{canRegister ? 'submit-btn-active' : 'submit-btn-disabled'}}"
+      open-type="chooseAvatar"
+      bindchooseavatar="onChooseAvatar"
+      disabled="{{!canRegister}}">
+      提交注册
+    </button>
+  </view>
+
+  <view wx:if="{{showTerms}}" class="terms-modal-mask" bindtap="hideTermsModal">
+    <view class="terms-modal-content" catchtap="preventClose">
+      <view class="terms-modal-header">
+        <text class="terms-modal-title">京采平台饭店注册条款</text>
+        <text class="terms-modal-close" bindtap="hideTermsModal">×</text>
+      </view>
+      <scroll-view class="terms-modal-body" scroll-y>
+        <text class="terms-text">注册即表示您同意在京采平台市场进行订货；平台注册仅创建饭店账号并绑定市场，不会在注册时指定配送商。</text>
+      </scroll-view>
+      <view class="terms-modal-footer">
+        <button class="terms-confirm-btn" bindtap="hideTermsModal">我已了解</button>
+      </view>
+    </view>
+  </view>
+</view>

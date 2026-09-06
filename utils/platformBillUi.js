@@ -57,16 +57,19 @@ function buildBillPendingView(bill) {
 
 function buildOutstandingBanner(info) {
   if (!info) return null;
-  var supplement = Number(info.supplementDue || 0);
-  if (info.payPhase === 'SUPPLEMENT' || supplement > 0) {
+  var supplement = Number(info.supplementDue || info.payAmount || 0);
+  var payPhase = info.payPhase || '';
+  if (payPhase === 'SUPPLEMENT' || supplement > 0) {
     return {
-      text: '您有待补款采购单 ¥' + (info.supplementDue || info.payAmount || '0.00') + '，请先补款后继续结算',
-      payPhase: 'SUPPLEMENT'
+      text: info.message || ('您有待补款采购单 ¥' + (info.supplementDue || info.payAmount || '0.00') + '，请先补款后继续结算'),
+      payPhase: 'SUPPLEMENT',
+      billId: info.billId
     };
   }
   return {
-    text: '您有未结清采购单，请先处理后再结算',
-    payPhase: 'BLOCK'
+    text: info.message || info.title || '您有未结清采购单，请先处理后再结算',
+    payPhase: payPhase || 'BLOCK',
+    billId: info.billId
   };
 }
 

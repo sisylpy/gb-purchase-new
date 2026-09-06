@@ -1,0 +1,7 @@
+<view class="page">
+  <view class="hero">
+    <view class="title">京采平台</view>
+    <view class="sub">批发市场饭店订货</view>
+  </view>
+  <button class="btn" bindtap="toRegister">注册饭店账号</button>
+</view>

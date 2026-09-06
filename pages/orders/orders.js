@@ -7,6 +7,7 @@ var pageLayout = require('../../lib/pageLayout');
 var platformCart = require('../../utils/platformCart');
 var platformCartApi = require('../../services/platformCart');
 var platformOrderApi = require('../../services/platformOrder');
+var platformBillApi = require('../../services/platformBill');
 
 Page({
   data: {
@@ -29,9 +30,14 @@ Page({
     checkoutNotice: '',
     hasPaymentProcessing: false,
     checkoutBlocked: false,
-    /** 正式订货 */
-    platformLines: [],
+    /** 正式订货（按采购单分组） */
+    todayBills: [],
+    todayBillCount: 0,
+    todayLineCount: 0,
     formalEmpty: true,
+    formalLoading: false,
+    /** 兼容旧编辑逻辑：当前展开 bill 的明细行 */
+    platformLines: [],
     show: false,
     editApply: true,
     applyNumber: '',
@@ -243,22 +249,119 @@ Page({
   },
 
   _loadFormalOrders: function () {
+    this._loadTodayBills();
+  },
+
+  _loadTodayBills: function () {
     var that = this;
     var ctx = platformCart.getBuyerContext();
     if (!ctx.gbDepartmentId) {
-      this.setData({ platformLines: [], formalEmpty: true });
+      this.setData({
+        todayBills: [],
+        todayBillCount: 0,
+        todayLineCount: 0,
+        formalEmpty: true,
+        platformLines: []
+      });
       return;
     }
-    platformOrderApi.listTodayLines().then(function (res) {
-      var body = platformOrderApi.parseBody(res);
-      var lines = (platformOrderApi.isOk(body) && body.data) ? body.data : [];
+    this.setData({ formalLoading: true });
+    platformBillApi.listBills().then(function (body) {
+      if (!platformBillApi.isOk(body) || !body.data) {
+        that.setData({
+          formalLoading: false,
+          todayBills: [],
+          todayBillCount: 0,
+          todayLineCount: 0,
+          formalEmpty: true,
+          platformLines: []
+        });
+        return;
+      }
+      var data = body.data;
+      var bills = (data.bills || []).map(function (bill) {
+        return Object.assign({}, bill, {
+          expanded: false,
+          detailLines: [],
+          detailLoading: false
+        });
+      });
       that.setData({
-        platformLines: lines,
-        formalEmpty: lines.length === 0
+        formalLoading: false,
+        todayBills: bills,
+        todayBillCount: data.billCount != null ? data.billCount : bills.length,
+        todayLineCount: data.totalLineCount != null ? data.totalLineCount : 0,
+        formalEmpty: bills.length === 0,
+        platformLines: []
       });
     }).catch(function () {
-      that.setData({ platformLines: [], formalEmpty: true });
+      that.setData({
+        formalLoading: false,
+        todayBills: [],
+        todayBillCount: 0,
+        todayLineCount: 0,
+        formalEmpty: true,
+        platformLines: []
+      });
     });
+  },
+
+  onToggleBillExpand: function (e) {
+    var billId = Number(e.currentTarget.dataset.billId);
+    var index = Number(e.currentTarget.dataset.index);
+    var bills = (this.data.todayBills || []).slice();
+    var bill = bills[index];
+    if (!bill || bill.billId !== billId) return;
+    var nextExpanded = !bill.expanded;
+    bill.expanded = nextExpanded;
+    this.setData({ todayBills: bills });
+    if (nextExpanded && (!bill.detailLines || !bill.detailLines.length)) {
+      this._loadBillDetail(index, billId);
+    }
+  },
+
+  _loadBillDetail: function (index, billId) {
+    var that = this;
+    var bills = (this.data.todayBills || []).slice();
+    var bill = bills[index];
+    if (!bill) return;
+    bill.detailLoading = true;
+    this.setData({ todayBills: bills });
+    platformBillApi.billDetail(billId).then(function (body) {
+      bills = (that.data.todayBills || []).slice();
+      bill = bills[index];
+      if (!bill || bill.billId !== billId) return;
+      bill.detailLoading = false;
+      if (platformBillApi.isOk(body) && body.data) {
+        bill.detailLines = body.data.lines || [];
+      } else {
+        bill.detailLines = bill.linesPreview || [];
+      }
+      that.setData({ todayBills: bills });
+    }).catch(function () {
+      bills = (that.data.todayBills || []).slice();
+      bill = bills[index];
+      if (!bill) return;
+      bill.detailLoading = false;
+      bill.detailLines = bill.linesPreview || [];
+      that.setData({ todayBills: bills });
+    });
+  },
+
+  onGoBillPending: function (e) {
+    var billId = Number(e.currentTarget.dataset.billId);
+    if (!billId) return;
+    wx.navigateTo({ url: '/pages/billPending/billPending?from=orders&billId=' + billId });
+  },
+
+  _findBillLine: function (orderId) {
+    var found = null;
+    (this.data.todayBills || []).forEach(function (bill) {
+      (bill.detailLines || []).forEach(function (line) {
+        if (line.orderId === orderId) found = line;
+      });
+    });
+    return found;
   },
 
   onToggleSelectAll: function () {
@@ -426,6 +529,37 @@ Page({
     });
   },
 
+  onEditBillLine: function (e) {
+    var orderId = Number(e.currentTarget.dataset.orderId);
+    var line = this._findBillLine(orderId);
+    if (!line || !line.editable) {
+      if (line && !line.editable) {
+        wx.showToast({ title: '已匹配配送商，不可修改', icon: 'none' });
+      }
+      return;
+    }
+    this.setData({
+      show: true,
+      editApply: true,
+      editingSource: 'formal',
+      editingLine: line,
+      editingIndex: -1,
+      applyNumber: line.quantity,
+      applyStandardName: line.standard,
+      applyRemark: line.remark || '',
+      canSave: true,
+      nxGoods: {
+        nxGoodsId: line.nxGoodsId,
+        nxGoodsName: line.goodsName,
+        nxGoodsStandardname: line.standard,
+        nxGoodsBrand: '',
+        nxGoodsStandardWeight: '',
+        nxAliasEntities: [],
+        nxGoodsStandardEntities: []
+      }
+    });
+  },
+
   onEditPlatformLine: function (e) {
     var idx = Number(e.currentTarget.dataset.index);
     var line = this.data.platformLines[idx];
@@ -472,7 +606,7 @@ Page({
         return;
       }
       if (typeof onSuccess === 'function') onSuccess(body.data);
-      that._loadFormalOrders();
+      that._loadTodayBills();
       wx.showToast({ title: '已保存', icon: 'success' });
     }).catch(function () {
       load.hideLoading();
@@ -491,7 +625,7 @@ Page({
         return;
       }
       that.setData({ show: false, editingLine: null, nxGoods: null });
-      that._loadFormalOrders();
+      that._loadTodayBills();
       wx.showToast({ title: '已删除', icon: 'success' });
     }).catch(function () {
       load.hideLoading();

@@ -1,13 +1,9 @@
 {
   "pages": [
-    "pages/home/home",
-    "pages/categoryGoods/categoryGoods",
-    "pages/snapshotGoods/snapshotGoods",
-    "pages/orders/orders",
-    "pages/checkout/checkout",
-    "pages/billPending/billPending",
-    "pages/mine/mine",
+        "pages/platformEntry/platformEntry",
+
     "pages/index/index",
+   
     "pages/splash/splash",
     "pages/common/selectDate/selectDate",
     "pages/register/register",
@@ -154,13 +150,27 @@
       ]
     },
     {
+      "root": "subPackage-platform/",
+      "name": "platform",
+      "pages": [
+        "pages/home/home",
+        "pages/categoryGoods/categoryGoods",
+        "pages/snapshotGoods/snapshotGoods",
+        "pages/orders/orders",
+        "pages/checkout/checkout",
+        "pages/billPending/billPending",
+        "pages/mine/mine",
+        "pages/landing/landing",
+        "pages/register/register"
+      ]
+    },
+    {
       "root": "subPackage-group/",
       "name": "group",
       "pages": [
         "pages/account/disEdit/disEdit",
         "pages/account/payPage/payPage",
         "pages/account/payList/payList",
-        "pages/account/couponList/couponList",
         "pages/account/payDetail/payDetail",
         "pages/account/loginPay/loginPay",
         "pages/account/invitePage/invitePage",
@@ -186,44 +196,6 @@
     "navigationBarTitleText": "京采市场",
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
-  },
-  "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#187e6e",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/home/home",
-        "text": "首页",
-        "iconPath": "images/tab/home.png",
-        "selectedIconPath": "images/tab/home-active.png"
-      },
-      {
-        "pagePath": "pages/categoryGoods/categoryGoods",
-        "text": "全部类别",
-        "iconPath": "images/book.png",
-        "selectedIconPath": "images/dish.png"
-      },
-      {
-        "pagePath": "pages/snapshotGoods/snapshotGoods",
-        "text": "快照商品",
-        "iconPath": "images/goods-3.png",
-        "selectedIconPath": "images/goods.png"
-      },
-      {
-        "pagePath": "pages/orders/orders",
-        "text": "订货",
-        "iconPath": "images/tab/orders.png",
-        "selectedIconPath": "images/tab/orders-active.png"
-      },
-      {
-        "pagePath": "pages/mine/mine",
-        "text": "我的",
-        "iconPath": "images/tab/mine.png",
-        "selectedIconPath": "images/tab/mine-active.png"
-      }
-    ]
   },
   "networkTimeout": {
     "request": 300000

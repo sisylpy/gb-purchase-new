@@ -1,0 +1,24 @@
+function parsePrice(price) {
+  if (price === null || price === undefined || price === '') return -1;
+  var n = parseFloat(price);
+  return isNaN(n) ? -1 : n;
+}
+
+function isValidDisplayPrice(price) {
+  var n = parsePrice(price);
+  return n > 0.1;
+}
+
+function formatReferencePrice(price, unit) {
+  if (!isValidDisplayPrice(price)) {
+    return '待确认价';
+  }
+  var n = parsePrice(price);
+  var text = n % 1 === 0 ? String(n) : n.toFixed(2);
+  return unit ? ('参考价 ¥' + text + ' / ' + unit) : ('参考价 ¥' + text);
+}
+
+module.exports = {
+  isValidDisplayPrice: isValidDisplayPrice,
+  formatReferencePrice: formatReferencePrice
+};
