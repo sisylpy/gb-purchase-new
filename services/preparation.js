@@ -241,6 +241,13 @@ function listFoodVersions(recipeId, distributerId) {
   return get('preparation/p1/food-recipes/' + recipeId + '/versions', { distributerId: distributerId });
 }
 
+function getFoodVersionDeletionEligibility(recipeId, versionId, distributerId) {
+  return get(
+    'preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId + '/deletion-eligibility',
+    { distributerId: distributerId }
+  );
+}
+
 function saveFoodDraft(recipeId, versionId, body) {
   return put('preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId + '/draft', body);
 }
@@ -553,6 +560,7 @@ module.exports = {
   enableVersionedFood: enableVersionedFood,
   getFoodRecipe: getFoodRecipe,
   listFoodVersions: listFoodVersions,
+  getFoodVersionDeletionEligibility: getFoodVersionDeletionEligibility,
   saveFoodDraft: saveFoodDraft,
   foodVersionAction: foodVersionAction,
   listFoodEffectiveIntervals: listFoodEffectiveIntervals,

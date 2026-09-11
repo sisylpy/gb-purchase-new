@@ -157,9 +157,18 @@ function _managedVersionUsageState(detail, selectedVersion) {
       + (item.effectiveEnd ? _recipeDateText(item.effectiveEnd) + ' 起停止' : '持续使用');
     return item;
   });
+  var preferredId = Number(detail && detail._preferredIntervalId || 0);
   var preferred = intervals.find(function (row) {
     return row.effectiveStart <= today && (!row.effectiveEnd || today < row.effectiveEnd);
-  }) || intervals[intervals.length - 1] || null;
+  }) || null;
+  // 编辑指定区间时优先回填该区间，避免读到同一业务版本下另一个修订的时间。
+  if (preferredId) {
+    var explicitInterval = intervals.find(function (row) {
+      return Number(row.id) === preferredId;
+    });
+    if (explicitInterval) preferred = explicitInterval;
+  }
+  if (!preferred) preferred = intervals[intervals.length - 1] || null;
   var start = preferred && _recipeDateText(preferred.effectiveStart);
   if (!start) {
     var latestBoundary = timeline.filter(function (row) {
@@ -1171,7 +1180,10 @@ function createRecipePage(pageMode) {
       foodItem: foodItem,
       foodId: foodId,
       baseVersionId: Number(options && options.baseVersionId) || null,
-      manageVersionId: Number(options && options.manageVersionId) || null,
+      // 内容修订 ID 是唯一权威对象；manageVersionId 仅作为旧入口兼容。
+      manageVersionId: Number(options && options.contentVersionId)
+        || Number(options && options.manageVersionId) || null,
+      editIntervalId: Number(options && options.intervalId) || null,
       returnToManage: String(options && options.returnToManage || '') === '1',
       versionedMode: foodItem.gbDfRecipeModel === 'VERSIONED',
       versionUsageStart: this.data.versionEditorMode ? _todayText() : '',
@@ -1330,11 +1342,42 @@ function createRecipePage(pageMode) {
         } else {
           selectedVersionId = effectiveVersionId;
         }
+        // 编辑既有对象时，内容修订与指定区间都必须真实存在；缺失要明确报错，
+        // 不能让页面默默回退成今天的默认日期。
+        if (that.data.versionEditorMode && Number(that.data.manageVersionId) > 0) {
+          if (!Number(selectedVersionId)) {
+            return Promise.reject({
+              preparationError: true,
+              status: 404,
+              message: '要编辑的配方内容修订不存在，请返回版本列表重试',
+            });
+          }
+          if (Number(that.data.editIntervalId) > 0) {
+            var targetInterval = timeline.find(function (row) {
+              return Number(row.id) === Number(that.data.editIntervalId);
+            });
+            if (!targetInterval) {
+              return Promise.reject({
+                preparationError: true,
+                status: 404,
+                message: '指定的门店适用区间不存在，请返回版本列表重试',
+              });
+            }
+            if (Number(targetInterval.recipeVersionId) !== Number(selectedVersionId)) {
+              return Promise.reject({
+                preparationError: true,
+                status: 409,
+                message: '该适用区间不属于要编辑的内容修订，请返回版本列表重试',
+              });
+            }
+          }
+        }
         var withContext = function (selectedDetail) {
           return Object.assign({}, selectedDetail, {
             versionHistory: versions,
             recipeTimeline: timeline,
             effectiveVersionId: effectiveVersionId,
+            _preferredIntervalId: Number(that.data.editIntervalId) || 0,
           });
         };
         if (!selectedVersionId) {
@@ -2601,7 +2644,20 @@ function createRecipePage(pageMode) {
     confirmPromise.then(function (result) {
       var intervalResult = result && result.recipeInterval ? result.recipeInterval : result;
       var requestId = intervalResult && intervalResult.recalculationRequestId;
+      var appliedId = Number(intervalResult && intervalResult.appliedContentVersionId || 0);
+      var applicationStatus = String(intervalResult && intervalResult.applicationStatus || '');
       var identity = that.preparationIdentity || preparationUtil.getIdentity();
+      // 实际写入区间的修订必须与预览的修订一致，避免把新内容挂到别的修订上。
+      if (appliedId && appliedId !== Number(versionId)) {
+        wx.hideLoading();
+        that.setData({ versionUsageConfirming: false, versionUsagePreview: null });
+        wx.showModal({
+          title: '适用时间写入的修订不一致',
+          content: '预览的内容修订是 #' + versionId + '，实际写入的是 #' + appliedId + '，请返回列表确认。',
+          showCancel: false,
+        });
+        return;
+      }
       return preparationApi.waitForDishCostRecalculation(
         requestId,
         identity.distributerId,
@@ -2610,11 +2666,23 @@ function createRecipePage(pageMode) {
         wx.hideLoading();
         var status = String(recalculation && recalculation.status || '');
         var failed = Number(recalculation && recalculation.failedGrainCount || 0);
-        if (status === 'FAILED' || status === 'COMPLETED_WITH_FAILURES') {
+        // 只有 COMPLETED 且失败数为 0 才算完成；其余都不得把新内容与旧成本组合展示。
+        if (status === 'FAILED' || status === 'COMPLETED_WITH_FAILURES'
+          || (status === 'COMPLETED' && failed > 0)) {
           that.setData({ versionUsageConfirming: false, versionUsageDirty: false });
           wx.showModal({
             title: '成本更新未全部完成',
             content: '配方使用时间已保存，但有 ' + failed + ' 条成本更新失败，被替代的旧版本暂未删除。',
+            showCancel: false,
+            success: function () { wx.navigateBack({ delta: 1 }); },
+          });
+          return;
+        }
+        if (status !== 'COMPLETED') {
+          that.setData({ versionUsageConfirming: false, versionUsageDirty: false });
+          wx.showModal({
+            title: '成本仍在更新',
+            content: '系统尚未确认成本全部完成（状态 ' + (status || '未知') + '），请稍后刷新查看。',
             showCancel: false,
             success: function () { wx.navigateBack({ delta: 1 }); },
           });
@@ -3771,9 +3839,44 @@ function createRecipePage(pageMode) {
       wx.showToast({ title: '配方版本信息不完整', icon: 'none' });
       return;
     }
+    var identity = that.preparationIdentity || preparationUtil.getIdentity();
+    // 删除资格完全以后端返回值为准，前端不放宽任何拦截条件。
+    load.showLoading('检查删除条件');
+    preparationApi.getFoodVersionDeletionEligibility(
+      detail.recipe.id,
+      detail.version.id,
+      identity.distributerId
+    ).then(function (eligibility) {
+      load.hideLoading();
+      if (eligibility && eligibility.canDelete === false) {
+        var counts = eligibility.referenceCounts || {};
+        var releasable = eligibility.releasableActiveIntervalIds || [];
+        var content = eligibility.blockingMessage || '该内容修订仍有业务引用，暂时不能删除。';
+        content += '\n\n生效区间 ' + Number(counts.activeIntervalCount || 0)
+          + ' · 当前成本 ' + Number(counts.currentCostResultCount || 0)
+          + ' · 生产记录 ' + Number(counts.productionFactCount || 0)
+          + ' · 重算中 ' + Number(counts.pendingRecalculationCount || 0);
+        if (releasable.length) {
+          content += '\n\n有 ' + releasable.length + ' 个空白适用区间可以先解除。';
+        }
+        wx.showModal({ title: '暂时不能删除', content: content, showCancel: false });
+        return;
+      }
+      that._promptDeleteReason(detail, eligibility);
+    }).catch(function (error) {
+      load.hideLoading();
+      preparationUtil.showError(error);
+    });
+  },
+
+  _promptDeleteReason(detail, eligibility) {
+    var that = this;
+    var modeText = eligibility && eligibility.deletionMode === 'ARCHIVE'
+      ? '该修订存在历史区间、成本或调整证据，删除后仅从业务页面移除，后台保留历史。'
+      : '该修订没有业务或历史依赖，将直接从业务数据中删除。';
     wx.showModal({
       title: '输入删除 V' + (detail.version.versionNo || '') + ' 的原因',
-      content: '',
+      content: modeText,
       editable: true,
       placeholderText: '例如：误建版本',
       confirmText: '确认删除',

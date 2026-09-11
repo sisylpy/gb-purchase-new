@@ -22,6 +22,11 @@
           </view>
           <text class="version-card__date">{{version._publishedText ? version._publishedText + (version._isDraft ? ' 创建' : ' 发布') : ''}}</text>
         </view>
+        <text class="version-card__content-id">内容修订 #{{version._contentVersionId}} · 第 {{version.revisionNo}} 次修订</text>
+        <view class="version-card__warn" wx:if="{{version._latestNotApplied}}">
+          <text>最新内容尚未被门店采用：下方适用时间与成本属于已采用的修订，不属于这份最新内容。</text>
+        </view>
+        <text class="version-card__cost-state" wx:if="{{version._costDetailText}}">核算状态：{{version._costDetailText}}</text>
         <view class="version-card__use" wx:if="{{version._isCurrent}}">
           <view class="version-card__use-current">✓ 今天正在使用</view>
         </view>
@@ -81,10 +86,29 @@
           </view>
           <view class="version-recipe__empty" wx:if="{{!version._components.length}}">该版本没有可展示的配料快照</view>
         </view>
-        <view class="version-card__actions version-card__actions--single">
-          <view class="version-card__action version-card__action--primary" data-version-id="{{version.id}}" bindtap="editVersion">
+        <view class="version-revisions" wx:if="{{version._contentRevisions.length > 1}}">
+          <view class="version-revisions__head"><text class="version-section-title">内容修订明细</text></view>
+          <view wx:for="{{version._contentRevisions}}" wx:for-item="revision" wx:key="_contentVersionId" class="version-revision-row">
+            <view class="version-revision-row__head">
+              <text class="version-revision-row__title">修订 {{revision.revisionNo}} · #{{revision._contentVersionId}} · {{revision._statusText}}</text>
+              <text class="version-revision-row__state">{{revision._isApplied ? '已被门店采用' : '未采用'}}</text>
+            </view>
+            <text class="version-revision-row__line">配料 {{revision._components.length}} 种</text>
+            <text class="version-revision-row__line" wx:if="{{revision._intervals.length}}">适用时间：{{revision._intervals[0]._periodText}}</text>
+            <text class="version-revision-row__line" wx:else>适用时间：尚未设置</text>
+            <text class="version-revision-row__line">每份成本：{{revision._costPerPortionText}} · {{revision._costStatusText}}</text>
+            <text class="version-revision-row__detail" wx:if="{{revision._costDetailText}}">{{revision._costDetailText}}</text>
+            <view class="version-revision-row__actions">
+              <text class="version-revision-row__action" data-content-version-id="{{revision._contentVersionId}}" data-interval-id="{{revision._firstIntervalId}}" bindtap="editVersion">编辑该修订</text>
+              <text class="version-revision-row__action version-revision-row__action--danger" data-content-version-id="{{revision._contentVersionId}}" bindtap="deleteVersion">删除该修订</text>
+            </view>
+          </view>
+        </view>
+        <view class="version-card__actions">
+          <view class="version-card__action version-card__action--primary" data-content-version-id="{{version._contentVersionId}}" data-interval-id="{{version._intervals[0].id}}" bindtap="editVersion">
             {{version._isDraft ? '编辑草稿' : '编辑'}}
           </view>
+          <view class="version-card__action version-card__action--danger" data-content-version-id="{{version._contentVersionId}}" bindtap="deleteVersion">删除</view>
         </view>
       </view>
     </block>

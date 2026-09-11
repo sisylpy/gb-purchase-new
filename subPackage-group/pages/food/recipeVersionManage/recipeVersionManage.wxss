@@ -68,6 +68,21 @@
 .version-card__action--history { color: #147966; background: #eaf7f3; }
 .version-card__actions--single { display: block; }
 .version-card__action--primary { color: #fff; background: #168d79; }
+.version-card__action--danger { color: #c2443f; background: #fbeeec; }
+.version-card__content-id { margin-top: 10rpx; color: #87908e; font-size: 21rpx; }
+.version-card__cost-state { margin-top: 8rpx; color: #72807c; font-size: 20rpx; line-height: 1.45; }
+.version-card__warn { margin-top: 12rpx; padding: 14rpx 16rpx; color: #8a5a12; font-size: 22rpx; line-height: 1.5; background: #fdf3e2; border-radius: 10rpx; }
+.version-revisions { margin-top: 18rpx; padding-top: 16rpx; border-top: 1rpx dashed #e2e6e5; }
+.version-revisions__head { margin-bottom: 10rpx; }
+.version-revision-row { margin-top: 12rpx; padding: 14rpx; background: #f6f8f7; border-radius: 10rpx; }
+.version-revision-row__head { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.version-revision-row__title { color: #35423f; font-size: 24rpx; font-weight: 600; }
+.version-revision-row__state { flex-shrink: 0; color: #168d79; font-size: 21rpx; }
+.version-revision-row__line { margin-top: 6rpx; color: #5d6a66; font-size: 22rpx; line-height: 1.45; }
+.version-revision-row__detail { margin-top: 6rpx; color: #87908e; font-size: 20rpx; line-height: 1.45; }
+.version-revision-row__actions { display: flex; gap: 26rpx; margin-top: 12rpx; }
+.version-revision-row__action { color: #168d79; font-size: 23rpx; }
+.version-revision-row__action--danger { color: #c2443f; }
 .version-page__safe { height: calc(30rpx + env(safe-area-inset-bottom)); }
 
 .interval-mask { position: fixed; z-index: 1000; inset: 0; display: flex; align-items: flex-end; background: rgba(0,0,0,.46); }

@@ -202,24 +202,110 @@ function normalizeTimeline(payload) {
     interval._versionStatus = wrapper.versionStatus;
     interval._displayState = wrapper.displayState;
     interval._isCurrentToday = !!wrapper.isCurrentToday;
+    interval._contentVersionId = Number(wrapper.contentVersionId || interval.recipeVersionId || 0);
+    interval._revisionNo = wrapper.revisionNo;
     interval._periodText = intervalText(interval);
     return interval;
   });
 }
 
-function decorateVersions(versions, timeline, baseUrl, businessToday) {
+var COST_STATE_TEXT = {
+  RECALCULATION_PENDING: '成本重算进行中，暂不能作为最终成本',
+  RECALCULATION_FAILED: '成本重算失败或部分失败',
+  CURRENT_COST_READY: '当前成本已就绪',
+  COST_INCOMPLETE: '已有当前结果但证据不完整',
+  NO_COST_GRAINS: '适用范围内没有需要计算的销量粒度',
+  COST_NOT_CALCULATED: '已被使用但尚无可确认的成本结果',
+  NOT_APPLIED: '该内容修订没有门店适用区间',
+};
+
+function costStateText(cost) {
+  var state = (cost && cost.state) || '';
+  return COST_STATE_TEXT[state] || '';
+}
+
+function costDetailText(cost) {
+  if (!cost) return '';
+  if (cost.state === 'RECALCULATION_PENDING' || cost.state === 'RECALCULATION_FAILED') {
+    var parts = [];
+    if (cost.recalculationStatus) parts.push('重算状态 ' + cost.recalculationStatus);
+    parts.push('完成 ' + Number(cost.completedGrainCount || 0)
+      + '/' + Number(cost.affectedGrainCount || 0) + ' 条');
+    if (Number(cost.failedGrainCount || 0) > 0) parts.push('失败 ' + cost.failedGrainCount + ' 条');
+    if (cost.failureMessage) parts.push(String(cost.failureMessage));
+    return parts.join(' · ');
+  }
+  if (cost.state === 'CURRENT_COST_READY' || cost.state === 'COST_INCOMPLETE') {
+    return '当前结果 ' + Number(cost.currentResultCount || 0) + ' 条 · 完整 '
+      + Number(cost.completedResultCount || 0) + ' 条 · 不完整 '
+      + Number(cost.incompleteResultCount || 0) + ' 条';
+  }
+  return '';
+}
+
+function contentStatusText(status) {
+  var key = String(status || '').toUpperCase();
+  if (key === 'DRAFT') return '草稿';
+  if (key === 'PUBLISHED') return '已发布';
+  if (key === 'RETIRED') return '已退役';
+  return status || '';
+}
+
+// 后端 activeIntervals 已按内容修订绑定；页面直接消费，不再用 versionNo 反推归属。
+function normalizeActiveIntervals(rows, storeDepartmentId) {
+  return (rows || []).filter(function (row) {
+    return !storeDepartmentId || Number(row.storeDepartmentId) === Number(storeDepartmentId);
+  }).map(function (row) {
+    var interval = {
+      id: row.intervalId,
+      recipeVersionId: row.recipeVersionId,
+      storeDepartmentId: row.storeDepartmentId,
+      effectiveStart: dateText(row.effectiveStart),
+      effectiveEnd: row.effectiveEnd ? dateText(row.effectiveEnd) : '',
+      status: row.intervalStatus,
+    };
+    interval._contentVersionId = Number(row.recipeVersionId || 0);
+    interval._periodText = intervalText(interval);
+    return interval;
+  });
+}
+
+function decorateContentRevision(revision, baseUrl, today, storeDepartmentId) {
+  var row = Object.assign({}, revision || {});
+  row._contentVersionId = Number(row.contentVersionId || row.id || 0);
+  row._components = (row.componentSummary || []).map(function (component, index) {
+    return componentView(component, index, baseUrl);
+  });
+  row._intervals = normalizeActiveIntervals(row.activeIntervals, storeDepartmentId);
+  row._isApplied = row.usageState === 'APPLIED' || row._intervals.length > 0;
+  row._isCurrent = row._intervals.some(function (interval) {
+    return intervalContains(interval, today);
+  });
+  row._statusText = contentStatusText(row.status);
+  row._costState = (row.cost && row.cost.state) || '';
+  row._costStateText = costStateText(row.cost);
+  row._costDetailText = costDetailText(row.cost);
+  row._publishedText = dateText(row.publishedAt || row.createdAt);
+  row._changeReasonText = cleanText(row.changeReason);
+  row._firstIntervalId = row._intervals.length ? row._intervals[0].id : '';
+  row._costPerPortionText = '—';
+  row._periodTotalCostText = '—';
+  row._costStatusText = row._costStateText || '暂无成本状态';
+  return row;
+}
+
+function decorateVersions(versions, timeline, baseUrl, businessToday, storeDepartmentId) {
   var today = businessToday || localDateText();
   var rows = (versions || []).slice().sort(function (left, right) {
     return Number(right.versionNo || 0) - Number(left.versionNo || 0);
   }).map(function (version) {
     var row = Object.assign({}, version);
+    row._contentVersionId = Number(row.latestContentVersionId || row.id || 0);
     row._components = (row.componentSummary || []).map(function (component, index) {
       return componentView(component, index, baseUrl);
     });
-    row._intervals = (timeline || []).filter(function (interval) {
-      return Number(interval.recipeVersionId) === Number(row.id)
-        || Number(interval._versionNo) === Number(row.versionNo);
-    });
+    // 只取后端为该内容修订返回的 ACTIVE 区间，不按 versionNo 关联同一业务版本下的其他修订。
+    row._intervals = normalizeActiveIntervals(row.activeIntervals, storeDepartmentId);
     row._isCurrent = row._intervals.some(function (interval) {
       return intervalContains(interval, today);
     });
@@ -232,6 +318,14 @@ function decorateVersions(versions, timeline, baseUrl, businessToday) {
     if (retired) row._statusClass = 'retired';
     row._publishedText = dateText(row.publishedAt || row.createdAt);
     row._changeReasonText = cleanText(row.changeReason);
+    row._usageState = row.usageState || '';
+    row._latestNotApplied = row._usageState === 'LATEST_CONTENT_NOT_APPLIED';
+    row._costState = (row.cost && row.cost.state) || '';
+    row._costStateText = costStateText(row.cost);
+    row._costDetailText = costDetailText(row.cost);
+    row._contentRevisions = (row.revisions || row.revisionHistory || []).map(function (revision) {
+      return decorateContentRevision(revision, baseUrl, today, storeDepartmentId);
+    });
     return row;
   });
   var byId = {};
@@ -265,7 +359,8 @@ function versionCostChunks(version, businessToday) {
   return rows;
 }
 
-function aggregateVersionCost(version, reports, foodId) {
+function aggregateVersionCost(version, reports, foodId, contentVersionId) {
+  var strictVersionId = Number(contentVersionId || version.id);
   var dailyRows = [];
   var ingredients = {};
   (reports || []).forEach(function (report) {
@@ -274,9 +369,8 @@ function aggregateVersionCost(version, reports, foodId) {
     });
     if (!dish) return;
     (dish.dailyRows || []).forEach(function (daily) {
-      var sameVersion = Number(daily.recipeVersionId) === Number(version.id)
-        || Number(daily.recipeVersionNo) === Number(version.versionNo);
-      if (sameVersion) dailyRows.push(daily);
+      // 只认内容修订 ID；不再用 versionNo 把同一业务版本下其他修订的成本算进来。
+      if (Number(daily.recipeVersionId) === strictVersionId) dailyRows.push(daily);
     });
     (dish.ingredientSummaries || []).forEach(function (ingredient) {
       var recipeVersionNos = ingredient.recipeVersionNos || [];
@@ -320,6 +414,14 @@ function aggregateVersionCost(version, reports, foodId) {
 
   var components = (version._components || []).map(function (component) {
     var row = Object.assign({}, component);
+    // 没有属于该内容修订的当前成本结果时，不借用其他修订的证据反算单价。
+    if (!dailyRows.length) {
+      row._averagePriceText = row._isIntermediate
+        ? '中间料按组成原料核算' : '该内容修订暂无已确认成本';
+      row._portionCostText = '—';
+      row._costComplete = false;
+      return row;
+    }
     if (row._isIntermediate) {
       row._averagePriceText = '中间料按组成原料核算';
       row._portionCostText = '—';
@@ -364,55 +466,77 @@ function aggregateVersionCost(version, reports, foodId) {
     version._costStatusText = version._costDateCount + '个营业日 · '
       + version._salesQuantityText + '份 · 累计 ' + version._periodTotalCostText;
   } else if (!dailyRows.length) {
-    version._costStatusText = version._intervals.length
-      ? '适用期内暂无营业销量，暂不能计算时期均价' : '尚未设置门店适用时间';
+    version._costStatusText = version._costStateText
+      || (version._intervals.length
+        ? '适用期内暂无营业销量，暂不能计算时期均价' : '尚未设置门店适用时间');
   } else {
     version._costStatusText = '适用期存在缺少配方、价格或换算的营业日，完整成本保持“—”';
   }
   return version;
 }
 
+function loadCostFor(target, foodId, identity, businessToday, contentVersionId) {
+  var row = Object.assign({}, target, {
+    _components: (target._components || []).map(function (component) {
+      return Object.assign({}, component);
+    }),
+  });
+  if (String(row.status || '').toUpperCase() === 'DRAFT') {
+    row._costPerPortionText = '—';
+    row._periodTotalCostText = '—';
+    row._costStatusText = '草稿不参与成本核算';
+    return Promise.resolve(row);
+  }
+  var chunks = versionCostChunks(row, businessToday);
+  if (!chunks.length) {
+    return Promise.resolve(aggregateVersionCost(row, [], foodId, contentVersionId));
+  }
+  return Promise.all(chunks.map(function (chunk) {
+    return preparationApi.getDishDailyCostReport({
+      distributerId: identity.distributerId,
+      storeDepartmentId: identity.currentStoreId,
+      startDate: chunk.startDate,
+      endDate: chunk.endDate,
+      sortBy: 'status',
+      sortOrder: 'desc',
+    });
+  })).then(function (reports) {
+    return aggregateVersionCost(row, reports, foodId, contentVersionId);
+  }).catch(function () {
+    row._costPerPortionText = '—';
+    row._periodTotalCostText = '—';
+    row._costStatusText = '版本时期成本读取失败，请稍后重试';
+    row._components = row._components.map(function (component) {
+      return Object.assign({}, component, {
+        _averagePriceText: '成本数据读取失败',
+        _portionCostText: '—',
+        _costComplete: false,
+      });
+    });
+    return row;
+  });
+}
+
 function loadVersionCosts(versions, foodId, identity, businessToday) {
   return Promise.all((versions || []).map(function (version) {
-    var row = Object.assign({}, version, {
-      _components: (version._components || []).map(function (component) {
-        return Object.assign({}, component);
-      }),
-    });
-    if (row._isDraft) {
-      row._costPerPortionText = '—';
-      row._periodTotalCostText = '—';
-      row._costStatusText = '草稿不参与成本核算';
-      return Promise.resolve(row);
-    }
-    var chunks = versionCostChunks(row, businessToday);
-    if (!chunks.length) {
-      return Promise.resolve(aggregateVersionCost(row, [], foodId));
-    }
-    return Promise.all(chunks.map(function (chunk) {
-      return preparationApi.getDishDailyCostReport({
-        distributerId: identity.distributerId,
-        storeDepartmentId: identity.currentStoreId,
-        startDate: chunk.startDate,
-        endDate: chunk.endDate,
-        sortBy: 'status',
-        sortOrder: 'desc',
-      });
-    })).then(function (reports) {
-      return aggregateVersionCost(row, reports, foodId);
-    }).catch(function () {
-      row._costPerPortionText = '—';
-      row._periodTotalCostText = '—';
-      row._costStatusText = '版本时期成本读取失败，请稍后重试';
-      row._components = row._components.map(function (component) {
-        return Object.assign({}, component, {
-          _averagePriceText: '成本数据读取失败',
-          _portionCostText: '—',
-          _costComplete: false,
+    return loadCostFor(version, foodId, identity, businessToday, version._contentVersionId)
+      .then(function (row) {
+        // 每个内容修订按各自的区间取成本，不共用最新修订的核算结果。
+        var applied = (row._contentRevisions || []).filter(function (revision) {
+          return revision._isApplied;
+        });
+        if (!applied.length) return row;
+        return Promise.all(applied.map(function (revision) {
+          return loadCostFor(revision, foodId, identity, businessToday, revision._contentVersionId);
+        })).then(function (loaded) {
+          var byId = {};
+          loaded.forEach(function (item) { byId[String(item._contentVersionId)] = item; });
+          row._contentRevisions = (row._contentRevisions || []).map(function (revision) {
+            return byId[String(revision._contentVersionId)] || revision;
+          });
+          return row;
         });
       });
-      return row;
-    });
   }));
 }
 
@@ -538,7 +662,13 @@ Page({
           var timelinePayload = results[1] || {};
           var businessToday = dateText(timelinePayload.businessToday) || localDateText();
           var timeline = normalizeTimeline(timelinePayload);
-          var baseVersions = decorateVersions(results[0], timeline, that.data.serverUrl, businessToday);
+          var baseVersions = decorateVersions(
+            results[0],
+            timeline,
+            that.data.serverUrl,
+            businessToday,
+            identity.currentStoreId
+          );
           return loadVersionCosts(baseVersions, that.data.foodId, identity, businessToday).then(function (versions) {
             that.setData({
               loading: false,
@@ -573,17 +703,168 @@ Page({
     wx.navigateTo({ url: '../recipeVersionEdit/recipeVersionEdit?' + params.join('&') });
   },
 
+  // 编辑入口必须携带明确的内容修订 ID；若该修订已有适用区间，一并带上区间 ID，
+  // 编辑页据此回填已保存的日期，而不是默默退回今天。
   editVersion: function (event) {
-    var versionId = Number(event && event.currentTarget && event.currentTarget.dataset.versionId || 0);
+    var dataset = (event && event.currentTarget && event.currentTarget.dataset) || {};
+    var contentVersionId = Number(dataset.contentVersionId || dataset.versionId || 0);
+    var intervalId = Number(dataset.intervalId || 0);
+    if (!contentVersionId) {
+      wx.showToast({ title: '缺少配方内容修订，请刷新后重试', icon: 'none' });
+      return;
+    }
     var params = [
       'foodId=' + encodeURIComponent(String(this.data.foodId)),
       'returnToManage=1',
+      'contentVersionId=' + encodeURIComponent(String(contentVersionId)),
+      'manageVersionId=' + encodeURIComponent(String(contentVersionId)),
+      'baseVersionId=' + encodeURIComponent(String(contentVersionId)),
     ];
-    if (versionId > 0) {
-      params.push('baseVersionId=' + encodeURIComponent(String(versionId)));
-      params.push('manageVersionId=' + encodeURIComponent(String(versionId)));
+    if (intervalId > 0) {
+      params.push('intervalId=' + encodeURIComponent(String(intervalId)));
     }
     wx.navigateTo({ url: '../recipeVersionEdit/recipeVersionEdit?' + params.join('&') });
+  },
+
+  findContentVersion: function (contentVersionId) {
+    var found = null;
+    (this.data.versions || []).forEach(function (version) {
+      if (found) return;
+      if (Number(version._contentVersionId) === Number(contentVersionId)) {
+        found = version;
+        return;
+      }
+      (version._contentRevisions || []).forEach(function (revision) {
+        if (!found && Number(revision._contentVersionId) === Number(contentVersionId)) {
+          found = revision;
+        }
+      });
+    });
+    return found;
+  },
+
+  deleteVersion: function (event) {
+    var that = this;
+    var dataset = (event && event.currentTarget && event.currentTarget.dataset) || {};
+    var contentVersionId = Number(dataset.contentVersionId || 0);
+    var recipe = this.data.recipe;
+    if (!contentVersionId || !recipe || !recipe.id) {
+      wx.showToast({ title: '缺少配方内容修订，请刷新后重试', icon: 'none' });
+      return;
+    }
+    var identity = this.identity || preparationUtil.getIdentity();
+    wx.showLoading({ title: '检查删除条件', mask: true });
+    preparationApi.getFoodVersionDeletionEligibility(
+      recipe.id,
+      contentVersionId,
+      identity.distributerId
+    ).then(function (eligibility) {
+      wx.hideLoading();
+      that.showDeletionEligibility(eligibility, contentVersionId);
+    }).catch(function (error) {
+      wx.hideLoading();
+      preparationUtil.showError(error);
+    });
+  },
+
+  // 删除资格完全以后端返回值为准：不隐藏按钮，也不在前端放宽任何拦截条件。
+  showDeletionEligibility: function (eligibility, contentVersionId) {
+    var that = this;
+    if (!eligibility) return;
+    if (eligibility.canDelete) {
+      var modeText = eligibility.deletionMode === 'ARCHIVE'
+        ? '该修订存在历史区间、成本或调整证据，删除后仅从业务页面移除，后台保留历史。'
+        : '该修订没有业务或历史依赖，将直接从业务数据中删除。';
+      wx.showModal({
+        title: '删除该内容修订？',
+        content: modeText,
+        confirmText: '确认删除',
+        confirmColor: '#d94b4b',
+        success: function (result) {
+          if (result.confirm) that.performDelete(contentVersionId);
+        },
+      });
+      return;
+    }
+    var counts = eligibility.referenceCounts || {};
+    var releasable = eligibility.releasableActiveIntervalIds || [];
+    var content = eligibility.blockingMessage || '该修订仍有业务引用，暂时不能删除。';
+    content += '\n\n生效区间 ' + Number(counts.activeIntervalCount || 0)
+      + ' · 当前成本 ' + Number(counts.currentCostResultCount || 0)
+      + ' · 生产记录 ' + Number(counts.productionFactCount || 0)
+      + ' · 重算中 ' + Number(counts.pendingRecalculationCount || 0);
+    if (releasable.length) {
+      content += '\n\n有 ' + releasable.length + ' 个空白适用区间可以先解除，解除后再试。';
+    }
+    wx.showModal({
+      title: '暂时不能删除',
+      content: content,
+      confirmText: releasable.length ? '解除空白区间' : '知道了',
+      confirmColor: releasable.length ? '#2f7ef7' : '#8a8a8a',
+      success: function (result) {
+        if (result.confirm && releasable.length) {
+          that.releaseBlankIntervals(releasable);
+        }
+      },
+    });
+  },
+
+  releaseBlankIntervals: function (intervalIds) {
+    var that = this;
+    var identity = this.identity || preparationUtil.getIdentity();
+    var recipeId = this.data.recipe.id;
+    var queue = (intervalIds || []).slice();
+    function next() {
+      if (!queue.length) {
+        wx.hideLoading();
+        wx.showToast({ title: '空白区间已解除', icon: 'success' });
+        return that.loadVersions();
+      }
+      var intervalId = queue.shift();
+      var request = {
+        distributerId: identity.distributerId,
+        storeDepartmentId: identity.currentStoreId,
+        adjustmentReason: '解除空白适用区间以便删除内容修订',
+        operatorId: identity.operatorId,
+      };
+      return preparationApi.previewRemoveFoodEffectiveInterval(recipeId, intervalId, request)
+        .then(function (preview) {
+          return preparationApi.confirmRemoveFoodEffectiveInterval(recipeId, intervalId, Object.assign({}, request, {
+            expectedTimelineRevision: preview.timelineRevision,
+            expectedPreviewToken: preview.previewToken,
+          }));
+        }).then(next).catch(function (error) {
+          wx.hideLoading();
+          preparationUtil.showError(error);
+        });
+    }
+    wx.showLoading({ title: '解除空白区间', mask: true });
+    return next();
+  },
+
+  performDelete: function (contentVersionId) {
+    var that = this;
+    var identity = this.identity || preparationUtil.getIdentity();
+    var version = this.findContentVersion(contentVersionId);
+    if (!version) {
+      wx.showToast({ title: '未找到该内容修订，请刷新后重试', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '删除中', mask: true });
+    preparationApi.foodVersionAction(this.data.recipe.id, contentVersionId, 'delete', {
+      distributerId: identity.distributerId,
+      recipeRowVersion: Number(this.data.recipe.rowVersion || 0),
+      versionRowVersion: Number(version.rowVersion || 0),
+      deletionReason: '用户在配方版本管理页删除内容修订',
+      operatorId: identity.operatorId,
+    }).then(function () {
+      wx.hideLoading();
+      wx.showToast({ title: '已删除', icon: 'success' });
+      return that.loadVersions();
+    }).catch(function (error) {
+      wx.hideLoading();
+      preparationUtil.showError(error);
+    });
   },
 
   openIntervalEditor: function (event) {
