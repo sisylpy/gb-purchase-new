@@ -1995,7 +1995,13 @@
 .unified-impact__date { margin-top: 7rpx; color: #77827e; }
 .unified-impact__grid { display: flex; gap: 1rpx; margin-top: 12rpx; background: #d9ebe6; }
 .unified-impact__grid view { display: flex; flex: 1; flex-direction: column; gap: 7rpx; padding: 14rpx 8rpx; text-align: center; background: #fff; }
-.unified-impact__grid text:last-child { color: #147966; font-size: 25rpx; font-weight: 650; }
+.unified-impact__grid text:last-child { color: #147966; font-size: 25rpx; font-weight: 650; word-break: break-all; }
+.unified-impact__reasons { margin-top: 12rpx; padding-top: 10rpx; border-top: 1rpx solid #d8ece6; }
+.unified-impact__reasons-title { display: block; color: #25322e; font-size: 23rpx; font-weight: 600; }
+.unified-impact__reason { margin-top: 10rpx; padding: 10rpx 12rpx; background: #fff; border-radius: 8rpx; }
+.unified-impact__reason-date { display: block; color: #a05e13; }
+.unified-impact__reason-text { display: block; margin-top: 4rpx; color: #53605c; line-height: 1.45; word-break: break-all; }
+.unified-impact__more { display: block; margin-top: 10rpx; color: #147966; font-weight: 600; }
 
 .version-delete-card {
   display: flex;

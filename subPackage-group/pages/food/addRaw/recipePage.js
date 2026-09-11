@@ -65,6 +65,44 @@ function _recipeDateText(value) {
   return value ? String(value).slice(0, 10) : '';
 }
 
+/*
+ * 新成本缺失原因的分组展示。
+ * 只按后端返回的原文分组，不解析文字、不推断业务原因、不补金额；
+ * 同一原因在多天重复时只展示一条，避免在手机上铺开几十条重复记录。
+ */
+function _recipeNewMissingReasonGroups(rows) {
+  var groups = [];
+  (rows || []).forEach(function (row) {
+    var reasons = (row.newMissingReasons || []).filter(function (item) {
+      return String(item || '').trim();
+    });
+    if (!reasons.length) reasons = ['未返回具体原因'];
+    reasons.forEach(function (item) {
+      var text = String(item).trim();
+      var group = null;
+      for (var i = 0; i < groups.length; i++) {
+        if (groups[i].reason === text) { group = groups[i]; break; }
+      }
+      if (!group) {
+        group = { reason: text, dates: [] };
+        groups.push(group);
+      }
+      var date = _recipeDateText(row.businessDate);
+      if (date && group.dates.indexOf(date) < 0) group.dates.push(date);
+    });
+  });
+  return groups;
+}
+
+function _recipeReasonGroupView(group, dateLimit) {
+  var dates = group.dates.slice(0, dateLimit);
+  return {
+    reason: group.reason,
+    _datesText: dates.join('、') + (group.dates.length > dates.length
+      ? ' 等 ' + group.dates.length + ' 天' : ''),
+  };
+}
+
 function _toP1Unit(unit) {
   var value = String(unit || '').trim();
   var lower = value.toLowerCase();
@@ -1147,6 +1185,7 @@ function createRecipePage(pageMode) {
     versionUsagePreviewVersionId: null,
     versionUsageReplacementPreview: null,
     versionUsageReplacementRequest: null,
+    versionUsageNewReasonExpanded: false,
     versionUsageConfirming: false,
     versionDeleting: false,
     versionCostBasisDate: '',
@@ -2433,6 +2472,10 @@ function createRecipePage(pageMode) {
     });
   },
 
+  toggleVersionUsageReasonDetail() {
+    this.setData({ versionUsageNewReasonExpanded: !this.data.versionUsageNewReasonExpanded });
+  },
+
   _buildUnifiedUsagePlan() {
     var reason = String(this.data.versionUsageReason || '').trim();
     var end = this.data.versionUsageHasEnd ? this.data.versionUsageEnd : null;
@@ -2579,12 +2622,43 @@ function createRecipePage(pageMode) {
           });
         });
         var impact = preview.costImpact || {};
+        var totalRecords = Number(impact.affectedSalesRecordCount || 0);
+        var oldIncomplete = Number(impact.oldIncompleteRecordCount || 0);
+        var newIncomplete = Number(impact.newIncompleteRecordCount || 0);
         impact._salesText = _recipeNumberText(impact.salesQuantity) + ' 份';
-        impact._oldCostText = _recipeMoneyText(impact.oldCompleteCostAmount);
-        impact._newCostText = _recipeMoneyText(impact.newCompleteCostAmount);
-        impact._differenceText = _recipeMoneyText(impact.completeCostDifference);
-        impact._hasIncomplete = Number(impact.oldIncompleteRecordCount || 0) > 0
-          || Number(impact.newIncompleteRecordCount || 0) > 0;
+        // 原成本、新成本、差额各自独立判断，任一侧缺失都不影响另一侧取值。
+        impact._oldCostText = impact.oldCompleteCostAmount === null
+          || typeof impact.oldCompleteCostAmount === 'undefined'
+          ? '无法取得' : _recipeMoneyText(impact.oldCompleteCostAmount);
+        impact._newCostText = impact.newCompleteCostAmount === null
+          || typeof impact.newCompleteCostAmount === 'undefined'
+          ? '无法取得' : _recipeMoneyText(impact.newCompleteCostAmount);
+        impact._differenceText = impact.completeCostDifference === null
+          || typeof impact.completeCostDifference === 'undefined'
+          ? '无法比较' : _recipeMoneyText(impact.completeCostDifference);
+        impact._oldCostNote = impact._oldCostText === '无法取得'
+          ? '原完整成本无法取得：' + totalRecords + ' 条销量记录中有 ' + oldIncomplete + ' 条未算全。'
+          : '';
+        impact._newCostNote = impact._newCostText === '无法取得'
+          ? '新完整成本无法取得：' + totalRecords + ' 条销量记录中有 ' + newIncomplete + ' 条未算全。'
+          : '';
+        impact._differenceNote = impact._differenceText === '无法比较'
+          ? '成本差额无法比较：原完整成本或新完整成本未算全。'
+          : '';
+        // 新成本缺失原因只取新侧字段，不回落到原成本的原因。
+        var newIncompleteRows = (impact.dailyChanges || []).filter(function (row) {
+          return row.newCompleteCostAmount === null || typeof row.newCompleteCostAmount === 'undefined';
+        });
+        var newReasonGroups = _recipeNewMissingReasonGroups(newIncompleteRows);
+        impact._newReasonGroups = newReasonGroups.map(function (group) {
+          return _recipeReasonGroupView(group, 10);
+        });
+        impact._newReasonGroupsBrief = newReasonGroups.map(function (group) {
+          return _recipeReasonGroupView(group, 3);
+        });
+        impact._newReasonExpandable = newReasonGroups.length > 2
+          || newReasonGroups.some(function (group) { return group.dates.length > 3; });
+        impact._newDetailTruncated = impact.dailyChangesTruncated === true;
         impact._dateText = impact.actualBusinessDateStart
           ? _recipeDateText(impact.actualBusinessDateStart) + ' 至 '
             + _recipeDateText(impact.actualBusinessDateEnd) + '（不含）'
@@ -2597,6 +2671,7 @@ function createRecipePage(pageMode) {
         preview._gapCount = (preview.gaps || []).length;
         that.setData({
           recipeSaving: false,
+          versionUsageNewReasonExpanded: false,
           versionUsagePreview: preview,
           versionUsagePreviewRequest: request,
           versionUsagePreviewVersionId: Number(version.id),
