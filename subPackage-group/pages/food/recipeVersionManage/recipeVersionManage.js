@@ -1,6 +1,8 @@
 var preparationApi = require('../../../../services/preparation');
 var preparationUtil = require('../../../../utils/preparation');
 var RECIPE_REPLACEMENT_CONTEXT_PREFIX = 'foodRecipeReplacementContext:';
+// 与菜品配方详情页共用同一个键，删除成功后一并清掉该菜品的旧配料迁移暂存。
+var PREPARATION_MIGRATION_CACHE_PREFIX = 'preparationFoodRecipeMigration:';
 
 function localDateText(date) {
   var value = date || new Date();
@@ -837,6 +839,8 @@ Page({
         });
         return;
       }
+      // 与详情页一致：只清当前菜品的旧配料迁移暂存，其他菜品与编辑草稿不受影响。
+      wx.removeStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
       wx.showToast({ title: '已删除', icon: 'success' });
       return that.loadVersions();
     }).catch(function (error) {

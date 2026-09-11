@@ -1113,6 +1113,8 @@ function createRecipePage(pageMode) {
     recipeVersionHistory: [],
     recipeVersionPrimary: null,
     currentRecipeVersionView: null,
+    // 服务端是否解析出今天的生效配方；null 表示还没拿到服务端结论（加载中或查询失败）。
+    versionHasEffectiveRecipe: null,
     recipeTimeline: [],
     baseVersionId: null,
     manageVersionId: null,
@@ -1425,10 +1427,9 @@ function createRecipePage(pageMode) {
       }) || null;
       var primaryVersion = selectedVersion || currentVersion || versionHistory[0] || null;
       var usageState = _managedVersionUsageState(detail, primaryVersion);
-      var cached = wx.getStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
-      if (!components.length && cached && Array.isArray(cached.components)) {
-        components = cached.components;
-      }
+      // 普通详情查询只以服务端的有效配方状态为准：服务端解析出今天的生效修订才算有当前配方。
+      // 首次迁移的本地暂存放在迁移流程内部使用，不能因为服务端返回空配料就在这里补回旧配料。
+      var hasEffectiveRecipe = !!detail.effectiveVersionId;
       // 版本配方的成本必须来自该版本门店适用区间内的正式历史成本证据。
       // 详情页和编辑页使用同一份上下文，不能在详情页退回商品档案价或近期均价。
       var costContextPromise = that._loadVersionCostContext(usageState, primaryVersion);
@@ -1444,6 +1445,7 @@ function createRecipePage(pageMode) {
           recipeVersionHistory: versionHistory,
           recipeVersionPrimary: primaryVersion,
           currentRecipeVersionView: that.data.versionEditorMode ? primaryVersion : currentVersion,
+          versionHasEffectiveRecipe: hasEffectiveRecipe,
           recipeTimeline: detail.recipeTimeline || [],
           versionCostBasisDate: usageState.start,
           versionCostScopeText: (that._activeVersionCostContext || {}).scopeText || '',
@@ -1847,9 +1849,13 @@ function createRecipePage(pageMode) {
       }
       totalCost += cost;
     }
-    // 没有任何有效配方时不能把"没有配料"当成零成本展示，按后端状态说明未核算。
-    var noEffectiveRecipe = !!this.data.versionedMode && !this.data.versionEditorMode
-      && !this.data.currentRecipeVersionView && !list.length;
+    // 普通详情页有没有当前有效配方，只看服务端生效区间的解析结果：
+    // null 表示还没拿到服务端结论（加载中或查询失败），此时不按无配方处理；
+    // 也不能用"最新修订存在"或"配料列表为空"代替这个判断。
+    var effectiveRecipeState = this.data.versionedMode && !this.data.versionEditorMode
+      ? this.data.versionHasEffectiveRecipe
+      : null;
+    var noEffectiveRecipe = effectiveRecipeState === false;
     if (noEffectiveRecipe) {
       totalCostComplete = false;
       missingCostRows.push('当前没有有效配方');
@@ -3922,8 +3928,22 @@ function createRecipePage(pageMode) {
         });
         return;
       }
-      // 删除成功后清掉迁移暂存，避免详情页在无有效配方时又回退出已删除的旧配料。
+      // 删除成功后清掉当前菜品的迁移暂存和该修订的旧展示，不保留已删除的配料与原成本。
+      // 其余修订以后端刷新结果为准：这里把有效配方状态置回未知，不替后端断言是否还有有效配方。
       wx.removeStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
+      that.setData({
+        rawArr: [],
+        totalCost: '—',
+        costTotal: '—',
+        totalCostComplete: false,
+        costRate: '—',
+        profit: '—',
+        grossMarginRate: '—',
+        profitLevelClass: 'profit-tag--normal',
+        profitHint: '已删除的配方内容不再计入成本',
+        costMissingReason: '已删除的配方内容不再计入成本',
+        versionHasEffectiveRecipe: null,
+      });
       wx.showToast({ title: '版本已删除', icon: 'success' });
       setTimeout(function () {
         wx.navigateBack({ delta: 1 });
