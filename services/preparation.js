@@ -241,10 +241,14 @@ function listFoodVersions(recipeId, distributerId) {
   return get('preparation/p1/food-recipes/' + recipeId + '/versions', { distributerId: distributerId });
 }
 
-function getFoodVersionDeletionEligibility(recipeId, versionId, distributerId) {
-  return get(
-    'preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId + '/deletion-eligibility',
-    { distributerId: distributerId }
+/**
+ * 删除影响预览：只读返回该内容修订的使用安排、受影响营业日、成本范围
+ * 和 deletionPreviewToken，确认删除时必须原样回传该令牌。
+ */
+function previewFoodVersionDeletion(recipeId, versionId, body) {
+  return post(
+    'preparation/p1/food-recipes/' + recipeId + '/versions/' + versionId + '/delete-preview',
+    body
   );
 }
 
@@ -560,7 +564,7 @@ module.exports = {
   enableVersionedFood: enableVersionedFood,
   getFoodRecipe: getFoodRecipe,
   listFoodVersions: listFoodVersions,
-  getFoodVersionDeletionEligibility: getFoodVersionDeletionEligibility,
+  previewFoodVersionDeletion: previewFoodVersionDeletion,
   saveFoodDraft: saveFoodDraft,
   foodVersionAction: foodVersionAction,
   listFoodEffectiveIntervals: listFoodEffectiveIntervals,

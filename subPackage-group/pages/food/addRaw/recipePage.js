@@ -1847,6 +1847,13 @@ function createRecipePage(pageMode) {
       }
       totalCost += cost;
     }
+    // 没有任何有效配方时不能把"没有配料"当成零成本展示，按后端状态说明未核算。
+    var noEffectiveRecipe = !!this.data.versionedMode && !this.data.versionEditorMode
+      && !this.data.currentRecipeVersionView && !list.length;
+    if (noEffectiveRecipe) {
+      totalCostComplete = false;
+      missingCostRows.push('当前没有有效配方');
+    }
     var costRate = totalCostComplete && salePrice > 0 ? (totalCost / salePrice * 100).toFixed(1) : '—';
     var profit = totalCostComplete ? (salePrice - totalCost).toFixed(2) : '—';
     var grossMarginRate = totalCostComplete && salePrice > 0
@@ -1858,7 +1865,9 @@ function createRecipePage(pageMode) {
     var gm = parseFloat(grossMarginRate);
     if (!totalCostComplete) {
       profitLevelClass = 'profit-tag--normal';
-      profitHint = '部分配料缺少成本依据，暂不计算完整毛利';
+      profitHint = noEffectiveRecipe
+        ? '当前没有有效配方，暂不计算成本与毛利'
+        : '部分配料缺少成本依据，暂不计算完整毛利';
     } else if (gm < 30) {
       profitLevelClass = 'profit-tag--bad';
       profitHint = '毛利率偏低，建议优化';
@@ -3830,6 +3839,8 @@ function createRecipePage(pageMode) {
     });
   },
 
+  // 删除统一走"预览影响 → 一次确认 → 提交"。前端不再判断有区间或有成本就禁止删除，
+  // 也不再逐个解除区间或取消重算，这些由后端在确认删除时一次完成。
   deleteRecipeVersion() {
     var that = this;
     if (!this.data.versionEditorMode || !Number(this.data.manageVersionId)) return;
@@ -3839,82 +3850,100 @@ function createRecipePage(pageMode) {
       wx.showToast({ title: '配方版本信息不完整', icon: 'none' });
       return;
     }
-    var identity = that.preparationIdentity || preparationUtil.getIdentity();
-    // 删除资格完全以后端返回值为准，前端不放宽任何拦截条件。
-    load.showLoading('检查删除条件');
-    preparationApi.getFoodVersionDeletionEligibility(
-      detail.recipe.id,
-      detail.version.id,
-      identity.distributerId
-    ).then(function (eligibility) {
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    load.showLoading('读取删除影响');
+    preparationApi.previewFoodVersionDeletion(detail.recipe.id, detail.version.id, {
+      distributerId: identity.distributerId,
+      recipeRowVersion: detail.recipe.rowVersion,
+      versionRowVersion: detail.version.rowVersion,
+      operatorId: identity.operatorId,
+    }).then(function (preview) {
       load.hideLoading();
-      if (eligibility && eligibility.canDelete === false) {
-        var counts = eligibility.referenceCounts || {};
-        var releasable = eligibility.releasableActiveIntervalIds || [];
-        var content = eligibility.blockingMessage || '该内容修订仍有业务引用，暂时不能删除。';
-        content += '\n\n生效区间 ' + Number(counts.activeIntervalCount || 0)
-          + ' · 当前成本 ' + Number(counts.currentCostResultCount || 0)
-          + ' · 生产记录 ' + Number(counts.productionFactCount || 0)
-          + ' · 重算中 ' + Number(counts.pendingRecalculationCount || 0);
-        if (releasable.length) {
-          content += '\n\n有 ' + releasable.length + ' 个空白适用区间可以先解除。';
-        }
-        wx.showModal({ title: '暂时不能删除', content: content, showCancel: false });
-        return;
-      }
-      that._promptDeleteReason(detail, eligibility);
+      that._confirmVersionDeletion(detail, preview);
     }).catch(function (error) {
       load.hideLoading();
       preparationUtil.showError(error);
     });
   },
 
-  _promptDeleteReason(detail, eligibility) {
+  // 确认框只用业务语言说明删哪份、解除什么、清理什么、什么不受影响。
+  _confirmVersionDeletion(detail, preview) {
     var that = this;
-    var modeText = eligibility && eligibility.deletionMode === 'ARCHIVE'
-      ? '该修订存在历史区间、成本或调整证据，删除后仅从业务页面移除，后台保留历史。'
-      : '该修订没有业务或历史依赖，将直接从业务数据中删除。';
+    if (!preview || !preview.deletionPreviewToken) {
+      wx.showToast({ title: '删除影响读取失败，请重试', icon: 'none' });
+      return;
+    }
     wx.showModal({
-      title: '输入删除 V' + (detail.version.versionNo || '') + ' 的原因',
-      content: modeText,
-      editable: true,
-      placeholderText: '例如：误建版本',
+      title: '确认删除这份配方？',
+      content: preparationUtil.deletionPreviewText(
+        preview,
+        this.data.foodItem && this.data.foodItem.dishName
+      ),
       confirmText: '确认删除',
       confirmColor: '#d84d4d',
       success: function (modalResult) {
-        if (!modalResult.confirm) return;
-        var reason = String(modalResult.content || '').trim();
-        if (!reason) {
-          wx.showToast({ title: '请填写删除原因', icon: 'none' });
-          return;
-        }
-        var identity = that.preparationIdentity || preparationUtil.getIdentity();
-        that.setData({ versionDeleting: true });
-        load.showLoading('删除版本');
-        preparationApi.foodVersionAction(
-          detail.recipe.id,
-          detail.version.id,
-          'delete',
-          {
-            distributerId: identity.distributerId,
-            recipeRowVersion: detail.recipe.rowVersion,
-            versionRowVersion: detail.version.rowVersion,
-            operatorId: identity.operatorId,
-            deletionReason: reason,
-          }
-        ).then(function () {
-          load.hideLoading();
-          that.setData({ versionDeleting: false });
-          wx.showToast({ title: '版本已删除', icon: 'success' });
-          setTimeout(function () {
-            wx.navigateBack({ delta: 1 });
-          }, 500);
-        }).catch(function (error) {
-          load.hideLoading();
-          that.setData({ versionDeleting: false });
-          preparationUtil.showError(error);
-        });
+        if (modalResult.confirm) that._performVersionDeletion(detail, preview);
       },
+    });
+  },
+
+  _performVersionDeletion(detail, preview) {
+    var that = this;
+    // 提交期间防止重复点击。
+    if (this.data.versionDeleting) return;
+    if (!preview || !preview.deletionPreviewToken) {
+      wx.showToast({ title: '删除影响已失效，请重新确认', icon: 'none' });
+      return;
+    }
+    var identity = this.preparationIdentity || preparationUtil.getIdentity();
+    this.setData({ versionDeleting: true });
+    load.showLoading('删除版本');
+    preparationApi.foodVersionAction(
+      detail.recipe.id,
+      detail.version.id,
+      'delete',
+      {
+        distributerId: identity.distributerId,
+        recipeRowVersion: detail.recipe.rowVersion,
+        versionRowVersion: detail.version.rowVersion,
+        operatorId: identity.operatorId,
+        deletionReason: '用户在菜品配方页删除内容修订',
+        deletionPreviewToken: preview.deletionPreviewToken,
+      }
+    ).then(function (result) {
+      load.hideLoading();
+      that.setData({ versionDeleting: false });
+      // 只有后端明确返回完成才收口；COMPLETED 且幂等重放同样按已完成处理。
+      if (String((result && result.operationStatus) || '') !== 'COMPLETED') {
+        wx.showModal({
+          title: '删除尚未完成',
+          content: '后端没有确认删除完成，页面保持原样，请稍后刷新查看。',
+          showCancel: false,
+        });
+        return;
+      }
+      // 删除成功后清掉迁移暂存，避免详情页在无有效配方时又回退出已删除的旧配料。
+      wx.removeStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
+      wx.showToast({ title: '版本已删除', icon: 'success' });
+      setTimeout(function () {
+        wx.navigateBack({ delta: 1 });
+      }, 500);
+    }).catch(function (error) {
+      load.hideLoading();
+      that.setData({ versionDeleting: false });
+      // 预览令牌或行版本已变化：重新预览并让用户确认新的影响范围，不静默换令牌继续删除。
+      if (Number(error && error.status) === 409) {
+        wx.showModal({
+          title: '删除影响范围已变化',
+          content: '这份配方的内容或使用安排刚被改动，需要按最新情况重新确认。',
+          confirmText: '重新确认',
+          success: function (modalResult) {
+            if (modalResult.confirm) that.deleteRecipeVersion();
+          },
+        });
+        return;
+      }
+      preparationUtil.showError(error);
     });
   },
 

@@ -217,6 +217,36 @@ function confirm(content, title) {
   });
 }
 
+/**
+ * 删除确认文案：只用业务语言说明删哪份、解除什么、清理什么、什么不受影响。
+ * 门店数、使用日期和影响日期全部取后端预览响应，不展示引用计数或技术编号。
+ */
+function deletionPreviewText(preview, dishName) {
+  var source = preview || {};
+  var active = (source.usageArrangements || []).filter(function (row) {
+    return String(row.intervalStatus || '').toUpperCase() === 'ACTIVE';
+  });
+  var starts = active.map(function (row) {
+    return datePart(row.effectiveStart);
+  }).filter(function (value) { return !!value; }).sort();
+  var dates = (source.affectedBusinessDates || []).map(function (value) {
+    return datePart(value);
+  }).filter(function (value) { return !!value; }).sort();
+  return [
+    '将删除「' + (dishName || '该菜品') + '」V' + (source.businessVersionNo || '')
+      + ' 第 ' + Number(source.revisionNo || 1) + ' 次修订，并解除它的使用安排。',
+    '',
+    active.length
+      ? '· 解除 ' + active.length + ' 个门店的使用安排' + (starts.length ? '（' + starts[0] + ' 起）' : '')
+      : '· 该修订没有门店正在使用',
+    dates.length
+      ? '· 清理 ' + dates.length + ' 个营业日的成本结果（' + dates[0] + ' 至 ' + dates[dates.length - 1] + '）'
+      : '· 没有需要清理的成本结果',
+    '· 销量、采购、出入库和生产记录不会删除',
+    '· 这些日期如果没有其他有效配方，将显示为未核算',
+  ].join('\n');
+}
+
 function selectCurrentDepartment(options, identity) {
   var savedId = wx.getStorageSync('preparationDepartmentId');
   var selected = (options || []).find(function (row) {
@@ -250,5 +280,6 @@ module.exports = {
   toLocalDateTime: toLocalDateTime,
   showError: showError,
   confirm: confirm,
+  deletionPreviewText: deletionPreviewText,
   selectCurrentDepartment: selectCurrentDepartment,
 };
