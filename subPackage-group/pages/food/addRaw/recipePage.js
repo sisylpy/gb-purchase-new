@@ -2179,6 +2179,7 @@ function createRecipePage(pageMode) {
     var component = {
       itemKind: 'INTERMEDIATE_PRODUCT',
       intermediateProductId: Number(product.id),
+      intermediateProductName: product.productName || '',
       quantityPerPortion: amount,
       inputUnitCode: this.data.preparationAmountUnit || 'G',
     };
@@ -2197,7 +2198,7 @@ function createRecipePage(pageMode) {
   _currentP1Components() {
     if (this.data.versionedMode) {
       return (this.data.versionedComponents || []).map(function (component) {
-        return {
+        var normalized = {
           itemKind: component.itemKind,
           rawGoodsId: component.itemKind === 'RAW_GOODS'
             ? Number(component.rawGoodsId)
@@ -2208,6 +2209,13 @@ function createRecipePage(pageMode) {
           quantityPerPortion: Number(component.quantityPerPortion),
           inputUnitCode: String(component.inputUnitCode || '').toUpperCase(),
         };
+        if (component.rawGoods) normalized.rawGoods = component.rawGoods;
+        if (component.rawGoodsName) normalized.rawGoodsName = component.rawGoodsName;
+        if (component.intermediateRecipe) normalized.intermediateRecipe = component.intermediateRecipe;
+        if (component.intermediateProductName) {
+          normalized.intermediateProductName = component.intermediateProductName;
+        }
+        return normalized;
       });
     }
     return (this.data.rawArr || []).map(_legacyRawToP1Component);
@@ -2876,6 +2884,34 @@ function createRecipePage(pageMode) {
     }).then(function (detail) {
       if (!detail) return null;
       if (detail.version && detail.version.status === 'DRAFT') return detail;
+      if (!detail.version) {
+        // 查询接口保持只读；真正保存时才通过正式业务入口补建空草稿。
+        // 这里不刷新页面配方，避免后端空草稿覆盖用户刚刚填写的 components。
+        return preparationApi.getFoodDetail(that.data.foodId).then(function (latestFood) {
+          if (!latestFood || latestFood.gbDfRecipeModel !== 'VERSIONED') {
+            return Promise.reject({
+              preparationError: true,
+              status: 409,
+              message: '菜品配方状态已变化，请刷新后重试',
+            });
+          }
+          return preparationApi.enableVersionedFood(that.data.foodId, {
+            distributerId: identity.distributerId,
+            foodRowVersion: Number(latestFood.gbDfRecipeRowVersion || 0),
+            operatorId: identity.operatorId,
+          });
+        }).then(function (createdDetail) {
+          if (createdDetail && createdDetail.version
+            && createdDetail.version.status === 'DRAFT') {
+            return createdDetail;
+          }
+          return Promise.reject({
+            preparationError: true,
+            status: 409,
+            message: '暂时无法创建配方草稿，请重试',
+          });
+        });
+      }
       return preparationApi.foodVersionAction(
         detail.recipe.id,
         detail.version.id,
@@ -3562,6 +3598,8 @@ function createRecipePage(pageMode) {
       var versionedComponent = {
         itemKind: 'RAW_GOODS',
         rawGoodsId: Number(goods.gbDistributerGoodsId),
+        rawGoodsName: goods.gbDgGoodsName || goodsName,
+        rawGoods: goods,
         quantityPerPortion: Number(portionMin),
         inputUnitCode: _toP1Unit(minUnit),
       };
