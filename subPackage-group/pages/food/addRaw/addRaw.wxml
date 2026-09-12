@@ -320,11 +320,11 @@
   </scroll-view>
   <view class="version-editor-footer" wx:if="{{versionEditorMode}}">
     <view class="version-editor-footer__summary">
-      <text class="version-editor-footer__title">{{manageVersionId ? (versionUsagePreview ? '影响已预览' : '编辑配方 V' + (currentRecipeVersionView.versionNo || '-')) : (versionUsagePreview ? '新配方已检查' : '新建配方')}}</text>
+      <text class="version-editor-footer__title">{{manageVersionId ? (versionUsagePreview ? '影响已预览' : '编辑配方 V' + (currentRecipeVersionView.versionNo || '-')) : '新建配方'}}</text>
       <text class="version-editor-footer__sub">{{manageVersionId ? (rawArr.length + ' 项配料' + (versionDraftDirty ? ' · 内容已修改，将保存为本版本的新修订' : ' · 可只修改使用时间')) : (rawArr.length + ' 项配料 · 设置完成后即可创建')}}</text>
     </view>
     <view class="version-editor-footer__save" bindtap="saveNewRecipeVersion">
-      {{versionUsageConfirming ? '确认中…' : (recipeSaving ? '检查中…' : (manageVersionId ? (versionUsagePreview ? '确认保存' : '预览并保存') : (versionUsagePreview ? '确认创建' : '检查并创建')))}}
+      {{manageVersionId ? (versionUsageConfirming ? '确认中…' : (recipeSaving ? '预览中…' : (versionUsagePreview ? '确认保存' : '预览并保存'))) : ((recipeSaving || versionUsageConfirming) ? '创建中…' : '创建配方')}}
     </view>
   </view>
 </view>

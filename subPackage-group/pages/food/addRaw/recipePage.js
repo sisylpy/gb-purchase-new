@@ -1636,6 +1636,7 @@ function createRecipePage(versionEditorMode) {
             ? _recipeDateText(preview.affectedEffectiveEnd) + '（不含）' : '以后');
         preview._afterTimeline = afterTimeline;
         preview._gapCount = (preview.gaps || []).length;
+        var creatingVersion = !Number(that.data.manageVersionId);
         that.setData({
           recipeSaving: false,
           versionUsageNewReasonExpanded: false,
@@ -1646,6 +1647,9 @@ function createRecipePage(versionEditorMode) {
           versionUsageReplacementRequest: replacementRequest,
           versionedDetail: detail,
           versionDraftChangeContext: changeContext || null,
+        }, function () {
+          // 新建没有旧内容需要用户比较：预览令牌仅作为后端一致性校验，页面自动确认。
+          if (creatingVersion) that.confirmUnifiedVersionEdit();
         });
       }).catch(function (error) {
         wx.hideLoading();
