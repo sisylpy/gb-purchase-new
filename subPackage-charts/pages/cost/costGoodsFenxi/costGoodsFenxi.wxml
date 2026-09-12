@@ -161,10 +161,10 @@
             <text>出库金额</text>
           </view>
           <view class="cog-sort-chip cog-sort-chip--deviance {{ingredientSortBy === 'deviance' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="deviance">
-            <text>偏差率</text>
+            <text>出库分摊偏差率</text>
           </view>
           <view class="cog-sort-chip cog-sort-chip--devianceAmount {{ingredientSortBy === 'devianceAmount' ? 'is-on' : ''}}" bindtap="onIngredientSort" data-sort="devianceAmount">
-            <text>偏差金额</text>
+            <text>出库分摊偏差金额</text>
             <text class="cog-sort-chip-arrow" wx:if="{{ingredientSortBy === 'devianceAmount'}}">{{ingredientSortOrder === 'asc' ? '↑' : '↓'}}</text>
           </view>
         </view>
@@ -194,11 +194,11 @@
          <text>¥{{goods.outboundTotalAmount}}</text>
          </view>
          <view class="cog-stat4-cell cog-stat4--outbound">
-         <text class="cog-stat4-cap">偏差率</text>
+         <text class="cog-stat4-cap">出库分摊偏差率</text>
          <text>{{goods.devianceRate}}%</text>
          </view>
          <view class="cog-stat4-cell cog-stat4--outbound">
-          <text  class="cog-stat4-cap">偏差金额</text>
+          <text class="cog-stat4-cap">出库分摊偏差金额</text>
           <text>¥{{goods.diffCostAmount}}</text>
          </view>
          
@@ -253,13 +253,20 @@
         </view>
 
         <view class="cog-sub-table" wx:if="{{expandedDisGoodsId == goods.disGoodsId}}">
+          <view class="cog-allocation-note">
+            <text>出库分摊量不是菜品实际称重耗用，系统根据原料出库池和菜品理论需求比例计算。</text>
+            <text
+              class="cog-allocation-note__attention"
+              wx:if="{{goods.deviance && (goods.deviance.level == 'HIGH' || goods.deviance.level == 'CRITICAL')}}"
+            >出库分摊偏高，建议核查。</text>
+          </view>
           <view class="cog-tr cog-tr--head">
             <text class="cog-td cog-td--name">菜品名称</text>
             <text class="cog-td">销量(份)</text>
             <text class="cog-td">单份用量({{goods.gbDgGoodsStandardname}})</text>
             <text class="cog-td">理论消耗({{goods.gbDgGoodsStandardname}})</text>
-            <text class="cog-td">实际分摊({{goods.gbDgGoodsStandardname}})</text>
-            <text class="cog-td cog-td--right">偏差({{goods.gbDgGoodsStandardname}})</text>
+            <text class="cog-td">制作出库分摊({{goods.gbDgGoodsStandardname}})</text>
+            <text class="cog-td cog-td--right">出库分摊偏差({{goods.gbDgGoodsStandardname}})</text>
           </view>
           <view class="cog-tr" wx:for="{{goods.supportedDishes}}" wx:for-item="row" wx:key="dishId">
             <view class="cog-td cog-td--name">

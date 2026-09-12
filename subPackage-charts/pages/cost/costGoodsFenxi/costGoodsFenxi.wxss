@@ -604,6 +604,23 @@ page {
   padding: 0 0 8rpx;
 }
 
+.cog-allocation-note {
+  margin: 0 8rpx 12rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 10rpx;
+  background: #f0f9ff;
+  color: #475569;
+  font-size: 22rpx;
+  line-height: 1.55;
+}
+
+.cog-allocation-note__attention {
+  display: block;
+  margin-top: 6rpx;
+  color: #b45309;
+  font-weight: 600;
+}
+
 .cog-tr {
   display: flex;
   flex-direction: row;
