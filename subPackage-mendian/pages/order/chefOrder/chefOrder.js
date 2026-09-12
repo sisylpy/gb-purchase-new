@@ -2,7 +2,6 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil');
 var config = require('../../../../config/index.js');
 var depOrder = require('../../../../services/depOrder');
-var autoOrderDelete = require('../../../../utils/autoOrderDelete.js');
 
 // ========================
 // 本页面使用的所有接口方法（来自 depOrder）
@@ -520,7 +519,8 @@ Page({
   /** 弹出删除确认弹窗（从操作面板进入） */
   delApply() {
     this.setData({
-      warnContent: this.data.goodsName + "  " + this.data.applyItem.gbDoQuantity + this.data.applyItem.gbDoStandard,
+      warnContent: this.data.goodsName + "  " + this.data.applyItem.gbDoQuantity
+        + this.data.applyItem.gbDoStandard + "（将同步删除本次订货及配送关联）",
       show: false,
       popupType: 'deleteOrder',
       showPopupWarn: true,
@@ -533,7 +533,7 @@ Page({
   /** 弹出删除确认弹窗（从临时操作面板进入） */
   delApplyPaste() {
     load.showLoading("删除订单");
-    depOrder.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId).then(function(res) {
+    depOrder.deleteOrderCompletelyGb(this.data.applyItem.gbDepartmentOrdersId).then(function(res) {
       load.hideLoading();
       if (res.result.code == 0) {
         this._refreshDataWithSearch();
@@ -547,19 +547,12 @@ Page({
   /** 确认删除订单（从删除确认弹窗触发） */
   deleteApplyApi() {
     this.setData({ popupType: "", showPopupWarn: false });
-    var order = this.data.applyItem;
-    autoOrderDelete.chooseDeleteMode(order).then(function(cancelAutoOrder) {
-      this._deleteApplyApi(cancelAutoOrder);
-    }.bind(this)).catch(function(err) {
-      if (!err || !err.cancelled) {
-        wx.showToast({ title: '请选择删除方式', icon: 'none' });
-      }
-    });
+    this._deleteApplyApi();
   },
 
-  _deleteApplyApi(cancelAutoOrder) {
+  _deleteApplyApi() {
     load.showLoading("删除订单");
-    depOrder.deleteOrderGb(this.data.applyItem.gbDepartmentOrdersId, cancelAutoOrder).then(function(res) {
+    depOrder.deleteOrderCompletelyGb(this.data.applyItem.gbDepartmentOrdersId).then(function(res) {
       load.hideLoading();
       if (res.result.code == 0) {
         this._refreshDataWithSearch();

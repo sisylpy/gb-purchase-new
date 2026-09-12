@@ -77,6 +77,12 @@ var deleteOrderGb = function (id, cancelAutoOrder) {
   });
 };
 
+var deleteOrderCompletelyGb = function (id) {
+  return requestUtil.request('gbdepartmentorders/deleteOrderCompletelyGb/' + id, {}, {
+    method: 'DELETE',
+  });
+};
+
 var depGetApplyAiByTime = function (id) {
   return requestUtil.get('gbdepartmentorders/depGetApplyAiByTime/' + id);
 };
@@ -468,6 +474,7 @@ module.exports = {
   updateOrderGbJj: updateOrderGbJj,
   updateOrderGbJjSx: updateOrderGbJjSx,
   deleteOrderGb: deleteOrderGb,
+  deleteOrderCompletelyGb: deleteOrderCompletelyGb,
   depGetApplyAiByTime: depGetApplyAiByTime,
   subDepGetApplyAiByTime: subDepGetApplyAiByTime,
   depGetApplyAiFather: depGetApplyAiFather,
