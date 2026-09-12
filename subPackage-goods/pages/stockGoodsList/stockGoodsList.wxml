@@ -257,7 +257,7 @@
                     <text class=" mr-10">{{tool.getAttrDateString(reduce.gbDgsrDate)}}</text>
                     <text>{{reduce.gbDgsrWeight}}{{disGoods.gbDgGoodsStandardname}}</text>
                   </view>
-                  <view class="flex-row p-10" wx:if="{{reduce.gbDgsrStatus == '-1' }}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
+                  <view class="flex-row p-10" wx:if="{{reduce.gbDgsrStatus == '-1' || reduce.gbDgsrStatus == '2'}}" bindtap="deleteReduce" data-id="{{reduce.gbDepartmentGoodsStockReduceId}}" data-date="{{reduce.gbDgsrDate}}" hover-class="hover">
                     <image class="del_btn" src="/images/delok.png" mode="aspectFill" />
                   </view>
                 </view>

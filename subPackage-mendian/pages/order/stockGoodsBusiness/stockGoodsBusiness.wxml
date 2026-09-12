@@ -227,7 +227,7 @@
                       <text>{{tool.getAttrDateString(reduce.gbDgsrDate)}} {{reduce.gbDgsrWeight}}{{goodsUnit}}</text>
                     </view>
                     <view
-                      wx:if="{{reduce.gbDgsrStatus == '-1'}}"
+                      wx:if="{{reduce.gbDgsrStatus == '-1' || reduce.gbDgsrStatus == '2'}}"
                       class="sgb-pill__del"
                       bindtap="deleteReduce"
                       data-id="{{reduce.gbDepartmentGoodsStockReduceId}}"
