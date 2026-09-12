@@ -17,6 +17,57 @@ import {
 } from '../../../../services/apiDistributerGbFood'
 
 var recipePageModel = require('./recipePageModel');
+var MIN_UNIT_OPTIONS = recipePageModel.MIN_UNIT_OPTIONS;
+var QUICK_DOSAGE_PRESETS = recipePageModel.QUICK_DOSAGE_PRESETS;
+var COST_DAYS_OPTIONS = recipePageModel.COST_DAYS_OPTIONS;
+var MODAL_PAD_TOP_RATIO_SEARCH = recipePageModel.MODAL_PAD_TOP_RATIO_SEARCH;
+var MODAL_PAD_TOP_RATIO_PICKED = recipePageModel.MODAL_PAD_TOP_RATIO_PICKED;
+var PREPARATION_MIGRATION_CACHE_PREFIX = recipePageModel.PREPARATION_MIGRATION_CACHE_PREFIX;
+var RECIPE_REPLACEMENT_CONTEXT_PREFIX = recipePageModel.RECIPE_REPLACEMENT_CONTEXT_PREFIX;
+var P1_STANDARD_UNITS = recipePageModel.P1_STANDARD_UNITS;
+var _todayText = recipePageModel._todayText;
+var _offsetDateText = recipePageModel._offsetDateText;
+var _recipeMoneyText = recipePageModel._recipeMoneyText;
+var _recipeNumberText = recipePageModel._recipeNumberText;
+var _recipeDateText = recipePageModel._recipeDateText;
+var _recipeNewMissingReasonGroups = recipePageModel._recipeNewMissingReasonGroups;
+var _recipeReasonGroupView = recipePageModel._recipeReasonGroupView;
+var _toP1Unit = recipePageModel._toP1Unit;
+var _fromP1Unit = recipePageModel._fromP1Unit;
+var _baseUnitInfo = recipePageModel._baseUnitInfo;
+var _baseUnitCode = recipePageModel._baseUnitCode;
+var _baseUnitLabel = recipePageModel._baseUnitLabel;
+var _historicalPriceMissingText = recipePageModel._historicalPriceMissingText;
+var _managedVersionUsageState = recipePageModel._managedVersionUsageState;
+var _nextRecipeVersionStart = recipePageModel._nextRecipeVersionStart;
+var _recipeIntervalsOverlap = recipePageModel._recipeIntervalsOverlap;
+var _rawGoodsPurchaseEvidence = recipePageModel._rawGoodsPurchaseEvidence;
+var _unitFactorToGram = recipePageModel._unitFactorToGram;
+var _legacyRawToP1Component = recipePageModel._legacyRawToP1Component;
+var _rawPackSpecAmount = recipePageModel._rawPackSpecAmount;
+var _packQtyInMinUnit = recipePageModel._packQtyInMinUnit;
+var _minUnitOptionsForGoods = recipePageModel._minUnitOptionsForGoods;
+var _suggestMinUnit = recipePageModel._suggestMinUnit;
+var _hasGoodsDefaultSpec = recipePageModel._hasGoodsDefaultSpec;
+var _effectivePackQtyInMin = recipePageModel._effectivePackQtyInMin;
+var _needsManualConversion = recipePageModel._needsManualConversion;
+var _formatPortionsPerPack = recipePageModel._formatPortionsPerPack;
+var _getGoodsEntity = recipePageModel._getGoodsEntity;
+var _normalizeRawGoodsPayload = recipePageModel._normalizeRawGoodsPayload;
+var _goodsImageUrl = recipePageModel._goodsImageUrl;
+var _decorateGoodsSearchPrice = recipePageModel._decorateGoodsSearchPrice;
+var _defaultPortionAmount = recipePageModel._defaultPortionAmount;
+var _buildUnitContext = recipePageModel._buildUnitContext;
+var _trimDecimal = recipePageModel._trimDecimal;
+var _formatPackAmountDisplay = recipePageModel._formatPackAmountDisplay;
+var _formatPackAmount = recipePageModel._formatPackAmount;
+var _convertMinUnitToPack = recipePageModel._convertMinUnitToPack;
+var _buildPortionPersistPayload = recipePageModel._buildPortionPersistPayload;
+var _convertPackToMinUnitForDisplay = recipePageModel._convertPackToMinUnitForDisplay;
+var _getRawLinePrice = recipePageModel._getRawLinePrice;
+var _calcRawLineCost = recipePageModel._calcRawLineCost;
+var _calcPortionCost = recipePageModel._calcPortionCost;
+var _normalizeRecipeVersion = recipePageModel._normalizeRecipeVersion;
 
 
 function createRecipePage(versionEditorMode) {
