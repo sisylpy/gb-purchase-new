@@ -1590,33 +1590,36 @@ function createRecipePage(versionEditorMode) {
         });
         var impact = preview.costImpact || {};
         var totalRecords = Number(impact.affectedSalesRecordCount || 0);
-        var oldIncomplete = Number(impact.oldIncompleteRecordCount || 0);
-        var newIncomplete = Number(impact.newIncompleteRecordCount || 0);
+        var oldCost = impact.oldCost || {};
+        var newCost = impact.newCost || {};
+        var oldIncomplete = Number(oldCost.missingBusinessDateCount || 0);
+        var newIncomplete = Number(newCost.missingBusinessDateCount || 0);
         impact._salesText = _recipeNumberText(impact.salesQuantity) + ' 份';
-        // 原成本、新成本、差额各自独立判断，任一侧缺失都不影响另一侧取值。
-        impact._oldCostText = impact.oldCompleteCostAmount === null
-          || typeof impact.oldCompleteCostAmount === 'undefined'
-          ? '无法取得' : _recipeMoneyText(impact.oldCompleteCostAmount);
-        impact._newCostText = impact.newCompleteCostAmount === null
-          || typeof impact.newCompleteCostAmount === 'undefined'
-          ? '无法取得' : _recipeMoneyText(impact.newCompleteCostAmount);
-        impact._differenceText = impact.completeCostDifference === null
-          || typeof impact.completeCostDifference === 'undefined'
+        // 原、新两侧完全按各自结构化状态展示，不互相回退。
+        impact._oldCostText = oldCost.status === 'COMPLETE'
+          ? _recipeMoneyText(oldCost.completeCostAmount)
+          : (oldCost.status === 'PARTIAL'
+            ? '已知 ' + _recipeMoneyText(oldCost.knownCostAmount) : '无法取得');
+        impact._newCostText = newCost.status === 'COMPLETE'
+          ? _recipeMoneyText(newCost.completeCostAmount)
+          : (newCost.status === 'PARTIAL'
+            ? '已知 ' + _recipeMoneyText(newCost.knownCostAmount) : '无法取得');
+        impact._differenceText = oldCost.status !== 'COMPLETE' || newCost.status !== 'COMPLETE'
           ? '无法比较' : _recipeMoneyText(impact.completeCostDifference);
-        impact._oldCostNote = impact._oldCostText === '无法取得'
-          ? '原完整成本无法取得：' + totalRecords + ' 条销量记录中有 ' + oldIncomplete + ' 条未算全。'
-          : '';
-        impact._newCostNote = impact._newCostText === '无法取得'
-          ? '新完整成本无法取得：' + totalRecords + ' 条销量记录中有 ' + newIncomplete + ' 条未算全。'
-          : '';
+        impact._oldCostNote = oldCost.status === 'PARTIAL'
+          ? '原成本部分日期缺少依据：完整 '
+            + Number(oldCost.completeBusinessDateCount || 0) + ' 天，缺失 ' + oldIncomplete + ' 天。'
+          : (oldCost.status === 'UNAVAILABLE' && totalRecords
+            ? '原成本缺少依据：' + oldIncomplete + ' 个营业日均未算全。' : '');
+        impact._newCostNote = newCost.status === 'PARTIAL'
+          ? '新成本部分日期缺少依据：完整 '
+            + Number(newCost.completeBusinessDateCount || 0) + ' 天，缺失 ' + newIncomplete + ' 天。'
+          : (newCost.status === 'UNAVAILABLE' && totalRecords
+            ? '新成本缺少依据：' + newIncomplete + ' 个营业日均未算全。' : '');
         impact._differenceNote = impact._differenceText === '无法比较'
           ? '成本差额无法比较：原完整成本或新完整成本未算全。'
           : '';
-        // 新成本缺失原因只取新侧字段，不回落到原成本的原因。
-        var newIncompleteRows = (impact.dailyChanges || []).filter(function (row) {
-          return row.newCompleteCostAmount === null || typeof row.newCompleteCostAmount === 'undefined';
-        });
-        var newReasonGroups = _recipeNewMissingReasonGroups(newIncompleteRows);
+        var newReasonGroups = _recipeNewMissingReasonGroups(newCost.missingReasons || []);
         impact._newReasonGroups = newReasonGroups.map(function (group) {
           return _recipeReasonGroupView(group, 10);
         });
@@ -1625,7 +1628,7 @@ function createRecipePage(versionEditorMode) {
         });
         impact._newReasonExpandable = newReasonGroups.length > 2
           || newReasonGroups.some(function (group) { return group.dates.length > 3; });
-        impact._newDetailTruncated = impact.dailyChangesTruncated === true;
+        impact._newDetailTruncated = newCost.missingReasonsTruncated === true;
         impact._dateText = impact.actualBusinessDateStart
           ? _recipeDateText(impact.actualBusinessDateStart) + ' 至 '
             + _recipeDateText(impact.actualBusinessDateEnd) + '（不含）'

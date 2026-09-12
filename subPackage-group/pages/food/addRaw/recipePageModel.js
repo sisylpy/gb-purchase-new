@@ -50,29 +50,31 @@ function _recipeDateText(value) {
 
 /*
  * 新成本缺失原因的分组展示。
- * 只按后端返回的原文分组，不解析文字、不推断业务原因、不补金额；
- * 同一原因在多天重复时只展示一条，避免在手机上铺开几十条重复记录。
+ * 只消费后端结构化字段，不解析 reasonMessage，也不根据文案推断商品或原因类型。
  */
-function _recipeNewMissingReasonGroups(rows) {
+function _recipeNewMissingReasonGroups(details) {
   var groups = [];
-  (rows || []).forEach(function (row) {
-    var reasons = (row.newMissingReasons || []).filter(function (item) {
-      return String(item || '').trim();
-    });
-    if (!reasons.length) reasons = ['未返回具体原因'];
-    reasons.forEach(function (item) {
-      var text = String(item).trim();
-      var group = null;
-      for (var i = 0; i < groups.length; i++) {
-        if (groups[i].reason === text) { group = groups[i]; break; }
-      }
-      if (!group) {
-        group = { reason: text, dates: [] };
-        groups.push(group);
-      }
-      var date = _recipeDateText(row.businessDate);
-      if (date && group.dates.indexOf(date) < 0) group.dates.push(date);
-    });
+  (details || []).forEach(function (detail) {
+    var reasonCode = String(detail.reasonCode || '');
+    var reasonMessage = String(detail.reasonMessage || '');
+    var rawGoodsId = Number(detail.rawGoodsId || 0);
+    var rawGoodsName = String(detail.rawGoodsName || '');
+    var key = [reasonCode, rawGoodsId, rawGoodsName, reasonMessage].join(':');
+    var group = null;
+    for (var i = 0; i < groups.length; i++) {
+      if (groups[i].key === key) { group = groups[i]; break; }
+    }
+    if (!group) {
+      var subject = rawGoodsName || (rawGoodsId ? '原料 #' + rawGoodsId : '');
+      group = {
+        key: key,
+        reason: [subject, reasonMessage || reasonCode].filter(Boolean).join('：'),
+        dates: [],
+      };
+      groups.push(group);
+    }
+    var date = _recipeDateText(detail.businessDate);
+    if (date && group.dates.indexOf(date) < 0) group.dates.push(date);
   });
   return groups;
 }
@@ -80,6 +82,7 @@ function _recipeNewMissingReasonGroups(rows) {
 function _recipeReasonGroupView(group, dateLimit) {
   var dates = group.dates.slice(0, dateLimit);
   return {
+    key: group.key,
     reason: group.reason,
     _datesText: dates.join('、') + (group.dates.length > dates.length
       ? ' 等 ' + group.dates.length + ' 天' : ''),

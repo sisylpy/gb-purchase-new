@@ -162,7 +162,7 @@
             <text class="unified-impact__reasons-title">新成本缺少依据的日期与原因</text>
             <view class="unified-impact__reason"
               wx:for="{{versionUsageNewReasonExpanded ? versionUsagePreview.costImpact._newReasonGroups : versionUsagePreview.costImpact._newReasonGroupsBrief}}"
-              wx:key="reason">
+              wx:key="key">
               <text class="unified-impact__reason-date">{{item._datesText}}</text>
               <text class="unified-impact__reason-text">{{item.reason}}</text>
             </view>
@@ -170,7 +170,7 @@
               wx:if="{{versionUsagePreview.costImpact._newReasonExpandable}}"
               bindtap="toggleVersionUsageReasonDetail">{{versionUsageNewReasonExpanded ? '收起明细' : '展开更多原因'}}</text>
             <text class="unified-impact__warning"
-              wx:if="{{versionUsagePreview.costImpact._newDetailTruncated}}">销量明细仅返回前 {{versionUsagePreview.costImpact.dailyChanges.length}} 条，以上原因不是全部。</text>
+              wx:if="{{versionUsagePreview.costImpact._newDetailTruncated}}">缺失原因明细已截断，以上内容不是全部。</text>
           </view>
         </view>
       </view>

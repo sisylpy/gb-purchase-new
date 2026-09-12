@@ -103,10 +103,8 @@ function aggregateVersionCost(version, reports, foodId, contentVersionId) {
       if (Number(daily.recipeVersionId) === strictVersionId) dailyRows.push(daily);
     });
     (dish.ingredientSummaries || []).forEach(function (ingredient) {
-      var recipeVersionNos = ingredient.recipeVersionNos || [];
-      if (recipeVersionNos.length && !recipeVersionNos.some(function (value) {
-        return Number(value) === Number(version.versionNo);
-      })) return;
+      var evidenceVersionId = Number(ingredient.contentVersionId || ingredient.recipeVersionId || 0);
+      if (!evidenceVersionId || evidenceVersionId !== strictVersionId) return;
       var key = String(ingredient.rawGoodsId) + ':' + String(ingredient.baseUnitCode || '');
       var aggregate = ingredients[key] || {
         totalBaseQuantity: 0,
@@ -756,12 +754,19 @@ Page({
         });
         preview._gapCount = (preview.gaps || []).length;
         var impact = preview.costImpact || {};
+        var oldCost = impact.oldCost || {};
+        var newCost = impact.newCost || {};
         impact._salesText = numberText(impact.salesQuantity || 0) + ' 份';
-        impact._oldCostText = moneyText(impact.oldCompleteCostAmount);
-        impact._newCostText = moneyText(impact.newCompleteCostAmount);
-        impact._differenceText = moneyText(impact.completeCostDifference);
-        impact._hasIncomplete = Number(impact.oldIncompleteRecordCount || 0) > 0
-          || Number(impact.newIncompleteRecordCount || 0) > 0;
+        impact._oldCostText = oldCost.status === 'COMPLETE'
+          ? moneyText(oldCost.completeCostAmount)
+          : (oldCost.status === 'PARTIAL' ? '已知 ' + moneyText(oldCost.knownCostAmount) : '—');
+        impact._newCostText = newCost.status === 'COMPLETE'
+          ? moneyText(newCost.completeCostAmount)
+          : (newCost.status === 'PARTIAL' ? '已知 ' + moneyText(newCost.knownCostAmount) : '—');
+        impact._differenceText = oldCost.status === 'COMPLETE' && newCost.status === 'COMPLETE'
+          ? moneyText(impact.completeCostDifference) : '—';
+        impact._hasIncomplete = oldCost.status === 'PARTIAL' || oldCost.status === 'UNAVAILABLE'
+          || newCost.status === 'PARTIAL' || newCost.status === 'UNAVAILABLE';
         impact._dateText = impact.actualBusinessDateStart
           ? dateText(impact.actualBusinessDateStart) + ' 至 '
             + dateText(impact.actualBusinessDateEnd) + '（不含）'
