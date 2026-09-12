@@ -1,23 +1,12 @@
 <view class="prep-page">
-  <back-navbar title="记录原料损耗" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="中间料损耗" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="prep-navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
-  <view class="prep-loading" wx:if="{{loading}}">正在加载…</view>
-  <scroll-view wx:else scroll-y class="loss-scroll">
-    <view class="prep-tip">本次损耗将直接计入原料损耗，不产生中间料生产批次。</view>
-    <view class="prep-section">
-      <view class="prep-form-row"><text class="prep-form-label prep-required">选择中间料</text><picker range="{{products}}" range-key="productName" value="{{productIndex}}" bindchange="onProductChange"><view class="prep-picker {{product ? '' : 'prep-placeholder'}}">{{product ? product.productName : '请选择已完成配方的中间料'}}</view></picker></view>
-      <view class="prep-form-row" wx:if="{{product}}"><text class="prep-form-label prep-required">选择实际损耗的配方原料</text><picker range="{{materials}}" range-key="rawGoodsName" value="{{materialIndex}}" bindchange="onMaterialChange"><view class="prep-picker {{material ? '' : 'prep-placeholder'}}">{{material ? material.rawGoodsName : '请选择原料'}}</view></picker></view>
+  <view class="scope-wrap">
+    <view class="scope-card">
+      <view class="scope-mark">—</view>
+      <view class="scope-title">当前版本不支持中间料损耗</view>
+      <view class="scope-desc">中间料仅作为菜品配方中的标准加工组成，用于成本展开。当前不维护中间料库存、生产、损耗或废弃记录。</view>
+      <button class="prep-button prep-button-primary scope-button" bindtap="toBack">返回</button>
     </view>
-    <view class="prep-section" wx:if="{{material}}">
-      <view class="prep-section-title">选择有库存的进货记录</view><view class="prep-section-subtitle">按进货日期和剩余量选择，不需要记库存 ID。</view>
-      <view class="prep-empty compact" wx:if="{{stocks.length === 0}}">当前门店没有可用的“{{material.rawGoodsName}}”库存</view>
-      <view class="stock-card {{stockIndex === index ? 'selected' : ''}}" wx:for="{{stocks}}" wx:key="rawStockBatchId" data-index="{{index}}" bindtap="chooseStock"><view><view class="stock-date">进货日期 {{item.purchaseDate || '未记录'}}</view><view class="prep-muted">剩余 {{item.remainingQuantity}} {{item.stockUnitLabel}}</view></view><text class="select-dot">{{stockIndex === index ? '✓' : ''}}</text></view>
-    </view>
-    <view class="prep-section" wx:if="{{stock}}">
-      <view class="prep-form-row"><text class="prep-form-label prep-required">损耗数量</text><view class="prep-inline"><input class="prep-input" type="digit" placeholder="不能超过剩余量" value="{{quantity}}" bindinput="onQuantityInput" /><view class="unit-label">{{stock.stockUnitLabel}}</view></view></view>
-      <view class="prep-form-row"><text class="prep-form-label prep-required">损耗原因</text><picker range="{{reasons}}" range-key="label" value="{{reasonIndex}}" bindchange="onReasonChange"><view class="prep-picker">{{reasons[reasonIndex].label}}</view></picker></view>
-      <view class="prep-form-row"><text class="prep-form-label">说明{{reasons[reasonIndex].code === 'OTHER' ? '（必填）' : '（选填）'}}</text><textarea class="prep-textarea" maxlength="500" placeholder="补充损耗情况" value="{{note}}" bindinput="onNoteInput"></textarea></view>
-    </view>
-  </scroll-view>
-  <view class="prep-actions"><button class="prep-button prep-button-primary" loading="{{submitting}}" disabled="{{submitting || !stock}}" bindtap="submit">确认记录损耗</button></view>
+  </view>
 </view>

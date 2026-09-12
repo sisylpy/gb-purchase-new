@@ -20,7 +20,7 @@ Page({
     product: null,
     recipe: { components: [] },
     visibleComponents: [],
-    canOperate: false,
+    historicalLossCount: 0,
   },
 
   onLoad: function (options) {
@@ -32,18 +32,22 @@ Page({
   loadDetail: function () {
     var that = this;
     this.setData({ loading: true });
-    Promise.all([api.getStoreProduct(this.data.id), api.getStoreRecipe(this.data.id)]).then(function (rows) {
+    Promise.all([
+      api.getStoreProduct(this.data.id),
+      api.getStoreRecipe(this.data.id),
+      api.listStoreRawLosses(this.data.id).catch(function () { return []; }),
+    ]).then(function (rows) {
       var product = rows[0];
       var recipe = rows[1] || { components: [] };
       product.usageUnitLabel = unitLabels[product.usageUnitCode] || product.usageUnitCode || '—';
-      that.finishDetail(product, recipe);
+      that.finishDetail(product, recipe, rows[2] || []);
     }).catch(function (error) {
       that.setData({ loading: false });
       util.showError(error);
     });
   },
 
-  finishDetail: function (product, recipe) {
+  finishDetail: function (product, recipe, historicalLosses) {
     var canOperate = product.status === 'ENABLED' && product.recipeConfigured;
     product.displayStateLabel = product.status === 'DISABLED' ? '已停用' : (canOperate ? '使用中' : '配方待完善');
     product.displayStateClass = product.status === 'DISABLED' ? 'status-muted' : (canOperate ? 'status-success' : 'status-warning');
@@ -71,24 +75,13 @@ Page({
       product: product,
       recipe: Object.assign({}, recipe, { components: decoratedComponents }),
       visibleComponents: decoratedComponents.slice(0, 6),
-      canOperate: canOperate,
-      blockedOperationText: product.status === 'DISABLED'
-        ? '该中间料已停用，重新启用后可记录原料损耗。'
-        : '完成标准配方后即可记录原料损耗。',
-      blockedActionText: product.status === 'DISABLED'
-        ? '重新启用 ›'
-        : '去完善标准配方 ›',
+      historicalLossCount: historicalLosses.length,
     });
   },
 
   toEdit: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeProductForm/storeProductForm?id=' + this.data.id }); },
   toRecipe: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeRecipe/storeRecipe?productId=' + this.data.id }); },
-  toLoss: function () { if (this.data.canOperate) wx.navigateTo({ url: '/subPackage-preparation/pages/storeLoss/storeLoss?productId=' + this.data.id }); },
-  toLossRecords: function () { if (this.data.canOperate) wx.navigateTo({ url: '/subPackage-preparation/pages/storeLossRecords/storeLossRecords?productId=' + this.data.id }); },
-  handleBlockedAction: function () {
-    if (this.data.product && this.data.product.status === 'DISABLED') this.toggleStatus();
-    else this.toRecipe();
-  },
+  toLossRecords: function () { wx.navigateTo({ url: '/subPackage-preparation/pages/storeLossRecords/storeLossRecords?productId=' + this.data.id }); },
 
   toggleStatus: function () {
     var that = this;

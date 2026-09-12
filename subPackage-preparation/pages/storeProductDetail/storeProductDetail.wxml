@@ -28,15 +28,13 @@
       <view class="view-all" wx:if="{{recipe.components.length > 6}}" bindtap="toRecipe">查看全部 {{recipe.components.length}} 种原料 ›</view>
     </view>
 
-    <view class="prep-section operation-section">
-      <view class="prep-section-title">原料损耗</view>
-      <view wx:if="{{canOperate}}">
-        <view class="loss-action" bindtap="toLoss"><text>记录原料损耗</text></view>
-        <view class="loss-record-link" bindtap="toLossRecords">查看损耗记录 ›</view>
-      </view>
-      <view class="blocked-operation" wx:else>
-        <text>{{blockedOperationText}}</text>
-        <text class="warning-action" bindtap="handleBlockedAction">{{blockedActionText}}</text>
+    <view class="prep-section operation-section" wx:if="{{historicalLossCount > 0}}">
+      <view class="section-head">
+        <view>
+          <view class="prep-section-title no-margin">历史损耗记录</view>
+          <text class="prep-muted">旧入口产生的原料损耗，仅供查询</text>
+        </view>
+        <view class="history-link" bindtap="toLossRecords">查看 {{historicalLossCount}} 条 ›</view>
       </view>
     </view>
 
