@@ -1,12 +1,7 @@
-const globalData = getApp().globalData;
-
 var load = require('../../../../lib/load.js');
-import apiUrl from '../../../../config/index.js'
-var dateUtils = require('../../../../lib/dateUtil');
 
 import {
   gbDisGetAllSuppliers,
-  disUpdateDisGoodsGb,
 } from '../../../../services/supplier.js';
 
 
@@ -72,26 +67,9 @@ Page({
 
 
   choiceSupplier(e) {
-    var supplierItem = e.currentTarget.dataset.item;var goodsItem = wx.getStorageSync('disGoods');
-     var aaa = supplierItem.nxJrdhSupplierId;
-     goodsItem.gbDgGbSupplierId = aaa;
-     goodsItem.gbDgGoodsType = 21;
-     goodsItem.gbDgGbDepartmentId = this.data.depId,
-    disUpdateDisGoodsGb(goodsItem).then(res =>{
-     
-      if(res.result.code == 0){
-        wx.navigateBack({
-          delta: 2,
-        })
-      }else{
-        wx.showToast({
-          title: res.result.msg,
-          icon: 'none'
-        })
-      }
-    })
-  
-    
+    var supplierItem = e.currentTarget.dataset.item;
+    this.getOpenerEventChannel().emit('supplierSelected', supplierItem);
+    wx.navigateBack({ delta: 1 });
   },
 
   toBack(){

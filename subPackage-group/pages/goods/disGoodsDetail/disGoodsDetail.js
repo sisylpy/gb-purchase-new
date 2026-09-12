@@ -17,7 +17,9 @@ Page({
        navBarHeight: globalData.navBarHeight * globalData.rpxR,
      });
 
-    if (!this.data.specOnly) {
+    if (this._supplierSelectionPending) {
+      this._supplierSelectionPending = false;
+    } else if (!this.data.specOnly) {
       this._getGoodsDetail();
     }
   },
@@ -46,7 +48,7 @@ Page({
     // ],
     items: [{
         name: '2',
-        value: '自采',
+        value: '采购商品',
         checked: ""
       },
 
@@ -105,7 +107,8 @@ Page({
     var value = wx.getStorageSync('disGoods');
     if (value) {
       this.setData({
-        goods: value
+        goods: value,
+        supplierId: value.gbDgGbSupplierId == null ? -1 : value.gbDgGbSupplierId,
       })
       if (!specOnly && value.gbDepartmentEntity) {
         this.setData({
@@ -132,8 +135,13 @@ Page({
     goodsApi.gbDisGetGoodsDetail(this.data.disGoodsId).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
+        var goods = res.result.data.goodsInfo;
         this.setData({
-          goods: res.result.data.goodsInfo,
+          goods: goods,
+          gbDepId: goods.gbDgGbDepartmentId,
+          nxDisId: goods.gbDgNxDistributerId,
+          nxGoodsId: goods.gbDgNxDistributerGoodsId,
+          supplierId: goods.gbDgGbSupplierId == null ? -1 : goods.gbDgGbSupplierId,
         })
       } else {
         wx.showToast({
@@ -623,7 +631,9 @@ Page({
         showPurDeps: true,
         showSupplier: false,
         nxGoodsId: -1,
-        supplierId: -1
+        supplierId: -1,
+        'goods.gbDgGbSupplierId': -1,
+        'goods.gbDistributerAppointSupplierEntity': null,
 
       })
 
@@ -709,8 +719,24 @@ Page({
 
 
   toSupplier() {
+    var that = this;
     wx.navigateTo({
       url: '/subPackage-mendian/pages/supplier/appointSupplierList/appointSupplierList',
+      success: function (result) {
+        result.eventChannel.on('supplierSelected', function (supplier) {
+          if (!supplier || !supplier.nxJrdhSupplierId) return;
+          that._supplierSelectionPending = true;
+          that.setData({
+            gbDepId: that.data.purDepId,
+            supplierId: supplier.nxJrdhSupplierId,
+            'goods.gbDgGoodsType': 21,
+            'goods.gbDgGbDepartmentId': that.data.purDepId,
+            'goods.gbDgGbSupplierId': supplier.nxJrdhSupplierId,
+            'goods.gbDistributerAppointSupplierEntity': supplier,
+          });
+          that._ifCanSave();
+        });
+      },
     })
   },
 

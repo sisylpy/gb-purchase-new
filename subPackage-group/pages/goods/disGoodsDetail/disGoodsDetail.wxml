@@ -120,7 +120,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
          <view class="flex-row">
           <text class="mr-10 text-secondary"> 自动订货供货商:</text>
-        <text class="border-bottom" style="width: {{windowWidth - 500}}rpx;border-bottom: 1px solid #15b5bb; height: 50rpx;">{{goods.gbDistributerAppointSupplierEntity.nxJrdhsSupplierName}}</text>
+        <text class="border-bottom" style="width: {{windowWidth - 500}}rpx;border-bottom: 1px solid #15b5bb; height: 50rpx;">{{goods.gbDistributerAppointSupplierEntity ? goods.gbDistributerAppointSupplierEntity.nxJrdhsSupplierName : '请选择'}}</text>
          </view>
          <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon"/>
       
