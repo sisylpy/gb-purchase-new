@@ -1,6 +1,6 @@
 <view class="flex flex-column page-bg">
 
-  <back-navbar title="{{versionEditorMode ? (currentRecipeVersionView ? '编辑配方版本' : '新建配方版本') : foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="{{versionEditorMode ? (manageVersionId ? '编辑配方版本' : '新建配方版本') : foodItem.dishName}}" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
   <scroll-view scroll-y class="content-scroll">
     <!-- 售价/成本/毛利率卡片 -->
@@ -84,12 +84,12 @@
       <view class="unified-edit-card__head">
         <view>
           <text class="unified-edit-card__title">门店使用时间</text>
-          <text class="unified-edit-card__sub">选择一段现有时间进行修改，或为该版本设置新时间</text>
+          <text class="unified-edit-card__sub">{{manageVersionId ? '选择一段现有时间进行修改，或为该版本设置新时间' : '设置新配方开始使用的日期和期限'}}</text>
         </view>
-        <text class="unified-edit-card__version">V{{currentRecipeVersionView.versionNo || '-'}}</text>
+        <text class="unified-edit-card__version" wx:if="{{manageVersionId}}">V{{currentRecipeVersionView.versionNo || '-'}}</text>
       </view>
 
-      <scroll-view scroll-x class="managed-intervals" wx:if="{{managedVersionIntervals.length}}">
+      <scroll-view scroll-x class="managed-intervals" wx:if="{{manageVersionId && managedVersionIntervals.length}}">
         <view class="managed-intervals__track">
           <view wx:for="{{managedVersionIntervals}}" wx:key="id"
             class="managed-interval {{managedIntervalId == item.id ? 'is-selected' : ''}}"
@@ -99,7 +99,7 @@
           </view>
         </view>
       </scroll-view>
-      <text class="managed-intervals__empty" wx:else>该版本尚未设置门店使用时间</text>
+      <text class="managed-intervals__empty" wx:elif="{{manageVersionId}}">该版本尚未设置门店使用时间</text>
 
       <view class="version-usage-row">
         <text class="version-usage-row__label">开始营业日</text>
@@ -130,12 +130,12 @@
           <view class="version-usage-row__value">{{versionUsageEnd}} ›</view>
         </picker>
       </view>
-      <view class="version-usage-reason">
+      <view class="version-usage-reason" wx:if="{{manageVersionId}}">
         <text class="version-usage-row__label">修改原因</text>
         <input class="version-usage-reason__input" value="{{versionUsageReason}}" maxlength="200"
           bindinput="onVersionUsageReasonInput" placeholder="例如：从今天起加入盐" />
       </view>
-      <view class="unified-impact" wx:if="{{versionUsagePreview}}">
+      <view class="unified-impact" wx:if="{{manageVersionId && versionUsagePreview}}">
         <text class="unified-impact__title">影响预览</text>
         <text class="unified-impact__line">影响营业日：{{versionUsagePreview._affectedText}}</text>
         <text class="unified-impact__line">将替换 {{versionUsagePreview.supersededIntervalIds.length}} 段旧区间，调整后共 {{versionUsagePreview._afterTimeline.length}} 段有效时间</text>
@@ -320,11 +320,11 @@
   </scroll-view>
   <view class="version-editor-footer" wx:if="{{versionEditorMode}}">
     <view class="version-editor-footer__summary">
-      <text class="version-editor-footer__title">{{versionUsagePreview ? '影响已预览' : '编辑配方 V' + (currentRecipeVersionView.versionNo || '-')}}</text>
-      <text class="version-editor-footer__sub">{{rawArr.length}} 项配料{{versionDraftDirty ? ' · 内容已修改，将保存为本版本的新修订' : ' · 可只修改使用时间'}}</text>
+      <text class="version-editor-footer__title">{{manageVersionId ? (versionUsagePreview ? '影响已预览' : '编辑配方 V' + (currentRecipeVersionView.versionNo || '-')) : (versionUsagePreview ? '新配方已检查' : '新建配方')}}</text>
+      <text class="version-editor-footer__sub">{{manageVersionId ? (rawArr.length + ' 项配料' + (versionDraftDirty ? ' · 内容已修改，将保存为本版本的新修订' : ' · 可只修改使用时间')) : (rawArr.length + ' 项配料 · 设置完成后即可创建')}}</text>
     </view>
     <view class="version-editor-footer__save" bindtap="saveNewRecipeVersion">
-      {{versionUsageConfirming ? '确认中…' : (recipeSaving ? '预览中…' : (versionUsagePreview ? '确认保存' : '预览并保存'))}}
+      {{versionUsageConfirming ? '确认中…' : (recipeSaving ? '检查中…' : (manageVersionId ? (versionUsagePreview ? '确认保存' : '预览并保存') : (versionUsagePreview ? '确认创建' : '检查并创建')))}}
     </view>
   </view>
 </view>

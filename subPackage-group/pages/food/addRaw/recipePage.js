@@ -1443,7 +1443,9 @@ function createRecipePage(versionEditorMode) {
   },
 
   _buildUnifiedUsagePlan() {
+    var creatingVersion = !Number(this.data.manageVersionId);
     var reason = String(this.data.versionUsageReason || '').trim();
+    if (creatingVersion && !reason) reason = '新增配方版本并设置门店使用时间';
     var end = this.data.versionUsageHasEnd ? this.data.versionUsageEnd : null;
     var start = this.data.versionUsageStart;
     if (!start) {
@@ -1458,7 +1460,6 @@ function createRecipePage(versionEditorMode) {
       wx.showToast({ title: '停止日期必须晚于开始日期', icon: 'none' });
       return null;
     }
-    var creatingVersion = !Number(this.data.manageVersionId);
     var minimumStart = this.data.minimumNewVersionStart;
     if (creatingVersion && minimumStart && start < minimumStart) {
       wx.showModal({
