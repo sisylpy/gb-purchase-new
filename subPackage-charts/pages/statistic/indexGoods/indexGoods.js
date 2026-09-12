@@ -215,6 +215,12 @@ Page({
     })
   },
 
+  toDailyDashboard() {
+    wx.redirectTo({
+      url: '/subPackage-charts/pages/statistic/index/index',
+    });
+  },
+
 
   toBack() {
     wx.navigateBack({

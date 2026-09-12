@@ -419,6 +419,12 @@ Page({
     })
   },
 
+  toGoodsDashboard() {
+    wx.redirectTo({
+      url: '/subPackage-charts/pages/statistic/indexGoods/indexGoods',
+    });
+  },
+
 
   toFilterType() {
     var type = "";

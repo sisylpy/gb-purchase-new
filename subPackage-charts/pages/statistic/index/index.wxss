@@ -30,6 +30,41 @@
   background-color: #f0f0f0 !important;
 }
 
+.dashboard-switch {
+  display: flex;
+  align-items: center;
+  padding: 6rpx;
+  border: 1rpx solid #dfe8e5;
+  border-radius: 14rpx;
+  background: #f5f7f7;
+}
+
+.dashboard-switch__item {
+  width: 58rpx;
+  height: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10rpx;
+  opacity: 0.5;
+}
+
+.dashboard-switch__item--active {
+  background: #ffffff;
+  box-shadow: 0 2rpx 8rpx rgba(18, 111, 91, 0.12);
+  opacity: 1;
+}
+
+.dashboard-switch__item--hover {
+  background: #e8f4f1;
+  opacity: 0.85;
+}
+
+.dashboard-switch__icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
 /* ============ 顶部汇总卡片 ============ */
 .summary-section {
   padding: 24rpx 24rpx 0;

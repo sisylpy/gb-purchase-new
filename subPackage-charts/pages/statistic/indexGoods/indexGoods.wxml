@@ -4,7 +4,7 @@
 <view class="flex flex-column">
 
 
-  <back-navbar title="商品看板" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="配料看板" style="height: {{navBarHeight}}rpx;" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
   <!--  top -->
   <view class=" flex-row-between pl-20 pr-20 border-bottom bg-white">
@@ -24,10 +24,14 @@
         </view>
       </view>
     </view>
-
-    <!-- <view class="flex-row p-20" bindtap="toFilterType">
-      <image src="{{searchDepId !== -1 ? '../../../../images/filter.png' : '../../../../images/filter-3-fill.png'}}" class="icon mr-20"></image>
-    </view> -->
+    <view class="dashboard-switch" aria-label="看板切换">
+      <view class="dashboard-switch__item" bindtap="toDailyDashboard" hover-class="dashboard-switch__item--hover" aria-label="切换到日看板">
+        <image src="/images/calender.png" class="dashboard-switch__icon" mode="aspectFit"></image>
+      </view>
+      <view class="dashboard-switch__item dashboard-switch__item--active" aria-label="当前为配料看板">
+        <image src="/images/icon_goods_active.png" class="dashboard-switch__icon" mode="aspectFit"></image>
+      </view>
+    </view>
   </view>
 
 

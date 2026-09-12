@@ -69,7 +69,6 @@ Page({
       { icon: '🍽️', iconBg: '#E8F5E9', name: '菜品管理', sub: '菜品与规格', bind: 'toStaffMeal' },
       { icon: '📦', iconBg: '#F3E8FD', name: '配料管理', sub: goodsSub, bind: goodsBind },
       { icon: '📊', iconBg: '#E0F7FA', name: '菜品经营', sub: '菜品经营概览', bind: 'toMendainFood' },
-      { icon: '🛒', iconBg: '#FFF8E1', name: '配料看板', sub: '商品销售看板', bind: 'toPurchaseGoods' },
     ];
     var purchaseItems = [
       { icon: '👥', iconBg: '#E3F2FD', name: '采购组', sub: '采购员与权限', bind: 'toStaff' },
@@ -174,9 +173,6 @@ Page({
   },
   toPurchaseDate() {
     wx.navigateTo({ url: '/subPackage-charts/pages/statistic/index/index' });
-  },
-  toPurchaseGoods() {
-    wx.navigateTo({ url: '/subPackage-charts/pages/statistic/indexGoods/indexGoods' });
   },
   toDaily() {
     wx.navigateTo({ url: '/subPackage-charts/pages/sales/dailyTurnover/dailyTurnover' });
