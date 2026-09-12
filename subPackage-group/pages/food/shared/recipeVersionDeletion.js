@@ -3,6 +3,20 @@ var preparationUtil = require('../../../../utils/preparation');
 
 var MIGRATION_CACHE_PREFIX = 'preparationFoodRecipeMigration:';
 
+function hasRowVersion(target) {
+  return target && target.rowVersion !== undefined && target.rowVersion !== null;
+}
+
+function ensureDeletionVersions(context) {
+  if (hasRowVersion(context.recipe) && hasRowVersion(context.version)) return true;
+  wx.showModal({
+    title: '配方信息需要刷新',
+    content: '当前配方修订缺少并发版本信息，请刷新页面后重新确认删除。',
+    showCancel: false,
+  });
+  return false;
+}
+
 function showIncompleteResult() {
   wx.showModal({
     title: '删除尚未完成',
@@ -43,6 +57,7 @@ function retryAfterConflict(page, context) {
 
 function performDelete(page, context, preview) {
   if (page.data[context.submittingField]) return Promise.resolve();
+  if (!ensureDeletionVersions(context)) return Promise.resolve();
   if (!preview || !preview.deletionPreviewToken) {
     wx.showToast({ title: '删除影响已失效，请重新确认', icon: 'none' });
     return Promise.resolve();
@@ -100,6 +115,7 @@ function previewAndConfirm(page, context) {
     wx.showToast({ title: '配方版本信息不完整', icon: 'none' });
     return Promise.resolve();
   }
+  if (!ensureDeletionVersions(context)) return Promise.resolve();
 
   var identity = context.getIdentity();
   context.showLoading('读取删除影响');
