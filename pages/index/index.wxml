@@ -281,7 +281,7 @@
                     >
                       <view class="batch-amount-preview-body">
                         <view class="batch-amount-detail-row">
-                          <text>商品金额</text>
+                          <text>{{batch.gbDpbPurchaseType == 9 ? '退货商品金额' : '商品金额'}}</text>
                           <text>¥{{batch.nxBillAmount.goodsAmount}}</text>
                         </view>
                         <view class="batch-amount-detail-row" wx:if="{{batch.nxBillAmount.hasCouponDiscount}}">
@@ -302,7 +302,7 @@
                       </view>
                       <view class="batch-amount-preview-footer">
                         <view class="batch-amount-total-row">
-                          <text class="batch-amount-total-label">应付</text>
+                          <text class="batch-amount-total-label">{{batch.gbDpbPurchaseType == 9 ? '退货总金额' : '应付'}}</text>
                           <text class="batch-amount-total-value">¥{{batch.nxBillAmount.payAmount}}</text>
                         </view>
                       </view>
@@ -311,12 +311,17 @@
                   <view class="flex-column  pb-10 pt-10" wx:if="{{batch.gbDpbStatus > 1}}">
                     <block wx:if="{{batch.gbDpbStatus == 2}}">
                       <view class="flex-column p-10" style="align-items:flex-end;" wx:if="{{!batch.nxBillAmount}}">
-                        <text class="font-sl text-secondary">商品金额 ¥{{batch.gbDpbSubtotal}}</text>
-                        <text class="font-sl" wx:if="{{batch.gbDpbNxDeliveryFee > 0}}">配送费 +¥{{batch.gbDpbNxDeliveryFee}}</text>
-                        <text class="font-sl text-danger" wx:if="{{batch.gbDpbNxCouponDiscountAmount > 0}}">{{batch.gbDpbNxCouponName}} -¥{{batch.gbDpbNxCouponDiscountAmount}}</text>
-                        <view><text class="mr-10">应付:</text><text class="big">¥{{batch.gbDpbPaySubtotal ? batch.gbDpbPaySubtotal : batch.gbDpbSubtotal}}元</text></view>
+                        <block wx:if="{{batch.gbDpbPurchaseType == 9}}">
+                          <view><text class="mr-10 text-danger">退货总金额:</text><text class="big text-danger">¥{{batch.gbDpbPaySubtotal ? batch.gbDpbPaySubtotal : batch.gbDpbSubtotal}}元</text></view>
+                        </block>
+                        <block wx:else>
+                          <text class="font-sl text-secondary">商品金额 ¥{{batch.gbDpbSubtotal}}</text>
+                          <text class="font-sl" wx:if="{{batch.gbDpbNxDeliveryFee > 0}}">配送费 +¥{{batch.gbDpbNxDeliveryFee}}</text>
+                          <text class="font-sl text-danger" wx:if="{{batch.gbDpbNxCouponDiscountAmount > 0}}">{{batch.gbDpbNxCouponName}} -¥{{batch.gbDpbNxCouponDiscountAmount}}</text>
+                          <view><text class="mr-10">应付:</text><text class="big">¥{{batch.gbDpbPaySubtotal ? batch.gbDpbPaySubtotal : batch.gbDpbSubtotal}}元</text></view>
+                        </block>
                       </view>
-                      <view class="center-content p-20"><view class="finish_btn" style="width: {{windowWidth - 300}}rpx;" bindtap="showFinish" data-item="{{batch}}">一键收货</view></view>
+                      <view class="center-content p-20" wx:if="{{batch.gbDpbPurchaseType != 9}}"><view class="finish_btn" style="width: {{windowWidth - 300}}rpx;" bindtap="showFinish" data-item="{{batch}}">一键收货</view></view>
                     </block>
                   </view>
                 </view>
