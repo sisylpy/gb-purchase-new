@@ -55,59 +55,106 @@
   <view class="ingredient-picker-mask" wx:if="{{showGoodsPicker}}" bindtap="closeGoodsPicker" catchtouchmove="noop">
     <view class="ingredient-dialog" catchtap="noop">
       <view class="ingredient-dialog-head">添加原料</view>
-      <view class="ingredient-dialog-body">
-        <block wx:if="{{!selectedGoods}}">
-          <view class="dialog-search">
-            <image class="dialog-search-icon" src="/images/search-3.png" mode="aspectFit"></image>
-            <input class="dialog-search-input" placeholder="搜索商品名称、简拼或全拼" placeholder-style="color:#999;font-size:30rpx;" adjust-position="{{false}}" value="{{goodsKeyword}}" bindinput="onGoodsKeyword" bindconfirm="searchGoods" confirm-type="search" />
-            <view class="dialog-search-clear" wx:if="{{goodsKeyword}}" bindtap="clearGoodsKeyword">×</view>
-          </view>
-          <view class="dialog-loading" wx:if="{{goodsLoading}}">正在搜索原料…</view>
-          <scroll-view wx:elif="{{goodsResults.length}}" scroll-y class="dialog-results" bindscroll="dismissKeyboard">
-            <view class="dialog-result-row" wx:for="{{goodsResults}}" wx:key="gbDistributerGoodsId">
-              <view class="dialog-result-main">
-                <view class="dialog-result-name">{{item.gbDgGoodsName}}</view>
-                <view class="dialog-result-meta">{{item.specText}}</view>
+      <scroll-view scroll-y class="ingredient-dialog-scroll" bindscroll="dismissKeyboard">
+        <view class="raw-add-modal__search">
+          <image class="raw-add-modal__search-icon" src="/images/search-3.png" mode="aspectFit"></image>
+          <input class="raw-add-modal__search-input" placeholder="搜索商品名称、简拼或全拼" placeholder-style="color:#999;font-size:28rpx;" adjust-position="{{false}}" value="{{goodsKeyword}}" bindinput="onGoodsKeyword" bindconfirm="searchGoods" confirm-type="search" />
+          <view class="raw-add-modal__search-clear" wx:if="{{goodsKeyword}}" bindtap="clearGoodsKeyword">×</view>
+        </view>
+
+        <view class="dialog-loading" wx:if="{{goodsLoading}}">正在搜索原料…</view>
+        <scroll-view wx:elif="{{goodsSearchActive && goodsResults.length}}" scroll-y class="dialog-results" bindscroll="dismissKeyboard">
+          <view class="food-raw-search-row" wx:for="{{goodsResults}}" wx:key="gbDistributerGoodsId">
+            <text class="food-raw-search-row__idx">{{index + 1}}.</text>
+            <view class="food-raw-search-row__content">
+              <view class="food-raw-search-row__line">
+                <text class="food-raw-search-row__name">{{item.gbDgGoodsName}}</text>
+                <text class="food-raw-search-row__spec">（{{item.specText}}）</text>
               </view>
-              <view class="dialog-select" data-item="{{item}}" bindtap="chooseGoods">选择</view>
+              <view class="food-raw-search-row__price">{{item.searchPriceTitle}}：{{item.searchPriceText}}</view>
             </view>
-          </scroll-view>
-          <view class="dialog-no-result" wx:elif="{{goodsKeyword}}">没有找到匹配的原料</view>
-        </block>
-        <scroll-view wx:else scroll-y class="dialog-config-scroll" bindscroll="dismissKeyboard">
-          <view class="dialog-selected rich">
-            <view class="dialog-selected-check">✓</view>
-            <image wx:if="{{selectedImageUrl}}" class="dialog-selected-image" src="{{selectedImageUrl}}" mode="aspectFill"></image>
-            <view wx:else class="dialog-selected-image dialog-selected-placeholder">原</view>
-            <view class="dialog-selected-main">
-              <view class="dialog-selected-name">{{selectedGoods.gbDgGoodsName}}</view>
-              <view class="dialog-selected-spec">{{selectedPackLabel}}</view>
-            </view>
-            <view class="dialog-reselect" bindtap="clearSelectedGoods">重选</view>
+            <view class="food-raw-search-row__select-btn" data-item="{{item}}" bindtap="chooseGoods">选择</view>
           </view>
-
-          <view class="dialog-form">
-            <view class="dialog-form-row quantity">
-              <text class="dialog-form-label">标准投料量</text>
-              <view class="selected-stepper">
-                <view class="stepper-button minus" data-direction="-1" bindtap="stepSelectedQuantity">−</view>
-                <input class="selected-quantity-input" type="digit" placeholder="0" value="{{selectedQuantity}}" bindinput="onSelectedQuantity" bindconfirm="dismissKeyboard" confirm-type="done" />
-                <view class="stepper-button" data-direction="1" bindtap="stepSelectedQuantity">＋</view>
-                <picker range="{{selectedUnitNames}}" value="{{selectedUnitIndex}}" bindtap="dismissKeyboard" bindchange="onSelectedUnit"><view class="selected-unit">{{selectedUnitNames[selectedUnitIndex]}} ▾</view></picker>
-              </view>
-            </view>
-          </view>
-
-          <view class="dialog-quick" wx:if="{{selectedQuickTags.length}}">
-            <text class="dialog-quick-label">常用用量</text>
-            <view class="dialog-quick-list">
-              <view wx:for="{{selectedQuickTags}}" wx:key="value" class="dialog-quick-tag {{item.active ? 'active' : ''}}" data-value="{{item.value}}" bindtap="onSelectedQuickQuantity">{{item.label}}</view>
-            </view>
-          </view>
-
-          <view class="dialog-output-hint">以上投料量对应制作 {{standardOutputQuantity || '—'}} {{usageUnitLabel}}{{productName}}；成本在菜品经营分析时按底层采购原料统一核算。</view>
         </scroll-view>
-      </view>
+        <view class="dialog-no-result" wx:elif="{{goodsSearchActive && goodsKeyword}}">没有找到匹配的原料</view>
+
+        <block wx:if="{{selectedGoods && !goodsSearchActive}}">
+          <view class="raw-add-modal__picked">
+            <view class="raw-add-modal__picked-check">✓</view>
+            <image wx:if="{{selectedImageUrl}}" class="raw-add-modal__picked-img" src="{{selectedImageUrl}}" mode="aspectFill"></image>
+            <view wx:else class="raw-add-modal__picked-img raw-add-modal__picked-placeholder">原</view>
+            <view class="raw-add-modal__picked-info">
+              <text class="raw-add-modal__picked-name">{{selectedGoods.gbDgGoodsName}}</text>
+              <text class="raw-add-modal__picked-spec">{{selectedPackLabel}}</text>
+              <text class="raw-add-modal__picked-price">{{selectedPackPriceTitle}} {{selectedPackPriceLabel}}</text>
+            </view>
+          </view>
+
+          <view class="raw-add-modal__form">
+            <view class="raw-add-modal__row raw-add-modal__row--link {{selectedGoodsSpecMissing ? 'raw-add-modal__row--warning' : ''}}" bindtap="toEditSelectedGoodsSpecification">
+              <text class="raw-add-modal__label">采购包装</text>
+              <text class="raw-add-modal__value {{selectedGoodsSpecMissing ? 'raw-add-modal__value--warning' : ''}}">{{selectedGoodsSpecMissing ? '规格不完整，去补充' : selectedPackLabel}}</text>
+              <text class="raw-add-modal__arrow">›</text>
+            </view>
+            <view class="raw-add-modal__row">
+              <text class="raw-add-modal__label">{{selectedPackPriceTitle}}</text>
+              <text class="raw-add-modal__value raw-add-modal__value--price">{{selectedPackPriceLabel}}</text>
+              <text class="raw-add-modal__arrow">›</text>
+            </view>
+            <text class="raw-add-modal__price-note" wx:if="{{selectedPriceReferenceOnly}}">商品参考价仅用于本页估算；正式历史理论成本仍按营业日的入库批次和单位换算证据核算。</text>
+            <view class="raw-add-modal__row raw-add-modal__row--dosage">
+              <text class="raw-add-modal__label">标准投料量</text>
+              <view class="raw-add-modal__dosage">
+                <view class="raw-add-modal__stepper">
+                  <view class="raw-add-modal__step-btn" data-direction="-1" bindtap="stepSelectedQuantity">−</view>
+                  <input class="raw-add-modal__step-input" type="digit" value="{{selectedQuantity}}" bindinput="onSelectedQuantity" bindconfirm="dismissKeyboard" confirm-type="done" />
+                  <view class="raw-add-modal__step-btn" data-direction="1" bindtap="stepSelectedQuantity">＋</view>
+                </view>
+                <picker range="{{selectedUnitNames}}" value="{{selectedUnitIndex}}" bindtap="dismissKeyboard" bindchange="onSelectedUnit">
+                  <view class="raw-add-modal__unit-pick"><text>{{selectedUnitNames[selectedUnitIndex]}}</text><text class="raw-add-modal__unit-arrow">▾</text></view>
+                </picker>
+              </view>
+            </view>
+            <view class="raw-add-modal__row raw-add-modal__row--picker">
+              <text class="raw-add-modal__label">最小单位</text>
+              <picker range="{{selectedUnitNames}}" value="{{selectedUnitIndex}}" bindtap="dismissKeyboard" bindchange="onSelectedUnit">
+                <view class="raw-add-modal__unit-pick raw-add-modal__unit-pick--wide"><text>{{selectedUnitNames[selectedUnitIndex]}}</text><text class="raw-add-modal__unit-arrow">▾</text></view>
+              </picker>
+            </view>
+            <text class="raw-add-modal__hint" wx:if="{{selectedBulkWeightPack}}">大包装默认按“斤”计投料量，也可改选 g，系统按 1斤=500g 换算。</text>
+            <text class="raw-add-modal__hint" wx:else>支持使用 g、ml、张、个等最小单位。</text>
+            <view class="raw-add-modal__row raw-add-modal__row--conversion" wx:if="{{selectedPackUnit && selectedUnitNames[selectedUnitIndex] !== selectedPackUnit}}">
+              <text class="raw-add-modal__label">换算关系<text class="raw-add-modal__required" wx:if="{{selectedConversionRequired}}">*</text></text>
+              <view class="raw-add-modal__conversion-col">
+                <view class="raw-add-modal__conversion-edit {{selectedConversionRequired ? 'raw-add-modal__conversion-edit--warn' : ''}}">
+                  <text class="raw-add-modal__conversion-prefix">1{{selectedPackUnit}} =</text>
+                  <input class="raw-add-modal__conversion-input" type="digit" placeholder="{{selectedConversionPlaceholder}}" value="{{selectedPackQtyInMin}}" disabled="{{selectedGoodsSpecMissing}}" bindinput="onSelectedConversionInput" bindconfirm="dismissKeyboard" confirm-type="done" />
+                  <text class="raw-add-modal__conversion-suffix">{{selectedUnitNames[selectedUnitIndex]}}</text>
+                </view>
+                <text class="raw-add-modal__conversion-warn" wx:if="{{selectedGoodsSpecMissing}}">商品未配置可用规格，请点击上方“采购包装”补充规格重量</text>
+                <text class="raw-add-modal__conversion-sub" wx:elif="{{selectedPackEquivalentText}}">{{selectedPackEquivalentText}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="raw-add-modal__summary">
+            <view class="raw-add-modal__summary-top">
+              <view class="raw-add-modal__summary-cell"><text class="raw-add-modal__summary-icon">🧮</text><view class="raw-add-modal__summary-text"><text class="raw-add-modal__summary-label">本次投料参考成本 ≈</text><text class="raw-add-modal__summary-num">¥ {{selectedCostText}}</text></view></view>
+              <view class="raw-add-modal__summary-divider"></view>
+              <view class="raw-add-modal__summary-cell"><text class="raw-add-modal__summary-icon">📦</text><view class="raw-add-modal__summary-text"><text class="raw-add-modal__summary-label">1{{selectedPackUnit}}约可配</text><text class="raw-add-modal__summary-num">{{selectedUsesPerPack}} 次</text></view></view>
+            </view>
+            <view class="raw-add-modal__summary-demo">{{selectedDemoText}}</view>
+            <view class="raw-add-modal__summary-tip"><text class="raw-add-modal__summary-tip-i">i</text><text>参考价只帮助配置标准投料，正式成本仍按营业日价格证据核算</text></view>
+          </view>
+
+          <view class="raw-add-modal__quick" wx:if="{{selectedQuickTags.length}}">
+            <text class="raw-add-modal__quick-label">常用用量</text>
+            <view class="raw-add-modal__quick-tags">
+              <view wx:for="{{selectedQuickTags}}" wx:key="value" class="raw-add-modal__quick-tag {{item.active ? 'is-active' : ''}}" data-value="{{item.value}}" bindtap="onSelectedQuickQuantity">{{item.label}}</view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
       <view class="ingredient-dialog-footer">
         <view class="dialog-cancel" bindtap="closeGoodsPicker">取消</view>
         <view class="dialog-confirm" bindtap="confirmSelectedGoods">确认添加</view>

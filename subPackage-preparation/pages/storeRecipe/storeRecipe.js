@@ -4,7 +4,6 @@ var util = require('../../../utils/preparation');
 var stockUnit = require('../../../lib/stockUnitConvert');
 
 var unitLabels = { G: '克', KG: '千克', JIN: '斤', ML: '毫升', L: '升', EA: '个' };
-var recentGoodsStorageKey = 'preparationRecentRawGoods';
 var unitDefinitions = {
   G: { dimension: 'WEIGHT', factor: 1 },
   KG: { dimension: 'WEIGHT', factor: 1000 },
@@ -15,25 +14,21 @@ var unitDefinitions = {
 };
 var modalUnitLabels = { G: '克', KG: '千克', JIN: '斤', ML: '毫升', L: '升', EA: '个' };
 
+function toP1Unit(unit) {
+  var value = String(unit || '').trim();
+  var aliases = {
+    g: 'G', '克': 'G', kg: 'KG', '公斤': 'KG', '千克': 'KG', '斤': 'JIN',
+    ml: 'ML', '毫升': 'ML', l: 'L', L: 'L', '升': 'L',
+    '个': 'EA', '只': 'EA', '张': 'EA', '枚': 'EA', '条': 'EA', '根': 'EA', '颗': 'EA',
+  };
+  return aliases[value] || value.toUpperCase();
+}
+
 function trimNumber(value, digits) {
   var number = Number(value);
   if (!isFinite(number)) return '—';
   var text = number.toFixed(digits == null ? 2 : digits);
   return text.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
-}
-
-function modalUnitCodesForGoods(goods) {
-  var packUnit = String((goods && goods.gbDgGoodsStandardname) || '').trim();
-  var family = stockUnit.detectUnitFamily(packUnit, goods || {});
-  var codes = family === 'volume' ? ['ML', 'L'] : (family === 'count' ? ['EA'] : ['G', 'KG', 'JIN']);
-  var suggested = stockUnit.suggestMinUnit(packUnit, stockUnit.rawPackSpecAmount(goods || {}), goods || {});
-  var suggestedCode = suggested === 'ml' ? 'ML'
-    : (suggested === '斤' ? 'JIN' : (suggested === '个' || suggested === '只' || suggested === '张' ? 'EA' : 'G'));
-  if (codes.indexOf(suggestedCode) > 0) {
-    codes.splice(codes.indexOf(suggestedCode), 1);
-    codes.unshift(suggestedCode);
-  }
-  return codes;
 }
 
 function packLabel(goods) {
@@ -43,11 +38,44 @@ function packLabel(goods) {
   return packUnit ? '1' + packUnit : '采购包装未设置';
 }
 
+function goodsPriceContext(goods) {
+  var averagePrice = Number(goods && goods.gbDgGoodsAveragePrice);
+  var referencePrice = Number(goods && goods.gbDgGoodsPrice);
+  var unit = String((goods && goods.gbDgGoodsStandardname) || '').trim();
+  var price = averagePrice > 0 ? averagePrice : (referencePrice > 0 ? referencePrice : 0);
+  var title = averagePrice > 0 ? '近期采购均价' : (referencePrice > 0 ? '商品参考价' : '采购单价');
+  return {
+    price: price,
+    title: title,
+    referenceOnly: !(averagePrice > 0) && referencePrice > 0,
+    text: price > 0 ? ('¥' + price.toFixed(2) + (unit ? '/' + unit : '')) : '暂无单价',
+  };
+}
+
+function minUnitOptionsForGoods(goods) {
+  var packUnit = String((goods && goods.gbDgGoodsStandardname) || '').trim();
+  var family = stockUnit.detectUnitFamily(packUnit, goods || {});
+  var options = family === 'volume' ? ['ml'] : (family === 'count' ? ['个', '只', '张'] : ['g', '斤']);
+  var suggested = stockUnit.suggestMinUnit(packUnit, stockUnit.rawPackSpecAmount(goods || {}), goods || {});
+  var index = options.indexOf(suggested);
+  if (index > 0) {
+    options.splice(index, 1);
+    options.unshift(suggested);
+  }
+  return options;
+}
+
 function joinImageUrl(server, path) {
   var value = String(path || '').trim();
   if (!value) return '';
   if (/^https?:\/\//i.test(value)) return value;
   return String(server || '').replace(/\/$/, '') + '/' + value.replace(/^\//, '');
+}
+
+function goodsImageUrl(server, goods) {
+  var row = goods || {};
+  return joinImageUrl(server, row.gbDgNxFatherImg || row.gbDgNxFatherImgLarge
+    || row.gbDgGoodsFile || row.gbDgGoodsFileImg);
 }
 
 Page({
@@ -67,16 +95,8 @@ Page({
     showGoodsPicker: false,
     goodsKeyword: '',
     goodsLoading: false,
-    allGoodsResults: [],
+    goodsSearchActive: false,
     goodsResults: [],
-    goodsTabs: [
-      { key: 'RECENT', name: '最近使用' },
-      { key: 'ALL', name: '全部' },
-      { key: 'VEGETABLE', name: '蔬菜' },
-      { key: 'MEAT', name: '肉禽蛋' },
-      { key: 'SEASONING', name: '调料' },
-    ],
-    goodsTab: 'ALL',
     selectedGoods: null,
     selectedQuantity: '',
     selectedUnitIndex: 0,
@@ -84,6 +104,19 @@ Page({
     selectedUnitNames: ['克'],
     selectedImageUrl: '',
     selectedPackLabel: '—',
+    selectedPackUnit: '',
+    selectedPackPriceTitle: '采购单价',
+    selectedPackPriceLabel: '暂无单价',
+    selectedPriceReferenceOnly: false,
+    selectedPackQtyInMin: '',
+    selectedConversionPlaceholder: '如500',
+    selectedConversionRequired: false,
+    selectedGoodsSpecMissing: false,
+    selectedBulkWeightPack: false,
+    selectedPackEquivalentText: '',
+    selectedCostText: '—',
+    selectedUsesPerPack: '—',
+    selectedDemoText: '',
     selectedQuickTags: [],
     hasUnsavedChanges: false,
     totalInputText: '—',
@@ -99,6 +132,10 @@ Page({
       server: app.globalData.server || '',
     });
     this.loadRecipe();
+  },
+
+  onShow: function () {
+    if (this.pendingSpecificationGoodsId) this.refreshSelectedGoodsSpecification();
   },
 
   loadRecipe: function () {
@@ -118,7 +155,7 @@ Page({
       var decoratedComponents = components.map(function (line) {
         var goods = line.rawGoods || {};
         return Object.assign({}, line, {
-          imageUrl: joinImageUrl(that.data.server, goods.gbDgNxFatherImg || goods.gbDgNxFatherImgLarge || goods.gbDgGoodsFile),
+          imageUrl: goodsImageUrl(that.data.server, goods),
           specText: packLabel(goods),
         });
       });
@@ -226,12 +263,12 @@ Page({
       showGoodsPicker: true,
       goodsKeyword: '',
       goodsLoading: false,
-      allGoodsResults: [],
+      goodsSearchActive: false,
       goodsResults: [],
-      goodsTab: 'ALL',
       selectedGoods: null,
       selectedQuantity: '',
       selectedUnitIndex: 0,
+      selectedPackQtyInMin: '',
     });
   },
 
@@ -239,7 +276,7 @@ Page({
     this.dismissKeyboard();
     if (this.goodsSearchTimer) clearTimeout(this.goodsSearchTimer);
     this.goodsSearchSequence = (this.goodsSearchSequence || 0) + 1;
-    this.setData({ showGoodsPicker: false, goodsKeyword: '', goodsLoading: false, allGoodsResults: [], goodsResults: [], selectedGoods: null });
+    this.setData({ showGoodsPicker: false, goodsKeyword: '', goodsLoading: false, goodsSearchActive: false, goodsResults: [], selectedGoods: null });
   },
   noop: function () {},
   dismissKeyboard: function () {
@@ -255,7 +292,7 @@ Page({
     var requestSequence = (this.goodsSearchSequence || 0) + 1;
     this.goodsSearchSequence = requestSequence;
     var hasKeyword = !!String(keyword).trim();
-    this.setData({ goodsKeyword: keyword, goodsLoading: hasKeyword, allGoodsResults: [], goodsResults: [], selectedGoods: null });
+    this.setData({ goodsKeyword: keyword, goodsLoading: hasKeyword, goodsSearchActive: hasKeyword, goodsResults: [] });
     if (!hasKeyword) return;
     this.goodsSearchTimer = setTimeout(function () { that.searchGoods(keyword, requestSequence); }, 260);
   },
@@ -263,7 +300,7 @@ Page({
   clearGoodsKeyword: function () {
     if (this.goodsSearchTimer) clearTimeout(this.goodsSearchTimer);
     this.goodsSearchSequence = (this.goodsSearchSequence || 0) + 1;
-    this.setData({ goodsKeyword: '', goodsLoading: false, allGoodsResults: [], goodsResults: [], selectedGoods: null });
+    this.setData({ goodsKeyword: '', goodsLoading: false, goodsSearchActive: false, goodsResults: [] });
   },
 
   searchGoods: function (input, requestSequence) {
@@ -288,50 +325,23 @@ Page({
       rows = (rows || []).filter(function (row) {
         return !currentIds[String(row.gbDistributerGoodsId)];
       }).map(function (row) {
+        var priceContext = goodsPriceContext(row);
         return Object.assign({}, row, {
           specText: packLabel(row),
-          goodsCategory: that.classifyGoods(row),
+          imageUrl: goodsImageUrl(that.data.server, row),
+          searchPriceTitle: priceContext.title,
+          searchPriceText: priceContext.text,
         });
       });
       if (!that.data.showGoodsPicker
         || that.goodsSearchSequence !== requestSequence
         || String(that.data.goodsKeyword || '').trim() !== keyword) return;
-      that.setData({ goodsLoading: false, allGoodsResults: rows, goodsResults: rows });
+      that.setData({ goodsLoading: false, goodsSearchActive: true, goodsResults: rows });
     }).catch(function (error) {
       if (that.goodsSearchSequence !== requestSequence) return;
       that.setData({ goodsLoading: false });
       util.showError(error);
     });
-  },
-
-  classifyGoods: function (row) {
-    var name = String(row.gbDgGoodsName || '');
-    if (/油|盐|酱|醋|糖|味精|料酒|香料|花椒|胡椒|粉|汁|耗油|蚝油/.test(name)) return 'SEASONING';
-    if (/肉|鸡|鸭|鹅|鱼|虾|蟹|蛋|排骨|牛|羊|猪/.test(name)) return 'MEAT';
-    if (/菜|葱|姜|蒜|笋|藕|瓜|椒|豆芽|菌|菇|萝卜|番茄|土豆|香菜/.test(name)) return 'VEGETABLE';
-    return 'OTHER';
-  },
-
-  applyGoodsFilter: function () {
-    var tab = this.data.goodsTab;
-    var rows = this.data.allGoodsResults || [];
-    if (tab === 'RECENT') {
-      var recentIds = wx.getStorageSync(recentGoodsStorageKey) || [];
-      if (!Array.isArray(recentIds)) recentIds = [];
-      rows = rows.filter(function (row) {
-        return recentIds.indexOf(String(row.gbDistributerGoodsId)) >= 0;
-      }).sort(function (left, right) {
-        return recentIds.indexOf(String(left.gbDistributerGoodsId)) - recentIds.indexOf(String(right.gbDistributerGoodsId));
-      });
-    } else if (tab !== 'ALL') {
-      rows = rows.filter(function (row) { return row.goodsCategory === tab; });
-    }
-    this.setData({ goodsResults: rows });
-  },
-
-  onGoodsTabTap: function (event) {
-    var that = this;
-    this.setData({ goodsTab: event.currentTarget.dataset.key }, function () { that.applyGoodsFilter(); });
   },
 
   chooseGoods: function (event) {
@@ -341,37 +351,34 @@ Page({
       wx.showToast({ title: '该原料已经添加', icon: 'none' });
       return;
     }
-    var unitCodes = modalUnitCodesForGoods(goods);
-    var unitNames = unitCodes.map(function (code) { return modalUnitLabels[code]; });
+    var unitNames = minUnitOptionsForGoods(goods);
+    var unitCodes = unitNames.map(toP1Unit);
     this.setData({
       selectedGoods: goods,
-      selectedQuantity: unitCodes[0] === 'JIN' ? '0.2' : (unitCodes[0] === 'EA' ? '1' : '5'),
+      selectedQuantity: unitNames[0] === '斤' ? '0.2' : (unitCodes[0] === 'EA' ? '1' : '5'),
       selectedUnitIndex: 0,
       selectedUnitCodes: unitCodes,
       selectedUnitNames: unitNames,
-      selectedImageUrl: joinImageUrl(this.data.server, goods.gbDgNxFatherImg || goods.gbDgNxFatherImgLarge || goods.gbDgGoodsFile),
+      selectedImageUrl: goodsImageUrl(this.data.server, goods),
       selectedPackLabel: packLabel(goods),
+      goodsKeyword: goods.gbDgGoodsName || '',
+      goodsSearchActive: false,
       goodsResults: [],
     }, this.recalculateSelectedGoods.bind(this));
   },
 
-  clearSelectedGoods: function () {
-    this.setData({
-      selectedGoods: null,
-      selectedQuantity: '',
-      selectedQuickTags: [],
-      goodsKeyword: '',
-      goodsLoading: false,
-      allGoodsResults: [],
-      goodsResults: [],
-    });
-  },
   onSelectedQuantity: function (event) {
     this.setData({ selectedQuantity: event.detail.value }, this.recalculateSelectedGoods.bind(this));
   },
   onSelectedUnit: function (event) {
     this.dismissKeyboard();
-    this.setData({ selectedUnitIndex: Number(event.detail.value || 0) }, this.recalculateSelectedGoods.bind(this));
+    this.setData({
+      selectedUnitIndex: Number(event.detail.value || 0),
+      selectedPackQtyInMin: '',
+    }, this.recalculateSelectedGoods.bind(this));
+  },
+  onSelectedConversionInput: function (event) {
+    this.setData({ selectedPackQtyInMin: event.detail.value }, this.recalculateSelectedGoods.bind(this));
   },
   onSelectedQuickQuantity: function (event) {
     this.dismissKeyboard();
@@ -390,10 +397,22 @@ Page({
     var goods = this.data.selectedGoods;
     if (!goods) return;
     var code = this.data.selectedUnitCodes[this.data.selectedUnitIndex] || 'G';
-    var unitLabel = modalUnitLabels[code] || code;
+    var unitLabel = this.data.selectedUnitNames[this.data.selectedUnitIndex] || modalUnitLabels[code] || code;
     var quantity = Number(this.data.selectedQuantity) || 0;
-    var presets = code === 'JIN' ? [0.1, 0.2, 0.5]
-      : ((code === 'KG' || code === 'L') ? [0.1, 0.5, 1] : (code === 'EA' ? [1, 2, 3] : [5, 10, 15]));
+    var packUnit = String(goods.gbDgGoodsStandardname || '').trim();
+    var defaultPackQty = unitLabel === packUnit
+      ? 1 : stockUnit.resolvePackQtyInMin(packUnit, unitLabel, goods);
+    var manualPackQty = Number(this.data.selectedPackQtyInMin);
+    var packQty = manualPackQty > 0 ? manualPackQty : defaultPackQty;
+    var priceContext = goodsPriceContext(goods);
+    var conversionRequired = !!packUnit && unitLabel !== packUnit && !(packQty > 0);
+    var cost = 0;
+    if (quantity > 0 && priceContext.price > 0) {
+      cost = unitLabel === packUnit ? quantity * priceContext.price
+        : (packQty > 0 ? quantity / packQty * priceContext.price : 0);
+    }
+    var presets = unitLabel === '斤' ? [0.1, 0.2, 0.5]
+      : (code === 'EA' ? [1, 2, 3] : [5, 10, 15]);
     var quickTags = presets.map(function (value) {
       return {
         value: value,
@@ -401,7 +420,58 @@ Page({
         active: Number(value) === quantity,
       };
     });
-    this.setData({ selectedQuickTags: quickTags });
+    var usesPerPack = quantity > 0 && packQty > 0 ? packQty / quantity : 0;
+    var packEquivalent = quantity > 0 && packQty > 0 ? quantity / packQty : 0;
+    this.setData({
+      selectedQuickTags: quickTags,
+      selectedPackUnit: packUnit,
+      selectedPackLabel: packLabel(goods),
+      selectedPackPriceTitle: priceContext.title,
+      selectedPackPriceLabel: priceContext.text,
+      selectedPriceReferenceOnly: priceContext.referenceOnly,
+      selectedPackQtyInMin: manualPackQty > 0 ? this.data.selectedPackQtyInMin : (defaultPackQty > 0 ? trimNumber(defaultPackQty, 4) : ''),
+      selectedConversionPlaceholder: code === 'EA' ? '如8' : '如500',
+      selectedConversionRequired: conversionRequired,
+      selectedGoodsSpecMissing: conversionRequired,
+      selectedBulkWeightPack: unitLabel === '斤',
+      selectedPackEquivalentText: packEquivalent > 0 ? ('每次约 ' + trimNumber(packEquivalent, 4) + packUnit) : '',
+      selectedCostText: cost > 0 ? cost.toFixed(2) : '—',
+      selectedUsesPerPack: usesPerPack > 0 ? trimNumber(usesPerPack, 1) : '—',
+      selectedDemoText: '按当前标准投料量，每配制 1 次约消耗 ' + trimNumber(quantity, 3) + unitLabel
+        + '，参考成本 ¥' + (cost > 0 ? cost.toFixed(2) : '—'),
+    });
+  },
+
+  toEditSelectedGoodsSpecification: function () {
+    var goods = this.data.selectedGoods;
+    var goodsId = goods && goods.gbDistributerGoodsId;
+    if (!goodsId) return;
+    this.dismissKeyboard();
+    this.pendingSpecificationGoodsId = Number(goodsId);
+    wx.setStorageSync('disGoods', goods);
+    wx.navigateTo({
+      url: '/subPackage-group/pages/goods/disGoodsDetail/disGoodsDetail?id=' + goodsId + '&specOnly=1',
+      fail: function () {
+        this.pendingSpecificationGoodsId = null;
+        wx.showToast({ title: '商品详情打开失败', icon: 'none' });
+      }.bind(this),
+    });
+  },
+
+  refreshSelectedGoodsSpecification: function () {
+    var goodsId = this.pendingSpecificationGoodsId;
+    this.pendingSpecificationGoodsId = null;
+    var goods = wx.getStorageSync('disGoods');
+    if (!goods || Number(goods.gbDistributerGoodsId) !== Number(goodsId)) return;
+    var unitNames = minUnitOptionsForGoods(goods);
+    this.setData({
+      selectedGoods: goods,
+      selectedImageUrl: goodsImageUrl(this.data.server, goods),
+      selectedUnitNames: unitNames,
+      selectedUnitCodes: unitNames.map(toP1Unit),
+      selectedUnitIndex: 0,
+      selectedPackQtyInMin: '',
+    }, this.recalculateSelectedGoods.bind(this));
   },
 
   confirmSelectedGoods: function () {
@@ -410,6 +480,10 @@ Page({
     var quantity = Number(this.data.selectedQuantity);
     if (!goods) { wx.showToast({ title: '请先搜索并选择原料', icon: 'none' }); return; }
     if (!(quantity > 0)) { wx.showToast({ title: '请填写标准投料量', icon: 'none' }); return; }
+    if (this.data.selectedGoodsSpecMissing) {
+      wx.showToast({ title: '请点击采购包装补充商品规格', icon: 'none' });
+      return;
+    }
     var selectedUnitCode = this.data.selectedUnitCodes[this.data.selectedUnitIndex] || 'G';
     var rows = this.data.components.slice();
     rows.push({
@@ -420,14 +494,8 @@ Page({
       unitLabel: unitLabels[selectedUnitCode] || selectedUnitCode,
       ratioText: '—',
       specText: packLabel(goods),
-      imageUrl: joinImageUrl(this.data.server, goods.gbDgNxFatherImg || goods.gbDgNxFatherImgLarge || goods.gbDgGoodsFile),
+      imageUrl: goodsImageUrl(this.data.server, goods),
     });
-    var recentIds = wx.getStorageSync(recentGoodsStorageKey) || [];
-    if (!Array.isArray(recentIds)) recentIds = [];
-    var goodsId = String(goods.gbDistributerGoodsId);
-    recentIds = recentIds.filter(function (id) { return String(id) !== goodsId; });
-    recentIds.unshift(goodsId);
-    wx.setStorageSync(recentGoodsStorageKey, recentIds.slice(0, 20));
     this.setData({ components: rows, hasUnsavedChanges: true, showGoodsPicker: false, selectedGoods: null }, this.updateRecipeSummary.bind(this));
   },
 
