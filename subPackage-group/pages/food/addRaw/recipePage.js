@@ -970,6 +970,7 @@ function createRecipePage(versionEditorMode) {
   },
 
   deleteGoods(e) {
+    if (this._redirectCurrentRecipeChangeToRevisionEditor()) return;
     var idx = e.currentTarget.dataset.index;
     var row = this.data.rawArr[idx];
     if (!row) return;
@@ -998,14 +999,7 @@ function createRecipePage(versionEditorMode) {
         wx.showToast({ title: '菜品配方至少保留一项', icon: 'none' });
         return;
       }
-      if (this.data.versionEditorMode) {
-        this._applyVersionDraftComponents(components, {
-          changeType: 'REMOVE',
-          replacedRawGoodsId: row._isPreparation ? null : Number(row.gbDfgDisGoodsId),
-        });
-        return;
-      }
-      this._saveAndPublishComponents(components, '删除中', {
+      this._applyVersionDraftComponents(components, {
         changeType: 'REMOVE',
         replacedRawGoodsId: row._isPreparation ? null : Number(row.gbDfgDisGoodsId),
       });
@@ -1037,6 +1031,7 @@ function createRecipePage(versionEditorMode) {
   },
 
   editGoods(e) {
+    if (this._redirectCurrentRecipeChangeToRevisionEditor()) return;
     var item = e.currentTarget.dataset.item;
     if (item && item._isPreparation) {
       this.editPreparation(item);
@@ -1061,6 +1056,7 @@ function createRecipePage(versionEditorMode) {
   },
 
   toAddGoods(e) {
+    if (this._redirectCurrentRecipeChangeToRevisionEditor()) return;
     var that = this;
     this._resetModalForm();
     this.setData({
@@ -1079,6 +1075,7 @@ function createRecipePage(versionEditorMode) {
   },
 
   toAddPreparation() {
+    if (this._redirectCurrentRecipeChangeToRevisionEditor()) return;
     this.setData({
       showPreparation: true,
       preparationLoading: true,
@@ -1254,11 +1251,7 @@ function createRecipePage(versionEditorMode) {
     } else {
       components.push(component);
     }
-    if (this.data.versionEditorMode) {
-      this._applyVersionDraftComponents(components, { changeType: 'QUANTITY' });
-      return;
-    }
-    this._saveAndPublishComponents(components, '保存中间料', { changeType: 'QUANTITY' });
+    this._applyVersionDraftComponents(components, { changeType: 'QUANTITY' });
   },
 
   _currentP1Components() {
@@ -1949,6 +1942,12 @@ function createRecipePage(versionEditorMode) {
     var identity = this.preparationIdentity || preparationUtil.getIdentity();
     var activeChangeContext = changeContext || this.data.versionDraftChangeContext || null;
     if (this.data.recipeSaving) return;
+    // 已进入版本管理的菜品，详情页不得再通过 copy + publish 形成一条未应用的新业务版本。
+    // 所有内容修改统一进入修订编辑页，由用户预览并确认适用区间后再应用。
+    if (this.data.versionedMode && !this.data.versionEditorMode) {
+      this.toEditCurrentRecipe();
+      return;
+    }
     if (!identity.distributerId || !identity.operatorId) {
       wx.showToast({ title: '当前登录身份不完整', icon: 'none' });
       return;
@@ -2050,7 +2049,9 @@ function createRecipePage(versionEditorMode) {
       return preparationApi.foodVersionAction(
         detail.recipe.id,
         detail.version.id,
-        that.data.versionEditorMode && Number(that.data.manageVersionId) > 0 ? 'revise' : 'copy',
+        // 指定既有 contentVersionId 时只能创建同一业务版本下的新修订；
+        // copy 只服务于用户明确选择“新增业务版本”的编辑页。
+        Number(that.data.manageVersionId) > 0 ? 'revise' : 'copy',
         that._versionActionBody(detail)
       );
     }).then(function (draftDetail) {
@@ -2418,6 +2419,39 @@ function createRecipePage(versionEditorMode) {
       url: '../recipeVersionManage/recipeVersionManage?foodId='
         + encodeURIComponent(String(this.data.foodId)),
     });
+  },
+
+  _currentEffectiveInterval() {
+    var currentVersionId = Number((this.data.currentRecipeVersionView || {}).id || 0);
+    var today = _todayText();
+    return (this.data.recipeTimeline || []).find(function (interval) {
+      return Number(interval.recipeVersionId) === currentVersionId
+        && interval.effectiveStart <= today
+        && (!interval.effectiveEnd || today < interval.effectiveEnd);
+    }) || null;
+  },
+
+  toEditCurrentRecipe() {
+    var currentVersionId = Number((this.data.currentRecipeVersionView || {}).id || 0);
+    var interval = this._currentEffectiveInterval();
+    if (!currentVersionId || !interval || !Number(interval.id)) {
+      wx.showToast({ title: '当前没有可修改的在用配方', icon: 'none' });
+      return;
+    }
+    var params = [
+      'foodId=' + encodeURIComponent(String(this.data.foodId)),
+      'contentVersionId=' + encodeURIComponent(String(currentVersionId)),
+      'manageVersionId=' + encodeURIComponent(String(currentVersionId)),
+      'baseVersionId=' + encodeURIComponent(String(currentVersionId)),
+      'intervalId=' + encodeURIComponent(String(interval.id)),
+    ];
+    wx.navigateTo({ url: '../recipeVersionEdit/recipeVersionEdit?' + params.join('&') });
+  },
+
+  _redirectCurrentRecipeChangeToRevisionEditor() {
+    if (!this.data.versionedMode || this.data.versionEditorMode) return false;
+    this.toEditCurrentRecipe();
+    return true;
   },
 
   toCreateFirstRecipeVersion() {
@@ -2797,11 +2831,7 @@ function createRecipePage(versionEditorMode) {
           evidence: newEvidence,
         },
       };
-      if (this.data.versionEditorMode) {
-        this._applyVersionDraftComponents(versionedComponents, versionChangeContext);
-        return;
-      }
-      this._saveAndPublishComponents(versionedComponents, '保存配料', versionChangeContext);
+      this._applyVersionDraftComponents(versionedComponents, versionChangeContext);
       return;
     }
 

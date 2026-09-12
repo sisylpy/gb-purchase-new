@@ -461,6 +461,10 @@
   gap: 12rpx;
 }
 
+.raw-section-actions--detail {
+  flex-wrap: wrap;
+}
+
 .raw-section-add {
   display: flex;
   flex-direction: row;
@@ -1991,6 +1995,11 @@
 .unified-edit-card__title { color: #222c29; font-size: 30rpx; font-weight: 650; }
 .unified-edit-card__sub { margin-top: 6rpx; color: #78827f; font-size: 21rpx; line-height: 1.45; }
 .unified-edit-card__version { margin-left: 20rpx; padding: 6rpx 14rpx; color: #147966; font-size: 22rpx; background: #e9f7f3; border-radius: 999rpx; }
+.adopted-revision-notice { margin-top: 18rpx; padding: 18rpx; background: #fff8e8; border: 1rpx solid #f0d49b; border-radius: 12rpx; }
+.adopted-revision-notice__title,
+.adopted-revision-notice__text { display: block; }
+.adopted-revision-notice__title { color: #875716; font-size: 24rpx; font-weight: 600; }
+.adopted-revision-notice__text { margin-top: 7rpx; color: #765f3d; font-size: 21rpx; line-height: 1.5; }
 .managed-intervals { margin-top: 18rpx; white-space: nowrap; }
 .managed-intervals__track { display: inline-flex; gap: 12rpx; }
 .managed-interval { display: inline-flex; flex-direction: column; min-width: 300rpx; padding: 16rpx 18rpx; background: #f5f7f6; border: 1rpx solid #e2e7e5; border-radius: 12rpx; }

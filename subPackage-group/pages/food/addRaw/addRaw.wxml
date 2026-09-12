@@ -98,6 +98,10 @@
         </view>
         <text class="unified-edit-card__version" wx:if="{{manageVersionId}}">V{{currentRecipeVersionView.versionNo || '-'}}</text>
       </view>
+      <view class="adopted-revision-notice" wx:if="{{manageVersionId && managedVersionIntervals.length}}">
+        <text class="adopted-revision-notice__title">此次修改将影响已有使用期间，需要确认</text>
+        <text class="adopted-revision-notice__text">配方内容会保存为同一 V 版本下的新修订；预览影响后，由你确认本次适用范围，旧内容修订不会被覆盖。</text>
+      </view>
 
       <scroll-view scroll-x class="managed-intervals" wx:if="{{manageVersionId && managedVersionIntervals.length}}">
         <view class="managed-intervals__track">
@@ -202,6 +206,15 @@
           <view class="raw-section-add" bindtap="toAddGoods" data-type="raw" hover-class="raw-section-add--hover">
             <text class="raw-section-add-plus">+</text>
             <text>添加配料</text>
+          </view>
+        </view>
+        <view class="raw-section-actions raw-section-actions--detail" wx:elif="{{versionedMode && currentRecipeVersionView}}">
+          <view class="raw-section-add" catchtap="toEditCurrentRecipe" hover-class="raw-section-add--hover">
+            <text>修改当前配方</text>
+          </view>
+          <view class="raw-section-version" catchtap="toRecipeVersionManage" hover-class="raw-section-version--hover">
+            <text>版本管理</text>
+            <text class="raw-section-version__arrow">›</text>
           </view>
         </view>
         <view
