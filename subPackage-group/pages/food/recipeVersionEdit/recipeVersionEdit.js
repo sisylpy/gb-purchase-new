@@ -1,3 +1,3 @@
-var createRecipePage = require('../addRaw/recipePage');
+const recipePage = require('../addRaw/recipePage');
 
-Page(createRecipePage('editor'));
+Page(recipePage.createEditorPage());

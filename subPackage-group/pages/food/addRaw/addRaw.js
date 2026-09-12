@@ -1,3 +1,3 @@
-var createRecipePage = require('./recipePage');
+const recipePage = require('./recipePage');
 
-Page(createRecipePage('detail'));
+Page(recipePage.createDetailPage());

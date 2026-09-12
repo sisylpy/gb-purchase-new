@@ -1,301 +1,29 @@
 var preparationApi = require('../../../../services/preparation');
 var preparationUtil = require('../../../../utils/preparation');
-var RECIPE_REPLACEMENT_CONTEXT_PREFIX = 'foodRecipeReplacementContext:';
-// 与菜品配方详情页共用同一个键，删除成功后一并清掉该菜品的旧配料迁移暂存。
-var PREPARATION_MIGRATION_CACHE_PREFIX = 'preparationFoodRecipeMigration:';
-
-function localDateText(date) {
-  var value = date || new Date();
-  var year = value.getFullYear();
-  var month = String(value.getMonth() + 1).padStart(2, '0');
-  var day = String(value.getDate()).padStart(2, '0');
-  return year + '-' + month + '-' + day;
-}
-
-function offsetDateText(value, days) {
-  var parts = String(value || localDateText()).split('-').map(Number);
-  var date = new Date(parts[0], parts[1] - 1, parts[2]);
-  date.setDate(date.getDate() + Number(days || 0));
-  return localDateText(date);
-}
-
-function dateText(value) {
-  return value ? String(value).slice(0, 10) : '';
-}
-
-function numberText(value) {
-  var n = Number(value);
-  if (isNaN(n)) return String(value || '');
-  if (Math.abs(n - Math.round(n)) < 0.000001) return String(Math.round(n));
-  return n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
-}
-
-function decimalText(value, digits) {
-  var n = Number(value);
-  if (isNaN(n)) return '—';
-  return n.toFixed(typeof digits === 'number' ? digits : 8)
-    .replace(/0+$/, '').replace(/\.$/, '');
-}
-
-function moneyText(value) {
-  if (value === null || typeof value === 'undefined' || value === '') return '—';
-  var amount = Number(value);
-  return isNaN(amount) ? '—' : '¥' + amount.toFixed(2);
-}
-
-function unitText(value) {
-  var labels = { G: '克', KG: '千克', JIN: '斤', ML: '毫升', L: '升', EA: '个' };
-  var key = String(value || '').toUpperCase();
-  return labels[key] || value || '';
-}
-
-function baseUnitInfo(value) {
-  var key = String(value || '').toUpperCase();
-  if (key === 'G') return { code: 'G', factor: 1 };
-  if (key === 'KG') return { code: 'G', factor: 1000 };
-  if (key === 'JIN') return { code: 'G', factor: 500 };
-  if (key === 'ML') return { code: 'ML', factor: 1 };
-  if (key === 'L') return { code: 'ML', factor: 1000 };
-  if (key === 'EA') return { code: 'EA', factor: 1 };
-  return null;
-}
-
-function purchasePackBaseQuantity(goods, baseCode) {
-  var row = goods || {};
-  var specification = cleanText(row.gbDgGoodsStandardWeight || row.standardWeight);
-  var purchaseUnit = cleanText(row.gbDgGoodsStandardname || row.standardName);
-  var amount = parseFloat(specification.replace(/[^\d.]/g, ''));
-  var lower = specification.toLowerCase();
-  if (amount > 0) {
-    if (baseCode === 'G') {
-      if (/kg|公斤|千克/.test(lower)) return amount * 1000;
-      if (/斤/.test(specification)) return amount * 500;
-      if (/g|克/.test(lower)) return amount;
-    }
-    if (baseCode === 'ML') {
-      if (/ml|毫升/.test(lower)) return amount;
-      if (/(^|\d)\s*l\b|升/.test(lower)) return amount * 1000;
-    }
-    if (baseCode === 'EA' && /个|只|枚|颗|张|条|根/.test(specification)) return amount;
-  }
-  var purchaseBase = baseUnitInfo(purchaseUnitCode(purchaseUnit));
-  return purchaseBase && purchaseBase.code === baseCode ? purchaseBase.factor : 0;
-}
-
-function dateRangeChunks(start, end) {
-  var rows = [];
-  var cursor = start;
-  while (cursor && end && cursor <= end) {
-    var chunkEnd = offsetDateText(cursor, 365);
-    if (chunkEnd > end) chunkEnd = end;
-    rows.push({ startDate: cursor, endDate: chunkEnd });
-    cursor = offsetDateText(chunkEnd, 1);
-  }
-  return rows;
-}
-
-function cleanText(value) {
-  if (value == null) return '';
-  var text = String(value).trim();
-  return !text || text.toLowerCase() === 'null' ? '' : text;
-}
-
-function purchaseUnitCode(value) {
-  var unit = cleanText(value);
-  var lower = unit.toLowerCase();
-  var aliases = {
-    g: 'G', '克': 'G', kg: 'KG', '公斤': 'KG', '千克': 'KG', '斤': 'JIN',
-    ml: 'ML', '毫升': 'ML', l: 'L', '升': 'L',
-    '个': 'EA', '只': 'EA', '枚': 'EA', '颗': 'EA', '张': 'EA', '条': 'EA', '根': 'EA',
-  };
-  return aliases[lower] || aliases[unit] || unit.toUpperCase();
-}
-
-function purchaseSpec(component) {
-  var goods = (component && component.rawGoods) || {};
-  var name = cleanText(goods.gbDgGoodsStandardname || goods.standardName);
-  var weight = cleanText(goods.gbDgGoodsStandardWeight || goods.standardWeight);
-  return [name, weight].filter(function (value) { return !!value; }).join(' ');
-}
-
-function replacementCandidate(version, base, pending) {
-  if (!version || !base) return null;
-  var currentRaw = (version._components || []).filter(function (row) { return !row._isIntermediate; });
-  var baseRaw = (base._components || []).filter(function (row) { return !row._isIntermediate; });
-  var currentIds = {};
-  var baseIds = {};
-  currentRaw.forEach(function (row) { currentIds[String(row.rawGoodsId)] = true; });
-  baseRaw.forEach(function (row) { baseIds[String(row.rawGoodsId)] = true; });
-  var added = currentRaw.filter(function (row) { return !baseIds[String(row.rawGoodsId)]; });
-  var removed = baseRaw.filter(function (row) { return !currentIds[String(row.rawGoodsId)]; });
-  if (added.length !== 1 || removed.length !== 1) return null;
-  var next = added[0];
-  var previous = removed[0];
-  var pendingMatches = pending && pending.changeType === 'REPLACE'
-    && Number(pending.replacedRawGoodsId) === Number(previous.rawGoodsId)
-    && Number(pending.newRawGoodsId) === Number(next.rawGoodsId);
-  var oldEvidence = pendingMatches && pending.oldGoods && pending.oldGoods.evidence;
-  var newEvidence = pendingMatches && pending.newGoods && pending.newGoods.evidence;
-  return {
-    replacedRawGoodsId: Number(previous.rawGoodsId),
-    replacementRawGoodsId: Number(next.rawGoodsId),
-    replacedName: previous.name,
-    replacementName: next.name,
-    replacedSpec: purchaseSpec(previous),
-    replacementSpec: purchaseSpec(next),
-    replacedPurchaseUnitCode: oldEvidence && oldEvidence.purchaseUnitCode
-      ? oldEvidence.purchaseUnitCode
-      : purchaseUnitCode((previous.rawGoods || {}).gbDgGoodsStandardname),
-    replacementPurchaseUnitCode: newEvidence && newEvidence.purchaseUnitCode
-      ? newEvidence.purchaseUnitCode
-      : purchaseUnitCode((next.rawGoods || {}).gbDgGoodsStandardname),
-    explicitlyReplaced: !!pendingMatches,
-  };
-}
-
-function componentKey(component) {
-  var kind = String(component.itemKind || 'RAW_GOODS');
-  var id = kind === 'INTERMEDIATE_PRODUCT'
-    ? component.intermediateProductId : component.rawGoodsId;
-  return kind + ':' + String(id || component.name || '');
-}
-
-function componentView(component, index, baseUrl) {
-  var row = Object.assign({}, component || {});
-  var goods = row.rawGoods || {};
-  var standardName = cleanText(goods.gbDgGoodsStandardname || goods.standardName);
-  var standardWeight = cleanText(goods.gbDgGoodsStandardWeight || goods.standardWeight);
-  var imagePath = cleanText(goods.gbDgNxFatherImg || goods.gbDgNxFatherImgLarge);
-  row._key = componentKey(row);
-  row._index = index + 1;
-  row._isIntermediate = row.itemKind === 'INTERMEDIATE_PRODUCT';
-  row._amountText = numberText(row.quantityPerPortion) + ' ' + unitText(row.unitCode);
-  row._specText = [standardName, standardWeight].filter(function (value) { return !!value; }).join(' ');
-  row._imageUrl = !row._isIntermediate && imagePath
-    ? (/^https?:\/\//i.test(imagePath) ? imagePath : String(baseUrl || '') + imagePath)
-    : '';
-  return row;
-}
-
-function intervalContains(row, date) {
-  return row && row.effectiveStart <= date && (!row.effectiveEnd || date < row.effectiveEnd);
-}
-
-function latestEndedInterval(timeline, businessToday) {
-  return (timeline || []).filter(function (row) {
-    return row && row.effectiveStart <= businessToday
-      && row.effectiveEnd && row.effectiveEnd <= businessToday;
-  }).sort(function (left, right) {
-    var byEnd = String(right.effectiveEnd).localeCompare(String(left.effectiveEnd));
-    return byEnd || String(right.effectiveStart).localeCompare(String(left.effectiveStart));
-  })[0] || null;
-}
-
-function intervalText(row) {
-  if (!row) return '';
-  return dateText(row.effectiveStart) + ' 起 · '
-    + (row.effectiveEnd ? dateText(row.effectiveEnd) + ' 起停止' : '持续使用');
-}
-
-function normalizeTimeline(payload) {
-  return ((payload && payload.intervals) || []).map(function (wrapper) {
-    var interval = Object.assign({}, wrapper.interval || wrapper || {});
-    interval._versionNo = wrapper.versionNo;
-    interval._versionStatus = wrapper.versionStatus;
-    interval._displayState = wrapper.displayState;
-    interval._isCurrentToday = !!wrapper.isCurrentToday;
-    interval._contentVersionId = Number(wrapper.contentVersionId || interval.recipeVersionId || 0);
-    interval._revisionNo = wrapper.revisionNo;
-    interval._periodText = intervalText(interval);
-    return interval;
-  });
-}
-
-var COST_STATE_TEXT = {
-  RECALCULATION_PENDING: '成本重算进行中，暂不能作为最终成本',
-  RECALCULATION_FAILED: '成本重算失败或部分失败',
-  CURRENT_COST_READY: '当前成本已就绪',
-  COST_INCOMPLETE: '已有当前结果但证据不完整',
-  NO_COST_GRAINS: '适用范围内没有需要计算的销量粒度',
-  COST_NOT_CALCULATED: '已被使用但尚无可确认的成本结果',
-  NOT_APPLIED: '该内容修订没有门店适用区间',
-};
-
-function costStateText(cost) {
-  var state = (cost && cost.state) || '';
-  return COST_STATE_TEXT[state] || '';
-}
-
-function costDetailText(cost) {
-  if (!cost) return '';
-  if (cost.state === 'RECALCULATION_PENDING' || cost.state === 'RECALCULATION_FAILED') {
-    var parts = [];
-    if (cost.recalculationStatus) parts.push('重算状态 ' + cost.recalculationStatus);
-    parts.push('完成 ' + Number(cost.completedGrainCount || 0)
-      + '/' + Number(cost.affectedGrainCount || 0) + ' 条');
-    if (Number(cost.failedGrainCount || 0) > 0) parts.push('失败 ' + cost.failedGrainCount + ' 条');
-    if (cost.failureMessage) parts.push(String(cost.failureMessage));
-    return parts.join(' · ');
-  }
-  if (cost.state === 'CURRENT_COST_READY' || cost.state === 'COST_INCOMPLETE') {
-    return '当前结果 ' + Number(cost.currentResultCount || 0) + ' 条 · 完整 '
-      + Number(cost.completedResultCount || 0) + ' 条 · 不完整 '
-      + Number(cost.incompleteResultCount || 0) + ' 条';
-  }
-  return '';
-}
-
-function contentStatusText(status) {
-  var key = String(status || '').toUpperCase();
-  if (key === 'DRAFT') return '草稿';
-  if (key === 'PUBLISHED') return '已发布';
-  if (key === 'RETIRED') return '已退役';
-  return status || '';
-}
-
-// 后端 activeIntervals 已按内容修订绑定；页面直接消费，不再用 versionNo 反推归属。
-function normalizeActiveIntervals(rows, storeDepartmentId) {
-  return (rows || []).filter(function (row) {
-    return !storeDepartmentId || Number(row.storeDepartmentId) === Number(storeDepartmentId);
-  }).map(function (row) {
-    var interval = {
-      id: row.intervalId,
-      recipeVersionId: row.recipeVersionId,
-      storeDepartmentId: row.storeDepartmentId,
-      effectiveStart: dateText(row.effectiveStart),
-      effectiveEnd: row.effectiveEnd ? dateText(row.effectiveEnd) : '',
-      status: row.intervalStatus,
-    };
-    interval._contentVersionId = Number(row.recipeVersionId || 0);
-    interval._periodText = intervalText(interval);
-    return interval;
-  });
-}
-
-function decorateContentRevision(revision, baseUrl, today, storeDepartmentId) {
-  var row = Object.assign({}, revision || {});
-  row._contentVersionId = Number(row.contentVersionId || row.id || 0);
-  row._components = (row.componentSummary || []).map(function (component, index) {
-    return componentView(component, index, baseUrl);
-  });
-  row._intervals = normalizeActiveIntervals(row.activeIntervals, storeDepartmentId);
-  row._isApplied = row.usageState === 'APPLIED' || row._intervals.length > 0;
-  row._isCurrent = row._intervals.some(function (interval) {
-    return intervalContains(interval, today);
-  });
-  row._statusText = contentStatusText(row.status);
-  row._costState = (row.cost && row.cost.state) || '';
-  row._costStateText = costStateText(row.cost);
-  row._costDetailText = costDetailText(row.cost);
-  row._publishedText = dateText(row.publishedAt || row.createdAt);
-  row._changeReasonText = cleanText(row.changeReason);
-  row._firstIntervalId = row._intervals.length ? row._intervals[0].id : '';
-  row._costPerPortionText = '—';
-  row._periodTotalCostText = '—';
-  row._costStatusText = row._costStateText || '暂无成本状态';
-  return row;
-}
-
+var recipeVersionDeletion = require('../shared/recipeVersionDeletion');
+var viewModel = require('./viewModel');
+var RECIPE_REPLACEMENT_CONTEXT_PREFIX = viewModel.replacementCachePrefix;
+var localDateText = viewModel.localDateText;
+var offsetDateText = viewModel.offsetDateText;
+var dateText = viewModel.dateText;
+var numberText = viewModel.numberText;
+var decimalText = viewModel.decimalText;
+var moneyText = viewModel.moneyText;
+var unitText = viewModel.unitText;
+var baseUnitInfo = viewModel.baseUnitInfo;
+var purchasePackBaseQuantity = viewModel.purchasePackBaseQuantity;
+var dateRangeChunks = viewModel.dateRangeChunks;
+var cleanText = viewModel.cleanText;
+var replacementCandidate = viewModel.replacementCandidate;
+var componentView = viewModel.componentView;
+var intervalContains = viewModel.intervalContains;
+var latestEndedInterval = viewModel.latestEndedInterval;
+var intervalText = viewModel.intervalText;
+var normalizeTimeline = viewModel.normalizeTimeline;
+var costStateText = viewModel.costStateText;
+var costDetailText = viewModel.costDetailText;
+var normalizeActiveIntervals = viewModel.normalizeActiveIntervals;
+var decorateContentRevision = viewModel.decorateContentRevision;
 function decorateVersions(versions, timeline, baseUrl, businessToday, storeDepartmentId) {
   var today = businessToday || localDateText();
   var rows = (versions || []).slice().sort(function (left, right) {
@@ -748,117 +476,32 @@ Page({
 
   deleteVersion: function (event) {
     var dataset = (event && event.currentTarget && event.currentTarget.dataset) || {};
-    this.previewDeletion(Number(dataset.contentVersionId || 0));
-  },
-
-  // 删除统一走"预览影响 → 一次确认 → 提交"。前端不再判断有区间或有成本就禁止删除，
-  // 也不再逐个解除区间、取消重算或清理数据，这些由后端在确认时一次完成。
-  previewDeletion: function (contentVersionId) {
-    var that = this;
-    if (this.data.deletionSubmitting) return Promise.resolve();
+    var contentVersionId = Number(dataset.contentVersionId || 0);
     var recipe = this.data.recipe;
     if (!contentVersionId || !recipe || !recipe.id) {
       wx.showToast({ title: '缺少配方内容修订，请刷新后重试', icon: 'none' });
-      return Promise.resolve();
-    }
-    var version = this.findContentVersion(contentVersionId);
-    if (!version) {
-      wx.showToast({ title: '未找到该内容修订，请刷新后重试', icon: 'none' });
-      return Promise.resolve();
-    }
-    var identity = this.identity || preparationUtil.getIdentity();
-    wx.showLoading({ title: '读取删除影响', mask: true });
-    return preparationApi.previewFoodVersionDeletion(recipe.id, contentVersionId, {
-      distributerId: identity.distributerId,
-      recipeRowVersion: Number(recipe.rowVersion || 0),
-      versionRowVersion: Number(version.rowVersion || 0),
-      operatorId: identity.operatorId,
-    }).then(function (preview) {
-      wx.hideLoading();
-      that.confirmDeletion(contentVersionId, preview);
-      return preview;
-    }).catch(function (error) {
-      wx.hideLoading();
-      preparationUtil.showError(error);
-    });
-  },
-
-  // 确认框只用业务语言说明删哪份、解除什么、清理什么、什么不受影响。
-  confirmDeletion: function (contentVersionId, preview) {
-    var that = this;
-    if (!preview || !preview.deletionPreviewToken) {
-      wx.showToast({ title: '删除影响读取失败，请重试', icon: 'none' });
       return;
     }
-    wx.showModal({
-      title: '确认删除这份配方？',
-      content: preparationUtil.deletionPreviewText(
-        preview,
-        this.data.foodItem && this.data.foodItem.dishName
-      ),
-      confirmText: '确认删除',
-      confirmColor: '#d94b4b',
-      success: function (result) {
-        if (result.confirm) that.performDelete(contentVersionId, preview);
-      },
-    });
-  },
-
-  performDelete: function (contentVersionId, preview) {
-    var that = this;
-    // 提交期间防止重复点击。
-    if (this.data.deletionSubmitting) return;
-    var identity = this.identity || preparationUtil.getIdentity();
     var version = this.findContentVersion(contentVersionId);
     if (!version) {
       wx.showToast({ title: '未找到该内容修订，请刷新后重试', icon: 'none' });
       return;
     }
-    if (!preview || !preview.deletionPreviewToken) {
-      wx.showToast({ title: '删除影响已失效，请重新确认', icon: 'none' });
-      return;
-    }
-    this.setData({ deletionSubmitting: true });
-    wx.showLoading({ title: '删除中', mask: true });
-    preparationApi.foodVersionAction(this.data.recipe.id, contentVersionId, 'delete', {
-      distributerId: identity.distributerId,
-      recipeRowVersion: Number(this.data.recipe.rowVersion || 0),
-      versionRowVersion: Number(version.rowVersion || 0),
+    var that = this;
+    return recipeVersionDeletion.previewAndConfirm(this, {
+      recipe: recipe,
+      version: version,
+      submittingField: 'deletionSubmitting',
       deletionReason: '用户在配方版本管理页删除内容修订',
-      deletionPreviewToken: preview.deletionPreviewToken,
-      operatorId: identity.operatorId,
-    }).then(function (result) {
-      wx.hideLoading();
-      that.setData({ deletionSubmitting: false });
-      // 只有后端明确返回完成才收口；COMPLETED 且幂等重放同样按已完成处理。
-      if (String((result && result.operationStatus) || '') !== 'COMPLETED') {
-        wx.showModal({
-          title: '删除尚未完成',
-          content: '后端没有确认删除完成，页面保持原样，请稍后刷新查看。',
-          showCancel: false,
-        });
-        return;
-      }
-      // 与详情页一致：只清当前菜品的旧配料迁移暂存，其他菜品与编辑草稿不受影响。
-      wx.removeStorageSync(PREPARATION_MIGRATION_CACHE_PREFIX + that.data.foodId);
-      wx.showToast({ title: '已删除', icon: 'success' });
-      return that.loadVersions();
-    }).catch(function (error) {
-      wx.hideLoading();
-      that.setData({ deletionSubmitting: false });
-      // 预览令牌或行版本已变化：重新预览并让用户确认新的影响范围，不静默换令牌继续删除。
-      if (Number(error && error.status) === 409) {
-        wx.showModal({
-          title: '删除影响范围已变化',
-          content: '这份配方的内容或使用安排刚被改动，需要按最新情况重新确认。',
-          confirmText: '重新确认',
-          success: function (modalResult) {
-            if (modalResult.confirm) that.previewDeletion(contentVersionId);
-          },
-        });
-        return;
-      }
-      preparationUtil.showError(error);
+      getIdentity: function () {
+        return that.identity || preparationUtil.getIdentity();
+      },
+      showLoading: function (title) { wx.showLoading({ title: title, mask: true }); },
+      hideLoading: wx.hideLoading,
+      onCompleted: function () {
+        wx.showToast({ title: '已删除', icon: 'success' });
+        return that.loadVersions();
+      },
     });
   },
 
