@@ -36,6 +36,16 @@
       <view class="hint-left"><text class="hint-text">{{costMissingReason || '部分配料缺少可靠成本依据'}}，完整理论成本和毛利暂不显示为 0。</text></view>
     </view>
 
+    <view class="recipe-gap-hint"
+      wx:if="{{!versionEditorMode && versionedMode && recipeCoverageGaps.length}}">
+      <text class="recipe-gap-hint__title">存在未设置配方期间</text>
+      <text class="recipe-gap-hint__intro">该菜品存在配方未覆盖日期：</text>
+      <text class="recipe-gap-hint__range" wx:for="{{recipeCoverageGaps}}" wx:key="startDate">
+        {{item.startDate}} ～ {{item.endDate}}
+      </text>
+      <text class="recipe-gap-hint__note">这些日期如有销售，将无法按标准配方核算成本。</text>
+    </view>
+
     <!-- 收益卡片 -->
     <view class="profit-card">
       <view class="profit-left">

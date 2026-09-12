@@ -120,6 +120,7 @@ function createRecipePage(versionEditorMode) {
     // 服务端是否解析出今天的生效配方；null 表示还没拿到服务端结论（加载中或查询失败）。
     versionHasEffectiveRecipe: null,
     recipeTimeline: [],
+    recipeCoverageGaps: [],
     baseVersionId: null,
     manageVersionId: null,
     returnToManage: false,
@@ -383,6 +384,7 @@ function createRecipePage(versionEditorMode) {
           return Object.assign({}, selectedDetail, {
             versionHistory: versions,
             recipeTimeline: timeline,
+            recipeCoverageGaps: (results[1] && results[1].gaps) || [],
             effectiveVersionId: effectiveVersionId,
             _preferredIntervalId: Number(that.data.editIntervalId) || 0,
           });
@@ -452,6 +454,7 @@ function createRecipePage(versionEditorMode) {
           currentRecipeVersionView: that.data.versionEditorMode ? primaryVersion : currentVersion,
           versionHasEffectiveRecipe: hasEffectiveRecipe,
           recipeTimeline: detail.recipeTimeline || [],
+          recipeCoverageGaps: detail.recipeCoverageGaps || [],
           versionCostBasisDate: usageState.start,
           versionCostScopeText: (that._activeVersionCostContext || {}).scopeText || '',
         }, function () {
