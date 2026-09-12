@@ -59,13 +59,13 @@
 .ingredient-picker-mask { align-items: center; background: rgba(0,0,0,.46); bottom: 0; box-sizing: border-box; display: flex; justify-content: center; left: 0; padding: 30rpx; position: fixed; right: 0; top: 0; z-index: 100; }
 .ingredient-dialog { background: #fff; border-radius: 18rpx; box-shadow: 0 20rpx 60rpx rgba(0,0,0,.22); display: flex; flex-direction: column; max-height: 86vh; overflow: hidden; width: 100%; }
 .ingredient-dialog-head { background: #168b78; color: #fff; flex-shrink: 0; font-size: 31rpx; font-weight: 600; line-height: 1.4; padding: 24rpx 28rpx; }
-.ingredient-dialog-scroll { box-sizing: border-box; flex: 1; max-height: calc(86vh - 190rpx); min-height: 0; padding: 0 24rpx 12rpx; }
+.ingredient-dialog-scroll { box-sizing: border-box; flex: 1; height: 770rpx; max-height: calc(86vh - 190rpx); min-height: 0; padding: 0 24rpx 12rpx; }
 .raw-add-modal__search { align-items: center; background: #f5f6f8; border: 1rpx solid #eee; border-radius: 12rpx; display: flex; height: 72rpx; margin: 16rpx 0 20rpx; padding: 0 20rpx; }
 .raw-add-modal__search-icon { flex-shrink: 0; height: 32rpx; margin-right: 12rpx; opacity: .45; width: 32rpx; }
 .raw-add-modal__search-input { color: #333; flex: 1; font-size: 28rpx; height: 72rpx; min-width: 0; }
 .raw-add-modal__search-clear { align-items: center; color: #999; display: flex; font-size: 36rpx; height: 44rpx; justify-content: center; width: 44rpx; }
 .dialog-loading, .dialog-no-result { color: #8a9290; flex-shrink: 0; font-size: 24rpx; padding: 31rpx 0; text-align: center; }
-.dialog-results { border-top: 1rpx solid #edf0ef; margin-top: 14rpx; max-height: 430rpx; min-height: 95rpx; }
+.dialog-results { border-top: 1rpx solid #edf0ef; margin-top: 14rpx; }
 .food-raw-search-row { align-items: center; border-bottom: 1rpx solid #eee; display: flex; padding: 20rpx 16rpx 20rpx 20rpx; }
 .food-raw-search-row__idx { color: #333; flex-shrink: 0; font-size: 29rpx; margin-right: 12rpx; width: 38rpx; }
 .food-raw-search-row__content { flex: 1; min-width: 0; }

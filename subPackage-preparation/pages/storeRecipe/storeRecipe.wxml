@@ -63,7 +63,7 @@
         </view>
 
         <view class="dialog-loading" wx:if="{{goodsLoading}}">正在搜索原料…</view>
-        <scroll-view wx:elif="{{goodsSearchActive && goodsResults.length}}" scroll-y class="dialog-results" bindscroll="dismissKeyboard">
+        <view wx:elif="{{goodsSearchActive && goodsResults.length}}" class="dialog-results">
           <view class="food-raw-search-row" wx:for="{{goodsResults}}" wx:key="gbDistributerGoodsId">
             <text class="food-raw-search-row__idx">{{index + 1}}.</text>
             <view class="food-raw-search-row__content">
@@ -75,7 +75,7 @@
             </view>
             <view class="food-raw-search-row__select-btn" data-item="{{item}}" bindtap="chooseGoods">选择</view>
           </view>
-        </scroll-view>
+        </view>
         <view class="dialog-no-result" wx:elif="{{goodsSearchActive && goodsKeyword}}">没有找到匹配的原料</view>
 
         <block wx:if="{{selectedGoods && !goodsSearchActive}}">
