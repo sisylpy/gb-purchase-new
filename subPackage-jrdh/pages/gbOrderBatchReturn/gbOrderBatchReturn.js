@@ -36,6 +36,7 @@ Page({
     batchId: null,
     batch: null,
     batchStatus: null,
+    canCompleteReturn: false,
     returnTotal: '0.00',
     from: '',
     url: '',
@@ -94,6 +95,9 @@ Page({
     this.setData({
       batch: batch,
       batchStatus: batch.gbDpbStatus,
+      canCompleteReturn: batch.gbDpbPurchaseType == 9
+        && batch.gbDpbStatus !== null
+        && batch.gbDpbStatus < 3,
       disId: batch.gbDpbDistributerId,
       returnTotal: returnTotal.toFixed(2),
     });

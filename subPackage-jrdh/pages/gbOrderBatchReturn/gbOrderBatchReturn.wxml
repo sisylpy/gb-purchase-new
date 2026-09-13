@@ -43,9 +43,9 @@
           </view>
         </view>
 
-        <view class="return-action-bar" wx:if="{{batchStatus == 0}}">
+        <view class="return-action-bar" wx:if="{{canCompleteReturn}}">
           <view class="btn_container return-btn-wrap">
-            <view class="save_btn save_btn_return" bindtap="showShareTishi" hover-class="numHover">收到退货</view>
+            <view class="save_btn save_btn_return" bindtap="showShareTishi" hover-class="numHover">完成退货</view>
           </view>
         </view>
       </view>
