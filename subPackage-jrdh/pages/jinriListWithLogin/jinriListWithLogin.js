@@ -5,7 +5,7 @@ import {
   indexJrdhUserLoginJj,
   sellerDistributerPurchaseBatchsGb,
 } from '../../../services/depOrder';
-
+//subPackage-mendian/pages/order/stockGoodsBusiness/stockGoodsBusiness
 const { SUPPLIER_SUBSCRIBE_TMPL_IDS } = require('../../../lib/subscribeTemplates.js');
 
 Page({

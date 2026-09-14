@@ -188,13 +188,6 @@ Page({
 
   },
 
-  toFood(){
-    wx.navigateTo({
-      url: '../food/index/index',
-    })
-
-  },
-
   toHeadquartersTasks: function () {
     wx.navigateTo({
       url: '/subPackage-inspection/pages/home/home',
@@ -501,20 +494,6 @@ toPayList(){
 toGroupGoods(){
   wx.navigateTo({
     url: '/subPackage-group/pages/goods/resGoods/resGoods',
-  })
-},
-
-
-toFood(){
-  wx.navigateTo({
-    url: '/subPackage-group/pages/food/index/index',
-  })
-},
-
-
-toReportStock(){
-  wx.navigateTo({
-    url: '/subPackage-charts/pages/report/reportPage/reportPage',
   })
 },
 

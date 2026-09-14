@@ -22,7 +22,7 @@
             hover-class="menu-item-hover"
           >
             <view class="menu-icon" style="background: {{item.iconBg}};">
-              <text class="menu-emoji">{{item.icon}}</text>
+              <image class="menu-icon-img" src="{{item.icon}}" mode="aspectFit" />
             </view>
             <text class="menu-name">{{item.name}}</text>
             <text class="menu-sub">{{item.sub}}</text>

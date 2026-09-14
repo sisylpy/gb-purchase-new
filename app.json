@@ -71,6 +71,9 @@
         "pages/management/disUserEdit/disUserEdit",
         "pages/management/purUserDayDeatil/purUserDayDeatil",
         "pages/management/depFoodList/depFoodList",
+        "pages/management/foodBusinessDiagnosis/foodBusinessDiagnosis",
+        "pages/management/costProblemLocation/costProblemLocation",
+        "pages/management/ingredientCostDetail/ingredientCostDetail",
         "pages/management/dishIngredientDashboard/dishIngredientDashboard",
         "pages/management/franchiseUpgrade/franchiseUpgrade",
         "pages/mendian/index/index",
@@ -106,8 +109,6 @@
       "root": "subPackage-ai/",
       "name": "ai",
       "pages": [
-        "pages/restraunt/restaurantProfile/restaurantProfile",
-        "pages/restraunt/restaurantEdit/restaurantEdit"
       ]
     },
     {
@@ -146,6 +147,7 @@
       "name": "charts",
       "pages": [
         "pages/aiChat/aiChat",
+        "pages/aiCapabilityMap/aiCapabilityMap",
         "pages/pinList/pinList",
         "pages/pinDetail/pinDetail",
         "pages/workRecord/workRecord",
@@ -158,12 +160,18 @@
         "pages/statistic/purchaseDeatil/purchaseDeatil",
         "pages/statistic/stockPurGoods/stockPurGoods",
         "pages/stock/index/index",
-        "pages/stock/stockList/stockList",
         "pages/stock/stockListOneDay/stockListOneDay",
         "pages/stock/stockGoodsList/stockGoodsList",
         "pages/cost/purGoodsFenxi/purGoodsFenxi",
+        "pages/cost/selfPurchaseAnalysis/selfPurchaseAnalysis",
+        "pages/cost/purchaseCountAnalysis/purchaseCountAnalysis",
+        "pages/cost/unitPriceAnalysis/unitPriceAnalysis",
+        "pages/cost/purchaseCategoryDetail/purchaseCategoryDetail",
+        "pages/cost/supplierAnalysis/supplierAnalysis",
         "pages/cost/costGoodsFenxi/costGoodsFenxi",
+        "pages/cost/costGoodsFenxiList/costGoodsFenxiList",
         "pages/cost/foodGoodsFenxi/foodGoodsFenxi",
+        "pages/cost/foodGoodsFenxiDetail/foodGoodsFenxiDetail",
         "pages/cost/costEvidenceDetail/costEvidenceDetail",
         "pages/cost/goodsFenxiCost/goodsFenxiCost",
         "pages/cost/goodsFenxiPurchase/goodsFenxiPurchase",

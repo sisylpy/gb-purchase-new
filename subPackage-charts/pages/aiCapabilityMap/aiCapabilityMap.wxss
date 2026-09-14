@@ -1,0 +1,82 @@
+.capmap-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7f6;
+}
+.capmap-scroll {
+  flex: 1;
+  height: 0;
+  padding: 0 16px 24px;
+  box-sizing: border-box;
+}
+.capmap-loading,
+.capmap-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: #8a938f;
+  font-size: 14px;
+}
+.capmap-group {
+  margin-top: 12px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.capmap-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef1ef;
+}
+.capmap-group-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f3029;
+}
+.capmap-group-chevron {
+  color: #8a938f;
+  font-size: 14px;
+}
+.capmap-group-body {
+  padding: 12px 16px;
+}
+.capmap-cap {
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f5f4;
+}
+.capmap-cap:last-child {
+  border-bottom: 0;
+}
+.capmap-cap-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c3a33;
+}
+.capmap-cap-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a847f;
+  line-height: 1.5;
+}
+.capmap-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 9px 11px;
+  background: #f3f8f5;
+  border-radius: 8px;
+}
+.capmap-question-text {
+  font-size: 13px;
+  color: #2b7157;
+  flex: 1;
+}
+.capmap-question-arrow {
+  color: #2b7157;
+  font-size: 14px;
+}

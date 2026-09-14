@@ -6,8 +6,6 @@
 
  <view class="flex-column bg-white">
 
-  <preparation-entry />
-
   <view wx:if="{{hasFranchiseHeadquarters}}" class="flex-row-between p-30 border-bottom mt-10" bindtap="toHeadquartersTasks" hover-class="hover">
     <view class="flex-row">
       <image src="/images/book.png" class="icon mr-20" />
@@ -19,35 +17,15 @@
     <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
   </view>
 
-  <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toFood">
-      <view class="flex-row">
-        <image src="/images/home/stock0.png" class="icon mr-20" />
-        <text>菜单</text>
-      </view>
-        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
-    </view>
-
-    <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toGroupGoods" wx:if="{{disInfo.mendianDepartmentList.length > 1}}">
-      <view class="flex-row">
-        <image src="/images/home/stock0.png" class="icon mr-20" />
-        <text>商品管理</text>
-      </view>
-        <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
-    </view>
-
-    <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toReportStock">
-     <view class="flex-row">
+  <view class="flex-row-between  p-30  border-bottom mt-10" bind:tap="toGroupGoods" wx:if="{{disInfo.mendianDepartmentList.length > 1}}">
+    <view class="flex-row">
       <image src="/images/home/stock0.png" class="icon mr-20" />
-      <text>报表</text>
+      <text>商品管理</text>
     </view>
       <image src="/images/arrow-right-3.png" mode="aspectFill" class="icon" />
+  </view>
 
-   
-
- 
  </view>
-
-</view>
 
   <view style="height:  20rpx;"></view>
 

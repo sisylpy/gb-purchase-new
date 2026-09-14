@@ -1,8 +1,6 @@
 {
- 
-  "usingComponents": {
-    "back-navbar": "/components/back-navbar/back-navbar",
-    "preparation-entry": "/components/preparationEntry/preparationEntry"
 
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar"
   }
 }

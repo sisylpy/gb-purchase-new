@@ -26,6 +26,10 @@ var getDishDailyCostResult = function (resultId, distributerId) {
   });
 };
 
+var getDishCostDetail = function (payload) {
+  return request.post('gbDishCostAnalysis/dishDetail', payload, { useUrlParams: true });
+};
+
 var getGoodsCostBySearchDate = function (payload) {
   return request.post('gbdepartmentgoodsstockreduce/getGoodsCostBySearchDate', payload, { useUrlParams: true });
 };
@@ -230,6 +234,7 @@ module.exports = {
   getGbIngredientAnalysis: aiChatApi.getGbIngredientAnalysis,
   getDishDailyCostReport: getDishDailyCostReport,
   getDishDailyCostResult: getDishDailyCostResult,
+  getDishCostDetail: getDishCostDetail,
   outboundIngredientAnalysis: aiChatApi.outboundIngredientAnalysis,
   // 库存
   getGbStockPurGoods: getGbStockPurGoods,

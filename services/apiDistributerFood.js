@@ -22,6 +22,9 @@ export const depGeFoodBusiness = (data) => {
     if (data.subDepId != null && data.subDepId !== '' && data.subDepId !== undefined && !isNaN(Number(data.subDepId))) {
       parts.push('subDepId=' + encodeURIComponent(String(Number(data.subDepId))));
     }
+    if (data.viewMode) {
+      parts.push('viewMode=' + encodeURIComponent(String(data.viewMode)));
+    }
     wx.request({
       url: apiUrl.apiUrl + 'gbdepfood/depGeFoodBusiness',
       method: 'POST',
@@ -36,6 +39,27 @@ export const depGeFoodBusiness = (data) => {
         reject(e);
         load.hideLoading();
       },
+    });
+  });
+};
+
+export const getFoodBusinessDiagnosis = (data) => {
+  return new Promise((resolve, reject) => {
+    var parts = [
+      'disId=' + encodeURIComponent(String(data.disId)),
+      'depFatherId=' + encodeURIComponent(String(data.depFatherId)),
+      'foodId=' + encodeURIComponent(String(data.foodId)),
+      'startDate=' + encodeURIComponent(String(data.startDate)),
+      'stopDate=' + encodeURIComponent(String(data.stopDate)),
+    ];
+    if (data.subDepId != null && data.subDepId !== '') parts.push('subDepId=' + encodeURIComponent(String(data.subDepId)));
+    wx.request({
+      url: apiUrl.apiUrl + 'gbdepfood/getFoodBusinessDiagnosis',
+      method: 'POST',
+      data: parts.join('&'),
+      header: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
+      success: (res) => resolve({ result: res.data }),
+      fail: (e) => { reject(e); load.hideLoading(); },
     });
   });
 };
@@ -87,6 +111,9 @@ export const dishIngredientDashboard = (data) => {
   if (data.trendEndDate) body.trendEndDate = data.trendEndDate;
   if (data.primaryDisGoodsId != null && data.primaryDisGoodsId !== '') {
     body.primaryDisGoodsId = data.primaryDisGoodsId;
+  }
+  if (data.subDepId != null && data.subDepId !== '') {
+    body.subDepId = data.subDepId;
   }
   return new Promise((resolve, reject) => {
     wx.request({

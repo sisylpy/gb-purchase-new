@@ -21,7 +21,8 @@
       </view>
       <view class="flex-row-around" >
         <view class="flex-column center-content p-20 mr-10" bindtap="toEditHome" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
-          <image src="../../images/setup.png" class="icon"></image>
+          <!-- <image src="../../images/setup.png" class="icon"></image> -->
+          <image src="../../images/restaurant_management_small/manage_settings.png" class="icon-md"></image>
           <text class="font-sl">管理</text>
         </view>
       
@@ -31,17 +32,17 @@
         </view> -->
 
         <view class="flex-column center-content p-20 mr-10" bindtap="toWork" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
-          <image src="../../images/book.png" class="icon"></image>
+          <image src="../../images/restaurant_management_small/notebook.png" class="icon-md"></image>
           <text class="font-sl">笔记</text>
         </view>
 
         <view class="flex-column center-content p-20 mr-10" bindtap="toStoreAnnounce" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
-          <image src="../../images/pingjunjia.png" class="icon"></image>
+          <image src="../../images/restaurant_management_small/daily_dashboard.png" class="icon-md"></image>
           <text class="font-sl">公告</text>
         </view>
 
         <view class="flex-column center-content p-20 mr-10" bindtap="toAiOrders" hover-class="hoverBar" style="width: {{(windowWidth - 200)/6 + 20}}rpx;">
-          <image src="../../images/edit-2.png" class="icon"></image>
+          <image src="../../images/restaurant_management_small/place_order.png" class="icon-md"></image>
           <text class="font-sl">下单</text>
         </view>
       </view>

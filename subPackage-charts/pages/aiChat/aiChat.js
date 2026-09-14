@@ -190,6 +190,19 @@ Page({
   },
 
   /**
+   * 从能力导航页返回时，读取待填入的问题到输入框（不覆盖用户已输入内容，不自动发送）。
+   */
+  onShow: function () {
+    var pending = wx.getStorageSync('aiCapabilityQuestion');
+    if (pending) {
+      wx.removeStorageSync('aiCapabilityQuestion');
+      if (!this.data.inputValue) {
+        this.setData({ inputValue: pending, inputFocus: true });
+      }
+    }
+  },
+
+  /**
    * 拉取推荐问题（老板常问）
    * @param {number|null} [forcedAdvisorId] 兼容旧入口传入的数据库主键
    * @param {string} [forcedAdvisorCode] 稳定顾问 code（推荐）
@@ -470,6 +483,16 @@ Page({
     this.setData({ drawerOpen: false, drawerExpandedTopicId: '' });
     wx.navigateTo({
       url: '../workNoteList/workNoteList',
+    });
+  },
+
+  /**
+   * 点击「查看全部可问范围」入口 — 跳转到完整能力导航页
+   */
+  onOpenCapabilityMap: function () {
+    this.setData({ drawerOpen: false, drawerExpandedTopicId: '' });
+    wx.navigateTo({
+      url: '../aiCapabilityMap/aiCapabilityMap',
     });
   },
 

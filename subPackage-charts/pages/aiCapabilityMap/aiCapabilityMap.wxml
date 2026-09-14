@@ -1,0 +1,24 @@
+<view class="capmap-page">
+  <back-navbar title="AI 能帮我做什么" avatar="/images/back-gray.png" bindnavbuttontap="onBack"></back-navbar>
+  <view class="capmap-nav-spacer" style="height: {{navBarHeight}}px;"></view>
+  <scroll-view scroll-y="true" class="capmap-scroll">
+    <view class="capmap-loading" wx:if="{{loading}}">正在加载能力目录…</view>
+    <view class="capmap-empty" wx:if="{{!loading && groups.length === 0}}">当前没有可展示的能力</view>
+    <view class="capmap-group" wx:for="{{groups}}" wx:for-item="group" wx:key="category">
+      <view class="capmap-group-header" catchtap="onGroupTap" data-category="{{group.category}}">
+        <text class="capmap-group-title">{{group.category}}</text>
+        <text class="capmap-group-chevron">{{expandedGroup === group.category ? '⌃' : '⌄'}}</text>
+      </view>
+      <view class="capmap-group-body" wx:if="{{expandedGroup === group.category}}">
+        <view class="capmap-cap" wx:for="{{group.capabilities}}" wx:for-item="cap" wx:key="displayName">
+          <text class="capmap-cap-name">{{cap.displayName}}</text>
+          <text class="capmap-cap-desc" wx:if="{{cap.description}}">{{cap.description}}</text>
+          <view class="capmap-question" wx:for="{{cap.exampleQuestions}}" wx:for-item="q" wx:key="*this" catchtap="onQuestionTap" data-text="{{q}}">
+            <text class="capmap-question-text">{{q}}</text>
+            <text class="capmap-question-arrow">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,21 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+<view class="page">
+  <back-navbar title="菜品诊断" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="nav-spacer" style="height:{{navBarHeight}}rpx"></view>
+  <view class="date-bar" bindtap="toDatePage"><image src="/images/calender.png"></image><text class="date-name">{{hanzi}}</text><text class="date-range">{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text><text>›</text></view>
+  <view wx:if="{{hasData}}">
+    <view class="food-card"><view class="food-head"><image wx:if="{{food.image}}" src="{{food.image}}" mode="aspectFill"></image><view wx:else class="food-placeholder">菜</view><view class="food-info"><view><text class="food-name">{{food.name}}</text><text class="food-tag">♛ {{food.status}}</text></view><text>单价 ¥{{food.price}}/份　|　{{food.method}}</text></view></view><view class="top-grid"><view><text>♜　销量</text><text>{{food.sales}}<text class="unit"> 份</text></text></view><view><text>▤　销售收入</text><text>￥{{food.revenue}}</text></view><view><text>￥　实际利润</text><text class="profit">￥{{food.profit}}</text></view><view><text>▥　综合毛利率</text><text class="margin">{{food.margin}}%</text></view></view></view>
+
+    <view class="diagnosis"><view class="section-head"><text class="section-title">▥　诊断摘要</text><text class="section-note">多维度数据分析，了解菜品表现</text><text class="status">👍 {{food.status}}</text></view><view class="diagnosis-grid"><view class="diagnosis-item orange"><text>￥　利润表现</text><text class="big profit">￥{{food.profit}}</text><text>实际利润</text><text>利润贡献显著</text></view><view class="diagnosis-item blue"><text>▤　成本效率</text><text class="big blue-text">￥{{food.totalCost}}</text><text>总成本</text><text>￥{{food.costPer}}/份　单份成本</text></view><view class="diagnosis-item green"><text>◕　损耗控制</text><text class="big margin">￥{{food.wasteCost}}</text><text>损耗+废弃</text><text>￥{{food.wastePer}}/份　单份损耗</text></view><view class="diagnosis-item purple"><text>〽　销售节奏</text><text class="big blue-text">{{food.peakValue}}份</text><text>{{food.peakDay}}最高</text><text>{{food.lowValue}}份　{{food.lowDay}}销量</text></view></view></view>
+
+    <view class="section"><view class="section-head"><text class="section-title">￥　收入构成</text><text class="section-note right">销售收入来源分析</text></view><view class="income-grid"><view><text>销售标价收入</text><text>￥{{food.revenue}}</text></view><view><text>销售收入</text><text>￥{{food.normalRevenue}}</text></view><view><text>员工</text><text>￥{{food.employeeRevenue}}</text></view><view><text>折扣</text><text>￥{{food.discountRevenue}}</text></view></view></view>
+
+    <view class="section"><view class="section-head"><text class="section-title">◇　制作成本构成</text><text class="section-note right">每一份的成本去向</text></view><view class="formula"><view><text>制作总成本</text><text>￥{{food.totalCost}}</text></view><text>=</text><view><text>菜品制作</text><text class="blue-text">￥{{food.productionCost}}</text></view><text>+</text><view><text>损耗+废弃</text><text>￥{{food.wasteCost}}</text></view></view><view class="formula"><view><text>单份制作成本</text><text>￥{{food.costPer}}/份</text></view><text>=</text><view><text>菜品制作</text><text class="blue-text">￥{{food.productionPer}}/份</text></view><text>+</text><view><text>损耗+废弃</text><text>￥{{food.wastePer}}/份</text></view></view><view class="cost-detail-btn" bindtap="toCostProblem">成本详细 <text>›</text></view></view>
+
+    <view class="section chart-section"><view class="section-head"><text class="section-title">▥　按星期销售表现</text><text class="section-note right">单位：份</text></view><ec-canvas id="weekChart" canvas-id="food-week-chart" ec="{{ecWeek}}" class="week-chart"></ec-canvas></view>
+
+    <view class="advice"><view class="section-head"><text class="section-title">●　经营建议</text><text class="section-note">基于数据，提供可执行的建议</text><text class="advice-slogan">持续优化，创造更大价值</text></view><view class="advice-grid"><view class="advice-item {{item.tone}}" wx:for="{{recommendations}}" wx:key="title"><text class="advice-icon">{{item.icon}}</text><view><text>{{item.title}}</text><text>{{item.text}}</text></view></view></view></view>
+  </view>
+  <view wx:elif="{{!loading}}" class="empty"><text>本期暂无该菜品诊断数据</text><text bindtap="toDatePage">切换日期查看</text></view>
+  <view class="bottom"></view>
+</view>

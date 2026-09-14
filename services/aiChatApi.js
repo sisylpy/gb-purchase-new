@@ -13,10 +13,6 @@
  * listConversations(userId, page, pageSize) - GET /ai/conversations 会话列表
  * getConversationMessages(convId, userId)   - GET /ai/conversations/{id}/messages 会话消息
  *
- * ====== 门店画像 (GbAiRestaurantProfileController) ======
- * getAiProfile(departmentId)   - 获取门店画像
- * updateAiProfile(data)         - 更新门店画像
- *
  * ====== 营业额统计 (ai/daily-revenue) ======
  * getRevenueStats(departmentId[, { startDate, endDate }]) - 获取营业额统计
  */
@@ -583,24 +579,8 @@ var connectAiRunSse = function (runId, handlers) {
 };
 
 // ============================================================
-// 门店画像
+// 门店画像 (已移除：餐厅画像业务下线)
 // ============================================================
-
-/**
- * 获取门店画像
- * GET gbairestaurantprofile/info/{departmentId}
- */
-var getAiProfile = function (departmentId) {
-  return request.get('gbairestaurantprofile/info/' + departmentId);
-};
-
-/**
- * 创建/更新门店画像
- * POST gbairestaurantprofile/saveProfile
- */
-var updateAiProfile = function (data) {
-  return request.post('gbairestaurantprofile/saveProfile', data);
-};
 
 // ============================================================
 // 营业额统计
@@ -891,6 +871,16 @@ var getAiRun = function (runId) {
  */
 var getAdvisorDetail = function (advisorId) {
   return request.get('ai/advisors/' + advisorId, { scene: 'MINIAPP' }, { showErrorToast: false });
+};
+
+/**
+ * 获取手机端普通 AI 能力目录（完整可问范围导航）
+ * GET /api/ai/capability-map
+ * 返回 data[] → 每个含 category / capabilities[]（displayName / description / exampleQuestions[]）
+ * @returns {Promise}
+ */
+var getCapabilityMap = function () {
+  return request.get('ai/capability-map', {}, { showErrorToast: false });
 };
 
 // ============================================================
@@ -1286,15 +1276,14 @@ module.exports = {
   getAiRun: getAiRun,
   listConversations: listConversations,
   getConversationMessages: getConversationMessages,
-  // 门店画像
-  getAiProfile: getAiProfile,
-  updateAiProfile: updateAiProfile,
   // 营业额统计
   getRevenueStats: getRevenueStats,
   getDailyTurnover: getDailyTurnover,
   // 智能体详情（统一顾问详情，含推荐问题 questionTopics）
   listAdvisors: listAdvisors,
   getAdvisorDetail: getAdvisorDetail,
+  // 手机端普通 AI 能力目录（完整可问范围导航）
+  getCapabilityMap: getCapabilityMap,
   // 成本分析 - 菜品配料分析
   getGbIngredientAnalysis: getGbIngredientAnalysis,
   outboundIngredientAnalysis: outboundIngredientAnalysis,

@@ -1,453 +1,319 @@
 var load = require('../../../../lib/load.js');
 const globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil');
+
+import apiUrl from '../../../../config/index.js';
+import apiDistributer from '../../../../services/apiDistributer.js';
 import * as echarts from '../../../../ec-canvas/echarts';
 
-import apiUrl from '../../../../config/index.js'
-import apiDistributer from '../../../../services/apiDistributer.js'
+const PURCHASE_IMAGES = '/subPackage-charts/images/purchase/icon_pack/';
 
+function numberValue(value) {
+  var num = Number(value);
+  return isNaN(num) ? 0 : num;
+}
+
+function round(value, digits) {
+  var multiple = Math.pow(10, digits || 0);
+  return Math.round(numberValue(value) * multiple) / multiple;
+}
+
+function money(value) {
+  var num = numberValue(value);
+  var parts = num.toFixed(1).replace(/\.0$/, '').split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
+function percent(part, total) {
+  if (!total) return '0.0';
+  return (part * 100 / total).toFixed(1);
+}
+
+function sumAmounts(rows) {
+  return (rows || []).reduce(function (sum, item) {
+    return sum + numberValue(item.totalAmount);
+  }, 0);
+}
+
+function parseDate(dateString) {
+  var parts = (dateString || '').split('-');
+  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+}
+
+function formatDate(date) {
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  return date.getFullYear() + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+}
+
+function previousRange(startDate, stopDate) {
+  var start = parseDate(startDate);
+  var stop = parseDate(stopDate);
+  var dayCount = Math.round((stop.getTime() - start.getTime()) / 86400000) + 1;
+  var previousStop = new Date(start.getTime());
+  previousStop.setDate(previousStop.getDate() - 1);
+  var previousStart = new Date(previousStop.getTime());
+  previousStart.setDate(previousStart.getDate() - dayCount + 1);
+  return { startDate: formatDate(previousStart), stopDate: formatDate(previousStop) };
+}
 
 Page({
+  data: {
+    imageRoot: PURCHASE_IMAGES,
+    ecSelf: { lazyLoad: true },
+    supplierIds: -1,
+    purUserIds: -1,
+    loading: true,
+    hasData: false,
+    showAllPriceGoods: false,
+    showAllGoods: false,
+    showAllSubtotalGoods: false,
+    purTotalDisplay: '0',
+    selfTotalDisplay: '0',
+    supplierTotalDisplay: '0',
+    purchaseCount: 0,
+    selfPercent: '0.0',
+    supplierPercent: '0.0',
+    purUserData: [],
+    supplierCards: [],
+    topGoodsPrice: [],
+    topTimesGoods: [],
+    topSubtotalGoods: [],
+    mainPurchaser: '暂无',
+    mainGoodsName: '暂无',
+    reminderText: '本期暂无明显价格波动，采购节奏较平稳。',
+    totalTrend: null,
+    countTrend: null
+  },
 
-  onShow(){
-    
+  onLoad: function () {
+    this.setData({
+      windowWidth: globalData.windowWidth * globalData.rpxR,
+      windowHeight: globalData.windowHeight * globalData.rpxR,
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      url: apiUrl.server
+    });
+    var disInfo = wx.getStorageSync('disInfo');
+    if (disInfo) this.setData({ disInfo: disInfo, disId: disInfo.gbDistributerId });
+    this._syncDatesFromMyDateStorage();
+    this._getSupplierStatistics();
+  },
 
+  onShow: function () {
     if (this.data.update) {
       this._syncDatesFromMyDateStorage();
       this.setData({ update: false });
       this._getSupplierStatistics();
     }
- 
   },
 
-  data: {
-    ecDaily: {
-      lazyLoad: false // 每日进货总额图表不使用延迟加载
-    },
-    ecPurUser: {
-      lazyLoad: false // 采购员图表不使用延迟加载
-    },
-    ecSupplier: {
-      lazyLoad: false // 供货商图表不使用延迟加载
-    },
-    ecCategory: {
-      lazyLoad: false // 商品大类图表不使用延迟加载
-    },
-    categoryChartData: [], // 商品大类图表数据
-    showAllGoods: false, // 是否显示所有商品
-    showAllSubtotalGoods: false, // 是否显示所有采购金额商品
-  },
-
-  onLoad: function (options) {
-    this.setData({
-      windowWidth: globalData.windowWidth * globalData.rpxR,
-      windowHeight: globalData.windowHeight * globalData.rpxR,
-      navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      url: apiUrl.server,
-      supplierIds: -1,
-      purUserIds: -1,
-    })
-
-
-    var disInfo = wx.getStorageSync('disInfo');
- 
-    if (disInfo) {
-      this.setData({
-        disInfo: disInfo,
-        disId: disInfo.gbDistributerId,
-      })
-    }
-    this._syncDatesFromMyDateStorage();
-
-    
-    this._getSupplierStatistics();
-  },
-
-
-
-  _syncDatesFromMyDateStorage() {
+  _syncDatesFromMyDateStorage: function () {
     var myDate = wx.getStorageSync('myDate');
     if (myDate) {
-      var dateRange;
-      if (myDate.name === 'custom') {
-        dateRange = dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate);
-      } else {
-        dateRange = dateUtils.getDateRange(myDate.name);
-      }
+      var dateRange = myDate.name === 'custom'
+        ? dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate)
+        : dateUtils.getDateRange(myDate.name);
       this.setData({
         startDate: dateRange.startDate,
         stopDate: dateRange.stopDate,
         dateType: myDate.dateType,
-        hanzi: myDate.hanzi || dateRange.name,
+        hanzi: myDate.hanzi || dateRange.name
       });
     } else {
       this.setData({
         dateType: 'month',
         startDate: dateUtils.getFirstDateInMonth(),
         stopDate: dateUtils.getArriveDate(0),
-        hanzi: "本月",
+        hanzi: '本月'
       });
     }
   },
 
-
-  // 获取供货商统计信息
-  _getSupplierStatistics() {
-    var data = {
+  _requestStatistics: function (startDate, stopDate) {
+    return apiDistributer.getGbPurGoodsStatisticsForDis({
       purUserIds: this.data.purUserIds,
       supplierIds: this.data.supplierIds,
       disId: this.data.disId,
-      startDate: this.data.startDate,
-      stopDate: this.data.stopDate,
-      greatId: -1,
-    };
-    load.showLoading("获取数据中");
-    apiDistributer.getGbPurGoodsStatisticsForDis(data)
-      .then(res => {
+      startDate: startDate,
+      stopDate: stopDate,
+      greatId: -1
+    });
+  },
+
+  _getSupplierStatistics: function () {
+    var that = this;
+    var requestKey = [this.data.disId, this.data.startDate, this.data.stopDate].join('-');
+    this._statisticsRequestKey = requestKey;
+    this.setData({ loading: true });
+    load.showLoading('获取数据中');
+    this._requestStatistics(this.data.startDate, this.data.stopDate)
+      .then(function (res) {
+        if (that._statisticsRequestKey !== requestKey) return;
         load.hideLoading();
-        if (res.result.code == 0) {
-          console.log("REs", res.result.data);
-          this.setData({
-            supplierItem: res.result.data,
-            purTotal: res.result.data.purTotal,
-            purUserData: res.result.data.purUserData,
-            supplierData: res.result.data.supplierData,
-            topTimesGoods: res.result.data.topTimesGoods,
-            topSubtotalGoods: res.result.data.topSubtotalGoods,
-            topSubtotalGoodsSubtotal: res.result.data.topSubtotalGoodsSubtotal,
-            topSubtotalGoodsPercent: res.result.data.topSubtotalGoodsPercent,
-            topGoodsPrice: res.result.data.topGoodsPrice,
-            arr: res.result.data.arr,
-          }, () => {
-            this.init_purUser_chart();
-            this.init_supplier_chart();
-          });
-        } else {
-          this.setData({
-            mapEveryDay: null
-          })
-          load.hideLoading();
+        if (res.result.code !== 0) {
+          that.setData({ loading: false, hasData: false });
           load.showToast(res.result.msg || '获取统计信息失败');
+          return;
         }
+        that._applyStatistics(res.result.data || {});
+        that._loadPreviousStatistics(requestKey);
       })
-      .catch(err => {
+      .catch(function (err) {
+        if (that._statisticsRequestKey !== requestKey) return;
         load.hideLoading();
+        that.setData({ loading: false, hasData: false });
         load.showToast('网络请求失败');
         console.error('统计信息接口失败:', err);
       });
   },
 
+  _applyStatistics: function (data) {
+    var purTotal = numberValue(data.purTotal);
+    var purUsers = (data.purUserData || []).map(function (item) {
+      return Object.assign({}, item, { totalAmountDisplay: money(item.totalAmount) });
+    }).sort(function (a, b) { return numberValue(b.totalAmount) - numberValue(a.totalAmount); });
+    var suppliers = data.supplierData || [];
+    var selfTotal = data.selfPurchaseTotal == null ? sumAmounts(purUsers) : numberValue(data.selfPurchaseTotal);
+    var supplierTotal = data.supplierPurchaseTotal == null ? sumAmounts(suppliers) : numberValue(data.supplierPurchaseTotal);
+    var topTimes = this._normalizeGoods(data.topTimesGoods || []);
+    var maxTimes = topTimes.length ? numberValue(topTimes[0].gbDgQuantityDays) : 0;
+    topTimes = topTimes.map(function (item) {
+      item.barWidth = maxTimes ? Math.max(12, Math.round(numberValue(item.gbDgQuantityDays) * 100 / maxTimes)) : 0;
+      return item;
+    });
+    var topSubtotal = this._normalizeGoods(data.topSubtotalGoods || []).map(function (item) {
+      item.subtotalDisplay = money(item.goodsPurTotalSubtotal);
+      return item;
+    });
+    var priceGoods = this._normalizeGoods(data.topGoodsPrice || []).map(function (item) {
+      item.fluctuationDisplay = round(item.goodsPriceFluctuation, 1);
+      item.diffDisplay = round(item.goodsPriceDiff, 1);
+      return item;
+    });
+    var supplierCards = suppliers.slice().sort(function (a, b) {
+      return numberValue(b.totalAmount) - numberValue(a.totalAmount);
+    }).map(function (item, index) {
+      return Object.assign({}, item, {
+        rank: index + 1,
+        totalAmountDisplay: money(item.totalAmount),
+        sharePercent: percent(numberValue(item.totalAmount), supplierTotal || purTotal),
+        purchaseCountDisplay: item.purchaseCount == null ? '--' : item.purchaseCount
+      });
+    });
+    var purchaseCount = numberValue(data.purchaseCount);
+    var reminderText = priceGoods.length
+      ? priceGoods[0].gbDgGoodsName + '价格波动最明显（' + priceGoods[0].fluctuationDisplay + '%），建议关注后续市场行情，合理安排采购计划。'
+      : '本期暂无明显价格波动，采购节奏较平稳。';
 
-  // 初始化采购员采购总额图表
-  init_purUser_chart: function () {
+    this.setData({
+      loading: false,
+      hasData: purTotal > 0 || purchaseCount > 0,
+      supplierItem: data,
+      purTotal: purTotal,
+      purTotalDisplay: money(purTotal),
+      selfTotal: selfTotal,
+      selfTotalDisplay: money(selfTotal),
+      supplierTotal: supplierTotal,
+      supplierTotalDisplay: money(supplierTotal),
+      purchaseCount: purchaseCount,
+      selfPercent: percent(selfTotal, purTotal),
+      supplierPercent: percent(supplierTotal, purTotal),
+      purUserData: purUsers,
+      supplierCards: supplierCards,
+      topGoodsPrice: priceGoods,
+      topTimesGoods: topTimes,
+      topSubtotalGoods: topSubtotal,
+      topSubtotalGoodsSubtotal: data.topSubtotalGoodsSubtotal || 0,
+      topSubtotalGoodsPercent: data.topSubtotalGoodsPercent || 0,
+      mainPurchaser: purUsers.length ? (purUsers[0].purUserName || purUsers[0].name || '未命名') : '暂无',
+      mainGoodsName: topSubtotal.length ? topSubtotal[0].gbDgGoodsName : '暂无',
+      reminderText: reminderText,
+      totalTrend: null,
+      countTrend: null
+    }, this._initSelfDonutChart.bind(this));
+  },
+
+  _initSelfDonutChart: function () {
+    var component = this.selectComponent('#selfDonutChart');
+    if (!component || !this.data.hasData) return;
+    var selfTotal = this.data.selfTotal;
+    var otherTotal = Math.max(this.data.purTotal - selfTotal, 0);
     var that = this;
-    
-    that.purUserEchartsComponent = that.selectComponent('#purUserChart');    
-    if (!that.purUserEchartsComponent) {
-      return;
-    }
-    
-    that.purUserEchartsComponent.init((canvas, width, height) => {
-      const Chart = echarts.init(canvas, null, {
+    component.init(function (canvas, width, height, dpr) {
+      if (that.selfDonutChart) that.selfDonutChart.dispose();
+      var chart = echarts.init(canvas, null, {
         width: width,
         height: height,
-        devicePixelRatio: globalData.rpxR
+        devicePixelRatio: dpr
       });
-      
-      const option = that.getPurUserChartOption();
-      Chart.setOption(option);
-      
-      return Chart;
+      chart.setOption({
+        animation: true,
+        tooltip: { show: false },
+        series: [{
+          type: 'pie',
+          radius: ['68%', '88%'],
+          center: ['50%', '50%'],
+          silent: true,
+          avoidLabelOverlap: false,
+          label: { show: false },
+          labelLine: { show: false },
+          data: [
+            { value: selfTotal, name: '自采金额', itemStyle: { color: '#20c987' } },
+            { value: otherTotal, name: '其他金额', itemStyle: { color: '#e5edf1' } }
+          ]
+        }]
+      });
+      that.selfDonutChart = chart;
+      return chart;
     });
   },
 
-  // 初始化供货商采购总额图表
-  init_supplier_chart: function () {
+  _normalizeGoods: function (rows) {
+    var server = this.data.url || '';
+    return rows.map(function (item) {
+      var path = item.gbDgNxFatherImg;
+      var imageUrl = '/images/logo.png';
+      if (path) imageUrl = /^https?:\/\//.test(path) ? path : server + path;
+      return Object.assign({}, item, { imageUrl: imageUrl });
+    });
+  },
+
+  _loadPreviousStatistics: function (requestKey) {
     var that = this;
-    
-    that.supplierEchartsComponent = that.selectComponent('#supplierChart');    
-    if (!that.supplierEchartsComponent) {
-      return;
-    }
-    
-    that.supplierEchartsComponent.init((canvas, width, height) => {
-      const Chart = echarts.init(canvas, null, {
-        width: width,
-        height: height,
-        devicePixelRatio: globalData.rpxR
+    var range = previousRange(this.data.startDate, this.data.stopDate);
+    this._requestStatistics(range.startDate, range.stopDate).then(function (res) {
+      if (that._statisticsRequestKey !== requestKey || res.result.code !== 0) return;
+      var previous = res.result.data || {};
+      that.setData({
+        totalTrend: that._trend(that.data.purTotal, numberValue(previous.purTotal)),
+        countTrend: that._trend(that.data.purchaseCount, numberValue(previous.purchaseCount))
       });
-      
-      const option = that.getSupplierChartOption();
-      Chart.setOption(option);
-      
-      return Chart;
+    }).catch(function (err) {
+      console.warn('上期采购统计获取失败:', err);
     });
   },
 
-
-  // 获取采购员采购总额图表配置
-  getPurUserChartOption() {
-    const purUserData = this.data.purUserData || [];
-    
-    if (!purUserData || purUserData.length === 0) {
-      return {
-        title: { text: '暂无采购员数据', left: 'center', top: 'center' }
-      };
-    }
-    
-    // 提取采购员名称和采购总额
-    const names = purUserData.map(item => item.name || item.purUserName || '未知采购员');
-    const amounts = purUserData.map(item => parseFloat(item.totalAmount || item.purTotalAmount) || 0);
-    
-    return {
-      tooltip: {
-        show: false
-      },
-      grid: {
-        left: '2%',
-        right: '2%',
-        bottom: '0',
-        top: '20%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: names,
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666',
-          fontSize: 12,
-          rotate: 45,
-          formatter: function(value, index) {
-            const amount = amounts[index];
-            return value + '\n' + amount + '元';
-          },
-          lineHeight: 16
-        },
-        splitLine: {
-          show: false
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: '金额(元)',
-        position: 'right',
-        nameTextStyle: {
-          color: '#666',
-          fontSize: 12
-        },
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666',
-          fontSize: 12
-        },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            color: '#f0f0f0',
-            type: 'dashed'
-          }
-        }
-      },
-      series: [
-        {
-          name: '采购总额',
-          type: 'bar',
-          data: amounts,
-          itemStyle: {
-            color: '#66bb6a',
-            borderRadius: [4, 4, 0, 0]
-          },
-          emphasis: {
-            itemStyle: {
-              color: '#4caf50'
-            }
-          },
-          barWidth: amounts.length === 1 ? '30%' : (amounts.length <= 3 ? '50%' : '60%')
-        }
-      ]
-    };
+  _trend: function (current, previous) {
+    if (!previous) return null;
+    var value = round((numberValue(current) - previous) * 100 / previous, 1);
+    return { value: Math.abs(value).toFixed(1), direction: value >= 0 ? 'up' : 'down' };
   },
 
-  // 获取供货商采购总额图表配置
-  getSupplierChartOption() {
-    const supplierData = this.data.supplierData || [];
-    
-    if (!supplierData || supplierData.length === 0) {
-      return {
-        title: { text: '暂无供货商数据', left: 'center', top: 'center' }
-      };
-    }
-    
-    // 获取供货商名称和采购总额
-    const names = supplierData.map(item => item.name || item.supplierName || '未知供货商');
-    const amounts = supplierData.map(item => parseFloat(item.totalAmount || item.supplierTotalAmount) || 0);
-    
-    return {
-      tooltip: {
-        show: false
-      },
-      grid: {
-        left: '2%',
-        right: '2%',
-        bottom: '0',
-        top: '20%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        data: names,
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666',
-          fontSize: 12,
-          rotate: 45,
-          formatter: function(value, index) {
-            const amount = amounts[index];
-            return value + '\n' + amount + '元';
-          },
-          lineHeight: 16
-        },
-        splitLine: {
-          show: false
-        }
-      },
-      yAxis: {
-        type: 'value',
-        name: '金额(元)',
-        position: 'right',
-        nameTextStyle: {
-          color: '#666',
-          fontSize: 12
-        },
-        axisLine: {
-          lineStyle: {
-            color: '#999'
-          }
-        },
-        axisLabel: {
-          color: '#666',
-          fontSize: 12
-        },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            color: '#f0f0f0',
-            type: 'dashed'
-          }
-        }
-      },
-      series: [
-        {
-          name: '采购总额',
-          type: 'bar',
-          data: amounts,
-          itemStyle: {
-            color: '#ffa726',
-            borderRadius: [4, 4, 0, 0]
-          },
-          emphasis: {
-            itemStyle: {
-              color: '#ff9800'
-            }
-          },
-          barWidth: amounts.length === 1 ? '30%' : (amounts.length <= 3 ? '50%' : '60%')
-
-        }
-      ]
-    };
+  toDatePageSearch: function () {
+    this.setData({ update: true });
+    wx.navigateTo({ url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType });
   },
 
-  toDatePageSearch() {
-    this.setData({
-      update: true,
-    })
-    wx.navigateTo({
-      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType,
-    })
-  },
-
-  showSearch() {
-    this.setData({
-      showSearch: true,
-    })
-  },
-
-  searchData(e) {
-    this.setData({
-      showSearch: false,
-      type: e.currentTarget.dataset.type,
-      typeString: e.currentTarget.dataset.string,
-      currentPage: 1,
-      dailyChartDrawn: false
-    });
-    this._getInitData();
-  },
-
-  // 获取初始数据
-  _getInitData() {
-    this.setData({
-      dailyChartDrawn: false
-    });
-    this._getSupplierStatistics();
-  },
-
-
-  toGoodsPage(e){
-
-    var id = e.currentTarget.dataset.id;
+  toGoodsPage: function (e) {
     wx.setStorageSync('disGoods', e.currentTarget.dataset.goods);
-
-    wx.navigateTo({
-      url: '../goodsFenxiPurchase/goodsFenxiPurchase?disGoodsId=' + id ,
-    })
-
+    wx.navigateTo({ url: '/subPackage-charts/pages/cost/purchaseCategoryDetail/purchaseCategoryDetail?focusGoodsId=' + e.currentTarget.dataset.id });
   },
 
-  // 切换商品列表展开/收起
-  toggleGoodsList() {
-    this.setData({
-      showAllGoods: !this.data.showAllGoods
-    });
-  },
-
-  // 切换采购金额商品列表展开/收起
-  toggleSubtotalGoodsList() {
-    this.setData({
-      showAllSubtotalGoods: !this.data.showAllSubtotalGoods
-    });
-  },  
-
-
-
-  toPurchaser(){
-    wx.navigateTo({
-      url: '/subPackage-mendian/pages/management/staff/staff',
-    })
-  },
-
-  toSupplier(){
-    wx.navigateTo({
-      url: '/subPackage-mendian/pages/supplier/index/index',
-    })
-  },
-
-  toBack() {
-    wx.navigateBack({
-      delta: 1,
-    })
-  },
-  
-})
+  togglePriceGoodsList: function () { wx.navigateTo({ url: '/subPackage-charts/pages/cost/unitPriceAnalysis/unitPriceAnalysis' }); },
+  toggleGoodsList: function () { wx.navigateTo({ url: '/subPackage-charts/pages/cost/purchaseCountAnalysis/purchaseCountAnalysis' }); },
+  toggleSubtotalGoodsList: function () { this.setData({ showAllSubtotalGoods: !this.data.showAllSubtotalGoods }); },
+  toPurchaser: function () { wx.navigateTo({ url: '/subPackage-charts/pages/cost/selfPurchaseAnalysis/selfPurchaseAnalysis' }); },
+  toSupplier: function () { wx.navigateTo({ url: '/subPackage-charts/pages/cost/supplierAnalysis/supplierAnalysis' }); },
+  toBack: function () { wx.navigateBack({ delta: 1 }); }
+});

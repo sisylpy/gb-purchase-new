@@ -29,12 +29,10 @@ Page({
       this._getInitData();
       return;
     }
-    if (this.data.jrdhUserInfo !== null) {
-      this.setData({ isSellRegiste: false });
-      this._getInitData();
-    } else {
-      this._userLogin();
-    }
+    // 供货商可能先以普通用户接单，之后才从 Boss 小程序绑定 NX 配送商。
+    // 不能继续使用页面内/Storage 中的旧用户对象；每次回到订单页都重新登录，
+    // 让后端按当前供货关系返回最新 nxDisId，随后才能显示补偿转单入口。
+    this._userLogin();
   },
 
   _isCompletedView() {
@@ -153,6 +151,7 @@ Page({
     buyerInput: false,
     canSave: false,
     nickName: "",
+    nicknameFocused: false,
     jrdhUserInfo: null,
     viewMode: '',
     isCompletedView: false,
@@ -565,8 +564,11 @@ Page({
     }
     var userInfo = this.data.jrdhUserInfo;
     var supplierInfo = this.data.supplierInfo;
-    var nxDisId = userInfo ? Number(userInfo.nxJrdhNxDistributerId || 0) : 0;
+    var userNxDisId = userInfo ? Number(userInfo.nxJrdhNxDistributerId || 0) : 0;
     var supplierNxDisId = supplierInfo ? Number(supplierInfo.nxJrdhsNxDistributerId || 0) : 0;
+    // 后关联场景下，供货关系是当前订单能否转单的直接依据。即使页面曾缓存
+    // 普通供货商身份，也应使用后端最新返回的 supplier.nxDisId。
+    var nxDisId = supplierNxDisId > 0 ? supplierNxDisId : userNxDisId;
     var businessRelationId = Number(this.data.nxBusinessRelationId || 0);
     var hasNxIdentity = this.data.isNxDistributerUser || nxDisId > 0;
     var hasSupplierRelation = businessRelationId > 0
@@ -743,6 +745,14 @@ Page({
     this.setData({
       nickName: value
     });this._checkRegister();
+  },
+
+  onNicknameFocus() {
+    this.setData({ nicknameFocused: true });
+  },
+
+  onNicknameBlur() {
+    this.setData({ nicknameFocused: false });
   },
 
 

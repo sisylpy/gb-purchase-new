@@ -1,0 +1,43 @@
+<view class="page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="自采分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view style="height: {{navBarHeight}}rpx;"></view>
+
+  <view class="filter-row">
+    <view class="date-pill" bindtap="toDatePage"><image src="/images/calender.png"></image><text>{{dateRangeText}}</text><view class="chevron"></view></view>
+    <view class="period-pill {{periodKey == 'month' ? 'active' : ''}}" data-key="month" bindtap="selectPeriod">本月</view>
+    <view class="period-pill {{periodKey == 'week' ? 'active' : ''}}" data-key="week" bindtap="selectPeriod">近7天</view>
+    <picker mode="selector" range="{{departmentNames}}" value="{{departmentIndex}}" bindchange="changeDepartment"><view class="department-pill">{{departmentNames[departmentIndex]}}⌄</view></picker>
+  </view>
+
+  <view class="banner">
+    <image class="banner-image" src="{{bannerUrl}}" mode="aspectFill"></image>
+  </view>
+
+  <view wx:if="{{hasData}}">
+    <view class="summary-grid">
+      <view class="summary-card"><text>自采金额</text><view class="summary-icon yellow"><image src="{{iconRoot}}money_bag.png"></image></view><view class="summary-value">￥{{summary.amountDisplay}}</view><view class="compare">较上期 <text class="{{summary.amountTrend.direction}}">{{summary.amountTrend.text}}</text></view></view>
+      <view class="summary-card"><text>采购次数</text><view class="summary-icon green"><image src="{{iconRoot}}menu_green.png"></image></view><view class="summary-value">{{summary.purchaseCount}}<text class="unit"> 次</text></view><view class="compare">较上期 <text class="{{summary.countTrend.direction}}">{{summary.countTrend.text}}</text></view></view>
+      <view class="summary-card"><text>合作采购员</text><view class="summary-icon blue"><image src="{{iconRoot}}user.png"></image></view><view class="summary-value">{{summary.purchaserCount}}<text class="unit"> 人</text></view><view class="compare">较上期 <text class="{{summary.purchaserTrend.direction}}">{{summary.purchaserTrend.text}}</text></view></view>
+      <view class="summary-card"><text>均次采购</text><view class="summary-icon pink"><image src="{{iconRoot}}bar_chart.png"></image></view><view class="summary-value">￥{{summary.averageDisplay}}</view><view class="compare">较上期 <text class="{{summary.averageTrend.direction}}">{{summary.averageTrend.text}}</text></view></view>
+    </view>
+
+    <view class="panel trend-panel">
+      <view class="panel-head"><view class="panel-title"><image src="{{iconRoot}}bar_chart.png"></image>自采金额趋势</view><view class="tabs"><text class="{{metric == 'amount' ? 'active' : ''}}" data-metric="amount" bindtap="switchMetric">金额</text><text class="{{metric == 'count' ? 'active' : ''}}" data-metric="count" bindtap="switchMetric">采购次数</text></view></view>
+      <ec-canvas id="trendChart" canvas-id="self-trend-chart" ec="{{ecTrend}}" class="trend-chart"></ec-canvas>
+    </view>
+
+    <view class="panel">
+      <view class="panel-head"><view class="panel-title"><image src="{{iconRoot}}user.png"></image>采购员分布</view></view>
+      <scroll-view scroll-x class="purchaser-scroll" enhanced show-scrollbar="{{false}}"><view class="purchaser-list"><view class="purchaser" wx:for="{{purchasers}}" wx:key="purUserId"><view class="medal" wx:if="{{item.rank < 4}}">{{item.rank}}</view><image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"></image><view wx:else class="avatar" style="background:{{item.color}}">{{item.initial}}</view><text>{{item.purUserName}}</text><text class="bold">￥{{item.amountDisplay}}</text><text class="small">{{item.percentDisplay}}%</text><view class="mini-track"><view style="width:{{item.barWidth}}%;background:{{item.color}}"></view></view></view></view></scroll-view>
+    </view>
+
+    <view class="panel category-panel">
+      <view class="panel-head"><view class="panel-title"><image src="{{iconRoot}}leaf.png"></image>品类结构</view></view>
+      <view class="category-body"><ec-canvas id="categoryChart" canvas-id="self-category-chart" ec="{{ecCategory}}" class="category-chart"></ec-canvas><view class="category-list"><view class="category-item" wx:for="{{categories}}" wx:key="categoryId" data-id="{{item.categoryId}}" bindtap="toCategoryDetail"><view class="category-image"><image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFit"></image><view wx:else class="color-dot" style="background:{{item.color}}"></view></view><view><text>{{item.categoryName}}</text><text class="bold">￥{{item.amountDisplay}}</text></view><text class="percent">{{item.percentDisplay}}%</text></view></view></view>
+    </view>
+
+    <view class="tips-panel"><view class="panel-title"><image src="{{iconRoot}}light_bulb.png"></image>采购提示</view><view class="tip-list"><view class="tip" wx:for="{{tips}}" wx:key="type"><view class="tip-arrow">↗</view><view><text>{{item.title}}</text><text class="bold">{{item.dayValue}}</text><text class="small">{{item.description}}</text></view></view></view></view>
+  </view>
+  <view wx:elif="{{!loading}}" class="empty"><image src="/subPackage-charts/images/purchase/keaibaicai.png" mode="aspectFit"></image><text>本期暂无自采数据</text><text class="small">可切换日期或门店查看</text></view>
+  <view class="bottom-space"></view>
+</view>

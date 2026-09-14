@@ -1,208 +1,215 @@
+/**
+ * 采购商品经营分析卡片（PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD）
+ *
+ * 仅展示后端 PurchaseGoodsBusinessAnalysis 结果，不做重算/猜测：
+ *  - 库存覆盖：综合支撑天数只在 forecast 完整（非 combinedCoverDaysIncomplete）时展示；
+ *  - 理论消耗为 base 单位（克/毫升/个），采购量为采购单据数量（无单位码），
+ *    两者不可直接比较，后端已停发采购/理论比值（purchaseToTheoryRatio=null），此处显示「单位不可比」；
+ *  - 明细行区分缺失/不可计算/真实零销量/正常，不使用 0.00 掩盖字段缺失。
+ */
+function textOrDash(v) {
+  return v === null || v === undefined || v === '' ? '-' : String(v);
+}
+
+function isEmptyValue(v) {
+  return v === null || v === undefined || v === '';
+}
+
 Component({
   properties: {
     cardData: {
       type: Object,
       value: null,
-    },
-    /** 卡片类型（用于记入工作记录） */
-    cardType: {
-      type: String,
-      value: '',
-    },
-    /** 所属消息 ID */
-    messageId: {
-      type: Number,
-      value: null,
-    },
-    /** 所属 Run ID */
-    runId: {
-      type: Number,
-      value: null,
-    },
-    /** 只读模式（来源卡展示时隐藏行级操作按钮） */
-    readonly: {
-      type: Boolean,
-      value: false,
+      observer: '_onCardDataChange',
     },
   },
-  data: {},
-  observers: {
-    'cardData': function (cd) {
-      var that = this;
-      var cdData = cd || {};
-      var payload = cdData.payload || cdData || {};
-      var status = payload.status || 'SUCCESS';
 
-      // ===== 商品名称（优先 purchaseSourceSection）=====
-      var ps = payload.purchaseSourceSection || {};
-      var goodsName = ps.goodsName || payload.goodsName || '';
-      var queryGoodsName = payload.goodsName || '';
-      var showQueryName = !!(queryGoodsName && queryGoodsName !== goodsName);
+  data: {
+    visible: false,
+    title: '',
+    subtitle: '',
+    goodsName: '',
 
-      // ===== 门店名称（去掉 "门店：" 前缀）=====
-      var scopeLabel = payload.scopeLabel || '';
-      var scopeName = scopeLabel.replace('门店：', '') || '—';
+    // 库存覆盖
+    stockQty: '',
+    stockUnit: '',
+    coverAvailable: false,
+    coverDaysText: '',
+    coverBadgeText: '',
+    coverLow: false,
+    coverUnit: '',
+    stockNote: '',
 
-      var timeLabel = payload.purchaseTimeLabel || cdData.subtitle || '';
+    // 采购
+    purchaseAmount: '',
+    purchaseQty: '',
+    purchaseCount: '',
+    theoryQty: '',
+    theoryUnit: '',
+    theoryNote: '',
+    ratioDisplay: '-',
+    ratioTag: '',
 
-      // ===== 数据截至日期 =====
+    // 明细
+    dishRows: [],
+
+    // 提示
+    gapTexts: [],
+    signalTexts: [],
+  },
+
+  methods: {
+    _onCardDataChange: function (data) {
+      if (!data) {
+        this.setData({ visible: false });
+        return;
+      }
+      var payload = data.payload || data;
+      var summary = payload.summary || {};
       var inv = payload.inventorySection || {};
-      var stockAsOfDate = inv.stockAsOfDate || '';
-      var salesBaselineStop = (payload.salesMatchSection && payload.salesMatchSection.salesBaselineStopDate) || '';
-      var dataAsOfDate = stockAsOfDate || salesBaselineStop || '';
-
-      // ===== 采购来源标签 =====
-      var dsLabelMap = { 'SELF': '自采为主', 'SUPPLIER': '供应商为主', 'OTHER': '其他为主', 'MIXED': '混合采购' };
-      var dsLabel = dsLabelMap[ps.dominantPurchaseSource || payload.dominantPurchaseSource] || '—';
-
-      // ===== 采购来源金额 =====
-      var selfAmt = ps.selfPurchaseAmount != null ? Number(ps.selfPurchaseAmount).toFixed(2) : '0.00';
-      var supplierAmt = ps.supplierPurchaseAmount != null ? Number(ps.supplierPurchaseAmount).toFixed(2) : '0.00';
-      var otherAmt = ps.otherPurchaseAmount != null ? Number(ps.otherPurchaseAmount).toFixed(2) : '0.00';
-      var totalPurchaseAmount = ps.totalPurchaseAmount != null ? Number(ps.totalPurchaseAmount).toFixed(2) : '0.00';
-      var totalPurchaseQuantity = ps.totalPurchaseQuantity != null ? Number(ps.totalPurchaseQuantity) : 0;
-      var totalLineCount = ps.totalPurchaseLineCount != null ? Number(ps.totalPurchaseLineCount) : 0;
-
-      // ===== 采购量 / 理论消耗 / 库存支撑 =====
       var pv = payload.purchaseVolumeSection || {};
-      var purchaseToTheoryRatio = pv.purchaseToTheoryRatio != null ? Number(pv.purchaseToTheoryRatio) : null;
-      var theoreticalConsumptionQty = pv.theoreticalConsumptionQty != null ? Number(pv.theoreticalConsumptionQty) : null;
+      var signals = (payload.judgmentSignals && Array.isArray(payload.judgmentSignals))
+        ? payload.judgmentSignals : [];
+      var knownGaps = (payload.knownGaps && Array.isArray(payload.knownGaps))
+        ? payload.knownGaps : [];
+      var rawRows = (payload.dishRows && Array.isArray(payload.dishRows))
+        ? payload.dishRows : [];
 
-      // ===== 库存快照 =====
-      var currentStockQty = inv.currentStockQty != null ? Number(inv.currentStockQty) : null;
-      var stockUnit = inv.stockUnit || '';
-      var firstImpactedDishName = inv.firstImpactedDishName || '';
-      var firstImpactedCoverDays = inv.firstImpactedCoverDays != null ? Number(inv.firstImpactedCoverDays) : null;
+      // ===== 库存覆盖：仅在预测完整（非 incomplete）时展示天数 =====
+      var incomplete = inv.combinedCoverDaysIncomplete === true
+        || inv.combinedCoverDaysIncomplete === 'true';
+      var coverDays = (!incomplete && !isEmptyValue(inv.combinedCoverDays))
+        ? Number(inv.combinedCoverDays) : null;
+      var coverAvailable = coverDays !== null && !isNaN(coverDays);
+      var coverBadgeText = coverAvailable
+        ? '综合可支撑'
+        : (incomplete ? '数据缺口' : '暂无可用天数');
 
-      var hasStock = !!(currentStockQty != null);
-      var stockAsOfDateVal = inv.stockAsOfDate || '';
-      var hasCoverDays = !!(firstImpactedCoverDays != null);
-
-      // ===== 用量匹配面板 =====
-      var matchTheoryQty = theoreticalConsumptionQty;
-      var ratioVal = purchaseToTheoryRatio;
-      var ratioText = ratioVal != null ? ratioVal.toFixed(1) : '—';
-
-      // 显示的字符串（预计算，WXML 不支持字符串拼接）
-      var theoryQtyDisplay = theoreticalConsumptionQty != null ? String(theoreticalConsumptionQty) : '—';
-      var coverDaysDisplay = firstImpactedCoverDays != null ? String(firstImpactedCoverDays) : '—';
-
-      // 理论消耗显示（带单位）
-      var matchTheoryQtyDisplay = '';
-      if (matchTheoryQty != null) {
-        matchTheoryQtyDisplay = String(matchTheoryQty) + ' ' + stockUnit;
-      } else {
-        matchTheoryQtyDisplay = '—';
-      }
-      var matchTotalQtyDisplay = String(totalPurchaseQuantity) + ' ' + stockUnit;
-
-      // 采购/理论比标签
-      var ratioTag = '';
-      var ratioTagHigh = false;
-      var ratioTagLow = false;
-      var ratioTagNormal = false;
-      if (ratioVal != null) {
-        if (ratioVal > 1.5) { ratioTag = '采购偏高'; ratioTagHigh = true; }
-        else if (ratioVal < 0.7) { ratioTag = '采购偏低'; ratioTagLow = true; }
-        else { ratioTag = '基本合理'; ratioTagNormal = true; }
+      // ===== 采购量 / 理论消耗 =====
+      var theoryQty = textOrDash(pv.theoreticalConsumptionQty);
+      var theoryUnit = pv.theoreticalConsumptionUnit || '';
+      var ratio = (pv.purchaseToTheoryRatio === null || pv.purchaseToTheoryRatio === undefined || pv.purchaseToTheoryRatio === '')
+        ? null : Number(pv.purchaseToTheoryRatio);
+      var ratioDisplay = '-';
+      var ratioTag = '单位不可比';
+      if (ratio !== null && !isNaN(ratio)) {
+        ratioDisplay = ratio.toFixed(2);
+        ratioTag = '';
       }
 
-      // ===== 关联菜品 =====
-      var dishRows = payload.dishRows && Array.isArray(payload.dishRows) ? payload.dishRows : [];
-      var sm = payload.salesMatchSection || {};
-      var linkedDishCount = sm.linkedDishCount != null ? Number(sm.linkedDishCount) : dishRows.length;
-      var hasDishRows = dishRows.length > 0;
+      // ===== 明细行 =====
+      var rows = rawRows.map(function (r) {
+        var fs = r.forecastStatus || '';
+        var isIncluded = fs === 'INCLUDED';
+        var isZeroSales = fs === 'EXCLUDED_ZERO_SALES';
 
-      // ===== 判断信号（按 severity 分组）=====
-      var signals = payload.judgmentSignals && Array.isArray(payload.judgmentSignals) ? payload.judgmentSignals : [];
-      var signalWarnList = [];
-      var signalErrorList = [];
-      var signalInfoList = [];
-      var signalLabelMap = {
-        'PURCHASE_SOURCE_SELF_ONLY': '纯自采模式',
-        'PURCHASE_VOLUME_BELOW_THEORY': '采购低于理论用量',
-        'PURCHASE_VOLUME_ABOVE_THEORY': '采购高于理论用量',
-        'LOW_STOCK_COVER_DAYS': '库存支撑偏低',
-        'HIGH_STOCK_COVER_DAYS': '库存积压风险',
-        'PRICE_UP_TREND': '价格呈上涨趋势',
-        'PRICE_DOWN_TREND': '价格呈下跌趋势',
-      };
-      for (var si = 0; si < signals.length; si++) {
-        var s = signals[si];
-        var item = {
-          code: s.code,
-          label: signalLabelMap[s.code] || s.code,
-          severity: s.severity || 'INFO',
+        var recipeTxt = '-';
+        if (!isEmptyValue(r.recipeUnitPerDish)) {
+          recipeTxt = String(r.recipeUnitPerDish)
+            + (isEmptyValue(r.recipeUnitPerDishUnit) ? '' : ' ' + String(r.recipeUnitPerDishUnit));
+        }
+        var salesTxt = '-';
+        if (isZeroSales) {
+          salesTxt = '0 份';
+        } else if (!isEmptyValue(r.salesPortionsInBaseline)) {
+          salesTxt = String(r.salesPortionsInBaseline) + ' 份';
+        }
+        var dailyTxt = '-';
+        if (isZeroSales) {
+          dailyTxt = '0 份/天';
+        } else if (!isEmptyValue(r.dailySalesPortions)) {
+          dailyTxt = String(r.dailySalesPortions) + ' 份/天';
+        }
+        var usageTxt = '-';
+        if (!isEmptyValue(r.dailyIngredientUsage)) {
+          usageTxt = String(r.dailyIngredientUsage)
+            + (isEmptyValue(r.dailyIngredientUsageUnit) ? '' : ' ' + String(r.dailyIngredientUsageUnit));
+        }
+
+        return {
+          dishId: r.dishId || '',
+          dishName: r.dishName || '未知菜品',
+          recipeTxt: recipeTxt,
+          salesTxt: salesTxt,
+          dailyTxt: dailyTxt,
+          usageTxt: usageTxt,
+          note: r.forecastNote || '',
+          rowClass: isIncluded ? '' : 'pgba-tr--excluded',
         };
-        if (item.severity === 'WARN') signalWarnList.push(item);
-        else if (item.severity === 'ERROR') signalErrorList.push(item);
-        else signalInfoList.push(item);
+      });
+
+      // ===== 缺口文案 =====
+      var gapMap = {
+        no_linked_dish_for_goods: '该原料未关联到菜品',
+        stock_unit_missing: '部分库存批次缺少单位码，未按斤推算，综合预测不完整',
+        stock_unit_unresolved: '部分库存批次单位无法换算，综合预测不完整',
+        stock_unit_dimension_conflict: '库存批次单位维度不一致，综合预测不完整',
+        inventory_rest_weight_missing: '库存剩余量数据缺失',
+        recipe_unit_unresolved: '部分菜品配方用量无单位或无法换算，未计入预测',
+        recipe_unit_dimension_mismatch: '部分菜品配方用量维度与库存不一致，未计入预测',
+        sales_data_missing: '部分菜品基线无销量记录，按数据缺失处理',
+        zero_sales_dish_excluded_from_forecast: '存在基线真实零销量菜品（预测期不消耗）',
+        all_related_dishes_zero_sales: '相关菜品基线均无销量，无法给出支撑天数',
+        purchase_quantity_unit_not_resolved_for_ratio: '采购单据数量未记录单位码，未输出采购/理论比值',
+      };
+      var gapTexts = [];
+      var seen = {};
+      (knownGaps || []).forEach(function (code) {
+        var key = String(code);
+        if (seen[key]) return;
+        seen[key] = true;
+        gapTexts.push(gapMap[key] || key);
+      });
+
+      // 信号→徽标
+      var signalTexts = [];
+      var signalMap = {
+        PURCHASE_VOLUME_RATIO_NOT_AVAILABLE: '',
+        STOCK_COVER_FORECAST_INCOMPLETE: '库存覆盖预测不完整',
+        LOW_STOCK_COVER_DAYS: '库存偏低',
+        HIGH_STOCK_COVER_DAYS: '库存较充足',
+        ZERO_OR_MISSING_STOCK: '库存缺失或为零',
+        NO_LINKED_DISH: '未关联菜品',
+      };
+      signals.forEach(function (s) {
+        var label = signalMap[s.code] || s.code;
+        if (label) signalTexts.push(label);
+      });
+      // 冗余信号去除
+      if (incomplete) {
+        signalTexts = signalTexts.filter(function (t) {
+          return t !== '库存偏低' && t !== '库存较充足';
+        });
       }
 
-      var hasSignals = signalWarnList.length + signalErrorList.length + signalInfoList.length > 0;
+      this.setData({
+        visible: true,
+        title: data.title || (payload.goodsName ? payload.goodsName + '·采购经营分析' : '采购经营分析'),
+        subtitle: data.subtitle || summary.purchaseTimeLabel || '',
+        goodsName: payload.goodsName || data.goodsName || '',
 
-      // ===== knownGaps =====
-      var knownGaps = payload.knownGaps && Array.isArray(payload.knownGaps) ? payload.knownGaps : [];
-      var hasGaps = knownGaps.length > 0;
+        stockQty: textOrDash(inv.currentStockQty),
+        stockUnit: textOrDash(inv.stockUnit),
+        coverAvailable: coverAvailable,
+        coverDaysText: coverAvailable ? coverDays.toFixed(2) : '',
+        coverBadgeText: coverBadgeText,
+        coverLow: coverAvailable && coverDays < 1,
+        coverUnit: coverAvailable ? '天' : '',
+        stockNote: incomplete ? '综合覆盖预测有数据缺口，天数未给出' : '',
 
-      that.setData({
-        _goodsName: goodsName,
-        _queryGoodsName: queryGoodsName,
-        _showQueryName: showQueryName,
-        _dominantSourceLabel: dsLabel,
-        _scopeName: scopeName,
-        _timeLabel: timeLabel,
-        _dataAsOfDate: dataAsOfDate,
+        purchaseAmount: textOrDash(pv.totalPurchaseAmount),
+        purchaseQty: textOrDash(pv.totalPurchaseQuantity),
+        purchaseCount: textOrDash(pv.totalPurchaseLineCount),
+        theoryQty: theoryQty,
+        theoryUnit: theoryUnit,
+        theoryNote: pv.theoreticalConsumptionBasisNote || '',
+        ratioDisplay: ratioDisplay,
+        ratioTag: ratioTag,
 
-        // 采购来源金额
-        _selfAmt: selfAmt,
-        _supplierAmt: supplierAmt,
-        _otherAmt: otherAmt,
-        _totalAmount: totalPurchaseAmount,
-
-        // 核心指标
-        _totalQuantity: String(totalPurchaseQuantity),
-        _totalLineCount: String(totalLineCount),
-        _theoryQtyDisplay: theoryQtyDisplay,
-
-        // 库存
-        _hasStock: hasStock,
-        _currentStockQty: String(currentStockQty != null ? currentStockQty : ''),
-        _stockUnit: stockUnit,
-        _stockAsOfDate: stockAsOfDateVal,
-        _firstImpactedDishName: firstImpactedDishName,
-        _coverDaysDisplay: coverDaysDisplay,
-        _hasCoverDays: hasCoverDays,
-
-        // 用量匹配面板
-        _matchTotalQtyDisplay: matchTotalQtyDisplay,
-        _matchTheoryQtyDisplay: matchTheoryQtyDisplay,
-        _ratioDisplay: ratioText + ' 倍',
-        _ratioTag: ratioTag,
-        _ratioTagHigh: ratioTagHigh,
-        _ratioTagLow: ratioTagLow,
-        _ratioTagNormal: ratioTagNormal,
-
-        // 关联菜品表格
-        _hasDishRows: hasDishRows,
-        _linkedDishCount: linkedDishCount,
-        _dishRows: dishRows,
-
-        // 信号分组
-        _hasSignals: hasSignals,
-        _signalWarnList: signalWarnList,
-        _signalErrorList: signalErrorList,
-        _signalInfoList: signalInfoList,
-
-        // 能力边界
-        _hasGaps: hasGaps,
-        _gapLabels: knownGaps,
-
-        // 空状态
-        _isEmpty: status === 'EMPTY' || status === 'ERROR',
-        _emptyReason: payload.emptyReason || '暂无采购经营分析数据',
+        dishRows: rows,
+        gapTexts: gapTexts,
+        signalTexts: signalTexts,
       });
     },
   },
-  methods: {},
 });

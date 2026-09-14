@@ -582,3 +582,48 @@
   font-size: 24rpx;
   opacity: 0.5;
 }
+
+/* ===== 覆盖新字段的补充样式 ===== */
+.pba-val-dim {
+  color: #b45309;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.pba-mat-gray { color: #9ca3af; }
+
+.pba-theory-note {
+  display: block;
+  font-size: 20rpx;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin-top: 10rpx;
+}
+
+.pba-match-unit {
+  font-size: 18rpx;
+  color: #9ca3af;
+  margin-left: 4rpx;
+}
+
+/* 关联菜品表格：日均销量列 */
+.pba-th-daily { flex: 0.9; text-align: center; }
+.pba-td-daily { flex: 0.9; text-align: center; font-size: 22rpx; color: #4b5563; }
+
+/* 被排除 / 不可计算 / 真实零销量行 */
+.pba-tr--excluded .pba-dish-cell-name,
+.pba-tr--excluded .pba-td {
+  color: #9ca3af;
+}
+
+.pba-row-note {
+  display: block;
+  font-size: 19rpx;
+  color: #c08552;
+  line-height: 1.4;
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}

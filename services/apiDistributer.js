@@ -92,6 +92,46 @@ var getGbPurGoodsStatisticsForDis = function (data) {
   }, { useUrlParams: true });
 };
 
+/** 自采分析首页：汇总、趋势、采购员和品类结构 */
+var getGbSelfPurchaseAnalysis = function (data) {
+  var params = {
+    disId: data.disId,
+    startDate: data.startDate,
+    stopDate: data.stopDate
+  };
+  if (data.purDepId) params.purDepId = data.purDepId;
+  return requestUtil.post('gbdistributerpurchasegoods/getGbSelfPurchaseAnalysis', params, { useUrlParams: true });
+};
+
+/** 采购次数分析：节奏、高频商品与采购行为 */
+var getGbPurchaseCountAnalysis = function (data) {
+  var params = { disId: data.disId, startDate: data.startDate, stopDate: data.stopDate, sourceType: data.sourceType || 'ALL' };
+  if (data.purDepId) params.purDepId = data.purDepId;
+  return requestUtil.post('gbdistributerpurchasegoods/getGbPurchaseCountAnalysis', params, { useUrlParams: true });
+};
+
+/** 单价波动分析 */
+var getGbUnitPriceAnalysis = function (data) {
+  var params = { disId: data.disId, startDate: data.startDate, stopDate: data.stopDate, sourceType: data.sourceType || 'ALL' };
+  if (data.purDepId) params.purDepId = data.purDepId;
+  if (data.disGoodsId) params.disGoodsId = data.disGoodsId;
+  return requestUtil.post('gbdistributerpurchasegoods/getGbUnitPriceAnalysis', params, { useUrlParams: true });
+};
+
+/** 采购分类明细：一级分类及商品四项指标 */
+var getGbPurchaseCategoryDetail = function (data) {
+  var params = { disId: data.disId, startDate: data.startDate, stopDate: data.stopDate };
+  if (data.purDepId) params.purDepId = data.purDepId;
+  return requestUtil.post('gbdistributerpurchasegoods/getGbPurchaseCategoryDetail', params, { useUrlParams: true });
+};
+
+/** 供货商分析：合作、订单、结款结构与供货商排行 */
+var getGbSupplierAnalysis = function (data) {
+  var params = { disId: data.disId, startDate: data.startDate, stopDate: data.stopDate };
+  if (data.purDepId) params.purDepId = data.purDepId;
+  return requestUtil.post('gbdistributerpurchasegoods/getGbSupplierAnalysis', params, { useUrlParams: true });
+};
+
 /**
  * 获取商品采购明细列表
  * POST gbdistributerpurchasegoods/getGbPurGoodsDetailList
@@ -152,6 +192,11 @@ module.exports = {
   getPurUserDate: getPurUserDate,
   getPurchaseUserGoods: getPurchaseUserGoods,
   getGbPurGoodsStatisticsForDis: getGbPurGoodsStatisticsForDis,
+  getGbSelfPurchaseAnalysis: getGbSelfPurchaseAnalysis,
+  getGbPurchaseCountAnalysis: getGbPurchaseCountAnalysis,
+  getGbUnitPriceAnalysis: getGbUnitPriceAnalysis,
+  getGbPurchaseCategoryDetail: getGbPurchaseCategoryDetail,
+  getGbSupplierAnalysis: getGbSupplierAnalysis,
   getGbPurGoodsDetailList: getGbPurGoodsDetailList,
   getGbCostGoodsStatistics: getGbCostGoodsStatistics,
   // settlePageGb 需要的 API

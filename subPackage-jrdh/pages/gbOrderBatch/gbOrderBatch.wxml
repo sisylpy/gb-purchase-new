@@ -63,7 +63,7 @@
               <view wx:elif="{{nxBridgeState === 'closed'}}" class="nx-order-bridge-title">本单已在精彩账本完成</view>
               <view wx:elif="{{nxBridgeState === 'partial'}}" class="nx-order-bridge-title">转单尚未全部完成</view>
               <view wx:elif="{{nxBridgeState === 'conflict'}}" class="nx-order-bridge-title">订单配送关系异常</view>
-              <view wx:else class="nx-order-bridge-title">本单待接收到精彩接单</view>
+              <view wx:else class="nx-order-bridge-title">本单尚未转入精彩接单</view>
 
               <view wx:if="{{nxBridgeState === 'transferred'}}" class="nx-order-bridge-desc">请在精彩接单继续完成备货、称重和出货。</view>
               <view wx:elif="{{nxBridgeState === 'delivered'}}" class="nx-order-bridge-desc">出货数据已经回到精彩账本，饭店可以继续确认收货和结账。</view>
@@ -85,7 +85,7 @@
             <block wx:if="{{nxBridgeOpening}}">正在打开…</block>
             <block wx:elif="{{nxBridgeState === 'transferred' || nxBridgeState === 'delivered'}}">去精彩接单查看</block>
             <block wx:elif="{{nxBridgeState === 'partial'}}">继续完成转单</block>
-            <block wx:else>打开精彩接单接收本单</block>
+            <block wx:else>转到精彩接单</block>
           </button>
         </view>
 
@@ -216,33 +216,97 @@
 </view>
 
 <!-- 供货商注册 -->
-<view class="overlay1 popup-mask {{isSellRegiste ? 'show' : 'hide'}}">
-  <view class="popup1 popup-container p-30">
-    <view class="">
-      <view class="">
-        <view class="center-content flex-column">
-          <text class="font-lg p-30">注册接单用户信息</text>
+<view class="overlay1 popup-mask supplier-register-mask {{isSellRegiste ? 'show' : 'hide'}}" catchtouchmove="noop">
+  <view class="popup1 popup-container supplier-register-sheet">
+    <view class="supplier-register-grabber"></view>
+
+    <scroll-view class="supplier-register-scroll" scroll-y="true" enhanced="true" show-scrollbar="false">
+      <view class="supplier-register-content">
+        <view class="supplier-register-invite">
+          <text class="supplier-register-invite-dot"></text>
+          <text>来自{{retName || '饭店'}}的订货邀请</text>
         </view>
-        <view class="flex-row">
-          <text>用户头像</text>
-          <button class="avatar-wrapper" style="width: {{windowWidth - 220}}rpx;" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-            <image class="avatar" src="{{avatarUrl}}"></image>
+
+        <view class="supplier-register-title">开通微信接单</view>
+        <view class="supplier-register-subtitle">完成一次注册，以后饭店订货都可以在小程序里处理。</view>
+
+        <view class="supplier-profile-card">
+          <view class="supplier-profile-head">
+            <view>
+              <view class="supplier-profile-heading">填写接单资料</view>
+              <view class="supplier-profile-tip">头像和昵称会展示给订货饭店</view>
+            </view>
+            <view class="supplier-profile-required">先完成这里</view>
+          </view>
+
+          <button class="supplier-avatar-row supplier-avatar-select" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+            <view class="avatar-wrapper supplier-avatar-button">
+              <image class="avatar supplier-avatar" mode="aspectFill" src="{{avatarUrl}}"></image>
+              <view class="supplier-avatar-edit">换</view>
+            </view>
+            <view class="supplier-avatar-copy">
+              <view class="supplier-field-label">接单头像</view>
+              <view class="supplier-field-hint">点击这一行选择微信头像</view>
+            </view>
+            <text class="supplier-field-arrow">›</text>
           </button>
+
+          <view class="supplier-nickname-field">
+            <view class="supplier-field-label">供货商或联系人名称</view>
+            <input
+              type="nickname"
+              value="{{nickName}}"
+              bindinput="onNicknameInput"
+              bindfocus="onNicknameFocus"
+              bindblur="onNicknameBlur"
+              class="supplier-nickname-input {{nicknameFocused ? 'is-focused' : ''}}"
+              placeholder="请输入供货商或联系人名称"
+              placeholder-class="supplier-nickname-placeholder"
+              maxlength="24"
+              confirm-type="done"
+            />
+          </view>
         </view>
-        <view class="flex-row">
-          <text class="mr-20">用户昵称</text>
-          <mp-form bindsubmit="formSubmit">
-            <mp-cells>
-              <mp-cell title="昵称">
-                <input type="nickname" bindinput="onNicknameInput" class="weui-input" placeholder="" />
-              </mp-cell>
-            </mp-cells>
-          </mp-form>
+
+        <view class="supplier-benefit-section-title">以后用小程序接单更方便</view>
+        <view class="supplier-benefit-card">
+          <view class="supplier-benefit-item">
+            <view class="supplier-benefit-icon supplier-benefit-icon-order">单</view>
+            <view class="supplier-benefit-copy">
+              <view class="supplier-benefit-title">订货集中，不容易漏单</view>
+              <view class="supplier-benefit-desc">商品、数量和备注统一展示，不用再翻找聊天记录。</view>
+            </view>
+          </view>
+          <view class="supplier-benefit-divider"></view>
+          <view class="supplier-benefit-item">
+            <view class="supplier-benefit-icon supplier-benefit-icon-delivery">货</view>
+            <view class="supplier-benefit-copy">
+              <view class="supplier-benefit-title">手机直接填价、备货和出货</view>
+              <view class="supplier-benefit-desc">接单进度同步给饭店，双方确认更清楚。</view>
+            </view>
+          </view>
+          <view class="supplier-benefit-divider"></view>
+          <view class="supplier-benefit-item">
+            <view class="supplier-benefit-icon supplier-benefit-icon-bill">账</view>
+            <view class="supplier-benefit-copy">
+              <view class="supplier-benefit-title">历史订单和金额随时可查</view>
+              <view class="supplier-benefit-desc">订货、退货和账款记录集中留存，对账更省心。</view>
+            </view>
+          </view>
         </view>
+
+        <view class="supplier-register-note">注册即表示同意接收该饭店的订货信息；不会公开你的微信号。</view>
+        <view class="supplier-register-bottom-space"></view>
       </view>
-    </view>
-    <view class="p-20 mt-30">
-      <button bindtap="save" class="register-btn {{canRegister ? 'is-active' : ''}}">注册</button>
+    </scroll-view>
+
+    <view class="supplier-register-actions">
+      <button
+        bindtap="save"
+        disabled="{{!canRegister}}"
+        class="register-btn supplier-register-button {{canRegister ? 'is-active' : ''}}"
+      >完成注册，开始接单</button>
+      <view class="supplier-register-action-hint">选择头像并填写昵称后即可开通</view>
     </view>
   </view>
 </view>

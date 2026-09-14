@@ -1,28 +1,37 @@
 <view class="gsdc-card" wx:if="{{visible}}">
-  <!-- 头部：原料名称 + 整体可支撑天数 -->
+  <!-- 头部：原料名称 + 综合预计支撑天数（仅 USABLE 显示天数，否则显示数据缺口） -->
   <view class="gsdc-header">
     <view class="gsdc-header-main">
       <text class="gsdc-title">{{title}}</text>
-      <view class="gsdc-cover-badge">
-        <text class="gsdc-cover-label">可支撑</text>
-        <text class="gsdc-cover-num {{dishDanger ? 'gsdc-cover-num--danger' : ''}}">{{dishCoverDays}}</text>
+      <view class="gsdc-cover-badge" wx:if="{{coverAvailable}}">
+        <text class="gsdc-cover-label">综合可支撑</text>
+        <text class="gsdc-cover-num {{coverLow ? 'gsdc-cover-num--danger' : ''}}">{{coverDaysText}}</text>
         <text class="gsdc-cover-unit">天</text>
+      </view>
+      <view class="gsdc-cover-badge gsdc-cover-badge--gap" wx:else>
+        <text class="gsdc-cover-label">预测状态</text>
+        <text class="gsdc-cover-num">{{coverBadgeText}}</text>
       </view>
     </view>
     <text class="gsdc-subtitle">{{subtitle}}</text>
-    <text class="gsdc-stock">当前库存 {{currentStockQty}} {{weightUnit}}</text>
+    <text class="gsdc-stock">当前库存 {{currentStockQty}} {{stockUnit}}</text>
   </view>
 
-  <!-- 瓶颈菜品 -->
-  <view class="gsdc-bottleneck" wx:if="{{bottleneckName}}">
-    <view class="gsdc-bottleneck-dot"></view>
-    <text class="gsdc-bottleneck-text">瓶颈菜品：{{bottleneckName}}（{{bottleneckDays}} 天）</text>
+  <!-- 每日总消耗概要 -->
+  <view class="gsdc-overview" wx:if="{{totalDailyUsage && totalDailyUsage !== '-'}}">
+    <text class="gsdc-overview-text">相关菜品预计每日总消耗 {{totalDailyUsage}} {{totalDailyUsageUnit}}</text>
   </view>
 
   <!-- 销量基线说明 -->
   <view class="gsdc-baseline" wx:if="{{salesBaselineLabel}}">
     <text class="gsdc-baseline-label">销量基线：</text>
     <text class="gsdc-baseline-text">{{salesBaselineLabel}}</text>
+  </view>
+
+  <!-- 综合预测不完整 / 未计入预测的菜品提示 -->
+  <view class="gsdc-gap" wx:if="{{excludedDishNames.length > 0}}">
+    <text class="gsdc-gap-title">{{forecastIncomplete ? '预测不完整：库存单位 / 配方用量 / 销量数据存在缺口，未给出综合天数。以下菜品未计入：' : '以下菜品未计入消耗预测：'}}</text>
+    <text class="gsdc-gap-item" wx:for="{{excludedDishNames}}" wx:key="*this" wx:for-item="exc">· {{exc}}</text>
   </view>
 
   <!-- 菜品表格 -->
@@ -32,42 +41,42 @@
       <text class="gsdc-th gsdc-th--dish">菜品</text>
       <text class="gsdc-th gsdc-th--recipe">单份用量</text>
       <text class="gsdc-th gsdc-th--daily">日均销量</text>
-      <text class="gsdc-th gsdc-th--cover">可支撑天数</text>
-      <text class="gsdc-th gsdc-th--portions">还可卖(份)</text>
+      <text class="gsdc-th gsdc-th--usage">原料日消耗</text>
+      <text class="gsdc-th gsdc-th--share">占比</text>
     </view>
 
     <!-- 数据行 -->
     <view
-      class="gsdc-tr {{item.isBottleneck ? 'gsdc-tr--bottleneck' : ''}}"
+      class="gsdc-tr {{item.rowClass}}"
       wx:for="{{dishRows}}"
       wx:key="dishId"
     >
       <view class="gsdc-td gsdc-td--dish">
         <text class="gsdc-dish-name">{{item.dishName}}</text>
-        <text class="gsdc-bottleneck-tag" wx:if="{{item.isBottleneck}}">瓶颈</text>
+        <text class="gsdc-row-note" wx:if="{{item.note}}">{{item.note}}</text>
       </view>
       <view class="gsdc-td gsdc-td--recipe">
-        <text class="gsdc-recipe-val">{{item.recipeUnitPerDish}}</text>
+        <text class="gsdc-recipe-val">{{item.recipeTxt}}</text>
       </view>
       <view class="gsdc-td gsdc-td--daily">
-        <text class="gsdc-daily-val">{{item.dailySalesPortions}}</text>
+        <text class="gsdc-daily-val">{{item.dailyTxt}}</text>
       </view>
-      <view class="gsdc-td gsdc-td--cover">
-        <text class="gsdc-cover-val {{item.isDanger ? 'gsdc-cover-val--danger' : item.isWarning ? 'gsdc-cover-val--warning' : ''}}">{{item.coverDaysStr}}</text>
+      <view class="gsdc-td gsdc-td--usage">
+        <text class="gsdc-usage-val">{{item.usageTxt}}</text>
       </view>
-      <view class="gsdc-td gsdc-td--portions">
-        <text class="gsdc-portions-val">{{item.supportedPortions}}</text>
+      <view class="gsdc-td gsdc-td--share">
+        <text class="gsdc-share-val">{{item.shareTxt}}</text>
       </view>
     </view>
   </view>
 
   <!-- 空数据 -->
   <view class="gsdc-empty" wx:if="{{dishRows.length === 0}}">
-    <text class="gsdc-empty-text">暂无使用此原料的菜品数据</text>
+    <text class="gsdc-empty-text">暂无使用此原料的菜品明细</text>
   </view>
 
   <!-- 底部说明 -->
-  <view class="gsdc-footer" wx:if="{{summary && summary.methodNote}}">
-    <text class="gsdc-method-note">{{summary.methodNote}}</text>
+  <view class="gsdc-footer" wx:if="{{forecastBasisNote}}">
+    <text class="gsdc-method-note">{{forecastBasisNote}}</text>
   </view>
 </view>

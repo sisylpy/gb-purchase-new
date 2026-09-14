@@ -1,0 +1,52 @@
+<view class="page">
+  <back-navbar style="height:{{navBarHeight}}rpx" title="供货商分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view style="height:{{navBarHeight}}rpx"></view>
+
+  <view class="filter-row">
+    <view class="date-pill" bindtap="toDatePage"><image src="/images/calender.png"></image><text class="date-name">{{hanzi}}</text><text class="date-range">{{dateRangeText}}</text><text>⌄</text></view>
+    <view class="period {{periodKey=='month'?'active':''}}" data-key="month" bindtap="selectPeriod">本月</view>
+    <view class="period {{periodKey=='thirty'?'active':''}}" data-key="thirty" bindtap="selectPeriod">近30天</view>
+  </view>
+
+  <view class="banner">
+    <view><text class="banner-title">把供货商看清楚，</text><text class="banner-title">合作更省心</text><text class="banner-note">稳定供货，合理结算，更懂你的生意</text></view>
+    <view class="banner-scene"><text class="truck">🚚</text><text class="seller">🧑‍🌾</text><text class="vegetables">🥬🥕</text></view>
+    <view class="banner-bubble"><text>好供货</text><text>合作更轻松！</text></view>
+  </view>
+
+  <view wx:if="{{hasData}}">
+    <view class="summary-grid">
+      <view class="summary-card"><view class="summary-icon green"><image src="{{iconRoot}}user.png"></image></view><view><text>合作供货商</text><text class="summary-value">{{summary.supplierCount}}<text> 家</text></text><text class="compare {{summary.supplierTrend.direction}}">较上期 {{summary.supplierTrend.text}}</text></view></view>
+      <view class="summary-card"><view class="summary-icon orange"><image src="{{iconRoot}}menu_green.png"></image></view><view><text>订单次数</text><text class="summary-value">{{summary.orderCount}}<text> 次</text></text><text class="compare {{summary.orderTrend.direction}}">较上期 {{summary.orderTrend.text}}</text></view></view>
+      <view class="summary-card"><view class="summary-icon red">￥</view><view><text>未结账款</text><text class="summary-value">￥{{summary.unsettledDisplay}}</text><text class="compare {{summary.unsettledTrend.direction}}">较上期 {{summary.unsettledTrend.text}}</text></view></view>
+      <view class="summary-card"><view class="summary-icon blue">▰</view><view><text>已结账款</text><text class="summary-value">￥{{summary.settledDisplay}}</text><text class="compare {{summary.settledTrend.direction}}">较上期 {{summary.settledTrend.text}}</text></view></view>
+    </view>
+
+    <view class="panel supplier-panel">
+      <view class="panel-title"><image src="{{iconRoot}}bar_chart.png"></image><text>供货商占比</text></view>
+      <view class="supplier-row rank-{{item.rank}}" wx:for="{{suppliers}}" wx:key="supplierId">
+        <view class="rank">{{item.rank}}</view>
+        <view class="shop">🏪</view>
+        <view class="supplier-main"><text class="supplier-name">{{item.supplierName}}</text><text class="supplier-note">{{item.description}}</text><view class="share-track"><view style="width:{{item.shareWidth}}%"></view></view></view>
+        <view class="supplier-amount"><text>￥{{item.amountDisplay}}</text><text>供货金额</text></view>
+        <view class="share-ring"><text>{{item.shareDisplay}}%</text><text>占比</text></view>
+        <view class="orders"><image src="{{iconRoot}}menu_green.png"></image><text>{{item.orderCount}} 次</text><text>订单次数</text></view>
+        <view class="settle-row"><text class="unsettled">未结 ￥{{item.unsettledDisplay}}</text><text class="pending">待结 ￥{{item.pendingDisplay}}</text><text class="settled">已结 ￥{{item.settledDisplay}}</text></view>
+      </view>
+    </view>
+
+    <view class="panel insights-panel">
+      <view class="panel-title"><image src="{{iconRoot}}leaf.png"></image><text>供货商洞察</text></view>
+      <view class="insight-list">
+        <view class="insight green-bg"><text class="insight-icon">◕</text><view><text>合作较集中</text><text>TOP3 供货商占比 {{insights.topThree}}%</text></view></view>
+        <view class="insight orange-bg"><text class="insight-icon">♟</text><view><text>有未结账款</text><text>￥{{insights.outstanding}} 待结算</text></view></view>
+        <view class="insight blue-bg"><text class="insight-icon">●●</text><view><text>供货商活跃</text><text>本期 {{insights.active}} 家有供货</text></view></view>
+      </view>
+    </view>
+
+    <view class="tip"><image src="{{iconRoot}}light_bulb.png"></image><text>小提示：维护稳定的供货商关系，让新鲜好食材持续为你助力！</text><view><text>精打细算</text><text>生意更好！</text></view></view>
+  </view>
+
+  <view wx:elif="{{!loading}}" class="empty"><image src="/subPackage-charts/images/purchase/keaibaicai.png" mode="aspectFit"></image><text>本期暂无供货商采购数据</text><text class="empty-note">可切换日期后查看</text></view>
+  <view class="bottom"></view>
+</view>

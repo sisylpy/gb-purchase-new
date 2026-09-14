@@ -1,7 +1,6 @@
 {
-  "navigationBarTitleText": "成本/出库分析",
+  "navigationBarTitleText": "配料分析",
   "usingComponents": {
-    "back-navbar": "/components/back-navbar/back-navbar",
-    "ec-canvas": "/ec-canvas/ec-canvas"
+    "back-navbar": "/components/back-navbar/back-navbar"
   }
 }

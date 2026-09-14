@@ -1,0 +1,45 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+<view class="page">
+  <back-navbar title="成本问题定位" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar>
+  <view style="height:{{navBarHeight}}rpx"></view>
+  <view class="date-bar" bindtap="toDatePage">
+    <image src="/images/calender.png"></image><text class="date-name">{{hanzi}}</text>
+    <text>{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text><text class="arrow">›</text>
+  </view>
+  <view wx:if="{{hasData}}">
+    <view class="hero">
+      <view class="hero-top">
+        <image wx:if="{{dish.image}}" src="{{dish.image}}" mode="aspectFill"></image><view wx:else class="dish-placeholder">菜</view>
+        <view class="hero-name"><view><text>{{dish.name}}</text><text>热销菜</text></view><text>先定位问题原料，再决定怎么处理</text></view>
+        <view class="priority" bindtap="toPriorityIngredient"><text>⚠</text><view><text>优先关注</text><text>{{dish.priority}}</text></view></view>
+      </view>
+      <view class="hero-metrics">
+        <view><text>¥{{dish.price}}/份</text><text>菜品单价</text></view><view><text>{{dish.sales}}份</text><text>本期销量</text></view>
+        <view><text>¥{{dish.profit}}</text><text>实际利润</text></view><view><text>{{dish.margin}}%</text><text>综合毛利率</text></view>
+      </view>
+    </view>
+    <view class="panel">
+      <view class="panel-head"><text>原料成本影响排行</text><text>按成本影响从高到低排序 ›</text></view>
+      <view class="ingredient" wx:for="{{ingredients}}" wx:key="goodsId" data-index="{{index}}" bindtap="toIngredient">
+        <view class="rank">{{item.rank}}</view>
+        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><view wx:else class="goods-placeholder">料</view>
+        <view class="ingredient-main">
+          <view class="ingredient-title"><text>{{item.goodsName}}</text><text class="{{item.issue?'warn':'ok'}}">{{item.issue?'⚠ ': '✓ '}}{{item.status}}</text><text class="go">›</text></view>
+          <text class="reason">{{item.issue?'出库分摊与配方理论存在差异，建议进一步排查':'用量在合理范围内'}}</text>
+          <view class="numbers">
+            <view><text>配方理论用量</text><text>{{item.theoryDisplay}} {{item.unit}}</text></view><view><text>制作出库分摊量</text><text>{{item.actualDisplay}} {{item.unit}}</text></view>
+            <view><text>差异</text><text class="red">{{item.difference}} {{item.unit}}</text></view><view><text>分摊成本</text><text>¥{{item.allocatedCost}}</text></view>
+          </view>
+          <view class="bars">
+            <text>理论用量</text><view><view class="bar-fill" style="width:{{item.theoryWidth}}%"></view></view><text>{{item.theoryDisplay}}{{item.unit}}</text>
+            <text>出库分摊</text><view><view class="bar-fill actual {{item.issue?'bad':''}}" style="width:{{item.actualWidth}}%"></view></view><text>{{item.actualDisplay}}{{item.unit}}</text>
+          </view>
+          <view class="rate {{item.issue?'rate-warn':'rate-ok'}}">{{item.issue?'↗ 超出 '+item.diffRate+'%':'✓ 基本一致'}}</view>
+        </view>
+      </view>
+      <view class="explain">ⓘ　出库分摊是根据领料、出库和菜品销量进行的成本分摊，不等于实际称重消耗，请结合经营情况进一步分析。</view>
+    </view>
+    <view class="primary-btn" bindtap="toPriorityIngredient">▤　查看{{dish.priority}}详情　›</view>
+  </view>
+  <view wx:elif="{{!loading}}" class="empty">暂无成本定位数据</view><view class="bottom"></view>
+</view>

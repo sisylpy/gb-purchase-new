@@ -3,11 +3,25 @@
     "miniprogram": {
       "list": [
         {
+          "name": "subPackage-mendian/pages/supplier/index/index",
+          "pathName": "subPackage-mendian/pages/supplier/index/index",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
+          "name": "subPackage-group/pages/food/depFoodList/depFoodList",
+          "pathName": "subPackage-group/pages/food/depFoodList/depFoodList",
+          "query": "categoryId=3&categoryName=%25E7%2582%2592%25E8%258F%259C&distributerId=2&scopeMode=GROUP",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "pages/supportTempGoods/supportTempGoods",
           "pathName": "pages/supportTempGoods/supportTempGoods",
           "query": "taskId=2",
-          "scene": null,
-          "launchMode": "default"
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "pages/index/index",
@@ -75,6 +89,6 @@
     "ignoreDevUnusedFiles": true,
     "bigPackageSizeSupport": false
   },
-  "libVersion": "3.17.1",
+  "libVersion": "3.13.2",
   "projectname": "jczb-restraunt"
 }

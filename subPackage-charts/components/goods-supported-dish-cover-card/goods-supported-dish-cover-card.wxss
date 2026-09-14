@@ -239,3 +239,89 @@
   color: #aaa;
   line-height: 1.6;
 }
+
+/* ===== 综合预测不完整 / 状态缺口 ===== */
+.gsdc-cover-badge--gap .gsdc-cover-num {
+  color: #e8632d;
+  font-size: 30rpx;
+}
+
+.gsdc-overview {
+  background: #f0f7ee;
+  border-radius: 10rpx;
+  padding: 12rpx 18rpx;
+  margin-bottom: 16rpx;
+}
+
+.gsdc-overview-text {
+  font-size: 26rpx;
+  color: #2f7d32;
+  font-weight: 500;
+}
+
+.gsdc-gap {
+  background: #fdf3ec;
+  border-radius: 10rpx;
+  padding: 14rpx 18rpx;
+  margin-bottom: 12rpx;
+}
+
+.gsdc-gap-title {
+  display: block;
+  font-size: 24rpx;
+  color: #a05a1d;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.gsdc-gap-item {
+  display: block;
+  font-size: 22rpx;
+  color: #a05a1d;
+  line-height: 1.5;
+  margin-top: 4rpx;
+}
+
+/* ===== 表格列：单份用量 / 日均销量 / 原料日消耗 / 占比 ===== */
+.gsdc-th--usage { width: 130rpx; flex-shrink: 0; text-align: center; }
+.gsdc-th--share { width: 92rpx; flex-shrink: 0; text-align: center; padding-right: 4rpx; }
+
+.gsdc-td--usage { width: 130rpx; flex-shrink: 0; justify-content: center; }
+.gsdc-td--share { width: 92rpx; flex-shrink: 0; justify-content: center; padding-right: 4rpx; }
+
+.gsdc-usage-val {
+  font-size: 24rpx;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.gsdc-share-val {
+  font-size: 22rpx;
+  color: #999;
+  line-height: 1.3;
+}
+
+/* ===== 被排除 / 不可计算 / 真实零销量的行 ===== */
+.gsdc-tr--excluded .gsdc-dish-name {
+  color: #aaa;
+}
+
+.gsdc-tr--excluded .gsdc-recipe-val,
+.gsdc-tr--excluded .gsdc-daily-val,
+.gsdc-tr--excluded .gsdc-usage-val,
+.gsdc-tr--excluded .gsdc-share-val {
+  color: #bbb;
+}
+
+.gsdc-row-note {
+  display: block;
+  font-size: 20rpx;
+  color: #c08552;
+  line-height: 1.5;
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}

@@ -2,7 +2,7 @@
 
 
 <view class="food-menu-page flex flex-column">
-  <back-navbar title="菜单" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="菜单管理" avatar="/images/back.png" style="height: {{navBarHeight}}rpx;" bindnavbuttontap="toBack"></back-navbar>
 
 
 
