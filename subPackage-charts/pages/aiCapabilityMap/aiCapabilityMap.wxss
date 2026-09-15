@@ -62,6 +62,12 @@
   color: #7a847f;
   line-height: 1.5;
 }
+.capmap-cap-basis {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #9a6c35;
+}
 .capmap-question {
   display: flex;
   align-items: center;

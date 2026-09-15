@@ -13,6 +13,7 @@
         <view class="capmap-cap" wx:for="{{group.capabilities}}" wx:for-item="cap" wx:key="displayName">
           <text class="capmap-cap-name">{{cap.displayName}}</text>
           <text class="capmap-cap-desc" wx:if="{{cap.description}}">{{cap.description}}</text>
+          <text class="capmap-cap-basis" wx:if="{{cap.queryBasisLabel}}">判断基准：{{cap.queryBasisLabel}} · {{cap.queryBasisSource}} · {{cap.queryBasisUnit}}</text>
           <view class="capmap-question" wx:for="{{cap.exampleQuestions}}" wx:for-item="q" wx:key="text" catchtap="onQuestionTap" data-text="{{q.text}}" data-contract-id="{{q.contractId}}">
             <text class="capmap-question-text">{{q.text}}</text>
             <text class="capmap-question-arrow">›</text>

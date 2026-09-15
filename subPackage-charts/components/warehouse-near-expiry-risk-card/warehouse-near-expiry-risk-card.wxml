@@ -5,6 +5,7 @@
     <text class="wner-title">{{title}}</text>
     <text class="wner-subtitle">{{subtitle}}</text>
   </view>
+  <view class="wner-basis"><text>判断基准：{{queryBasisLabel}}</text><text>来源：{{queryBasisSource}}</text></view>
 
   <!-- 摘要 -->
   <view class="wner-summary" wx:if="{{narrative}}">
@@ -13,7 +14,7 @@
 
   <!-- 空数据 -->
   <view class="wner-empty" wx:if="{{totalCount === 0}}">
-    <text class="wner-empty-text">暂无{{isStorageReminder ? storageDaysLabel : '临期/过期'}}记录</text>
+    <text class="wner-empty-text">暂无最佳库存时间风险记录</text>
   </view>
 
   <!-- 紧凑列表 -->
@@ -27,6 +28,9 @@
       <view class="wner-row-right">
         <text class="wner-row-batch">批次#{{item.batchId}}</text>
         <text class="wner-row-stock">{{item.restWeight}}{{item.weightUnit}}</text>
+        <text class="wner-row-date" wx:if="{{item.storageDays !== ''}}">标准{{item.storageDays}}天</text>
+        <text class="wner-row-date" wx:if="{{item.batchAgeDays != null}}">已入库{{item.batchAgeDays}}天</text>
+        <text class="wner-row-date" wx:if="{{item.daysUntilExpiry !== '-'}}">距标准{{item.daysUntilExpiry}}天</text>
         <text class="wner-row-date {{item.isExpired ? 'wner-date--expired' : item.isDueToday ? 'wner-date--today' : ''}}">{{item.displayDate}}</text>
         <text class="wner-risk-tag {{item.riskTierCls}}">{{item.riskTierLabel}}</text>
       </view>
@@ -37,9 +41,9 @@
   <view class="wner-footer" wx:if="{{totalCount > 0}}">
     <view class="wner-footer-left">
       <text class="wner-footer-text">共 {{totalCount}} 个风险批次</text>
-      <text class="wner-footer-tag wner-footer-tag--expired" wx:if="{{expiredCount > 0}}">{{expiredCount}} 过期</text>
+      <text class="wner-footer-tag wner-footer-tag--expired" wx:if="{{expiredCount > 0}}">{{expiredCount}} 已超过</text>
       <text class="wner-footer-tag wner-footer-tag--today" wx:if="{{dueTodayCount > 0}}">{{dueTodayCount}} 今日</text>
-      <text class="wner-footer-tag wner-footer-tag--near" wx:if="{{nearExpiryCount > 0}}">{{nearExpiryCount}} 临期</text>
+      <text class="wner-footer-tag wner-footer-tag--near" wx:if="{{nearExpiryCount > 0}}">{{nearExpiryCount}} 接近</text>
     </view>
     <view class="wner-footer-right" wx:if="{{hasMore}}" catchtap="onToggleExpand">
       <text class="wner-expand-text">{{showAll ? '收起' : '查看全部'}}</text>

@@ -119,6 +119,11 @@
       cardData="{{_resolvedCardData}}"
       readonly="{{readonly}}"
     />
+    <warehouse-freshness-management-card
+      wx:elif="{{cardType === 'WAREHOUSE_FRESHNESS_MANAGEMENT_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
     <purchase-goods-business-analysis-card
       wx:elif="{{cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD'}}"
       cardData="{{_resolvedCardData}}"

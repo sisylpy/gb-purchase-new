@@ -283,7 +283,7 @@ function resolveDisplayCard(card) {
   }
 
   if (card.cardType === 'WAREHOUSE_NEAR_EXPIRY_RISK_CARD') {
-    var title8 = card.title || '库存临期/过期风险';
+    var title8 = card.title || '最佳库存时间风险';
     var subtitle8 = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
     return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title8, subtitle: subtitle8 }) };
   }
@@ -295,9 +295,15 @@ function resolveDisplayCard(card) {
   }
 
   if (card.cardType === 'WAREHOUSE_WASTE_RISK_CARD') {
-    var titleWaste = card.title || '鲜品废弃风险';
+    var titleWaste = card.title || '保鲜废弃到期风险';
     var subtitleWaste = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
     return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: titleWaste, subtitle: subtitleWaste }) };
+  }
+
+  if (card.cardType === 'WAREHOUSE_FRESHNESS_MANAGEMENT_CARD') {
+    var titleFreshness = card.title || '商品保鲜管理';
+    var subtitleFreshness = card.subtitle || (payload ? (payload.stockSnapshotLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: titleFreshness, subtitle: subtitleFreshness }) };
   }
 
   if (card.cardType === 'PURCHASE_ANOMALY_CARD') {
