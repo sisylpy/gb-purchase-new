@@ -2,7 +2,6 @@
   <!-- 第一层：业务名称（生产耗用 / 废弃 / 损耗 / 退货 / 出库·核销汇总） -->
   <view class="srs-head">
     <text class="srs-name">{{cardData.businessName || '出库/核销'}}</text>
-    <text class="srs-entity" wx:if="{{cardData.metricLabel && cardData.metricLabel !== cardData.businessName}}">{{cardData.metricLabel}}</text>
   </view>
 
   <!-- 第二层：金额（最醒目）；不可用则展示原因 -->

@@ -24,11 +24,6 @@
   color: #111827;
 }
 
-.srs-entity {
-  font-size: 22rpx;
-  color: #6b7280;
-}
-
 /* 第二层：金额（最醒目） */
 .srs-amount {
   font-size: 48rpx;
