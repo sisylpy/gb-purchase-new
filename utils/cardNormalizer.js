@@ -57,6 +57,16 @@ function resolveDisplayCard(card) {
     return { cardType: card.cardType, cardData: payload };
   }
 
+  if (card.cardType === 'DISH_BUSINESS_OVERVIEW_CARD') {
+    return {
+      cardType: card.cardType,
+      cardData: Object.assign({}, payload || {}, {
+        title: card.title || '单菜经营概览',
+        subtitle: card.subtitle || (payload && payload.timeLabel) || '',
+      }),
+    };
+  }
+
   if (card.cardType === 'MENU_HIGH_SALES_LOW_MARGIN_CARD') {
     var isEmpty = payload && payload.status === 'EMPTY';
     return {

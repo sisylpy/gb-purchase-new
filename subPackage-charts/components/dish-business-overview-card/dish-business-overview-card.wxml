@@ -1,0 +1,34 @@
+<view class="dbo-card" wx:if="{{cardData}}">
+  <view class="dbo-head">
+    <text class="dbo-title">{{view.dishName}}</text>
+    <text class="dbo-status dbo-status--partial" wx:if="{{view.availability === 'PARTIAL'}}">数据不完整</text>
+    <text class="dbo-status dbo-status--off" wx:elif="{{view.availability === 'UNAVAILABLE'}}">暂不可用</text>
+  </view>
+  <view class="dbo-tags" wx:if="{{view.timeLabel || view.scopeLabel}}">
+    <text class="dbo-tag" wx:if="{{view.timeLabel}}">{{view.timeLabel}}</text>
+    <text class="dbo-tag" wx:if="{{view.scopeLabel}}">{{view.scopeLabel}}</text>
+  </view>
+
+  <view class="dbo-section">
+    <text class="dbo-section-title">销售表现</text>
+    <view class="dbo-grid">
+      <view class="dbo-cell"><text class="dbo-label">销量</text><text class="dbo-value">{{view.salesPortions}}</text></view>
+      <view class="dbo-cell"><text class="dbo-label">日均销量</text><text class="dbo-value">{{view.dailyAverageSales}}</text></view>
+      <view class="dbo-cell"><text class="dbo-label">销售额</text><text class="dbo-value">{{view.salesAmount}}</text></view>
+      <view class="dbo-cell"><text class="dbo-label">销售单价</text><text class="dbo-value">{{view.salesUnitPrice}}</text></view>
+      <view class="dbo-cell" wx:if="{{view.rankingAvailable}}"><text class="dbo-label">销量排名</text><text class="dbo-value">第{{view.ranking}}名</text></view>
+    </view>
+  </view>
+
+  <view class="dbo-section">
+    <text class="dbo-section-title">盈利表现</text>
+    <view class="dbo-grid">
+      <view class="dbo-cell"><text class="dbo-label">理论成本</text><text class="dbo-value">{{view.theoreticalCost}}</text></view>
+      <view class="dbo-cell"><text class="dbo-label">实际成本</text><text class="dbo-value">{{view.actualCost}}</text></view>
+      <view class="dbo-cell"><text class="dbo-label">毛利额</text><text class="dbo-value">{{view.grossProfitAmount}}</text></view>
+      <view class="dbo-cell"><text class="dbo-label">毛利率</text><text class="dbo-value">{{view.grossMargin}}</text></view>
+    </view>
+  </view>
+
+  <view class="dbo-note" wx:if="{{view.incomplete}}">部分经营事实缺失，当前仅展示已确认数据。</view>
+</view>

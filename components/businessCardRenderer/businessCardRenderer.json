@@ -4,6 +4,7 @@
     "menu-portfolio-quadrant-card": "/subPackage-charts/components/menu-portfolio-quadrant-card/menu-portfolio-quadrant-card",
     "dish-cost-analysis-card": "/subPackage-charts/components/dish-cost-analysis-card/dish-cost-analysis-card",
     "dish-sales-single-dish-card": "/subPackage-charts/components/dish-sales-single-dish-card/dish-sales-single-dish-card",
+    "dish-business-overview-card": "/subPackage-charts/components/dish-business-overview-card/dish-business-overview-card",
     "menu-high-sales-low-margin-card": "/subPackage-charts/components/menu-high-sales-low-margin-card/menu-high-sales-low-margin-card",
     "menu-action-recommendation-card": "/subPackage-charts/components/menu-action-recommendation-card/menu-action-recommendation-card",
     "dish-profit-prescription-card": "/subPackage-charts/components/dish-profit-prescription-card/dish-profit-prescription-card",

@@ -1,0 +1,15 @@
+.dbo-card { margin-top: 16rpx; padding: 24rpx 20rpx; border: 1rpx solid #e5e7eb; border-radius: 16rpx; background: #fff; box-shadow: 0 2rpx 12rpx rgba(0,0,0,.04); }
+.dbo-head { display: flex; align-items: center; justify-content: space-between; }
+.dbo-title { color: #111827; font-size: 34rpx; font-weight: 700; }
+.dbo-status { padding: 4rpx 10rpx; border-radius: 8rpx; font-size: 20rpx; }
+.dbo-status--partial { color: #92400e; background: #fef3c7; }
+.dbo-status--off { color: #991b1b; background: #fee2e2; }
+.dbo-tags { display: flex; gap: 10rpx; margin-top: 10rpx; }
+.dbo-tag { padding: 3rpx 10rpx; border-radius: 6rpx; color: #6b7280; background: #f3f4f6; font-size: 20rpx; }
+.dbo-section { margin-top: 20rpx; }
+.dbo-section-title { color: #374151; font-size: 24rpx; font-weight: 600; }
+.dbo-grid { display: flex; flex-wrap: wrap; margin-top: 10rpx; border-radius: 12rpx; background: #f9fafb; }
+.dbo-cell { box-sizing: border-box; width: 50%; padding: 16rpx; display: flex; flex-direction: column; }
+.dbo-label { color: #6b7280; font-size: 22rpx; }
+.dbo-value { margin-top: 5rpx; color: #111827; font-size: 28rpx; font-weight: 650; }
+.dbo-note { margin-top: 18rpx; padding: 12rpx; border-radius: 8rpx; color: #92400e; background: #fffbeb; font-size: 22rpx; }

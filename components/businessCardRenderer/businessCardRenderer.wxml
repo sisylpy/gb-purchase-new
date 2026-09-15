@@ -15,6 +15,11 @@
       cardData="{{_resolvedCardData}}"
       readonly="{{readonly}}"
     />
+    <dish-business-overview-card
+      wx:elif="{{cardType === 'DISH_BUSINESS_OVERVIEW_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
     <menu-high-sales-low-margin-card
       wx:elif="{{cardType === 'MENU_HIGH_SALES_LOW_MARGIN_CARD'}}"
       cardData="{{_resolvedCardData}}"
