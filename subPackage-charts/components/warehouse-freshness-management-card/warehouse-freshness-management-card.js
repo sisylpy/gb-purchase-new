@@ -2,15 +2,16 @@ Component({
   properties: {
     cardData: { type: Object, value: null, observer: '_render' }
   },
-  data: { visible: false, title: '', subtitle: '', basisLabel: '', basisSource: '', availabilityMessage: '', rows: [] },
+  data: { visible: false, title: '', subtitle: '', basisLabel: '', basisSource: '', availabilityMessage: '', emptyMessage: '', rows: [] },
   methods: {
     _render: function (data) {
       if (!data) { this.setData({ visible: false }); return; }
       var payload = data.payload || data;
       var rows = Array.isArray(payload.rows) ? payload.rows.map(function (r) {
         return Object.assign({}, r, {
+          rowKey: r.batchId != null ? 'batch-' + r.batchId : 'goods-' + r.goodsId,
           remainingText: r.remainingText || '未知',
-          stateText: r.priorityLabel || r.standardStatusLabel || r.standardsCompleteLabel || '状态未知'
+          stateText: r.stateText || r.priorityLabel || r.standardStatusLabel || r.standardsCompleteLabel || r.freshnessManagedLabel || '状态未知'
         });
       }) : [];
       this.setData({
@@ -20,6 +21,7 @@ Component({
         basisLabel: payload.queryBasisLabel || '',
         basisSource: payload.queryBasisSource || '',
         availabilityMessage: payload.availabilityMessage || '',
+        emptyMessage: payload.emptyMessage || '暂无可确认结果；标准缺失表示未知，不表示安全',
         rows: rows
       });
     }
