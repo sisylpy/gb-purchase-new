@@ -151,6 +151,7 @@
         "pages/pinList/pinList",
         "pages/pinDetail/pinDetail",
         "pages/workRecord/workRecord",
+        "pages/workRecordConfirm/workRecordConfirm",
         "pages/workNoteList/workNoteList",
         "pages/storeAnnouncement/storeAnnouncement",
         "pages/statistic/index/index",

@@ -1529,7 +1529,7 @@ Page({
     var existingRecord = pending.existingRecord;
 
     that._recordingCard = true;
-    wx.showLoading({ title: '保存中…', mask: false });
+    wx.showLoading({ title: 'AI整理中…', mask: false });
 
     console.log('@@[WORK_RECORD_DEBUG] createWorkRecordFromBusinessCard 请求', JSON.stringify({
       url: 'POST /ai/work-records/from-business-card',
@@ -1563,6 +1563,17 @@ Page({
           data = data.data;
         }
         var recordId = data.recordId || data.id || null;
+        if (data.confirmationStatus === 'PENDING_CONFIRMATION') {
+          if (data.aiStatus !== 'SUCCESS') {
+            wx.showToast({ title: data.aiErrorCode || 'AI整理失败，请重试', icon: 'none' });
+            return;
+          }
+          that.onCloseWorkRecordDialog();
+          wx.navigateTo({
+            url: '../workRecordConfirm/workRecordConfirm?recordId=' + recordId,
+          });
+          return;
+        }
         var isDuplicate = !!(data.duplicated)
           || (existingRecord && existingRecord.recordId && recordId && String(existingRecord.recordId) === String(recordId));
 

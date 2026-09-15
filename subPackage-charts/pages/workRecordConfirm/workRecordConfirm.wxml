@@ -1,0 +1,35 @@
+<view class="confirm-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="确认工作记录" avatar="/images/back-gray.png" button-text="取消" bindnavbuttontap="toBack"></back-navbar>
+
+  <scroll-view scroll-y class="confirm-scroll">
+    <view class="confirm-intro">
+      <text class="confirm-intro-title">AI 已完成整理</text>
+      <text class="confirm-intro-sub">请检查标题、正文和标签，确认后才会正式写入工作记录。</text>
+    </view>
+
+    <view class="confirm-loading" wx:if="{{loading}}">正在读取整理结果…</view>
+    <block wx:else>
+      <view class="confirm-card">
+        <text class="field-label">标题</text>
+        <input class="title-input" value="{{title}}" maxlength="100" bindinput="onTitleInput" />
+
+        <text class="field-label field-label--spaced">标签</text>
+        <view class="tag-grid">
+          <view class="tag-option {{item.selected ? 'tag-option--selected' : ''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" bindtap="onToggleTag">
+            <text>{{item.name}}</text>
+            <text class="tag-check" wx:if="{{item.selected}}">✓</text>
+          </view>
+        </view>
+
+        <text class="field-label field-label--spaced">记录内容</text>
+        <textarea class="content-input" value="{{content}}" maxlength="3000" auto-height show-confirm-bar="{{false}}" bindinput="onContentInput"></textarea>
+      </view>
+      <view class="trace-note">原始输入已由系统保留用于追溯，不会替代上方正式记录正文。</view>
+      <view class="bottom-spacer"></view>
+    </block>
+  </scroll-view>
+
+  <view class="confirm-footer" wx:if="{{!loading}}">
+    <button class="confirm-button" loading="{{saving}}" disabled="{{saving}}" bindtap="onConfirm">确认保存</button>
+  </view>
+</view>

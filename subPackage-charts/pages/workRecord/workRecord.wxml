@@ -4,7 +4,7 @@
   <back-navbar style="height: {{navBarHeight}}rpx;" title="我的工作记录" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
   <!-- 分类筛选栏 -->
-  <scroll-view class="wr-category-bar " scroll-x="{{true}}" show-scrollbar="{{false}}" wx:if="{{categoryList.length > 0}}">
+  <view class="wr-category-bar" wx:if="{{categoryList.length > 0}}">
     <view class="wr-category-list">
       <view
         class="wr-category-filter {{activeCategoryId === item.id ? 'wr-category-filter--active' : ''}}"
@@ -18,7 +18,7 @@
         <text class="wr-category-filter-name">{{item.name}}</text>
       </view>
     </view>
-  </scroll-view>
+  </view>
 
   <!-- 主内容区 -->
   <scroll-view
@@ -55,9 +55,11 @@
                 <!-- 列表抬头：displayTitle 优先，否则沿用分类标签 -->
                 <view class="wr-card-header">
                   <text class="wr-card-title" wx:if="{{record.title}}">{{record.displayTitle || record.title}}</text>
-                  <view class="wr-category-tag" style="background: {{record.categoryBg || '#e8f5e9'}}; color: {{record.categoryColor || '#2e7d32'}};">
-                    <text class="wr-category-icon">{{record.categoryIcon || '•'}}</text>
-                    <text class="wr-category-name">{{record.categoryName || '未分类'}}</text>
+                  <view class="wr-record-tags">
+                    <view class="wr-category-tag" wx:for="{{record.tags}}" wx:for-item="tag" wx:key="id" style="background: {{tag.bg}}; color: {{tag.color}};">
+                      <text class="wr-category-icon" wx:if="{{tag.icon}}">{{tag.icon}}</text>
+                      <text class="wr-category-name">{{tag.name}}</text>
+                    </view>
                   </view>
                 </view>
 

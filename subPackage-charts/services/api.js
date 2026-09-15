@@ -170,6 +170,14 @@ var createWorkRecord = function (payload) {
   return request.post('ai/work-records', payload);
 };
 
+var getWorkRecord = function (recordId, params) {
+  return request.get('ai/work-records/' + recordId, params, { showErrorToast: false });
+};
+
+var confirmWorkRecord = function (recordId, payload) {
+  return request.post('ai/work-records/' + recordId + '/confirm', payload);
+};
+
 var getWorkRecordCategories = function (params) {
   return request.get('ai/work-records/categories', params, { showErrorToast: false });
 };
@@ -268,6 +276,8 @@ module.exports = {
   getWorkRecordConversation: getWorkRecordConversation,
   listWorkRecords: listWorkRecords,
   createWorkRecord: createWorkRecord,
+  getWorkRecord: getWorkRecord,
+  confirmWorkRecord: confirmWorkRecord,
   getWorkRecordCategories: getWorkRecordCategories,
   retryAiWorkRecord: retryAiWorkRecord,
   getWorkRecordSourceCard: getWorkRecordSourceCard,

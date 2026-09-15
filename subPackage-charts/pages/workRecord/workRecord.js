@@ -98,7 +98,7 @@ Page({
   },
 
   onShow: function () {
-    // 可根据需要刷新数据
+    if (this._loadedOnce) this._fetchRecords(false);
   },
 
   // ========== 初始化加载 ==========
@@ -117,6 +117,7 @@ Page({
       })
       .then(function () {
         that.setData({ loading: false });
+        that._loadedOnce = true;
       })
       .catch(function (err) {
         console.error('[工作记录] 初始化加载失败', err);
@@ -300,7 +301,20 @@ Page({
       '';
     var status = raw.aiStatus || raw.status || raw.gbWorkRecordStatus || 'SUCCESS';
 
-    // 分类ID（后端直接返回）
+    var rawTags = Array.isArray(raw.tags) ? raw.tags : [];
+    var tags = rawTags.map(function (tag) {
+      var tagId = tag.categoryId || tag.id;
+      var style = categoryMap[tagId] || {};
+      return {
+        id: tagId,
+        name: tag.categoryName || tag.name || style.name || '未分类',
+        icon: style.icon || '',
+        bg: style.bg || '#eef5f1',
+        color: style.color || '#35745c',
+      };
+    });
+
+    // 旧单分类字段继续作为没有关系数据时的兼容回退
     var categoryId = raw.categoryId || raw.gbWorkRecordCategoryId || null;
 
     // 后端直接返回的分类名称（优先使用，最权威）
@@ -352,6 +366,15 @@ Page({
     if (categoryId !== null && categoryId !== undefined && !categoryName) {
       categoryName = '未分类';
     }
+    if (!tags.length && categoryId !== null && categoryId !== undefined) {
+      tags.push({
+        id: categoryId,
+        name: categoryName || '未分类',
+        icon: category.icon || '',
+        bg: category.bg || '#eef5f1',
+        color: category.color || '#35745c',
+      });
+    }
 
     var displayTitle = raw.displayTitle || title || categoryName || '';
 
@@ -376,6 +399,7 @@ Page({
       categoryIcon: category.icon || '',
       categoryBg: category.bg || '#f0f0f0',
       categoryColor: category.color || '#999999',
+      tags: tags,
       createdAt: createdAt,
       date: timeObj.date,
       timeStr: timeObj.timeStr,
@@ -588,7 +612,7 @@ Page({
       content: content,
     };
 
-    wx.showLoading({ title: '提交中', mask: true });
+    wx.showLoading({ title: 'AI整理中', mask: true });
 
     api
       .createWorkRecord(payload)
@@ -605,34 +629,21 @@ Page({
           that.setData({ conversationId: newConversationId });
         }
 
-        // 清空输入框，恢复提交状态
+        if (!data.recordId || data.aiStatus !== 'SUCCESS') {
+          throw new Error(data.aiErrorCode || 'AI整理失败');
+        }
+
+        // AI 只生成待确认结果；进入独立确认页后才正式保存
         that.setData({ inputValue: '', canSubmit: false, submitting: false });
-
-        // 关键修复：使用后端返回的完整 data 对象，仅以用户输入作为 rawContent 回退
-        var backendRecord = Object.assign({}, data, {
-          rawContent: data.rawContent || data.content || content,
+        wx.navigateTo({
+          url: '../workRecordConfirm/workRecordConfirm?recordId=' + data.recordId,
         });
-        var newRecord = that._normalizeRecord(backendRecord);
-
-        // 追加到列表（无临时占位记录，不会重复）
-        var allRecords = that.data.rawRecordList.concat([newRecord]);
-        var grouped = that._groupByDate(allRecords);
-
-        that.setData({
-          rawRecordList: allRecords,
-          groupedRecords: grouped,
-        });
-
-        // 新记录排在最前，滚动到顶部
-        that._scrollToRecord(newRecord.id);
-
-        wx.showToast({ title: '记录成功', icon: 'success', duration: 1200 });
       })
       .catch(function (err) {
         wx.hideLoading();
         that.setData({ submitting: false });
         console.error('[工作记录] 提交失败', err);
-        wx.showToast({ title: '提交失败，请重试', icon: 'none' });
+        wx.showToast({ title: 'AI整理失败，请重试', icon: 'none' });
       });
   },
 
@@ -653,6 +664,12 @@ Page({
         // 尝试用后端返回的数据原地更新当前记录
         var result = res.result || {};
         var data = result.data || result;
+        if (data.confirmationStatus === 'PENDING_CONFIRMATION' && data.aiStatus === 'SUCCESS') {
+          wx.navigateTo({
+            url: '../workRecordConfirm/workRecordConfirm?recordId=' + data.recordId,
+          });
+          return;
+        }
         var rawRecordList = that.data.rawRecordList;
         var found = false;
 

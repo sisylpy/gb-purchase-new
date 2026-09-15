@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "确认工作记录",
+  "usingComponents": {
+    "back-navbar": "/components/back-navbar/back-navbar"
+  }
+}
