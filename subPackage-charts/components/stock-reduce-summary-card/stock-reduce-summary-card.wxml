@@ -1,0 +1,35 @@
+<view class="srs-card" wx:if="{{cardData}}">
+  <!-- 第一层：业务名称（生产耗用 / 废弃 / 损耗 / 退货 / 出库·核销汇总） -->
+  <view class="srs-head">
+    <text class="srs-name">{{cardData.businessName || '出库/核销'}}</text>
+    <text class="srs-entity" wx:if="{{cardData.metricLabel && cardData.metricLabel !== cardData.businessName}}">{{cardData.metricLabel}}</text>
+  </view>
+
+  <!-- 第二层：金额（最醒目）；不可用则展示原因 -->
+  <block wx:if="{{cardData.hasAmount}}">
+    <text class="srs-amount">{{cardData.amountText}}</text>
+  </block>
+  <block wx:elif="{{cardData.availability === 'UNAVAILABLE'}}">
+    <text class="srs-unavailable">{{cardData.reason || '当前数据暂不可用'}}</text>
+  </block>
+  <block wx:else>
+    <text class="srs-amount srs-amount--empty">—</text>
+  </block>
+
+  <!-- 第三层：时间范围 · 门店范围 -->
+  <text class="srs-scope" wx:if="{{cardData.scopeText}}">{{cardData.scopeText}}</text>
+
+  <!-- 补充事实：focusRows / secondaryRows（存在且与头条不重复时展示，不占空白） -->
+  <view class="srs-rows" wx:if="{{cardData.focusRows && cardData.focusRows.length > 0}}">
+    <view class="srs-row" wx:for="{{cardData.focusRows}}" wx:key="reduceType" wx:for-item="row">
+      <text class="srs-row-label">{{row.label}}</text>
+      <text class="srs-row-amount">{{row.amountText}}</text>
+    </view>
+  </view>
+  <view class="srs-rows" wx:elif="{{cardData.secondaryRows && cardData.secondaryRows.length > 0}}">
+    <view class="srs-row" wx:for="{{cardData.secondaryRows}}" wx:key="reduceType" wx:for-item="row">
+      <text class="srs-row-label">{{row.label}}</text>
+      <text class="srs-row-amount">{{row.amountText}}</text>
+    </view>
+  </view>
+</view>

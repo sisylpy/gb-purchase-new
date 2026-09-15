@@ -9,6 +9,7 @@
 
 var workRecordCardTypes = require('./workRecordCardTypes');
 var businessRankingCardUtil = require('./businessRankingCardUtil');
+var moneyFormatter = require('./moneyFormatter');
 
 /**
  * 解析单个 card：从 card.payload 提取 cardData
@@ -212,6 +213,10 @@ function resolveDisplayCard(card) {
     };
   }
 
+  if (card.cardType === 'STOCK_REDUCE_SUMMARY_CARD') {
+    return { cardType: card.cardType, cardData: resolveStockReduceSummaryCardData(card) };
+  }
+
   if (card.cardType === 'REORDER_REMINDER_CARD') {
     return { cardType: card.cardType, cardData: payload };
   }
@@ -316,6 +321,13 @@ function resolveDisplayCard(card) {
     return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title11 }) };
   }
 
+  if (card.cardType === 'PURCHASE_SUPPLIER_GOODS_DETAIL_CARD') {
+    return {
+      cardType: card.cardType,
+      cardData: resolvePurchaseSupplierGoodsDetailCardData(card),
+    };
+  }
+
   if (card.cardType === 'GOODS_STOCK_BATCH_DETAIL_CARD') {
     var goodsName3 = payload ? payload.goodsName : '';
     var title12 = goodsName3 ? goodsName3 + ' · 库存批次' : (card.title || '库存批次');
@@ -331,6 +343,161 @@ function resolveDisplayCard(card) {
   }
 
   return { cardType: card.cardType, cardData: payload };
+}
+
+/**
+ * 供货商采购明细卡 ViewModel：单一商品在各供货商口径下的采购明细。
+ * 仅整理字段，组件不自行猜字段；行字段按后端真实结构做兼容回退取值。
+ */
+function resolvePurchaseSupplierGoodsDetailCardData(card) {
+  var payload = card.payload || {};
+  var summary = payload.summary || {};
+  var goodsName = summary.goodsName || '';
+
+  function pick(obj, keys) {
+    if (!obj) return null;
+    for (var i = 0; i < keys.length; i++) {
+      var v = obj[keys[i]];
+      if (v != null && String(v) !== '' && String(v).toLowerCase() !== 'null') return v;
+    }
+    return null;
+  }
+
+  var focusRows = Array.isArray(payload.focusRows) ? payload.focusRows : [];
+  var secondaryRows = Array.isArray(payload.secondaryRows) ? payload.secondaryRows : [];
+
+  var suppliers = [];
+  function mapRow(row, isFocus) {
+    if (!row) return;
+    suppliers.push({
+      key: suppliers.length,
+      supplierName: pick(row, ['supplierName']) || '（未命名供应商）',
+      purchaseAmount: pick(row, ['totalPurchaseAmount', 'purchaseAmount']),
+      quantity: pick(row, ['buyQuantity', 'purchaseQuantity', 'goodsQuantity', 'quantity', 'purchaseWeight']),
+      unitPrice: pick(row, [
+        'unitPrice',
+        'avgUnitPrice',
+        'buyPrice',
+        'avgBuyPrice',
+        'averageBuyPrice',
+        'weightedAvgBuyPrice',
+        'purchaseAvgPrice',
+        'goodsAveragePrice',
+        'gbDgGoodsAveragePrice',
+        'averagePrice',
+      ]),
+      purchaseCount: pick(row, [
+        'orderCount',
+        'recordCount',
+        'purchaseTimes',
+        'purchaseCount',
+        'purchaseLineCount',
+      ]),
+      unit: pick(row, ['unit', 'standardUnit', 'weightUnit']),
+      isFocus: !!isFocus,
+    });
+  }
+  focusRows.forEach(function (r) {
+    mapRow(r, true);
+  });
+  secondaryRows.forEach(function (r) {
+    mapRow(r, false);
+  });
+
+  var status = payload.status || (suppliers.length ? 'OK' : 'EMPTY');
+  var title = goodsName ? goodsName + ' · 供货商采购明细' : (card.title || '供货商采购明细');
+
+  return {
+    cardType: card.cardType,
+    title: title,
+    goodsName: goodsName,
+    timeLabel: payload.timeLabel || '',
+    scopeLabel: payload.scopeLabel || '',
+    status: status,
+    emptyReason: payload.emptyReason || '',
+    suppliers: suppliers,
+  };
+}
+
+/**
+ * 出库/核销汇总卡 ViewModel：后端 payload → 唯一展示模型；组件只消费，不判断业务。
+ * 支持 summaryType：OVERALL / PRODUCTION / WASTE / LOSS / RETURN（一张卡复用）。
+ */
+function resolveStockReduceSummaryCardData(card) {
+  var payload = card.payload || {};
+  var summaryType = payload.summaryType || '';
+  var businessName = summaryTypeLabel(summaryType, payload.metricLabel);
+
+  var availability = payload.availability
+    || (payload.status === 'UNAVAILABLE' ? 'UNAVAILABLE' : 'AVAILABLE');
+  var amount = payload.amount;
+  var amountText = (amount !== undefined && amount !== null && amount !== '')
+    ? moneyFormatter.formatCny(amount)
+    : '';
+  var hasAmount = amountText !== '';
+
+  var timeLabel = payload.timeLabel || '';
+  var scopeLabel = payload.scopeLabel || '';
+  var scopeText = [timeLabel, scopeLabel].filter(Boolean).join(' · ');
+
+  var focusRows = normalizeSummaryRows(payload.focusRows);
+  var secondaryRows = normalizeSummaryRows(payload.secondaryRows);
+  // 单类型卡 focusRows 仅 1 行且等于头条事实，避免与头条重复；OVERALL 为多行拆解才展示。
+  var showFocus = focusRows.length > 1;
+
+  return {
+    cardType: card.cardType,
+    title: businessName,
+    businessName: businessName,
+    summaryType: summaryType,
+    metricLabel: payload.metricLabel || '',
+    amountText: amountText,
+    hasAmount: hasAmount,
+    availability: availability,
+    status: payload.status || (availability === 'UNAVAILABLE' ? 'UNAVAILABLE' : 'OK'),
+    reason: payload.reason || '',
+    timeLabel: timeLabel,
+    scopeLabel: scopeLabel,
+    scopeText: scopeText,
+    focusRows: showFocus ? focusRows : [],
+    secondaryRows: secondaryRows,
+    subtitle: buildSummarySubtitle(businessName, amountText, scopeText, availability, payload.reason),
+  };
+}
+
+function summaryTypeLabel(summaryType, metricLabel) {
+  if (summaryType === 'PRODUCTION') return '生产耗用';
+  if (summaryType === 'OUTPUT') return '出品耗用';
+  if (summaryType === 'WASTE') return '废弃';
+  if (summaryType === 'LOSS') return '损耗';
+  if (summaryType === 'RETURN') return '退货';
+  if (summaryType === 'OVERALL') return '出库/核销汇总';
+  return metricLabel ? String(metricLabel).replace(/金额$/, '') : '出库/核销';
+}
+
+function normalizeSummaryRows(rows) {
+  if (!Array.isArray(rows)) return [];
+  return rows.map(function (row) {
+    if (!row) return null;
+    var amt = row.amount;
+    return {
+      reduceType: row.reduceType || '',
+      label: row.label || '',
+      amountText: (amt !== undefined && amt !== null && amt !== '')
+        ? moneyFormatter.formatCny(amt)
+        : '',
+      metricCode: row.metricCode || '',
+    };
+  }).filter(Boolean);
+}
+
+function buildSummarySubtitle(businessName, amountText, scopeText, availability, reason) {
+  if (availability === 'UNAVAILABLE') {
+    return (businessName ? businessName + '：' : '') + (reason || '当前数据暂不可用')
+      + (scopeText ? '（' + scopeText + '）' : '');
+  }
+  return (businessName ? businessName + '：' : '') + (amountText || '')
+    + (scopeText ? '（' + scopeText + '）' : '');
 }
 
 function normalizeCards(cards) {

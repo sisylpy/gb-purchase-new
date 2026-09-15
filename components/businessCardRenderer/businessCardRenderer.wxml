@@ -50,6 +50,11 @@
       cardData="{{_resolvedCardData}}"
       readonly="{{readonly}}"
     />
+    <stock-reduce-summary-card
+      wx:elif="{{cardType === 'STOCK_REDUCE_SUMMARY_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
     <reorder-reminder-card
       wx:elif="{{cardType === 'REORDER_REMINDER_CARD'}}"
       cardData="{{_resolvedCardData}}"
@@ -125,6 +130,11 @@
     />
     <purchase-goods-anchor-detail-card
       wx:elif="{{cardType === 'PURCHASE_GOODS_ANCHOR_DETAIL_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
+    <purchase-supplier-goods-detail-card
+      wx:elif="{{cardType === 'PURCHASE_SUPPLIER_GOODS_DETAIL_CARD'}}"
       cardData="{{_resolvedCardData}}"
       readonly="{{readonly}}"
     />
