@@ -233,8 +233,11 @@ Page({
         }
 
         feedItems.sort(function (a, b) {
-          return (b._sortTs || 0) - (a._sortTs || 0);
+          var timeDiff = (b._sortTs || 0) - (a._sortTs || 0);
+          if (timeDiff !== 0) return timeDiff;
+          return (b._sortId || 0) - (a._sortId || 0);
         });
+        _decorateDateGroups(feedItems);
 
         if (feedItems.length === 0) {
           that.setData({
@@ -382,6 +385,8 @@ function _mapNoteItem(note, index, categoryByName) {
     _type: 'note',
     _key: 'note-' + (note.announcementId || index),
     _sortTs: sortTs,
+    _sortId: Number(note.announcementId) || 0,
+    _dateKey: _fmtDate(rawTime),
     timeLabel: _fmtTime(rawTime),
     title: title,
     displayTitle: displayTitle,
@@ -429,7 +434,8 @@ function _mapPurchaseFeedItem(card, asOfDate) {
   }
 
   var purchaseDate = asOfDate || payload.purchaseDate || '';
-  var sortTs = _parseTs(purchaseDate + 'T23:59:59');
+  // 采购分析只有业务日期、没有真实发布时间，放在当天公告之后。
+  var sortTs = _parseTs(purchaseDate + 'T00:00:00');
 
   var mappedGoods = goodsRows.map(function (row) {
     var delta = row.unitPriceDelta;
@@ -486,6 +492,8 @@ function _mapPurchaseFeedItem(card, asOfDate) {
     _type: 'purchase',
     _key: 'purchase-' + (purchaseDate || 'today'),
     _sortTs: sortTs,
+    _sortId: 0,
+    _dateKey: _fmtDate(purchaseDate),
     timeLabel: _fmtDate(purchaseDate),
     title: '采购价格影响',
     priceChangedGoodsCount: priceChanged,
@@ -536,15 +544,25 @@ function _buildSummary(feedItems, apiSummary) {
 function _parseTs(dateStr) {
   if (!dateStr) return 0;
   var d;
-  try { d = new Date(dateStr); } catch (e) { return 0; }
+  try { d = _parseDate(dateStr); } catch (e) { return 0; }
   var ts = d.getTime();
   return isNaN(ts) ? 0 : ts;
+}
+
+function _parseDate(dateStr) {
+  if (dateStr instanceof Date) return dateStr;
+  var value = String(dateStr || '').trim();
+  // iOS/部分小程序基础库无法直接解析 yyyy-MM-dd HH:mm:ss。
+  if (/^\d{4}-\d{2}-\d{2}(\s|$)/.test(value)) {
+    value = value.replace(/-/g, '/');
+  }
+  return new Date(value);
 }
 
 function _fmtDate(dateStr) {
   if (!dateStr) return '';
   if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
-  var d = new Date(dateStr);
+  var d = _parseDate(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   var M = d.getMonth() + 1;
   var day = d.getDate();
@@ -553,7 +571,7 @@ function _fmtDate(dateStr) {
 
 function _fmtTime(dateStr) {
   if (!dateStr) return '';
-  var d = new Date(dateStr);
+  var d = _parseDate(dateStr);
   if (isNaN(d.getTime())) return dateStr;
 
   var now = new Date();
@@ -574,6 +592,42 @@ function _fmtTime(dateStr) {
   }
 
   return y + '-' + pad(M) + '-' + pad(day) + ' ' + pad(h) + ':' + pad(m);
+}
+
+function _decorateDateGroups(feedItems) {
+  var previousDate = '';
+  var latestAnnouncementMarked = false;
+  var now = new Date();
+  var todayKey = _fmtDate(now);
+  var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  var yesterdayKey = _fmtDate(yesterday);
+
+  (feedItems || []).forEach(function (item) {
+    var dateKey = item._dateKey || _fmtDate(new Date(item._sortTs || 0));
+    var dateMeta = _dateGroupMeta(dateKey, todayKey, yesterdayKey, now.getFullYear());
+    item._dateKey = dateKey;
+    item._showDateHeader = dateKey !== previousDate;
+    item._dateRelativeLabel = dateMeta.relativeLabel;
+    item._dateCalendarLabel = dateMeta.calendarLabel;
+    item._isLatest = item._type === 'note' && !latestAnnouncementMarked;
+    if (item._isLatest) latestAnnouncementMarked = true;
+    previousDate = dateKey;
+  });
+}
+
+function _dateGroupMeta(dateKey, todayKey, yesterdayKey, currentYear) {
+  if (!dateKey) return { relativeLabel: '', calendarLabel: '日期未知' };
+  var parts = dateKey.split('-');
+  if (parts.length !== 3) return { relativeLabel: '', calendarLabel: dateKey };
+  var year = Number(parts[0]);
+  var month = Number(parts[1]);
+  var day = Number(parts[2]);
+  var calendarLabel = month + '月' + day + '日';
+  if (year !== currentYear) calendarLabel = year + '年' + calendarLabel;
+  return {
+    relativeLabel: dateKey === todayKey ? '今天' : (dateKey === yesterdayKey ? '昨天' : ''),
+    calendarLabel: calendarLabel,
+  };
 }
 
 function _fmtDelta(val) {

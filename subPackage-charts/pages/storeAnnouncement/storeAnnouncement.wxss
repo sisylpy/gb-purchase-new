@@ -100,6 +100,57 @@
 .section {
   margin: 24rpx 20rpx;
 }
+
+.announcement-date-header {
+  display: flex;
+  align-items: center;
+  margin: 30rpx 8rpx 16rpx;
+}
+
+.announcement-date-header:first-child {
+  margin-top: 0;
+}
+
+.announcement-date-relative {
+  margin-right: 16rpx;
+  color: #07523f;
+  font-size: 40rpx;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.announcement-date-calendar {
+  color: #40464d;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.announcement-date-line {
+  flex: 1;
+  height: 1rpx;
+  margin: 0 18rpx;
+  background: #cdd8d3;
+}
+
+.announcement-date-slogan {
+  color: #6e9388;
+  font-size: 20rpx;
+  white-space: nowrap;
+}
+
+.announcement-latest-badge {
+  display: inline-flex;
+  margin-bottom: 18rpx;
+  padding: 7rpx 20rpx;
+  background: #e84655;
+  color: #ffffff;
+  font-size: 25rpx;
+  font-weight: 700;
+  line-height: 1.35;
+  transform: rotate(-5deg);
+}
+
 .section-head {
   display: flex;
   align-items: center;
