@@ -386,6 +386,13 @@
   gap: 12rpx;
 }
 
+.wr-record-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
 .wr-card-title {
   font-size: 30rpx;
   font-weight: 600;

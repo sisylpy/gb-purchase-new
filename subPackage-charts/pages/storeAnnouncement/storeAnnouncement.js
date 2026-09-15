@@ -363,7 +363,25 @@ function _mapNoteItem(note, index, categoryByName) {
     rawGoodsId = sourceItemKey.substring('rawGoodsId:'.length);
   }
   var title = note.title || (isAi ? '智能消息' : '公告');
-  var category = _resolveCategoryMeta(title, categoryByName);
+  // 工作记录标签来自公告发布时保存的真实快照，不能再用标题猜分类。
+  var category = isWorkRecord ? null : _resolveCategoryMeta(title, categoryByName);
+  var workRecordTags = [];
+  if (isWorkRecord && Array.isArray(note.tags)) {
+    workRecordTags = note.tags.map(function (tag) {
+      var tagName = tag.categoryName || tag.name || '';
+      var style = categoryByName[tagName] || DEFAULT_CATEGORY_STYLE;
+      return {
+        id: tag.categoryId || tag.id || tag.categoryCode || tagName,
+        code: tag.categoryCode || tag.code || '',
+        name: tagName,
+        icon: style.icon || DEFAULT_CATEGORY_STYLE.icon,
+        bg: style.bg || DEFAULT_CATEGORY_STYLE.bg,
+        color: style.color || DEFAULT_CATEGORY_STYLE.color,
+      };
+    }).filter(function (tag) {
+      return !!tag.name;
+    });
+  }
   var displayTitle = title;
   var showTitle = true;
 
@@ -372,7 +390,7 @@ function _mapNoteItem(note, index, categoryByName) {
   }
 
   var noteTypeMeta = isWorkNote ? _resolveNoteTypeMeta(note, isAi) : {};
-  var categoryName = category ? category.name : (isWorkRecord ? title : '');
+  var categoryName = category ? category.name : '';
   var categoryBg = category ? category.bg : DEFAULT_CATEGORY_STYLE.bg;
   var categoryColor = category ? category.color : DEFAULT_CATEGORY_STYLE.color;
   var categoryIcon = category ? category.icon : DEFAULT_CATEGORY_STYLE.icon;
@@ -403,6 +421,7 @@ function _mapNoteItem(note, index, categoryByName) {
     categoryColor: categoryColor,
     categoryIcon: categoryIcon,
     categoryCode: category ? category.code : '',
+    tags: workRecordTags,
     noteTypeLabel: noteTypeMeta.noteTypeLabel || '',
     noteTypeBg: noteTypeMeta.noteTypeBg || '',
     noteTypeColor: noteTypeMeta.noteTypeColor || '',

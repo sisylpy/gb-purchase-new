@@ -67,9 +67,11 @@
           <view class="announcement-latest-badge" wx:if="{{item._isLatest}}">最新</view>
           <view class="wr-card-header">
             <text class="wr-card-title" wx:if="{{item._showTitle}}">{{item.displayTitle}}</text>
-            <view class="wr-category-tag" style="background: {{item.categoryBg}}; color: {{item.categoryColor}};">
-              <text class="wr-category-icon" wx:if="{{item.categoryIcon}}">{{item.categoryIcon}}</text>
-              <text class="wr-category-name">{{item.categoryName || '未分类'}}</text>
+            <view class="wr-record-tags" wx:if="{{item.tags.length > 0}}">
+              <view class="wr-category-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="id" style="background: {{tag.bg}}; color: {{tag.color}};">
+                <text class="wr-category-icon" wx:if="{{tag.icon}}">{{tag.icon}}</text>
+                <text class="wr-category-name">{{tag.name}}</text>
+              </view>
             </view>
           </view>
 
