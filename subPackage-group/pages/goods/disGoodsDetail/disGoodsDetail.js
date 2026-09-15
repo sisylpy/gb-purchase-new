@@ -747,7 +747,11 @@ Page({
       return;
     }
     if (this.data.canSave) {
-      var goods = this.data.goods;
+      var goods = Object.assign({}, this.data.goods);
+      delete goods.gbDgQuantityDays;
+      delete goods.gbDgFreshWarnHour;
+      delete goods.gbDgFreshWasteHour;
+      delete goods.gbDgControlFresh;
       goods.gbDgGbDepartmentId = this.data.gbDepId;
       goods.gbDgNxDistributerId = this.data.nxDisId;
       goods.gbDgNxDistributerGoodsId = this.data.nxGoodsId;

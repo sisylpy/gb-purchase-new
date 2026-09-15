@@ -512,7 +512,12 @@ Page({
 
   _updateGoodsPullOff(){
 
-    goodsApi.updateGbGoodsPullOff(this.data.goods).then(res =>{
+    var pullOffGoods = Object.assign({}, this.data.goods);
+    delete pullOffGoods.gbDgQuantityDays;
+    delete pullOffGoods.gbDgFreshWarnHour;
+    delete pullOffGoods.gbDgFreshWasteHour;
+    delete pullOffGoods.gbDgControlFresh;
+    goodsApi.updateGbGoodsPullOff(pullOffGoods).then(res =>{
       if(res.result.code == 0){
         this.setData({
           goods: res.result.data
@@ -586,7 +591,6 @@ Page({
       this.setData({
         showOperation: true,
         showPrice: false,
-        showFresh: false,
         showFranchisePrice: false,
         showIsSelfControl: true,
       })
@@ -610,7 +614,6 @@ Page({
       this.setData({
         showOperation: true,
         showPrice: false,
-        showFresh: false,
         showIsSelfControl: false,
         showFranchisePrice: true,
       })
@@ -651,7 +654,6 @@ Page({
       this.setData({
         showOperation: true,
         showPrice: true,
-        showFresh: false,
         showFranchisePrice: false,
       })
     } else {
@@ -784,7 +786,11 @@ Page({
 
   _updateGoods(e) {
     load.showLoading("修改商品")
-    var goods = this.data.goods;
+    var goods = Object.assign({}, this.data.goods);
+    delete goods.gbDgQuantityDays;
+    delete goods.gbDgFreshWarnHour;
+    delete goods.gbDgFreshWasteHour;
+    delete goods.gbDgControlFresh;
     goodsApi.updateGbGoods(goods)
       .then(res => {
         load.hideLoading();
@@ -794,7 +800,6 @@ Page({
           })
           this.setData({
             showChoice: false,
-            showFresh: false,
             showPrice: false,
             showFranchisePrice: false,
             showOperation: false,

@@ -387,8 +387,6 @@ Page({
       gbDistributerGoodsEntity: entity,
       gbDepartmentGoodsStockEntities: stocks,
       gbDepartmentOrdersEntity: d.gbDepartmentOrdersEntity || null,
-      gbDgControlFresh: d.gbDgControlFresh != null ? d.gbDgControlFresh : 0,
-      gbDgFreshWasteHour: d.gbDgFreshWasteHour,
     };
   },
 

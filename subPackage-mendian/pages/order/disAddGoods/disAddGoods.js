@@ -99,7 +99,6 @@ Page({
         gbDgGoodsStandardname: standard,
         gbDgGoodsStandardWeight: "",
         gbDgCartonUnit: "",
-        gbDgQuantityDays: "",
         gbDgGoodsBrand: "",
         gbDgGoodsPlace: "",
         gbDgGoodsInventoryType: 1,

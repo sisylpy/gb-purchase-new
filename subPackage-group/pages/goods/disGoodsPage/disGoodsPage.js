@@ -613,7 +613,6 @@ Page({
       this.setData({
         showOperation: true,
         showPrice: false,
-        showFresh: false,
         showFranchisePrice: false,
         showIsSelfControl: true,
       })
@@ -638,7 +637,6 @@ Page({
       this.setData({
         showOperation: true,
         showPrice: false,
-        showFresh: false,
         showIsSelfControl: false,
         showFranchisePrice: true,
       })
@@ -680,7 +678,6 @@ Page({
       this.setData({
         showOperation: true,
         showPrice: true,
-        showFresh: false,
         showFranchisePrice: false,
       })
     } else {
@@ -826,7 +823,6 @@ Page({
           });
           this.setData({
             showChoice: false,
-            showFresh: false,
             showPrice: false,
             showFranchisePrice: false,
             showOperation: false,

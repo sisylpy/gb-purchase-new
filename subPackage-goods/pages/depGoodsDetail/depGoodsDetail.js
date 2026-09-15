@@ -12,7 +12,6 @@ Page({
     canSave: true,
     showOperation: false,
     showChoice: false,
-    showFresh: false,
     showAdd: false,
     showAddAlias: false,
     editStandard: false,
@@ -183,7 +182,11 @@ Page({
       wx.showToast({ title: '请检查必填内容', icon: 'none' });
       return;
     }
-    var goods = this.data.goods;
+    var goods = Object.assign({}, this.data.goods);
+    delete goods.gbDgQuantityDays;
+    delete goods.gbDgFreshWarnHour;
+    delete goods.gbDgFreshWasteHour;
+    delete goods.gbDgControlFresh;
     load.showLoading('保存商品');
     goodsApi.disUpdateDisGoodsGb(goods).then(res => {
       if (res.result.code == 0) {
@@ -233,7 +236,12 @@ Page({
   },
 
   _updateGoodsPullOff() {
-    goodsApi.updateGbGoodsPullOff(this.data.goods).then(res => {
+    var goods = Object.assign({}, this.data.goods);
+    delete goods.gbDgQuantityDays;
+    delete goods.gbDgFreshWarnHour;
+    delete goods.gbDgFreshWasteHour;
+    delete goods.gbDgControlFresh;
+    goodsApi.updateGbGoodsPullOff(goods).then(res => {
       if (res.result.code == 0) {
         this.setData({ goods: res.result.data });
       } else {
@@ -266,11 +274,16 @@ Page({
 
   _updateGoods() {
     load.showLoading('修改商品');
-    goodsApi.updateGbGoods(this.data.goods).then(res => {
+    var goods = Object.assign({}, this.data.goods);
+    delete goods.gbDgQuantityDays;
+    delete goods.gbDgFreshWarnHour;
+    delete goods.gbDgFreshWasteHour;
+    delete goods.gbDgControlFresh;
+    goodsApi.updateGbGoods(goods).then(res => {
       load.hideLoading();
       if (res.result.code == 0) {
         wx.showToast({ title: '修改成功' });
-        this.setData({ showOperation: false, showFresh: false, goods: res.result.data });
+        this.setData({ showOperation: false, goods: res.result.data });
         this._getDepGoodsDetail();
       } else {
         wx.showToast({ title: res.result.msg, icon: 'none' });
@@ -453,7 +466,7 @@ Page({
 
   // ========== 弹窗控制 ==========
   hideMask() {
-    this.setData({ showOperation: false, showChoice: false, showFresh: false });
+    this.setData({ showOperation: false, showChoice: false });
   },
 
   cancle() {
