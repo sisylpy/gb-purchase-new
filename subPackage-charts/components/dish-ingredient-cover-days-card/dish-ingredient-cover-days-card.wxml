@@ -6,11 +6,15 @@
     <view class="dicd-header-left">
       <text class="dicd-dish-name">{{dishName}}</text>
       <text class="dicd-subtitle" wx:if="{{subtitle}}">{{subtitle}}</text>
+      <text class="dicd-status-detail" wx:if="{{coverDaysStatusDetail}}">{{coverDaysStatusDetail}}</text>
     </view>
     <view class="dicd-header-right {{dishDanger ? 'dicd-header-right--danger' : ''}}">
-      <text class="dicd-cover-days-label">可支撑</text>
-      <text class="dicd-cover-days-num {{dishDanger ? 'dicd-cover-days-num--danger' : ''}}">{{dishCoverDays}}</text>
-      <text class="dicd-cover-days-unit">天</text>
+      <block wx:if="{{coverDaysUsable}}">
+        <text class="dicd-cover-days-label">可支撑</text>
+        <text class="dicd-cover-days-num {{dishDanger ? 'dicd-cover-days-num--danger' : ''}}">{{dishCoverDays}}</text>
+        <text class="dicd-cover-days-unit">天</text>
+      </block>
+      <text class="dicd-cover-days-unavailable" wx:else>{{coverDaysStatusText}}</text>
     </view>
   </view>
 
@@ -54,13 +58,16 @@
       </view>
       <view class="dicd-td dicd-td--stock">
         <text class="dicd-td-val">{{item.currentStockQty}}</text>
+        <text class="dicd-empty-reason" wx:if="{{item.currentStockQtyEmptyReasonText}}">{{item.currentStockQtyEmptyReasonText}}</text>
       </view>
       <view class="dicd-td dicd-td--daily">
         <text class="dicd-td-val">{{item.dailyExpectedUsageQty}}</text>
+        <text class="dicd-empty-reason" wx:if="{{item.dailyExpectedUsageQtyEmptyReasonText}}">{{item.dailyExpectedUsageQtyEmptyReasonText}}</text>
       </view>
       <view class="dicd-td dicd-td--days">
         <text class="dicd-days-val {{item.isDanger ? 'dicd-days-val--danger' : (item.isWarning ? 'dicd-days-val--warning' : '')}}">{{item.coverDaysStr}}</text>
-        <text class="dicd-days-unit">天</text>
+        <text class="dicd-days-unit" wx:if="{{item.coverDaysUnit}}">{{item.coverDaysUnit}}</text>
+        <text class="dicd-empty-reason" wx:if="{{item.coverDaysEmptyReasonText}}">{{item.coverDaysEmptyReasonText}}</text>
       </view>
     </view>
   </view>

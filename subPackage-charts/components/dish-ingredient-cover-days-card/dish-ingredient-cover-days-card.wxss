@@ -47,6 +47,14 @@
   display: block;
 }
 
+.dicd-status-detail {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #9a6700;
+  line-height: 1.4;
+}
+
 .dicd-header-right {
   flex-shrink: 0;
   display: flex;
@@ -81,6 +89,12 @@
   font-size: 24rpx;
   color: #888;
   margin-left: 4rpx;
+}
+
+.dicd-cover-days-unavailable {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #9a6700;
 }
 
 /* ========== 摘要统计 ========== */
@@ -227,12 +241,14 @@
   width: 120rpx;
   flex-shrink: 0;
   justify-content: center;
+  flex-direction: column;
 }
 
 .dicd-td--days {
   width: 130rpx;
   flex-shrink: 0;
   justify-content: center;
+  flex-direction: column;
 }
 
 /* ---------- 配料名称 ---------- */
@@ -261,6 +277,14 @@
   color: #555;
   font-weight: 400;
   line-height: 1.4;
+}
+
+.dicd-empty-reason {
+  margin-top: 4rpx;
+  font-size: 18rpx;
+  color: #a36a00;
+  line-height: 1.25;
+  text-align: center;
 }
 
 /* ---------- 可支撑天数 ---------- */
