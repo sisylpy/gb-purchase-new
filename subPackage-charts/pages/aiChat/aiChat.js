@@ -58,6 +58,8 @@ Page({
     inputFocus: false,
     inputSelectionStart: -1,
     inputSelectionEnd: -1,
+    /** 仅 Capability Map example 带回；文本一经编辑立即清空。 */
+    capabilityEntryBinding: null,
     scrollToView: '',
     topics: [],
     topicPageTitle: '',
@@ -190,14 +192,19 @@ Page({
   },
 
   /**
-   * 从能力导航页返回时，读取待填入的问题到输入框（不覆盖用户已输入内容，不自动发送）。
+   * 从能力导航页返回时读取 contract-aware entry（不覆盖用户已输入内容，不自动发送）。
    */
   onShow: function () {
-    var pending = wx.getStorageSync('aiCapabilityQuestion');
+    var pending = wx.getStorageSync('aiCapabilityEntry');
     if (pending) {
-      wx.removeStorageSync('aiCapabilityQuestion');
-      if (!this.data.inputValue) {
-        this.setData({ inputValue: pending, inputFocus: true });
+      wx.removeStorageSync('aiCapabilityEntry');
+      if (!this.data.inputValue && pending.text && pending.entryContractId
+          && pending.entrySource === 'CAPABILITY_EXAMPLE') {
+        this.setData({
+          inputValue: pending.text,
+          inputFocus: true,
+          capabilityEntryBinding: pending,
+        });
       }
     }
   },
@@ -541,6 +548,7 @@ Page({
       inputFocus: false,
       inputSelectionStart: -1,
       inputSelectionEnd: -1,
+      capabilityEntryBinding: null,
       isSending: false,
       _sending: false,
     });
@@ -576,6 +584,11 @@ Page({
         : that.data.inputValue.trim();
     // 去除 $ 占位符符号（用户可能未替换完，完整去除所有 $）
     message = message.replace(/\$/g, '');
+    var capabilityEntry = presetText === undefined
+      && that.data.capabilityEntryBinding
+      && message === that.data.capabilityEntryBinding.text
+      ? that.data.capabilityEntryBinding
+      : null;
     if (!message || that.data.isSending || that._sending) {
       if (!message && !that.data.isSending && !that._sending) {
         wx.showToast({ title: '请先输入内容', icon: 'none', duration: 1500 });
@@ -625,6 +638,7 @@ Page({
         inputFocus: false,
         inputSelectionStart: -1,
         inputSelectionEnd: -1,
+        capabilityEntryBinding: null,
         isSending: true,
         messages: messages,
         streamingStages: ['正在连接...'],
@@ -634,6 +648,10 @@ Page({
 
         // 构建 createAiRun payload
         var payload = Object.assign({}, runPayloadBase, { message: message });
+        if (capabilityEntry) {
+          payload.entrySource = capabilityEntry.entrySource;
+          payload.entryContractId = capabilityEntry.entryContractId;
+        }
         if (that.data.conversationId) {
           payload.conversationId = that.data.conversationId;
         }
@@ -1029,8 +1047,11 @@ Page({
   },
 
   onInputChange: function (e) {
+    var nextValue = e.detail.value;
+    var binding = this.data.capabilityEntryBinding;
     this.setData({
-      inputValue: e.detail.value,
+      inputValue: nextValue,
+      capabilityEntryBinding: binding && nextValue === binding.text ? binding : null,
       // 用户手动输入时清除占位符选择状态
       inputSelectionStart: -1,
       inputSelectionEnd: -1,

@@ -876,7 +876,7 @@ var getAdvisorDetail = function (advisorId) {
 /**
  * 获取手机端普通 AI 能力目录（完整可问范围导航）
  * GET /api/ai/capability-map
- * 返回 data[] → 每个含 category / capabilities[]（displayName / description / exampleQuestions[]）
+ * 返回 data[] → capabilities[].exampleQuestions[] 为 { text, contractId }。
  * @returns {Promise}
  */
 var getCapabilityMap = function () {
