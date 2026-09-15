@@ -107,7 +107,7 @@
                 <view style="align-items: center;">
                   <text class="font-bold font-xl">{{goods.gbDgGoodsName}}</text>
                     <block wx:if="{{goods.gbDgControlFresh == 1}}">
-                                <text class="fresh_goods">保鲜{{goods.gbDgFreshWasteHour}}小时</text>
+                                <text class="fresh_goods">保鲜废弃{{goods.gbDgFreshWasteHour}}小时</text>
                               </block>
                   </view>
                   <view class="flex-row font-sm" wx:if="{{goods.gbDgGoodsStandardWeight.length > 0}}">

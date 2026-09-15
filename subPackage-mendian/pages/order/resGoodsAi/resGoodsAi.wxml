@@ -91,7 +91,7 @@
                           <text wx:if="{{goods.gbDdgDepGoodsBrand || goods.gbDistributerGoodsEntity.gbDgGoodsBrand}}" class="dep-goods-brand">{{goods.gbDdgDepGoodsBrand || goods.gbDistributerGoodsEntity.gbDgGoodsBrand}}</text>
                           <text class="font-bold font-xl">{{goods.gbDdgDepGoodsName}}</text>
                           <block wx:if="{{goods.gbDistributerGoodsEntity.gbDgControlFresh == 1}}">
-                            <text class="fresh_goods ml-10">保鲜{{goods.gbDistributerGoodsEntity.gbDgFreshWasteHour}}小时</text>
+                            <text class="fresh_goods ml-10">保鲜废弃{{goods.gbDistributerGoodsEntity.gbDgFreshWasteHour}}小时</text>
                           </block>
                         </view>
 
