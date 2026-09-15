@@ -7,7 +7,7 @@
  *
  * 交互：
  * - 按"今天/昨天/具体日期"分组，日期与同一天内记录均按时间倒序（新在上，旧在下）
- * - 底部输入栏支持键盘自适应
+ * - 右上角“＋”进入 AI 识别与确认页
  * - 下拉刷新 + 分页加载
  */
 
@@ -25,10 +25,6 @@ Page({
 
     // 原始记录列表（未分组，用于流水视图）
     rawRecordList: [],
-
-    // 输入栏
-    inputValue: '',
-    submitting: false,
 
     // 修改弹窗
     showEditPopup: false,
@@ -596,71 +592,8 @@ Page({
     that._fetchRecords(true);
   },
 
-  // ========== 底部输入栏 ==========
-
-  onInputChange: function (e) {
-    var value = e.detail.value || '';
-    this.setData({
-      inputValue: value,
-      canSubmit: value.trim().length > 0,
-    });
-  },
-
-  onSubmit: function () {
-    var that = this;
-    var content = (that.data.inputValue || '').trim();
-    if (!content) {
-      wx.showToast({ title: '请输入记录内容', icon: 'none' });
-      return;
-    }
-
-    // 提交中禁用输入，防止重复提交
-    that.setData({ submitting: true, canSubmit: false });
-
-    var payload = {
-      userId: that.data.userId,
-      departmentId: that.data.departmentId,
-      distributerId: that.data.distributerId || undefined,
-      inputType: 'TEXT',
-      content: content,
-    };
-
-    wx.showLoading({ title: 'AI整理中', mask: true });
-
-    api
-      .createWorkRecord(payload)
-      .then(function (res) {
-        wx.hideLoading();
-
-        // 响应解包：res.result.data → 后端 R 包装 → 直接 data
-        var result = res.result || {};
-        var data = result.data || result;
-
-        // 后端可能返回新创建的会话ID
-        var newConversationId = data.conversationId;
-        if (newConversationId && String(newConversationId) !== String(that.data.conversationId)) {
-          that.setData({ conversationId: newConversationId });
-        }
-
-        var preparedRecords = Array.isArray(data.records) ? data.records : [];
-        if (!preparedRecords.length || preparedRecords.some(function (item) { return item.aiStatus !== 'SUCCESS'; })) {
-          throw new Error((preparedRecords[0] && preparedRecords[0].aiErrorCode) || 'AI整理失败');
-        }
-
-        // AI 只生成待确认结果；进入独立确认页后才正式保存
-        that.setData({ inputValue: '', canSubmit: false, submitting: false });
-        wx.navigateTo({
-          url: '../workRecordConfirm/workRecordConfirm?recordIds=' + preparedRecords.map(function (item) {
-            return item.recordId;
-          }).join(','),
-        });
-      })
-      .catch(function (err) {
-        wx.hideLoading();
-        that.setData({ submitting: false });
-        console.error('[工作记录] 提交失败', err);
-        wx.showToast({ title: 'AI整理失败，请重试', icon: 'none' });
-      });
+  onAddRecord: function () {
+    wx.navigateTo({ url: '../workRecordConfirm/workRecordConfirm' });
   },
 
   // ========== AI 失败时重新整理 ==========

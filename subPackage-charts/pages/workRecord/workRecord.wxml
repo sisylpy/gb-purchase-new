@@ -4,18 +4,23 @@
   <back-navbar style="height: {{navBarHeight}}rpx;" title="我的工作记录" avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></back-navbar>
 
   <!-- 分类筛选栏 -->
-  <view class="wr-category-bar" wx:if="{{categoryList.length > 0}}">
-    <view class="wr-category-list">
-      <view
-        class="wr-category-filter {{activeCategoryId === item.id ? 'wr-category-filter--active' : ''}}"
-        wx:for="{{categoryList}}"
-        wx:key="id"
-        catchtap="onFilterCategory"
-        data-id="{{item.id}}"
-        style="background: {{activeCategoryId === item.id ? (item.color || '#2e7d32') : item.bg || '#e8f5e9'}}; color: {{activeCategoryId === item.id ? '#ffffff' : (item.color || '#2e7d32')}};"
-      >
-        <text class="wr-category-filter-icon" wx:if="{{item.icon}}">{{item.icon}}</text>
-        <text class="wr-category-filter-name">{{item.name}}</text>
+  <view class="wr-category-bar">
+    <view class="wr-category-toolbar">
+      <view class="wr-category-list">
+        <view
+          class="wr-category-filter {{activeCategoryId === item.id ? 'wr-category-filter--active' : ''}}"
+          wx:for="{{categoryList}}"
+          wx:key="id"
+          catchtap="onFilterCategory"
+          data-id="{{item.id}}"
+          style="background: {{activeCategoryId === item.id ? (item.color || '#2e7d32') : item.bg || '#e8f5e9'}}; color: {{activeCategoryId === item.id ? '#ffffff' : (item.color || '#2e7d32')}};"
+        >
+          <text class="wr-category-filter-icon" wx:if="{{item.icon}}">{{item.icon}}</text>
+          <text class="wr-category-filter-name">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="wr-add-btn" catchtap="onAddRecord" aria-label="添加工作记录">
+        <text class="wr-add-btn-icon">＋</text>
       </view>
     </view>
   </view>
@@ -35,7 +40,7 @@
     <view class="wr-empty" wx:if="{{!loading && groupedRecords.length === 0}}">
       <image class="wr-empty-img" src="/images/xiuxi.png" mode="aspectFit"></image>
       <text class="wr-empty-text">暂无工作记录</text>
-      <text class="wr-empty-sub">在底部输入框记录今天的工作事项</text>
+      <text class="wr-empty-sub">点击右上角“＋”记录今天的工作事项</text>
     </view>
 
     <!-- 按日期分组渲染 -->
@@ -156,31 +161,6 @@
     <!-- 底部安全间距 -->
     <view class="wr-scroll-spacer"></view>
   </scroll-view>
-
-  <!-- 底部输入栏 -->
-  <view class="wr-composer" style="padding-bottom: calc(16rpx + env(safe-area-inset-bottom));">
-    <view class="wr-composer-inner">
-      <textarea
-        class="wr-input"
-        placeholder="记录今天发现的问题、想法或需要跟进的事项…"
-        placeholder-class="wr-input-placeholder"
-        value="{{inputValue}}"
-        maxlength="500"
-        auto-height="{{true}}"
-        fixed="{{true}}"
-        show-confirm-bar="{{false}}"
-        cursor-spacing="16"
-        adjust-position="{{true}}"
-        bindinput="onInputChange"
-        bindconfirm="onSubmit"
-        confirm-type="send"
-        disabled="{{submitting}}"
-      />
-      <view class="wr-submit-btn {{canSubmit && !submitting ? 'wr-submit-btn--active' : ''}}" catchtap="onSubmit">
-        <text class="wr-submit-text">记录</text>
-      </view>
-    </view>
-  </view>
 
   <!-- 修改弹窗 -->
   <view class="wr-edit-popup-mask {{showEditPopup ? 'wr-edit-popup-mask--show' : ''}}" catchtap="onCancelEdit"></view>

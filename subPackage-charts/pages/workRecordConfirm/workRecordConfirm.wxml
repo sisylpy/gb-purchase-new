@@ -1,10 +1,32 @@
 <view class="confirm-page">
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="确认工作记录" avatar="/images/back-gray.png" button-text="取消" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="添加工作记录" avatar="/images/back-gray.png" button-text="取消" bindnavbuttontap="toBack"></back-navbar>
 
   <scroll-view scroll-y class="confirm-scroll">
     <view class="confirm-intro">
-      <text class="confirm-intro-title">AI 已完成整理</text>
-      <text class="confirm-intro-sub">AI 已按独立事项拆分。请逐条检查，确认后将分别写入工作记录。</text>
+      <text class="confirm-intro-title">{{records.length > 0 ? 'AI 已完成整理' : 'AI 识别工作记录'}}</text>
+      <text class="confirm-intro-sub">{{records.length > 0 ? 'AI 已按独立事项拆分。请逐条检查，确认后将分别写入工作记录。' : '输入或粘贴店长原话，AI 将整理标题、正文并推荐业务标签。'}}</text>
+    </view>
+
+    <view class="recognition-composer">
+      <textarea
+        class="recognition-input"
+        placeholder="记录今天发现的问题、想法或需要跟进的事项…"
+        placeholder-class="recognition-input-placeholder"
+        value="{{inputValue}}"
+        maxlength="500"
+        auto-height="{{true}}"
+        fixed="{{true}}"
+        show-confirm-bar="{{false}}"
+        cursor-spacing="16"
+        adjust-position="{{true}}"
+        bindinput="onInputChange"
+        bindconfirm="onSubmit"
+        confirm-type="send"
+        disabled="{{submitting}}"
+      />
+      <view class="recognition-submit {{canSubmit && !submitting ? 'recognition-submit--active' : ''}}" catchtap="onSubmit">
+        <text class="recognition-submit-text">记录</text>
+      </view>
     </view>
 
     <view class="confirm-loading" wx:if="{{loading}}">正在读取整理结果…</view>
@@ -31,7 +53,7 @@
     </block>
   </scroll-view>
 
-  <view class="confirm-footer" wx:if="{{!loading}}">
+  <view class="confirm-footer" wx:if="{{!loading && records.length > 0}}">
     <button class="confirm-button" loading="{{saving}}" disabled="{{saving}}" bindtap="onConfirm">确认保存</button>
   </view>
 </view>
