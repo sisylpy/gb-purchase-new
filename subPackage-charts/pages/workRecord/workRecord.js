@@ -300,6 +300,7 @@ Page({
       raw.gbWrCreatedAt ||
       '';
     var status = raw.aiStatus || raw.status || raw.gbWorkRecordStatus || 'SUCCESS';
+    var announcementPublished = raw.announcementPublished === true;
 
     var rawTags = Array.isArray(raw.tags) ? raw.tags : [];
     var tags = rawTags.map(function (tag) {
@@ -394,6 +395,9 @@ Page({
       polishedContent: polishedContent,
       status: status,
       statusText: statusText,
+      announcementPublished: announcementPublished,
+      announcementId: raw.announcementId || null,
+      announcementPublishedAt: raw.announcementPublishedAt || '',
       categoryId: categoryId,
       categoryName: categoryName || '未分类',
       categoryIcon: category.icon || '',
@@ -1057,8 +1061,23 @@ Page({
     wx.showLoading({ title: '推送中…', mask: true });
 
     api.pushWorkRecordToAnnouncement(dbRecordId, payload)
-      .then(function () {
+      .then(function (res) {
         wx.hideLoading();
+        var result = res.result || res || {};
+        var announcement = result.data || result;
+        var rawRecordList = that.data.rawRecordList.slice();
+        for (var i = 0; i < rawRecordList.length; i++) {
+          if (String(rawRecordList[i].id) === String(id)) {
+            rawRecordList[i].announcementPublished = true;
+            rawRecordList[i].announcementId = announcement.announcementId || announcement.id || null;
+            rawRecordList[i].announcementPublishedAt = announcement.publishedAt || '';
+            break;
+          }
+        }
+        that.setData({
+          rawRecordList: rawRecordList,
+          groupedRecords: that._groupByDate(rawRecordList),
+        });
         wx.showToast({ title: '已推送', icon: 'success', duration: 1500 });
       })
       .catch(function (err) {

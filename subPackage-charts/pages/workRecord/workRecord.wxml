@@ -55,6 +55,10 @@
                 <!-- 列表抬头：displayTitle 优先，否则沿用分类标签 -->
                 <view class="wr-card-header">
                   <text class="wr-card-title" wx:if="{{record.title}}">{{record.displayTitle || record.title}}</text>
+                  <view class="wr-announcement-badge" wx:if="{{record.announcementPublished}}">
+                    <text class="wr-announcement-icon">📣</text>
+                    <text>已推送公告</text>
+                  </view>
                   <view class="wr-record-tags">
                     <view class="wr-category-tag" wx:for="{{record.tags}}" wx:for-item="tag" wx:key="id" style="background: {{tag.bg}}; color: {{tag.color}};">
                       <text class="wr-category-icon" wx:if="{{tag.icon}}">{{tag.icon}}</text>
@@ -127,7 +131,7 @@
                     <text class="wr-action-btn-text">删除</text>
                   </view>
                   <view class="wr-action-btn wr-action-btn--announce" catchtap="onPushToAnnouncement" data-id="{{record.id}}">
-                    <text class="wr-action-btn-text">公告</text>
+                    <text class="wr-action-btn-text">{{record.announcementPublished ? '重新推送' : '公告'}}</text>
                   </view>
                   <!-- 业务卡来源：收起/展开来源卡片 -->
                   <view class="wr-source-btn" wx:if="{{record._isBusinessCard}}" catchtap="onViewSource" data-id="{{record.id}}">
