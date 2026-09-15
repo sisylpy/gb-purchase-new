@@ -1562,15 +1562,18 @@ Page({
         if (data && data.code !== undefined && data.data !== undefined) {
           data = data.data;
         }
-        var recordId = data.recordId || data.id || null;
-        if (data.confirmationStatus === 'PENDING_CONFIRMATION') {
-          if (data.aiStatus !== 'SUCCESS') {
-            wx.showToast({ title: data.aiErrorCode || 'AI整理失败，请重试', icon: 'none' });
+        var preparedRecords = Array.isArray(data.records) ? data.records : [];
+        var recordId = preparedRecords.length ? preparedRecords[0].recordId : null;
+        if (preparedRecords.length && preparedRecords[0].confirmationStatus === 'PENDING_CONFIRMATION') {
+          if (preparedRecords.some(function (item) { return item.aiStatus !== 'SUCCESS'; })) {
+            wx.showToast({ title: preparedRecords[0].aiErrorCode || 'AI整理失败，请重试', icon: 'none' });
             return;
           }
           that.onCloseWorkRecordDialog();
           wx.navigateTo({
-            url: '../workRecordConfirm/workRecordConfirm?recordId=' + recordId,
+            url: '../workRecordConfirm/workRecordConfirm?recordIds=' + preparedRecords.map(function (item) {
+              return item.recordId;
+            }).join(','),
           });
           return;
         }

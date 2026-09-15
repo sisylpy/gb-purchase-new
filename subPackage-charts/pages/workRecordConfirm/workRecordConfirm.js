@@ -1,27 +1,18 @@
 var api = require('../../services/api');
 
 Page({
-  data: {
-    navBarHeight: 0,
-    recordId: null,
-    userId: 0,
-    distributerId: 0,
-    title: '',
-    content: '',
-    categories: [],
-    selectedTagIds: [],
-    loading: true,
-    saving: false,
-  },
+  data: { navBarHeight: 0, recordIds: [], userId: 0, distributerId: 0, records: [], loading: true, saving: false },
 
   onLoad: function (options) {
-    var app = getApp();
-    var gd = app.globalData || {};
+    var gd = getApp().globalData || {};
     var sys = wx.getSystemInfoSync();
     var userInfo = wx.getStorageSync('userInfo') || {};
+    var ids = String(options.recordIds || options.recordId || '').split(',').filter(function (id) {
+      return /^\d+$/.test(id);
+    }).map(function (id) { return Number(id); });
     this.setData({
       navBarHeight: Math.round((gd.navBarHeight || (sys.statusBarHeight + 44)) * 750 / sys.windowWidth),
-      recordId: Number(options.recordId),
+      recordIds: ids,
       userId: userInfo.gbDepartmentUserId,
       distributerId: userInfo.gbDuDistributerId || 0,
     });
@@ -38,33 +29,41 @@ Page({
 
   _load: function () {
     var that = this;
-    Promise.all([
-      api.getWorkRecord(that.data.recordId, { userId: that.data.userId }),
-      api.getWorkRecordCategories({
-        userId: that.data.userId,
-        distributerId: that.data.distributerId || undefined,
-      }),
-    ]).then(function (responses) {
-      var record = that._unwrap(responses[0]);
-      var categories = that._unwrap(responses[1]);
+    if (!that.data.recordIds.length) {
+      that.setData({ loading: false });
+      wx.showToast({ title: '待确认记录不存在', icon: 'none' });
+      return;
+    }
+    var requests = that.data.recordIds.map(function (recordId) {
+      return api.getWorkRecord(recordId, { userId: that.data.userId });
+    });
+    requests.push(api.getWorkRecordCategories({
+      userId: that.data.userId,
+      distributerId: that.data.distributerId || undefined,
+    }));
+    Promise.all(requests).then(function (responses) {
+      var categories = that._unwrap(responses[responses.length - 1]);
       categories = Array.isArray(categories) ? categories : [];
-      var selectedIds = (record.tags || []).map(function (tag) { return Number(tag.categoryId); });
-      categories = categories.map(function (category) {
-        var id = Number(category.categoryId || category.id);
+      var records = responses.slice(0, -1).map(function (response) {
+        var record = that._unwrap(response);
+        var selectedIds = (record.tags || []).map(function (tag) { return Number(tag.categoryId); });
         return {
-          id: id,
-          code: category.categoryCode || category.code || '',
-          name: category.categoryName || category.name || '未命名标签',
-          selected: selectedIds.indexOf(id) >= 0,
+          recordId: record.recordId,
+          title: record.title || record.displayTitle || '',
+          content: record.polishedContent || '',
+          selectedTagIds: selectedIds,
+          tagOptions: categories.map(function (category) {
+            var id = Number(category.categoryId || category.id);
+            return {
+              id: id,
+              code: category.categoryCode || category.code || '',
+              name: category.categoryName || category.name || '未命名标签',
+              selected: selectedIds.indexOf(id) >= 0,
+            };
+          }),
         };
       });
-      that.setData({
-        title: record.title || record.displayTitle || '',
-        content: record.polishedContent || '',
-        categories: categories,
-        selectedTagIds: selectedIds,
-        loading: false,
-      });
+      that.setData({ records: records, loading: false });
     }).catch(function (err) {
       console.error('[工作记录确认] 加载失败', err);
       that.setData({ loading: false });
@@ -73,64 +72,66 @@ Page({
   },
 
   onTitleInput: function (e) {
-    this.setData({ title: e.detail.value || '' });
+    var key = 'records[' + Number(e.currentTarget.dataset.index) + '].title';
+    this.setData({ [key]: e.detail.value || '' });
   },
 
   onContentInput: function (e) {
-    this.setData({ content: e.detail.value || '' });
+    var key = 'records[' + Number(e.currentTarget.dataset.index) + '].content';
+    this.setData({ [key]: e.detail.value || '' });
   },
 
   onToggleTag: function (e) {
+    var recordIndex = Number(e.currentTarget.dataset.recordIndex);
     var id = Number(e.currentTarget.dataset.id);
-    var categories = this.data.categories.slice();
-    var selectedIds = this.data.selectedTagIds.slice();
+    var records = this.data.records.slice();
+    var record = records[recordIndex];
+    if (!record) return;
     var target = null;
-    for (var i = 0; i < categories.length; i++) {
-      if (categories[i].id === id) { target = categories[i]; break; }
+    for (var i = 0; i < record.tagOptions.length; i++) {
+      if (record.tagOptions[i].id === id) { target = record.tagOptions[i]; break; }
     }
     if (!target) return;
     var nextSelected = !target.selected;
     if (nextSelected && target.code === 'OTHER') {
-      selectedIds = [];
-      categories.forEach(function (item) { item.selected = false; });
+      record.selectedTagIds = [];
+      record.tagOptions.forEach(function (item) { item.selected = false; });
     } else if (nextSelected) {
-      categories.forEach(function (item) {
-        if (item.code === 'OTHER') item.selected = false;
-      });
-      selectedIds = selectedIds.filter(function (selectedId) {
-        var selected = null;
-        for (var index = 0; index < categories.length; index++) {
-          if (categories[index].id === selectedId) { selected = categories[index]; break; }
+      record.tagOptions.forEach(function (item) { if (item.code === 'OTHER') item.selected = false; });
+      record.selectedTagIds = record.selectedTagIds.filter(function (selectedId) {
+        for (var index = 0; index < record.tagOptions.length; index++) {
+          if (record.tagOptions[index].id === selectedId) return record.tagOptions[index].code !== 'OTHER';
         }
-        return !selected || selected.code !== 'OTHER';
+        return true;
       });
     }
     target.selected = nextSelected;
-    if (nextSelected) selectedIds.push(id);
-    else selectedIds = selectedIds.filter(function (selectedId) { return selectedId !== id; });
-    this.setData({ categories: categories, selectedTagIds: selectedIds });
+    if (nextSelected) record.selectedTagIds.push(id);
+    else record.selectedTagIds = record.selectedTagIds.filter(function (selectedId) { return selectedId !== id; });
+    this.setData({ records: records });
   },
 
   onConfirm: function () {
     var that = this;
-    var title = (that.data.title || '').trim();
-    var content = (that.data.content || '').trim();
-    if (!title) return wx.showToast({ title: '标题不能为空', icon: 'none' });
-    if (!content) return wx.showToast({ title: '记录内容不能为空', icon: 'none' });
-    if (!that.data.selectedTagIds.length) return wx.showToast({ title: '请至少选择一个标签', icon: 'none' });
+    var records = that.data.records;
+    for (var i = 0; i < records.length; i++) {
+      if (!(records[i].title || '').trim()) return wx.showToast({ title: '第' + (i + 1) + '条标题不能为空', icon: 'none' });
+      if (!(records[i].content || '').trim()) return wx.showToast({ title: '第' + (i + 1) + '条内容不能为空', icon: 'none' });
+      if (!records[i].selectedTagIds.length) return wx.showToast({ title: '第' + (i + 1) + '条至少选择一个标签', icon: 'none' });
+    }
     if (that.data.saving) return;
-
     that.setData({ saving: true });
-    wx.showLoading({ title: '正式保存中', mask: true });
-    api.confirmWorkRecord(that.data.recordId, {
-      userId: that.data.userId,
-      title: title,
-      content: content,
-      tagIds: that.data.selectedTagIds,
-    }).then(function (res) {
-      that._unwrap(res);
+    wx.showLoading({ title: '分别保存中', mask: true });
+    Promise.all(records.map(function (record) {
+      return api.confirmWorkRecord(record.recordId, {
+        userId: that.data.userId,
+        title: record.title.trim(),
+        content: record.content.trim(),
+        tagIds: record.selectedTagIds,
+      }).then(that._unwrap.bind(that));
+    })).then(function () {
       wx.hideLoading();
-      wx.showToast({ title: '工作记录已保存', icon: 'success' });
+      wx.showToast({ title: records.length + '条工作记录已保存', icon: 'success' });
       setTimeout(function () { wx.navigateBack(); }, 900);
     }).catch(function (err) {
       wx.hideLoading();
@@ -139,7 +140,5 @@ Page({
     });
   },
 
-  toBack: function () {
-    wx.navigateBack();
-  },
+  toBack: function () { wx.navigateBack(); },
 });

@@ -4,25 +4,27 @@
   <scroll-view scroll-y class="confirm-scroll">
     <view class="confirm-intro">
       <text class="confirm-intro-title">AI 已完成整理</text>
-      <text class="confirm-intro-sub">请检查标题、正文和标签，确认后才会正式写入工作记录。</text>
+      <text class="confirm-intro-sub">AI 已按独立事项拆分。请逐条检查，确认后将分别写入工作记录。</text>
     </view>
 
     <view class="confirm-loading" wx:if="{{loading}}">正在读取整理结果…</view>
     <block wx:else>
-      <view class="confirm-card">
+      <view class="record-count" wx:if="{{records.length > 1}}">共整理出 {{records.length}} 条独立记录</view>
+      <view class="confirm-card" wx:for="{{records}}" wx:for-item="record" wx:for-index="recordIndex" wx:key="recordId">
+        <view class="record-order" wx:if="{{records.length > 1}}">第 {{recordIndex + 1}} 条</view>
         <text class="field-label">标题</text>
-        <input class="title-input" value="{{title}}" maxlength="100" bindinput="onTitleInput" />
+        <input class="title-input" value="{{record.title}}" maxlength="100" data-index="{{recordIndex}}" bindinput="onTitleInput" />
 
         <text class="field-label field-label--spaced">标签</text>
         <view class="tag-grid">
-          <view class="tag-option {{item.selected ? 'tag-option--selected' : ''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" bindtap="onToggleTag">
+          <view class="tag-option {{item.selected ? 'tag-option--selected' : ''}}" wx:for="{{record.tagOptions}}" wx:key="id" data-record-index="{{recordIndex}}" data-id="{{item.id}}" bindtap="onToggleTag">
             <text>{{item.name}}</text>
             <text class="tag-check" wx:if="{{item.selected}}">✓</text>
           </view>
         </view>
 
         <text class="field-label field-label--spaced">记录内容</text>
-        <textarea class="content-input" value="{{content}}" maxlength="3000" auto-height show-confirm-bar="{{false}}" bindinput="onContentInput"></textarea>
+        <textarea class="content-input" value="{{record.content}}" maxlength="3000" auto-height show-confirm-bar="{{false}}" data-index="{{recordIndex}}" bindinput="onContentInput"></textarea>
       </view>
       <view class="trace-note">原始输入已由系统保留用于追溯，不会替代上方正式记录正文。</view>
       <view class="bottom-spacer"></view>

@@ -624,19 +624,22 @@ Page({
         var data = result.data || result;
 
         // 后端可能返回新创建的会话ID
-        var newConversationId = data.conversationId || data.id;
+        var newConversationId = data.conversationId;
         if (newConversationId && String(newConversationId) !== String(that.data.conversationId)) {
           that.setData({ conversationId: newConversationId });
         }
 
-        if (!data.recordId || data.aiStatus !== 'SUCCESS') {
-          throw new Error(data.aiErrorCode || 'AI整理失败');
+        var preparedRecords = Array.isArray(data.records) ? data.records : [];
+        if (!preparedRecords.length || preparedRecords.some(function (item) { return item.aiStatus !== 'SUCCESS'; })) {
+          throw new Error((preparedRecords[0] && preparedRecords[0].aiErrorCode) || 'AI整理失败');
         }
 
         // AI 只生成待确认结果；进入独立确认页后才正式保存
         that.setData({ inputValue: '', canSubmit: false, submitting: false });
         wx.navigateTo({
-          url: '../workRecordConfirm/workRecordConfirm?recordId=' + data.recordId,
+          url: '../workRecordConfirm/workRecordConfirm?recordIds=' + preparedRecords.map(function (item) {
+            return item.recordId;
+          }).join(','),
         });
       })
       .catch(function (err) {
@@ -664,9 +667,12 @@ Page({
         // 尝试用后端返回的数据原地更新当前记录
         var result = res.result || {};
         var data = result.data || result;
-        if (data.confirmationStatus === 'PENDING_CONFIRMATION' && data.aiStatus === 'SUCCESS') {
+        var preparedRecords = Array.isArray(data.records) ? data.records : [];
+        if (preparedRecords.length && preparedRecords.every(function (item) { return item.aiStatus === 'SUCCESS'; })) {
           wx.navigateTo({
-            url: '../workRecordConfirm/workRecordConfirm?recordId=' + data.recordId,
+            url: '../workRecordConfirm/workRecordConfirm?recordIds=' + preparedRecords.map(function (item) {
+              return item.recordId;
+            }).join(','),
           });
           return;
         }
