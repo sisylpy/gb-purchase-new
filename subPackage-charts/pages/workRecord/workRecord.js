@@ -292,6 +292,8 @@ Page({
     var polishedContent = raw.polishedContent || raw.gbWorkRecordPolishedContent || '';
     var title = raw.title || raw.gbWorkRecordTitle || raw.gbWrTitle || '';
     var createdAt =
+      raw.recordedAtEpoch ||
+      raw.createdAtEpoch ||
       raw.recordedAt ||
       raw.gbWrRecordedAt ||
       raw.createdAt ||
@@ -442,7 +444,12 @@ Page({
       if (/^\d+$/.test(str)) {
         date = new Date(parseInt(str, 10));
       } else {
-        date = new Date(str.replace(/-/g, '/').replace('T', ' ').split('.')[0]);
+        var hasExplicitTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(str);
+        if (hasExplicitTimezone) {
+          date = new Date(str);
+        } else {
+          date = new Date(str.replace(/-/g, '/').replace('T', ' ').split('.')[0]);
+        }
       }
     }
     if (!date || isNaN(date.getTime())) {
@@ -450,11 +457,13 @@ Page({
       date = new Date();
     }
 
-    var year = date.getFullYear();
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-    var hour = date.getHours();
-    var minute = date.getMinutes();
+    // 固定按中国标准时间（UTC+8）展示，不依赖手机或服务器所在时区。
+    var chinaDate = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+    var year = chinaDate.getUTCFullYear();
+    var month = chinaDate.getUTCMonth() + 1;
+    var day = chinaDate.getUTCDate();
+    var hour = chinaDate.getUTCHours();
+    var minute = chinaDate.getUTCMinutes();
 
     var pad = function (n) {
       return n < 10 ? '0' + n : String(n);
