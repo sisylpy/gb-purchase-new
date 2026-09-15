@@ -52,7 +52,7 @@
 
     <view class="flex-row" wx:if="{{item.gbDgControlFresh == 1}}" style="background-color: #187e6e; color: #fff;padding-left: 20rpx; padding-bottom: 20rpx;">
       <view class="flex-row half-row">
-        <text class="margin-l-right">保鲜时长:</text>
+        <text class="margin-l-right">保鲜废弃时间:</text>
         <text class="">{{consultItem.gbDgFreshWasteHour}}小时</text>
       </view>
       <view class="flex-row half-row">

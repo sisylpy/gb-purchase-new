@@ -53,15 +53,7 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
         </view>
       </view>
 
-      <view class="flex-row p-10">
-        <view class="half-row">
-          <text class="text-secondary flex-shrink-0 mr-10">大包装数量:</text>
-          <text class="pt-20 pb-20 shrink_change">{{goods.gbDgQuantityDays}}</text>
-        </view>
-      </view>
-
-
-      
+ 
       <view class=" flex-row-default p-10  mb-20">
         <view class="flex-row-default half-row">
           <text class="mr-10 text-secondary flex-shrink-0">采购方式:</text>
@@ -200,21 +192,29 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
           </block>
         </view> -->
 
-        <view class="bg-white p-20  border-bottom flex-column">
-          <view class="flex-row-between pt-20 pb-20 font-md">
-            <text class="text-secondary flex-shrink-0 mr-10">保鲜管理</text>
-            <switch checked="{{goods.gbDgControlFresh == 1 ? 'checked' : ''}}" bindchange="switchControlFresh" />
-          </view>
-          <block wx:if="{{goods.gbDgControlFresh == 1}}">
-            <view class="flex-row p-10 font-md">
-              <text class="graymr-20">时间设置:</text>
-              <view style="width:{{windowWidth - 280}}rpx;" class="flex-row">
-                <view class="flex-row half-row">
-                  <text class="">{{goods.gbDgFreshWasteHour}}小时废弃</text>
-                </view>
-              </view>
+        <view class="bg-white p-20 border-bottom flex-column">
+          <view class="p-10"><text class="text-secondary font-md">商品保鲜标准（总部统一设置，门店仅执行）</text></view>
+          <view class="flex-row-between p-10">
+            <text class="text-secondary">最佳库存时间</text>
+            <view class="flex-row">
+              <text class="font-bold mr-10">{{goods.gbDgQuantityDays ? goods.gbDgQuantityDays + '天' : '未设置'}}</text>
+              <text class="text-secondary">公司商品目录推荐</text>
             </view>
-          </block>
+          </view>
+          <view class="flex-row-between p-10">
+            <text class="text-secondary">保鲜报警时间</text>
+            <view class="flex-row">
+              <text class="font-bold mr-10">{{goods.gbDgFreshWarnHour ? goods.gbDgFreshWarnHour + '小时' : '未设置'}}</text>
+              <text class="text-secondary">总部统一标准</text>
+            </view>
+          </view>
+          <view class="flex-row-between p-10">
+            <text class="text-secondary">保鲜废弃时间</text>
+            <view class="flex-row">
+              <text class="font-bold mr-10">{{goods.gbDgFreshWasteHour ? goods.gbDgFreshWasteHour + '小时' : '未设置'}}</text>
+              <text class="text-secondary">总部统一标准</text>
+            </view>
+          </view>
         </view>
         <view class="bg-white p-20  border-bottom flex-column">
           <text class="text-secondary font-md">商品下架</text>
@@ -260,62 +260,6 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
     <view class="p-20" bindtap="delete">删除</view>
   </view>
 
-
-  <!--  showFresh -->
-
-  <view class="bg-white popup" wx:elif="{{showFresh}}" >
-
-    <view class="flex-column">
-      <view class="flex-column center-content mainBack">
-        <view class="p-20   five-weight  flex-row font-lg">
-          {{goods.gbDgGoodsName}}({{goods.gbDgGoodsStandardname}})
-        </view>
-      </view>
-
-      <view class="p-20 flex-row mb-30 mt-30">
-        <text class="p-20"> 废弃时间:</text>
-        <view >
-          <input 
-            class="" 
-            focus="{{showFresh}}" 
-            type="digit" 
-            value="{{goods.gbDgFreshWasteHour}}" 
-            placeholder="请输入小时数"
-            placeholder-style="color: #999; font-size: 28rpx;"
-            bindinput="getFresh" 
-            data-type="gbDgFreshWasteHour" 
-            style="width: {{windowWidth / 3}}rpx; border: 2rpx solid #e5e5e5; border-radius: 8rpx; background-color: #f8f8f8;line-height: 60rpx; height: 60rpx; padding-left: 10rpx;" 
-          />
-          <view 
-            style="position: absolute; right: 10rpx; color: #1989fa; font-size: 24rpx; cursor: pointer;"
-            catchtap="showFreshInputHint"
-          >
-          
-          </view>
-        </view>
-        <text style="margin-left: 10rpx; color: #666; font-size: 28rpx;">个小时</text>
-      </view>
-      
-      <!-- 输入提示信息 -->
-      <view style="margin: -20rpx 20rpx 20rpx 20rpx; padding: 10rpx; background-color: #f0f8ff; border-radius: 8rpx; border-left: 4rpx solid #1989fa;">
-        <text style="color: #1989fa; font-size: 24rpx;">💡 提示：请输入商品保鲜时间的小时数（仅支持整数，最大999小时）</text>
-      </view>
-
-      <view class="fresh-footer">
-        <view
-          class="fresh-btn fresh-btn--cancel"
-          catchtap="cancleFresh"
-          hover-class="fresh-btn-hover"
-        >取消</view>
-        <view
-          class="fresh-btn fresh-btn--confirm {{goods.gbDgFreshWasteHour > 0 ? 'is-active' : ''}}"
-          catchtap="{{goods.gbDgFreshWasteHour > 0 ? '_updateGoodsFresh' : ''}}"
-          hover-class="{{goods.gbDgFreshWasteHour > 0 ? 'fresh-btn-hover' : 'none'}}"
-        >确定废弃设置</view>
-      </view>
-    </view>
-  </view>
-  <!-- ../showFresh -->
 
 
 </view>

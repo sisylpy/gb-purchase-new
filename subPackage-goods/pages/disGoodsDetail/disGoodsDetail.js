@@ -611,18 +611,6 @@ Page({
         })
       }
     }
-    if (e.currentTarget.dataset.type == 9) {
-      var quantityDays = "goods.gbDgQuantityDays";
-      if (e.detail.value.length > 0) {
-        this.setData({
-          [quantityDays]: e.detail.value
-        })
-      } else {
-        this.setData({
-          [quantityDays]: null
-        })
-      }
-    }
     this._ifCanSave();
 
   },

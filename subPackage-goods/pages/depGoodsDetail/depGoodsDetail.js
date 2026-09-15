@@ -150,7 +150,6 @@ Page({
       '5': 'goods.gbDgGoodsDetail',
       '7': 'goods.gbDgCartonUnit',
       '8': 'goods.gbDgItemsPerCarton',
-      '9': 'goods.gbDgQuantityDays',
     };
     var key = fieldMap[type];
     if (key) {
@@ -263,26 +262,6 @@ Page({
       wx.showToast({ title: '保存失败', icon: 'none' });
       this.setData({ 'depGoods.gbDdgDepGoodsPullOff': val == 1 ? 0 : 1 });
     });
-  },
-
-  // ========== 保鲜管理 ==========
-  switchControlFresh(e) {
-    if (e.detail.value == 1) {
-      this.setData({ showOperation: true, showFresh: true });
-    } else {
-      this.setData({ 'goods.gbDgControlFresh': 0, 'goods.gbDgFreshWarnHour': '', 'goods.gbDgFreshWasteHour': '' });
-      this._updateGoods();
-    }
-  },
-
-  getFresh(e) {
-    var val = e.detail.value.replace(/[^0-9]/g, '');
-    if (parseInt(val) > 999) val = '999';
-    this.setData({ 'goods.gbDgFreshWasteHour': val });
-  },
-
-  cancleFresh() {
-    this.hideMask();
   },
 
   _updateGoods() {

@@ -66,6 +66,32 @@
       </view>
     </view>
 
+    <!-- 商品保鲜标准（总部统一设置，门店仅执行） -->
+    <view class="card bg-white card--mt" wx:if="{{goods}}">
+      <view class="p-10"><text class="text-secondary font-md">商品保鲜标准</text></view>
+      <view class="flex-row-between p-10">
+        <text class="text-secondary">最佳库存时间</text>
+        <view class="flex-row">
+          <text class="font-bold mr-10">{{goods.gbDgQuantityDays ? goods.gbDgQuantityDays + '天' : '未设置'}}</text>
+          <text class="text-secondary">公司商品目录推荐</text>
+        </view>
+      </view>
+      <view class="flex-row-between p-10">
+        <text class="text-secondary">保鲜报警时间</text>
+        <view class="flex-row">
+          <text class="font-bold mr-10">{{goods.gbDgFreshWarnHour ? goods.gbDgFreshWarnHour + '小时' : '未设置'}}</text>
+          <text class="text-secondary">总部统一标准</text>
+        </view>
+      </view>
+      <view class="flex-row-between p-10">
+        <text class="text-secondary">保鲜废弃时间</text>
+        <view class="flex-row">
+          <text class="font-bold mr-10">{{goods.gbDgFreshWasteHour ? goods.gbDgFreshWasteHour + '小时' : '未设置'}}</text>
+          <text class="text-secondary">总部统一标准</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 保存按钮（编辑模式） -->
     <view class="card-footer-inner" wx:if="{{showEdit}}">
       <view class="saveBtn {{canSave ? 'is-active' : ''}}" bindtap="updateComGoods">保存</view>

@@ -15,16 +15,12 @@ var BASIC_GOODS_FIELDS = [
   'gbDgGoodsStandardWeight',
   'gbDgGoodsIsWeight',
   'gbDgControlPrice',
-  'gbDgControlFresh',
-  'gbDgFreshWarnHour',
-  'gbDgFreshWasteHour',
   'gbDgPullOff',
   'gbDgGoodsBrand',
   'gbDgGoodsPlace',
   'gbDgGoodsPrice',
   'gbDgGoodsLowestPrice',
   'gbDgGoodsHighestPrice',
-  'gbDgQuantityDays',
   'gbDgCartonUnit',
   'gbDgItemsPerCarton',
 ];
@@ -427,7 +423,6 @@ Page({
     this.setData({
       showOperation: false,
       showChoice: false,
-      showFresh: false,
       showPrice: false,
       
     })
@@ -437,7 +432,6 @@ Page({
     this.setData({
       showOperationBtn: false,
       showChoice: false,
-      showFresh: false,
       showPrice: false,
     })
   },
@@ -598,25 +592,7 @@ Page({
   },
 
   // /??????
-  editDisGoodsFresh() {
-    if(this.data.goods.gbDgControlFresh == 1){
-      this.setData({
-        showFresh: true,
-        showOperation: true,
-        showOperationBtn: false,
 
-      })
-     }else{
-       wx.showToast({
-         title: '请先在参数设置',
-         icon: 'none'
-       })
-       this.setData({
-         itemIndex:0,
-        showOperationBtn: false,
-      })
-     }
-  },
 
 
   switchIsSelfControl(e) {
@@ -683,39 +659,10 @@ Page({
 
 
   //设置商品废弃时间
-  switchControlFresh(e) {
-    if (e.detail.value == 1) {
-      this.setData({
-        showOperation: true,
-        showPrice: false,
-        showIsSelfControl:false,
-        showFresh: true,
-        showFranchisePrice: false,
-      })
-    } else {
-      var goodsData = "goods.gbDgControlFresh";
-      var warnHour = "goods.gbDgFreshWarnHour";
-      var wasteHour = "goods.gbDgFreshWasteHour";
-      this.setData({
-        [goodsData]: 0,
-        [warnHour]: "",
-        [wasteHour]: ""
-      })
-      this._updateGoods();
-    }
-
-  },
 
 
-  cancleFresh(e) {
-    if (this.data.goods.gbDgControlFresh == 0) {
-      var goodsData = "goods.gbDgControlFresh";
-      this.setData({
-        [goodsData]: 0,
-      })
-    }
-    this.hideMask();
-  },
+
+
   
   cancleContrl(e){
     if (this.data.goods.gbDgIsSelfControl == 0) {
@@ -725,32 +672,6 @@ Page({
       })
     }
     this.hideMask();
-  },
-  _updateGoodsFresh(e) {
-    var warnHour = this.data.goods.gbDgFreshWarnHour;
-    var wasteHour = this.data.goods.gbDgFreshWasteHour;
-    if (!warnHour || !wasteHour || warnHour.length === 0 || wasteHour.length === 0) {
-      wx.showToast({
-        title: '请填写报警和废弃时间',
-        icon: 'none'
-      });
-      return;
-    }
-    if (parseInt(warnHour, 10) >= parseInt(wasteHour, 10)) {
-      wx.showToast({
-        title: '报警应早于废弃时间',
-        icon: 'none'
-      });
-      return;
-    }
-    this.setData({
-      'goods.gbDgControlFresh': 1
-    });
-    this._updateGoodsFreshData();
-  },
-  
-  _updateGoodsFreshData() {
-    this._updateGoods();
   },
 
   // 设置采购价格
@@ -835,16 +756,6 @@ Page({
     }
   },
 
-  getFresh(e) {
-    var inputValue = e.detail.value.replace(/[^0-9]/g, '');
-    if (parseInt(inputValue, 10) > 999) {
-      inputValue = '999';
-    }
-    var freshData = 'goods.' + e.currentTarget.dataset.type;
-    this.setData({
-      [freshData]: inputValue
-    });
-  },
 
   _updateGoodsControlPrice(e) {
     var lowestPrice = this.data.goods.gbDgGoodsLowestPrice;

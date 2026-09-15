@@ -67,8 +67,8 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
 
   <view class="flex-row">
     <view class=" flex-row half-row">
-      <text class=" flex-shrink-0 mr-10 text-secondary">库存天数:</text>
-      <input class="inputAddGoods pt-20 pb-20" placeholder="大包装数量" value="{{goods.gbDgItemsPerCarton}}" bindinput="getComGoodsContent" data-type="9"></input>
+      <text class=" flex-shrink-0 mr-10 text-secondary">最佳库存时间:</text>
+      <text class="inputAddGoods pt-20 pb-20">{{goods.gbDgQuantityDays ? goods.gbDgQuantityDays + '天' : '未设置'}}（总部统一设置）</text>
     </view>
   </view>
 

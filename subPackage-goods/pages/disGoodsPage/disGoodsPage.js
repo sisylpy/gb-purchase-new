@@ -389,7 +389,6 @@ Page({
     this.setData({
       showOperation: false,
       showChoice: false,
-      showFresh: false,
       showPrice: false,
       
     })
@@ -399,7 +398,6 @@ Page({
     this.setData({
       showOperationBtn: false,
       showChoice: false,
-      showFresh: false,
       showPrice: false,
     })
   },
@@ -567,25 +565,7 @@ Page({
   },
 
   // /??????
-  editDisGoodsFresh() {
-    if(this.data.goods.gbDgControlFresh == 1){
-      this.setData({
-        showFresh: true,
-        showOperation: true,
-        showOperationBtn: false,
 
-      })
-     }else{
-       wx.showToast({
-         title: '请先在参数设置',
-         icon: 'none'
-       })
-       this.setData({
-         itemIndex:0,
-        showOperationBtn: false,
-      })
-     }
-  },
 
 
   switchIsSelfControl(e) {
@@ -650,41 +630,10 @@ Page({
   },
 
 
-  //设置商品废弃时间
-  switchControlFresh(e) {
-    if (e.detail.value == 1) {
-      this.setData({
-        showOperation: true,
-        showPrice: false,
-        showIsSelfControl:false,
-        showFresh: true,
-        showFranchisePrice: false,
-      })
-    } else {
-      var goodsData = "goods.gbDgControlFresh";
-      var warnHour = "goods.gbDgFreshWarnHour";
-      var wasteHour = "goods.gbDgFreshWasteHour";
-      this.setData({
-        [goodsData]: 0,
-        [warnHour]: "",
-        [wasteHour]: ""
-      })
-      this._updateGoods();
-    }
-
-  },
 
 
-  cancleFresh(e) {
-    if (this.data.goods.gbDgControlFresh == 0) {
-      var goodsData = "goods.gbDgControlFresh";
-      this.setData({
-        [goodsData]: 0,
-      })
-    }
-    this.hideMask();
-  },
-  
+
+
   cancleContrl(e){if (this.data.goods.gbDgIsSelfControl == 0) {
       var goodsData = "goods.gbDgIsSelfControl";
       this.setData({
@@ -693,24 +642,7 @@ Page({
     }
     this.hideMask();
   },
-  _updateGoodsFresh(e) {
-    var warnHour = this.data.goods.gbDgFreshWasteHour;
-    var wasteHour = this.data.goods.gbDgFreshWasteHour;
-    var goodsData = "goods.gbDgControlFresh";    
-    if (warnHour !== null && wasteHour !== null && warnHour.length > 0 && wasteHour.length > 0) {
-      this.setData({
-        [goodsData]: 1
-      })
-      this._updateGoodsFreshData();
 
-    } else {
-      wx.showToast({
-        title: '时间输入不正确',
-        icon: 'none'
-      })
-    }
-  },
-  
   
 
   // 设置采购价格
@@ -791,99 +723,8 @@ Page({
     }
   },
 
-  // 输入框帮助提示
-  showFreshInputHint() {
-    wx.showModal({
-      title: '💡 输入说明',
-      content: '请输入商品保鲜时间的小时数\n\n• 仅支持整数（如：24）\n• 不支持小数（如：24.5）\n• 建议范围：1-168小时\n• 单位：小时',
-      showCancel: false,
-      confirmText: '知道了',
-      confirmColor: '#1989fa'
-    });
-  },
 
-  getFresh(e) {var inputValue = e.detail.value;
-    var freshData = "goods." + e.currentTarget.dataset.type;
-    
-    // 输入验证和格式化
-    if (inputValue.length === 0) {
-      // 空值处理
-      this.setData({
-        [freshData]: ""
-      });
-      return;
-    }
-    
-    // 只允许输入数字
-    var numericValue = inputValue.replace(/[^0-9]/g, '');
-    
-    // 如果输入了非数字字符，显示提示
-    if (numericValue !== inputValue) {
-      wx.showModal({
-        title: '⚠️ 输入格式错误',
-        content: '保鲜时间只能输入数字（小时）\n\n请输入有效的小时数，例如：24',
-        showCancel: false,
-        confirmText: '重新输入',
-        confirmColor: '#ff4444'
-      });
-      // 使用清理后的数字值
-      inputValue = numericValue;
-    }
-    
-    // 检查是否输入了小数
-    if (inputValue.indexOf('.') !== -1) {
-      wx.showModal({
-        title: '⚠️ 不支持小数',
-        content: '保鲜时间请设置为整数小时\n\n例如：输入 24 而不是 24.5',
-        showCancel: false,
-        confirmText: '重新输入',
-        confirmColor: '#ff4444'
-      });
-      // 移除小数点及之后的内容
-      inputValue = inputValue.substring(0, inputValue.indexOf('.'));
-    }
-    
-    // 设置合理的上限（比如999小时）
-    var maxHours = 999;
-    var numValue = parseInt(inputValue);
-    if (numValue > maxHours) {
-      wx.showModal({
-        title: '⚠️ 输入超出范围',
-        content: `保鲜时间不能超过${maxHours}小时\n\n请输入合理的数值，建议范围：1-168小时（1-7天）`,
-        showCancel: false,
-        confirmText: '重新输入',
-        confirmColor: '#ff4444'
-      });
-      inputValue = maxHours.toString();
-    }
-    
-    // 更新数据
-    this.setData({
-      [freshData]: inputValue
-    });
-    
-    // 输入成功提示
-    if (inputValue.length > 0 && numValue > 0) {
-      var timeText = '';
-      if (numValue < 24) {
-        timeText = `${numValue}小时`;
-      } else if (numValue < 168) {
-        var days = Math.floor(numValue / 24);
-        var hours = numValue % 24;
-        timeText = days > 0 ? `${days}天${hours > 0 ? hours + '小时' : ''}` : `${numValue}小时`;
-      } else {
-        timeText = `${numValue}小时`;
-      }
-      
-      // 只在输入有效值且不是通过错误处理自动修正的情况下显示成功提示
-      if (inputValue === e.detail.value) {
-        wx.showToast({
-          title: `已设置：${timeText}`,
-          icon: 'success',
-          duration: 1500
-        });
-      }
-    }},
+
 
   _updateGoodsControlPrice(e) {
     var lowestPrice = this.data.goods.gbDgGoodsLowestPrice;
