@@ -1231,6 +1231,25 @@ var listStoreAnnouncements = function (params) {
 };
 
 /**
+ * 删除自己发布的店内公告（后端软删除）。
+ * DELETE /store-announcements/{announcementId}
+ */
+var deleteStoreAnnouncement = function (announcementId, params) {
+  var query = [
+    'userId=' + encodeURIComponent(params.userId),
+    'departmentId=' + encodeURIComponent(params.departmentId),
+  ];
+  if (params.distributerId) {
+    query.push('distributerId=' + encodeURIComponent(params.distributerId));
+  }
+  return request.request(
+    'store-announcements/' + announcementId + '?' + query.join('&'),
+    {},
+    { method: 'DELETE', showErrorToast: false }
+  );
+};
+
+/**
  * 获取每日公告牌
  * GET /store-announcements/daily-board
  * @param {{ userId: number, departmentId: number, distributerId: number, boardType: string, asOfDate?: string, page?: number, pageSize?: number }} params
@@ -1324,6 +1343,7 @@ module.exports = {
   pushWorkRecordToAnnouncement: pushWorkRecordToAnnouncement,
   // 店内公告栏
   listStoreAnnouncements: listStoreAnnouncements,
+  deleteStoreAnnouncement: deleteStoreAnnouncement,
   getDailyBoard: getDailyBoard,
   ignoreNewGoodsRecipeReview: ignoreNewGoodsRecipeReview,
 };

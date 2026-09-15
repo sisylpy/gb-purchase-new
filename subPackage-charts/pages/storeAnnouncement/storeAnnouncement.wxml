@@ -15,6 +15,7 @@
 
         <!-- 公告：工作笔记推送 → 与工作笔记列表一致 -->
         <view class="note-card wn-card {{item._isAi ? 'note-card--ai' : ''}}" wx:if="{{item._type === 'note' && item._useWorkNoteStyle}}">
+          <view class="announcement-delete-btn" wx:if="{{item._canDelete}}" catchtap="onDeleteAnnouncement" data-id="{{item.announcementId}}">删除</view>
           <view class="announcement-latest-badge" wx:if="{{item._isLatest}}">最新</view>
           <view class="wn-card-header">
             <view class="wn-type-tag" wx:if="{{item.noteTypeLabel}}" style="background: {{item.noteTypeBg}}; color: {{item.noteTypeColor}};">
@@ -64,6 +65,7 @@
 
         <!-- 公告：工作记录推送 → 与工作记录列表一致 -->
         <view class="note-card wr-card" wx:elif="{{item._type === 'note' && item._useWorkRecordStyle}}">
+          <view class="announcement-delete-btn" wx:if="{{item._canDelete}}" catchtap="onDeleteAnnouncement" data-id="{{item.announcementId}}">删除</view>
           <view class="announcement-latest-badge" wx:if="{{item._isLatest}}">最新</view>
           <view class="wr-card-header">
             <text class="wr-card-title" wx:if="{{item._showTitle}}">{{item.displayTitle}}</text>
@@ -112,6 +114,7 @@
 
         <!-- 公告：其他来源（图钉、直接发布等） -->
         <view class="note-card {{item._isAi ? 'note-card--ai' : ''}}" wx:elif="{{item._type === 'note'}}">
+          <view class="announcement-delete-btn" wx:if="{{item._canDelete}}" catchtap="onDeleteAnnouncement" data-id="{{item.announcementId}}">删除</view>
           <view class="announcement-latest-badge" wx:if="{{item._isLatest}}">最新</view>
           <view class="note-badge" wx:if="{{item._isAi}}">
             <text class="note-badge-icon">✨</text>

@@ -49,6 +49,7 @@ Page({
     feedItems: [],
     navBarHeight: 0,
     showRecipeDebug: false,
+    deletingAnnouncementId: null,
   },
 
   onLoad: function (options) {
@@ -68,6 +69,52 @@ Page({
 
   onRetry: function () {
     this._loadBoard();
+  },
+
+  onDeleteAnnouncement: function (e) {
+    var that = this;
+    var announcementId = Number(e.currentTarget.dataset.id);
+    if (!announcementId || that.data.deletingAnnouncementId) return;
+
+    wx.showModal({
+      title: '删除公告',
+      content: '删除后将不再在店内公告栏展示，确认删除吗？',
+      confirmText: '删除',
+      confirmColor: '#d94848',
+      success: function (modalResult) {
+        if (!modalResult.confirm) return;
+        var scope = that._getStoreScope();
+        if (!scope) return;
+
+        that.setData({ deletingAnnouncementId: announcementId });
+        wx.showLoading({ title: '删除中', mask: true });
+        api.deleteStoreAnnouncement(announcementId, scope).then(function () {
+          var feedItems = (that.data.feedItems || []).filter(function (item) {
+            return Number(item.announcementId) !== announcementId;
+          });
+          _decorateDateGroups(feedItems);
+          var summary = Object.assign({}, that.data.summary, {
+            noteCount: Math.max(0, Number(that.data.summary.noteCount || 0) - 1),
+          });
+          wx.hideLoading();
+          that.setData({
+            feedItems: feedItems,
+            summary: summary,
+            deletingAnnouncementId: null,
+            emptyReason: feedItems.length ? '' : '暂无公告',
+          });
+          wx.showToast({ title: '已删除', icon: 'success' });
+        }).catch(function (err) {
+          wx.hideLoading();
+          that.setData({ deletingAnnouncementId: null });
+          console.error('[公告牌] 删除公告失败', err);
+          var message = (err && err.data && (err.data.msg || err.data.message))
+            || (err && err.message)
+            || '删除失败，请重试';
+          wx.showToast({ title: message, icon: 'none' });
+        });
+      },
+    });
   },
 
   onToggleRecipeDebug: function () {
@@ -222,7 +269,7 @@ Page({
         var i;
 
         for (i = 0; i < rawNotes.length; i++) {
-          var mapped = _mapNoteItem(rawNotes[i], i, categoryByName);
+          var mapped = _mapNoteItem(rawNotes[i], i, categoryByName, userId);
           if (mapped) feedItems.push(mapped);
         }
 
@@ -323,7 +370,7 @@ function _resolveNoteTypeMeta(note, isAi) {
   };
 }
 
-function _mapNoteItem(note, index, categoryByName) {
+function _mapNoteItem(note, index, categoryByName, currentUserId) {
   if (!note) return null;
 
   var type = note.announcementType || note.sourceType || 'TEXT';
@@ -401,6 +448,8 @@ function _mapNoteItem(note, index, categoryByName) {
 
   return {
     _type: 'note',
+    announcementId: note.announcementId,
+    _canDelete: Number(note.publisherUserId) === Number(currentUserId),
     _key: 'note-' + (note.announcementId || index),
     _sortTs: sortTs,
     _sortId: Number(note.announcementId) || 0,

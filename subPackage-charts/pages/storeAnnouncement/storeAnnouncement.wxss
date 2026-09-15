@@ -179,11 +179,31 @@
 
 /* ========== 公告卡片 ========== */
 .note-card {
+  position: relative;
   background: #fff;
   border-radius: 20rpx;
   padding: 28rpx;
   margin-bottom: 16rpx;
   box-shadow: 0 1rpx 8rpx rgba(0,0,0,0.04);
+}
+
+.announcement-delete-btn {
+  position: absolute;
+  top: 22rpx;
+  right: 24rpx;
+  z-index: 2;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #fff1f1;
+  color: #d94848;
+  font-size: 23rpx;
+  line-height: 1.3;
+}
+
+.note-card > .wn-card-header,
+.note-card > .wr-card-header,
+.note-card > .note-badge {
+  padding-right: 90rpx;
 }
 .note-card--ai {
   border-left: 6rpx solid #f59e0b;
