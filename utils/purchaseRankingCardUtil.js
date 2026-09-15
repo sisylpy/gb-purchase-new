@@ -122,6 +122,14 @@ function extractRawRows(payload) {
   if (Array.isArray(payload.rankingItems)) return payload.rankingItems;
   if (Array.isArray(payload.items)) return payload.items;
   if (Array.isArray(payload.list)) return payload.list;
+  // 后端正式字段：focusRows（主排）+ secondaryRows（次排）。
+  // 按后端原有顺序合并，排序主权留在后端，前端不重排。
+  // 两者均缺失/非数组时才回退空数组，以保留真实 EMPTY 状态。
+  if (Array.isArray(payload.focusRows) || Array.isArray(payload.secondaryRows)) {
+    var focus = Array.isArray(payload.focusRows) ? payload.focusRows : [];
+    var secondary = Array.isArray(payload.secondaryRows) ? payload.secondaryRows : [];
+    return focus.concat(secondary);
+  }
   return [];
 }
 
