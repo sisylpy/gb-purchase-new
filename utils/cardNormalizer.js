@@ -8,7 +8,7 @@
  */
 
 var workRecordCardTypes = require('./workRecordCardTypes');
-var purchaseRankingCardUtil = require('./purchaseRankingCardUtil');
+var businessRankingCardUtil = require('./businessRankingCardUtil');
 
 /**
  * 解析单个 card：从 card.payload 提取 cardData
@@ -322,8 +322,8 @@ function resolveDisplayCard(card) {
     return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: title12, subtitle: card.subtitle || (payload && payload.stockSnapshotLabel) || '' }) };
   }
 
-  if (purchaseRankingCardUtil.isPurchaseRankingCardType(card.cardType)) {
-    var rankingData = purchaseRankingCardUtil.resolvePurchaseRankingCardData(card);
+  if (businessRankingCardUtil.isBusinessRankingCardType(card.cardType)) {
+    var rankingData = businessRankingCardUtil.resolveBusinessRankingCardData(card);
     return {
       cardType: card.cardType,
       cardData: rankingData,
@@ -344,7 +344,7 @@ function normalizeCards(cards) {
       resolved._cardTitle = card.title || '';
       resolved._supportsWorkRecord = workRecordCardTypes.isWorkRecordCardType(resolved.cardType);
       resolved._supportsRowWorkRecord = workRecordCardTypes.supportsRowLevelWorkRecord(resolved.cardType);
-      var rankingCfg = purchaseRankingCardUtil.CONFIG[resolved.cardType];
+      var rankingCfg = businessRankingCardUtil.CONFIG[resolved.cardType];
       resolved._allowsRowRecordUI = !!(rankingCfg && rankingCfg.supportsRowRecord)
         || resolved.cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD';
     }

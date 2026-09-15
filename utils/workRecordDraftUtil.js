@@ -2,7 +2,7 @@
  * 从业务卡片 cardType + cardData 生成「加入店长工作记录」弹窗默认标题与内容
  * 不调用后端 preview 接口
  */
-var purchaseRankingCardUtil = require('./purchaseRankingCardUtil');
+var businessRankingCardUtil = require('./businessRankingCardUtil');
 
 function formatPrice(price) {
   var n = parseFloat(price);
@@ -120,17 +120,16 @@ function buildPurchaseAnomalyDraft(cardData, sourceItemKey) {
 }
 
 function buildRankingDraft(cardType, cardData, sourceItemKey) {
-  var cfg = purchaseRankingCardUtil.CONFIG[cardType];
-  var title = cardData.title || (cfg && cfg.defaultTitle) || '采购排行';
+  var cfg = businessRankingCardUtil.CONFIG[cardType];
+  var title = cardData.title || (cfg && cfg.defaultTitle) || '业务排行';
   var lines = [];
   if (cardData.subtitle) lines.push('统计范围：' + cardData.subtitle);
   if (cardData.narrative) lines.push(cardData.narrative);
 
   var rows = cardData.rows || [];
-  var disGoodsId = parseItemKeyId(sourceItemKey, 'disGoodsId:');
-  if (disGoodsId) {
+  if (sourceItemKey && sourceItemKey !== '__CARD__') {
     for (var i = 0; i < rows.length; i++) {
-      if (String(rows[i].rowId) === String(disGoodsId)) {
+      if (rows[i].sourceItemKey === sourceItemKey) {
         var one = rows[i];
         title = (one.name || '—') + ' · ' + (cfg ? cfg.defaultTitle : title);
         lines.push('');
@@ -251,7 +250,7 @@ function buildWorkRecordDraft(cardType, cardData, opts) {
   var draft;
   if (cardType === 'PURCHASE_ANOMALY_CARD') {
     draft = buildPurchaseAnomalyDraft(cardData, sourceItemKey);
-  } else if (purchaseRankingCardUtil.isPurchaseRankingCardType(cardType)) {
+  } else if (businessRankingCardUtil.isBusinessRankingCardType(cardType)) {
     draft = buildRankingDraft(cardType, cardData, sourceItemKey);
   } else if (cardType === 'WAREHOUSE_INVENTORY_RISK_LIST_CARD') {
     draft = buildWarehouseRiskDraft(cardData, sourceItemKey);

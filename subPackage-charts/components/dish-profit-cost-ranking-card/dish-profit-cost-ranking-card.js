@@ -2,9 +2,9 @@
  * 菜品成本/利润排行卡片（表格样式）
  *
  * cardData：
- * { title, subtitle, payload: { timeLabel, timeDisplayText, metricLabel, rankingType, rows[], summary } }
+ * { title, subtitle, payload: { timeLabel, timeDisplayText, metricLabel, rankingType, focusRows[], secondaryRows[], summary } }
  *
- * rows[] 字段：
+ * focusRows[] / secondaryRows[] 字段：
  * rank, dishName, salesQuantity, actualRevenue, theoryCostAmount, outboundAllocatedCostAmount, blendedGrossMarginRateOnListPrice
  */
 
@@ -63,7 +63,9 @@ Component({
       }
 
       var payload = newVal.payload || {};
-      var rows = payload.rows || [];
+      var focusRows = Array.isArray(payload.focusRows) ? payload.focusRows : [];
+      var secondaryRows = Array.isArray(payload.secondaryRows) ? payload.secondaryRows : [];
+      var rows = focusRows.concat(secondaryRows);
       var title = newVal.title || '菜品成本排行';
       var subtitle = newVal.subtitle || '';
 

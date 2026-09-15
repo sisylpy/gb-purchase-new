@@ -3,10 +3,10 @@
  *
  * cardData（由 _resolveDisplayCard 构建）：
  * { title, subtitle,
- *   payload: { rankingType, metricLabel, rows[], summary: { narrative } }
+ *   payload: { rankingType, metricLabel, focusRows[], secondaryRows[], summary: { narrative } }
  * }
  *
- * rows[] 字段：rank, goodsName, restAmountTotal, restWeightTotal
+ * focusRows[] / secondaryRows[] 字段：rank, goodsName, restAmountTotal, restWeightTotal
  */
 
 /** 金额格式化 */
@@ -64,7 +64,9 @@ Component({
       }
 
       var payload = newVal.payload || newVal;
-      var rows = payload.rows || [];
+      var focusRows = Array.isArray(payload.focusRows) ? payload.focusRows : [];
+      var secondaryRows = Array.isArray(payload.secondaryRows) ? payload.secondaryRows : [];
+      var rows = focusRows.concat(secondaryRows);
       var title = newVal.title || '账面库存排行';
       var subtitle = newVal.subtitle || '';
       var narrative = (payload.summary && payload.summary.narrative) || '';

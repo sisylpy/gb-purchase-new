@@ -1,14 +1,15 @@
 /**
- * 采购排行卡通用配置与数据规范化
+ * 业务排行卡统一配置与数据规范化。
  * 仅依据 cardType + payload，不根据标题/文案猜类型
  */
 
-var PURCHASE_RANKING_CARD_TYPES = [
+var BUSINESS_RANKING_CARD_TYPES = [
   'PURCHASE_GOODS_AMOUNT_RANKING_CARD',
   'PURCHASE_GOODS_COUNT_RANKING_CARD',
   'PURCHASE_GOODS_QUANTITY_RANKING_CARD',
   'PURCHASE_STORE_AMOUNT_RANKING_CARD',
   'PURCHASE_SUPPLIER_AMOUNT_RANKING_CARD',
+  'STOCK_REDUCE_RANKING_CARD',
 ];
 
 var CONFIG = {
@@ -68,10 +69,20 @@ var CONFIG = {
     supportsRowRecord: false,
     footerUnit: '家供应商',
   },
+  STOCK_REDUCE_RANKING_CARD: {
+    defaultTitle: '出库排行',
+    nameLabel: '名称',
+    nameFields: ['storeName', 'goodsName'],
+    metricLabel: '出库金额（元）',
+    metricFields: ['amount', 'count'],
+    metricFormat: 'amount',
+    supportsRowRecord: true,
+    footerUnit: '项',
+  },
 };
 
-function isPurchaseRankingCardType(cardType) {
-  return PURCHASE_RANKING_CARD_TYPES.indexOf(cardType) >= 0;
+function isBusinessRankingCardType(cardType) {
+  return BUSINESS_RANKING_CARD_TYPES.indexOf(cardType) >= 0;
 }
 
 function pickField(row, fields) {
@@ -118,36 +129,38 @@ function fmtQuantity(val, unit) {
 
 function extractRawRows(payload) {
   if (!payload) return [];
-  if (Array.isArray(payload.rows)) return payload.rows;
-  if (Array.isArray(payload.rankingItems)) return payload.rankingItems;
-  if (Array.isArray(payload.items)) return payload.items;
-  if (Array.isArray(payload.list)) return payload.list;
-  // 后端正式字段：focusRows（主排）+ secondaryRows（次排）。
-  // 按后端原有顺序合并，排序主权留在后端，前端不重排。
-  // 两者均缺失/非数组时才回退空数组，以保留真实 EMPTY 状态。
-  if (Array.isArray(payload.focusRows) || Array.isArray(payload.secondaryRows)) {
-    var focus = Array.isArray(payload.focusRows) ? payload.focusRows : [];
-    var secondary = Array.isArray(payload.secondaryRows) ? payload.secondaryRows : [];
-    return focus.concat(secondary);
-  }
-  return [];
+  // 正式协议：后端只下发 focusRows（主排）+ secondaryRows（次排），按原顺序合并。
+  // 排序主权在后端，前端不重排；两者均缺失/非数组时回退空数组以保留真实 EMPTY 状态。
+  // 不再兼容 rows / rankingItems / items / list 等历史别名（采购 Ranking 链路无生产者下发）。
+  var focus = Array.isArray(payload.focusRows) ? payload.focusRows : [];
+  var secondary = Array.isArray(payload.secondaryRows) ? payload.secondaryRows : [];
+  return focus.concat(secondary);
 }
 
-function normalizeRows(cardType, rawRows) {
+function normalizeRows(cardType, rawRows, payload) {
   var cfg = CONFIG[cardType];
   if (!cfg || !rawRows || !rawRows.length) return [];
 
   return rawRows.map(function (row, index) {
     var rank = Number(row.rank);
     if (isNaN(rank) || rank <= 0) rank = index + 1;
-    var metricVal = pickMetric(row, cfg.metricFields);
+    var stockCountRanking = cardType === 'STOCK_REDUCE_RANKING_CARD'
+      && payload && payload.metricCode === 'OUTBOUND_COUNT';
+    var metricVal = stockCountRanking ? row.count : pickMetric(row, cfg.metricFields);
     var unit = cfg.unitFields ? pickField(row, cfg.unitFields) : '';
     var metricStr = '—';
-    if (cfg.metricFormat === 'amount') metricStr = fmtAmount(metricVal);
+    if (stockCountRanking) metricStr = fmtCount(metricVal);
+    else if (cfg.metricFormat === 'amount') metricStr = fmtAmount(metricVal);
     else if (cfg.metricFormat === 'count') metricStr = fmtCount(metricVal);
     else if (cfg.metricFormat === 'quantity') metricStr = fmtQuantity(metricVal, unit);
 
-    var rowId = row[cfg.idField];
+    var idField = cfg.idField;
+    if (cardType === 'STOCK_REDUCE_RANKING_CARD') {
+      idField = payload && payload.rankingEntityType === 'STORE' ? 'storeId' : 'goodsId';
+    }
+    var rowId = row[idField];
+    var itemKeyPrefix = idField === 'storeId' ? 'storeId:'
+      : idField === 'goodsId' ? 'goodsId:' : 'disGoodsId:';
     return {
       rank: rank,
       name: pickField(row, cfg.nameFields) || '—',
@@ -155,22 +168,23 @@ function normalizeRows(cardType, rawRows) {
       metricVal: metricVal,
       unit: unit,
       rowId: rowId != null ? rowId : null,
+      sourceItemKey: rowId != null ? itemKeyPrefix + rowId : '__CARD__',
       standardName: row.standardName || '',
     };
   });
 }
 
 /**
- * 将原始 card + payload 规范为 purchase-ranking-card 所需 cardData
+ * 将原始 card + payload 规范为 business-ranking-card 所需 ViewModel。
  */
-function resolvePurchaseRankingCardData(card) {
+function resolveBusinessRankingCardData(card) {
   var cardType = card.cardType;
   var cfg = CONFIG[cardType];
   if (!cfg) return null;
 
   var payload = card.payload || {};
   var rawRows = extractRawRows(payload);
-  var rows = normalizeRows(cardType, rawRows);
+  var rows = normalizeRows(cardType, rawRows, payload);
   var narrative = '';
   if (payload.summary && payload.summary.narrative) narrative = payload.summary.narrative;
   else if (payload.narrative) narrative = payload.narrative;
@@ -179,21 +193,26 @@ function resolvePurchaseRankingCardData(card) {
     cardType: cardType,
     title: card.title || payload.title || cfg.defaultTitle,
     subtitle: card.subtitle || payload.subtitle || payload.timeLabel || payload.timeDisplayText || '',
-    nameLabel: payload.nameLabel || payload.metricName || cfg.nameLabel,
+    nameLabel: payload.nameLabel || payload.metricName
+      || (payload.rankingEntityType === 'STORE' ? '门店' : cfg.nameLabel),
     metricLabel: payload.metricLabel || cfg.metricLabel,
     narrative: narrative,
     rows: rows,
-    emptyReason: payload.emptyReason || (rows.length ? '' : '暂无排行数据'),
+    status: payload.status || (rows.length ? 'OK' : 'EMPTY'),
+    rankingScopeAvailability: payload.rankingScopeAvailability || '',
+    emptyReason: payload.message || payload.emptyReason || (rows.length ? '' : '暂无排行数据'),
     supportsRowRecord: cfg.supportsRowRecord,
-    footerUnit: cfg.footerUnit,
+    footerUnit: cardType === 'STOCK_REDUCE_RANKING_CARD'
+      ? (payload.rankingEntityType === 'STORE' ? '家门店' : '项商品')
+      : cfg.footerUnit,
   };
 }
 
 module.exports = {
-  PURCHASE_RANKING_CARD_TYPES: PURCHASE_RANKING_CARD_TYPES,
+  BUSINESS_RANKING_CARD_TYPES: BUSINESS_RANKING_CARD_TYPES,
   CONFIG: CONFIG,
-  isPurchaseRankingCardType: isPurchaseRankingCardType,
-  resolvePurchaseRankingCardData: resolvePurchaseRankingCardData,
+  isBusinessRankingCardType: isBusinessRankingCardType,
+  resolveBusinessRankingCardData: resolveBusinessRankingCardData,
   extractRawRows: extractRawRows,
   normalizeRows: normalizeRows,
 };

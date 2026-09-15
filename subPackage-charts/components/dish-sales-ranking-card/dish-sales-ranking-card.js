@@ -2,7 +2,7 @@
  * 菜品销量/销售额排行卡片（表格样式）
  *
  * cardData：
- * { title, subtitle, payload: { startDate, endDate, timeLabel, timeDisplayText, metricLabel, rankingType, rows[], summary } }
+ * { title, subtitle, payload: { startDate, endDate, timeLabel, timeDisplayText, metricLabel, rankingType, focusRows[], secondaryRows[], summary } }
  */
 
 /** 金额格式化 */
@@ -46,7 +46,9 @@ Component({
       }
 
       var payload = newVal.payload || {};
-      var rows = payload.rows || [];
+      var focusRows = Array.isArray(payload.focusRows) ? payload.focusRows : [];
+      var secondaryRows = Array.isArray(payload.secondaryRows) ? payload.secondaryRows : [];
+      var rows = focusRows.concat(secondaryRows);
       var title = newVal.title || '菜品排行';
       var subtitle = newVal.subtitle || '';
 

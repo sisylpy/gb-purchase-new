@@ -114,8 +114,8 @@
       cardData="{{_resolvedCardData}}"
       readonly="{{readonly}}"
     />
-    <purchase-ranking-card
-      wx:elif="{{cardType === 'PURCHASE_GOODS_AMOUNT_RANKING_CARD' || cardType === 'PURCHASE_GOODS_COUNT_RANKING_CARD' || cardType === 'PURCHASE_GOODS_QUANTITY_RANKING_CARD' || cardType === 'PURCHASE_STORE_AMOUNT_RANKING_CARD' || cardType === 'PURCHASE_SUPPLIER_AMOUNT_RANKING_CARD'}}"
+    <business-ranking-card
+      wx:elif="{{cardType === 'PURCHASE_GOODS_AMOUNT_RANKING_CARD' || cardType === 'PURCHASE_GOODS_COUNT_RANKING_CARD' || cardType === 'PURCHASE_GOODS_QUANTITY_RANKING_CARD' || cardType === 'PURCHASE_STORE_AMOUNT_RANKING_CARD' || cardType === 'PURCHASE_SUPPLIER_AMOUNT_RANKING_CARD' || cardType === 'STOCK_REDUCE_RANKING_CARD'}}"
       card-type="{{cardType}}"
       cardData="{{_resolvedCardData}}"
       readonly="{{readonly}}"

@@ -1,9 +1,7 @@
 /**
- * 采购排行卡（通用）— 金额/次数/数量/门店/供应商
+ * 业务排行卡（通用）— 统一消费 focusRows / secondaryRows。
  * 仅展示，行级 recordWork 事件由页面处理
  */
-var purchaseRankingUtil = require('../../utils/purchaseRankingCardUtil');
-
 Component({
   properties: {
     cardType: {
@@ -53,22 +51,10 @@ Component({
         return;
       }
 
-      var cardType = this.properties.cardType || newVal.cardType || '';
       var data = newVal;
 
-      // 兼容仅传 payload 未预规范的场景
-      if (!data.rows && purchaseRankingUtil.isPurchaseRankingCardType(cardType)) {
-        var resolved = purchaseRankingUtil.resolvePurchaseRankingCardData({
-          cardType: cardType,
-          title: data.title || '',
-          subtitle: data.subtitle || '',
-          payload: data.payload || data,
-        });
-        if (resolved) data = resolved;
-      }
-
       var rows = data.rows || [];
-      var title = data.title || '采购排行';
+      var title = data.title || '业务排行';
       var subtitle = data.subtitle || '';
       var narrative = data.narrative || '';
 
@@ -119,7 +105,7 @@ Component({
       });
     },
 
-    /** 行级记入工作记录（仅商品类排行，由页面 bind:recordWork 处理） */
+    /** 行级记入工作记录；sourceItemKey 由正式行身份生成。 */
     onRecordItem: function (e) {
       var rank = e.currentTarget.dataset.rank;
       var item = null;
@@ -128,7 +114,7 @@ Component({
         if (rows[i].rank === rank) { item = rows[i]; break; }
       }
       if (!item) return;
-      var itemKey = item.rowId != null ? ('disGoodsId:' + item.rowId) : '__CARD__';
+      var itemKey = item.sourceItemKey || '__CARD__';
       this.triggerEvent('recordWork', {
         cardType: this.properties.cardType,
         itemKey: itemKey,

@@ -5,7 +5,7 @@
  * 场景：chat / pin / workRecord / announcement
  */
 var cardNormalizer = require('../../utils/cardNormalizer');
-var purchaseRankingCardUtil = require('../../utils/purchaseRankingCardUtil');
+var businessRankingCardUtil = require('../../utils/businessRankingCardUtil');
 var workRecordCardTypes = require('../../utils/workRecordCardTypes');
 
 /** 已有独立 UI 组件的 cardType */
@@ -37,8 +37,8 @@ var DISPLAY_COMPONENT_TYPES = {
   GOODS_STOCK_BATCH_DETAIL_CARD: true,
 };
 
-// 采购排行 5 种卡 — 共用 purchase-ranking-card
-purchaseRankingCardUtil.PURCHASE_RANKING_CARD_TYPES.forEach(function (t) {
+// 正式业务排行卡共用 business-ranking-card 与唯一 focusRows/secondaryRows 协议。
+businessRankingCardUtil.BUSINESS_RANKING_CARD_TYPES.forEach(function (t) {
   DISPLAY_COMPONENT_TYPES[t] = true;
 });
 
@@ -139,15 +139,6 @@ Component({
           payload: this.properties.payload || {},
         });
         cardData = resolved ? resolved.cardData : null;
-      } else if (purchaseRankingCardUtil.isPurchaseRankingCardType(cardType) && !cardData.rows) {
-        // cardData 可能是原始 payload，再规范一次
-        var rankingResolved = purchaseRankingCardUtil.resolvePurchaseRankingCardData({
-          cardType: cardType,
-          title: this.properties.title || cardData.title || '',
-          subtitle: this.properties.subtitle || cardData.subtitle || '',
-          payload: cardData.payload || cardData,
-        });
-        if (rankingResolved) cardData = rankingResolved;
       }
 
       var canRender = !!(cardData && canRenderCardType(cardType));
