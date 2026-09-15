@@ -28,8 +28,8 @@
         <text class="biz-kpi-value">¥{{_totalAmount || '—'}}</text>
       </view>
       <view class="biz-kpi-col">
-        <text class="biz-kpi-label">采购笔数</text>
-        <text class="biz-kpi-value biz-kpi-normal">{{_orderCount}} 笔</text>
+        <text class="biz-kpi-label">采购明细</text>
+        <text class="biz-kpi-value biz-kpi-normal">{{_purchaseLineCount}} 条</text>
       </view>
       <view class="biz-kpi-col">
         <text class="biz-kpi-label">原料种类</text>

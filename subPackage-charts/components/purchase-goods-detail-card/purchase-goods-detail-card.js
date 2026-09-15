@@ -45,8 +45,8 @@ Component({
       var totalAmount = payload.totalPurchaseAmount != null
         ? Number(payload.totalPurchaseAmount).toFixed(2)
         : '';
-      var orderCount = payload.purchaseOrderCount != null
-        ? Number(payload.purchaseOrderCount)
+      var purchaseLineCount = payload.purchaseLineCount != null
+        ? Number(payload.purchaseLineCount)
         : 0;
 
       that.setData({
@@ -54,7 +54,7 @@ Component({
         _itemCount: rawItems.length,
         _items: items,
         _totalAmount: totalAmount,
-        _orderCount: orderCount,
+        _purchaseLineCount: purchaseLineCount,
         // 标题区信息：优先取卡片顶层字段
         _title: cd2.title || payload.title || '原料采购',
         _timeLabel: payload.timeLabel || payload.reportLabel || '',
