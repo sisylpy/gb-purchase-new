@@ -6,7 +6,7 @@
 
  <view class="flex-column bg-white">
 
-  <view wx:if="{{hasFranchiseHeadquarters}}" class="flex-row-between p-30 border-bottom mt-10" bindtap="toHeadquartersTasks" hover-class="hover">
+  <view class="flex-row-between p-30 border-bottom mt-10" bindtap="toHeadquartersTasks" hover-class="hover">
     <view class="flex-row">
       <image src="/images/book.png" class="icon mr-20" />
       <view class="flex-column">
