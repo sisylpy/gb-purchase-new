@@ -1,0 +1,117 @@
+.oos-card {
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx 20rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  border: 1rpx solid #eaeaea;
+  box-sizing: border-box;
+}
+
+/* 头部 */
+.oos-header {
+  margin-bottom: 4rpx;
+}
+
+.oos-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: block;
+  line-height: 1.3;
+}
+
+.oos-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-top: 4rpx;
+  line-height: 1.4;
+}
+
+/* 摘要 */
+.oos-summary {
+  background: #f5f7fa;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  margin-top: 16rpx;
+}
+
+.oos-summary-text {
+  font-size: 24rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* 空态 */
+.oos-empty {
+  margin-top: 20rpx;
+  padding: 28rpx 20rpx;
+  background: #fafafa;
+  border-radius: 12rpx;
+  text-align: center;
+}
+
+.oos-empty-text {
+  font-size: 26rpx;
+  color: #999;
+  line-height: 1.6;
+}
+
+/* ========== 分块列表 ========== */
+.oos-section {
+  margin-top: 20rpx;
+}
+
+.oos-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.oos-section-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.oos-section-count {
+  font-size: 24rpx;
+  color: #e8632d;
+}
+
+.oos-list {
+  border-radius: 12rpx;
+  overflow: hidden;
+  border: 1rpx solid #f0f0f0;
+}
+
+.oos-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+
+.oos-row:last-child {
+  border-bottom: none;
+}
+
+.oos-row-name {
+  font-size: 26rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+  flex-shrink: 0;
+  max-width: 320rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oos-row-store {
+  font-size: 22rpx;
+  color: #999;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}

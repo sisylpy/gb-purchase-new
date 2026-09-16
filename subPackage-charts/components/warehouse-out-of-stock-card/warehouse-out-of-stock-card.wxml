@@ -1,0 +1,47 @@
+<view class="oos-card" wx:if="{{visible}}">
+  <!-- 头部 -->
+  <view class="oos-header">
+    <text class="oos-title">{{title}}</text>
+    <text class="oos-subtitle">{{subtitle}}</text>
+  </view>
+
+  <!-- 摘要描述 -->
+  <view class="oos-summary" wx:if="{{summaryText}}">
+    <text class="oos-summary-text">{{summaryText}}</text>
+  </view>
+
+  <!-- 空态 -->
+  <view class="oos-empty" wx:if="{{!hasData}}">
+    <text class="oos-empty-text">暂未发现无库存记录或库存已为零的部门商品</text>
+  </view>
+
+  <block wx:if="{{hasData}}">
+    <!-- 无库存记录 -->
+    <view class="oos-section" wx:if="{{noRecordItems.length > 0}}">
+      <view class="oos-section-head">
+        <text class="oos-section-title">无库存记录</text>
+        <text class="oos-section-count">{{noRecordCount}} 个</text>
+      </view>
+      <view class="oos-list">
+        <view class="oos-row" wx:for="{{noRecordItems}}" wx:key="index">
+          <text class="oos-row-name">{{item.goodsName}}</text>
+          <text class="oos-row-store" wx:if="{{item.storeName}}">{{item.storeName}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 库存为零 -->
+    <view class="oos-section" wx:if="{{zeroRestItems.length > 0}}">
+      <view class="oos-section-head">
+        <text class="oos-section-title">库存为零</text>
+        <text class="oos-section-count">{{zeroRestCount}} 个</text>
+      </view>
+      <view class="oos-list">
+        <view class="oos-row" wx:for="{{zeroRestItems}}" wx:key="index">
+          <text class="oos-row-name">{{item.goodsName}}</text>
+          <text class="oos-row-store" wx:if="{{item.storeName}}">{{item.storeName}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

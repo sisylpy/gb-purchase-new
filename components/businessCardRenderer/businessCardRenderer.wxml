@@ -124,6 +124,11 @@
       cardData="{{_resolvedCardData}}"
       readonly="{{readonly}}"
     />
+    <warehouse-out-of-stock-card
+      wx:elif="{{cardType === 'WAREHOUSE_OUT_OF_STOCK_CARD'}}"
+      cardData="{{_resolvedCardData}}"
+      readonly="{{readonly}}"
+    />
     <purchase-goods-business-analysis-card
       wx:elif="{{cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD'}}"
       cardData="{{_resolvedCardData}}"

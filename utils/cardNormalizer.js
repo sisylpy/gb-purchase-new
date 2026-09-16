@@ -306,6 +306,12 @@ function resolveDisplayCard(card) {
     return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: titleFreshness, subtitle: subtitleFreshness }) };
   }
 
+  if (card.cardType === 'WAREHOUSE_OUT_OF_STOCK_CARD') {
+    var titleOos = card.title || '缺货/断货清单';
+    var subtitleOos = card.subtitle || (payload ? (payload.stockSnapshotLabel || payload.timeLabel || '') : '');
+    return { cardType: card.cardType, cardData: Object.assign({}, payload, { title: titleOos, subtitle: subtitleOos }) };
+  }
+
   if (card.cardType === 'PURCHASE_ANOMALY_CARD') {
     var anomalyKind = payload ? (payload.anomalyKind || '') : '';
     var title13 = anomalyKind ? '采购异常 · ' + anomalyKind : (card.title || '采购异常');

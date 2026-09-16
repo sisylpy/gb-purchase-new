@@ -25,6 +25,7 @@
     "warehouse-inventory-supervision-card": "/subPackage-charts/components/warehouse-inventory-supervision-card/warehouse-inventory-supervision-card",
     "warehouse-waste-risk-card": "/subPackage-charts/components/warehouse-waste-risk-card/warehouse-waste-risk-card",
     "warehouse-freshness-management-card": "/subPackage-charts/components/warehouse-freshness-management-card/warehouse-freshness-management-card",
+    "warehouse-out-of-stock-card": "/subPackage-charts/components/warehouse-out-of-stock-card/warehouse-out-of-stock-card",
     "purchase-goods-business-analysis-card": "/subPackage-charts/components/purchase-goods-business-analysis-card/purchase-goods-business-analysis-card",
     "business-ranking-card": "/subPackage-charts/components/business-ranking-card/business-ranking-card",
     "purchase-goods-anchor-detail-card": "/subPackage-charts/components/purchase-goods-anchor-detail-card/purchase-goods-anchor-detail-card",
