@@ -4,12 +4,9 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js');
 var api = require('../../../services/api.js');
 var foodSalesDepUtil = require('../../../utils/foodSalesDepUtil');
+var storeRootDepartmentId = require('../../../../lib/storeRootDepartment').storeRootDepartmentId;
 
-var depFatherAndSubDepForChoice = foodSalesDepUtil.depFatherAndSubDepForChoice;
-var depFatherAndSubDepFromMendianInfo = foodSalesDepUtil.depFatherAndSubDepFromMendianInfo;
-var indexOfMendianDefaultSalesDep = foodSalesDepUtil.indexOfMendianDefaultSalesDep;
 var buildGroupedRows = foodSalesDepUtil.buildGroupedRows;
-var buildDepartmentChoiceListForCurrentMendian = foodSalesDepUtil.buildDepartmentChoiceListForCurrentMendian;
 
 Page({
   data: {
@@ -19,10 +16,6 @@ Page({
     disInfo: null,
     depFatherId: '',
     mendianInfo: null,
-
-    departmentChoiceList: [],
-    salesDepIndex: 0,
-    hasDepartmentChoices: false,
 
     singleDate: '',
     todayDate: '',
@@ -63,17 +56,12 @@ Page({
     var disInfo = wx.getStorageSync('disInfo');
     if (disInfo) {
       var mendianStored = wx.getStorageSync('mendianInfo');
-      var choices = buildDepartmentChoiceListForCurrentMendian(disInfo, mendianStored);
       var patch = {
         disInfo: disInfo,
-        depFatherId: (mendianStored && mendianStored.gbDepartmentId) ? mendianStored.gbDepartmentId : '',
-        departmentChoiceList: choices,
-        hasDepartmentChoices: choices.length > 1,
-        salesDepIndex: 0,
+        depFatherId: mendianStored ? storeRootDepartmentId(mendianStored) || '' : '',
       };
       if (mendianStored && mendianStored.gbDepartmentId) {
         patch.mendianInfo = mendianStored;
-        patch.salesDepIndex = indexOfMendianDefaultSalesDep(choices, mendianStored);
       }
       this.setData(patch);
     }
@@ -87,55 +75,15 @@ Page({
 
   /* ========== 工具方法 ========== */
 
-  _getSelectedDepChoice: function () {
-    var list = this.data.departmentChoiceList || [];
-    var idx = this.data.salesDepIndex || 0;
-    return list[idx] || list[0] || null;
-  },
-
-  _getDepFoodCatalogParams: function () {
-    var mi = this.data.mendianInfo || wx.getStorageSync('mendianInfo');
-    if (mi) {
-      var fromMi = depFatherAndSubDepFromMendianInfo(mi);
-      if (fromMi) return fromMi;
-    }
-    return depFatherAndSubDepForChoice(this._getSelectedDepChoice());
-  },
-
   _fatherDepForCurrentSelection: function () {
-    var ch = this._getSelectedDepChoice();
-    if (ch && ch.gbDfDepFatherId != null && ch.gbDfDepFatherId !== '') return ch.gbDfDepFatherId;
     var mi = this.data.mendianInfo || wx.getStorageSync('mendianInfo');
-    return (mi && mi.gbDepartmentId) ? mi.gbDepartmentId : '';
+    var root = storeRootDepartmentId(mi);
+    return root != null ? root : this.data.depFatherId;
   },
 
   _resolveDistributerId: function () {
     var disInfo = this.data.disInfo || wx.getStorageSync('disInfo');
     return (disInfo && disInfo.gbDistributerId != null) ? disInfo.gbDistributerId : '';
-  },
-
-  _getSalesDepId: function () {
-    var ch = this._getSelectedDepChoice();
-    if (ch && ch.gbDepartmentId != null && ch.gbDepartmentId !== '') {
-      var cid = Number(ch.gbDepartmentId);
-      var fidRaw = ch.gbDfDepFatherId;
-      var fid = fidRaw != null && fidRaw !== '' ? Number(fidRaw) : NaN;
-      if (!isNaN(cid) && !isNaN(fid) && cid !== fid) return ch.gbDepartmentId;
-
-      var mi = this.data.mendianInfo || wx.getStorageSync('mendianInfo');
-      var subs = (mi && mi.gbDepartmentEntityList) || [];
-      if (subs.length > 0 && subs[0] && subs[0].gbDepartmentId != null) {
-        return subs[0].gbDepartmentId;
-      }
-      return ch.gbDepartmentId;
-    }
-
-    var mi = this.data.mendianInfo || wx.getStorageSync('mendianInfo');
-    var subs2 = (mi && mi.gbDepartmentEntityList) || [];
-    if (subs2.length > 0 && subs2[0] && subs2[0].gbDepartmentId != null) {
-      return subs2[0].gbDepartmentId;
-    }
-    return this.data.depFatherId;
   },
 
   /* ========== 数据加载 ========== */
@@ -144,12 +92,12 @@ Page({
   _loadFoodCatalog: function () {
     var self = this;
     if (!self.data.disId) return;
-    var depParam = self._getDepFoodCatalogParams();
-    if (!depParam) return;
+    var depFatherId = self._fatherDepForCurrentSelection();
+    if (!depFatherId) return;
 
     self.setData({ foodsLoading: true });
 
-    api.depGetDepFoodList(depParam.depFatherId, depParam.subDepid)
+    api.depGetDepFoodList(depFatherId)
       .then(function (res) {
         if (res.result.code == 0) {
           var groups = buildGroupedRows(res.result.data, { mode: 'staffMeal' });
@@ -170,15 +118,12 @@ Page({
     var self = this;
     var depFatherId = self._fatherDepForCurrentSelection();
     var distributerId = self._resolveDistributerId();
-    var subDepId = self._getSalesDepId();
-
     if (!depFatherId || !distributerId) return;
 
     api.getDailyFoodSalesAndRevenue({
       depFatherId: depFatherId,
       distributerId: distributerId,
       recordDate: self.data.singleDate,
-      subDepId: subDepId,
     }).then(function (res) {
       if (res.result.code === 0) {
         var data = res.result.data || {};
@@ -227,12 +172,6 @@ Page({
   onDateChange: function (e) {
     this.setData({ singleDate: e.detail.value });
     this._loadDailyMeals();
-  },
-
-  onSalesDepChange: function (e) {
-    var idx = parseInt(e.detail.value, 10) || 0;
-    this.setData({ salesDepIndex: idx });
-    this._loadFoodCatalog();
   },
 
   /** 点击分类头部：展开/收起 */
@@ -302,9 +241,7 @@ Page({
 
         var depFatherId = self._fatherDepForCurrentSelection();
         var distributerId = self._resolveDistributerId();
-        var subDepId = self._getSalesDepId();
-
-        if (!depFatherId || !distributerId || !subDepId) {
+        if (!depFatherId || !distributerId) {
           wx.showToast({ title: '门店信息不完整', icon: 'none' }); return;
         }
 
@@ -312,7 +249,6 @@ Page({
         api.deleteDishSalesLine({
           recordDate: self.data.singleDate,
           depFatherId: Number(depFatherId),
-          depId: Number(subDepId),
           distributerId: Number(distributerId),
           foodId: Number(child.foodId),
           type: 5,
@@ -369,9 +305,7 @@ Page({
 
     var depFatherId = self._fatherDepForCurrentSelection();
     var distributerId = self._resolveDistributerId();
-    var subDepId = self._getSalesDepId();
-
-    if (!depFatherId || !distributerId || !subDepId) {
+    if (!depFatherId || !distributerId) {
       wx.showToast({ title: '门店信息不完整', icon: 'none' }); return;
     }
 

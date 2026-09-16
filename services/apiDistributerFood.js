@@ -19,9 +19,6 @@ export const depGeFoodBusiness = (data) => {
     if (data.sortOrder != null && data.sortOrder !== '') {
       parts.push('sortOrder=' + encodeURIComponent(String(data.sortOrder)));
     }
-    if (data.subDepId != null && data.subDepId !== '' && data.subDepId !== undefined && !isNaN(Number(data.subDepId))) {
-      parts.push('subDepId=' + encodeURIComponent(String(Number(data.subDepId))));
-    }
     if (data.viewMode) {
       parts.push('viewMode=' + encodeURIComponent(String(data.viewMode)));
     }
@@ -52,7 +49,6 @@ export const getFoodBusinessDiagnosis = (data) => {
       'startDate=' + encodeURIComponent(String(data.startDate)),
       'stopDate=' + encodeURIComponent(String(data.stopDate)),
     ];
-    if (data.subDepId != null && data.subDepId !== '') parts.push('subDepId=' + encodeURIComponent(String(data.subDepId)));
     wx.request({
       url: apiUrl.apiUrl + 'gbdepfood/getFoodBusinessDiagnosis',
       method: 'POST',
@@ -111,9 +107,6 @@ export const dishIngredientDashboard = (data) => {
   if (data.trendEndDate) body.trendEndDate = data.trendEndDate;
   if (data.primaryDisGoodsId != null && data.primaryDisGoodsId !== '') {
     body.primaryDisGoodsId = data.primaryDisGoodsId;
-  }
-  if (data.subDepId != null && data.subDepId !== '') {
-    body.subDepId = data.subDepId;
   }
   return new Promise((resolve, reject) => {
     wx.request({

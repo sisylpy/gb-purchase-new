@@ -3,6 +3,7 @@ var load = require('../../../../lib/load.js');
 var globalData = getApp().globalData;
 var dateUtils = require('../../../../lib/dateUtil.js');
 var http = require('../../../../lib/request.js');
+var storeRootDepartmentId = require('../../../../lib/storeRootDepartment').storeRootDepartmentId;
 
 Page({
 
@@ -15,7 +16,6 @@ Page({
     dishImage: '',
     disId: '',
     depFatherId: '',
-    subDepId: '',
 
     // 日期
     startDate: '',
@@ -66,17 +66,9 @@ Page({
       dishImage: options.dishImage ? decodeURIComponent(options.dishImage) : '',
       disId: options.disId || '',
       depFatherId: options.depFatherId || this._getDepFatherId(),
-      subDepId: options.subDepId || '',
       dishPrice: options.dishPrice || '',
     });
 
-    var orderDepInfo = wx.getStorageSync('orderDepInfo');
-    if(orderDepInfo){
-      this.setData({
-        orderDepInfo: orderDepInfo,
-        subDepId: orderDepInfo.gbDepartmentId
-      })
-    }
     this._syncDates();
     this._fetchData();
   },
@@ -90,14 +82,10 @@ Page({
     }
   },
 
-  /** 获取 depFatherId */
+  /** 获取门店根部门（SSOT：与后端 requireStoreRoot 一致） */
   _getDepFatherId: function () {
     var mendianInfo = wx.getStorageSync('mendianInfo');
-    if (mendianInfo && mendianInfo.gbDepartmentId) 
-    
-    return mendianInfo.gbDepartmentId;
-
-    return '';
+    return storeRootDepartmentId(mendianInfo);
   },
 
   _syncDates() {
@@ -306,7 +294,6 @@ Page({
 
     var saveData = {
       dishId: d.dishId,
-      departmentId: d.subDepId ,
       depFatherId: d.depFatherId,
       disId: d.disId,
       salesDate: row.date || row.salesDate,

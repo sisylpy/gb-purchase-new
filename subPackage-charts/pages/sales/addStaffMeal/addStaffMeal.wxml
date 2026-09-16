@@ -13,18 +13,6 @@
           </view>
         </picker>
       </view>
-      <view class="field-row" wx:if="{{hasDepartmentChoices}}">
-        <text class="field-label">销售部门</text>
-        <picker mode="selector" range="{{departmentChoiceList}}" range-key="gbDepartmentName" value="{{salesDepIndex}}" bindchange="onSalesDepChange">
-          <view class="date-input-wrapper" style="width: {{windowWidth - 240}}rpx;">
-            <text>{{departmentChoiceList[salesDepIndex] ? departmentChoiceList[salesDepIndex].gbDepartmentName : ''}}</text>
-          </view>
-        </picker>
-      </view>
-      <view class="field-row dep-readonly-row" wx:if="{{!hasDepartmentChoices && departmentChoiceList.length}}">
-        <text class="field-label">销售部门</text>
-        <text class="dep-readonly">{{departmentChoiceList[0].gbDepartmentName}}</text>
-      </view>
     </view>
 
     <!-- 销售类型标签 -->

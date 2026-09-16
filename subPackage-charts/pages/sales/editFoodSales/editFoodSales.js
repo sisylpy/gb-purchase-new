@@ -4,10 +4,10 @@ var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js');
 var api = require('../../../services/api.js');
 var foodSalesDisplayUtil = require('../../../utils/foodSalesDisplayUtil');
+var storeRootDepartmentId = require('../../../../lib/storeRootDepartment').storeRootDepartmentId;
 
 var SALES_TYPES = foodSalesDisplayUtil.SALES_TYPES;
 var parseDateDisplay = foodSalesDisplayUtil.parseDateDisplay;
-var getDepParamsFromMendian = foodSalesDisplayUtil.getDepParamsFromMendian;
 
 Page({
   data: {
@@ -21,7 +21,6 @@ Page({
     weekDisplay: '',
 
     depFatherId: '',
-    subDepId: '',
     mendianInfo: null,
     disInfo: null,
     distributerId: '',
@@ -93,12 +92,7 @@ Page({
     var patch = { disInfo: disInfo, mendianInfo: mendianInfo };
 
     if (mendianInfo && mendianInfo.gbDepartmentId) {
-      patch.depFatherId = mendianInfo.gbDepartmentId;
-      var depParams = getDepParamsFromMendian(mendianInfo);
-      if (depParams) {
-        patch.depFatherId = depParams.depFatherId;
-        patch.subDepId = depParams.subDepId || depParams.depFatherId;
-      }
+      patch.depFatherId = storeRootDepartmentId(mendianInfo);
     }
     this.setData(patch);
   },
