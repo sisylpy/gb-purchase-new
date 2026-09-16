@@ -25,7 +25,10 @@
     <view class="product-card" wx:for="{{filteredProducts}}" wx:key="id" data-id="{{item.id}}" bindtap="toDetail" hover-class="product-card-hover">
       <view class="product-card-head">
         <view class="product-name">{{item.productName}}</view>
-        <text class="prep-status {{item.displayStateClass}}">{{item.displayStateLabel}}</text>
+        <view class="product-card-actions">
+          <text class="prep-status {{item.displayStateClass}}">{{item.displayStateLabel}}</text>
+          <text class="delete-button {{item.deletable === false ? 'delete-button-disabled' : ''}}" data-id="{{item.id}}" catchtap="deleteProduct">{{deletingId === item.id ? '删除中' : '删除'}}</text>
+        </view>
       </view>
       <view class="product-meta">
         <text>{{item.ingredientCount}} 种原料 · 标准产出 {{item.standardOutputText}}</text>

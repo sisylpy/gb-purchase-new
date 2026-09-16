@@ -78,6 +78,10 @@ function put(path, body) {
   return call(path, body, 'PUT');
 }
 
+function del(path, body) {
+  return call(path, body, 'DELETE');
+}
+
 function createIdempotencyKey(prefix) {
   var random = Math.random().toString(36).slice(2, 10);
   return String(prefix || 'PREP') + '-' + Date.now() + '-' + random;
@@ -119,6 +123,10 @@ function changeStoreProductStatus(id, enabled, rowVersion) {
   return post('preparation/store/products/' + id + '/' + (enabled ? 'enable' : 'disable'), {
     rowVersion: rowVersion,
   });
+}
+
+function deleteStoreProduct(id, rowVersion) {
+  return del('preparation/store/products/' + id, { rowVersion: rowVersion });
 }
 
 function getStoreRecipe(productId) {
@@ -539,6 +547,7 @@ module.exports = {
   createStoreProduct: createStoreProduct,
   updateStoreProduct: updateStoreProduct,
   changeStoreProductStatus: changeStoreProductStatus,
+  deleteStoreProduct: deleteStoreProduct,
   getStoreRecipe: getStoreRecipe,
   searchStoreIngredientOptions: searchStoreIngredientOptions,
   saveStoreRecipe: saveStoreRecipe,

@@ -12,6 +12,7 @@ Page({
     filter: '',
     products: [],
     filteredProducts: [],
+    deletingId: null,
     tabs: [
       { value: '', label: '全部' },
       { value: 'READY', label: '使用中' },
@@ -102,6 +103,41 @@ Page({
 
   toDetail: function (event) {
     wx.navigateTo({ url: '/subPackage-preparation/pages/storeProductDetail/storeProductDetail?id=' + event.currentTarget.dataset.id });
+  },
+
+  deleteProduct: function (event) {
+    var that = this;
+    var productId = Number(event.currentTarget.dataset.id);
+    var product = (this.data.products || []).find(function (row) {
+      return Number(row.id) === productId;
+    });
+    if (!product || this.data.deletingId) return;
+    if (product.deletable === false) {
+      wx.showModal({
+        title: '不能删除',
+        content: product.deleteBlockedReason || '该中间料已被菜品配方引用，不能删除。',
+        showCancel: false,
+      });
+      return;
+    }
+    util.confirm(
+      '删除后，中间料及其标准配方、组成原料记录都会永久删除，且无法恢复。确认删除“' + product.productName + '”？',
+      '删除中间料'
+    ).then(function (confirmed) {
+      if (!confirmed) return;
+      that.setData({ deletingId: productId });
+      wx.showLoading({ title: '正在删除', mask: true });
+      return api.deleteStoreProduct(productId, product.rowVersion).then(function () {
+        wx.showToast({ title: '已删除', icon: 'success' });
+        return that.loadProducts();
+      }).catch(function (error) {
+        util.showError(error);
+        return that.loadProducts();
+      }).then(function () {
+        that.setData({ deletingId: null });
+        wx.hideLoading();
+      });
+    });
   },
 
   toBack: function () { wx.navigateBack({ delta: 1 }); },

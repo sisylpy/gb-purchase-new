@@ -20,7 +20,10 @@
 .product-card-hover { opacity: .82; }
 .product-card-head { align-items: center; display: flex; justify-content: space-between; padding-right: 0; }
 .product-name { color: #1d252b; font-size: 32rpx; font-weight: 600; line-height: 1.35; }
+.product-card-actions { align-items: center; display: flex; flex-shrink: 0; gap: 16rpx; margin-left: 18rpx; }
 .product-card .prep-status { font-size: 22rpx; font-weight: 500; line-height: 42rpx; padding: 0 17rpx; }
+.delete-button { color: #d14343; font-size: 24rpx; line-height: 42rpx; padding: 0 4rpx; }
+.delete-button-disabled { color: #a9afb4; }
 .product-meta { color: #7e8790; font-size: 25rpx; line-height: 1.45; margin-top: 19rpx; }
 .card-arrow { height: 42rpx; opacity: .65; position: absolute; right: 27rpx; top: 91rpx; width: 42rpx; }
 .recipe-line { align-items: center; border-top: 1rpx solid #e8ebed; color: #168572; display: flex; font-size: 23rpx; gap: 10rpx; line-height: 1.45; margin-top: 19rpx; padding-top: 17rpx; }
