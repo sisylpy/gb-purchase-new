@@ -227,6 +227,32 @@ function buildPurchaseBusinessAnalysisDraft(cardData) {
   return { title: title, content: lines.join('\n') || '请关注该商品采购经营情况。' };
 }
 
+function buildPurchaseSupplierGoodsDetailDraft(cardData) {
+  var goodsName = cardData.goodsName || '该商品';
+  var title = goodsName + ' · 供货商采购明细';
+  var lines = [];
+  if (cardData.timeLabel) lines.push('统计范围：' + cardData.timeLabel);
+  if (cardData.scopeLabel) lines.push('门店：' + cardData.scopeLabel);
+
+  var suppliers = cardData.suppliers || [];
+  if (suppliers.length) {
+    lines.push('');
+    lines.push('供货商采购明细：');
+    suppliers.forEach(function (sp, i) {
+      var parts = [(i + 1) + '. ' + sp.supplierName];
+      if (sp.purchaseAmount != null && sp.purchaseAmount !== '') parts.push('金额' + sp.purchaseAmount + '元');
+      if (sp.quantity != null && sp.quantity !== '') parts.push('数量' + sp.quantity);
+      if (sp.unitPrice != null && sp.unitPrice !== '') parts.push('均价' + sp.unitPrice + '元');
+      if (sp.purchaseCount != null && sp.purchaseCount !== '') parts.push(sp.purchaseCount + '笔');
+      lines.push(parts.join('，'));
+    });
+  } else if (cardData.emptyReason) {
+    lines.push(cardData.emptyReason);
+  }
+
+  return { title: title, content: lines.join('\n') || '请关注该商品供货商采购明细。' };
+}
+
 function buildGenericDraft(cardData, cardTitle) {
   return {
     title: cardData.title || cardTitle || '业务记录',
@@ -256,6 +282,8 @@ function buildWorkRecordDraft(cardType, cardData, opts) {
     draft = buildWarehouseRiskDraft(cardData, sourceItemKey);
   } else if (cardType === 'PURCHASE_GOODS_BUSINESS_ANALYSIS_CARD') {
     draft = buildPurchaseBusinessAnalysisDraft(cardData);
+  } else if (cardType === 'PURCHASE_SUPPLIER_GOODS_DETAIL_CARD') {
+    draft = buildPurchaseSupplierGoodsDetailDraft(cardData);
   } else {
     draft = buildGenericDraft(cardData, opts.cardTitle);
   }

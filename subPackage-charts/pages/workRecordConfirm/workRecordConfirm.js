@@ -63,6 +63,7 @@ Page({
         return {
           recordId: record.recordId,
           title: record.title || record.displayTitle || '',
+          rawContent: record.rawContent || '',
           content: record.polishedContent || '',
           selectedTagIds: selectedIds,
           tagOptions: categories.map(function (category) {
@@ -76,7 +77,16 @@ Page({
           }),
         };
       });
-      that.setData({ records: records, loading: false });
+      var patch = { records: records, loading: false };
+      // 输入框为空时用「原话」回填，避免解析后原话丢失
+      if (!(that.data.inputValue || '').trim()) {
+        var rawContent = records.length ? (records[0].rawContent || '') : '';
+        if (rawContent) {
+          patch.inputValue = rawContent;
+          patch.canSubmit = true;
+        }
+      }
+      that.setData(patch);
     }).catch(function (err) {
       console.error('[工作记录确认] 加载失败', err);
       that.setData({ loading: false });
@@ -124,9 +134,9 @@ Page({
       }
       var recordIds = preparedRecords.map(function (item) { return Number(item.recordId); });
       wx.hideLoading();
+      // 保留原来的原话，不清空输入框
       that.setData({
-        inputValue: '',
-        canSubmit: false,
+        canSubmit: content.length > 0,
         submitting: false,
         loading: true,
         recordIds: recordIds,

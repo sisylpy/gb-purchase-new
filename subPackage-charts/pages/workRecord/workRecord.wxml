@@ -6,21 +6,30 @@
   <!-- 分类筛选栏 -->
   <view class="wr-category-bar">
     <view class="wr-category-toolbar">
-      <view class="wr-category-list">
-        <view
-          class="wr-category-filter {{activeCategoryId === item.id ? 'wr-category-filter--active' : ''}}"
-          wx:for="{{categoryList}}"
-          wx:key="id"
-          catchtap="onFilterCategory"
-          data-id="{{item.id}}"
-          style="background: {{activeCategoryId === item.id ? (item.color || '#2e7d32') : item.bg || '#e8f5e9'}}; color: {{activeCategoryId === item.id ? '#ffffff' : (item.color || '#2e7d32')}};"
-        >
-          <text class="wr-category-filter-icon" wx:if="{{item.icon}}">{{item.icon}}</text>
-          <text class="wr-category-filter-name">{{item.name}}</text>
-        </view>
+      <!-- 折叠按钮：默认显示，点开才展开分类标签 -->
+      <view class="wr-category-toggle" catchtap="toggleCategoryBar">
+        <text class="wr-category-toggle-icon">▦</text>
+        <text class="wr-category-toggle-label">{{categoryFilterLabel}}</text>
+        <text class="wr-category-toggle-arrow">{{showCategoryBar ? '⌄' : '›'}}</text>
       </view>
       <view class="wr-add-btn" catchtap="onAddRecord" aria-label="添加工作记录">
         <text class="wr-add-btn-icon">＋</text>
+      </view>
+    </view>
+
+    <!-- 展开态：分类标签 -->
+    <view class="wr-category-list" wx:if="{{showCategoryBar}}">
+      <view
+        class="wr-category-filter {{activeCategoryId === item.id ? 'wr-category-filter--active' : ''}}"
+        wx:for="{{categoryList}}"
+        wx:key="id"
+        catchtap="onFilterCategory"
+        data-id="{{item.id}}"
+        style="background: {{activeCategoryId === item.id ? (item.color || '#2e7d32') : item.bg || '#e8f5e9'}}; color: {{activeCategoryId === item.id ? '#ffffff' : (item.color || '#2e7d32')}};"
+      >
+        <image class="wr-category-filter-img" wx:if="{{item.iconImg}}" src="{{item.iconImg}}" mode="aspectFit"></image>
+        <text class="wr-category-filter-icon" wx:if="{{item.icon}}">{{item.icon}}</text>
+        <text class="wr-category-filter-name">{{item.name}}</text>
       </view>
     </view>
   </view>
@@ -56,18 +65,17 @@
           <block wx:for="{{group.records}}" wx:for-item="record" wx:key="id">
             <!-- AI整理视图 -->
             <block>
-              <view class="wr-card" id="record-{{record.id}}">
-                <!-- 列表抬头：displayTitle 优先，否则沿用分类标签 -->
+              <view class="wr-card {{openMenuId === record.id ? 'wr-card--menu-open' : ''}}" id="record-{{record.id}}">
+                <!-- 抬头：标题 + 时间 +「…」菜单按钮 -->
                 <view class="wr-card-header">
                   <text class="wr-card-title" wx:if="{{record.title}}">{{record.displayTitle || record.title}}</text>
-                  <view class="wr-announcement-badge" wx:if="{{record.announcementPublished}}">
-                    <text class="wr-announcement-icon">📣</text>
-                    <text>已推送公告</text>
-                  </view>
-                  <view class="wr-record-tags">
-                    <view class="wr-category-tag" wx:for="{{record.tags}}" wx:for-item="tag" wx:key="id" style="background: {{tag.bg}}; color: {{tag.color}};">
-                      <text class="wr-category-icon" wx:if="{{tag.icon}}">{{tag.icon}}</text>
-                      <text class="wr-category-name">{{tag.name}}</text>
+                  <view class="wr-card-header-right">
+                    <view class="wr-announcement-badge" wx:if="{{record.announcementPublished}}">
+                      <text class="wr-announcement-icon">📣</text>
+                    </view>
+                    <text class="wr-card-time">{{record.timeStr}}</text>
+                    <view class="wr-more-btn" catchtap="onToggleMenu" data-id="{{record.id}}">
+                      <text class="wr-more-btn-icon">⋯</text>
                     </view>
                   </view>
                 </view>
@@ -102,24 +110,34 @@
                   </view>
                 </view>
 
-                <!-- 店长原话 / 手动记录原话 -->
-                <view class="wr-raw-toggle" catchtap="toggleRawExpand" data-id="{{record.id}}">
-                  <text class="wr-raw-toggle-text">{{record._rawExpanded ? (record._isBusinessCard ? '店长原话已展开' : '原话已展开') : (record._isBusinessCard ? '店长原话已收起' : '原话已收起')}}</text>
-                  <text class="wr-raw-toggle-arrow">{{record._rawExpanded ? '⌃' : '⌄'}}</text>
-                </view>
-
                 <!-- 展开后的原话 -->
                 <view class="wr-raw-content" wx:if="{{record._rawExpanded}}">
+                  <view class="wr-raw-close" catchtap="toggleRawExpand" data-id="{{record.id}}">
+                    <text class="wr-raw-close-icon">✕</text>
+                  </view>
                   <text class="wr-raw-text">{{record.rawContent}}</text>
                 </view>
 
-                <!-- 底部状态栏：时间 + 状态 -->
+                <!-- 业务卡来源：展开/收起来源卡片 -->
+                <view class="wr-source-btn" wx:if="{{record._isBusinessCard}}" catchtap="onViewSource" data-id="{{record.id}}">
+                  <text class="wr-source-text">{{record._sourceExpanded ? '收起来源卡片' : '展开来源卡片'}}</text>
+                </view>
+
+                <!-- 分类标签：放到正文下方 -->
+                <view class="wr-record-tags wr-record-tags--below" wx:if="{{record.tags.length > 0}}">
+                  <view class="wr-category-tag" wx:for="{{record.tags}}" wx:for-item="tag" wx:key="id" style="background: {{tag.bg}}; color: {{tag.color}};">
+                    <image class="wr-category-img" wx:if="{{tag.iconImg}}" src="{{tag.iconImg}}" mode="aspectFit"></image>
+                    <text class="wr-category-icon" wx:if="{{tag.icon}}">{{tag.icon}}</text>
+                    <text class="wr-category-name">{{tag.name}}</text>
+                  </view>
+                </view>
+
+                <!-- 底部状态栏 -->
                 <view class="wr-card-footer">
                   <view class="wr-status-row">
-                    <text class="wr-status-label {{record.status === 'SUCCESS' ? 'wr-status--success' : record.status === 'FAILED' ? 'wr-status--failed' : 'wr-status--pending'}}">
+                    <text class="wr-status-label {{record.status === 'SUCCESS' ? 'wr-status--success' : record.status === 'FAILED' ? 'wr-status--failed' : 'wr-status--pending'}}" wx:if="{{record.status !== 'SUCCESS'}}">
                       {{record.statusText}}
                     </text>
-                    <text class="wr-card-time">{{record.timeStr}}</text>
                   </view>
                   <!-- FAILED 时显示重新整理入口 -->
                   <view class="wr-retry-btn" wx:if="{{record.status === 'FAILED'}}" catchtap="onRetryPolish" data-id="{{record.id}}">
@@ -127,20 +145,20 @@
                   </view>
                 </view>
 
-                <!-- 修改 / 删除 操作按钮 -->
-                <view class="wr-card-actions">
-                  <view class="wr-action-btn wr-action-btn--edit" catchtap="onEditRecord" data-id="{{record.id}}">
-                    <text class="wr-action-btn-text">修改</text>
+                <!-- 「…」下拉菜单 -->
+                <view class="wr-menu-mask" wx:if="{{openMenuId === record.id}}" catchtap="onCloseMenu"></view>
+                <view class="wr-menu" wx:if="{{openMenuId === record.id}}">
+                  <view class="wr-menu-item" catchtap="onMenuShowRaw" data-id="{{record.id}}">
+                    <text class="wr-menu-item-text">{{record._rawExpanded ? '收起原话' : '显示原话'}}</text>
                   </view>
-                  <view class="wr-action-btn wr-action-btn--delete" catchtap="onDeleteRecord" data-id="{{record.id}}">
-                    <text class="wr-action-btn-text">删除</text>
+                  <view class="wr-menu-item" catchtap="onEditRecord" data-id="{{record.id}}">
+                    <text class="wr-menu-item-text">修改</text>
                   </view>
-                  <view class="wr-action-btn wr-action-btn--announce" catchtap="onPushToAnnouncement" data-id="{{record.id}}">
-                    <text class="wr-action-btn-text">{{record.announcementPublished ? '重新推送' : '公告'}}</text>
+                  <view class="wr-menu-item wr-menu-item--danger" catchtap="onDeleteRecord" data-id="{{record.id}}">
+                    <text class="wr-menu-item-text">删除</text>
                   </view>
-                  <!-- 业务卡来源：收起/展开来源卡片 -->
-                  <view class="wr-source-btn" wx:if="{{record._isBusinessCard}}" catchtap="onViewSource" data-id="{{record.id}}">
-                    <text class="wr-source-text">{{record._sourceExpanded ? '收起来源卡片' : '展开来源卡片'}}</text>
+                  <view class="wr-menu-item" catchtap="onPushToAnnouncement" data-id="{{record.id}}">
+                    <text class="wr-menu-item-text">{{record.announcementPublished ? '重新推送公告' : '推送到公告栏'}}</text>
                   </view>
                 </view>
               </view>
@@ -158,7 +176,6 @@
       <text class="wr-loadmore-text">没有更多记录了</text>
     </view>
 
-    <!-- 底部安全间距 -->
     <view class="wr-scroll-spacer"></view>
   </scroll-view>
 

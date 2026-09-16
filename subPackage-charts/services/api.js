@@ -82,9 +82,6 @@ var getDailyFoodSalesAndRevenue = function (body) {
   if (body.recordDate != null && body.recordDate !== '') {
     payload.recordDate = body.recordDate;
   }
-  if (body.subDepId != null && body.subDepId !== '') {
-    payload.subDepId = body.subDepId;
-  }
   return request.post('gbdepfood/getDailyFoodSalesAndRevenue', payload);
 };
 
@@ -92,11 +89,8 @@ var updateDailyFoodSalesAndRevenue = function (body) {
   return request.post('gbdepfood/updateDailyFoodSalesAndRevenue', body);
 };
 
-var depGetDepFoodList = function (depFatherId, subDepid) {
+var depGetDepFoodList = function (depFatherId) {
   var params = { depFatherId: depFatherId };
-  if (subDepid != null && subDepid !== '') {
-    params.subDepid = subDepid;
-  }
   return request.get('gbdepfood/depGetDepFoodList', params);
 };
 

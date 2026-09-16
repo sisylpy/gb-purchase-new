@@ -15,6 +15,25 @@ var api = require('../../services/api');
 var dateUtil = require('../../../lib/dateUtil');
 var sourceCardBuilder = require('../../utils/sourceCardBuilder');
 
+// 分类 code -> 标签图标（彩色原图，置于分包 subPackage-charts/images/work-record/ 下，避免撑大主包）
+// 注意：卫生与安全(HYGIENE_SAFETY) 暂无对应图片，不配图
+var CATEGORY_ICON_MAP = {
+  EMPLOYEE_MANAGEMENT: '/subPackage-charts/images/work-record/employee-management.png',
+  SUPPLIER_PURCHASE: '/subPackage-charts/images/work-record/supplier-purchase.png',
+  FOOD_QUALITY: '/subPackage-charts/images/work-record/food-safety.png',
+  DISH_SALES: '/subPackage-charts/images/work-record/dish-sales.png',
+  CUSTOMER_SERVICE: '/subPackage-charts/images/work-record/customer-service.png',
+  EQUIPMENT_FACILITY: '/subPackage-charts/images/work-record/equipment-facilities.png',
+  INVENTORY_WASTE: '/subPackage-charts/images/work-record/inventory-loss.png',
+  BUSINESS_MANAGEMENT: '/subPackage-charts/images/work-record/business-management.png',
+  OTHER: '/subPackage-charts/images/work-record/other.png',
+};
+
+function categoryIconImg(code) {
+  if (!code) return '';
+  return CATEGORY_ICON_MAP[code] || '';
+}
+
 Page({
   data: {
     // 导航栏高度
@@ -30,6 +49,9 @@ Page({
     showEditPopup: false,
     editingRecordId: '',
     editingContent: '',
+
+    // 「…」下拉菜单
+    openMenuId: null,
 
     // 加载状态
     loading: false,
@@ -60,6 +82,8 @@ Page({
 
     // 当前选中的分类 ID（null 表示「全部」）
     activeCategoryId: null,
+    categoryFilterLabel: '全部记录',
+    showCategoryBar: false,
   },
 
   onLoad: function (options) {
@@ -173,24 +197,28 @@ Page({
         var map = {};
         (Array.isArray(list) ? list : []).forEach(function (item) {
           var id = item.id || item.categoryId || item.code;
+          var code = item.code || item.categoryCode;
           if (id !== undefined && id !== null) {
             map[id] = {
               name: item.name || item.categoryName || '未分类',
               icon: item.icon || item.emoji || '',
+              iconImg: categoryIconImg(code),
               bg: item.bgColor || item.backgroundColor || '#e8f5e9',
               color: item.color || item.textColor || '#2e7d32',
             };
           }
         });
         // 构建带「全部」的分类列表（用于筛选栏）
-        var categoryList = [{ id: null, name: '全部', icon: '', bg: '#e8f5e9', color: '#2e7d32' }];
+        var categoryList = [{ id: null, name: '全部', icon: '', iconImg: '', bg: '#e8f5e9', color: '#2e7d32' }];
         (Array.isArray(list) ? list : []).forEach(function (item) {
           var id = item.id || item.categoryId || item.code;
+          var code = item.code || item.categoryCode;
           if (id !== undefined && id !== null) {
             categoryList.push({
               id: id,
               name: item.name || item.categoryName || '未分类',
               icon: item.icon || item.emoji || '',
+              iconImg: categoryIconImg(code),
               bg: item.bgColor || item.backgroundColor || '#e8f5e9',
               color: item.color || item.textColor || '#2e7d32',
             });
@@ -308,6 +336,7 @@ Page({
         id: tagId,
         name: tag.categoryName || tag.name || style.name || '未分类',
         icon: style.icon || '',
+        iconImg: style.iconImg || '',
         bg: style.bg || '#eef5f1',
         color: style.color || '#35745c',
       };
@@ -370,6 +399,7 @@ Page({
         id: categoryId,
         name: categoryName || '未分类',
         icon: category.icon || '',
+        iconImg: category.iconImg || '',
         bg: category.bg || '#eef5f1',
         color: category.color || '#35745c',
       });
@@ -531,15 +561,36 @@ Page({
 
   // ========== 分类筛选 ==========
 
+  toggleCategoryBar: function () {
+    this.setData({ showCategoryBar: !this.data.showCategoryBar });
+  },
+
   onFilterCategory: function (e) {
     var categoryId = e.currentTarget.dataset.id;
     // dataset 中 null 会变成字符串 'null'，需要特殊处理
     if (categoryId === 'null' || categoryId === '') {
       categoryId = null;
     }
-    if (categoryId === this.data.activeCategoryId) return;
-
-    this.setData({ activeCategoryId: categoryId });
+    // 点已选中的：仅收起面板
+    if (categoryId === this.data.activeCategoryId) {
+      this.setData({ showCategoryBar: false });
+      return;
+    }
+    var label = '全部记录';
+    if (categoryId !== null) {
+      var list = this.data.categoryList;
+      for (var i = 0; i < list.length; i++) {
+        if (String(list[i].id) === String(categoryId)) {
+          label = list[i].name;
+          break;
+        }
+      }
+    }
+    this.setData({
+      activeCategoryId: categoryId,
+      showCategoryBar: false,
+      categoryFilterLabel: label,
+    });
     this._fetchRecords(false);
   },
 
@@ -564,6 +615,22 @@ Page({
       }
       if (found) break;
     }
+  },
+
+  // ========== 「…」下拉菜单 ==========
+
+  onToggleMenu: function (e) {
+    var id = e.currentTarget.dataset.id;
+    this.setData({ openMenuId: this.data.openMenuId === id ? null : id });
+  },
+
+  onCloseMenu: function () {
+    this.setData({ openMenuId: null });
+  },
+
+  onMenuShowRaw: function (e) {
+    this.setData({ openMenuId: null });
+    this.toggleRawExpand(e);
   },
 
   // ========== 下拉刷新 ==========
@@ -894,6 +961,7 @@ Page({
     var editContent = pos.record.polishedContent || pos.record.rawContent || '';
 
     this.setData({
+      openMenuId: null,
       showEditPopup: true,
       editingRecordId: String(id),
       editingContent: editContent,
@@ -1000,6 +1068,7 @@ Page({
     if (that.data.departmentId) payload.departmentId = that.data.departmentId;
     if (that.data.distributerId) payload.distributerId = that.data.distributerId;
 
+    that.setData({ openMenuId: null });
     wx.showLoading({ title: '推送中…', mask: true });
 
     api.pushWorkRecordToAnnouncement(dbRecordId, payload)
@@ -1042,6 +1111,8 @@ Page({
 
     var pos = this._findRecordIndex(id);
     if (!pos) return;
+
+    this.setData({ openMenuId: null });
 
     var dbRecordId = pos.record._dbRecordId;
     if (dbRecordId === null || dbRecordId === undefined) {
