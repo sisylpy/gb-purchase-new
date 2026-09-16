@@ -110,11 +110,11 @@
   <view class="flex-column nnn bg-white" wx:if="{{chooseSize}}" animation='{{animationData}}'>
 
     <view class="p-30  flex-row border-bottom" catch:tap="toSupplierGoods">
-      <image src="../../../../images/procurement_supplier_small/auto_order_goods.png" class="icon-md mr-20"></image>
+      <image src="/subPackage-mendian/images/procurement_supplier_small/auto_order_goods.png" class="icon-md mr-20"></image>
       <text class="font-md">自动订货商品</text>
     </view>
     <view class="p-30 flex-row border-bottom" wx:if="{{supplierItem.nxJrdhsNxDistributerId}}" catch:tap="toSupplierCoupon" hover-class="hover">
-      <image src="../../../../images/procurement_supplier_small/supplier_coupon.png" class="icon-md mr-20"></image>
+      <image src="/subPackage-mendian/images/procurement_supplier_small/supplier_coupon.png" class="icon-md mr-20"></image>
       <text class="font-md">配送商优惠券</text>
     </view>
     <!-- <view class="p-30  flex-row border-bottom" catch:tap="toSupplierStars" hover-class="hover">
@@ -122,15 +122,15 @@
       <text class="font-md">退货</text>
     </view> -->
     <view class="p-30  flex-row border-bottom" catch:tap="toSupplierFenxi" hover-class="hover">
-      <image src="../../../../images/procurement_supplier_small/supplier_analysis.png" class="icon-md mr-20"></image>
+      <image src="/subPackage-mendian/images/procurement_supplier_small/supplier_analysis.png" class="icon-md mr-20"></image>
       <text class="font-md">供货商分析</text>
     </view>
     <view class="p-30  flex-row border-bottom" catch:tap="toEditSupplier" hover-class="hover">
-      <image src="../../../../images/procurement_supplier_small/edit_supplier.png" class="icon-md mr-20"></image>
+      <image src="/subPackage-mendian/images/procurement_supplier_small/edit_supplier.png" class="icon-md mr-20"></image>
       <text class="font-md">修改供货商名称</text>
     </view>
     <view class="p-30  flex-row " catch:tap="toDeleteSupplier" hover-class="hover">
-      <image src="../../../../images/procurement_supplier_small/delete_supplier.png" class="icon-md mr-20"></image>
+      <image src="/subPackage-mendian/images/procurement_supplier_small/delete_supplier.png" class="icon-md mr-20"></image>
       <text class="font-md">删除供货商</text>
     </view>
 
