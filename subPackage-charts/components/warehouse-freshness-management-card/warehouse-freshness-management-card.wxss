@@ -1,1 +1,28 @@
-.wfm-card{margin-top:24rpx;padding:28rpx 24rpx;background:#fff;border:1rpx solid #eaeaea;border-radius:20rpx}.wfm-head,.wfm-basis,.wfm-row,.wfm-standards{display:flex;flex-direction:column;gap:8rpx}.wfm-title{font-size:32rpx;font-weight:700}.wfm-subtitle,.wfm-basis,.wfm-row{font-size:23rpx;color:#777}.wfm-basis{margin:16rpx 0;padding:14rpx;background:#f6f8fa;border-radius:12rpx}.wfm-warning{margin-bottom:12rpx;padding:14rpx;border-radius:12rpx;background:#fff5e8;color:#9a5d21;font-size:23rpx}.wfm-empty{padding:32rpx 0;text-align:center;color:#aaa}.wfm-row{padding:18rpx 0;border-top:1rpx solid #f0f0f0}.wfm-main{display:flex;justify-content:space-between}.wfm-name{font-size:27rpx;color:#222;font-weight:600}.wfm-state{color:#d65b32}.wfm-standards{margin-top:8rpx;color:#555}
+.wfm-card{margin-top:24rpx;padding:28rpx 24rpx;background:#fff;border:1rpx solid #eaeaea;border-radius:20rpx}
+.wfm-head,.wfm-basis,.wfm-row,.wfm-standards,.wfm-detail{display:flex;flex-direction:column;gap:8rpx}
+.wfm-title{font-size:32rpx;font-weight:700}
+.wfm-subtitle,.wfm-basis,.wfm-row{font-size:23rpx;color:#777}
+.wfm-basis{margin:16rpx 0;padding:14rpx;background:#f6f8fa;border-radius:12rpx}
+.wfm-warning{margin-bottom:12rpx;padding:14rpx;border-radius:12rpx;background:#fff5e8;color:#9a5d21;font-size:23rpx}
+.wfm-empty{padding:32rpx 0;text-align:center;color:#aaa}
+.wfm-row{padding:16rpx 0;border-top:1rpx solid #f0f0f0}
+.wfm-main,.wfm-batch-main,.wfm-batch-bottom{display:flex;justify-content:space-between;align-items:center;gap:16rpx}
+.wfm-name{font-size:27rpx;color:#222;font-weight:600}
+.wfm-state{color:#d65b32}
+.wfm-standards{margin-top:8rpx;color:#555}
+.wfm-batch{position:relative;overflow:hidden;padding:18rpx 20rpx 18rpx 28rpx;background:#f7fcf9;border:1rpx solid #e1efe7;border-radius:14rpx}
+.wfm-batch:before{position:absolute;content:"";top:0;bottom:0;left:0;width:8rpx;background:#40a76d}
+.wfm-batch--warning{background:#fffaf0;border-color:#f7e8c3}
+.wfm-batch--warning:before{background:#e3a53e}
+.wfm-batch--danger{background:#fff7f7;border-color:#f7dadd}
+.wfm-batch--danger:before{background:#d65b5b}
+.wfm-batch-identity{display:flex;flex-direction:column;gap:5rpx}
+.wfm-batch-id,.wfm-batch-spec{font-size:21rpx;color:#88918e}
+.wfm-batch-status{font-size:22rpx;color:#508468;text-align:right}
+.wfm-batch--warning .wfm-batch-status{color:#aa771a}
+.wfm-batch--danger .wfm-batch-status{color:#cc4e4e}
+.wfm-batch-bottom{margin-top:12rpx}
+.wfm-batch-quantity{display:flex;flex-direction:column;color:#245d43;font-size:31rpx;font-weight:700}
+.wfm-batch--danger .wfm-batch-quantity{color:#aa3030}
+.wfm-batch-action{font-size:22rpx;color:#8b9690;white-space:nowrap}
+.wfm-detail{padding:12rpx 10rpx 4rpx}

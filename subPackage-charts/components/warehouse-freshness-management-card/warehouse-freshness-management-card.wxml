@@ -4,19 +4,31 @@
   <view class="wfm-warning" wx:if="{{availabilityMessage}}">{{availabilityMessage}}</view>
   <view class="wfm-empty" wx:if="{{rows.length === 0}}">{{emptyMessage}}</view>
   <view class="wfm-row" wx:for="{{rows}}" wx:key="rowKey">
-    <view class="wfm-main"><text class="wfm-name">{{item.goodsName || '未知商品'}}</text><text class="wfm-state">{{item.stateText}}</text></view>
-    <text wx:if="{{item.batchAgeHours != null}}">批次已入库 {{item.batchAgeHours}} 小时</text>
-    <text wx:if="{{item.standardHours != null}}">标准：{{item.standardHours}} 小时</text>
-    <text wx:if="{{item.thresholdFullTime}}">阈值：{{item.thresholdFullTime}}</text>
-    <text wx:if="{{item.remainingMinutes != null}}">剩余：{{item.remainingText}}</text>
-    <view wx:if="{{item.bestStockStatus}}" class="wfm-standards">
-      <text wx:if="{{item.bestStockDays != null}}">最佳库存：{{item.bestStockStatusLabel}}</text><text>保鲜报警：{{item.freshWarnStatusLabel}}</text><text>保鲜废弃：{{item.freshWasteStatusLabel}}</text>
-      <text wx:if="{{item.freshWarnHours != null}}">报警时间：{{item.freshWarnHours}}小时</text>
-      <text wx:if="{{item.freshWasteHours != null}}">废弃时间：{{item.freshWasteHours}}小时</text>
-      <text wx:if="{{item.bestStockDays != null}}">最佳库存标准：{{item.bestStockDays}}天<text wx:if="{{item.daysUntilBestStockDeadline != null}}">；距标准：{{item.daysUntilBestStockDeadline}}天</text></text>
-      <text wx:if="{{item.freshWarnWasteRelationStatusLabel}}">标准关系：{{item.freshWarnWasteRelationStatusLabel}}</text>
-      <text wx:if="{{item.freshWarnStandardHours != null}}">报警标准：{{item.freshWarnStandardHours}}小时；{{item.freshWarnRemainingText}}</text>
-      <text wx:if="{{item.freshWasteStandardHours != null}}">废弃标准：{{item.freshWasteStandardHours}}小时；{{item.freshWasteRemainingText}}</text>
+    <view wx:if="{{item.batchId != null}}" class="wfm-batch wfm-batch--{{item.displayTone}}" bindtap="toggleDetails" data-row-key="{{item.rowKey}}">
+      <view class="wfm-batch-main">
+        <view class="wfm-batch-identity"><text class="wfm-name">{{item.goodsName || '未知商品'}}</text><text class="wfm-batch-id">批次 #{{item.batchId}}</text></view>
+        <text class="wfm-batch-status">{{item.stateText}}</text>
+      </view>
+      <view class="wfm-batch-bottom">
+        <view class="wfm-batch-quantity"><text wx:if="{{item.displayRestQty != null}}">{{item.displayRestQty}}{{item.productUnit}}</text><text wx:else>数量待核</text><text class="wfm-batch-spec" wx:if="{{item.productUnit}}">商品规格：{{item.productUnit}}</text></view>
+        <text class="wfm-batch-action">{{item.detailOpen ? '收起' : '详情'}} ›</text>
+      </view>
+    </view>
+    <view wx:else class="wfm-main"><text class="wfm-name">{{item.goodsName || '未知商品'}}</text><text class="wfm-state">{{item.stateText}}</text></view>
+    <view class="wfm-detail" wx:if="{{item.batchId == null || item.detailOpen}}">
+      <text wx:if="{{item.batchAgeHours != null}}">批次已入库 {{item.batchAgeHours}} 小时</text>
+      <text wx:if="{{item.standardHours != null}}">标准：{{item.standardHours}} 小时</text>
+      <text wx:if="{{item.thresholdFullTime}}">阈值：{{item.thresholdFullTime}}</text>
+      <text wx:if="{{item.remainingMinutes != null}}">剩余：{{item.remainingText}}</text>
+      <view wx:if="{{item.bestStockStatus}}" class="wfm-standards">
+        <text wx:if="{{item.bestStockDays != null}}">最佳库存：{{item.bestStockStatusLabel}}</text><text>保鲜报警：{{item.freshWarnStatusLabel}}</text><text>保鲜废弃：{{item.freshWasteStatusLabel}}</text>
+        <text wx:if="{{item.freshWarnHours != null}}">报警时间：{{item.freshWarnHours}}小时</text>
+        <text wx:if="{{item.freshWasteHours != null}}">废弃时间：{{item.freshWasteHours}}小时</text>
+        <text wx:if="{{item.bestStockDays != null}}">最佳库存标准：{{item.bestStockDays}}天<text wx:if="{{item.daysUntilBestStockDeadline != null}}">；距标准：{{item.daysUntilBestStockDeadline}}天</text></text>
+        <text wx:if="{{item.freshWarnWasteRelationStatusLabel}}">标准关系：{{item.freshWarnWasteRelationStatusLabel}}</text>
+        <text wx:if="{{item.freshWarnStandardHours != null}}">报警标准：{{item.freshWarnStandardHours}}小时；{{item.freshWarnRemainingText}}</text>
+        <text wx:if="{{item.freshWasteStandardHours != null}}">废弃标准：{{item.freshWasteStandardHours}}小时；{{item.freshWasteRemainingText}}</text>
+      </view>
     </view>
   </view>
 </view>

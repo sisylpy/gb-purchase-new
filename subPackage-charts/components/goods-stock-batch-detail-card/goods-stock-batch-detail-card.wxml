@@ -50,15 +50,15 @@
           <view class="biz-batch-kpi-line">
             <view class="biz-batch-kpi-item">
               <text class="biz-batch-kpi-label">入库</text>
-              <text class="biz-batch-kpi-value">{{batch._inboundQty}}{{batch._unit}}</text>
+              <text class="biz-batch-kpi-value">{{batch._inboundQty}}</text>
             </view>
             <view class="biz-batch-kpi-item">
               <text class="biz-batch-kpi-label">剩余</text>
-              <text class="biz-batch-kpi-value biz-batch-rest">{{batch._restQty}}{{batch._unit}}</text>
+              <text class="biz-batch-kpi-value biz-batch-rest">{{batch._restQty}}</text>
             </view>
             <view class="biz-batch-kpi-item">
               <text class="biz-batch-kpi-label">单价</text>
-              <text class="biz-batch-kpi-value">¥{{batch._unitPrice}}{{'/' + batch._unit}}</text>
+              <text class="biz-batch-kpi-value">{{batch._priceLabel}}</text>
             </view>
           </view>
 

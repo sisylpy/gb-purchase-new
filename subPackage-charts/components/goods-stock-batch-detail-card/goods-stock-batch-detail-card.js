@@ -32,10 +32,11 @@ Component({
         var batches = [];
         for (var b = 0; b < rawBatches.length; b++) {
           var bt = rawBatches[b];
-          var unitPrice = bt.unitPrice != null ? Number(bt.unitPrice).toFixed(2) : '0.00';
-          var unit = bt.unit || group.unit || '';
-          var restQty = bt.restQty != null ? String(bt.restQty) : '0';
-          var inboundQty = bt.inboundQty != null ? String(bt.inboundQty) : '0';
+          var verified = bt.quantityStatus === 'VERIFIED';
+          var unitPrice = verified && bt.unitPrice != null ? Number(bt.unitPrice).toFixed(2) : null;
+          var unit = bt.unit || '';
+          var restQty = verified && bt.restQty != null ? String(bt.restQty) + unit : '数量待核';
+          var inboundQty = verified && bt.inboundQty != null ? String(bt.inboundQty) + unit : '数量待核';
           var inboundDateDisplay = bt.inboundDate || '';
 
           // 消耗明细行
@@ -51,14 +52,14 @@ Component({
           for (var c = 0; c < consumeFields.length; c++) {
             var cf = consumeFields[c];
             var val = bt[cf.key];
-            if (val != null && Number(val) !== 0) {
+            if (verified && val != null && Number(val) !== 0) {
               consumeItems.push({ label: cf.label, value: String(val), unit: unit });
             }
           }
 
           // 是否账实相符
           var balanceOk = bt.balanceOk !== false;
-          var balanceDiff = bt.balanceDifference != null ? String(bt.balanceDifference) : '0';
+          var balanceDiff = verified && bt.balanceDifference != null ? String(bt.balanceDifference) + unit : '待核';
 
           batches.push({
             stockBatchId: bt.stockBatchId,
@@ -66,6 +67,7 @@ Component({
             _inboundQty: inboundQty,
             _restQty: restQty,
             _unitPrice: unitPrice,
+            _priceLabel: unitPrice == null ? '单价待核' : '¥' + unitPrice + '/' + unit,
             _unit: unit,
             _consumeItems: consumeItems,
             _balanceOk: balanceOk,
@@ -74,7 +76,7 @@ Component({
           });
         }
         unitGroups.push({
-          unit: group.unit || '—',
+          unit: group.unit || '商品规格未配置',
           batchCount: group.batchCount || batches.length,
           batches: batches,
         });
