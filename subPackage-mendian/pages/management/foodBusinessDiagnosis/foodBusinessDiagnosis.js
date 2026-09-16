@@ -92,7 +92,7 @@ Page({
       recommendations: [
         { icon: '▥', title: '周末重点备货', text: (peakIndex >= 5 ? WEEK_NAMES[peakIndex] : '高峰日') + '销量最高 ' + max + '份，建议提前备货', tone: 'green' },
         { icon: '⚙', title: '继续保持成本控制', text: '单份成本 ¥' + money(item.outboundAllocatedCostPerPortion) + '，损耗仅 ¥' + money(item.wasteLossCostPerPortion), tone: 'orange' },
-        { icon: '◇', title: profit < 0 ? '及时调整售价' : '保持售价稳定', text: '当前单价 ¥' + money(item.foodPrice) + '/份，' + (profit < 0 ? '利润为负需尽快优化' : '利润空间良好'), tone: 'yellow' }
+        { icon: '◇', title: diag.title || '经营诊断建议', text: diag.message || ('当前单价 ¥' + money(item.foodPrice) + '/份，暂未生成专项建议'), tone: diag.level === 'WARN' ? 'yellow' : 'green' }
       ]
     }, this._drawWeekChart.bind(this));
   },
