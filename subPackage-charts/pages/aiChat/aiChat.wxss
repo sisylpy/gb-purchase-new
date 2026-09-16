@@ -40,6 +40,12 @@
   font-size: 28rpx;
 }
 
+/* 顶部常驻入口：位于导航栏下方，不随会话内容消失 */
+.gem-capability-entry--top {
+  margin: 10rpx 24rpx 12rpx;
+  padding: 18rpx 24rpx;
+}
+
 /* 首页底部的 AI 内容提示，避免抢占主视觉。 */
 .gem-ai-disclosure {
   flex-shrink: 0;
