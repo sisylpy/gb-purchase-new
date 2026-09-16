@@ -60,9 +60,6 @@ Page({
       var isOwner = (identity.roles || []).some(function (role) {
         return role.code === 'FRANCHISEE_OWNER';
       });
-      if (!isOwner && !util.hasAction(identity, 'RECTIFICATION_LIST_MINE')) {
-        return Promise.reject({ message: '当前账号不是加盟店负责人，不能查看总部任务' });
-      }
       var storesRequest = isOwner
         ? Promise.resolve(identity.accessibleStores || [])
         : api.listStores();
