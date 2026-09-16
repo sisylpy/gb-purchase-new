@@ -1,0 +1,58 @@
+<view class="biz-card biz-supplier-detail" wx:if="{{cardData}}">
+
+  <!-- 卡片标题 -->
+  <view class="biz-header">
+    <view class="biz-icon-wrap biz-icon-blue">
+      <text class="biz-icon">🚚</text>
+    </view>
+    <view class="biz-header-right">
+      <text class="biz-title">{{_title}}</text>
+      <view class="biz-scope-bar" wx:if="{{_timeLabel}}">
+        <text class="biz-scope-name">{{_timeLabel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="biz-empty" wx:if="{{_isEmpty}}">
+    <text class="biz-empty-text">{{_emptyReason}}</text>
+  </view>
+
+  <block wx:else>
+    <!-- 商品 + 范围 -->
+    <view class="biz-meta-row" wx:if="{{_goodsName || _scopeLabel}}">
+      <text class="biz-meta-chip" wx:if="{{_goodsName}}">商品：{{_goodsName}}</text>
+      <text class="biz-meta-chip" wx:if="{{_scopeLabel}}">{{_scopeLabel}}</text>
+    </view>
+
+    <!-- 供货商采购明细 -->
+    <view class="biz-supplier-section">
+      <view class="biz-lines-section-title">供货商采购明细（{{_supplierCount}}）</view>
+      <view class="biz-supplier-row" wx:for="{{_suppliers}}" wx:key="key" wx:for-item="sp">
+        <view class="biz-supplier-head">
+          <text class="biz-supplier-name">{{sp.supplierName}}</text>
+          <text class="biz-supplier-focus" wx:if="{{sp.isFocus}}">重点</text>
+        </view>
+        <view class="biz-supplier-metrics">
+          <view class="biz-metric">
+            <text class="biz-metric-label">采购金额</text>
+            <text class="biz-metric-value biz-metric-amount">{{sp.amountDisplay}}</text>
+          </view>
+          <view class="biz-metric">
+            <text class="biz-metric-label">采购数量</text>
+            <text class="biz-metric-value">{{sp.qtyDisplay}}</text>
+          </view>
+          <view class="biz-metric">
+            <text class="biz-metric-label">平均单价</text>
+            <text class="biz-metric-value">{{sp.priceDisplay}}</text>
+          </view>
+          <view class="biz-metric">
+            <text class="biz-metric-label">采购笔数</text>
+            <text class="biz-metric-value">{{sp.countDisplay}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+</view>
