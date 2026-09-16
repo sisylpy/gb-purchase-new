@@ -1,6 +1,7 @@
 var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js');
 var config = require('../../../../config/index.js');
+var storeRootDepartmentId = require('../../../../lib/storeRootDepartment').storeRootDepartmentId;
 var globalData = getApp().globalData;
 import { depGeFoodBusiness } from '../../../../services/apiDistributerFood';
 
@@ -25,8 +26,7 @@ Page({
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       disId: options.disId || disInfo.gbDistributerId,
-      depFatherId: options.depFatherId || mendian.gbDepartmentId,
-      activeSubDepId: options.subDepId || ''
+      depFatherId: options.depFatherId || storeRootDepartmentId(mendian) || ''
     });
     this._syncDate();
     this._load();
@@ -62,7 +62,6 @@ Page({
     depGeFoodBusiness({
       disId: this.data.disId,
       depFatherId: this.data.depFatherId,
-      subDepId: this.data.activeSubDepId,
       startDate: this.data.startDate,
       stopDate: this.data.stopDate,
       sortBy: 'profit',
@@ -80,8 +79,7 @@ Page({
     var rows = (body.data || []).map(function (item, index) {
       var profit = num(item.actualProfit);
       var margin = num(item.grossMarginRate);
-      var attention = !!item.needsAttention;
-      var tag = index === 0 && profit > 0 ? '利润王' : attention ? '需关注' : margin >= 60 ? '利润稳定' : '经营平稳';
+      var level = item.grossMarginLevel; var attention = !!item.needsAttention || level === 'BELOW'; var tag = index === 0 && profit > 0 ? '利润王' : attention ? '需关注' : '经营平稳';
       return Object.assign({}, item, {
         rank: index + 1,
         image: imageUrl(item.foodImageLarge || item.foodImage),
@@ -117,8 +115,7 @@ Page({
     var item = e.currentTarget.dataset.item;
     wx.navigateTo({
       url: '../foodBusinessDiagnosis/foodBusinessDiagnosis?foodId=' + item.foodId +
-        '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId +
-        '&subDepId=' + (this.data.activeSubDepId || '')
+        '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId
     });
   },
 

@@ -25,7 +25,7 @@
         <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><view wx:else class="goods-placeholder">料</view>
         <view class="ingredient-main">
           <view class="ingredient-title"><text>{{item.goodsName}}</text><text class="{{item.issue?'warn':'ok'}}">{{item.issue?'⚠ ': '✓ '}}{{item.status}}</text><text class="go">›</text></view>
-          <text class="reason">{{item.issue?'出库分摊与配方理论存在差异，建议进一步排查':'用量在合理范围内'}}</text>
+          <text class="reason">{{item.reason}}</text>
           <view class="numbers">
             <view><text>配方理论用量</text><text>{{item.theoryDisplay}} {{item.unit}}</text></view><view><text>制作出库分摊量</text><text>{{item.actualDisplay}} {{item.unit}}</text></view>
             <view><text>差异</text><text class="red">{{item.difference}} {{item.unit}}</text></view><view><text>分摊成本</text><text>¥{{item.allocatedCost}}</text></view>
@@ -34,7 +34,7 @@
             <text>理论用量</text><view><view class="bar-fill" style="width:{{item.theoryWidth}}%"></view></view><text>{{item.theoryDisplay}}{{item.unit}}</text>
             <text>出库分摊</text><view><view class="bar-fill actual {{item.issue?'bad':''}}" style="width:{{item.actualWidth}}%"></view></view><text>{{item.actualDisplay}}{{item.unit}}</text>
           </view>
-          <view class="rate {{item.issue?'rate-warn':'rate-ok'}}">{{item.issue?'↗ 超出 '+item.diffRate+'%':'✓ 基本一致'}}</view>
+          <view class="rate {{item.issue?'rate-warn':'rate-ok'}}">{{item.rateText}}</view>
         </view>
       </view>
       <view class="explain">ⓘ　出库分摊是根据领料、出库和菜品销量进行的成本分摊，不等于实际称重消耗，请结合经营情况进一步分析。</view>

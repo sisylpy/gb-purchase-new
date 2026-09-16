@@ -19,8 +19,7 @@ Page({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       foodId: Number(options.foodId || 0),
       disId: Number(options.disId || 0),
-      depFatherId: Number(options.depFatherId || 0),
-      subDepId: options.subDepId || ''
+      depFatherId: Number(options.depFatherId || 0)
     });
     this._syncDate();
     this._load();
@@ -54,7 +53,7 @@ Page({
     load.showLoading('加载菜品诊断');
     getFoodBusinessDiagnosis({
       disId: this.data.disId, depFatherId: this.data.depFatherId, foodId: this.data.foodId,
-      subDepId: this.data.subDepId, startDate: this.data.startDate, stopDate: this.data.stopDate
+      startDate: this.data.startDate, stopDate: this.data.stopDate
     }).then(function (res) {
       load.hideLoading();
       var body = res.result || {};
@@ -74,7 +73,8 @@ Page({
     var profit = num(item.actualProfitAmount);
     var margin = num(item.blendedGrossMarginRateOnListPrice);
     var waste = num(item.wasteLossCostAmount);
-    var status = profit < 0 || item.grossMarginLevel === 'BELOW' ? '需重点优化' : margin >= 60 ? '整体表现优秀' : '经营表现平稳';
+    var diag = item.businessDiagnosis || {};
+    var status = diag.title || (diag.level === 'WARN' ? '需重点优化' : diag.level === 'GOOD' ? '整体表现优秀' : diag.level === 'INFO' ? '经营表现平稳' : '数据不足，暂不能诊断');
     this.weekValues = values;
     this.setData({
       loading: false,
@@ -127,8 +127,7 @@ Page({
     });
     wx.navigateTo({
       url: '../costProblemLocation/costProblemLocation?foodId=' + this.data.foodId +
-        '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId +
-        '&subDepId=' + (this.data.subDepId || '')
+        '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId
     });
   },
 

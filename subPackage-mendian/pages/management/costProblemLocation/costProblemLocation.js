@@ -15,7 +15,7 @@ Page({
     this.context = wx.getStorageSync('foodCostContext') || {};
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      foodId: Number(o.foodId || 0), disId: Number(o.disId || 0), depFatherId: Number(o.depFatherId || 0), subDepId: o.subDepId || ''
+      foodId: Number(o.foodId || 0), disId: Number(o.disId || 0), depFatherId: Number(o.depFatherId || 0)
     });
     this._syncDate(); this._load();
   },
@@ -28,15 +28,23 @@ Page({
   },
   _load: function () {
     var that = this; this.setData({ loading: true }); load.showLoading('定位成本问题');
-    dishIngredientDashboard({ startDate: this.data.startDate, stopDate: this.data.stopDate, disId: this.data.disId, depFatherId: this.data.depFatherId, subDepId: this.data.subDepId, foodId: this.data.foodId, trendGranularity: 'month' })
+    dishIngredientDashboard({ startDate: this.data.startDate, stopDate: this.data.stopDate, disId: this.data.disId, depFatherId: this.data.depFatherId, foodId: this.data.foodId, trendGranularity: 'month' })
       .then(function (res) { load.hideLoading(); var body = res.result || {}; if (body.code !== 0) { that.setData({ loading: false }); load.showToast(body.msg || '加载失败'); return; } that._apply(body.data || {}); })
       .catch(function () { load.hideLoading(); that.setData({ loading: false }); load.showToast('网络异常'); });
   },
   _apply: function (data) {
     var dish = data.dish || {}, summary = data.dishSummary || {}, rows = (data.consumptionAuditIngredients || []).map(function (x) {
       var theory = num(x.theoryOutboundQty), actual = num(x.actualOutboundQty), diff = actual - theory;
-      var rate = theory ? diff * 100 / theory : 0;
-      return Object.assign({}, x, { image: imageUrl(x.goodsImage), difference: money(diff), diffRate: Math.abs(rate).toFixed(1), theoryDisplay: money(theory), actualDisplay: money(actual), allocatedCost: money(x.selectedDishAllocatedCost || x.actualOutboundAmount), issue: Math.abs(rate) > 10, status: Math.abs(rate) > 10 ? '需关注' : '正常' });
+      var usageStatus = x.usageStatus || 'UNKNOWN';
+      var abnormal = usageStatus === 'ABNORMAL', unknown = usageStatus === 'UNKNOWN';
+      var devPct = x.usageDeviationPercent != null ? x.usageDeviationPercent : null;
+      var rateText = abnormal ? ('↗ 超出 ' + (devPct != null ? devPct : '—') + '%') : unknown ? '⚠ 数据不足' : '✓ 基本一致';
+      var reason = clean(x.suggestionZh, abnormal ? '出库分摊与配方理论存在差异，建议进一步排查' : '用量在合理范围内');
+      return Object.assign({}, x, {
+        image: imageUrl(x.goodsImage), difference: money(diff), diffRate: devPct != null ? devPct : '—',
+        theoryDisplay: money(theory), actualDisplay: money(actual), allocatedCost: money(x.selectedDishAllocatedCost || x.actualOutboundAmount),
+        issue: abnormal, status: abnormal ? '需关注' : unknown ? '待确认' : '正常', rateText: rateText, reason: reason
+      });
     }).sort(function (a, b) { return num(b.allocatedCost) - num(a.allocatedCost); });
     var maxQty = 1; rows.forEach(function (x) { maxQty = Math.max(maxQty, num(x.theoryOutboundQty), num(x.actualOutboundQty)); });
     rows.forEach(function (x, i) { x.rank = i + 1; x.theoryWidth = Math.max(3, num(x.theoryOutboundQty) * 100 / maxQty); x.actualWidth = Math.max(3, num(x.actualOutboundQty) * 100 / maxQty); });
@@ -46,7 +54,7 @@ Page({
   toIngredient: function (e) {
     var item = this.data.ingredients[Number(e.currentTarget.dataset.index)]; if (!item) return;
     wx.setStorageSync('ingredientCostContext', { foodImage: this.data.dish.image, foodName: this.data.dish.name, ingredient: item });
-    wx.navigateTo({ url: '../ingredientCostDetail/ingredientCostDetail?foodId=' + this.data.foodId + '&goodsId=' + item.goodsId + '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId + '&subDepId=' + (this.data.subDepId || '') });
+    wx.navigateTo({ url: '../ingredientCostDetail/ingredientCostDetail?foodId=' + this.data.foodId + '&goodsId=' + item.goodsId + '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId });
   },
   toPriorityIngredient: function () { if (this.data.ingredients.length) this.toIngredient({ currentTarget: { dataset: { index: 0 } } }); },
   toDatePage: function () { this.setData({ updateDate: true }); wx.navigateTo({ url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType }); },
