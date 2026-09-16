@@ -27,6 +27,7 @@
         <text class="pba-stock-num">{{stockQty}}</text>
         <text class="pba-stock-unit" wx:if="{{stockUnit}}">{{stockUnit}}</text>
       </view>
+      <text class="pba-stock-status">{{stockStatusText}}</text>
     </view>
   </view>
 
@@ -38,11 +39,12 @@
         <text class="pba-metric-icon">🛒</text>
       </view>
       <view class="pba-metric-body">
-        <text class="pba-metric-label">采购量</text>
+        <text class="pba-metric-label">采购记录数量</text>
         <view class="pba-metric-value-row">
           <text class="pba-metric-value pba-val-green">{{purchaseQty}}</text>
         </view>
-        <text class="pba-metric-sub">{{purchaseCount}} 次采购 · 单据数量（无单位码）</text>
+        <text class="pba-metric-sub">采购单位：{{purchaseUnitText}}</text>
+        <text class="pba-metric-sub">采购明细：{{purchaseCount}}条</text>
       </view>
     </view>
     <!-- 理论消耗（base 单位） -->
@@ -51,11 +53,12 @@
         <text class="pba-metric-icon">📈</text>
       </view>
       <view class="pba-metric-body">
-        <text class="pba-metric-label">理论消耗</text>
+        <text class="pba-metric-label">{{theoryLabel}}</text>
         <view class="pba-metric-value-row">
           <text class="pba-metric-value pba-val-orange">{{theoryQty}}</text>
           <text class="pba-metric-unit" wx:if="{{theoryUnit}}">{{theoryUnit}}</text>
         </view>
+        <text class="pba-metric-sub">{{theorySummary}}</text>
       </view>
     </view>
     <!-- 库存可支撑（仅在预测完整时展示天数） -->
@@ -71,6 +74,20 @@
         </view>
         <text class="pba-metric-sub" wx:if="{{stockNote}}">{{stockNote}}</text>
       </view>
+    </view>
+  </view>
+
+  <!-- ===== 采购价格比较 ===== -->
+  <view class="pba-price-panel" wx:if="{{priceVisible}}">
+    <view class="pba-panel-head">
+      <text class="pba-panel-icon">💹</text>
+      <text class="pba-panel-title">采购价格</text>
+    </view>
+    <text class="pba-price-conclusion" wx:if="{{priceConclusion}}">{{priceConclusion}}</text>
+    <view class="pba-price-evidence">
+      <text class="pba-price-item">本期均价：{{currentAvgUnitPrice}}</text>
+      <text class="pba-price-item">{{compareLabel}}均价：{{previousAvgUnitPrice}}</text>
+      <text class="pba-price-item" wx:if="{{priceChangeAvailable}}">变化：{{priceChangePercent}}%</text>
     </view>
   </view>
 
@@ -97,7 +114,7 @@
         <view class="pba-match-item">
           <text class="pba-match-name">实际采购</text>
           <text class="pba-match-val pba-mat-blue">{{purchaseQty}}</text>
-          <text class="pba-match-unit">单据</text>
+          <text class="pba-match-unit">{{purchaseUnitText}}</text>
         </view>
         <view class="pba-match-item">
           <text class="pba-match-name">理论消耗</text>
@@ -153,7 +170,7 @@
     </view>
   </view>
 
-  <!-- ===== 能力边界提示 ===== -->
+  <!-- ===== 数据缺口说明 ===== -->
   <view class="pba-gap-list" wx:if="{{gapTexts.length > 0}}">
     <text class="pba-gap-item" wx:for="{{gapTexts}}" wx:key="*this">💡 {{item}}</text>
   </view>

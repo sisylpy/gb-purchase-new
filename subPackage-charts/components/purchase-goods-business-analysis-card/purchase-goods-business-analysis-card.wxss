@@ -176,6 +176,12 @@
   font-weight: 500;
 }
 
+.pba-stock-status {
+  font-size: 18rpx;
+  color: #64748b;
+  text-align: center;
+}
+
 .pba-stock-date {
   font-size: 16rpx;
   color: #93c5fd;
@@ -331,6 +337,33 @@
   font-size: 26rpx;
   font-weight: 700;
   color: #374151;
+}
+
+.pba-price-panel {
+  margin-bottom: 18rpx;
+  padding: 18rpx 20rpx;
+  background: #fff7ed;
+  border: 1rpx solid #fed7aa;
+  border-radius: 14rpx;
+}
+
+.pba-price-conclusion {
+  display: block;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #c2410c;
+}
+
+.pba-price-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx 20rpx;
+}
+
+.pba-price-item {
+  font-size: 22rpx;
+  color: #7c2d12;
 }
 
 /* 左面板 - 采购来源 */
