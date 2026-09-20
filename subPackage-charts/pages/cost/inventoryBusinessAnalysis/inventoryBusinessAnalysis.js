@@ -33,17 +33,12 @@ function isoDate(date) {
   return date.getFullYear() + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
 }
 
-function shortDate(value) {
-  var parts = String(value || '').split('-');
-  return parts.length === 3 ? Number(parts[1]) + '月' + Number(parts[2]) + '日' : value;
-}
-
 Page({
   data: {
     navBarHeight: 0,
     loading: true,
     loaded: false,
-    periodKey: 'month',
+    hanzi: '本月',
     departmentIndex: 0,
     departmentList: [{ gbDepartmentId: 0, gbDepartmentName: '全部门店' }],
     departmentNames: ['全部门店'],
@@ -81,7 +76,7 @@ Page({
 
   onShow: function () {
     if (this.data.updateDate) {
-      this.setData({ updateDate: false, periodKey: 'custom' });
+      this.setData({ updateDate: false });
       this._syncDate();
       this._load();
     }
@@ -99,34 +94,20 @@ Page({
     var saved = wx.getStorageSync('myDate');
     var startDate = dateUtils.getFirstDateInMonth();
     var stopDate = dateUtils.getArriveDate(0);
-    var periodKey = 'month';
+    var hanzi = '本月';
     if (saved) {
       var range = saved.name === 'custom'
         ? dateUtils.getDateRange(saved.name, saved.startDate, saved.stopDate)
         : dateUtils.getDateRange(saved.name);
       startDate = range.startDate;
       stopDate = range.stopDate;
-      periodKey = saved.name === 'month' ? 'month' : 'custom';
+      hanzi = saved.hanzi || range.name;
     }
     this.setData({
       startDate: startDate,
       stopDate: stopDate,
-      periodKey: periodKey,
-      dateRangeText: shortDate(startDate) + ' - ' + shortDate(stopDate)
+      hanzi: hanzi
     });
-  },
-
-  selectPeriod: function (event) {
-    var key = event.currentTarget.dataset.key;
-    var startDate = key === 'thirty' ? dateUtils.getArriveDate(-29) : dateUtils.getFirstDateInMonth();
-    var stopDate = dateUtils.getArriveDate(0);
-    this.setData({
-      periodKey: key,
-      startDate: startDate,
-      stopDate: stopDate,
-      dateRangeText: shortDate(startDate) + ' - ' + shortDate(stopDate)
-    });
-    this._load();
   },
 
   toDatePage: function () {

@@ -2,7 +2,7 @@
 <view class="page">
   <back-navbar title="菜品经营" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="nav-spacer" style="height:{{navBarHeight}}rpx"></view>
-  <view class="date-bar" bindtap="toDatePage"><image src="/images/calender.png"></image><text class="date-name">{{hanzi}}</text><text class="date-range">{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text><text class="arrow">›</text></view>
+  <view class="date-toolbar"><view class="date-selector" bindtap="toDatePage" hover-class="date-selector-hover"><view class="date-calendar"><image src="/images/calender.png"></image></view><view class="date-copy"><view class="date-title">{{hanzi}}</view><view class="date-values" wx:if="{{startDate == stopDate}}"><text>{{tool.transferDateString(startDate)}}</text></view><view class="date-values" wx:else><text>{{tool.transferDateString(startDate)}}</text><text class="date-divider">-</text><text>{{tool.transferDateString(stopDate)}}</text></view></view></view><view class="date-actions"></view></view>
   <view wx:if="{{hasData}}">
     <view class="overview">
       <view class="overview-head"><view class="overview-icon"><image src="/images/goods.png"></image></view><view><text class="overview-title">本区间经营总览</text><text class="overview-sub">先看结果，再逐层找原因</text></view><view class="overview-slogan"><text>用数据让每一道菜</text><text>更赚钱！</text></view></view>

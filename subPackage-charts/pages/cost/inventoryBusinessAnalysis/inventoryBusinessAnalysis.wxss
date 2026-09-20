@@ -1,16 +1,19 @@
 page { background: #f1faf8; color: #14213b; }
 .page { min-height: 100vh; padding: 0 20rpx; box-sizing: border-box; background: linear-gradient(180deg, #f8fcff 0, #eef9f6 55%, #f4faf9 100%); }
 .navbar-spacer { width: 100%; }
-.tap-hover { opacity: .76; }
-.filters { display: flex; align-items: center; gap: 8rpx; padding: 14rpx 0 10rpx; overflow: hidden; }
-.date-filter, .period, .department-filter { height: 60rpx; border-radius: 31rpx; background: #fff; box-shadow: 0 5rpx 16rpx rgba(34, 94, 78, .07); display: flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; color: #6d7c91; font-size: 20rpx; }
-.date-filter { min-width: 272rpx; flex: 1; justify-content: flex-start; padding: 0 13rpx; color: #34445c; font-weight: 600; }
-.date-filter image { width: 30rpx; height: 30rpx; margin-right: 7rpx; }
-.date-filter text:nth-child(2) { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-.period { padding: 0 16rpx; }
-.period.active { color: #fff; background: #1dbc7f; font-weight: 700; }
-.department-filter { max-width: 124rpx; padding: 0 12rpx; overflow: hidden; text-overflow: ellipsis; }
-.hero { height: 210rpx; margin: 4rpx 0 16rpx; padding: 30rpx 28rpx; border-radius: 27rpx; box-sizing: border-box; position: relative; overflow: hidden; background: linear-gradient(120deg, #e5faed, #effff2); }
+.date-toolbar { min-height: 104rpx; margin: 0 -20rpx; padding: 10rpx 24rpx; display: flex; align-items: center; justify-content: space-between; border-bottom: 1rpx solid #e5efed; background: #fff; box-sizing: border-box; }
+.date-selector { display: flex; align-items: center; min-width: 245rpx; flex-shrink: 0; }
+.date-selector-hover { opacity: .72; }
+.date-calendar { width: 58rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.date-calendar image { width: 34rpx; height: 34rpx; }
+.date-copy { display: flex; flex-direction: column; min-width: 0; }
+.date-title { color: #26354b; font-size: 27rpx; line-height: 34rpx; }
+.date-values { display: flex; align-items: center; margin-top: 2rpx; color: #26354b; font-size: 22rpx; line-height: 30rpx; white-space: nowrap; }
+.date-divider { padding: 0 8rpx; }
+.date-actions { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
+.date-actions picker { min-width: 0; }
+.date-filter-select { height: 52rpx; max-width: 190rpx; padding: 0 13rpx; border: 1rpx solid #e2ebe8; border-radius: 27rpx; background: #f7faf9; color: #607087; font-size: 20rpx; line-height: 52rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
+.hero { height: 210rpx; margin: 10rpx 0 16rpx; padding: 30rpx 28rpx; border-radius: 27rpx; box-sizing: border-box; position: relative; overflow: hidden; background: linear-gradient(120deg, #e5faed, #effff2); }
 .hero-copy { position: relative; z-index: 3; display: flex; flex-direction: column; }
 .hero-copy > text { font-size: 32rpx; line-height: 1.35; font-weight: 900; letter-spacing: 1rpx; }
 .hero-copy view { margin-top: 12rpx; color: #59a77f; font-size: 20rpx; }
