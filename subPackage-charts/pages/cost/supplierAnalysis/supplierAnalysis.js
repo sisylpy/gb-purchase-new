@@ -6,14 +6,12 @@ var ICON_ROOT = '/subPackage-charts/images/purchase/icon_pack/';
 
 function num(value) { var n = Number(value); return isNaN(n) ? 0 : n; }
 function money(value) { return num(value).toFixed(1).replace(/\.0$/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
-function shortDate(value) { var p = String(value || '').split('-'); return p.length === 3 ? Number(p[1]) + '月' + Number(p[2]) + '日' : value; }
 function trend(value) { var n = num(value); return { text: (n > 0 ? '+' : '') + n.toFixed(1) + '%', direction: n > 0 ? 'up' : n < 0 ? 'down' : 'stable' }; }
 
 Page({
   data: {
     navBarHeight: 0,
     iconRoot: ICON_ROOT,
-    periodKey: 'month',
     loading: true,
     hasData: false,
     suppliers: [],
@@ -30,7 +28,7 @@ Page({
 
   onShow: function () {
     if (this.data.updateDate) {
-      this.setData({ updateDate: false, periodKey: '' });
+      this.setData({ updateDate: false });
       this._syncDate();
       this._load();
     }
@@ -47,14 +45,7 @@ Page({
       var range = saved.name === 'custom' ? dateUtils.getDateRange(saved.name, saved.startDate, saved.stopDate) : dateUtils.getDateRange(saved.name);
       startDate = range.startDate; stopDate = range.stopDate; hanzi = saved.hanzi || range.name;
     }
-    this.setData({ startDate: startDate, stopDate: stopDate, hanzi: hanzi, dateRangeText: shortDate(startDate) + ' - ' + shortDate(stopDate) });
-  },
-
-  selectPeriod: function (e) {
-    var key = e.currentTarget.dataset.key;
-    var startDate = key === 'thirty' ? dateUtils.getArriveDate(-29) : dateUtils.getFirstDateInMonth();
-    var stopDate = dateUtils.getArriveDate(0);
-    this.setData({ periodKey: key, startDate: startDate, stopDate: stopDate, hanzi: key === 'thirty' ? '近30天' : '本月', dateRangeText: shortDate(startDate) + ' - ' + shortDate(stopDate) }, this._load.bind(this));
+    this.setData({ startDate: startDate, stopDate: stopDate, hanzi: hanzi });
   },
 
   toDatePage: function () {

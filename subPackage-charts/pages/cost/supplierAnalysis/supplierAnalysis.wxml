@@ -1,11 +1,18 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+
 <view class="page">
   <back-navbar style="height:{{navBarHeight}}rpx" title="供货商分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view style="height:{{navBarHeight}}rpx"></view>
 
-  <view class="filter-row">
-    <view class="date-pill" bindtap="toDatePage"><image src="/images/calender.png"></image><text class="date-name">{{hanzi}}</text><text class="date-range">{{dateRangeText}}</text><text>⌄</text></view>
-    <view class="period {{periodKey=='month'?'active':''}}" data-key="month" bindtap="selectPeriod">本月</view>
-    <view class="period {{periodKey=='thirty'?'active':''}}" data-key="thirty" bindtap="selectPeriod">近30天</view>
+  <view class="date-toolbar">
+    <view class="date-selector" bindtap="toDatePage" hover-class="date-selector-hover">
+      <view class="date-calendar"><image src="/images/calender.png"></image></view>
+      <view class="date-copy">
+        <view class="date-title">{{hanzi}}</view>
+        <view class="date-values" wx:if="{{startDate == stopDate}}"><text>{{tool.transferDateString(startDate)}}</text></view>
+        <view class="date-values" wx:else><text>{{tool.transferDateString(startDate)}}</text><text class="date-divider">-</text><text>{{tool.transferDateString(stopDate)}}</text></view>
+      </view>
+    </view>
   </view>
 
   <view class="banner">

@@ -1,12 +1,18 @@
+<wxs src="/wxs/format.wxs" module="tool" />
+
 <view class="page">
   <back-navbar style="height: {{navBarHeight}}rpx;" title="自采分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view style="height: {{navBarHeight}}rpx;"></view>
 
-  <view class="filter-row">
-    <view class="date-pill" bindtap="toDatePage"><image src="/images/calender.png"></image><text>{{dateRangeText}}</text><view class="chevron"></view></view>
-    <view class="period-pill {{periodKey == 'month' ? 'active' : ''}}" data-key="month" bindtap="selectPeriod">本月</view>
-    <view class="period-pill {{periodKey == 'week' ? 'active' : ''}}" data-key="week" bindtap="selectPeriod">近7天</view>
-    <picker mode="selector" range="{{departmentNames}}" value="{{departmentIndex}}" bindchange="changeDepartment"><view class="department-pill">{{departmentNames[departmentIndex]}}⌄</view></picker>
+  <view class="date-toolbar">
+    <view class="date-selector" bindtap="toDatePage" hover-class="date-selector-hover">
+      <view class="date-calendar"><image src="/images/calender.png"></image></view>
+      <view class="date-copy">
+        <view class="date-title">{{hanzi}}</view>
+        <view class="date-values" wx:if="{{startDate == stopDate}}"><text>{{tool.transferDateString(startDate)}}</text></view>
+        <view class="date-values" wx:else><text>{{tool.transferDateString(startDate)}}</text><text class="date-divider">-</text><text>{{tool.transferDateString(stopDate)}}</text></view>
+      </view>
+    </view>
   </view>
 
   <view class="banner">
@@ -38,6 +44,6 @@
 
     <view class="tips-panel"><view class="panel-title"><image src="{{iconRoot}}light_bulb.png"></image>采购提示</view><view class="tip-list"><view class="tip" wx:for="{{tips}}" wx:key="type"><view class="tip-arrow">↗</view><view><text>{{item.title}}</text><text class="bold">{{item.dayValue}}</text><text class="small">{{item.description}}</text></view></view></view></view>
   </view>
-  <view wx:elif="{{!loading}}" class="empty"><image src="/subPackage-charts/images/purchase/keaibaicai.png" mode="aspectFit"></image><text>本期暂无自采数据</text><text class="small">可切换日期或门店查看</text></view>
+  <view wx:elif="{{!loading}}" class="empty"><image src="/subPackage-charts/images/purchase/keaibaicai.png" mode="aspectFit"></image><text>本期暂无自采数据</text><text class="small">可切换日期查看</text></view>
   <view class="bottom-space"></view>
 </view>

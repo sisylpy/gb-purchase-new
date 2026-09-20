@@ -22,10 +22,6 @@ Page({
     loading: true,
     hasData: false,
     dateType: 'month',
-    periodKey: 'month',
-    departmentIndex: 0,
-    departmentList: [{ gbDepartmentId: 0, gbDepartmentName: '全部门店' }],
-    departmentNames: ['全部门店'],
     metric: 'amount',
     ecTrend: { lazyLoad: true },
     ecCategory: { lazyLoad: true },
@@ -37,19 +33,16 @@ Page({
 
   onLoad: function () {
     var disInfo = wx.getStorageSync('disInfo') || {};
-    var departments = [{ gbDepartmentId: 0, gbDepartmentName: '全部门店' }].concat(disInfo.gbDepartmentEntityList || []);
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
-      disId: disInfo.gbDistributerId,
-      departmentList: departments,
-      departmentNames: departments.map(function (d) { return d.gbDepartmentName; })
+      disId: disInfo.gbDistributerId
     });
     this._syncDate();
     this._load();
   },
 
   onShow: function () {
-    if (this.data.updateDate) { this.setData({ updateDate: false, periodKey: 'custom' }); this._syncDate(); this._load(); }
+    if (this.data.updateDate) { this.setData({ updateDate: false }); this._syncDate(); this._load(); }
   },
 
   onPullDownRefresh: function () { this._load(); },
@@ -63,25 +56,12 @@ Page({
       var range = myDate.name === 'custom' ? dateUtils.getDateRange(myDate.name, myDate.startDate, myDate.stopDate) : dateUtils.getDateRange(myDate.name);
       startDate = range.startDate; stopDate = range.stopDate; hanzi = myDate.hanzi || range.name;
     }
-    this.setData({ startDate: startDate, stopDate: stopDate, hanzi: hanzi, dateRangeText: shortDate(startDate) + ' - ' + shortDate(stopDate) });
-  },
-
-  selectPeriod: function (e) {
-    var key = e.currentTarget.dataset.key;
-    var startDate = key === 'week' ? dateUtils.getArriveDate(-6) : dateUtils.getFirstDateInMonth();
-    var stopDate = dateUtils.getArriveDate(0);
-    this.setData({ periodKey: key, startDate: startDate, stopDate: stopDate, hanzi: key === 'week' ? '近7天' : '本月', dateRangeText: shortDate(startDate) + ' - ' + shortDate(stopDate) });
-    this._load();
+    this.setData({ startDate: startDate, stopDate: stopDate, hanzi: hanzi });
   },
 
   toDatePage: function () {
     this.setData({ updateDate: true });
     wx.navigateTo({ url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType });
-  },
-
-  changeDepartment: function (e) {
-    this.setData({ departmentIndex: Number(e.detail.value) });
-    this._load();
   },
 
   switchMetric: function (e) {
@@ -91,10 +71,9 @@ Page({
   _load: function () {
     var that = this;
     if (!this.data.disId) { load.showToast('缺少分销商信息'); return; }
-    var dep = this.data.departmentList[this.data.departmentIndex] || {};
     this.setData({ loading: true });
     load.showLoading('获取数据中');
-    apiDistributer.getGbSelfPurchaseAnalysis({ disId: this.data.disId, startDate: this.data.startDate, stopDate: this.data.stopDate, purDepId: dep.gbDepartmentId || '' })
+    apiDistributer.getGbSelfPurchaseAnalysis({ disId: this.data.disId, startDate: this.data.startDate, stopDate: this.data.stopDate })
       .then(function (res) {
         load.hideLoading(); wx.stopPullDownRefresh();
         if (!res.result || res.result.code !== 0) { that.setData({ loading: false, hasData: false }); load.showToast((res.result && res.result.msg) || '获取失败'); return; }

@@ -14,11 +14,6 @@ function money(value) {
   return num(value).toFixed(1).replace(/\.0$/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function shortDate(value) {
-  var parts = String(value || '').split('-');
-  return parts.length === 3 ? Number(parts[1]) + '月' + Number(parts[2]) + '日' : value;
-}
-
 function imageUrl(value) {
   if (!value) return '';
   return /^https?:\/\//.test(value) ? value : config.server + value;
@@ -86,8 +81,7 @@ Page({
     this.setData({
       startDate: startDate,
       stopDate: stopDate,
-      hanzi: hanzi,
-      dateRangeText: shortDate(startDate) + ' - ' + shortDate(stopDate)
+      hanzi: hanzi
     });
   },
 

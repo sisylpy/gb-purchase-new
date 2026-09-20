@@ -3,14 +3,15 @@ page { background: #f4faf8; color: #152039; }
 .navbar-spacer { width: 100%; flex-shrink: 0; }
 .content { padding: 10rpx 24rpx 20rpx; }
 .tap-hover { opacity: .75; }
-.hero-strip { position: relative; height: 92rpx; padding-top: 16rpx; box-sizing: border-box; }
-.date-filter { position: relative; z-index: 5; width: 350rpx; min-height: 76rpx; margin-left: 24rpx; padding: 0 18rpx; box-sizing: border-box; border-radius: 38rpx; background: #fff; display: flex; align-items: center; box-shadow: 0 8rpx 24rpx rgba(29, 92, 73, .08); }
-.date-icon { width: 38rpx; height: 38rpx; margin-right: 16rpx; }
-.date-name { font-size: 30rpx; font-weight: 700; white-space: nowrap; }
-.date-range { color: #6d7a91; font-size: 24rpx; margin-left: 18rpx; flex: 1; white-space: nowrap; }
-.date-chevron { width: 14rpx; height: 14rpx; margin: -7rpx 4rpx 0 10rpx; border-right: 3rpx solid #8190a4; border-bottom: 3rpx solid #8190a4; transform: rotate(45deg); }
-.hero-slogan { position: absolute; z-index: 5; top: 8rpx; right: 20rpx; width: 190rpx; padding-bottom: 3rpx; color: #56c58e; border-bottom: 2rpx solid #91dab4; border-radius: 50%; font-size: 28rpx; line-height: 1.2; font-weight: 700; transform: rotate(-4deg); text-align: center; }
-.hero-slogan text { display: block; font-size: 23rpx; white-space: nowrap; }
+.date-toolbar { min-height: 104rpx; padding: 10rpx 24rpx; display: flex; align-items: center; justify-content: space-between; border-bottom: 1rpx solid #e5efed; background: #fff; box-sizing: border-box; }
+.date-selector { display: flex; align-items: center; min-width: 0; }
+.date-selector-hover { opacity: .72; }
+.date-calendar { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.date-calendar image { width: 34rpx; height: 34rpx; }
+.date-copy { display: flex; flex-direction: column; min-width: 0; }
+.date-title { font-size: 28rpx; line-height: 34rpx; color: #26354b; }
+.date-values { display: flex; align-items: center; margin-top: 2rpx; color: #26354b; font-size: 24rpx; line-height: 32rpx; white-space: nowrap; }
+.date-divider { padding: 0 10rpx; }
 .overview-card { position: relative; overflow: visible; padding: 26rpx 20rpx 20rpx; border-radius: 30rpx; background: linear-gradient(135deg, #e8faed, #f5fff5); }
 .overview-head { min-height: 130rpx; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; }
 .overview-title { font-size: 34rpx; font-weight: 800; letter-spacing: 2rpx; }

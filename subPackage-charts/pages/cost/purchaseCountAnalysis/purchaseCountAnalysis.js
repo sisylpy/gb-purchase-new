@@ -18,7 +18,7 @@ Page({
   data: {
     navBarHeight: 0, iconRoot: ICON_ROOT,
     bannerUrl: 'https://grainservice.club/uploadImage/purchase-count-analysis-banner.png?v=2',
-    periodKey: 'month', sourceIndex: 0, sourceNames: ['全部来源', '自采', '供货商'], sourceValues: ['ALL', 'SELF', 'SUPPLIER'],
+    sourceIndex: 0, sourceNames: ['全部来源', '自采', '供货商'], sourceValues: ['ALL', 'SELF', 'SUPPLIER'],
     departmentIndex: 0, departmentList: [{ gbDepartmentId: 0, gbDepartmentName: '全部门店' }], departmentNames: ['全部门店'],
     rhythmMetric: 'count', ecRhythm: { lazyLoad: true }, loading: true, hasData: false, summary: {}, goods: [], behaviors: [], tips: []
   },
@@ -29,15 +29,14 @@ Page({
     this.setData({ navBarHeight: globalData.navBarHeight * globalData.rpxR, disId: disInfo.gbDistributerId, departmentList: deps, departmentNames: deps.map(function (x) { return x.gbDepartmentName; }) });
     this._syncDate(); this._load();
   },
-  onShow: function () { if (this.data.updateDate) { this.setData({ updateDate: false, periodKey: 'custom' }); this._syncDate(); this._load(); } },
+  onShow: function () { if (this.data.updateDate) { this.setData({ updateDate: false }); this._syncDate(); this._load(); } },
   onPullDownRefresh: function () { this._load(); },
 
   _syncDate: function () {
-    var saved = wx.getStorageSync('myDate'), start = dateUtils.getFirstDateInMonth(), stop = dateUtils.getArriveDate(0);
-    if (saved) { var range = saved.name === 'custom' ? dateUtils.getDateRange(saved.name, saved.startDate, saved.stopDate) : dateUtils.getDateRange(saved.name); start = range.startDate; stop = range.stopDate; }
-    this.setData({ startDate: start, stopDate: stop, dateRangeText: shortDate(start) + ' - ' + shortDate(stop) });
+    var saved = wx.getStorageSync('myDate'), start = dateUtils.getFirstDateInMonth(), stop = dateUtils.getArriveDate(0), hanzi = '本月';
+    if (saved) { var range = saved.name === 'custom' ? dateUtils.getDateRange(saved.name, saved.startDate, saved.stopDate) : dateUtils.getDateRange(saved.name); start = range.startDate; stop = range.stopDate; hanzi = saved.hanzi || range.name; }
+    this.setData({ startDate: start, stopDate: stop, hanzi: hanzi });
   },
-  selectPeriod: function (e) { var key=e.currentTarget.dataset.key, start=key==='thirty'?dateUtils.getArriveDate(-29):dateUtils.getFirstDateInMonth(), stop=dateUtils.getArriveDate(0); this.setData({ periodKey:key,startDate:start,stopDate:stop,dateRangeText:shortDate(start)+' - '+shortDate(stop) }); this._load(); },
   toDatePage: function () { this.setData({ updateDate:true }); wx.navigateTo({ url:'/pages/common/selectDate/selectDate?startDate='+this.data.startDate+'&stopDate='+this.data.stopDate+'&dateType=month' }); },
   changeDepartment: function (e) { this.setData({departmentIndex:Number(e.detail.value)}); this._load(); },
   changeSource: function (e) { this.setData({sourceIndex:Number(e.detail.value)}); this._load(); },
