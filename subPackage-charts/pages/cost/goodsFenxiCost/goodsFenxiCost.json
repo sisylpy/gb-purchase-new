@@ -1,5 +1,6 @@
 {
   "usingComponents": {
-    "back-navbar": "/components/back-navbar/back-navbar"
+    "back-navbar": "/components/back-navbar/back-navbar",
+    "ec-canvas": "/ec-canvas/ec-canvas"
   }
 }

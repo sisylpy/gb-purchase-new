@@ -50,6 +50,13 @@ Component({
   },
 
   ready: function () {
+    if (this.data.canvasId === 'goods-price-trend') {
+      console.log('[goodsFenxiCost][priceTrend][ec-canvas] ready ' + JSON.stringify({
+        canvasId: this.data.canvasId,
+        hasEc: !!this.data.ec,
+        lazyLoad: !!(this.data.ec && this.data.ec.lazyLoad)
+      }));
+    }
     // Disable prograssive because drawImage doesn't support DOM as parameter
     // See https://developers.weixin.qq.com/miniprogram/dev/api/canvas/CanvasContext.drawImage.html
     echarts.registerPreprocessor(option => {
@@ -83,6 +90,15 @@ Component({
       const canUseNewCanvas = compareVersion(version, '2.9.0') >= 0;
       const forceUseOldCanvas = this.data.forceUseOldCanvas;
       const isUseNewCanvas = canUseNewCanvas && !forceUseOldCanvas;
+      if (this.data.canvasId === 'goods-price-trend') {
+        console.log('[goodsFenxiCost][priceTrend][ec-canvas] init ' + JSON.stringify({
+          sdkVersion: version,
+          canUseNewCanvas,
+          forceUseOldCanvas,
+          isUseNewCanvas,
+          hasCallback: typeof callback === 'function'
+        }));
+      }
       this.setData({ isUseNewCanvas });
 
       if (forceUseOldCanvas && canUseNewCanvas) {
@@ -143,6 +159,15 @@ Component({
         .select('.ec-canvas')
         .fields({ node: true, size: true })
         .exec(res => {
+          if (this.data.canvasId === 'goods-price-trend') {
+            const result = res && res[0]
+            console.log('[goodsFenxiCost][priceTrend][ec-canvas] selector result ' + JSON.stringify({
+              hasResult: !!result,
+              hasNode: !!(result && result.node),
+              width: result && result.width,
+              height: result && result.height
+            }));
+          }
           const canvasNode = res[0].node
           this.canvasNode = canvasNode
 
@@ -159,6 +184,14 @@ Component({
 
           if (typeof callback === 'function') {
             this.chart = callback(canvas, canvasWidth, canvasHeight, canvasDpr)
+            if (this.data.canvasId === 'goods-price-trend') {
+              console.log('[goodsFenxiCost][priceTrend][ec-canvas] callback completed ' + JSON.stringify({
+                hasChart: !!this.chart,
+                width: canvasWidth,
+                height: canvasHeight,
+                canvasDpr
+              }));
+            }
           } else if (this.data.ec && typeof this.data.ec.onInit === 'function') {
             this.chart = this.data.ec.onInit(canvas, canvasWidth, canvasHeight, canvasDpr)
           } else {
