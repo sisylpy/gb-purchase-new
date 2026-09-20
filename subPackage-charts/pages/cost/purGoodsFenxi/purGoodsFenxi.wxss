@@ -31,6 +31,21 @@ page { background: #f4faf8; color: #152039; }
 .metric-note { color: #8390a4; font-size: 21rpx; }
 .trend-up { color: #ff5f62; }.trend-down { color: #18ad7b; }
 .analysis-card { background: #fff; border-radius: 24rpx; padding: 22rpx; margin-top: 18rpx; box-shadow: 0 8rpx 24rpx rgba(31, 90, 73, .05); }
+.core-card { padding: 22rpx 16rpx 18rpx; overflow: hidden; }
+.core-card-hover { opacity: .88; transform: scale(.995); }
+.core-head { padding: 0 6rpx; margin-bottom: 18rpx; }
+.title-mark { width: 7rpx; height: 34rpx; margin-right: 11rpx; border-radius: 8rpx; background: #20bf82; }
+.core-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10rpx; }
+.core-item { min-width: 0; padding: 17rpx 8rpx 15rpx; border-radius: 18rpx; text-align: center; box-sizing: border-box; }
+.core-loss { background: linear-gradient(180deg, #edfbf4, #f8fffb); }
+.core-waste { background: linear-gradient(180deg, #fff0f3, #fff9fa); }
+.core-return { background: linear-gradient(180deg, #f0efff, #fafaff); }
+.core-meal { background: linear-gradient(180deg, #fff7e5, #fffcf5); }
+.core-icon { width: 50rpx; height: 50rpx; margin: 0 auto 7rpx; border-radius: 15rpx; background: rgba(255,255,255,.88); display: flex; align-items: center; justify-content: center; }
+.core-icon image { width: 36rpx; height: 36rpx; }
+.core-label { color: #536176; font-size: 20rpx; white-space: nowrap; }
+.core-value { margin: 7rpx 0; color: #152039; font-size: 26rpx; line-height: 1.2; font-weight: 800; white-space: nowrap; }
+.core-note { min-height: 28rpx; color: #8b97a8; font-size: 16rpx; white-space: nowrap; }
 .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20rpx; }
 .section-title { font-size: 30rpx; font-weight: 800; display: flex; align-items: center; white-space: nowrap; }
 .section-title image { width: 38rpx; height: 38rpx; margin-right: 12rpx; }

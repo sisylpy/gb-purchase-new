@@ -66,6 +66,8 @@ Page({
     purUserIds: -1,
     loading: true,
     hasData: false,
+    purchaseHasData: false,
+    businessHasData: false,
     showAllPriceGoods: false,
     showAllGoods: false,
     showAllSubtotalGoods: false,
@@ -84,7 +86,15 @@ Page({
     mainGoodsName: '暂无',
     reminderText: '本期暂无明显价格波动，采购节奏较平稳。',
     totalTrend: null,
-    countTrend: null
+    countTrend: null,
+    lossRateDisplay: '0.0',
+    wasteRateDisplay: '0.0',
+    returnAmountDisplay: '0',
+    employeeMealAmountDisplay: '0',
+    lossRateTrend: null,
+    wasteRateTrend: null,
+    returnAmountTrend: null,
+    employeeMealAmountTrend: null
   },
 
   onLoad: function () {
@@ -98,6 +108,7 @@ Page({
     if (disInfo) this.setData({ disInfo: disInfo, disId: disInfo.gbDistributerId });
     this._syncDatesFromMyDateStorage();
     this._getSupplierStatistics();
+    this._getBusinessStatistics();
   },
 
   onShow: function () {
@@ -105,6 +116,7 @@ Page({
       this._syncDatesFromMyDateStorage();
       this.setData({ update: false });
       this._getSupplierStatistics();
+      this._getBusinessStatistics();
     }
   },
 
@@ -138,6 +150,79 @@ Page({
       startDate: startDate,
       stopDate: stopDate,
       greatId: -1
+    });
+  },
+
+  _requestBusinessStatistics: function (startDate, stopDate, includeDetails) {
+    return apiDistributer.getGbInventoryBusinessAnalysis({
+      disId: this.data.disId,
+      startDate: startDate,
+      stopDate: stopDate,
+      greatId: -1,
+      searchDepId: '-1',
+      includeDetails: !!includeDetails
+    });
+  },
+
+  _getBusinessStatistics: function () {
+    var that = this;
+    var requestKey = [this.data.disId, this.data.startDate, this.data.stopDate].join('-');
+    this._businessRequestKey = requestKey;
+    this._requestBusinessStatistics(this.data.startDate, this.data.stopDate, false)
+      .then(function (res) {
+        if (that._businessRequestKey !== requestKey) return;
+        if (!res.result || res.result.code !== 0) {
+          console.warn('库存业务统计获取失败:', res.result && res.result.msg);
+          return;
+        }
+        that._applyBusinessStatistics(res.result.data || {});
+        that._loadPreviousBusinessStatistics(requestKey);
+      })
+      .catch(function (err) {
+        if (that._businessRequestKey !== requestKey) return;
+        console.warn('库存业务统计获取失败:', err);
+      });
+  },
+
+  _applyBusinessStatistics: function (data) {
+    var summary = data.summary || {};
+    var lossRate = numberValue(summary.lossRate);
+    var wasteRate = numberValue(summary.wasteRate);
+    var returnAmount = numberValue(summary.returnAmount);
+    var employeeMealAmount = numberValue(summary.employeeMealAmount);
+    var businessHasData = lossRate > 0 || wasteRate > 0 || returnAmount > 0 || employeeMealAmount > 0;
+    this.setData({
+      businessHasData: businessHasData,
+      hasData: this.data.purchaseHasData || businessHasData,
+      lossRate: lossRate,
+      lossRateDisplay: lossRate.toFixed(1),
+      wasteRate: wasteRate,
+      wasteRateDisplay: wasteRate.toFixed(1),
+      returnAmount: returnAmount,
+      returnAmountDisplay: money(returnAmount),
+      employeeMealAmount: employeeMealAmount,
+      employeeMealAmountDisplay: money(employeeMealAmount),
+      lossRateTrend: null,
+      wasteRateTrend: null,
+      returnAmountTrend: null,
+      employeeMealAmountTrend: null
+    });
+  },
+
+  _loadPreviousBusinessStatistics: function (requestKey) {
+    var that = this;
+    var range = previousRange(this.data.startDate, this.data.stopDate);
+    this._requestBusinessStatistics(range.startDate, range.stopDate, false).then(function (res) {
+      if (that._businessRequestKey !== requestKey || !res.result || res.result.code !== 0) return;
+      var previous = (res.result.data && res.result.data.summary) || {};
+      that.setData({
+        lossRateTrend: that._pointTrend(that.data.lossRate, numberValue(previous.lossRate)),
+        wasteRateTrend: that._pointTrend(that.data.wasteRate, numberValue(previous.wasteRate)),
+        returnAmountTrend: that._trend(that.data.returnAmount, numberValue(previous.returnAmount)),
+        employeeMealAmountTrend: that._trend(that.data.employeeMealAmount, numberValue(previous.employeeMealAmount))
+      });
+    }).catch(function (err) {
+      console.warn('上期库存业务统计获取失败:', err);
     });
   },
 
@@ -206,9 +291,11 @@ Page({
       ? priceGoods[0].gbDgGoodsName + '价格波动最明显（' + priceGoods[0].fluctuationDisplay + '%），建议关注后续市场行情，合理安排采购计划。'
       : '本期暂无明显价格波动，采购节奏较平稳。';
 
+    var purchaseHasData = purTotal > 0 || purchaseCount > 0;
     this.setData({
       loading: false,
-      hasData: purTotal > 0 || purchaseCount > 0,
+      purchaseHasData: purchaseHasData,
+      hasData: purchaseHasData || this.data.businessHasData,
       supplierItem: data,
       purTotal: purTotal,
       purTotalDisplay: money(purTotal),
@@ -236,7 +323,7 @@ Page({
 
   _initSelfDonutChart: function () {
     var component = this.selectComponent('#selfDonutChart');
-    if (!component || !this.data.hasData) return;
+    if (!component || !this.data.purTotal) return;
     var selfTotal = this.data.selfTotal;
     var otherTotal = Math.max(this.data.purTotal - selfTotal, 0);
     var that = this;
@@ -300,6 +387,12 @@ Page({
     return { value: Math.abs(value).toFixed(1), direction: value >= 0 ? 'up' : 'down' };
   },
 
+  _pointTrend: function (current, previous) {
+    if (!previous) return null;
+    var value = round(numberValue(current) - previous, 1);
+    return { value: Math.abs(value).toFixed(1), direction: value >= 0 ? 'up' : 'down' };
+  },
+
   toDatePageSearch: function () {
     this.setData({ update: true });
     wx.navigateTo({ url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType });
@@ -315,5 +408,9 @@ Page({
   toggleSubtotalGoodsList: function () { this.setData({ showAllSubtotalGoods: !this.data.showAllSubtotalGoods }); },
   toPurchaser: function () { wx.navigateTo({ url: '/subPackage-charts/pages/cost/selfPurchaseAnalysis/selfPurchaseAnalysis' }); },
   toSupplier: function () { wx.navigateTo({ url: '/subPackage-charts/pages/cost/supplierAnalysis/supplierAnalysis' }); },
+  toInventoryBusinessAnalysis: function () {
+    this.setData({ update: true });
+    wx.navigateTo({ url: '/subPackage-charts/pages/cost/inventoryBusinessAnalysis/inventoryBusinessAnalysis' });
+  },
   toBack: function () { wx.navigateBack({ delta: 1 }); }
 });

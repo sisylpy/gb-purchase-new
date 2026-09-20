@@ -32,6 +32,43 @@
       </view>
     </view>
 
+    <view class="analysis-card core-card" bindtap="toInventoryBusinessAnalysis" hover-class="core-card-hover">
+      <view class="section-head core-head">
+        <view class="section-title"><view class="title-mark"></view>采购核心指标</view>
+        <view class="more">查看详情 <image src="{{imageRoot}}arrow_right.png"></image></view>
+      </view>
+      <view class="core-grid">
+        <view class="core-item core-loss">
+          <view class="core-icon"><image src="/images/warn.png"></image></view>
+          <view class="core-label">平均损耗率</view>
+          <view class="core-value">{{lossRateDisplay}}%</view>
+          <view class="core-note" wx:if="{{lossRateTrend}}">较上期 <text class="trend-{{lossRateTrend.direction}}">{{lossRateTrend.direction == 'up' ? '+' : '-'}}{{lossRateTrend.value}}%</text></view>
+          <view class="core-note" wx:else>暂无上期数据</view>
+        </view>
+        <view class="core-item core-waste">
+          <view class="core-icon"><image src="/images/delete.png"></image></view>
+          <view class="core-label">废弃率</view>
+          <view class="core-value">{{wasteRateDisplay}}%</view>
+          <view class="core-note" wx:if="{{wasteRateTrend}}">较上期 <text class="trend-{{wasteRateTrend.direction}}">{{wasteRateTrend.direction == 'up' ? '+' : '-'}}{{wasteRateTrend.value}}%</text></view>
+          <view class="core-note" wx:else>暂无上期数据</view>
+        </view>
+        <view class="core-item core-return">
+          <view class="core-icon"><image src="/images/zhuanhuan.svg"></image></view>
+          <view class="core-label">退货金额</view>
+          <view class="core-value">￥{{returnAmountDisplay}}</view>
+          <view class="core-note" wx:if="{{returnAmountTrend}}">较上期 <text class="trend-{{returnAmountTrend.direction}}">{{returnAmountTrend.direction == 'up' ? '+' : '-'}}{{returnAmountTrend.value}}%</text></view>
+          <view class="core-note" wx:else>暂无上期数据</view>
+        </view>
+        <view class="core-item core-meal">
+          <view class="core-icon"><image src="/images/qiandaizi.png"></image></view>
+          <view class="core-label">员工餐金额</view>
+          <view class="core-value">￥{{employeeMealAmountDisplay}}</view>
+          <view class="core-note" wx:if="{{employeeMealAmountTrend}}">较上期 <text class="trend-{{employeeMealAmountTrend.direction}}">{{employeeMealAmountTrend.direction == 'up' ? '+' : '-'}}{{employeeMealAmountTrend.value}}%</text></view>
+          <view class="core-note" wx:else>暂无上期数据</view>
+        </view>
+      </view>
+    </view>
+
     <view class="analysis-card">
       <view class="section-head"><view class="section-title"><image src="{{imageRoot}}basket_green.png"></image>自采分析</view><view class="more" bindtap="toPurchaser">查看更多 <image src="{{imageRoot}}arrow_right.png"></image></view></view>
       <view class="self-content">

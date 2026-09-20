@@ -159,6 +159,22 @@ var getGbCostGoodsStatistics = function (data) {
   }, { useUrlParams: true });
 };
 
+/**
+ * 库存业务分析：损耗、废弃、退货、员工餐汇总及详情
+ * POST gbdepartmentgoodsstockreduce/getGbInventoryBusinessAnalysis
+ */
+var getGbInventoryBusinessAnalysis = function (data) {
+  var params = {
+    disId: data.disId,
+    startDate: data.startDate,
+    stopDate: data.stopDate,
+    greatId: data.greatId || -1,
+    searchDepId: data.searchDepId || '-1',
+    includeDetails: !!data.includeDetails,
+  };
+  return requestUtil.post('gbdepartmentgoodsstockreduce/getGbInventoryBusinessAnalysis', params, { useUrlParams: true });
+};
+
 // ===== settlePageGb 页面需要的 API =====
 
 /**
@@ -199,6 +215,7 @@ module.exports = {
   getGbSupplierAnalysis: getGbSupplierAnalysis,
   getGbPurGoodsDetailList: getGbPurGoodsDetailList,
   getGbCostGoodsStatistics: getGbCostGoodsStatistics,
+  getGbInventoryBusinessAnalysis: getGbInventoryBusinessAnalysis,
   // settlePageGb 需要的 API
   disGetGbSupplierBillsWithStatus: disGetGbSupplierBillsWithStatus,
   // myPurchaseDetail 需要的 API

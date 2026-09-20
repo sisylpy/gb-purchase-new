@@ -1,0 +1,46 @@
+<view class="page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="库存业务分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="navbar-spacer" style="height: {{navBarHeight}}rpx;"></view>
+
+  <view class="filters">
+    <view class="date-filter" bindtap="toDatePage" hover-class="tap-hover"><image src="/images/calender.png"></image><text>{{dateRangeText}}</text><text>⌄</text></view>
+    <view class="period {{periodKey == 'month' ? 'active' : ''}}" data-key="month" bindtap="selectPeriod">本月</view>
+    <view class="period {{periodKey == 'thirty' ? 'active' : ''}}" data-key="thirty" bindtap="selectPeriod">近30天</view>
+    <picker mode="selector" range="{{departmentNames}}" value="{{departmentIndex}}" bindchange="changeDepartment"><view class="department-filter">{{departmentNames[departmentIndex]}}⌄</view></picker>
+  </view>
+
+  <view class="hero">
+    <view class="hero-copy"><text>看清损耗与去向</text><text>让每一份食材更有价值</text><view>关注损耗、废弃、退货与员工餐</view></view>
+    <view class="hero-circle hero-circle-one"></view><view class="hero-circle hero-circle-two"></view>
+    <image src="/subPackage-charts/images/purchase/keaibaicai.png" mode="aspectFit"></image>
+  </view>
+
+  <block wx:if="{{loaded}}">
+    <view class="panel summary-panel">
+      <view class="panel-title"><view></view>整体情况</view>
+      <view class="summary-grid">
+        <view class="summary-card loss-card"><view class="summary-icon"><image src="/images/warn.png"></image></view><view><text class="summary-label">损耗量</text><text class="summary-value">{{summary.lossWeightDisplay}}<text> 斤</text></text><text class="summary-note">损耗率 <text>{{summary.lossRateDisplay}}%</text> · ￥{{summary.lossAmountDisplay}}</text></view></view>
+        <view class="summary-card waste-card"><view class="summary-icon"><image src="/images/delete.png"></image></view><view><text class="summary-label">废弃量</text><text class="summary-value">{{summary.wasteWeightDisplay}}<text> 斤</text></text><text class="summary-note">废弃率 <text>{{summary.wasteRateDisplay}}%</text> · ￥{{summary.wasteAmountDisplay}}</text></view></view>
+        <view class="summary-card return-card"><view class="summary-icon"><image src="/images/zhuanhuan.svg"></image></view><view><text class="summary-label">退货金额</text><text class="summary-value">￥{{summary.returnAmountDisplay}}</text><text class="summary-note">退货量 {{summary.returnWeightDisplay}} 斤</text></view></view>
+        <view class="summary-card meal-card"><view class="summary-icon"><image src="/images/qiandaizi.png"></image></view><view><text class="summary-label">员工餐金额</text><text class="summary-value">￥{{summary.employeeMealAmountDisplay}}</text><text class="summary-note">员工餐用量 {{summary.employeeMealWeightDisplay}} 斤</text></view></view>
+      </view>
+      <view class="rate-rule">损耗率、废弃率按正常使用＋损耗＋废弃的出库数量计算</view>
+    </view>
+
+    <view class="panel trend-panel">
+      <view class="panel-head"><view class="panel-title"><view></view>趋势图</view><view class="trend-tabs"><text class="{{trendMode == 'rate' ? 'active' : ''}}" data-mode="rate" bindtap="switchTrend">损耗/废弃率</text><text class="{{trendMode == 'amount' ? 'active' : ''}}" data-mode="amount" bindtap="switchTrend">退货/员工餐</text></view></view>
+      <view class="legend" wx:if="{{trendMode == 'rate'}}"><view class="legend-item"><view class="dot dot-loss"></view><text>损耗率</text></view><view class="legend-item"><view class="dot dot-waste"></view><text>废弃率</text></view></view>
+      <view class="legend" wx:else><view class="legend-item"><view class="dot dot-return"></view><text>退货金额</text></view><view class="legend-item"><view class="dot dot-meal"></view><text>员工餐金额</text></view></view>
+      <view class="chart-wrap"><ec-canvas id="businessTrendChart" canvas-id="inventory-business-trend" ec="{{ecTrend}}" class="trend-chart"></ec-canvas><view wx:if="{{!hasTrendData}}" class="chart-empty">本期暂无趋势数据</view></view>
+    </view>
+
+    <view class="panel detail-panel">
+      <view class="panel-title"><view></view>商品业务明细</view>
+      <view class="detail-tools"><view class="search-box"><image src="/images/search.png"></image><input value="{{searchKeyword}}" bindinput="onSearchInput" placeholder="搜索商品名称" /></view><picker mode="selector" range="{{businessTypeNames}}" value="{{businessTypeIndex}}" bindchange="changeBusinessType"><view class="type-picker">{{businessTypeNames[businessTypeIndex]}}⌄</view></picker></view>
+      <view class="table-head"><text class="goods-col">商品名称</text><text>业务数量</text><text>业务金额</text><text>{{detailRateLabel}}</text><text class="action-col">操作</text></view>
+      <view class="table-row" wx:for="{{detailRows}}" wx:key="id" bindtap="toGoodsPage" data-id="{{item.id}}" hover-class="row-hover"><text class="goods-col">{{item.name}}</text><text>{{item.weightDisplay}} {{item.unit}}</text><text>￥{{item.amountDisplay}}</text><text class="percent">{{item.percentDisplay}}%</text><text class="action-col">›</text></view>
+      <view class="detail-empty" wx:if="{{!detailRows.length}}">暂无{{businessTypeNames[businessTypeIndex]}}商品数据</view>
+    </view>
+  </block>
+  <view class="bottom-space"></view>
+</view>

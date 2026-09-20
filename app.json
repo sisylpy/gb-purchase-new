@@ -164,6 +164,7 @@
         "pages/stock/stockListOneDay/stockListOneDay",
         "pages/stock/stockGoodsList/stockGoodsList",
         "pages/cost/purGoodsFenxi/purGoodsFenxi",
+        "pages/cost/inventoryBusinessAnalysis/inventoryBusinessAnalysis",
         "pages/cost/selfPurchaseAnalysis/selfPurchaseAnalysis",
         "pages/cost/purchaseCountAnalysis/purchaseCountAnalysis",
         "pages/cost/unitPriceAnalysis/unitPriceAnalysis",
