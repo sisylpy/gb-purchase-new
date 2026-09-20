@@ -85,6 +85,7 @@ Page({
 
   onLoad: function (options) {
     options = options || {};
+    this._hasShownOnce = false;
     var dis = wx.getStorageSync('disInfo') || {};
     var dep = wx.getStorageSync('depInfo') || {};
     this.setData({
@@ -98,11 +99,15 @@ Page({
   },
 
   onShow: function () {
-    if (this.data.updateDate) {
-      this.setData({ updateDate: false });
-      this.syncDate();
-      this.loadData();
+    // onLoad 后会先加载分类并请求一次数据；后续每次回到本页都刷新，
+    // 避免后端发布、配方修改或从详情页返回后继续展示旧的关联菜品数量。
+    if (!this._hasShownOnce) {
+      this._hasShownOnce = true;
+      return;
     }
+    this.setData({ updateDate: false });
+    this.syncDate();
+    this.loadData();
   },
 
   syncDate: function () {
