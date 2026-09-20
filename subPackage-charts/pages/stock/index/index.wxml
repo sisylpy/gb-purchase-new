@@ -2,54 +2,75 @@
 <wxs src="/wxs/format.wxs" module="tool" />
 <view class="page">
   <back-navbar title="库存" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
-  <view style="height:{{navBarHeight}}rpx"></view>
+  <view style="height:{{navBarHeight}}rpx;flex-shrink:0"></view>
 
-  <scroll-view scroll-x class="day-tabs" show-scrollbar="false">
-    <view class="day-tab {{activeDay==index?'active':''}}" wx:for="{{dayTabs}}" wx:key="whichDay" data-index="{{index}}" bindtap="chooseDay">
-      <view class="day-label">{{item.label}}</view><view><text>{{item.sub}}</text><text class="day-total">{{item.total}}元</text></view>
+  <view class="overview-panel">
+    <scroll-view scroll-x enhanced class="day-tabs" show-scrollbar="false" scroll-into-view="day-{{activeDay}}">
+      <view class="day-tabs-inner">
+        <view id="day-{{index}}" class="day-tab {{activeDay==index?'active':''}}" wx:for="{{dayTabs}}" wx:key="whichDay" data-index="{{index}}" bindtap="chooseDay">
+          <view class="day-top"><text class="day-name">{{item.label}}</text><view class="calendar-badge"><image src="/images/calender.png"></image></view></view>
+          <text class="day-date">{{item.dateText}}</text>
+          <view class="day-bottom"><text>{{item.amountLabel}}</text><text><text class="day-total">{{item.totalText}}</text>元</text></view>
+          <view class="day-indicator"></view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="summary">
+      <view class="summary-card total"><view class="summary-icon">▰</view><view class="summary-copy"><text class="summary-label">库存总额</text><view class="summary-value"><text>{{totalAmount}}</text><text class="summary-unit">元</text></view></view></view>
+      <view class="summary-card today"><view class="summary-icon">↑</view><view class="summary-copy"><text class="summary-label">今日入库</text><view class="summary-value"><text>{{todayAmount}}</text><text class="summary-unit">元</text></view></view></view>
+      <view class="summary-card count"><view class="summary-icon">▣</view><view class="summary-copy"><text class="summary-label">库存商品</text><view class="summary-value"><text>{{goodsCount}}</text><text class="summary-unit">个</text></view></view></view>
+      <view class="summary-card attention"><view class="summary-icon">!</view><view class="summary-copy"><text class="summary-label">重点关注</text><view class="summary-value"><text>{{attentionCount}}</text><text class="summary-unit">个</text></view></view></view>
     </view>
-  </scroll-view>
-
-  <view class="summary">
-    <view class="summary-card total"><text class="summary-icon">▱</text><view><text>库存总额</text><text class="strong">{{totalAmount}}元</text></view></view>
-    <view class="summary-card today"><text class="summary-icon">↑</text><view><text>今日入库</text><text class="strong">{{todayAmount}}元</text></view></view>
-    <view class="summary-card count"><text class="summary-icon">♙</text><view><text>库存商品</text><text class="strong">{{goodsCount}}个</text></view></view>
-    <view class="summary-card attention"><text class="summary-icon">!</text><view><text>重点关注</text><text class="strong">{{attentionCount}}个</text></view></view>
   </view>
 
   <view class="main">
-    <scroll-view scroll-y class="category-rail">
+    <scroll-view scroll-y enhanced class="category-rail" show-scrollbar="false">
       <view class="category {{activeCategory==index?'active':''}}" wx:for="{{categories}}" wx:key="gbDistributerFatherGoodsId" data-index="{{index}}" bindtap="chooseCategory">
-        <text class="category-icon">{{item.icon}}</text><text>{{item.gbDfgFatherGoodsName}}</text>
+        <view class="category-icon-wrap"><text class="category-icon">{{item.icon}}</text></view>
+        <text class="category-name">{{item.gbDfgFatherGoodsName}}</text>
+        <text class="category-count">{{item.goodsCount}}种</text>
       </view>
     </scroll-view>
 
     <view class="content" wx:if="{{categories.length}}">
       <view class="category-card">
-        <image src="{{imgUrl.resolve(url,categories[activeCategory].gbDfgFatherGoodsImgLarge||categories[activeCategory].gbDfgFatherGoodsImg)}}" mode="aspectFill"></image>
-        <view class="category-info"><text class="category-title">{{categories[activeCategory].gbDfgFatherGoodsName}}</text><view class="category-grid"><view><text class="small">库存金额</text><text class="strong">{{categories[activeCategory].amountText}}元</text></view><view><text class="small">商品数</text><text class="strong">{{categories[activeCategory].goodsCount}}个</text></view><view><text class="small">批次入库</text><text class="strong">{{categoryInbound||0}}元</text></view><view><text class="small">重点商品</text><text class="strong">{{categories[activeCategory].attentionCount}}个</text></view></view></view>
+        <view class="category-card-top">
+          <view class="category-identity"><view class="category-symbol">{{categories[activeCategory].icon}}</view><view><text class="category-title">{{categories[activeCategory].gbDfgFatherGoodsName}}</text><text class="category-subtitle">分类库存概览</text></view></view>
+          <image wx:if="{{categories[activeCategory].gbDfgFatherGoodsImgLarge||categories[activeCategory].gbDfgFatherGoodsImg}}" class="category-art" src="{{imgUrl.resolve(url,categories[activeCategory].gbDfgFatherGoodsImgLarge||categories[activeCategory].gbDfgFatherGoodsImg)}}" mode="aspectFit"></image>
+        </view>
+        <view class="category-grid">
+          <view><text class="small">库存金额</text><text class="strong">{{categories[activeCategory].amountText}}<text class="unit">元</text></text></view>
+          <view><text class="small">商品数量</text><text class="strong">{{categories[activeCategory].goodsCount}}<text class="unit">个</text></text></view>
+          <view><text class="small">本期入库</text><text class="strong">{{categoryInbound||0}}<text class="unit">元</text></text></view>
+          <view><text class="small">重点商品</text><text class="strong attention-text">{{categories[activeCategory].attentionCount}}<text class="unit">个</text></text></view>
+        </view>
       </view>
 
       <view class="tools">
-        <picker mode="selector" range="{{sortNames}}" bindchange="changeSort"><view class="sort">排序方式⌄</view></picker>
+        <picker mode="selector" range="{{sortNames}}" value="{{sortIndex}}" bindchange="changeSort"><view class="sort"><text class="sort-icon">↕</text><text>{{sortNames[sortIndex]}}</text><text class="sort-arrow">⌄</text></view></picker>
         <view class="filters"><text class="{{activeFilter=='all'?'active':''}}" data-value="all" bindtap="chooseFilter">全部</text><text class="{{activeFilter=='more'?'active':''}}" data-value="more" bindtap="chooseFilter">库存偏多</text><text class="{{activeFilter=='attention'?'warn':''}}" data-value="attention" bindtap="chooseFilter">临期关注</text></view>
       </view>
 
-      <scroll-view scroll-y class="goods-list">
+      <scroll-view scroll-y enhanced class="goods-list" show-scrollbar="false">
         <view class="goods-card" wx:for="{{goods}}" wx:key="gbDistributerGoodsId" data-index="{{index}}" bindtap="toGoods">
-          <view class="goods-head"><image src="{{imgUrl.resolve(url,item.imagePath)}}" mode="aspectFill"></image><view class="goods-name"><text>{{item.gbDgGoodsName}}</text><text class="small">¥{{item.firstPrice}}/{{item.gbDgGoodsStandardname}}</text></view><text class="status {{item.tone}}">{{item.status}}</text><text class="arrow">›</text></view>
+          <view class="goods-head">
+            <view class="goods-image"><image src="{{imgUrl.resolve(url,item.imagePath)}}" mode="aspectFill"></image></view>
+            <view class="goods-name"><text>{{item.gbDgGoodsName}}</text><view class="goods-meta"><text>¥{{item.firstPrice}}/{{item.gbDgGoodsStandardname}}</text><text>{{item.batches.length}}个批次</text></view></view>
+            <view class="goods-action"><text class="status {{item.tone}}">{{item.status}}</text><text class="arrow">›</text></view>
+          </view>
           <view class="batch" wx:for="{{item.batches}}" wx:for-item="stock" wx:key="gbDepartmentGoodsStockId">
-            <view class="batch-age"><text class="strong">{{tool.getHowManyDays(stock.gbDgsDate)}}天库存</text><text class="small">{{stock.gbDepartmentName}}</text></view>
-            <view><text class="small">单价</text><text class="strong blue">{{stock.gbDgsPrice}}元/{{stock.goodsStandardName}}</text></view>
-            <view><text class="small">剩余数量</text><text class="strong green">{{stock.gbDgsRestWeight}}{{stock.goodsStandardName}}</text></view>
-            <view><text class="small">本月入库</text><text class="strong green">{{stock.gbDgsSubtotal}}元</text></view>
-            <view><text class="small">剩余金额</text><text class="strong orange">{{stock.gbDgsRestSubtotal}}元</text></view>
+            <view class="batch-age"><text class="age-number">{{tool.getHowManyDays(stock.gbDgsDate)}}<text>天</text></text><text class="small">{{stock.gbDepartmentName}}</text></view>
+            <view><text class="small">单价</text><text class="strong blue">{{stock.gbDgsPrice}}<text class="mini-unit">元/{{stock.goodsStandardName}}</text></text></view>
+            <view><text class="small">剩余数量</text><text class="strong green">{{stock.gbDgsRestWeight}}<text class="mini-unit">{{stock.goodsStandardName}}</text></text></view>
+            <view><text class="small">本期入库</text><text class="strong green">{{stock.gbDgsSubtotal}}<text class="mini-unit">元</text></text></view>
+            <view><text class="small">剩余金额</text><text class="strong orange">{{stock.gbDgsRestSubtotal}}<text class="mini-unit">元</text></text></view>
           </view>
         </view>
-        <view class="empty" wx:if="{{!goods.length}}"><image src="/images/file-common.png"></image><text>当前条件暂无库存商品</text></view>
+        <view class="empty" wx:if="{{!goods.length}}"><image src="/images/file-common.png"></image><text>当前条件暂无库存商品</text><text class="empty-sub">可以切换分类或筛选条件查看</text></view>
         <view class="bottom-space"></view>
       </scroll-view>
     </view>
-    <view class="empty-page" wx:else>暂无库存</view>
+    <view class="empty-page" wx:else><view class="empty-symbol">▣</view><text>暂无库存数据</text></view>
   </view>
 </view>

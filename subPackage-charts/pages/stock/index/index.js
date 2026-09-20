@@ -22,15 +22,28 @@ function categoryIcon(name) {
   return '♧';
 }
 
+function calendarMeta(offset) {
+  var date = new Date();
+  date.setDate(date.getDate() - offset);
+  return {
+    date: (date.getMonth() + 1) + '月' + date.getDate() + '日',
+    week: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()]
+  };
+}
+
 function dayTabs(data) {
   data = data || {};
+  var today = calendarMeta(0);
+  var yesterday = calendarMeta(1);
+  var beforeYesterday = calendarMeta(2);
+  var threeDaysAgo = calendarMeta(3);
   return [
-    { label: '全部', sub: '所有库存', whichDay: 99, total: data.total && data.total.restTotal || 0 },
-    { label: '今', sub: data.in && data.in.dateString || '今日', whichDay: 0, total: data.in && data.in.zeroTotal || 0 },
-    { label: '1', sub: data.one && data.one.dateString || '1天', whichDay: 1, total: data.one && data.one.oneTotal || 0 },
-    { label: '2', sub: data.two && data.two.dateString || '2天', whichDay: 2, total: data.two && data.two.twoTotal || 0 },
-    { label: '3', sub: data.three && data.three.dateString || '3天', whichDay: 3, total: data.three && data.three.threeTotal || 0 },
-    { label: '3+', sub: data.exceed && data.exceed.dateString || '3天以上', whichDay: 4, total: data.exceed && data.exceed.exceedThreeTotal || 0 }
+    { label: '全部库存', dateText: '当前结存', amountLabel: '库存', whichDay: 99, totalText: money(data.total && data.total.restTotal) },
+    { label: '今天', dateText: today.date, amountLabel: '入库', whichDay: 0, totalText: money(data.in && data.in.zeroTotal) },
+    { label: '昨天', dateText: yesterday.date, amountLabel: '入库', whichDay: 1, totalText: money(data.one && data.one.oneTotal) },
+    { label: '前天', dateText: beforeYesterday.date, amountLabel: '入库', whichDay: 2, totalText: money(data.two && data.two.twoTotal) },
+    { label: threeDaysAgo.date, dateText: threeDaysAgo.week, amountLabel: '入库', whichDay: 3, totalText: money(data.three && data.three.threeTotal) },
+    { label: '更早库存', dateText: '3天以上', amountLabel: '入库', whichDay: 4, totalText: money(data.exceed && data.exceed.exceedThreeTotal) }
   ];
 }
 
@@ -42,6 +55,7 @@ Page({
     activeCategory: 0,
     activeFilter: 'all',
     sortMode: 'default',
+    sortIndex: 0,
     sortNames: ['默认排序', '按库存金额', '按剩余数量', '按关注程度'],
     dayTabs: [],
     categories: [],
@@ -192,7 +206,7 @@ Page({
   },
 
   chooseFilter: function (e) { this.setData({ activeFilter: e.currentTarget.dataset.value }); this.applyGoods(); },
-  changeSort: function (e) { var values = ['default', 'amount', 'rest', 'attention']; this.setData({ sortMode: values[Number(e.detail.value)] || 'default' }); this.applyGoods(); },
+  changeSort: function (e) { var index = Number(e.detail.value), values = ['default', 'amount', 'rest', 'attention']; this.setData({ sortIndex: index, sortMode: values[index] || 'default' }); this.applyGoods(); },
 
   toGoods: function (e) {
     var item = this.data.goods[Number(e.currentTarget.dataset.index)];
