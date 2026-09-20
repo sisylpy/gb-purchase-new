@@ -5,10 +5,10 @@ var echarts = require('../../../../ec-canvas/echarts.js');
 var globalData = getApp().globalData;
 
 var BUSINESS_TYPES = [
-  { key: 'loss', label: '损耗', amountField: 'goodsLossTotal', weightField: 'goodsLossWeightTotal', totalField: 'lossAmount' },
-  { key: 'waste', label: '废弃', amountField: 'goodsWasteTotal', weightField: 'goodsWasteWeightTotal', totalField: 'wasteAmount' },
-  { key: 'return', label: '退货', amountField: 'goodsReturnTotal', weightField: 'goodsReturnWeightTotal', totalField: 'returnAmount' },
-  { key: 'employeeMeal', label: '员工餐', amountField: 'goodsEmployeeMealTotal', weightField: 'goodsEmployeeMealWeightTotal', totalField: 'employeeMealAmount' }
+  { key: 'loss', label: '损耗', amountField: 'goodsLossTotal' },
+  { key: 'waste', label: '废弃', amountField: 'goodsWasteTotal' },
+  { key: 'return', label: '退货', amountField: 'goodsReturnTotal' },
+  { key: 'employeeMeal', label: '员工餐', amountField: 'goodsEmployeeMealTotal' }
 ];
 
 function numberValue(value) {
@@ -20,10 +20,6 @@ function money(value) {
   var parts = numberValue(value).toFixed(1).replace(/\.0$/, '').split('.');
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return parts.join('.');
-}
-
-function quantity(value) {
-  return numberValue(value).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
 }
 
 function parseDate(value) {
@@ -61,10 +57,11 @@ Page({
     detailRows: [],
     detailRateLabel: '损耗率',
     summary: {
-      lossRateDisplay: '0.0', lossWeightDisplay: '0', lossAmountDisplay: '0',
-      wasteRateDisplay: '0.0', wasteWeightDisplay: '0', wasteAmountDisplay: '0',
-      returnWeightDisplay: '0', returnAmountDisplay: '0',
-      employeeMealWeightDisplay: '0', employeeMealAmountDisplay: '0'
+      purchaseAmountDisplay: '0',
+      lossRateDisplay: '0.0', lossAmountDisplay: '0',
+      wasteRateDisplay: '0.0', wasteAmountDisplay: '0',
+      returnRateDisplay: '0.0', returnAmountDisplay: '0',
+      employeeMealRateDisplay: '0.0', employeeMealAmountDisplay: '0'
     }
   },
 
@@ -197,24 +194,26 @@ Page({
 
   _apply: function (data) {
     var summary = data.summary || {};
+    var purchaseAmount = numberValue(summary.purchaseAmount);
+    var returnAmount = numberValue(summary.returnAmount);
+    var employeeMealAmount = numberValue(summary.employeeMealAmount);
     var normalizedSummary = {
+      purchaseAmount: purchaseAmount,
+      purchaseAmountDisplay: money(purchaseAmount),
       lossRate: numberValue(summary.lossRate),
       lossRateDisplay: numberValue(summary.lossRate).toFixed(1),
-      lossWeightDisplay: quantity(summary.lossWeight),
       lossAmount: numberValue(summary.lossAmount),
       lossAmountDisplay: money(summary.lossAmount),
       wasteRate: numberValue(summary.wasteRate),
       wasteRateDisplay: numberValue(summary.wasteRate).toFixed(1),
-      wasteWeightDisplay: quantity(summary.wasteWeight),
       wasteAmount: numberValue(summary.wasteAmount),
       wasteAmountDisplay: money(summary.wasteAmount),
-      returnWeightDisplay: quantity(summary.returnWeight),
-      returnAmount: numberValue(summary.returnAmount),
-      returnAmountDisplay: money(summary.returnAmount),
-      employeeMealWeightDisplay: quantity(summary.employeeMealWeight),
-      employeeMealAmount: numberValue(summary.employeeMealAmount),
-      employeeMealAmountDisplay: money(summary.employeeMealAmount),
-      rateBaseWeight: numberValue(summary.rateBaseWeight)
+      returnAmount: returnAmount,
+      returnAmountDisplay: money(returnAmount),
+      returnRateDisplay: (purchaseAmount ? returnAmount * 100 / purchaseAmount : 0).toFixed(1),
+      employeeMealAmount: employeeMealAmount,
+      employeeMealAmountDisplay: money(employeeMealAmount),
+      employeeMealRateDisplay: (purchaseAmount ? employeeMealAmount * 100 / purchaseAmount : 0).toFixed(1)
     };
     this._goodsRows = data.goodsRows || [];
     var trendRows = this._fillDays(data.trend || []);
@@ -258,34 +257,25 @@ Page({
   _applyDetailFilter: function () {
     var meta = BUSINESS_TYPES[this.data.businessTypeIndex] || BUSINESS_TYPES[0];
     var keyword = String(this.data.searchKeyword || '').trim().toLowerCase();
-    var selectedTotal = numberValue(this.data.summary[meta.totalField]);
+    var purchaseAmount = numberValue(this.data.summary.purchaseAmount);
     var rows = (this._goodsRows || []).map(function (item) {
       var amount = numberValue(item[meta.amountField]);
-      var businessWeight = numberValue(item[meta.weightField]);
-      var rateBase = numberValue(item.goodsProduceWeightTotal)
-        + numberValue(item.goodsLossWeightTotal)
-        + numberValue(item.goodsWasteWeightTotal);
-      var percent = (meta.key === 'loss' || meta.key === 'waste')
-        ? (rateBase ? businessWeight * 100 / rateBase : 0)
-        : (selectedTotal ? amount * 100 / selectedTotal : 0);
+      var percent = purchaseAmount ? amount * 100 / purchaseAmount : 0;
       return {
         id: item.gbDistributerGoodsId,
         name: item.gbDgGoodsName || '未命名商品',
-        unit: item.gbDgGoodsStandardname || '斤',
-        weightDisplay: quantity(businessWeight),
         amountDisplay: money(amount),
         percentDisplay: percent.toFixed(1),
-        amount: amount,
-        weight: businessWeight
+        amount: amount
       };
     }).filter(function (item) {
-      if (item.amount <= 0 && item.weight <= 0) return false;
+      if (item.amount <= 0) return false;
       return !keyword || item.name.toLowerCase().indexOf(keyword) >= 0;
     }).sort(function (a, b) { return b.amount - a.amount; });
     this.setData({
       detailRows: rows,
       detailRateLabel: meta.key === 'loss' ? '损耗率'
-        : (meta.key === 'waste' ? '废弃率' : '金额占比')
+        : (meta.key === 'waste' ? '废弃率' : '占采购金额')
     });
   },
 

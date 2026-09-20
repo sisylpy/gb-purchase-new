@@ -40,7 +40,7 @@
       <view class="core-grid">
         <view class="core-item core-loss">
           <view class="core-icon"><image src="/images/warn.png"></image></view>
-          <view class="core-label">平均损耗率</view>
+          <view class="core-label">损耗率</view>
           <view class="core-value">{{lossRateDisplay}}%</view>
           <view class="core-note" wx:if="{{lossRateTrend}}">较上期 <text class="trend-{{lossRateTrend.direction}}">{{lossRateTrend.direction == 'up' ? '+' : '-'}}{{lossRateTrend.value}}%</text></view>
           <view class="core-note" wx:else>暂无上期数据</view>
