@@ -15,6 +15,11 @@ var getGbGoodsCostStatistics = function (payload) {
   return request.post('gbdepartmentgoodsstockreduce/getGbGoodsCostStatistics', payload, { useUrlParams: true });
 };
 
+/** 与商品档案 resGoods 共用的两级分类目录。 */
+var disGetDepGoodsCataGbLite = function (payload) {
+  return request.post('gbdepartmentdisgoods/disGetDepGoodsCataGbLite', payload, { useUrlParams: true });
+};
+
 /** 当前有效销量输入对应的逐日历史理论成本报表。 */
 var getDishDailyCostReport = function (params) {
   return request.get('cost-accounting/daily-costs/report', params);
@@ -202,6 +207,8 @@ module.exports = {
   getConversationMessages: aiChatApi.getConversationMessages,
   listAdvisors: aiChatApi.listAdvisors,
   getAdvisorDetail: aiChatApi.getAdvisorDetail,
+  // 手机端 AI 能力目录（四分类导航，问法/顺序/contractId 唯一来源）
+  getCapabilityMap: aiChatApi.getCapabilityMap,
   // 图钉 & 工作笔记
   createWorkRecordFromBusinessCard: aiChatApi.createWorkRecordFromBusinessCard,
   pinMessage: aiChatApi.pinMessage,
@@ -239,6 +246,7 @@ module.exports = {
   getDishDailyCostResult: getDishDailyCostResult,
   getDishCostDetail: getDishCostDetail,
   outboundIngredientAnalysis: aiChatApi.outboundIngredientAnalysis,
+  disGetDepGoodsCataGbLite: disGetDepGoodsCataGbLite,
   // 库存
   getGbStockPurGoods: getGbStockPurGoods,
   getMendianStockTypePeriod: aiChatApi.getMendianStockTypePeriod,

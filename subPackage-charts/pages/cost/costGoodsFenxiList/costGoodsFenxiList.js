@@ -1,11 +1,269 @@
-var dateUtils=require('../../../../lib/dateUtil'),api=require('../../../services/api.js'),config=require('../../../../config/index'),load=require('../../../../lib/load.js'),globalData=getApp().globalData;
-function n(v){var x=parseFloat(String(v==null?0:v).replace(/,/g,''));return isNaN(x)?0:x} function money(v){return n(v).toFixed(2).replace(/\.00$/,'')} function shortDate(s){var p=String(s||'').split('-');return p.length===3?Number(p[1])+'月'+Number(p[2])+'日':s} function img(p){if(!p)return'/images/logo.jpg';if(/^https?:\/\//.test(p))return p;return(config.server||'').replace(/\/$/,'')+'/'+String(p).replace(/^\//,'').split('/').map(encodeURIComponent).join('/')}
-function cat(x){var labels=[x.goodsGreatName,x.gbDgNxGreatGrandName,x.categoryName,x.category].filter(Boolean).join(' '),name=x.gbDgGoodsName||'';if(/冻品|冷冻/.test(labels))return'冻品';if(/水产|海鲜/.test(labels))return'水产';if(/肉|禽|蛋/.test(labels))return'肉蛋';if(/调料|调味/.test(labels))return'调料';if(/干货|粮油|米面/.test(labels))return'干货';if(/蔬菜|果蔬/.test(labels))return'蔬菜';if(/[冻冰]/.test(name))return'冻品';if(/食盐|盐|醋|酱油|白糖|红糖|冰糖|淀粉|调料|香料|花椒|胡椒|蚝油|鸡精|味精|料酒|豆瓣酱|辣椒粉/.test(name))return'调料';if(/[鱼虾蟹贝]|海鲜/.test(name))return'水产';if(/[肉鸡鸭鹅猪牛羊蛋]/.test(name))return'肉蛋';if(/土豆|马铃薯|洋芋|红薯|白薯|山药|芋头|玉米|豆角|豆芽|毛豆|四季豆|豇豆|芸豆|扁豆|豌豆|蚕豆/.test(name))return'蔬菜';if(/大米|小米|糯米|香米|面粉|挂面|面条|粉丝|粉条|木耳|银耳|腐竹|豆皮|豆腐干|黄豆|绿豆|红豆|黑豆|干货|干菌|干菇/.test(name))return'干货';return'蔬菜'}
-function row(x){var rate=n(x.devianceRate),tone=Math.abs(rate)>=25?'danger':Math.abs(rate)>=10?'warn':'ok',d=x.supportedDishes||[];return Object.assign({},x,{name:x.gbDgGoodsName||'未命名原料',imageUrl:img(x.gbDgGoodsFileImg),category:cat(x),amountText:money(x.outboundTotalAmount),rateText:(rate>0?'+':'')+money(rate)+'%',dishCount:d.length,dishNames:d.slice(0,3).map(function(a){return a.dishName}).join('、'),statusText:tone==='danger'?'重点关注':tone==='warn'?'建议核查':'正常',tone:tone})}
-Page({data:{navBarHeight:0,hanzi:'本月',dateText:'',status:'all',sortBy:'outbound',sortOrder:'desc',category:'蔬菜',categories:[{name:'蔬菜',icon:'♧'},{name:'调料',icon:'♟'},{name:'干货',icon:'♨'},{name:'肉蛋',icon:'◉'},{name:'水产',icon:'◆'},{name:'冻品',icon:'❄'}],allRows:[],rows:[],search:''},
-onLoad:function(options){options=options||{};var dis=wx.getStorageSync('disInfo')||{},dep=wx.getStorageSync('depInfo')||{};this.setData({navBarHeight:globalData.navBarHeight*globalData.rpxR,disId:options.disId||dis.gbDistributerId,depFatherId:options.depFatherId||dep.gbDepartmentId||'',searchDepId:options.searchDepId||'-1'});this.syncDate();this.loadData()},
-onShow:function(){if(this.data.updateDate){this.setData({updateDate:false});this.syncDate();this.loadData()}},syncDate:function(){var s=wx.getStorageSync('myDate'),r=s?(s.name==='custom'?dateUtils.getDateRange(s.name,s.startDate,s.stopDate):dateUtils.getDateRange(s.name)):{startDate:dateUtils.getFirstDateInMonth(),stopDate:dateUtils.getArriveDate(0),name:'本月'};this.setData({startDate:r.startDate,stopDate:r.stopDate,hanzi:(s&&s.hanzi)||r.name||'本月',dateText:shortDate(r.startDate)+' - '+shortDate(r.stopDate)})},
-loadData:function(){var that=this;load.showLoading('加载中');api.outboundIngredientAnalysis({startDate:this.data.startDate,stopDate:this.data.stopDate,disId:this.data.disId,depFatherId:this.data.depFatherId,verificationStatus:this.data.status,sortBy:this.data.sortBy,sortOrder:this.data.sortOrder,goodsNameSearch:this.data.search}).then(function(res){load.hideLoading();var d=(res.result&&res.result.data)||{},rows=(d.ingredientsAnalysis||[]).map(row),counts={};rows.forEach(function(r){counts[r.category]=(counts[r.category]||0)+1});var cs=that.data.categories.map(function(c){return Object.assign({},c,{count:counts[c.name]||0})}),selected=that.data.category;if(!rows.some(function(r){return r.category===selected})&&rows.length)selected=rows[0].category;that.setData({allRows:rows,categories:cs,category:selected,summary:d.summary||{}});that.apply()}).catch(function(){load.hideLoading();wx.showToast({title:'原料列表加载失败',icon:'none'})})},
-apply:function(){var c=this.data.category,q=(this.data.search||'').toLowerCase(),rows=(this.data.allRows||[]).filter(function(r){return r.category===c&&(!q||r.name.toLowerCase().indexOf(q)>=0)});this.setData({rows:rows})},
-chooseStatus:function(e){this.setData({status:e.currentTarget.dataset.value});this.loadData()},chooseSort:function(e){var v=e.currentTarget.dataset.value;if(v===this.data.sortBy)this.setData({sortOrder:this.data.sortOrder==='desc'?'asc':'desc'});else this.setData({sortBy:v,sortOrder:'desc'});this.loadData()},chooseCategory:function(e){this.setData({category:e.currentTarget.dataset.value});this.apply()},searchInput:function(e){this.setData({search:e.detail.value});this.loadData()},noop:function(){},
-toDetail:function(e){var r=this.data.rows[e.currentTarget.dataset.index];wx.setStorageSync('costIngredient',r);wx.setStorageSync('disGoods',Object.assign({},r,{gbDistributerGoodsId:r.disGoodsId}));wx.navigateTo({url:'../goodsFenxiCost/goodsFenxiCost?disGoodsId='+r.disGoodsId+'&searchDepId='+this.data.searchDepId})},toDatePage:function(){this.setData({updateDate:true});wx.navigateTo({url:'/pages/common/selectDate/selectDate?startDate='+this.data.startDate+'&stopDate='+this.data.stopDate+'&dateType=month'})},toBack:function(){wx.navigateBack()}})
+var dateUtils = require('../../../../lib/dateUtil');
+var api = require('../../../services/api.js');
+var config = require('../../../../config/index');
+var load = require('../../../../lib/load.js');
+var globalData = getApp().globalData;
+
+function numberValue(value) {
+  var number = parseFloat(String(value == null ? 0 : value).replace(/,/g, ''));
+  return isNaN(number) ? 0 : number;
+}
+
+function money(value) {
+  return numberValue(value).toFixed(2).replace(/\.00$/, '');
+}
+
+function shortDate(value) {
+  var parts = String(value || '').split('-');
+  return parts.length === 3 ? Number(parts[1]) + '月' + Number(parts[2]) + '日' : value;
+}
+
+function imageUrl(path) {
+  if (!path) return '/images/logo.jpg';
+  if (/^https?:\/\//.test(path)) return path;
+  return (config.server || '').replace(/\/$/, '') + '/'
+    + String(path).replace(/^\//, '').split('/').map(encodeURIComponent).join('/');
+}
+
+function idString(value) {
+  return value == null ? '' : String(value);
+}
+
+function categoryIcon(name) {
+  if (/蔬菜/.test(name)) return '♧';
+  if (/肉|禽|蛋/.test(name)) return '◉';
+  if (/水产|海鲜/.test(name)) return '◆';
+  if (/冻/.test(name)) return '❄';
+  if (/调料|干货/.test(name)) return '♨';
+  if (/米|面|粮油/.test(name)) return '▰';
+  return '▦';
+}
+
+function catalogCategory(row) {
+  var name = row.gbDfgFatherGoodsName || '未命名分类';
+  return {
+    id: idString(row.gbDistributerFatherGoodsId),
+    name: name,
+    icon: categoryIcon(name),
+    count: 0
+  };
+}
+
+function ingredientRow(raw) {
+  var rate = numberValue(raw.devianceRate);
+  var tone = Math.abs(rate) >= 25 ? 'danger' : Math.abs(rate) >= 10 ? 'warn' : 'ok';
+  var dishes = raw.supportedDishes || [];
+  return Object.assign({}, raw, {
+    name: raw.gbDgGoodsName || '未命名原料',
+    imageUrl: imageUrl(raw.gbDgGoodsFileImg),
+    categoryId: idString(raw.gbDgDfgGoodsGreatId),
+    amountText: money(raw.outboundTotalAmount),
+    rateText: (rate > 0 ? '+' : '') + money(rate) + '%',
+    dishCount: dishes.length,
+    dishNames: dishes.slice(0, 3).map(function (item) { return item.dishName; }).join('、'),
+    statusText: tone === 'danger' ? '重点关注' : tone === 'warn' ? '建议核查' : '正常',
+    tone: tone
+  });
+}
+
+Page({
+  data: {
+    navBarHeight: 0,
+    hanzi: '本月',
+    dateText: '',
+    status: 'all',
+    sortBy: 'outbound',
+    sortOrder: 'desc',
+    categoryId: '',
+    categoryName: '',
+    catalogCategories: [],
+    categories: [],
+    allRows: [],
+    rows: [],
+    search: ''
+  },
+
+  onLoad: function (options) {
+    options = options || {};
+    var dis = wx.getStorageSync('disInfo') || {};
+    var dep = wx.getStorageSync('depInfo') || {};
+    this.setData({
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      disId: options.disId || dis.gbDistributerId,
+      depFatherId: options.depFatherId || dep.gbDepartmentId || '',
+      searchDepId: options.searchDepId || '-1'
+    });
+    this.syncDate();
+    this.loadCategories();
+  },
+
+  onShow: function () {
+    if (this.data.updateDate) {
+      this.setData({ updateDate: false });
+      this.syncDate();
+      this.loadData();
+    }
+  },
+
+  syncDate: function () {
+    var saved = wx.getStorageSync('myDate');
+    var range = saved
+      ? (saved.name === 'custom'
+        ? dateUtils.getDateRange(saved.name, saved.startDate, saved.stopDate)
+        : dateUtils.getDateRange(saved.name))
+      : { startDate: dateUtils.getFirstDateInMonth(), stopDate: dateUtils.getArriveDate(0), name: '本月' };
+    this.setData({
+      startDate: range.startDate,
+      stopDate: range.stopDate,
+      hanzi: (saved && saved.hanzi) || range.name || '本月',
+      dateText: shortDate(range.startDate) + ' - ' + shortDate(range.stopDate)
+    });
+  },
+
+  loadCategories: function () {
+    var that = this;
+    load.showLoading('获取分类');
+    api.disGetDepGoodsCataGbLite({ disId: this.data.disId, goodsType: 99 }).then(function (res) {
+      if (!res.result || res.result.code !== 0) {
+        throw new Error((res.result && res.result.msg) || '商品分类加载失败');
+      }
+      var data = res.result && res.result.data;
+      var categories = data && data.cataArr ? data.cataArr.map(catalogCategory).filter(function (item) {
+        return item.id;
+      }) : [];
+      that.setData({ catalogCategories: categories }, function () {
+        that.loadData();
+      });
+    }).catch(function () {
+      load.hideLoading();
+      wx.showToast({ title: '商品分类加载失败', icon: 'none' });
+      that.loadData();
+    });
+  },
+
+  buildCategories: function (rows) {
+    var categories = (this.data.catalogCategories || []).map(function (item) {
+      return Object.assign({}, item, { count: 0 });
+    });
+    var known = {};
+    categories.forEach(function (item) { known[item.id] = item; });
+    var hasUncategorized = false;
+    rows.forEach(function (row) {
+      if (!row.categoryId || !known[row.categoryId]) {
+        row.categoryId = 'uncategorized';
+        hasUncategorized = true;
+      }
+    });
+    if (hasUncategorized) {
+      var uncategorized = { id: 'uncategorized', name: '未分类', icon: '▦', count: 0 };
+      categories.push(uncategorized);
+      known[uncategorized.id] = uncategorized;
+    }
+    rows.forEach(function (row) {
+      known[row.categoryId].count += 1;
+    });
+    return categories;
+  },
+
+  loadData: function () {
+    var that = this;
+    load.showLoading('加载中');
+    api.outboundIngredientAnalysis({
+      startDate: this.data.startDate,
+      stopDate: this.data.stopDate,
+      disId: this.data.disId,
+      depFatherId: this.data.depFatherId,
+      verificationStatus: this.data.status,
+      sortBy: this.data.sortBy,
+      sortOrder: this.data.sortOrder,
+      goodsNameSearch: this.data.search
+    }).then(function (res) {
+      load.hideLoading();
+      var data = (res.result && res.result.data) || {};
+      var rows = (data.ingredientsAnalysis || []).map(ingredientRow);
+      var categories = that.buildCategories(rows);
+      var selectedId = idString(that.data.categoryId);
+      if (!rows.some(function (row) { return row.categoryId === selectedId; })) {
+        var firstWithGoods = categories.filter(function (item) { return item.count > 0; })[0];
+        selectedId = firstWithGoods ? firstWithGoods.id : (categories[0] ? categories[0].id : '');
+      }
+      var selectedCategory = categories.filter(function (item) { return item.id === selectedId; })[0];
+      that.setData({
+        allRows: rows,
+        categories: categories,
+        categoryId: selectedId,
+        categoryName: selectedCategory ? selectedCategory.name : '',
+        summary: data.summary || {}
+      });
+      that.apply();
+    }).catch(function () {
+      load.hideLoading();
+      wx.showToast({ title: '原料列表加载失败', icon: 'none' });
+    });
+  },
+
+  apply: function () {
+    var categoryId = idString(this.data.categoryId);
+    var keyword = (this.data.search || '').toLowerCase();
+    var rows = (this.data.allRows || []).filter(function (row) {
+      return row.categoryId === categoryId && (!keyword || row.name.toLowerCase().indexOf(keyword) >= 0);
+    });
+    this.setData({ rows: rows });
+  },
+
+  chooseStatus: function (event) {
+    this.setData({ status: event.currentTarget.dataset.value });
+    this.loadData();
+  },
+
+  chooseSort: function (event) {
+    var value = event.currentTarget.dataset.value;
+    if (value === this.data.sortBy) {
+      this.setData({ sortOrder: this.data.sortOrder === 'desc' ? 'asc' : 'desc' });
+    } else {
+      this.setData({ sortBy: value, sortOrder: 'desc' });
+    }
+    this.loadData();
+  },
+
+  chooseCategory: function (event) {
+    var selectedId = idString(event.currentTarget.dataset.id);
+    var selectedCategory = (this.data.categories || []).filter(function (item) {
+      return item.id === selectedId;
+    })[0];
+    this.setData({
+      categoryId: selectedId,
+      categoryName: selectedCategory ? selectedCategory.name : ''
+    });
+    this.apply();
+  },
+
+  searchInput: function (event) {
+    this.setData({ search: event.detail.value });
+    this.loadData();
+  },
+
+  noop: function () {},
+
+  toDetail: function (event) {
+    var row = this.data.rows[event.currentTarget.dataset.index];
+    wx.setStorageSync('costIngredient', row);
+    wx.setStorageSync('disGoods', Object.assign({}, row, { gbDistributerGoodsId: row.disGoodsId }));
+    wx.navigateTo({
+      url: '../goodsFenxiCost/goodsFenxiCost?disGoodsId=' + row.disGoodsId
+        + '&searchDepId=' + this.data.searchDepId
+    });
+  },
+
+  toDatePage: function () {
+    this.setData({ updateDate: true });
+    wx.navigateTo({
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate
+        + '&stopDate=' + this.data.stopDate + '&dateType=month'
+    });
+  },
+
+  toBack: function () {
+    wx.navigateBack();
+  }
+});
