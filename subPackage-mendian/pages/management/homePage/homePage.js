@@ -167,7 +167,7 @@ Page({
     wx.navigateTo({ url: '../../management/depFoodList/depFoodList?disId=' + this.data.disId });
   },
   toCostGoodsFenxi() {
-    wx.navigateTo({ url: '/subPackage-charts/pages/cost/costGoodsFenxi/costGoodsFenxi?disId=' + this.data.disId });
+    wx.navigateTo({ url: '/subPackage-charts/pages/cost/costGoodsFenxiList/costGoodsFenxiList?disId=' + this.data.disId });
   },
   toPurGoodsFenxi() {
     wx.navigateTo({ url: '/subPackage-charts/pages/cost/purGoodsFenxi/purGoodsFenxi?disId=' + this.data.disId });
