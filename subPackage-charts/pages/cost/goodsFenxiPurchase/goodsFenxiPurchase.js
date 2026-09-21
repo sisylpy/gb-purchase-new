@@ -297,10 +297,12 @@ setTimeout(() => {
           color: '#07a766'
         },
         label: {
-          show: valueList.length <= 8,
+          show: true,
           position: 'top',
           formatter: function(params) {
-            return '¥' + Number(params.value).toFixed(2);
+            const index = params.dataIndex;
+            const isKeyPoint = index === 0 || index === valueList.length - 1 || valueList[index] !== valueList[index - 1];
+            return isKeyPoint ? '¥' + Number(params.value).toFixed(2) : '';
           },
           color: '#38584c',
           fontSize: 10
