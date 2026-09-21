@@ -3,15 +3,242 @@ var dateUtils = require('../../../../lib/dateUtil');
 var chartsApi = require('../../../services/api.js');
 var config = require('../../../../config/index.js');
 var globalData = getApp().globalData;
-function num(v){var n=Number(v);return isNaN(n)?0:n;} function money(v){return num(v).toFixed(2);} function qty(v){return num(v).toFixed(2).replace(/\.00$/,'');} function imageUrl(v){return !v?'':(/^https?:\/\//.test(v)?v:config.server+v);}
+
+function numberOrNull(v) {
+  if (v === null || v === undefined || v === '') return null;
+  var n = Number(v);
+  return isNaN(n) ? null : n;
+}
+
+function num(v) {
+  var n = numberOrNull(v);
+  return n === null ? 0 : n;
+}
+
+function money(v) {
+  return num(v).toFixed(2);
+}
+
+function qty(v) {
+  return num(v).toFixed(2).replace(/\.00$/, '');
+}
+
+function imageUrl(v) {
+  return !v ? '' : (/^https?:\/\//.test(v) ? v : config.server + v);
+}
+
+function percentText(v) {
+  return v === null ? '—' : v.toFixed(1) + '%';
+}
 
 Page({
-  data:{navBarHeight:0,loading:true,hasData:false,ingredients:[]},
-  onLoad:function(o){this.context=wx.getStorageSync('foodGoodsFenxiDetailContext')||{};this.setData({navBarHeight:globalData.navBarHeight*globalData.rpxR,foodId:Number(o.foodId||0),disId:Number(o.disId||0),depFatherId:Number(o.depFatherId||0)});this._syncDate();this._load();},
-  onShow:function(){if(this.data.updateDate){this.setData({updateDate:false});this._syncDate();this._load();}},
-  _syncDate:function(){var s=wx.getStorageSync('myDate'),r=s?(s.name==='custom'?dateUtils.getDateRange(s.name,s.startDate,s.stopDate):dateUtils.getDateRange(s.name)):{startDate:dateUtils.getFirstDateInMonth(),stopDate:dateUtils.getArriveDate(0),name:'本月'};this.setData({startDate:r.startDate,stopDate:r.stopDate,hanzi:s&&s.hanzi||r.name||'本月',dateType:s?s.dateType:'month'});},
-  _load:function(){var that=this;this.setData({loading:true});load.showLoading('加载菜品成本明细');var req={startDate:this.data.startDate,stopDate:this.data.stopDate,disId:this.data.disId,depFatherId:this.data.depFatherId,foodId:this.data.foodId};chartsApi.getDishCostDetail(req).then(function(res){load.hideLoading();var b=res&&res.result||{};if(b.code!==0){that.setData({loading:false,hasData:false});load.showToast(b.msg||'加载失败');return;}that._apply(b.data||{});}).catch(function(){load.hideLoading();that.setData({loading:false,hasData:false});load.showToast('网络异常');});},
-  _apply:function(row){var sales=num(row.salesPortions),theoryTotal=num(row.theoryCostPerPortion)*sales,actualTotal=num(row.outboundAllocatedCostAmount),list=(row.ingredientRows||[]).map(function(x){var theoryCost=num(x.theoryCostPerPortion)*sales,actualCost=num(x.outboundAllocatedCostPerPortion)*sales;return Object.assign({},x,{name:x.gbDgGoodsName||'未命名配料',image:imageUrl(x.gbDgGoodsFileImg||x.gbDgNxFatherImg),unit:x.gbDgGoodsStandardname||'',portion:qty(x.recipeUnitPerDish),theoryQty:qty(x.theoryUsage),theoryCost:money(theoryCost),actualCost:money(actualCost),difference:money(actualCost-theoryCost),diffValue:actualCost-theoryCost,share:theoryTotal>0?theoryCost*100/theoryTotal:0});}).sort(function(a,b){return num(b.theoryCost)-num(a.theoryCost);});var max=1;list.forEach(function(x){max=Math.max(max,num(x.theoryCost));});list.forEach(function(x){x.shareText=x.share.toFixed(1);x.barWidth=Math.max(3,num(x.theoryCost)*100/max);});var top=list[0]||{},saving=list.slice().sort(function(a,b){return a.diffValue-b.diffValue;})[0]||{},min=list.slice().sort(function(a,b){return num(a.theoryCost)-num(b.theoryCost);})[0]||{};var revenue=num(row.salesAmount),marginRaw=row.actualGrossMarginRate,margin=(marginRaw!=null&&marginRaw!==''&&marginRaw!==undefined)?Number(marginRaw).toFixed(2):'—';this.setData({loading:false,hasData:true,dish:{name:row.dishName||this.context.name||'未命名菜品',image:imageUrl(row.dishImageLarge||row.dishImage)||this.context.image||'',price:money(row.listPricePerPortion||row.salesUnitPrice),sales:qty(sales),revenue:money(revenue),count:list.length,margin:margin,theoryTotal:money(theoryTotal),actualCost:money(actualTotal),difference:money(actualTotal-theoryTotal)},ingredients:list,keyData:{topName:top.name||'—',topShare:top.shareText||'0.0',savingName:saving.name||'—',savingValue:money(saving.diffValue||0),minName:min.name||'—',minCost:min.theoryCost||'0.00'}});},
-  toDatePage:function(){this.setData({updateDate:true});wx.navigateTo({url:'/pages/common/selectDate/selectDate?startDate='+this.data.startDate+'&stopDate='+this.data.stopDate+'&dateType='+this.data.dateType});},
-  toBack:function(){wx.navigateBack();}
+  data: {
+    navBarHeight: 0,
+    loading: true,
+    hasData: false,
+    ingredients: [],
+    attention: []
+  },
+
+  onLoad: function (options) {
+    this.context = wx.getStorageSync('foodGoodsFenxiDetailContext') || {};
+    this.setData({
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      foodId: Number(options.foodId || 0),
+      disId: Number(options.disId || 0),
+      depFatherId: Number(options.depFatherId || 0)
+    });
+    this._syncDate();
+    this._load();
+  },
+
+  onShow: function () {
+    if (this.data.updateDate) {
+      this.setData({ updateDate: false });
+      this._syncDate();
+      this._load();
+    }
+  },
+
+  _syncDate: function () {
+    var saved = wx.getStorageSync('myDate');
+    var range = saved
+      ? (saved.name === 'custom'
+        ? dateUtils.getDateRange(saved.name, saved.startDate, saved.stopDate)
+        : dateUtils.getDateRange(saved.name))
+      : { startDate: dateUtils.getFirstDateInMonth(), stopDate: dateUtils.getArriveDate(0), name: '本月' };
+    this.setData({
+      startDate: range.startDate,
+      stopDate: range.stopDate,
+      hanzi: saved && saved.hanzi || range.name || '本月',
+      dateType: saved ? saved.dateType : 'month'
+    });
+  },
+
+  _load: function () {
+    var that = this;
+    this.setData({ loading: true });
+    load.showLoading('加载菜品成本明细');
+    chartsApi.getDishCostDetail({
+      startDate: this.data.startDate,
+      stopDate: this.data.stopDate,
+      disId: this.data.disId,
+      depFatherId: this.data.depFatherId,
+      foodId: this.data.foodId
+    }).then(function (res) {
+      load.hideLoading();
+      var body = res && res.result || {};
+      if (body.code !== 0) {
+        that.setData({ loading: false, hasData: false });
+        load.showToast(body.msg || '加载失败');
+        return;
+      }
+      that._apply(body.data || {});
+    }).catch(function () {
+      load.hideLoading();
+      that.setData({ loading: false, hasData: false });
+      load.showToast('网络异常');
+    });
+  },
+
+  _apply: function (row) {
+    var sales = num(row.salesPortions);
+    var theoryTotal = numberOrNull(row.theoryCostTotal);
+    if (theoryTotal === null) theoryTotal = num(row.theoryCostPerPortion) * sales;
+    var actualTotal = num(row.outboundAllocatedCostAmount);
+    var revenue = num(row.salesAmount);
+    var difference = actualTotal - theoryTotal;
+    var actualMargin = numberOrNull(row.actualGrossMarginRate);
+    var lower = numberOrNull(this.context.grossMarginStandardBandLower);
+    var upper = numberOrNull(this.context.grossMarginStandardBandUpper);
+    var target = numberOrNull(row.targetGrossMarginRate);
+    var floatAbs = numberOrNull(row.grossMarginFloatAbs);
+
+    if ((lower === null || upper === null) && target !== null && floatAbs !== null) {
+      lower = target - floatAbs;
+      upper = target + floatAbs;
+    }
+
+    var status = 'pending';
+    var statusLabel = '待复核';
+    var deviationLabel = '数据待确认';
+    var deviationValue = '—';
+    var advice = '当前成本或目标数据不完整，建议先完善配方与成本记录。';
+    var whyTitle = '为什么需要复核？';
+
+    if (actualMargin !== null && lower !== null && upper !== null) {
+      if (actualMargin > upper) {
+        status = 'high';
+        statusLabel = '毛利偏高';
+        deviationLabel = '高于上限';
+        deviationValue = '+' + (actualMargin - upper).toFixed(1) + '%';
+        advice = '实际毛利率明显高于目标区间，建议优先核查成本采集、出库分摊与配料用量。';
+        whyTitle = '为什么毛利偏高？';
+      } else if (actualMargin < lower) {
+        status = 'low';
+        statusLabel = '毛利偏低';
+        deviationLabel = '低于下限';
+        deviationValue = '-' + (lower - actualMargin).toFixed(1) + '%';
+        advice = '实际毛利率低于目标区间，建议重点检查售价、采购成本和配料用量。';
+        whyTitle = '为什么毛利偏低？';
+      } else {
+        status = 'healthy';
+        statusLabel = '毛利健康';
+        deviationLabel = '目标区间内';
+        deviationValue = '0.0%';
+        advice = '实际毛利率位于目标区间内，建议继续保持当前售价与成本管理。';
+        whyTitle = '毛利为什么健康？';
+      }
+    }
+
+    var ingredients = (row.ingredientRows || []).map(function (item) {
+      var theoryCost = num(item.theoryCostPerPortion) * sales;
+      var actualCost = num(item.outboundAllocatedCostPerPortion) * sales;
+      var diff = actualCost - theoryCost;
+      return Object.assign({}, item, {
+        name: item.gbDgGoodsName || '未命名配料',
+        image: imageUrl(item.gbDgGoodsFileImg || item.gbDgNxFatherImg),
+        unit: item.gbDgGoodsStandardname || '',
+        portion: qty(item.recipeUnitPerDish),
+        theoryCost: money(theoryCost),
+        actualCost: money(actualCost),
+        difference: money(diff),
+        diffValue: diff,
+        diffTone: diff > 0 ? 'danger' : diff < 0 ? 'saving' : 'neutral',
+        share: theoryTotal > 0 ? theoryCost * 100 / theoryTotal : 0
+      });
+    }).sort(function (a, b) {
+      return num(b.theoryCost) - num(a.theoryCost);
+    });
+
+    ingredients.forEach(function (item) {
+      item.shareText = item.share.toFixed(1);
+      item.barWidth = Math.max(3, Math.min(100, item.share));
+    });
+
+    var top = ingredients[0] || {};
+    var largestGap = ingredients.slice().sort(function (a, b) {
+      return Math.abs(b.diffValue) - Math.abs(a.diffValue);
+    })[0] || {};
+    var targetRange = lower !== null && upper !== null
+      ? lower.toFixed(0) + '% ~ ' + upper.toFixed(0) + '%'
+      : (this.context.targetRange || '—');
+    var differenceTone = difference > 0 ? 'danger' : difference < 0 ? 'saving' : 'neutral';
+
+    this.setData({
+      loading: false,
+      hasData: true,
+      dish: {
+        name: row.dishName || this.context.name || '未命名菜品',
+        image: imageUrl(row.dishImageLarge || row.dishImage) || this.context.image || '',
+        price: money(row.listPricePerPortion || row.salesUnitPrice),
+        sales: qty(sales),
+        revenue: money(revenue),
+        count: ingredients.length,
+        margin: percentText(actualMargin),
+        targetRange: targetRange,
+        theoryTotal: money(theoryTotal),
+        actualCost: money(actualTotal),
+        actualProfit: money(revenue - actualTotal),
+        difference: money(difference),
+        differenceTone: differenceTone
+      },
+      analysis: {
+        status: status,
+        statusLabel: statusLabel,
+        deviationLabel: deviationLabel,
+        deviationValue: deviationValue,
+        advice: advice,
+        whyTitle: whyTitle
+      },
+      ingredients: ingredients,
+      attention: [
+        {
+          icon: '!', tone: 'red', title: '优先核查 ' + (top.name || '配料成本'),
+          text: top.name ? '理论成本占比 ' + (top.shareText || '0.0') + '%' : '当前没有可核查的配料'
+        },
+        {
+          icon: '⌕', tone: 'blue', title: '关注成本采集',
+          text: largestGap.name
+            ? largestGap.name + '成本差额 ¥' + money(Math.abs(largestGap.diffValue))
+            : '检查配料成本是否完整'
+        },
+        {
+          icon: '▤', tone: 'green', title: '复核建议',
+          text: '检查 TOP 用量与出库记录，确认配料分摊准确性'
+        }
+      ]
+    });
+  },
+
+  toDatePage: function () {
+    this.setData({ updateDate: true });
+    wx.navigateTo({
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType
+    });
+  },
+
+  toBack: function () {
+    wx.navigateBack();
+  }
 });

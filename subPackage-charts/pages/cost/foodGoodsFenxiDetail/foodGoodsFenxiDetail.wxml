@@ -1,7 +1,106 @@
 <wxs src="/wxs/format.wxs" module="tool" />
-<view class="page"><back-navbar title="{{dish.name||'菜品成本明细'}}" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar><view style="height:{{navBarHeight}}rpx"></view>
-  <view class="date-bar" bindtap="toDatePage"><image src="/images/calender.png"></image><view><text>{{hanzi}}</text><text>{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text></view><text>›</text></view>
-  <view wx:if="{{hasData}}"><view class="hero"><view class="dish-head"><image wx:if="{{dish.image}}" src="{{dish.image}}" mode="aspectFill"></image><view wx:else class="placeholder">菜</view><view><text>{{dish.name}}</text><view><text>单价</text><text>¥{{dish.price}}/份</text><text>销量</text><text>{{dish.sales}}份</text><text>销售额</text><text>¥{{dish.revenue}}</text></view></view></view><view class="dish-summary"><view><text>配料数</text><text>{{dish.count}} 种</text></view><view><text>毛利率</text><text class="green">{{dish.margin}}%</text></view><view><text>理论总成本</text><text>¥{{dish.theoryTotal}}</text></view><view><text>出库分摊成本</text><text class="green">¥{{dish.actualCost}}</text></view><view><text>成本差额</text><text class="green">¥{{dish.difference}}</text></view></view></view>
-  <view class="panel"><view class="head"><text>配料成本明细</text><text>按理论成本排序 ⇅</text></view><view class="table-head"><text>配料</text><text>单份用量</text><text>理论用量</text><text>理论成本</text><text>出库分摊成本</text><text>成本差额</text><text>成本占比</text></view><view class="ingredient" wx:for="{{ingredients}}" wx:key="disGoodsId"><view class="name"><image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><view wx:else>料</view><text>{{item.name}}</text></view><text>{{item.portion}}{{item.unit}}/份</text><text>{{item.theoryQty}}{{item.unit}}</text><text>¥{{item.theoryCost}}</text><text class="green">¥{{item.actualCost}}</text><text class="green">¥{{item.difference}}</text><view class="share"><text>{{item.shareText}}%</text><view><view style="width:{{item.barWidth}}%"></view></view></view></view></view>
-  <view class="panel"><text class="section-title">关键数据</text><view class="key-grid"><view><text>♛</text><view><text>成本TOP1</text><text>{{keyData.topName}}</text><text>{{keyData.topShare}}%</text></view></view><view><text>↓</text><view><text>节省最多</text><text>{{keyData.savingName}}</text><text>¥{{keyData.savingValue}}</text></view></view><view><text>▤</text><view><text>最小成本</text><text>{{keyData.minName}}</text><text>¥{{keyData.minCost}}</text></view></view></view></view>
-  <view class="panel"><view class="head"><text>成本对比（理论成本）</text><text>单位：元</text></view><view class="compare" wx:for="{{ingredients}}" wx:key="disGoodsId"><text>{{item.name}}</text><view><view style="width:{{item.barWidth}}%"></view></view><text>¥{{item.theoryCost}}</text></view></view></view><view wx:elif="{{!loading}}" class="empty">暂无该菜品成本明细</view><view class="bottom"></view></view>
+<view class="page">
+  <back-navbar title="{{dish.name || '菜品成本明细'}}" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar>
+  <view style="height:{{navBarHeight}}rpx"></view>
+
+  <view class="date-bar" bindtap="toDatePage">
+    <image src="/images/calender.png"></image>
+    <view>
+      <text>{{hanzi}}</text>
+      <text>{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{hasData}}">
+    <view class="panel conclusion-panel">
+      <view class="head conclusion-head">
+        <view><text>分析结论</text><text class="info-icon">i</text></view>
+      </view>
+
+      <view class="conclusion-hero">
+        <view class="conclusion-art"><image src="/images/dish-analysis/banner.png" mode="heightFix"></image></view>
+        <image wx:if="{{dish.image}}" class="dish-image" src="{{dish.image}}" mode="aspectFill"></image>
+        <view wx:else class="dish-placeholder">菜</view>
+        <view class="dish-title-wrap">
+          <text class="dish-title">{{dish.name}}</text>
+          <text class="status-badge {{analysis.status}}">{{analysis.statusLabel}}</text>
+        </view>
+      </view>
+
+      <view class="conclusion-grid">
+        <view class="conclusion-metric actual">
+          <text class="metric-icon">▂</text>
+          <view><text>实际毛利率</text><text>{{dish.margin}}</text></view>
+        </view>
+        <view class="conclusion-metric target">
+          <text class="metric-icon">◎</text>
+          <view><text>目标区间</text><text>{{dish.targetRange}}</text></view>
+        </view>
+        <view class="conclusion-metric deviation {{analysis.status}}">
+          <text class="metric-icon">↗</text>
+          <view><text>偏离值</text><text>{{analysis.deviationLabel}} {{analysis.deviationValue}}</text></view>
+        </view>
+      </view>
+
+      <view class="analysis-tip"><text>💡</text><text>{{analysis.advice}}</text></view>
+    </view>
+
+    <view class="panel business-panel">
+      <view class="head"><text>关键经营数据</text><text>单位：元（¥）</text></view>
+      <view class="business-grid">
+        <view class="business-card price"><text class="business-icon">◉</text><text>单价</text><text>¥{{dish.price}}</text></view>
+        <view class="business-card sales"><text class="business-icon">▣</text><text>销量</text><text>{{dish.sales}}份</text></view>
+        <view class="business-card revenue"><text class="business-icon">▂</text><text>销售额</text><text>¥{{dish.revenue}}</text></view>
+        <view class="business-card theory"><text class="business-icon">▦</text><text>理论总成本</text><text>¥{{dish.theoryTotal}}</text></view>
+        <view class="business-card actual-cost"><text class="business-icon">◈</text><text>出库分摊成本</text><text>¥{{dish.actualCost}}</text></view>
+        <view class="business-card difference {{dish.differenceTone}}"><text class="business-icon">↓</text><text>成本差额</text><text>¥{{dish.difference}}</text></view>
+      </view>
+    </view>
+
+    <view class="panel reason-panel">
+      <view class="head"><text>{{analysis.whyTitle}}</text></view>
+      <view class="reason-flow">
+        <view class="reason-card revenue-reason"><text>▂　销售额</text><text>¥{{dish.revenue}}</text><text>本期销售 {{dish.sales}}份</text></view>
+        <text class="reason-operator">−</text>
+        <view class="reason-card cost-reason"><text>◉　出库分摊成本</text><text>¥{{dish.actualCost}}</text><text>理论成本 ¥{{dish.theoryTotal}}</text></view>
+        <text class="reason-operator">→</text>
+        <view class="reason-card margin-reason {{analysis.status}}"><text>↗　{{analysis.statusLabel}}</text><text>{{dish.margin}}</text><text>{{analysis.deviationLabel}} {{analysis.deviationValue}}</text></view>
+      </view>
+      <view class="reason-note"><text>◎</text><text>实际销售额扣除出库分摊成本后，得到实际毛利额 ¥{{dish.actualProfit}}。</text></view>
+    </view>
+
+    <view class="panel ingredient-panel">
+      <view class="head"><text>配料成本明细</text><text>按理论成本降序 ⇅</text></view>
+      <view class="ingredient-table">
+        <view class="table-head">
+          <text>配料</text><text>单份用量</text><text>理论成本</text><text>出库分摊</text><text>成本差额</text><text>成本占比</text>
+        </view>
+        <view class="ingredient" wx:for="{{ingredients}}" wx:key="disGoodsId">
+          <view class="ingredient-name">
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+            <view wx:else>料</view>
+            <text>{{item.name}}</text>
+          </view>
+          <text class="portion-value">{{item.portion}}{{item.unit}}/份</text>
+          <text>¥{{item.theoryCost}}</text>
+          <text class="allocated-value">¥{{item.actualCost}}</text>
+          <text class="{{item.diffTone}}">¥{{item.difference}}</text>
+          <view class="share"><text>{{item.shareText}}%</text><view><view style="width:{{item.barWidth}}%"></view></view></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel attention-panel">
+      <view class="head"><text>重点关注</text></view>
+      <view class="attention-grid">
+        <view class="attention-card {{item.tone}}" wx:for="{{attention}}" wx:key="title">
+          <text class="attention-icon">{{item.icon}}</text>
+          <view><text>{{item.title}}</text><text>{{item.text}}</text></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:elif="{{!loading}}" class="empty">暂无该菜品成本明细</view>
+  <view class="bottom"></view>
+</view>
