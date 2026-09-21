@@ -22,7 +22,6 @@
         <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFit"></image>
         <text wx:else class="category-fallback">●</text>
         <text class="category-name">{{item.categoryName}}</text>
-        <text class="category-count">{{item.goodsCount}}种</text>
       </view>
     </scroll-view>
 
