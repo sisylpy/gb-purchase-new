@@ -4,7 +4,7 @@
   <view wx:if="{{hasData}}">
     <view class="banner"><image class="banner-image" src="/images/dish-analysis/banner.png" mode="aspectFill"></image></view>
     <view class="panel overview-panel">
-      <view class="head"><text>菜品健康总览</text><text bindtap="showAllDishes">查看全部菜品 ›</text></view>
+      <view class="head"><text>菜品健康总览</text><view class="head-actions"><view class="rule-toggle {{showHealthRule?'active':''}}" catchtap="toggleHealthRule" role="button" aria-label="健康判定说明">i</view><text class="head-action-link" bindtap="showAllDishes">查看全部菜品 ›</text></view></view>
       <view class="health-grid">
         <view class="healthy"><image class="health-icon" src="/images/dish-analysis/dish_healthy.png" mode="aspectFit"></image><text class="health-label">健康菜品</text><text class="health-value">{{summary.healthy}}<text class="unit"> 道</text></text><text class="health-note">落在目标区间内</text></view>
         <view class="low"><image class="health-icon" src="/images/dish-analysis/dish_margin_low.png" mode="aspectFit"></image><text class="health-label">毛利偏低</text><text class="health-value">{{summary.low}}<text class="unit"> 道</text></text><text class="health-note">低于目标下限</text></view>
@@ -12,8 +12,13 @@
         <view class="pending"><image class="health-icon" src="/images/dish-analysis/dish_pending_review.png" mode="aspectFit"></image><text class="health-label">待复核</text><text class="health-value">{{summary.pending}}<text class="unit"> 道</text></text><text class="health-note">成本采集待确认</text></view>
       </view>
     </view>
-    <view class="panel rule">
-      <view class="head"><text>健康判定说明 ⓘ</text><text>如何判定菜品健康？ ›</text></view>
+    <view class="panel"><view class="head"><view><text>问题发现</text><text class="sub">共 {{summary.problem}} 道需关注的菜品</text></view><text bindtap="toggleAll">{{showAll?'收起':'查看全部'}} ›</text></view><view class="dish" wx:for="{{displayRows}}" wx:key="foodId" data-index="{{index}}" bindtap="openDetail"><image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><view wx:else class="placeholder">{{item.initial}}</view><view class="dish-main"><view><text class="dish-name">{{item.name}}</text><text class="badge {{item.status}}">{{item.statusLabel}}</text><text class="arrow">›</text></view><view class="dish-data"><view><text>实际毛利率</text><text>{{item.actualMargin}}%</text></view><view><text>目标区间</text><text>{{item.targetRange}}</text></view><view><text>偏离值</text><text class="danger">{{item.deviation}}</text></view></view><text class="reason">原因：{{item.reason}}</text></view></view></view>
+    <view class="panel entry"><text class="entry-title">分析入口</text><view><view bindtap="chooseFilter"><text>▥</text><view><text>风险排行</text><text>快速识别问题菜品</text></view><text>›</text></view><view bindtap="openDiagnosis"><text>♧</text><view><text>菜品诊断</text><text>深入分析原因</text></view><text>›</text></view><view bindtap="openFirstDetail"><text>▤</text><view><text>配料归因</text><text>从配料找问题</text></view><text>›</text></view></view></view>
+    <view class="tip">💡　健康不是毛利越高越好，而是是否符合公司设定的目标毛利率区间。</view>
+  </view><view wx:elif="{{!loading}}" class="empty">当前日期范围暂无菜品分析数据</view><view class="bottom"></view>
+  <view wx:if="{{showHealthRule}}" class="rule-popup-mask" catchtap="closeHealthRule">
+    <view class="rule-popup" catchtap="stopHealthRuleTap">
+      <view class="rule-popup-head"><view><text>健康判定说明</text><text>了解菜品健康状态的计算方式</text></view><view class="rule-popup-close" bindtap="closeHealthRule">×</view></view>
       <view class="rule-row">
         <view class="rule-item target-rule"><image class="rule-icon" src="/images/dish-analysis/target_margin_rate.png" mode="aspectFit"></image><view class="rule-copy"><text>目标毛利率</text><text>后端配置区间</text></view></view>
         <text class="rule-operator">＋</text>
@@ -21,9 +26,8 @@
         <text class="rule-operator">＝</text>
         <view class="rule-item range-rule"><image class="rule-icon" src="/images/dish-analysis/health_range.png" mode="aspectFit"></image><view class="rule-copy"><text>健康区间</text><text>健康/偏低/偏高/待复核</text></view></view>
       </view>
+      <view class="rule-popup-tip">菜品实际毛利率落在目标区间内即为健康；超出区间或数据不完整时，系统会标记对应状态。</view>
+      <view class="rule-popup-button" bindtap="closeHealthRule">知道了</view>
     </view>
-    <view class="panel"><view class="head"><view><text>问题发现</text><text class="sub">共 {{summary.problem}} 道需关注的菜品</text></view><text bindtap="toggleAll">{{showAll?'收起':'查看全部'}} ›</text></view><view class="dish" wx:for="{{displayRows}}" wx:key="foodId" data-index="{{index}}" bindtap="openDetail"><image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><view wx:else class="placeholder">{{item.initial}}</view><view class="dish-main"><view><text class="dish-name">{{item.name}}</text><text class="badge {{item.status}}">{{item.statusLabel}}</text><text class="arrow">›</text></view><view class="dish-data"><view><text>实际毛利率</text><text>{{item.actualMargin}}%</text></view><view><text>目标区间</text><text>{{item.targetRange}}</text></view><view><text>偏离值</text><text class="danger">{{item.deviation}}</text></view></view><text class="reason">原因：{{item.reason}}</text></view></view></view>
-    <view class="panel entry"><text class="entry-title">分析入口</text><view><view bindtap="chooseFilter"><text>▥</text><view><text>风险排行</text><text>快速识别问题菜品</text></view><text>›</text></view><view bindtap="openDiagnosis"><text>♧</text><view><text>菜品诊断</text><text>深入分析原因</text></view><text>›</text></view><view bindtap="openFirstDetail"><text>▤</text><view><text>配料归因</text><text>从配料找问题</text></view><text>›</text></view></view></view>
-    <view class="tip">💡　健康不是毛利越高越好，而是是否符合公司设定的目标毛利率区间。</view>
-  </view><view wx:elif="{{!loading}}" class="empty">当前日期范围暂无菜品分析数据</view><view class="bottom"></view>
+  </view>
 </view>

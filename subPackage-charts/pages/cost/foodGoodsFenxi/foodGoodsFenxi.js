@@ -14,7 +14,7 @@ function clean(v, fallback) { var s = v == null ? '' : String(v).trim(); return 
 Page({
   data: {
     navBarHeight: 0, loading: true, hasData: false, allRows: [], displayRows: [],
-    filter: 'PROBLEM', filterLabel: '问题菜品', showAll: false,
+    filter: 'PROBLEM', filterLabel: '问题菜品', showAll: false, showHealthRule: false,
     summary: { healthy: 0, low: 0, high: 0, pending: 0, problem: 0 }
   },
   onLoad: function (options) {
@@ -85,6 +85,9 @@ Page({
     var that = this, values = ['PROBLEM', 'ALL', 'healthy', 'low', 'high', 'pending'], labels = ['问题菜品', '全部菜品', '健康菜品', '毛利偏低', '毛利偏高', '待复核'];
     wx.showActionSheet({ itemList: labels, success: function (res) { that.setData({ filter: values[res.tapIndex], filterLabel: labels[res.tapIndex], showAll: true }); that._filterRows(); } });
   },
+  toggleHealthRule: function () { this.setData({ showHealthRule: true }); },
+  closeHealthRule: function () { this.setData({ showHealthRule: false }); },
+  stopHealthRuleTap: function () {},
   showAllDishes: function () { this.setData({ filter: 'ALL', filterLabel: '全部菜品', showAll: true }); this._filterRows(); },
   toggleAll: function () { this.setData({ showAll: !this.data.showAll }, this._filterRows.bind(this)); },
   openDetail: function (e) {
