@@ -45,7 +45,7 @@ Page({
       IN_BAND: { token: 'healthy', label: '健康菜品', reason: '实际毛利落在目标区间内' },
       BELOW: { token: 'low', label: '毛利偏低', reason: '实际毛利低于目标区间下限' },
       ABOVE: { token: 'high', label: '毛利偏高', reason: '实际毛利高于目标区间上限' },
-      UNKNOWN: { token: 'pending', label: '待复核', reason: '成本或目标毛利标准缺失，暂不能判断' }
+      UNKNOWN: { token: 'pending', label: '待复核', reason: '数据不足，暂不能判断' }
     };
     var sc = { healthy: 0, low: 0, high: 0, pending: 0 };
     var rows = (data.salesDishRows || []).map(function (x) {
@@ -59,11 +59,19 @@ Page({
         deviation = (d > 0 ? '高于上限 +' : d < 0 ? '低于下限 ' : '区间内 ') + Math.abs(d).toFixed(1) + '%';
       }
       var targetRange = (lower !== null && upper !== null) ? (lower.toFixed(0) + '% ~ ' + upper.toFixed(0) + '%') : '—';
+      var reason = m.reason;
+      if (m.token === 'pending') {
+        reason = x.costFactStatus === 'UNKNOWN'
+          ? '缺少可核算的配方成本数据'
+          : lower === null || upper === null
+            ? '未配置目标毛利率和浮动范围'
+            : '成本、收入或目标区间数据不完整';
+      }
       sc[m.token]++;
       return Object.assign({}, x, {
         foodId: x.dishId || x.foodId, name: clean(x.dishName, '未命名菜品'), image: imageUrl(x.dishImageLarge || x.dishImage), initial: clean(x.dishName, '菜').slice(0, 1),
         actualMargin: actual === null ? '—' : actual.toFixed(1), targetRange: targetRange,
-        status: m.token, statusLabel: m.label, deviation: deviation, reason: m.reason
+        status: m.token, statusLabel: m.label, deviation: deviation, reason: reason
       });
     });
     this.setData({ loading: false, hasData: rows.length > 0, allRows: rows, summary: { healthy: sc.healthy, low: sc.low, high: sc.high, pending: sc.pending, problem: sc.low + sc.high + sc.pending } });
