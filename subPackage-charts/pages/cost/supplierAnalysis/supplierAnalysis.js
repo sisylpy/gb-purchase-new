@@ -1,11 +1,13 @@
 var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js');
 var api = require('../../../../services/apiDistributer.js');
+var apiUrl = require('../../../../config/index.js');
 var globalData = getApp().globalData;
 var ICON_ROOT = '/subPackage-charts/images/purchase/icon_pack/';
 
 function num(value) { var n = Number(value); return isNaN(n) ? 0 : n; }
 function money(value) { return num(value).toFixed(1).replace(/\.0$/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function imageUrl(value) { if (!value) return ''; return /^https?:\/\//.test(value) ? value : apiUrl.server + value; }
 function trend(value) { var n = num(value); return { text: (n > 0 ? '+' : '') + n.toFixed(1) + '%', direction: n > 0 ? 'up' : n < 0 ? 'down' : 'stable' }; }
 
 Page({
@@ -71,6 +73,7 @@ Page({
       return Object.assign({}, item, {
         rank: index + 1,
         initial: String(item.supplierName || '供').slice(0, 1),
+        avatar: imageUrl(item.supplierAvatar),
         amountDisplay: money(item.purchaseAmount),
         unsettledDisplay: money(item.unsettledAmount),
         pendingDisplay: money(item.pendingAmount),

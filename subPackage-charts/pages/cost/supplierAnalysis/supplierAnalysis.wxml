@@ -31,14 +31,31 @@
 
     <view class="panel supplier-panel">
       <view class="panel-title"><image src="{{iconRoot}}bar_chart.png"></image><text>供货商占比</text></view>
-      <view class="supplier-row rank-{{item.rank}}" wx:for="{{suppliers}}" wx:key="supplierId">
-        <view class="rank">{{item.rank}}</view>
-        <view class="shop">🏪</view>
-        <view class="supplier-main"><text class="supplier-name">{{item.supplierName}}</text><text class="supplier-note">{{item.description}}</text><view class="share-track"><view style="width:{{item.shareWidth}}%"></view></view></view>
-        <view class="supplier-amount"><text>￥{{item.amountDisplay}}</text><text>供货金额</text></view>
-        <view class="share-ring"><text>{{item.shareDisplay}}%</text><text>占比</text></view>
-        <view class="orders"><image src="{{iconRoot}}menu_green.png"></image><text>{{item.orderCount}} 次</text><text>订单次数</text></view>
-        <view class="settle-row"><text class="unsettled">未结 ￥{{item.unsettledDisplay}}</text><text class="pending">待结 ￥{{item.pendingDisplay}}</text><text class="settled">已结 ￥{{item.settledDisplay}}</text></view>
+      <view class="supplier-card rank-{{item.rank}}" wx:for="{{suppliers}}" wx:key="supplierId">
+        <view class="supplier-head">
+          <view class="rank">{{item.rank}}</view>
+          <image wx:if="{{item.avatar}}" class="supplier-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+          <view wx:else class="supplier-avatar supplier-avatar-fallback">{{item.initial}}</view>
+          <view class="supplier-main">
+            <text class="supplier-name">{{item.supplierName}}</text>
+            <text class="supplier-note">{{item.description}}</text>
+          </view>
+          <view class="share-badge"><text>金额占比</text><text>{{item.shareDisplay}}%</text></view>
+        </view>
+
+        <view class="supplier-metrics">
+          <view class="supplier-metric amount"><text>供货金额</text><text>￥{{item.amountDisplay}}</text></view>
+          <view class="supplier-metric orders"><text>订单次数</text><text>{{item.orderCount}}<text class="metric-unit"> 次</text></text></view>
+          <view class="supplier-metric share"><text>金额占比</text><text>{{item.shareDisplay}}%</text></view>
+        </view>
+
+        <view class="share-track"><view style="width:{{item.shareWidth}}%"></view></view>
+        <view class="settle-title">结算情况</view>
+        <view class="settle-row">
+          <view class="unsettled"><text>未结</text><text>￥{{item.unsettledDisplay}}</text></view>
+          <view class="pending"><text>待结</text><text>￥{{item.pendingDisplay}}</text></view>
+          <view class="settled"><text>已结</text><text>￥{{item.settledDisplay}}</text></view>
+        </view>
       </view>
     </view>
 
