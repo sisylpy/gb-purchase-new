@@ -18,7 +18,7 @@
         <input
           class="numberInput"
           style="width: {{windowWidth / 2}}rpx; font-size: 32rpx; min-height: 80rpx;"
-          bindblur="getFoodName"
+          bindinput="getFoodName"
           value="{{type == 'edit' ? foodItem.gbDfFoodName : foodName}}"
         />
       </view>
@@ -32,7 +32,7 @@
             placeholder-style="color: #999; font-size: 26rpx;"
             type="digit"
             value="{{type == 'edit' ? foodItem.gbDfFoodPrice : price}}"
-            bindblur="getPrice"
+            bindinput="getPrice"
           />
           <text class="ml-sm text-secondary" style="flex-shrink: 0;">元/份</text>
         </view>
@@ -48,7 +48,7 @@
             placeholder="请输入"
             type="digit"
             value="{{type == 'edit' && foodItem ? foodItem.gbDfTargetGrossMarginRate || '' : targetGrossMarginRate}}"
-            bindblur="getTargetGrossMarginRate"
+            bindinput="getTargetGrossMarginRate"
           />
           <text class="ml-sm text-secondary" style="flex-shrink: 0;">%</text>
         </view>
@@ -64,7 +64,7 @@
             placeholder="请输入"
             type="digit"
             value="{{type == 'edit' && foodItem ? foodItem.gbDfGrossMarginFloatAbs || '' : grossMarginFloatAbs}}"
-            bindblur="getGrossMarginFloatAbs"
+            bindinput="getGrossMarginFloatAbs"
           />
           <text class="ml-sm text-secondary" style="flex-shrink: 0;">%</text>
         </view>
@@ -86,7 +86,7 @@
         <textarea
           class="numberText"
           style="width: {{windowWidth - 260}}rpx;"
-          bindblur="getFoodMethod"
+          bindinput="getFoodMethod"
           value="{{type == 'edit' ? foodItem.gbDfFoodMethod : foodMethod}}"
           auto-height
         />
@@ -102,4 +102,3 @@
 
  
 </view>
-
