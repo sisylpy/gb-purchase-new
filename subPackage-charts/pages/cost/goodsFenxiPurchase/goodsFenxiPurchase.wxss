@@ -716,3 +716,27 @@
 .confirm-button:active {
   background-color: #f0f8ff;
 }
+
+.purchase-trend-card {
+  margin-top: 12rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 5rpx 18rpx rgba(39, 71, 87, 0.04);
+}
+
+.purchase-trend-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10rpx 6rpx;
+}
+
+.purchase-trend-head text:first-child {
+  color: #122038;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.purchase-trend-head text:last-child {
+  color: #66788c;
+  font-size: 21rpx;
+}

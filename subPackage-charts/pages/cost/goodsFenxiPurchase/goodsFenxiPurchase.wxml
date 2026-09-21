@@ -36,10 +36,10 @@
 
   <view class="flex-column" wx:if="{{arr.length > 0}}">
 
- <view class="bg-white p-20" style="height: 400rpx;">
+ <view class="bg-white p-20 purchase-trend-card" style="height: 400rpx;">
       <view class="flex-column" wx:if="{{itemList.length > 0}}" style="height: 360rpx;">
 
-        <view class="flex-column-center">采购单价</view>
+        <view class="purchase-trend-head"><text>价格趋势</text><text>采购单价（元/{{disGoods.gbDgGoodsStandardname}}）</text></view>
         <ec-canvas id="dailyChart" canvas-id="dailyChart" style="width: 100%; height: 100%;">
         </ec-canvas> 
       </view>
@@ -207,4 +207,3 @@
     </view>
   </view>
 </view>
-

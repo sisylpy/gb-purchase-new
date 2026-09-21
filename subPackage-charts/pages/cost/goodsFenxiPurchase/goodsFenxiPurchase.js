@@ -206,12 +206,16 @@ setTimeout(() => {
 
   // 获取采购金额图表配置
   getPurSubtotalOption() {
-    const itemList = this.data.itemList;
-    
-    if (!itemList || itemList.length === 0) {
+    const itemList = this.data.itemList || [];
+    const points = itemList.map(item => ({
+      date: item.date || '',
+      value: Number(item.purUnitPrice)
+    })).filter(item => item.date && Number.isFinite(item.value) && item.value > 0);
+
+    if (points.length === 0) {
       return {
         title: {
-          text: '暂无数据',
+          text: '暂无有效采购单价',
           left: 'center',
           top: 'center',
           textStyle: {
@@ -222,40 +226,35 @@ setTimeout(() => {
       };
     }
 
-    // 提取日期和金额数据
-    const dateList = [];
-    const valueList = [];
-    
-    itemList.forEach(item => {
-      if (item.date && item.purUnitPrice !== undefined && item.purUnitPrice !== null) {
-        // 提取日期部分，如从 "2025-01-15" 提取 "15"
-        const day = item.date.split('-')[2];
-        dateList.push(day);
-        valueList.push(parseFloat(item.purUnitPrice) || 0);
-      }
+    const dateList = points.map(item => {
+      const parts = item.date.split('-');
+      return parts.length === 3 ? Number(parts[1]) + '/' + Number(parts[2]) : item.date;
     });
+    const valueList = points.map(item => item.value);
 
     return {
-      color: ['#4A90E2'],
+      color: ['#07a766'],
       grid: {
-        left: 20,
-        right: 20,
-        bottom: 20,
-        top: 40,
+        left: 12,
+        right: 12,
+        bottom: 10,
+        top: 32,
         containLabel: true,
         show: false
       },
       xAxis: {
         type: 'category',
         data: dateList,
-        boundaryGap: true,
+        boundaryGap: false,
+        axisTick: { show: false },
         axisLine: {
           lineStyle: {
-            color: '#999'
+            color: '#d5e5de'
           }
         },
         axisLabel: {
-          color: '#666'
+          color: '#718198',
+          fontSize: 10
         },
         splitLine: {
           show: false
@@ -263,45 +262,51 @@ setTimeout(() => {
       },
       yAxis: {
         type: 'value',
-        position: 'right',
+        scale: true,
+        splitNumber: 3,
+        axisLine: { show: false },
+        axisTick: { show: false },
         splitLine: {
-          show: false
+          show: true,
+          lineStyle: {
+            type: 'dashed',
+            color: '#e6eeeb'
+          }
         },
         axisLabel: {
+          color: '#718198',
+          fontSize: 10,
           formatter: function(value) {
-            return '¥' + value.toFixed(0);
+            return '¥' + Number(value).toFixed(2);
           }
         }
       },
       series: [{
         type: 'line',
-        name: '采购金额',
+        name: '采购单价',
         data: valueList,
+        smooth: true,
         showSymbol: true,
         symbol: 'circle',
-        symbolSize: function (value, params) {
-          const v = typeof params.data === 'number' ? params.data : parseFloat(params.data);
-          return v > 0 ? 10 : 0;
-        },
+        symbolSize: 7,
         lineStyle: {
-          width: 2,
-          color: '#4A90E2'
+          width: 3,
+          color: '#07a766'
         },
         itemStyle: {
-          color: '#4A90E2'
+          color: '#07a766'
         },
         label: {
-          show: true,
+          show: valueList.length <= 8,
           position: 'top',
           formatter: function(params) {
-            const v = params.value;
-            if (typeof v === 'number' && v > 0) {
-              return '¥' + v.toFixed(0);
-            }
-            return '';
+            return '¥' + Number(params.value).toFixed(2);
           },
-          color: '#666',
+          color: '#38584c',
           fontSize: 10
+        },
+        areaStyle: {
+          color: 'rgba(28,190,116,.15)'
         },
         z: 3
       }]
