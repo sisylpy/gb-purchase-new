@@ -1,13 +1,11 @@
 var load = require('../../../../lib/load.js');
 var dateUtils = require('../../../../lib/dateUtil.js');
-var config = require('../../../../config/index.js');
 var storeRootDepartmentId = require('../../../../lib/storeRootDepartment').storeRootDepartmentId;
 var globalData = getApp().globalData;
 import { depGeFoodBusiness } from '../../../../services/apiDistributerFood';
 
 function num(v) { var n = Number(v); return isNaN(n) ? 0 : n; }
 function money(v) { return num(v).toFixed(2).replace(/\.00$/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
-function imageUrl(v) { return !v ? '' : (/^https?:\/\//.test(v) ? v : config.server + v); }
 
 Page({
   data: {
@@ -82,8 +80,6 @@ Page({
       var level = item.grossMarginLevel; var attention = !!item.needsAttention || level === 'BELOW'; var tag = index === 0 && profit > 0 ? '利润王' : attention ? '需关注' : '经营平稳';
       return Object.assign({}, item, {
         rank: index + 1,
-        image: imageUrl(item.foodImageLarge || item.foodImage),
-        initial: String(item.foodName || '菜').slice(0, 1),
         profitDisplay: money(profit),
         marginDisplay: margin.toFixed(2),
         tag: tag,

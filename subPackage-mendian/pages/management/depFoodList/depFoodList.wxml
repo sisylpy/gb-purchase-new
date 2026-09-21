@@ -17,9 +17,11 @@
       <view class="rank-head"><view><text class="rank-title">♛ 赚钱排行榜</text><text class="rank-note">按实际利润从高到低，看看哪些菜最赚钱</text></view><text class="view-all" bindtap="toggleAll">{{showAll?'收起':'查看全部'}} ›</text></view>
       <view class="dish-card" wx:for="{{visibleRows}}" wx:key="foodId" data-item="{{item}}" bindtap="toDiagnosis">
         <view class="medal medal-{{item.rank}}">{{item.rank}}</view>
-        <image wx:if="{{item.image}}" class="dish-image" src="{{item.image}}" mode="aspectFill"></image><view wx:else class="dish-image placeholder">{{item.initial}}</view>
-        <view class="dish-main"><view class="dish-title-row"><text class="dish-name">{{item.foodName}}</text><text class="tag {{item.tagClass}}">{{item.tag}}</text></view><text class="dish-desc">{{item.description}}</text><view class="dish-metrics"><view><text>销量</text><text>{{item.salesCount}}<text> 份</text></text></view><view><text>实际利润</text><text class="profit">￥{{item.profitDisplay}}</text></view><view><text>毛利率</text><text class="{{item.needsAttention?'danger-text':'margin'}}">{{item.marginDisplay}}%</text></view></view></view>
-        <view class="diagnosis-btn">查看诊断 ›</view>
+        <view class="dish-main">
+          <view class="dish-title-row"><text class="dish-name">{{item.foodName}}</text><text class="tag {{item.tagClass}}">{{item.tag}}</text><text class="diagnosis-btn">查看诊断 ›</text></view>
+          <text class="dish-desc">{{item.description}}</text>
+          <view class="dish-metrics"><view><text>销量</text><text>{{item.salesCount}}<text> 份</text></text></view><view><text>实际利润</text><text class="profit">￥{{item.profitDisplay}}</text></view><view><text>毛利率</text><text class="{{item.needsAttention?'danger-text':'margin'}}">{{item.marginDisplay}}%</text></view></view>
+        </view>
       </view>
     </view>
   </view>
