@@ -2,6 +2,7 @@
   <back-navbar title="配料分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view style="height:{{navBarHeight}}rpx"></view>
 
+  <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="page-scroll">
   <view class="toolbar">
     <view class="date-picker" bindtap="toDatePage">
       <image src="/images/calender.png"></image>
@@ -70,37 +71,40 @@
   </view>
 
   <view class="body">
-    <scroll-view scroll-y class="cats">
+    <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="cats">
       <view class="cat {{categoryId==item.id?'active':''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseCategory">
-        <text class="icon">{{item.icon}}</text>
+        <image wx:if="{{item.imageUrl}}" class="category-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
+        <text wx:else class="icon">{{item.icon}}</text>
         <text class="category-name">{{item.name}}</text>
         <text class="category-count">({{item.count}})</text>
       </view>
     </scroll-view>
 
-    <scroll-view scroll-y class="goods">
+    <view class="goods">
       <view class="card" wx:for="{{rows}}" wx:key="disGoodsId" data-index="{{index}}" bindtap="toDetail">
-        <image class="goods-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
-        <view class="info">
-          <view class="line">
-            <text class="name">{{item.name}}</text>
-            <text class="go">›</text>
-            <text wx:if="{{item.tone!='ok'}}" class="badge {{item.tone}}">{{item.statusText}}</text>
+        <view class="card-main">
+          <image class="goods-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
+          <view class="info">
+            <view class="line">
+              <text class="name">{{item.name}}</text>
+              <text class="go">›</text>
+              <text wx:if="{{item.tone!='ok'}}" class="badge {{item.tone}}">{{item.statusText}}</text>
+            </view>
+            <text class="price">¥{{item.unitPrice||0}} / {{item.gbDgGoodsStandardname||'斤'}}</text>
           </view>
-          <text class="price">¥{{item.unitPrice||0}} / {{item.gbDgGoodsStandardname||'斤'}}</text>
-          <view class="metrics">
-            <view>
-              <image src="/images/ingredient-analysis/outbound_amount.png"></image>
-              <view><text>出库金额</text><text>¥{{item.amountText}}</text></view>
-            </view>
-            <view>
-              <image src="/images/ingredient-analysis/allocation_deviation_rate.png"></image>
-              <view><text>偏差率</text><text class="{{item.tone}}">{{item.rateText}}</text></view>
-            </view>
-            <view>
-              <text class="dish-icon">菜</text>
-              <view><text>关联菜品</text><text>{{item.dishCount}}道</text></view>
-            </view>
+        </view>
+        <view class="metrics">
+          <view>
+            <image src="/images/ingredient-analysis/outbound_amount.png"></image>
+            <view><text>出库金额</text><text>¥{{item.amountText}}</text></view>
+          </view>
+          <view>
+            <image src="/images/ingredient-analysis/allocation_deviation_rate.png"></image>
+            <view><text>偏差率</text><text class="{{item.tone}}">{{item.rateText}}</text></view>
+          </view>
+          <view>
+            <text class="dish-icon">菜</text>
+            <view><text>关联菜品</text><text>{{item.dishCount}}道</text></view>
           </view>
         </view>
       </view>
@@ -109,6 +113,7 @@
         <text>可以切换左侧分类查看</text>
       </view>
       <view class="goods-bottom"></view>
-    </scroll-view>
+    </view>
   </view>
+  </scroll-view>
 </view>

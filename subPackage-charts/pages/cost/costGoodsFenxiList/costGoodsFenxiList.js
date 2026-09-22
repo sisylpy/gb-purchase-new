@@ -39,11 +39,17 @@ function categoryIcon(name) {
   return '▦';
 }
 
+function categoryImageUrl(row) {
+  var path = row.gbDfgFatherGoodsImg || row.gbDfgFatherGoodsImgLarge;
+  return path ? imageUrl(path) : '';
+}
+
 function catalogCategory(row) {
   var name = row.gbDfgFatherGoodsName || '未命名分类';
   return {
     id: idString(row.gbDistributerFatherGoodsId),
     name: name,
+    imageUrl: categoryImageUrl(row),
     icon: categoryIcon(name),
     count: 0
   };
