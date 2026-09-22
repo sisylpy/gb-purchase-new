@@ -119,7 +119,8 @@ Page({
         name: item.foodName || '未命名菜品', price: money(price), image: imageUrl(item.foodImageLarge || item.foodImage),
         method: item.foodMethod || '从经营结果到成本结构，快速看清这道菜为什么赚钱', status: status, tone: tone,
         sales: sales, revenue: money(item.actualRevenue), listRevenue: money(listRevenue), profit: money(profit), margin: margin === null ? '—' : margin.toFixed(2),
-        targetRange: targetRange, deviationLabel: deviationLabel, deviationValue: deviationValue, conclusion: conclusion,
+        targetRange: targetRange, targetLower: lower, targetUpper: upper,
+        deviationLabel: deviationLabel, deviationValue: deviationValue, conclusion: conclusion,
         normalRevenue: money(item.normalSaleAmount), employeeRevenue: money(employeeRevenue),
         employeeMealQty: employeeMealQty, employeeMealConcession: money(employeeMealConcession),
         employeeMealCostText: item.employeeMealCostAmount == null ? '—' : '¥' + money(item.employeeMealCostAmount),
@@ -173,13 +174,16 @@ Page({
     wx.navigateTo({ url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=' + this.data.dateType });
   },
 
-  toCostProblem: function () {
-    wx.setStorageSync('foodCostContext', {
+  toFoodAnalysis: function () {
+    wx.setStorageSync('foodGoodsFenxiDetailContext', {
       image: this.data.food && this.data.food.image || '',
-      name: this.data.food && this.data.food.name || ''
+      name: this.data.food && this.data.food.name || '',
+      targetRange: this.data.food && this.data.food.targetRange || '—',
+      grossMarginStandardBandLower: this.data.food && this.data.food.targetLower,
+      grossMarginStandardBandUpper: this.data.food && this.data.food.targetUpper
     });
     wx.navigateTo({
-      url: '../costProblemLocation/costProblemLocation?foodId=' + this.data.foodId +
+      url: '/subPackage-charts/pages/cost/foodGoodsFenxiDetail/foodGoodsFenxiDetail?foodId=' + this.data.foodId +
         '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId
     });
   },

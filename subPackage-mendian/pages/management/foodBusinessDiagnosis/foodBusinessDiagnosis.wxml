@@ -33,7 +33,7 @@
     </view>
 
     <view class="summary panel">
-      <view class="section-head"><text class="section-title">▥　经营摘要</text><text class="section-link" bindtap="toCostProblem">查看全部 ›</text></view>
+      <view class="section-head"><text class="section-title">▥　经营摘要</text><text class="section-link" bindtap="toFoodAnalysis">菜品分析 ›</text></view>
       <view class="summary-grid">
         <view class="summary-card profit-card"><text class="summary-icon">¥</text><text>实际毛利</text><text class="summary-value profit">¥{{food.profit}}</text><text>这道菜赚了</text></view>
         <view class="summary-card cost-card"><text class="summary-icon">▤</text><text>菜品总成本</text><text class="summary-value blue-text">¥{{food.totalCost}}</text><text>制作加损耗</text></view>
@@ -92,7 +92,7 @@
           <view class="finance-metric unit-metric"><text class="metric-icon">▤</text><view><text>一份总成本</text><text>¥{{food.costPer}}/份</text></view></view>
         </view>
       </view>
-      <view class="cost-detail-btn" bindtap="toCostProblem">查看成本明细 <text>›</text></view>
+      <view class="cost-detail-btn" bindtap="toFoodAnalysis">查看菜品分析 <text>›</text></view>
     </view>
 
     <view class="chart-panel panel">

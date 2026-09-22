@@ -72,8 +72,6 @@
         "pages/management/purUserDayDeatil/purUserDayDeatil",
         "pages/management/depFoodList/depFoodList",
         "pages/management/foodBusinessDiagnosis/foodBusinessDiagnosis",
-        "pages/management/costProblemLocation/costProblemLocation",
-        "pages/management/ingredientCostDetail/ingredientCostDetail",
         "pages/management/dishIngredientDashboard/dishIngredientDashboard",
         "pages/management/franchiseUpgrade/franchiseUpgrade",
         "pages/mendian/index/index",
