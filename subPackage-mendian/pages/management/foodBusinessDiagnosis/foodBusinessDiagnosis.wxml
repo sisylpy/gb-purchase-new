@@ -46,11 +46,15 @@
       <view class="section-head"><text class="section-title">¥　收入与成本</text></view>
 
       <view class="breakdown-block">
-        <view class="breakdown-head"><text>◉　收入构成</text><text>销售收入来源分析</text></view>
+        <view class="breakdown-head"><text>◉　收入与员工餐</text><text>收入来源与非经营消耗</text></view>
         <view class="income-grid">
           <view><text>销售标价收入</text><text>¥{{food.listRevenue}}</text></view>
           <view><text>销售收入</text><text>¥{{food.normalRevenue}}</text></view>
-          <view><text>员工</text><text>¥{{food.employeeRevenue}}</text></view>
+          <view class="employee-meal-cell">
+            <text>员工餐成本</text>
+            <text>{{food.employeeMealCostText}}</text>
+            <text class="income-note">{{food.employeeMealQty}}份 · 收入¥{{food.employeeRevenue}}</text>
+          </view>
           <view><text>折扣</text><text>¥{{food.discountRevenue}}</text></view>
         </view>
       </view>
