@@ -123,17 +123,69 @@
           <view class="dish-photo"><image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><text wx:else>{{item.initial}}</text></view>
           <view class="dish-main">
             <view class="dish-name-row"><text class="dish-name">{{item.dishName}}</text><text class="dish-arrow">›</text></view>
-            <text class="dish-total">本期共做 <text>{{item.totalText}} 份</text></text>
-            <text class="dish-relation">{{item.salesRelation}}</text>
+            <text class="dish-total">本期一共做了 <text>{{item.totalText}} 份</text></text>
+            <view class="dish-sale-chips">
+              <text>正常销售 {{item.normalText}}份</text>
+              <text>折扣餐 {{item.discountText}}份</text>
+              <text>员工餐 {{item.employeeText}}份</text>
+            </view>
           </view>
         </view>
-        <view class="dish-metrics">
-          <view><text>每份应该用</text><text>{{item.unitText}} {{row.unit}}</text></view>
-          <view><text>本期应该用</text><text>{{item.theoryText}} {{row.unit}}</text></view>
-          <view><text>实际分摊</text><text>{{item.actualText}} {{row.unit}}</text></view>
-          <view><text>相差</text><text class="{{item.tone}}">{{item.diffText}} {{row.unit}}</text></view>
+
+        <view class="dish-business-block ingredient-usage-block">
+          <view class="dish-block-title"><text>① {{row.name}}在这道菜里用了多少</text></view>
+          <view class="dish-metrics">
+            <view><text>每份配方用量</text><text>{{item.unitText}} {{row.unit}}</text></view>
+            <view><text>本期应该用</text><text>{{item.theoryText}} {{row.unit}}</text></view>
+            <view><text>实际分摊到菜</text><text>{{item.actualText}} {{row.unit}}</text></view>
+            <view><text>实际与配方相差</text><text class="{{item.tone}}">{{item.diffText}} {{row.unit}}</text></view>
+          </view>
+          <view class="usage-compare">
+            <view class="usage-compare-row"><text>配方应该用</text><view><view style="width:{{item.theoryBarWidth}}%"></view></view><text>{{item.theoryText}}</text></view>
+            <view class="usage-compare-row actual"><text>实际分摊到菜</text><view><view style="width:{{item.actualBarWidth}}%"></view></view><text>{{item.actualText}}</text></view>
+          </view>
+          <view class="dish-tip {{item.tone}}-tip">{{item.issueText}}</view>
         </view>
-        <view class="dish-tip {{item.tone}}-tip">{{item.issueText}}</view>
+
+        <view class="dish-business-block composition-block">
+          <view class="dish-block-title">
+            <text>② 这道菜的配料成本怎么组成</text>
+            <text class="dish-block-note">共 {{item.ingredientCountText}} 种配料</text>
+          </view>
+          <view class="composition-bar">
+            <view class="focus-part" style="width:{{item.focusShareWidth}}%"></view>
+            <view class="other-part" style="width:{{item.otherShareWidth}}%"></view>
+          </view>
+          <view class="composition-legend">
+            <view><text class="legend-dot focus-dot"></text><text>{{row.name}}</text><text class="legend-strong">{{item.focusShareText}}%</text><text class="legend-small">配方成本 ¥{{item.focusTheoryCostText}}</text></view>
+            <view><text class="legend-dot other-dot"></text><text>其他配料</text><text class="legend-strong">{{item.otherShareText}}%</text><text class="legend-small">配方成本 ¥{{item.otherTheoryCostText}}</text></view>
+          </view>
+          <text class="composition-help">这里按配方成本占比计算，不把斤、瓶、件等不同单位直接相加。</text>
+        </view>
+
+        <view class="dish-business-block finance-block">
+          <view class="dish-block-title"><text>③ 这道菜的毛利是多少</text></view>
+          <text class="finance-rule">按配方算：实际收到 − 配方成本 = 配方毛利</text>
+          <view class="finance-equation">
+            <view><text>实际收到</text><text class="finance-strong">¥{{item.salesAmountText}}</text></view>
+            <text class="operator">−</text>
+            <view><text>配方成本</text><text class="finance-strong">¥{{item.theoryCostText}}</text></view>
+            <text class="operator">=</text>
+            <view class="profit-box"><text>配方毛利</text><text class="finance-strong">¥{{item.theoryGrossProfitText}}</text><text class="finance-small">毛利率 {{item.theoryGrossMarginText}}%</text></view>
+          </view>
+          <text class="finance-rule recorded-rule">按出库记录算：实际收到 − 已分摊成本 = 账面毛利</text>
+          <view class="finance-equation recorded-equation">
+            <view><text>实际收到</text><text class="finance-strong">¥{{item.salesAmountText}}</text></view>
+            <text class="operator">−</text>
+            <view><text>已分摊成本</text><text class="finance-strong">¥{{item.allocatedCostText}}</text></view>
+            <text class="operator">=</text>
+            <view class="profit-box"><text>账面毛利</text><text class="finance-strong">¥{{item.recordedGrossProfitText}}</text><text class="finance-small">毛利率 {{item.recordedGrossMarginText}}%</text></view>
+          </view>
+          <view class="cost-warning {{item.costRecordTone}}-warning">{{item.costRecordWarning}}</view>
+          <text class="gross-profit-help">毛利只扣了配料成本，还没有扣人工、房租、水电等费用。</text>
+        </view>
+
+        <view class="dish-detail-link">查看整道菜分析 <text>›</text></view>
       </view>
       <view class="empty-box" wx:if="{{!dishes.length}}">还没有找到使用这项原料的菜品</view>
     </view>

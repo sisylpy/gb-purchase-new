@@ -266,11 +266,16 @@ Page({
   viewDishes: function (list) {
     return (list || []).map(function (dish) {
       var diff = num(dish.diffUsage);
+      var theoryUsage = num(dish.theoryUsage);
+      var actualUsage = num(dish.actualUsage);
+      var usageMax = Math.max(theoryUsage, actualUsage, 0);
       var normal = num(dish.normalSalePortions);
       var discount = num(dish.discountMealPortions);
       var employee = num(dish.employeeMealPortions);
       var total = num(dish.totalBusinessPortions != null ? dish.totalBusinessPortions : dish.salesPortions);
-      var relation = '正常 ' + money(normal) + '份 · 折扣 ' + money(discount) + '份 · 员工餐 ' + money(employee) + '份';
+      var focusShare = Math.max(0, Math.min(100, num(dish.focusIngredientTheoryCostSharePercent)));
+      var otherShare = Math.max(0, 100 - focusShare);
+      var status = dish.costRecordStatus || 'OK';
       var issue = Math.abs(diff) < 0.01
         ? '配方用量和实际分摊基本一致'
         : (diff < 0 ? '实际少分摊 ' + money(Math.abs(diff)) + '，请核对配方或出库' : '实际多分摊 ' + money(diff) + '，请留意成本偏高');
@@ -278,13 +283,33 @@ Page({
         image: imageUrl(dish.dishImageLarge || dish.dishImage),
         initial: String(dish.dishName || '菜').slice(0, 1),
         totalText: money(total),
-        salesRelation: relation,
+        normalText: money(normal),
+        discountText: money(discount),
+        employeeText: money(employee),
         unitText: money(dish.recipeUnitPerDish),
-        theoryText: money(dish.theoryUsage),
-        actualText: money(dish.actualUsage),
+        theoryText: money(theoryUsage),
+        actualText: money(actualUsage),
         diffText: signed(diff),
         tone: Math.abs(diff) < 0.01 ? 'ok' : 'danger',
-        issueText: issue
+        issueText: issue,
+        theoryBarWidth: usageMax ? Math.max(3, theoryUsage * 100 / usageMax) : 0,
+        actualBarWidth: usageMax ? Math.max(3, actualUsage * 100 / usageMax) : 0,
+        ingredientCountText: Number(dish.ingredientCount || 0),
+        focusShareText: money(focusShare),
+        otherShareText: money(otherShare),
+        focusShareWidth: focusShare,
+        otherShareWidth: otherShare,
+        focusTheoryCostText: money(dish.focusIngredientTheoryCost),
+        otherTheoryCostText: money(dish.otherIngredientTheoryCost),
+        salesAmountText: money(dish.salesAmount),
+        theoryCostText: money(dish.dishTheoryCostTotal),
+        allocatedCostText: money(dish.dishAllocatedCostTotal),
+        theoryGrossProfitText: money(dish.theoryGrossProfit),
+        recordedGrossProfitText: money(dish.recordedGrossProfit),
+        theoryGrossMarginText: money(dish.theoryGrossMarginRate),
+        recordedGrossMarginText: money(dish.recordedGrossMarginRate),
+        costRecordTone: status === 'OK' ? 'ok' : 'danger',
+        costRecordWarning: dish.costRecordWarning || '成本数据正在汇总，请稍后再看。'
       });
     });
   },
