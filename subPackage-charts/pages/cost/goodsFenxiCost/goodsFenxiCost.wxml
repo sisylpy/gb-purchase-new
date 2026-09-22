@@ -66,9 +66,13 @@
             <view class="source-icon {{item.sourceType === 'SELF' ? 'self-icon' : ''}}">{{item.iconText}}</view>
             <view class="source-main">
               <view class="source-name-row"><text class="source-name">{{item.displayName}}</text><text class="source-tag">{{item.typeText}}</text></view>
-              <text class="source-detail">{{item.batchCount}} 批 · {{item.quantityText}} {{row.unit}} · 均价 ¥{{item.priceText}}/{{row.unit}}</text>
             </view>
             <view class="source-share"><text>{{item.shareText}}%</text><text>采购占比</text></view>
+          </view>
+          <view class="source-purchase-metrics">
+            <view class="source-purchase-metric"><text>采购批次</text><text>{{item.batchCount}} 批</text></view>
+            <view class="source-purchase-metric"><text>采购数量</text><text>{{item.quantityText}} {{row.unit}}</text></view>
+            <view class="source-purchase-metric"><text>加权均价</text><text>¥{{item.priceText}}/{{row.unit}}</text></view>
           </view>
           <view class="source-loss-grid">
             <view class="source-loss-item loss-tone"><text>损耗</text><text>{{item.lossQuantityText}} {{row.unit}} · ¥{{item.lossAmountText}}</text></view>
