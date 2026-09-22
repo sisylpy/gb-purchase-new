@@ -103,11 +103,21 @@ Page({
 
   _apply: function (row) {
     var sales = num(row.salesPortions);
+    var price = num(row.listPricePerPortion || row.salesUnitPrice);
     var theoryTotal = numberOrNull(row.theoryCostTotal);
     if (theoryTotal === null) theoryTotal = num(row.theoryCostPerPortion) * sales;
     var actualTotal = num(row.outboundAllocatedCostAmount);
     var revenue = num(row.salesAmount);
+    var originalRevenue = price * sales;
+    var unreceivedAmount = Math.max(0, originalRevenue - revenue);
     var difference = actualTotal - theoryTotal;
+    var differenceAbs = Math.abs(difference);
+    var differenceLabel = difference > 0 ? '比配方多花' : difference < 0 ? '比配方少花' : '与配方一致';
+    var costCompareText = difference > 0
+      ? '实际用料成本比配方标准多 ¥' + money(differenceAbs) + '，会压低毛利，建议检查用量、采购价和损耗。'
+      : difference < 0
+        ? '实际用料成本比配方标准少 ¥' + money(differenceAbs) + '，可能是节省，也可能是出库没记全，建议先核对。'
+        : '实际用料成本与配方标准一致，成本记录暂未发现明显偏差。';
     var actualMargin = numberOrNull(row.actualGrossMarginRate);
     var lower = numberOrNull(this.context.grossMarginStandardBandLower);
     var upper = numberOrNull(this.context.grossMarginStandardBandUpper);
@@ -191,9 +201,11 @@ Page({
       dish: {
         name: row.dishName || this.context.name || '未命名菜品',
         image: imageUrl(row.dishImageLarge || row.dishImage) || this.context.image || '',
-        price: money(row.listPricePerPortion || row.salesUnitPrice),
+        price: money(price),
         sales: qty(sales),
         revenue: money(revenue),
+        originalRevenue: money(originalRevenue),
+        unreceivedAmount: money(unreceivedAmount),
         count: ingredients.length,
         margin: percentText(actualMargin),
         targetRange: targetRange,
@@ -201,6 +213,8 @@ Page({
         actualCost: money(actualTotal),
         actualProfit: money(revenue - actualTotal),
         difference: money(difference),
+        differenceAbs: money(differenceAbs),
+        differenceLabel: differenceLabel,
         differenceTone: differenceTone
       },
       analysis: {
@@ -209,7 +223,8 @@ Page({
         deviationLabel: deviationLabel,
         deviationValue: deviationValue,
         advice: advice,
-        whyTitle: whyTitle
+        whyTitle: whyTitle,
+        costCompareText: costCompareText
       },
       ingredients: ingredients,
       attention: [

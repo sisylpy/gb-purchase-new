@@ -46,27 +46,64 @@
     </view>
 
     <view class="panel business-panel">
-      <view class="head"><text>关键经营数据</text><text>单位：元（¥）</text></view>
-      <view class="business-grid">
-        <view class="business-card price"><text class="business-icon">◉</text><text>单价</text><text>¥{{dish.price}}</text></view>
-        <view class="business-card sales"><text class="business-icon">▣</text><text>销量</text><text>{{dish.sales}}份</text></view>
-        <view class="business-card revenue"><text class="business-icon">▂</text><text>销售额</text><text>¥{{dish.revenue}}</text></view>
-        <view class="business-card theory"><text class="business-icon">▦</text><text>理论总成本</text><text>¥{{dish.theoryTotal}}</text></view>
-        <view class="business-card actual-cost"><text class="business-icon">◈</text><text>出库分摊成本</text><text>¥{{dish.actualCost}}</text></view>
-        <view class="business-card difference {{dish.differenceTone}}"><text class="business-icon">↓</text><text>成本差额</text><text>¥{{dish.difference}}</text></view>
+      <view class="head"><text>收入和成本怎么来的</text><text>按步骤看懂</text></view>
+
+      <view class="owner-step revenue-step">
+        <view class="owner-step-head">
+          <text class="owner-step-number">1</text>
+          <view><text>先算原价应该收多少</text><text>每份售价 × 总出品份数 = 原价应收</text></view>
+        </view>
+        <view class="owner-equation">
+          <view class="owner-metric price-metric"><text>每份售价</text><text>¥{{dish.price}}</text></view>
+          <text class="owner-operator">×</text>
+          <view class="owner-metric sales-metric"><text>总出品</text><text>{{dish.sales}}份</text></view>
+          <text class="owner-operator">=</text>
+          <view class="owner-metric list-revenue-metric"><text>原价应收</text><text>¥{{dish.originalRevenue}}</text></view>
+        </view>
+        <view class="owner-equation actual-revenue-equation">
+          <view class="owner-metric list-revenue-metric"><text>原价应收</text><text>¥{{dish.originalRevenue}}</text></view>
+          <text class="owner-operator">−</text>
+          <view class="owner-metric concession-metric"><text>打折等少收</text><text>¥{{dish.unreceivedAmount}}</text></view>
+          <text class="owner-operator">=</text>
+          <view class="owner-metric received-metric"><text>实际收到</text><text>¥{{dish.revenue}}</text></view>
+        </view>
+        <view class="owner-note"><text>说明：</text><text>“打折等少收”包括打折、赠送、员工餐等没有收到的钱。</text></view>
+      </view>
+
+      <view class="owner-step cost-step">
+        <view class="owner-step-head">
+          <text class="owner-step-number">2</text>
+          <view><text>再看做菜实际花了多少</text><text>用出库记录算实际用料成本，再和配方标准比较</text></view>
+        </view>
+        <view class="cost-compare-row">
+          <view class="owner-metric theory-metric"><text>按配方应花</text><text>¥{{dish.theoryTotal}}</text></view>
+          <text class="compare-word">对比</text>
+          <view class="owner-metric actual-cost-metric"><text>实际用料成本</text><text>¥{{dish.actualCost}}</text></view>
+          <text class="owner-operator">→</text>
+          <view class="owner-metric difference-metric {{dish.differenceTone}}"><text>{{dish.differenceLabel}}</text><text>¥{{dish.differenceAbs}}</text></view>
+        </view>
+        <view class="owner-note cost-compare-note"><text>判断：</text><text>{{analysis.costCompareText}}</text></view>
       </view>
     </view>
 
     <view class="panel reason-panel">
-      <view class="head"><text>{{analysis.whyTitle}}</text></view>
-      <view class="reason-flow">
-        <view class="reason-card revenue-reason"><text>▂　销售额</text><text>¥{{dish.revenue}}</text><text>本期销售 {{dish.sales}}份</text></view>
-        <text class="reason-operator">−</text>
-        <view class="reason-card cost-reason"><text>◉　出库分摊成本</text><text>¥{{dish.actualCost}}</text><text>理论成本 ¥{{dish.theoryTotal}}</text></view>
-        <text class="reason-operator">→</text>
-        <view class="reason-card margin-reason {{analysis.status}}"><text>↗　{{analysis.statusLabel}}</text><text>{{dish.margin}}</text><text>{{analysis.deviationLabel}} {{analysis.deviationValue}}</text></view>
+      <view class="owner-step-head profit-step-head">
+        <text class="owner-step-number">3</text>
+        <view><text>最后算这道菜的实际毛利</text><text>实际收到 − 实际用料成本 = 实际毛利</text></view>
       </view>
-      <view class="reason-note"><text>◎</text><text>实际销售额扣除出库分摊成本后，得到实际毛利额 ¥{{dish.actualProfit}}。</text></view>
+      <view class="owner-equation profit-equation">
+        <view class="owner-metric received-metric"><text>实际收到</text><text>¥{{dish.revenue}}</text></view>
+        <text class="owner-operator">−</text>
+        <view class="owner-metric actual-cost-metric"><text>实际用料成本</text><text>¥{{dish.actualCost}}</text></view>
+        <text class="owner-operator">=</text>
+        <view class="owner-metric profit-metric"><text>实际毛利</text><text>¥{{dish.actualProfit}}</text></view>
+      </view>
+      <view class="margin-rate-row">
+        <view><text>实际毛利率</text><text>实际毛利 ÷ 实际收到</text></view>
+        <text class="margin-rate-formula">¥{{dish.actualProfit}} ÷ ¥{{dish.revenue}} =</text>
+        <text class="margin-rate-value {{analysis.status}}">{{dish.margin}}</text>
+      </view>
+      <view class="reason-note"><text>◎</text><text>目标毛利率 {{dish.targetRange}}，当前 {{dish.margin}}，{{analysis.deviationLabel}} {{analysis.deviationValue}}。</text></view>
     </view>
 
     <view class="panel ingredient-panel">

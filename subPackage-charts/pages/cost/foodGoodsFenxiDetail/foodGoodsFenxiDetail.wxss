@@ -48,33 +48,53 @@ page { background: #f3fafc; color: #122039; }
 .analysis-tip text:first-child { margin-right: 10rpx; font-size: 26rpx; }
 .analysis-tip text:last-child { font-size: 21rpx; line-height: 1.45; }
 
-.business-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8rpx; }
-.business-card { height: 112rpx; padding: 9rpx 7rpx; border-radius: 13rpx; display: flex; flex-direction: column; align-items: flex-start; box-sizing: border-box; background: #f4f8fb; }
-.business-card.price, .business-card.theory { background: #fff7e8; }
-.business-card.sales, .business-card.difference { background: #edf9f4; }
-.business-card.revenue { background: #eef6ff; }
-.business-card.actual-cost { background: #f1efff; }
-.business-icon { color: #20b77a; font-size: 23rpx; font-weight: 900; }
-.business-card > text:nth-child(2) { margin-top: 5rpx; color: #66778a; font-size: 18rpx; white-space: nowrap; }
-.business-card > text:last-child { max-width: 100%; margin-top: 6rpx; color: #122039; font-size: 23rpx; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.business-card.difference.saving > text:last-child { color: #07965d; }
-.business-card.difference.danger > text:last-child { color: #e3343e; }
-
-.reason-flow { display: grid; grid-template-columns: 1fr 30rpx 1fr 35rpx 1fr; align-items: center; gap: 5rpx; }
-.reason-card { min-height: 122rpx; padding: 14rpx; border-radius: 15rpx; display: flex; flex-direction: column; box-sizing: border-box; }
-.revenue-reason { background: #edf6ff; }
-.cost-reason { background: #fff6e8; }
-.margin-reason { background: #fff0f2; }
-.margin-reason.high { background: #fff3e7; }
-.margin-reason.healthy { background: #eaf9f4; }
-.reason-card text:first-child { color: #3b7fd7; font-size: 20rpx; font-weight: 800; }
-.cost-reason text:first-child { color: #e77b11; }
-.margin-reason text:first-child { color: #e33845; }
-.margin-reason.high text:first-child { color: #df7000; }
-.margin-reason.healthy text:first-child { color: #078b58; }
-.reason-card text:nth-child(2) { margin-top: 8rpx; color: #122039; font-size: 28rpx; font-weight: 900; }
-.reason-card text:last-child { margin-top: 5rpx; color: #6c7d90; font-size: 18rpx; line-height: 1.25; }
-.reason-operator { color: #8092a7; font-size: 34rpx; font-weight: 900; text-align: center; }
+.owner-step { padding: 14rpx; border: 1rpx solid #e0e9ec; border-radius: 16rpx; box-sizing: border-box; }
+.owner-step + .owner-step { margin-top: 13rpx; }
+.revenue-step { background: linear-gradient(110deg,#f5fbff,#fbfdff); }
+.cost-step { background: linear-gradient(110deg,#fffaf3,#fffdf9); }
+.owner-step-head { display: flex; align-items: center; }
+.owner-step-number { width: 38rpx; height: 38rpx; margin-right: 12rpx; border-radius: 50%; background: #32b982; color: #fff; font-size: 23rpx; font-weight: 900; line-height: 38rpx; text-align: center; flex-shrink: 0; }
+.cost-step .owner-step-number { background: #f0a443; }
+.profit-step-head .owner-step-number { background: #548fe8; }
+.owner-step-head > view { min-width: 0; display: flex; flex-direction: column; }
+.owner-step-head > view text:first-child { color: #1b304a; font-size: 25rpx; font-weight: 900; }
+.owner-step-head > view text:last-child { margin-top: 4rpx; color: #697b8f; font-size: 20rpx; line-height: 1.35; }
+.owner-equation, .cost-compare-row { margin-top: 12rpx; display: grid; grid-template-columns: minmax(0,1fr) 28rpx minmax(0,1fr) 28rpx minmax(0,1fr); align-items: center; }
+.cost-compare-row { grid-template-columns: minmax(0,1fr) 45rpx minmax(0,1fr) 28rpx minmax(0,1fr); }
+.owner-metric { min-width: 0; min-height: 92rpx; padding: 11rpx 8rpx; border-radius: 13rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
+.owner-metric > text:first-child { color: #566b83; font-size: 21rpx; white-space: nowrap; }
+.owner-metric > text:last-child { margin-top: 6rpx; color: #142842; font-size: 29rpx; font-weight: 900; white-space: nowrap; }
+.price-metric, .theory-metric { background: #fff2df; }
+.sales-metric { background: #edf5ff; }
+.list-revenue-metric { background: #e9f7f1; }
+.concession-metric { background: #fff0e9; }
+.concession-metric > text:last-child { color: #e26428; }
+.received-metric { background: #e5f7ef; }
+.received-metric > text:last-child { color: #087f61; }
+.actual-cost-metric { background: #f0efff; }
+.actual-cost-metric > text:last-child { color: #4d63c8; }
+.difference-metric { background: #edf9f3; }
+.difference-metric.saving > text:last-child { color: #078e5c; }
+.difference-metric.danger { background: #fff0f1; }
+.difference-metric.danger > text:last-child { color: #df3541; }
+.profit-metric { background: #e5f7ef; }
+.profit-metric > text:last-child { color: #087f61; }
+.owner-operator, .compare-word { color: #7a8da2; font-size: 31rpx; font-weight: 900; text-align: center; }
+.compare-word { font-size: 19rpx; }
+.actual-revenue-equation { margin-top: 9rpx; }
+.owner-note { margin-top: 10rpx; padding: 9rpx 12rpx; border-radius: 10rpx; background: rgba(255,255,255,.8); color: #65778b; font-size: 20rpx; line-height: 1.45; }
+.owner-note text:first-child { color: #263b54; font-weight: 900; }
+.cost-compare-note { background: #fff8e8; color: #79633f; }
+.profit-step-head { padding: 2rpx 0 4rpx; }
+.profit-equation { margin-top: 13rpx; }
+.margin-rate-row { margin-top: 12rpx; padding: 12rpx 14rpx; border-radius: 13rpx; background: #f1f6ff; display: grid; grid-template-columns: 1fr auto auto; gap: 12rpx; align-items: center; }
+.margin-rate-row > view { display: flex; flex-direction: column; }
+.margin-rate-row > view text:first-child { color: #253b56; font-size: 23rpx; font-weight: 900; }
+.margin-rate-row > view text:last-child { margin-top: 3rpx; color: #6a7c90; font-size: 18rpx; }
+.margin-rate-formula { color: #61758d; font-size: 20rpx; }
+.margin-rate-value { color: #e33945; font-size: 30rpx; font-weight: 900; }
+.margin-rate-value.high { color: #df7000; }
+.margin-rate-value.healthy { color: #078b58; }
 .reason-note { min-height: 58rpx; margin-top: 12rpx; padding: 11rpx 15rpx; border-radius: 12rpx; background: #eefaf5; color: #47675d; display: flex; align-items: center; box-sizing: border-box; }
 .reason-note text:first-child { margin-right: 10rpx; color: #10a86a; font-size: 28rpx; }
 .reason-note text:last-child { font-size: 20rpx; line-height: 1.4; }
