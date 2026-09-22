@@ -8,7 +8,8 @@ import { getFoodBusinessDiagnosis } from '../../../../services/apiDistributerFoo
 var WEEK_KEYS = ['1', '2', '3', '4', '5', '6', '0'];
 var WEEK_NAMES = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 function num(v) { var n = Number(v); return isNaN(n) ? 0 : n; }
-function money(v) { return num(v).toFixed(2).replace(/\.00$/, ''); }
+function numberOrNull(v) { if (v === null || v === undefined || v === '') return null; var n = Number(v); return isNaN(n) ? null : n; }
+function money(v) { return num(v).toFixed(2).replace(/\.00$/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function imageUrl(v) { return !v ? '' : (/^https?:\/\//.test(v) ? v : config.server + v); }
 
 Page({
@@ -71,20 +72,52 @@ Page({
     var low = positive.length ? Math.min.apply(null, positive) : 0;
     var lowIndex = values.indexOf(low);
     var profit = num(item.actualProfitAmount);
-    var margin = num(item.blendedGrossMarginRateOnListPrice);
+    var margin = numberOrNull(item.blendedGrossMarginRateOnListPrice);
+    var target = numberOrNull(item.grossMarginStandardTarget);
+    var floatAbs = numberOrNull(item.grossMarginStandardFloatAbs);
+    var lower = numberOrNull(item.grossMarginStandardBandLower);
+    var upper = numberOrNull(item.grossMarginStandardBandUpper);
+    if ((lower === null || upper === null) && target !== null && floatAbs !== null) {
+      lower = target - floatAbs;
+      upper = target + floatAbs;
+    }
     var waste = num(item.wasteLossCostAmount);
     var diag = item.businessDiagnosis || {};
-    var status = diag.title || (diag.level === 'WARN' ? '需重点优化' : diag.level === 'GOOD' ? '整体表现优秀' : diag.level === 'INFO' ? '经营表现平稳' : '数据不足，暂不能诊断');
+    var tone = 'pending';
+    var status = '数据待复核';
+    var deviationLabel = '暂无偏离值';
+    var deviationValue = '—';
+    var conclusion = '当前毛利或目标区间数据不完整，建议先完善成本与目标设置。';
+    if (margin !== null && lower !== null && upper !== null) {
+      if (margin > upper) {
+        tone = 'high'; status = '毛利高于目标区间'; deviationLabel = '高于上限';
+        deviationValue = '+' + (margin - upper).toFixed(1) + '%';
+        conclusion = '当前毛利率明显高于目标区间，优先关注成本采集、配料分摊与损耗记录。';
+      } else if (margin < lower) {
+        tone = 'low'; status = '毛利低于目标区间'; deviationLabel = '低于下限';
+        deviationValue = '-' + (lower - margin).toFixed(1) + '%';
+        conclusion = '当前毛利率低于目标区间，建议核查售价、采购成本和配料用量。';
+      } else {
+        tone = 'healthy'; status = '毛利处于目标区间'; deviationLabel = '目标区间内'; deviationValue = '0.0%';
+        conclusion = '当前毛利率处于目标区间，继续保持售价与成本控制。';
+      }
+    }
+    var price = num(item.foodPrice);
+    var sales = num(item.soldPortionsTotal);
+    var totalCost = num(item.outboundAllocatedCostAmount);
+    var listRevenue = price * sales;
+    var targetRange = lower !== null && upper !== null ? lower.toFixed(0) + '% ~ ' + upper.toFixed(0) + '%' : '—';
     this.weekValues = values;
     this.setData({
       loading: false,
       hasData: true,
       food: {
-        name: item.foodName || '未命名菜品', price: money(item.foodPrice), image: imageUrl(item.foodImageLarge || item.foodImage),
-        method: item.foodMethod || '根据本期销售与成本数据生成诊断', status: status,
-        sales: num(item.soldPortionsTotal), revenue: money(item.actualRevenue), profit: money(profit), margin: margin.toFixed(2),
+        name: item.foodName || '未命名菜品', price: money(price), image: imageUrl(item.foodImageLarge || item.foodImage),
+        method: item.foodMethod || '从经营结果到成本结构，快速看清这道菜为什么赚钱', status: status, tone: tone,
+        sales: sales, revenue: money(item.actualRevenue), listRevenue: money(listRevenue), profit: money(profit), margin: margin === null ? '—' : margin.toFixed(2),
+        targetRange: targetRange, deviationLabel: deviationLabel, deviationValue: deviationValue, conclusion: conclusion,
         normalRevenue: money(item.normalSaleAmount), employeeRevenue: money(item.employeeMealAmount), discountRevenue: money(item.discountGiftAmount),
-        totalCost: money(item.outboundAllocatedCostAmount), productionCost: money(item.productionOutboundAllocatedCostAmount), wasteCost: money(waste),
+        totalCost: money(totalCost), productionCost: money(item.productionOutboundAllocatedCostAmount), wasteCost: money(waste),
         costPer: money(item.outboundAllocatedCostPerPortion), productionPer: money(item.productionOutboundAllocatedCostPerPortion), wastePer: money(item.wasteLossCostPerPortion),
         peakDay: WEEK_NAMES[peakIndex < 0 ? 0 : peakIndex], peakValue: max,
         lowDay: WEEK_NAMES[lowIndex < 0 ? 0 : lowIndex], lowValue: low
@@ -92,14 +125,27 @@ Page({
       recommendations: [
         { icon: '▥', title: '周末重点备货', text: (peakIndex >= 5 ? WEEK_NAMES[peakIndex] : '高峰日') + '销量最高 ' + max + '份，建议提前备货', tone: 'green' },
         { icon: '⚙', title: '继续保持成本控制', text: '单份成本 ¥' + money(item.outboundAllocatedCostPerPortion) + '，损耗仅 ¥' + money(item.wasteLossCostPerPortion), tone: 'orange' },
-        { icon: '◇', title: diag.title || '经营诊断建议', text: diag.message || ('当前单价 ¥' + money(item.foodPrice) + '/份，暂未生成专项建议'), tone: diag.level === 'WARN' ? 'yellow' : 'green' }
+        { icon: '◇', title: diag.title || '经营诊断建议', text: diag.message || conclusion, tone: diag.level === 'WARN' ? 'yellow' : 'green' }
       ]
-    }, this._drawWeekChart.bind(this));
+    }, this._scheduleWeekChart.bind(this));
   },
 
-  _drawWeekChart: function () {
+  _scheduleWeekChart: function () {
+    var that = this;
+    wx.nextTick(function () {
+      setTimeout(function () { that._drawWeekChart(0); }, 100);
+    });
+  },
+
+  _drawWeekChart: function (attempt) {
     var component = this.selectComponent('#weekChart');
-    if (!component) return;
+    if (!component) {
+      if (attempt < 3) {
+        var thatPage = this;
+        setTimeout(function () { thatPage._drawWeekChart(attempt + 1); }, 180);
+      }
+      return;
+    }
     var values = this.weekValues || [], that = this;
     component.init(function (canvas, width, height, dpr) {
       if (that.weekChart) that.weekChart.dispose();
