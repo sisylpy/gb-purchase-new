@@ -105,9 +105,6 @@ export const dishIngredientDashboard = (data) => {
   };
   if (data.trendStartDate) body.trendStartDate = data.trendStartDate;
   if (data.trendEndDate) body.trendEndDate = data.trendEndDate;
-  if (data.primaryDisGoodsId != null && data.primaryDisGoodsId !== '') {
-    body.primaryDisGoodsId = data.primaryDisGoodsId;
-  }
   return new Promise((resolve, reject) => {
     wx.request({
       url: apiUrl.apiUrl + 'gbDishCostAnalysis/dishIngredientDashboard',
