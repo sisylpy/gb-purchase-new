@@ -59,16 +59,22 @@
         <view><text>采购数量</text><text class="big">{{purchase.totalQuantityText || 0}} {{row.unit}}</text></view>
         <view><text>加权平均价</text><text class="big">¥{{purchase.averagePriceText || 0}}/{{row.unit}}</text></view>
       </view>
+      <view class="source-scope-note">损耗和废弃按本期采购批次累计统计</view>
       <view class="source-list" wx:if="{{purchaseSources.length}}">
         <view class="source-row" wx:for="{{purchaseSources}}" wx:key="indexNo">
-          <view class="source-icon {{item.sourceType === 'SELF' ? 'self-icon' : ''}}">{{item.iconText}}</view>
-          <view class="source-main">
-            <view class="source-name-row"><text class="source-name">{{item.sourceName}}</text><text class="source-tag">{{item.typeText}}</text></view>
-            <text class="source-detail">{{item.batchCount}} 批 · {{item.quantityText}} {{row.unit}} · 均价 ¥{{item.priceText}}/{{row.unit}}</text>
-            <text class="source-buyer" wx:if="{{item.buyerText}}">采购人：{{item.buyerText}}</text>
-            <view class="source-progress"><view style="width:{{item.barWidth}}%"></view></view>
+          <view class="source-heading">
+            <view class="source-icon {{item.sourceType === 'SELF' ? 'self-icon' : ''}}">{{item.iconText}}</view>
+            <view class="source-main">
+              <view class="source-name-row"><text class="source-name">{{item.displayName}}</text><text class="source-tag">{{item.typeText}}</text></view>
+              <text class="source-detail">{{item.batchCount}} 批 · {{item.quantityText}} {{row.unit}} · 均价 ¥{{item.priceText}}/{{row.unit}}</text>
+            </view>
+            <view class="source-share"><text>{{item.shareText}}%</text><text>采购占比</text></view>
           </view>
-          <view class="source-share"><text>{{item.shareText}}%</text><text>采购占比</text></view>
+          <view class="source-loss-grid">
+            <view class="source-loss-item loss-tone"><text>损耗</text><text>{{item.lossQuantityText}} {{row.unit}} · ¥{{item.lossAmountText}}</text></view>
+            <view class="source-loss-item waste-tone"><text>废弃</text><text>{{item.wasteQuantityText}} {{row.unit}} · ¥{{item.wasteAmountText}}</text></view>
+          </view>
+          <view class="source-progress"><view style="width:{{item.barWidth}}%"></view></view>
         </view>
       </view>
       <view class="empty-box" wx:else>本期没有采购记录</view>

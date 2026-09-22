@@ -53,18 +53,35 @@ function fallbackPurchaseBusiness(data) {
     var batchKey = row.gbDpgBatchId ? 'B:' + row.gbDpgBatchId : 'P:' + row.gbDistributerPurchaseGoodsId;
     var supplierId = Number(row.gbDpgPurchaseNxSupplierId || -1);
     var selfPurchase = supplierId <= 0;
-    var sourceKey = selfPurchase ? 'SELF' : 'SUPPLIER:' + supplierId;
+    var buyer = ((row.purchaseDepartmentUser || {}).gbDuWxNickName) || '';
+    var buyerId = Number(row.gbDpgPurUserId || 0);
+    var sourceKey = selfPurchase
+      ? 'SELF:' + (buyerId > 0 ? buyerId : (buyer || 'UNKNOWN'))
+      : 'SUPPLIER:' + supplierId;
     var sourceName = selfPurchase ? '自采' : (((row.nxJrdhSupplierEntity || {}).nxJrdhsSupplierName) || '供货商');
     var quantity = receivedQuantity(row);
     var amount = num(row.gbDpgBuySubtotal);
+    var lossQuantity = 0;
+    var lossAmount = 0;
+    var wasteQuantity = 0;
+    var wasteAmount = 0;
+    (row.gbDepartmentGoodsStockEntities || []).forEach(function (stock) {
+      lossQuantity += num(stock.gbDgsLossWeight);
+      lossAmount += num(stock.gbDgsLossSubtotal);
+      wasteQuantity += num(stock.gbDgsWasteWeight);
+      wasteAmount += num(stock.gbDgsWasteSubtotal);
+    });
     batches[batchKey] = true;
     totalQuantity += quantity;
     totalAmount += amount;
-    if (!sources[sourceKey]) sources[sourceKey] = { sourceType: selfPurchase ? 'SELF' : 'SUPPLIER', sourceName: sourceName, batches: {}, purchaseQuantity: 0, purchaseAmount: 0, buyerNames: [] };
+    if (!sources[sourceKey]) sources[sourceKey] = { sourceType: selfPurchase ? 'SELF' : 'SUPPLIER', sourceName: sourceName, batches: {}, purchaseQuantity: 0, purchaseAmount: 0, buyerNames: [], lossQuantity: 0, lossAmount: 0, wasteQuantity: 0, wasteAmount: 0 };
     sources[sourceKey].batches[batchKey] = true;
     sources[sourceKey].purchaseQuantity += quantity;
     sources[sourceKey].purchaseAmount += amount;
-    var buyer = ((row.purchaseDepartmentUser || {}).gbDuWxNickName) || '';
+    sources[sourceKey].lossQuantity += lossQuantity;
+    sources[sourceKey].lossAmount += lossAmount;
+    sources[sourceKey].wasteQuantity += wasteQuantity;
+    sources[sourceKey].wasteAmount += wasteAmount;
     if (selfPurchase && buyer && sources[sourceKey].buyerNames.indexOf(buyer) < 0) sources[sourceKey].buyerNames.push(buyer);
   });
   var sourceRows = Object.keys(sources).map(function (key) {
@@ -77,7 +94,11 @@ function fallbackPurchaseBusiness(data) {
       purchaseQuantity: source.purchaseQuantity,
       purchaseAmount: source.purchaseAmount,
       averageUnitPrice: source.purchaseQuantity ? source.purchaseAmount / source.purchaseQuantity : 0,
-      quantitySharePercent: totalQuantity ? source.purchaseQuantity * 100 / totalQuantity : 0
+      quantitySharePercent: totalQuantity ? source.purchaseQuantity * 100 / totalQuantity : 0,
+      lossQuantity: source.lossQuantity,
+      lossAmount: source.lossAmount,
+      wasteQuantity: source.wasteQuantity,
+      wasteAmount: source.wasteAmount
     };
   }).sort(function (a, b) { return b.purchaseQuantity - a.purchaseQuantity; });
   return {
@@ -226,10 +247,17 @@ Page({
         iconText: source.sourceType === 'SELF' ? '自' : '供',
         typeText: source.sourceType === 'SELF' ? '自采' : '供货商',
         buyerText: (source.buyerNames || []).join('、'),
+        displayName: source.sourceType === 'SELF'
+          ? ((source.buyerNames || []).join('、') || '未记录采购人')
+          : (source.sourceName || '供货商'),
         quantityText: money(source.purchaseQuantity),
         amountText: money(source.purchaseAmount),
         priceText: money(source.averageUnitPrice),
         shareText: money(share),
+        lossQuantityText: money(source.lossQuantity),
+        lossAmountText: money(source.lossAmount),
+        wasteQuantityText: money(source.wasteQuantity),
+        wasteAmountText: money(source.wasteAmount),
         barWidth: share > 0 ? Math.max(4, share) : 0
       });
     });
