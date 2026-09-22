@@ -43,34 +43,53 @@
     </view>
 
     <view class="finance panel">
-      <view class="section-head"><text class="section-title">¥　收入与成本</text></view>
+      <view class="section-head finance-head">
+        <text class="section-title">¥　收入与成本</text>
+        <text class="section-note">这道菜的钱是怎么算出来的</text>
+      </view>
 
-      <view class="breakdown-block">
-        <view class="breakdown-head"><text>◉　收入与员工餐</text><text>收入来源与非经营消耗</text></view>
-        <view class="income-grid">
-          <view><text>销售标价收入</text><text>¥{{food.listRevenue}}</text></view>
-          <view><text>销售收入</text><text>¥{{food.normalRevenue}}</text></view>
-          <view class="employee-meal-cell">
-            <text>员工餐成本</text>
-            <text>{{food.employeeMealCostText}}</text>
-            <text class="income-note">{{food.employeeMealQty}}份 · 收入¥{{food.employeeRevenue}}</text>
-          </view>
-          <view><text>折扣</text><text>¥{{food.discountRevenue}}</text></view>
+      <view class="finance-step income-step">
+        <view class="finance-step-head"><text class="step-number">1</text><text>先算清楚实际收了多少钱</text></view>
+        <text class="step-explain">原价应收 − 打折和赠送少收 − 员工餐未收 = 实际收到</text>
+        <view class="revenue-detail-grid">
+          <view><text>按原价应收</text><text>¥{{food.listRevenue}}</text></view>
+          <view class="discount-detail"><text>打折/赠送少收</text><text>−¥{{food.discountConcession}}</text></view>
+          <view class="meal-detail"><text>员工餐未收</text><text>−¥{{food.employeeMealConcession}}</text><text>{{food.employeeMealQty}}份</text></view>
+          <view class="received-detail"><text>实际收到</text><text>¥{{food.revenue}}</text></view>
+        </view>
+        <view class="profit-rule"><text>再算利润：</text><text>实际收到 − 做菜总成本 = 最后赚到</text></view>
+        <view class="finance-equation three-part">
+          <view class="finance-metric revenue-metric"><text class="metric-icon">▤</text><view><text>卖菜收到</text><text>¥{{food.revenue}}</text></view></view>
+          <text class="equation-sign">−</text>
+          <view class="finance-metric cost-metric"><text class="metric-icon">▣</text><view><text>做菜花掉</text><text>¥{{food.totalCost}}</text></view></view>
+          <text class="equation-sign">=</text>
+          <view class="finance-metric profit-metric"><text class="metric-icon">▥</text><view><text>最后赚到</text><text>¥{{food.profit}}</text></view></view>
+        </view>
+        <view wx:if="{{food.employeeMealQty > 0}}" class="employee-meal-tip">
+          <text>员工餐做了 {{food.employeeMealQty}}份：少收 ¥{{food.employeeMealConcession}}，做菜还花了 {{food.employeeMealCostText}}，这笔成本已算在总成本里。</text>
         </view>
       </view>
 
-      <view class="breakdown-block cost-block">
-        <view class="breakdown-head"><text>⚙　制作成本构成</text><text>每一份的成本去向</text></view>
-        <view class="formula-row">
-          <view><text>制作总成本</text><text>¥{{food.totalCost}}</text></view><text>=</text>
-          <view><text>菜品制作</text><text class="blue-text">¥{{food.productionCost}}</text></view><text>+</text>
-          <view><text>损耗 / 废弃</text><text>¥{{food.wasteCost}}</text></view>
+      <view class="finance-step total-step">
+        <view class="finance-step-head"><text class="step-number">2</text><text>做菜的钱花在哪里</text></view>
+        <text class="step-explain">食材和配料 + 损耗和废弃 = 做菜总成本</text>
+        <view class="finance-equation two-part">
+          <view class="finance-metric production-metric"><text class="metric-icon">▣</text><view><text>食材和配料</text><text>¥{{food.productionCost}}</text></view></view>
+          <text class="equation-sign">+</text>
+          <view class="finance-metric waste-metric"><text class="metric-icon">◇</text><view><text>损耗和废弃</text><text>¥{{food.wasteCost}}</text></view></view>
         </view>
-        <view class="formula-divider"></view>
-        <view class="formula-row">
-          <view><text>单份制作成本</text><text>¥{{food.costPer}}/份</text></view><text>=</text>
-          <view><text>菜品制作</text><text class="blue-text">¥{{food.productionPer}}/份</text></view><text>+</text>
-          <view><text>损耗 / 废弃</text><text>¥{{food.wastePer}}/份</text></view>
+        <text class="formula-caption">¥{{food.productionCost}} + ¥{{food.wasteCost}} = 总成本 ¥{{food.totalCost}}</text>
+      </view>
+
+      <view class="finance-step portion-step">
+        <view class="finance-step-head"><text class="step-number">3</text><text>平均卖出1份要花多少钱</text></view>
+        <text class="step-explain">每份食材配料 + 每份损耗废弃 = 一份的总成本</text>
+        <view class="finance-equation three-part portion-equation">
+          <view class="finance-metric production-metric"><text class="metric-icon">▣</text><view><text>食材配料</text><text>¥{{food.productionPer}}/份</text></view></view>
+          <text class="equation-sign">+</text>
+          <view class="finance-metric waste-metric"><text class="metric-icon">◇</text><view><text>损耗废弃</text><text>¥{{food.wastePer}}/份</text></view></view>
+          <text class="equation-sign">=</text>
+          <view class="finance-metric unit-metric"><text class="metric-icon">▤</text><view><text>一份总成本</text><text>¥{{food.costPer}}/份</text></view></view>
         </view>
       </view>
       <view class="cost-detail-btn" bindtap="toCostProblem">查看成本明细 <text>›</text></view>

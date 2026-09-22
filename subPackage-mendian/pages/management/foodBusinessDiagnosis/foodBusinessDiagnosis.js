@@ -106,6 +106,10 @@ Page({
     var sales = num(item.soldPortionsTotal);
     var totalCost = num(item.outboundAllocatedCostAmount);
     var listRevenue = price * sales;
+    var employeeMealQty = num(item.employeeMealQty);
+    var employeeRevenue = num(item.employeeMealAmount);
+    var employeeMealConcession = Math.max(0, price * employeeMealQty - employeeRevenue);
+    var discountConcession = Math.max(0, listRevenue - num(item.actualRevenue) - employeeMealConcession);
     var targetRange = lower !== null && upper !== null ? lower.toFixed(0) + '% ~ ' + upper.toFixed(0) + '%' : '—';
     this.weekValues = values;
     this.setData({
@@ -116,10 +120,10 @@ Page({
         method: item.foodMethod || '从经营结果到成本结构，快速看清这道菜为什么赚钱', status: status, tone: tone,
         sales: sales, revenue: money(item.actualRevenue), listRevenue: money(listRevenue), profit: money(profit), margin: margin === null ? '—' : margin.toFixed(2),
         targetRange: targetRange, deviationLabel: deviationLabel, deviationValue: deviationValue, conclusion: conclusion,
-        normalRevenue: money(item.normalSaleAmount), employeeRevenue: money(item.employeeMealAmount),
-        employeeMealQty: num(item.employeeMealQty),
+        normalRevenue: money(item.normalSaleAmount), employeeRevenue: money(employeeRevenue),
+        employeeMealQty: employeeMealQty, employeeMealConcession: money(employeeMealConcession),
         employeeMealCostText: item.employeeMealCostAmount == null ? '—' : '¥' + money(item.employeeMealCostAmount),
-        discountRevenue: money(item.discountGiftAmount),
+        discountRevenue: money(item.discountGiftAmount), discountConcession: money(discountConcession),
         totalCost: money(totalCost), productionCost: money(item.productionOutboundAllocatedCostAmount), wasteCost: money(waste),
         costPer: money(item.outboundAllocatedCostPerPortion), productionPer: money(item.productionOutboundAllocatedCostPerPortion), wastePer: money(item.wasteLossCostPerPortion),
         peakDay: WEEK_NAMES[peakIndex < 0 ? 0 : peakIndex], peakValue: max,
@@ -156,9 +160,9 @@ Page({
       that.weekChart = chart;
       chart.setOption({
         grid: { left: 12, right: 12, top: 28, bottom: 8, containLabel: true },
-        xAxis: { type: 'category', boundaryGap: false, data: WEEK_NAMES, axisTick: { show: false }, axisLine: { lineStyle: { color: '#d8e5e3' } }, axisLabel: { color: '#66778c', fontSize: 11 } },
-        yAxis: { type: 'value', minInterval: 1, splitNumber: 4, axisTick: { show: false }, axisLine: { show: false }, axisLabel: { color: '#738399', fontSize: 10 }, splitLine: { lineStyle: { type: 'dashed', color: '#e5edeb' } } },
-        series: [{ type: 'line', smooth: true, data: values, symbol: 'circle', symbolSize: 7, label: { show: true, color: '#14243b', fontSize: 10 }, lineStyle: { color: '#058f68', width: 3 }, itemStyle: { color: '#058f68' }, areaStyle: { color: 'rgba(39,193,136,.18)' } }]
+        xAxis: { type: 'category', boundaryGap: false, data: WEEK_NAMES, axisTick: { show: false }, axisLine: { lineStyle: { color: '#d8e5e3' } }, axisLabel: { color: '#66778c', fontSize: 13 } },
+        yAxis: { type: 'value', minInterval: 1, splitNumber: 4, axisTick: { show: false }, axisLine: { show: false }, axisLabel: { color: '#738399', fontSize: 12 }, splitLine: { lineStyle: { type: 'dashed', color: '#e5edeb' } } },
+        series: [{ type: 'line', smooth: true, data: values, symbol: 'circle', symbolSize: 7, label: { show: true, color: '#14243b', fontSize: 12 }, lineStyle: { color: '#058f68', width: 3 }, itemStyle: { color: '#058f68' }, areaStyle: { color: 'rgba(39,193,136,.18)' } }]
       });
       return chart;
     });
