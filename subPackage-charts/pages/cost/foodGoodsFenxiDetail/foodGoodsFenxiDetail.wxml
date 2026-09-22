@@ -107,22 +107,41 @@
     </view>
 
     <view class="panel ingredient-panel">
-      <view class="head"><text>配料成本明细</text><text>按理论成本降序 ⇅</text></view>
-      <view class="ingredient-table">
-        <view class="table-head">
-          <text>配料</text><text>单份用量</text><text>理论成本</text><text>出库分摊</text><text>成本差额</text><text>成本占比</text>
-        </view>
-        <view class="ingredient" wx:for="{{ingredients}}" wx:key="disGoodsId">
-          <view class="ingredient-name">
+      <view class="head"><text>配料成本明细</text><text>按理论成本从高到低</text></view>
+      <view class="ingredient-list">
+        <view class="ingredient-card" wx:for="{{ingredients}}" wx:key="disGoodsId">
+          <text class="ingredient-rank">{{item.rank}}</text>
+          <view class="ingredient-card-head">
             <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
-            <view wx:else>料</view>
-            <text>{{item.name}}</text>
+            <view wx:else class="ingredient-placeholder">料</view>
+            <view class="ingredient-title-wrap">
+              <view class="ingredient-title-row">
+                <text>{{item.name}}</text>
+                <text class="ingredient-status {{item.diffTone}}">{{item.statusLabel}}</text>
+              </view>
+              <text class="ingredient-summary {{item.diffTone}}">{{item.comparisonText}}</text>
+            </view>
           </view>
-          <text class="portion-value">{{item.portion}}{{item.unit}}/份</text>
-          <text>¥{{item.theoryCost}}</text>
-          <text class="allocated-value">¥{{item.actualCost}}</text>
-          <text class="{{item.diffTone}}">¥{{item.difference}}</text>
-          <view class="share"><text>{{item.shareText}}%</text><view><view style="width:{{item.barWidth}}%"></view></view></view>
+
+          <view class="ingredient-metrics">
+            <view><text>单份用量</text><text>{{item.portion}}<text>{{item.unit}}/份</text></text></view>
+            <view><text>理论成本</text><text>¥{{item.theoryCost}}</text></view>
+            <view><text>实际成本</text><text class="allocated-value">¥{{item.actualCost}}</text></view>
+            <view><text>成本占比</text><text>{{item.shareText}}%</text></view>
+          </view>
+
+          <view class="usage-bars">
+            <view class="usage-bar-row">
+              <text>理论用量</text>
+              <view class="usage-track"><view class="usage-fill theory" style="width:{{item.theoryWidth}}%"></view></view>
+              <text>{{item.theoryUsage}} {{item.unit}}</text>
+            </view>
+            <view class="usage-bar-row">
+              <text>实际分摊</text>
+              <view class="usage-track"><view class="usage-fill actual" style="width:{{item.actualWidth}}%"></view></view>
+              <text>{{item.actualUsage}} {{item.unit}}</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>

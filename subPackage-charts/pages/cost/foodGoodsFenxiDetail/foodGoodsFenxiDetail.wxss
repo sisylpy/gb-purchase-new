@@ -99,23 +99,39 @@ page { background: #f3fafc; color: #122039; }
 .reason-note text:first-child { margin-right: 10rpx; color: #10a86a; font-size: 28rpx; }
 .reason-note text:last-child { font-size: 20rpx; line-height: 1.4; }
 
-.ingredient-table { overflow: hidden; border: 1rpx solid #e3ebed; border-radius: 14rpx; }
-.table-head, .ingredient { display: grid; grid-template-columns: 1.35fr 1fr 1fr 1.08fr 1fr 1fr; align-items: center; text-align: center; }
-.table-head { min-height: 58rpx; padding: 0 8rpx; background: #f4f7f9; color: #62758a; font-size: 20rpx; font-weight: 700; }
-.ingredient { min-height: 96rpx; padding: 8rpx; border-bottom: 1rpx solid #e3ebed; color: #122039; font-size: 23rpx; font-weight: 700; box-sizing: border-box; }
-.ingredient:last-child { border-bottom: 0; }
-.ingredient-name { min-width: 0; display: flex; align-items: center; text-align: left; }
-.ingredient-name image, .ingredient-name > view { width: 48rpx; height: 48rpx; margin-right: 7rpx; border-radius: 9rpx; flex-shrink: 0; }
-.ingredient-name > view { background: #e7f8ed; color: #078e58; display: flex; align-items: center; justify-content: center; font-size: 22rpx; font-weight: 900; }
-.ingredient-name text { min-width: 0; font-size: 25rpx; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.portion-value { color: #344d69; }
+.ingredient-list { display: flex; flex-direction: column; gap: 13rpx; }
+.ingredient-card { position: relative; padding: 17rpx 15rpx 15rpx; border: 1rpx solid #dce7ea; border-radius: 17rpx; background: #fff; box-shadow: 0 3rpx 10rpx rgba(42,76,91,.035); box-sizing: border-box; }
+.ingredient-rank { position: absolute; left: 10rpx; top: 10rpx; z-index: 2; width: 38rpx; height: 38rpx; border-radius: 50%; background: #ffc95d; color: #8a5b00; font-size: 22rpx; font-weight: 900; line-height: 38rpx; text-align: center; }
+.ingredient-card-head { min-height: 76rpx; padding: 0 0 12rpx 14rpx; display: flex; align-items: center; border-bottom: 1rpx solid #e2eaed; box-sizing: border-box; }
+.ingredient-card-head > image, .ingredient-placeholder { width: 76rpx; height: 68rpx; margin-right: 13rpx; border-radius: 12rpx; flex-shrink: 0; }
+.ingredient-placeholder { display: flex; align-items: center; justify-content: center; background: #e7f8ed; color: #078e58; font-size: 29rpx; font-weight: 900; }
+.ingredient-title-wrap { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.ingredient-title-row { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 10rpx; }
+.ingredient-title-row > text:first-child { min-width: 0; color: #14263f; font-size: 29rpx; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ingredient-status { padding: 5rpx 12rpx; border-radius: 18rpx; font-size: 19rpx; font-weight: 800; white-space: nowrap; flex-shrink: 0; }
+.ingredient-status.saving { background: #e9f9f1; }
+.ingredient-status.danger { background: #fff0f1; }
+.ingredient-status.neutral { background: #eef3f7; }
+.ingredient-summary { margin-top: 7rpx; font-size: 21rpx; line-height: 1.35; }
 .allocated-value, .saving { color: #07965d !important; }
 .danger { color: #e3343e !important; }
-.neutral { color: #43566b !important; }
-.share { display: flex; flex-direction: column; align-items: center; }
-.share > text { font-size: 22rpx; font-weight: 800; }
-.share > view { width: 76rpx; height: 11rpx; margin-top: 6rpx; border-radius: 7rpx; background: #e1f1e9; overflow: hidden; }
-.share > view > view { height: 100%; border-radius: 7rpx; background: #13b675; }
+.neutral { color: #566b82 !important; }
+
+.ingredient-metrics { display: grid; grid-template-columns: repeat(4, 1fr); padding: 13rpx 0 12rpx; }
+.ingredient-metrics > view { min-width: 0; padding: 0 8rpx; display: flex; flex-direction: column; align-items: center; border-right: 1rpx solid #e1e9ec; box-sizing: border-box; }
+.ingredient-metrics > view:last-child { border-right: 0; }
+.ingredient-metrics > view > text:first-child { color: #66798d; font-size: 19rpx; white-space: nowrap; }
+.ingredient-metrics > view > text:nth-child(2) { margin-top: 5rpx; color: #14263f; font-size: 25rpx; font-weight: 900; white-space: nowrap; }
+.ingredient-metrics > view > text:nth-child(2) > text { margin-left: 2rpx; font-size: 17rpx; font-weight: 700; }
+
+.usage-bars { padding-top: 10rpx; border-top: 1rpx solid #e2eaed; }
+.usage-bar-row { min-height: 37rpx; display: grid; grid-template-columns: 90rpx minmax(120rpx, 1fr) 132rpx; gap: 10rpx; align-items: center; }
+.usage-bar-row > text:first-child { color: #5a6e84; font-size: 20rpx; }
+.usage-bar-row > text:last-child { color: #4d6784; font-size: 20rpx; text-align: right; white-space: nowrap; }
+.usage-track { height: 15rpx; overflow: hidden; border-radius: 10rpx; background: #e8eef0; }
+.usage-fill { height: 100%; border-radius: 10rpx; }
+.usage-fill.theory { background: linear-gradient(90deg,#218de5,#43adf2); }
+.usage-fill.actual { background: linear-gradient(90deg,#09a96a,#36c68b); }
 
 .attention-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10rpx; }
 .attention-card { min-height: 113rpx; padding: 13rpx; border-radius: 14rpx; display: flex; align-items: flex-start; box-sizing: border-box; }

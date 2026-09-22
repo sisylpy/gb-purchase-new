@@ -165,25 +165,44 @@ Page({
       var theoryCost = num(item.theoryCostPerPortion) * sales;
       var actualCost = num(item.outboundAllocatedCostPerPortion) * sales;
       var diff = actualCost - theoryCost;
+      var theoryUsage = num(item.theoryUsage);
+      var actualUsage = num(item.actualUsage);
+      var usageMax = Math.max(theoryUsage, actualUsage, 0);
+      var diffAbs = Math.abs(diff);
       return Object.assign({}, item, {
-        name: item.gbDgGoodsName || '未命名配料',
+        name: item.gbDgGoodsName || item.ingredientName || item.goodsName || '未命名配料',
         image: imageUrl(item.gbDgGoodsFileImg || item.gbDgNxFatherImg),
         unit: item.gbDgGoodsStandardname || '',
         portion: qty(item.recipeUnitPerDish),
         theoryCost: money(theoryCost),
         actualCost: money(actualCost),
         difference: money(diff),
+        differenceAbs: money(diffAbs),
         diffValue: diff,
         diffTone: diff > 0 ? 'danger' : diff < 0 ? 'saving' : 'neutral',
+        statusLabel: diff > 0 ? '成本偏高' : diff < 0 ? '成本偏低' : '成本一致',
+        comparisonText: diff > 0
+          ? '实际成本比理论多 ¥' + money(diffAbs)
+          : diff < 0
+            ? '实际成本比理论少 ¥' + money(diffAbs)
+            : '实际成本与理论一致',
+        theoryUsage: qty(theoryUsage),
+        actualUsage: qty(actualUsage),
+        theoryWidth: usageMax > 0 && theoryUsage > 0
+          ? Math.max(5, theoryUsage * 100 / usageMax)
+          : 0,
+        actualWidth: usageMax > 0 && actualUsage > 0
+          ? Math.max(5, actualUsage * 100 / usageMax)
+          : 0,
         share: theoryTotal > 0 ? theoryCost * 100 / theoryTotal : 0
       });
     }).sort(function (a, b) {
       return num(b.theoryCost) - num(a.theoryCost);
     });
 
-    ingredients.forEach(function (item) {
+    ingredients.forEach(function (item, index) {
+      item.rank = index + 1;
       item.shareText = item.share.toFixed(1);
-      item.barWidth = Math.max(3, Math.min(100, item.share));
     });
 
     var top = ingredients[0] || {};
