@@ -54,6 +54,7 @@ page { background: #f3fafc; color: #132038; }
 .summary-card > text:nth-child(2) { margin-top: 7rpx; color: #283c55; font-size: 23rpx; font-weight: 800; }
 .summary-value { margin-top: 7rpx; font-size: 31rpx; font-weight: 900; }
 .summary-card > text:last-child { margin-top: auto; color: #718196; font-size: 20rpx; }
+.rhythm-card > text:last-child { line-height: 1.25; }
 .profit { color: #ed4b18 !important; }
 .margin { color: #07965d !important; }
 .blue-text { color: #1767df !important; }

@@ -38,7 +38,7 @@
         <view class="summary-card profit-card"><text class="summary-icon">¥</text><text>实际表现</text><text class="summary-value profit">¥{{food.profit}}</text><text>实际利润</text></view>
         <view class="summary-card cost-card"><text class="summary-icon">▤</text><text>成本效率</text><text class="summary-value blue-text">¥{{food.totalCost}}</text><text>总成本</text></view>
         <view class="summary-card waste-card"><text class="summary-icon">◔</text><text>损耗控制</text><text class="summary-value margin">¥{{food.wasteCost}}</text><text>损耗+废弃</text></view>
-        <view class="summary-card rhythm-card"><text class="summary-icon">〽</text><text>销售节奏</text><text class="summary-value blue-text">{{food.peakValue}}份</text><text>{{food.peakDay}}最高</text></view>
+        <view class="summary-card rhythm-card"><text class="summary-icon">份</text><text>总出品份数</text><text class="summary-value blue-text">{{food.sales}}份</text><text>销售/折扣/赠送/员工餐</text></view>
       </view>
     </view>
 
