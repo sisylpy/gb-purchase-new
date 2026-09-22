@@ -1,45 +1,97 @@
 <wxs src="/wxs/format.wxs" module="tool" />
 <view class="page">
-  <back-navbar title="成本问题定位" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar>
-  <view style="height:{{navBarHeight}}rpx"></view>
+  <back-navbar title="成本明细" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="nav-spacer" style="height:{{navBarHeight}}rpx"></view>
   <view class="date-bar" bindtap="toDatePage">
-    <image src="/images/calender.png"></image><text class="date-name">{{hanzi}}</text>
-    <text>{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text><text class="arrow">›</text>
+    <image src="/images/calender.png"></image>
+    <text class="date-name">{{hanzi}}</text>
+    <text wx:if="{{startDate && stopDate}}" class="date-range">{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text>
+    <text class="date-arrow">›</text>
   </view>
+
   <view wx:if="{{hasData}}">
-    <view class="hero">
-      <view class="hero-top">
-        <image wx:if="{{dish.image}}" src="{{dish.image}}" mode="aspectFill"></image><view wx:else class="dish-placeholder">菜</view>
-        <view class="hero-name"><view><text>{{dish.name}}</text><text>热销菜</text></view><text>先定位问题原料，再决定怎么处理</text></view>
-        <view class="priority" bindtap="toPriorityIngredient"><text>⚠</text><view><text>优先关注</text><text>{{dish.priority}}</text></view></view>
+    <view class="hero-card">
+      <image class="hero-background" src="/images/dish-business/banner.png" mode="widthFix"></image>
+      <view class="hero-main">
+        <image wx:if="{{dish.image}}" class="dish-image" src="{{dish.image}}" mode="aspectFill"></image>
+        <view wx:else class="dish-placeholder">菜</view>
+        <view class="hero-copy">
+          <view class="dish-title-row">
+            <text class="dish-name">{{dish.name}}</text>
+            <text class="dish-status {{dish.marginTone}}">↗ {{dish.marginStatus}}</text>
+          </view>
+          <text class="hero-subtitle">先看问题原料，再决定怎么处理</text>
+        </view>
+        <view class="hero-slogan"><text>用数据看清</text><text>每一道菜的成本！</text></view>
       </view>
       <view class="hero-metrics">
-        <view><text>¥{{dish.price}}/份</text><text>菜品单价</text></view><view><text>{{dish.sales}}份</text><text>本期销量</text></view>
-        <view><text>¥{{dish.profit}}</text><text>实际利润</text></view><view><text>{{dish.margin}}%</text><text>综合毛利率</text></view>
+        <view><text>¥{{dish.price}}/份</text><text>菜品单价</text></view>
+        <view><text>{{dish.sales}}份</text><text>本期销量</text></view>
+        <view><text>¥{{dish.profit}}</text><text>实际利润</text></view>
+        <view><text>{{dish.margin}}<text wx:if="{{dish.margin != '—'}}">%</text></text><text>综合毛利率</text></view>
       </view>
     </view>
+
+    <view class="overview panel">
+      <view class="section-head"><text class="section-title">▥　问题总览</text><text class="section-note">快速了解成本问题的关键点</text></view>
+      <view class="overview-grid">
+        <view class="overview-card issue"><text class="overview-icon">▤</text><text>问题原料数</text><text>{{overview.issueCount}}<text>项</text></text></view>
+        <view class="overview-card goods"><text class="overview-icon">▥</text><text>最大差异原料</text><text>{{overview.maxGoods}}</text></view>
+        <view class="overview-card difference"><text class="overview-icon">↘</text><text>最大差异值</text><text>{{overview.maxDifference}}<text>{{overview.maxDifferenceUnit}}</text></text></view>
+        <view class="overview-card cost"><text class="overview-icon">¥</text><text>主要影响成本</text><text>¥{{overview.mainCost}}</text></view>
+      </view>
+      <view class="warning-strip {{warningTone}}"><text>!</text><text>{{warningText}}</text></view>
+    </view>
+
     <view class="panel">
-      <view class="panel-head"><text>原料成本影响排行</text><text>按成本影响从高到低排序 ›</text></view>
+      <view class="section-head"><text class="section-title">▥　原料成本影响排行</text><text class="section-note">按成本影响从高到低排序 ›</text></view>
       <view class="ingredient" wx:for="{{ingredients}}" wx:key="goodsId" data-index="{{index}}" bindtap="toIngredient">
         <view class="rank">{{item.rank}}</view>
-        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><view wx:else class="goods-placeholder">料</view>
-        <view class="ingredient-main">
-          <view class="ingredient-title"><text>{{item.goodsName}}</text><text class="{{item.issue?'warn':'ok'}}">{{item.issue?'⚠ ': '✓ '}}{{item.status}}</text><text class="go">›</text></view>
-          <text class="reason">{{item.reason}}</text>
-          <view class="numbers">
-            <view><text>配方理论用量</text><text>{{item.theoryDisplay}} {{item.unit}}</text></view><view><text>制作出库分摊量</text><text>{{item.actualDisplay}} {{item.unit}}</text></view>
-            <view><text>差异</text><text class="red">{{item.difference}} {{item.unit}}</text></view><view><text>分摊成本</text><text>¥{{item.allocatedCost}}</text></view>
+        <view class="ingredient-head">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+          <view wx:else class="goods-placeholder">料</view>
+          <view class="ingredient-copy">
+            <view class="ingredient-title"><text>{{item.goodsName}}</text><text class="badge {{item.badgeTone}}">{{item.status}}</text></view>
+            <text class="reason">{{item.reason}}</text>
           </view>
-          <view class="bars">
-            <text>理论用量</text><view><view class="bar-fill" style="width:{{item.theoryWidth}}%"></view></view><text>{{item.theoryDisplay}}{{item.unit}}</text>
-            <text>出库分摊</text><view><view class="bar-fill actual {{item.issue?'bad':''}}" style="width:{{item.actualWidth}}%"></view></view><text>{{item.actualDisplay}}{{item.unit}}</text>
+          <view class="impact {{item.badgeTone}}"><text>▥</text><text>{{item.impactText}}</text></view>
+        </view>
+
+        <view class="number-grid">
+          <view><text>理论用量</text><text>{{item.theoryDisplay}}<text>{{item.unit}}</text></text></view>
+          <view><text>实际分摊量</text><text>{{item.actualDisplay}}<text>{{item.unit}}</text></text></view>
+          <view><text>差异值</text><text class="difference-value">{{item.difference}}<text>{{item.unit}}</text></text></view>
+          <view><text>分摊成本</text><text>¥{{item.allocatedCost}}</text></view>
+        </view>
+
+        <view class="allocation-bars">
+          <view class="bar-row">
+            <text>理论用量</text>
+            <view class="bar-track"><view class="bar-fill theory" style="width:{{item.theoryWidth}}%"></view></view>
+            <text>{{item.theoryDisplay}} {{item.unit}}</text>
           </view>
-          <view class="rate {{item.issue?'rate-warn':'rate-ok'}}">{{item.rateText}}</view>
+          <view class="bar-row">
+            <text>实际分摊</text>
+            <view class="bar-track"><view class="bar-fill actual" style="width:{{item.actualWidth}}%"></view></view>
+            <text>{{item.actualDisplay}} {{item.unit}}</text>
+          </view>
+        </view>
+        <text class="card-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="advice panel">
+      <view class="section-head"><text class="section-title">▥　处理建议</text><text class="section-note">从源头解决问题，确保成本数据准确</text></view>
+      <view class="advice-grid">
+        <view class="advice-item {{item.tone}}" wx:for="{{recommendations}}" wx:key="title">
+          <text class="advice-icon">{{item.icon}}</text>
+          <view><text>{{item.title}}</text><text>{{item.text}}</text></view>
+          <text class="advice-arrow">›</text>
         </view>
       </view>
-      <view class="explain">ⓘ　出库分摊是根据领料、出库和菜品销量进行的成本分摊，不等于实际称重消耗，请结合经营情况进一步分析。</view>
     </view>
-    <view class="primary-btn" bindtap="toPriorityIngredient">▤　查看{{dish.priority}}详情　›</view>
   </view>
-  <view wx:elif="{{!loading}}" class="empty">暂无成本定位数据</view><view class="bottom"></view>
+
+  <view wx:elif="{{!loading}}" class="empty"><text>暂无成本定位数据</text><text bindtap="toDatePage">切换日期查看</text></view>
+  <view class="bottom"></view>
 </view>
