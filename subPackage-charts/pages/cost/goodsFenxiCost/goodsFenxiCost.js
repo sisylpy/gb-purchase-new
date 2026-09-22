@@ -1,11 +1,375 @@
-var dateUtils=require('../../../../lib/dateUtil'),api=require('../../../services/api.js'),apiDis=require('../../../../services/apiDistributer.js'),load=require('../../../../lib/load.js'),echarts=require('../../../../ec-canvas/echarts'),globalData=getApp().globalData;
-function n(v){var x=parseFloat(String(v==null?0:v).replace(/,/g,''));return isNaN(x)?0:x}function money(v){return n(v).toFixed(2).replace(/\.00$/,'')}function shortDate(s){var p=String(s||'').split('-');return p.length===3?Number(p[1])+'月'+Number(p[2])+'日':s}
-Page({data:{navBarHeight:0,hanzi:'本月',dateText:'',row:{},dishes:[],daily:[],ecTrend:{lazyLoad:true},loading:true},
-onLoad:function(options){var cached=wx.getStorageSync('costIngredient')||{},legacy=wx.getStorageSync('disGoods')||{},target=Number(options.disGoodsId||0),cachedId=Number(cached.disGoodsId||cached.gbDistributerGoodsId||0),row=target&&cachedId!==target?legacy:(cached.disGoodsId||cached.gbDistributerGoodsId?cached:legacy),dis=wx.getStorageSync('disInfo')||{},searchDepId=options.searchDepId||'-1',depFatherId=options.depFatherId||(searchDepId!=='-1'?searchDepId:'');this.setData({navBarHeight:globalData.navBarHeight*globalData.rpxR,disId:options.disId||dis.gbDistributerId,depFatherId:depFatherId,disGoodsId:options.disGoodsId||row.disGoodsId||row.gbDistributerGoodsId,searchDepId:searchDepId,row:this.viewRow(row),dishes:this.viewDishes(row.supportedDishes||[])});this.syncDate();this.loadData()},
-onShow:function(){if(this.data.updateDate){this.setData({updateDate:false});this.syncDate();this.loadData()}},syncDate:function(){var s=wx.getStorageSync('myDate'),r=s?(s.name==='custom'?dateUtils.getDateRange(s.name,s.startDate,s.stopDate):dateUtils.getDateRange(s.name)):{startDate:dateUtils.getFirstDateInMonth(),stopDate:dateUtils.getArriveDate(0),name:'本月'};this.setData({startDate:r.startDate,stopDate:r.stopDate,hanzi:(s&&s.hanzi)||r.name||'本月',dateText:shortDate(r.startDate)+' - '+shortDate(r.stopDate)})},
-viewRow:function(r){var total=n(r.outboundTotalAmount),verified=n(r.verifiedAmount),un=n(r.nonVerifiedAmount),meal=n(r.employeeMealAmount),qty=n(r.outboundTotalQty),actual=n(r.actualUsage),theory=n(r.theoryUsage),diff=actual-theory;return Object.assign({},r,{name:r.name||r.gbDgGoodsName||'原料详情',unit:r.gbDgGoodsStandardname||'斤',unitPriceText:money(r.unitPrice),totalText:money(total),verifiedText:money(verified),unverifiedText:money(un),mealText:money(meal),qtyText:money(qty),verifiedQtyText:money(r.verifiedQty),unverifiedQtyText:money(r.nonVerifiedQty),mealQtyText:money(r.employeeMealQty),verifiedPct:total?Math.round(verified*100/total):0,unverifiedPct:total?Math.round(un*100/total):0,mealPct:total?Math.round(meal*100/total):0,theoryText:money(theory),actualText:money(actual),diffText:(diff>0?'+':'')+money(diff),diffTone:diff>0?'danger':'ok'})},
-viewDishes:function(list){return(list||[]).map(function(d){var diff=n(d.diffUsage);return Object.assign({},d,{salesText:money(d.salesPortions),unitText:money(d.recipeUnitPerDish),theoryText:money(d.theoryUsage),actualText:money(d.actualUsage),diffText:(diff>0?'+':'')+money(diff),tone:diff>0?'danger':'ok'})})},
-loadData:function(){var that=this;load.showLoading('加载中');Promise.all([api.outboundIngredientAnalysis({startDate:this.data.startDate,stopDate:this.data.stopDate,disId:this.data.disId,depFatherId:this.data.depFatherId,verificationStatus:'all',sortBy:'outbound',sortOrder:'desc'}),apiDis.getGbUnitPriceAnalysis({disId:this.data.disId,startDate:this.data.startDate,stopDate:this.data.stopDate,sourceType:'ALL',purDepId:'',disGoodsId:this.data.disGoodsId})]).then(function(all){load.hideLoading();var d=(all[0].result&&all[0].result.data)||{},p=(all[1].result&&all[1].result.data)||{},g=(p.goods||[])[0]||{},ingredient=(d.ingredientsAnalysis||[]).filter(function(x){return Number(x.disGoodsId)===Number(that.data.disGoodsId)})[0]||{},daily=(p.priceTrend||[]).map(function(x){return{date:x.day||'',value:x.averageUnitPrice==null?null:n(x.averageUnitPrice)}}),merged=Object.assign({},that.data.row,ingredient,{unitPrice:g.currentUnitPrice||ingredient.unitPrice||that.data.row.unitPrice,previousPrice:g.previousUnitPrice,priceChangePercent:g.priceChangePercent});that.setData({loading:false,daily:daily,history:{},row:that.viewRow(merged),dishes:that.viewDishes(ingredient.supportedDishes||[])},function(){that.scheduleChart()})}).catch(function(error){load.hideLoading();console.error('[goodsFenxiCost] load data failed',error);that.setData({loading:false},function(){that.scheduleChart()})})},
-scheduleChart:function(){var that=this;wx.nextTick(function(){setTimeout(function(){that.drawChart()},80)})},
-drawChart:function(){var comp=this.selectComponent('#trend'),daily=this.data.daily||[],that=this;if(!comp){this.chartInitAttempts=(this.chartInitAttempts||0)+1;if(this.chartInitAttempts<8)setTimeout(this.drawChart.bind(this),100);return}this.chartInitAttempts=0;var dates=daily.map(function(x){var p=String(x.date).split('-');return p.length>2?Number(p[1])+'/'+Number(p[2]):x.date}),vals=daily.map(function(x){return x.value});if(!dates.length){dates=['本期'];vals=[n(this.data.row.unitPrice)]}comp.init(function(canvas,w,h,dpr){if(that.trendChart)that.trendChart.dispose();var chart=echarts.init(canvas,null,{width:w,height:h,devicePixelRatio:dpr});that.trendChart=chart;canvas.setChart(chart);chart.setOption({animation:false,grid:{left:10,right:12,top:18,bottom:8,containLabel:true},xAxis:{type:'category',data:dates,boundaryGap:false,axisLine:{lineStyle:{color:'#ccd5df'}},axisLabel:{color:'#728099',fontSize:10}},yAxis:{type:'value',splitNumber:3,splitLine:{lineStyle:{color:'#e8edf2',type:'dashed'}},axisLabel:{color:'#728099',fontSize:10}},series:[{type:'line',data:vals,connectNulls:true,smooth:true,symbol:'circle',symbolSize:7,lineStyle:{color:'#099c65',width:3},itemStyle:{color:'#fff',borderColor:'#099c65',borderWidth:2},areaStyle:{color:'rgba(51,207,143,.18)'}}]});return chart})},
-toDish:function(e){var d=this.data.dishes[e.currentTarget.dataset.index];if(!d||!d.dishId)return;wx.setStorageSync('foodGoodsFenxiDetailContext',{name:d.dishName});wx.navigateTo({url:'../foodGoodsFenxiDetail/foodGoodsFenxiDetail?foodId='+d.dishId+'&disId='+this.data.disId+'&depFatherId='+this.data.depFatherId})},toDatePage:function(){this.setData({updateDate:true});wx.navigateTo({url:'/pages/common/selectDate/selectDate?startDate='+this.data.startDate+'&stopDate='+this.data.stopDate+'&dateType=month'})},toBack:function(){wx.navigateBack()}})
+var dateUtils = require('../../../../lib/dateUtil');
+var api = require('../../../services/api.js');
+var apiDis = require('../../../../services/apiDistributer.js');
+var load = require('../../../../lib/load.js');
+var echarts = require('../../../../ec-canvas/echarts');
+var config = require('../../../../config/index.js');
+var globalData = getApp().globalData;
+
+function num(value) {
+  var parsed = parseFloat(String(value == null ? 0 : value).replace(/,/g, ''));
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function money(value) {
+  return num(value).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+}
+
+function signed(value) {
+  var resolved = num(value);
+  return (resolved > 0 ? '+' : '') + money(resolved);
+}
+
+function imageUrl(value) {
+  if (!value) return '';
+  if (/^https?:\/\//.test(value)) return value;
+  return String(config.server || '').replace(/\/$/, '') + '/' + String(value).replace(/^\//, '');
+}
+
+function shortDate(value) {
+  var parts = String(value || '').split('-');
+  return parts.length === 3 ? Number(parts[1]) + '月' + Number(parts[2]) + '日' : value;
+}
+
+function hasOwn(row, key) {
+  return row && Object.prototype.hasOwnProperty.call(row, key);
+}
+
+function receivedQuantity(purchaseRow) {
+  var stocks = purchaseRow.gbDepartmentGoodsStockEntities || [];
+  if (stocks.length) {
+    return stocks.reduce(function (sum, stock) { return sum + num(stock.gbDgsWeight); }, 0);
+  }
+  return num(purchaseRow.gbDpgBuyQuantity);
+}
+
+function fallbackPurchaseBusiness(data) {
+  var rows = data.arr || [];
+  var batches = {};
+  var sources = {};
+  var totalQuantity = 0;
+  var totalAmount = 0;
+  rows.forEach(function (row) {
+    var batchKey = row.gbDpgBatchId ? 'B:' + row.gbDpgBatchId : 'P:' + row.gbDistributerPurchaseGoodsId;
+    var supplierId = Number(row.gbDpgPurchaseNxSupplierId || -1);
+    var selfPurchase = supplierId <= 0;
+    var sourceKey = selfPurchase ? 'SELF' : 'SUPPLIER:' + supplierId;
+    var sourceName = selfPurchase ? '自采' : (((row.nxJrdhSupplierEntity || {}).nxJrdhsSupplierName) || '供货商');
+    var quantity = receivedQuantity(row);
+    var amount = num(row.gbDpgBuySubtotal);
+    batches[batchKey] = true;
+    totalQuantity += quantity;
+    totalAmount += amount;
+    if (!sources[sourceKey]) sources[sourceKey] = { sourceType: selfPurchase ? 'SELF' : 'SUPPLIER', sourceName: sourceName, batches: {}, purchaseQuantity: 0, purchaseAmount: 0, buyerNames: [] };
+    sources[sourceKey].batches[batchKey] = true;
+    sources[sourceKey].purchaseQuantity += quantity;
+    sources[sourceKey].purchaseAmount += amount;
+    var buyer = ((row.purchaseDepartmentUser || {}).gbDuWxNickName) || '';
+    if (selfPurchase && buyer && sources[sourceKey].buyerNames.indexOf(buyer) < 0) sources[sourceKey].buyerNames.push(buyer);
+  });
+  var sourceRows = Object.keys(sources).map(function (key) {
+    var source = sources[key];
+    return {
+      sourceType: source.sourceType,
+      sourceName: source.sourceName,
+      buyerNames: source.buyerNames,
+      batchCount: Object.keys(source.batches).length,
+      purchaseQuantity: source.purchaseQuantity,
+      purchaseAmount: source.purchaseAmount,
+      averageUnitPrice: source.purchaseQuantity ? source.purchaseAmount / source.purchaseQuantity : 0,
+      quantitySharePercent: totalQuantity ? source.purchaseQuantity * 100 / totalQuantity : 0
+    };
+  }).sort(function (a, b) { return b.purchaseQuantity - a.purchaseQuantity; });
+  return {
+    purchaseSummary: {
+      batchCount: Object.keys(batches).length,
+      totalQuantity: totalQuantity,
+      totalAmount: totalAmount,
+      averageUnitPrice: totalQuantity ? totalAmount / totalQuantity : 0
+    },
+    purchaseSources: sourceRows,
+    inventorySummary: data.inventorySummary || {}
+  };
+}
+
+Page({
+  data: {
+    navBarHeight: 0,
+    hanzi: '本月',
+    dateText: '',
+    row: {},
+    purchase: {},
+    purchaseSources: [],
+    dishes: [],
+    daily: [],
+    ecTrend: { lazyLoad: true },
+    loading: true
+  },
+
+  onLoad: function (options) {
+    var cached = wx.getStorageSync('costIngredient') || {};
+    var legacy = wx.getStorageSync('disGoods') || {};
+    var target = Number(options.disGoodsId || 0);
+    var cachedId = Number(cached.disGoodsId || cached.gbDistributerGoodsId || 0);
+    var source = target && cachedId !== target ? legacy : (cachedId ? cached : legacy);
+    var dis = wx.getStorageSync('disInfo') || {};
+    var searchDepId = options.searchDepId || '-1';
+    var depFatherId = options.depFatherId || (searchDepId !== '-1' ? searchDepId : '');
+    this.setData({
+      navBarHeight: globalData.navBarHeight * globalData.rpxR,
+      disId: options.disId || dis.gbDistributerId,
+      depFatherId: depFatherId,
+      disGoodsId: options.disGoodsId || source.disGoodsId || source.gbDistributerGoodsId,
+      searchDepId: searchDepId,
+      row: this.viewRow(source),
+      dishes: this.viewDishes(source.supportedDishes || [])
+    });
+    this.syncDate();
+    this.loadData();
+  },
+
+  onShow: function () {
+    if (this.data.updateDate) {
+      this.setData({ updateDate: false });
+      this.syncDate();
+      this.loadData();
+    }
+  },
+
+  syncDate: function () {
+    var stored = wx.getStorageSync('myDate');
+    var range = stored
+      ? (stored.name === 'custom' ? dateUtils.getDateRange(stored.name, stored.startDate, stored.stopDate) : dateUtils.getDateRange(stored.name))
+      : { startDate: dateUtils.getFirstDateInMonth(), stopDate: dateUtils.getArriveDate(0), name: '本月' };
+    this.setData({
+      startDate: range.startDate,
+      stopDate: range.stopDate,
+      hanzi: (stored && stored.hanzi) || range.name || '本月',
+      dateText: shortDate(range.startDate) + ' - ' + shortDate(range.stopDate)
+    });
+  },
+
+  viewRow: function (raw) {
+    var row = raw || {};
+    var unit = row.gbDgGoodsStandardname || row.unit || '斤';
+    var verified = num(row.verifiedAmount);
+    var pending = hasOwn(row, 'businessPendingUseAmount') ? num(row.businessPendingUseAmount) : num(row.nonVerifiedAmount);
+    var normal = hasOwn(row, 'businessNormalSaleAmount') ? num(row.businessNormalSaleAmount) : verified;
+    var discount = num(row.businessDiscountMealAmount);
+    var employee = hasOwn(row, 'businessEmployeeMealAmount') ? num(row.businessEmployeeMealAmount) : num(row.employeeMealAmount);
+    var waste = hasOwn(row, 'businessWasteLossAmount') ? num(row.businessWasteLossAmount) : 0;
+    var destinationTotal = normal + discount + employee + pending + waste;
+    var destinations = [
+      { key: 'normal', name: '正常售卖', hint: '正常卖出的菜', amountText: money(normal), qtyText: money(row.businessNormalSaleQty), color: '#16a36a' },
+      { key: 'discount', name: '折扣餐', hint: '含会员优惠和赠送', amountText: money(discount), qtyText: money(row.businessDiscountMealQty), color: '#4388f7' },
+      { key: 'employee', name: '员工餐', hint: '菜品和原料员工餐', amountText: money(employee), qtyText: money(hasOwn(row, 'businessEmployeeMealQty') ? row.businessEmployeeMealQty : row.employeeMealQty), color: '#f39b25' },
+      { key: 'pending', name: '待确认用途', hint: '出库了，还没对应到菜品', amountText: money(pending), qtyText: money(hasOwn(row, 'businessPendingUseQty') ? row.businessPendingUseQty : row.nonVerifiedQty), color: '#ef5b64' },
+      { key: 'waste', name: '损耗 / 废弃', hint: '已登记的损耗和废弃', amountText: money(waste), qtyText: money(row.businessWasteLossQty), color: '#8f79d9' }
+    ].map(function (item) {
+      var amount = num(item.amountText);
+      item.percent = destinationTotal ? Math.round(amount * 100 / destinationTotal) : 0;
+      item.barWidth = amount > 0 ? Math.max(3, item.percent) : 0;
+      return item;
+    });
+    var diff = num(row.diffUsage != null ? row.diffUsage : num(row.actualUsage) - num(row.theoryUsage));
+    var conclusion = pending > 0
+      ? '有 ¥' + money(pending) + ' 的出库还没对应到菜品，建议先核对出库和配方记录。'
+      : (waste > 0 ? '本期有 ¥' + money(waste) + ' 的损耗或废弃，建议查看登记原因。' : '本期出库用途已经基本对应清楚。');
+    return Object.assign({}, row, {
+      name: row.name || row.gbDgGoodsName || '原料详情',
+      initial: String(row.name || row.gbDgGoodsName || '原').slice(0, 1),
+      unit: unit,
+      imageUrl: imageUrl(row.gbDgGoodsFileImg || row.imageUrl),
+      unitPriceText: money(row.unitPrice),
+      totalText: money(row.businessDestinationTotalAmount || row.outboundTotalAmount),
+      totalQtyText: money(row.businessDestinationTotalQty || row.outboundTotalQty),
+      theoryText: money(row.theoryUsage),
+      actualText: money(row.actualUsage),
+      diffText: signed(diff),
+      diffAbsText: money(Math.abs(diff)),
+      diffTone: Math.abs(diff) < 0.01 ? 'ok' : 'danger',
+      destinations: destinations,
+      destinationTotalText: money(destinationTotal),
+      conclusion: conclusion
+    });
+  },
+
+  viewPurchase: function (raw) {
+    var fallback = fallbackPurchaseBusiness(raw || {});
+    var summary = (raw && raw.purchaseSummary) || fallback.purchaseSummary;
+    var inventory = (raw && raw.inventorySummary) || fallback.inventorySummary || {};
+    return {
+      batchCount: Number(summary.batchCount || 0),
+      totalQuantityText: money(summary.totalQuantity),
+      totalAmountText: money(summary.totalAmount),
+      averagePriceText: money(summary.averageUnitPrice),
+      currentStockText: inventory.currentStockWeight == null ? '--' : money(inventory.currentStockWeight),
+      currentStockAmountText: inventory.currentStockAmount == null ? '--' : money(inventory.currentStockAmount),
+      hasCurrentStock: inventory.currentStockWeight != null,
+      hasPurchase: Number(summary.batchCount || 0) > 0
+    };
+  },
+
+  viewPurchaseSources: function (raw) {
+    var fallback = fallbackPurchaseBusiness(raw || {});
+    return ((raw && raw.purchaseSources) || fallback.purchaseSources || []).map(function (source, index) {
+      var share = num(source.quantitySharePercent);
+      return Object.assign({}, source, {
+        indexNo: index + 1,
+        iconText: source.sourceType === 'SELF' ? '自' : '供',
+        typeText: source.sourceType === 'SELF' ? '自采' : '供货商',
+        buyerText: (source.buyerNames || []).join('、'),
+        quantityText: money(source.purchaseQuantity),
+        amountText: money(source.purchaseAmount),
+        priceText: money(source.averageUnitPrice),
+        shareText: money(share),
+        barWidth: share > 0 ? Math.max(4, share) : 0
+      });
+    });
+  },
+
+  viewDishes: function (list) {
+    return (list || []).map(function (dish) {
+      var diff = num(dish.diffUsage);
+      var normal = num(dish.normalSalePortions);
+      var discount = num(dish.discountMealPortions);
+      var employee = num(dish.employeeMealPortions);
+      var total = num(dish.totalBusinessPortions != null ? dish.totalBusinessPortions : dish.salesPortions);
+      var relation = '正常 ' + money(normal) + '份 · 折扣 ' + money(discount) + '份 · 员工餐 ' + money(employee) + '份';
+      var issue = Math.abs(diff) < 0.01
+        ? '配方用量和实际分摊基本一致'
+        : (diff < 0 ? '实际少分摊 ' + money(Math.abs(diff)) + '，请核对配方或出库' : '实际多分摊 ' + money(diff) + '，请留意成本偏高');
+      return Object.assign({}, dish, {
+        image: imageUrl(dish.dishImageLarge || dish.dishImage),
+        initial: String(dish.dishName || '菜').slice(0, 1),
+        totalText: money(total),
+        salesRelation: relation,
+        unitText: money(dish.recipeUnitPerDish),
+        theoryText: money(dish.theoryUsage),
+        actualText: money(dish.actualUsage),
+        diffText: signed(diff),
+        tone: Math.abs(diff) < 0.01 ? 'ok' : 'danger',
+        issueText: issue
+      });
+    });
+  },
+
+  loadData: function () {
+    var that = this;
+    load.showLoading('加载中');
+    Promise.all([
+      api.outboundIngredientAnalysis({
+        startDate: this.data.startDate,
+        stopDate: this.data.stopDate,
+        disId: this.data.disId,
+        depFatherId: this.data.depFatherId,
+        verificationStatus: 'all',
+        sortBy: 'outbound',
+        sortOrder: 'desc'
+      }),
+      apiDis.getGbUnitPriceAnalysis({
+        disId: this.data.disId,
+        startDate: this.data.startDate,
+        stopDate: this.data.stopDate,
+        sourceType: 'ALL',
+        purDepId: '',
+        disGoodsId: this.data.disGoodsId
+      }),
+      apiDis.getGbPurGoodsDetailList({
+        disGoodsId: this.data.disGoodsId,
+        startDate: this.data.startDate,
+        stopDate: this.data.stopDate
+      })
+    ]).then(function (responses) {
+      load.hideLoading();
+      var outbound = (responses[0].result && responses[0].result.data) || {};
+      var price = (responses[1].result && responses[1].result.data) || {};
+      var purchaseData = (responses[2].result && responses[2].result.data) || {};
+      var priceGoods = (price.goods || [])[0] || {};
+      var ingredient = (outbound.ingredientsAnalysis || []).filter(function (item) {
+        return Number(item.disGoodsId) === Number(that.data.disGoodsId);
+      })[0] || {};
+      var daily = (price.priceTrend || []).map(function (item) {
+        return { date: item.day || '', value: item.averageUnitPrice == null ? null : num(item.averageUnitPrice) };
+      });
+      var merged = Object.assign({}, that.data.row, ingredient, {
+        unitPrice: priceGoods.currentUnitPrice || ingredient.unitPrice || that.data.row.unitPrice,
+        previousPrice: priceGoods.previousUnitPrice,
+        priceChangePercent: priceGoods.priceChangePercent,
+        minUnitPrice: priceGoods.minUnitPrice,
+        maxUnitPrice: priceGoods.maxUnitPrice,
+        purchaseCount: priceGoods.purchaseCount
+      });
+      that.setData({
+        loading: false,
+        daily: daily,
+        row: that.viewRow(merged),
+        purchase: that.viewPurchase(purchaseData),
+        purchaseSources: that.viewPurchaseSources(purchaseData),
+        dishes: that.viewDishes(ingredient.supportedDishes || [])
+      }, function () { that.scheduleChart(); });
+    }).catch(function (error) {
+      load.hideLoading();
+      console.error('[goodsFenxiCost] load data failed', error);
+      that.setData({ loading: false }, function () { that.scheduleChart(); });
+    });
+  },
+
+  scheduleChart: function () {
+    var that = this;
+    wx.nextTick(function () { setTimeout(function () { that.drawChart(); }, 80); });
+  },
+
+  drawChart: function () {
+    var component = this.selectComponent('#trend');
+    var daily = this.data.daily || [];
+    var that = this;
+    if (!component) {
+      this.chartInitAttempts = (this.chartInitAttempts || 0) + 1;
+      if (this.chartInitAttempts < 8) setTimeout(this.drawChart.bind(this), 100);
+      return;
+    }
+    this.chartInitAttempts = 0;
+    var dates = daily.map(function (item) {
+      var parts = String(item.date).split('-');
+      return parts.length > 2 ? Number(parts[1]) + '/' + Number(parts[2]) : item.date;
+    });
+    var values = daily.map(function (item) { return item.value; });
+    if (!dates.length) {
+      dates = ['本期'];
+      values = [num(this.data.row.unitPrice)];
+    }
+    component.init(function (canvas, width, height, dpr) {
+      if (that.trendChart) that.trendChart.dispose();
+      var chart = echarts.init(canvas, null, { width: width, height: height, devicePixelRatio: dpr });
+      that.trendChart = chart;
+      canvas.setChart(chart);
+      chart.setOption({
+        animation: false,
+        grid: { left: 8, right: 12, top: 26, bottom: 8, containLabel: true },
+        xAxis: { type: 'category', data: dates, boundaryGap: false, axisLine: { lineStyle: { color: '#cad7d1' } }, axisLabel: { color: '#64758a', fontSize: 11 } },
+        yAxis: { type: 'value', splitNumber: 3, splitLine: { lineStyle: { color: '#e2eee9', type: 'dashed' } }, axisLabel: { color: '#64758a', fontSize: 11 } },
+        series: [{ type: 'line', data: values, connectNulls: true, smooth: true, symbol: 'circle', symbolSize: 8, lineStyle: { color: '#0ca36a', width: 3 }, itemStyle: { color: '#fff', borderColor: '#0ca36a', borderWidth: 3 }, areaStyle: { color: 'rgba(31,190,124,.16)' } }]
+      });
+      return chart;
+    });
+  },
+
+  toDish: function (event) {
+    var dish = this.data.dishes[event.currentTarget.dataset.index];
+    if (!dish || !dish.dishId) return;
+    wx.setStorageSync('foodGoodsFenxiDetailContext', { name: dish.dishName, image: dish.image });
+    wx.navigateTo({
+      url: '../foodGoodsFenxiDetail/foodGoodsFenxiDetail?foodId=' + dish.dishId + '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId
+    });
+  },
+
+  toDatePage: function () {
+    this.setData({ updateDate: true });
+    wx.navigateTo({
+      url: '/pages/common/selectDate/selectDate?startDate=' + this.data.startDate + '&stopDate=' + this.data.stopDate + '&dateType=month'
+    });
+  },
+
+  toBack: function () { wx.navigateBack(); }
+});

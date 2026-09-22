@@ -1,5 +1,148 @@
-<view class="page"><back-navbar title="{{row.name}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar><view style="height:{{navBarHeight}}rpx;flex-shrink:0"></view><view class="datebar" style="flex-shrink:0" bindtap="toDatePage"><image src="/images/calender.png"></image><text class="bold">{{hanzi}}</text><text>{{dateText}}</text><text>⌄</text><text class="search">⌕</text></view><scroll-view scroll-y class="scroll" style="min-height:0">
-<view class="hero"><view class="top"><image src="{{row.imageUrl||'/images/logo.jpg'}}" mode="aspectFill"></image><view><text class="name">{{row.name}}</text><text class="desc">主要用于{{row.dishNames||'多种菜品制作'}}</text></view><view class="price"><text class="small">当前单价</text><text class="strong">¥{{row.unitPriceText}}/{{row.unit}}</text></view></view><view class="kpis"><view><text>▰ 出库金额</text><text class="strong">¥{{row.totalText}}</text><text class="small">{{row.qtyText}} {{row.unit}}</text></view><view><text>✓ 核销金额</text><text class="strong">¥{{row.verifiedText}}</text><text class="small">{{row.verifiedQtyText}} {{row.unit}}</text></view><view class="red"><text>! 未核销金额</text><text class="strong">¥{{row.unverifiedText}}</text><text class="small">{{row.unverifiedQtyText}} {{row.unit}}</text></view><view class="orange"><text>♟ 员工餐</text><text class="strong">¥{{row.mealText}}</text><text class="small">{{row.mealQtyText}} {{row.unit}}</text></view></view></view>
-<view class="panel"><view class="head"><text>▥ 出库去向分布</text><view><text class="active">按金额</text><text>按重量</text></view></view><view class="bar"><text style="width:{{row.verifiedPct}}%"></text><text style="width:{{row.unverifiedPct}}%"></text><text style="width:{{row.mealPct}}%"></text></view><view class="legend"><view><text class="dot blue"></text><text>核销 ¥{{row.verifiedText}} ({{row.verifiedPct}}%)</text></view><view><text class="dot red"></text><text>未核销 ¥{{row.unverifiedText}} ({{row.unverifiedPct}}%)</text></view><view><text class="dot orange"></text><text>员工餐 ¥{{row.mealText}} ({{row.mealPct}}%)</text></view></view></view>
-<view class="panel"><view class="head"><text>♜ 关联菜品 ({{dishes.length}})</text><text class="small">按出库分摊量排序</text></view><view class="table-head"><text>菜品名称</text><text>销量(份)</text><text>单份用量</text><text>理论消耗</text><text>出库分摊</text><text>偏差</text></view><view class="dish" wx:for="{{dishes}}" wx:key="dishId" data-index="{{index}}" bindtap="toDish"><text class="dishname">{{item.dishName}} ›</text><text>{{item.salesText}}</text><text>{{item.unitText}}</text><text>{{item.theoryText}}</text><text>{{item.actualText}}</text><text class="{{item.tone}}">{{item.diffText}}</text></view><view class="empty" wx:if="{{!dishes.length}}">暂无关联菜品数据</view></view>
-<view class="panel cost"><view class="head"><text>↗ 成本与消耗</text><view><text class="active">本期</text><text>价格趋势</text></view></view><view class="costbody"><view class="stats"><view><text class="small">本期均价</text><text class="strong">¥{{row.unitPriceText}}/{{row.unit}}</text></view><view><text class="small">上期均价</text><text class="strong">¥{{row.previousPrice||0}}/{{row.unit}}</text></view><view><text class="small">累计理论消耗</text><text class="strong">{{row.theoryText}} {{row.unit}}</text></view><view><text class="small">累计制作出库分摊</text><text class="strong">{{row.actualText}} {{row.unit}}</text><text class="{{row.diffTone}}">较理论 {{row.diffText}}</text></view></view><view class="chart"><text class="chart-title">采购单价走势（元/{{row.unit}}）</text><ec-canvas id="trend" canvas-id="goods-price-trend" ec="{{ecTrend}}" class="trend-chart"></ec-canvas></view></view></view><view class="slogan">💡　合理控制食材损耗，让每一份食材创造更大价值！</view><view class="space"></view></scroll-view></view>
+<view class="page">
+  <back-navbar title="{{row.name}}经营分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view style="height:{{navBarHeight}}rpx;flex-shrink:0"></view>
+  <view class="datebar" bindtap="toDatePage">
+    <image src="/images/calender.png"></image>
+    <text class="date-name">{{hanzi}}</text>
+    <text class="date-range">{{dateText}}</text>
+    <text class="date-arrow">›</text>
+  </view>
+
+  <scroll-view scroll-y class="scroll" enhanced show-scrollbar="{{false}}">
+    <view class="hero-card">
+      <view class="hero-top">
+        <view class="ingredient-photo">
+          <image wx:if="{{row.imageUrl}}" src="{{row.imageUrl}}" mode="aspectFill"></image>
+          <text wx:else>{{row.initial}}</text>
+        </view>
+        <view class="ingredient-main">
+          <text class="ingredient-name">{{row.name}}</text>
+          <text class="ingredient-sub">采购、库存、出库和菜品，一页看清楚</text>
+        </view>
+        <view class="current-price">
+          <text>当前单价</text>
+          <text class="price-value">¥{{row.unitPriceText}}</text>
+          <text>/{{row.unit}}</text>
+        </view>
+      </view>
+      <view class="hero-metrics">
+        <view class="hero-metric purchase-tone">
+          <text class="metric-label">本期采购</text>
+          <text class="metric-value">{{purchase.totalQuantityText || 0}} {{row.unit}}</text>
+          <text class="metric-help">共 {{purchase.batchCount || 0}} 批</text>
+        </view>
+        <view class="hero-metric outbound-tone">
+          <text class="metric-label">本期出库</text>
+          <text class="metric-value">{{row.totalQtyText || 0}} {{row.unit}}</text>
+          <text class="metric-help">成本 ¥{{row.totalText || 0}}</text>
+        </view>
+        <view class="hero-metric stock-tone">
+          <text class="metric-label">当前库存</text>
+          <text class="metric-value">{{purchase.currentStockText || '--'}} {{purchase.hasCurrentStock ? row.unit : ''}}</text>
+          <text class="metric-help">现值 ¥{{purchase.currentStockAmountText || '--'}}</text>
+        </view>
+        <view class="hero-metric average-tone">
+          <text class="metric-label">平均采购价</text>
+          <text class="metric-value">¥{{purchase.averagePriceText || 0}}</text>
+          <text class="metric-help">每 {{row.unit}}</text>
+        </view>
+      </view>
+      <view class="conclusion-strip"><text class="bulb">💡</text><text>{{row.conclusion}}</text></view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-head">
+        <view><text class="step step-green">1</text><text class="section-title">这些货从哪里买的</text></view>
+        <text class="section-note">本期共花 ¥{{purchase.totalAmountText || 0}}</text>
+      </view>
+      <view class="purchase-summary">
+        <view><text>采购批次</text><text class="big">{{purchase.batchCount || 0}} 批</text></view>
+        <view><text>采购数量</text><text class="big">{{purchase.totalQuantityText || 0}} {{row.unit}}</text></view>
+        <view><text>平均单价</text><text class="big">¥{{purchase.averagePriceText || 0}}/{{row.unit}}</text></view>
+      </view>
+      <view class="source-list" wx:if="{{purchaseSources.length}}">
+        <view class="source-row" wx:for="{{purchaseSources}}" wx:key="indexNo">
+          <view class="source-icon {{item.sourceType === 'SELF' ? 'self-icon' : ''}}">{{item.iconText}}</view>
+          <view class="source-main">
+            <view class="source-name-row"><text class="source-name">{{item.sourceName}}</text><text class="source-tag">{{item.typeText}}</text></view>
+            <text class="source-detail">{{item.batchCount}} 批 · {{item.quantityText}} {{row.unit}} · 均价 ¥{{item.priceText}}/{{row.unit}}</text>
+            <text class="source-buyer" wx:if="{{item.buyerText}}">采购人：{{item.buyerText}}</text>
+            <view class="source-progress"><view style="width:{{item.barWidth}}%"></view></view>
+          </view>
+          <view class="source-share"><text>{{item.shareText}}%</text><text>采购占比</text></view>
+        </view>
+      </view>
+      <view class="empty-box" wx:else>本期没有采购记录</view>
+    </view>
+
+    <view class="section-card inventory-card">
+      <view class="section-head">
+        <view><text class="step step-blue">2</text><text class="section-title">现在还剩多少</text></view>
+        <text class="live-tag">实时库存</text>
+      </view>
+      <view class="inventory-body">
+        <view class="inventory-number"><text class="inventory-label">当前库存</text><text class="inventory-value">{{purchase.currentStockText || '--'}} <text>{{purchase.hasCurrentStock ? row.unit : ''}}</text></text></view>
+        <view class="inventory-number"><text class="inventory-label">库存货值</text><text class="inventory-value amount">¥{{purchase.currentStockAmountText || '--'}}</text></view>
+      </view>
+      <view class="plain-note">库存是现在实时剩下的数量；采购和出库按上方所选日期统计，两者时间口径不同。</view>
+    </view>
+
+    <view class="section-card usage-card">
+      <view class="section-head">
+        <view><text class="step step-orange">3</text><text class="section-title">这些{{row.name}}用到哪里</text></view>
+        <text class="section-note">按成本金额</text>
+      </view>
+      <view class="usage-grid">
+        <view class="usage-item usage-{{item.key}}" wx:for="{{row.destinations}}" wx:key="key">
+          <view class="usage-title-row"><text class="usage-dot" style="background:{{item.color}}"></text><text class="usage-name">{{item.name}}</text></view>
+          <text class="usage-amount">¥{{item.amountText}}</text>
+          <text class="usage-qty">{{item.qtyText}} {{row.unit}} · {{item.percent}}%</text>
+          <text class="usage-hint">{{item.hint}}</text>
+        </view>
+      </view>
+      <view class="usage-bar"><view wx:for="{{row.destinations}}" wx:key="key" style="width:{{item.barWidth}}%;background:{{item.color}}"></view></view>
+      <view class="pending-help"><text>“待确认用途”</text>就是货已经出库，但还没找到对应的菜品或经营记录，需要核对。</view>
+    </view>
+
+    <view class="section-card dishes-card">
+      <view class="section-head">
+        <view><text class="step step-purple">4</text><text class="section-title">哪些菜用了{{row.name}}</text></view>
+        <text class="section-note">共 {{dishes.length}} 道</text>
+      </view>
+      <view class="dish-card" wx:for="{{dishes}}" wx:key="dishId" data-index="{{index}}" bindtap="toDish">
+        <view class="dish-top">
+          <view class="dish-photo"><image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><text wx:else>{{item.initial}}</text></view>
+          <view class="dish-main">
+            <view class="dish-name-row"><text class="dish-name">{{item.dishName}}</text><text class="dish-arrow">›</text></view>
+            <text class="dish-total">本期共做 <text>{{item.totalText}} 份</text></text>
+            <text class="dish-relation">{{item.salesRelation}}</text>
+          </view>
+        </view>
+        <view class="dish-metrics">
+          <view><text>每份应该用</text><text>{{item.unitText}} {{row.unit}}</text></view>
+          <view><text>本期应该用</text><text>{{item.theoryText}} {{row.unit}}</text></view>
+          <view><text>实际分摊</text><text>{{item.actualText}} {{row.unit}}</text></view>
+          <view><text>相差</text><text class="{{item.tone}}">{{item.diffText}} {{row.unit}}</text></view>
+        </view>
+        <view class="dish-tip {{item.tone}}-tip">{{item.issueText}}</view>
+      </view>
+      <view class="empty-box" wx:if="{{!dishes.length}}">还没有找到使用这项原料的菜品</view>
+    </view>
+
+    <view class="section-card trend-card">
+      <view class="section-head">
+        <view><text class="step step-green">5</text><text class="section-title">采购价格怎么变</text></view>
+        <text class="section-note">元 / {{row.unit}}</text>
+      </view>
+      <view class="trend-summary">
+        <view><text>本期均价</text><text>¥{{purchase.averagePriceText || row.unitPriceText}}</text></view>
+        <view><text>上期均价</text><text>¥{{row.previousPrice || 0}}</text></view>
+        <view><text>本期采购</text><text>{{purchase.batchCount || 0}} 批</text></view>
+      </view>
+      <view class="chart-wrap"><ec-canvas id="trend" canvas-id="goods-price-trend" ec="{{ecTrend}}" class="trend-chart"></ec-canvas></view>
+    </view>
+
+    <view class="bottom-slogan">看清采购、库存和用途，才能知道每一斤原料花到哪里。</view>
+    <view class="bottom-space"></view>
+  </scroll-view>
+</view>
