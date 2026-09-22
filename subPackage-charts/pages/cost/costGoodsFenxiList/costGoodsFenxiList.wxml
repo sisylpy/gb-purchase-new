@@ -1,4 +1,114 @@
-<view class="page"><back-navbar title="配料分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar><view style="height:{{navBarHeight}}rpx"></view><view class="datebar" bindtap="toDatePage"><image src="/images/calender.png"></image><text class="bold">{{hanzi}}</text><text>{{dateText}}</text><text>⌄</text><input value="{{search}}" placeholder="搜索" catchtap="noop" bindconfirm="searchInput"/></view>
-<view class="filters"><text class="{{status=='all'?'active':''}}" data-value="all" bindtap="chooseStatus">全部</text><text class="{{status=='verified'?'active':''}}" data-value="verified" bindtap="chooseStatus">已核销</text><text class="{{status=='unverified'?'active':''}}" data-value="unverified" bindtap="chooseStatus">未核销</text><text class="{{status=='employeeMeal'?'active':''}}" data-value="employeeMeal" bindtap="chooseStatus">员工餐</text></view>
-<view class="sorts"><text>↕ 排序:{{sortOrder=='desc'?'降序':'升序'}}</text><text class="{{sortBy=='outbound'?'active':''}}" data-value="outbound" bindtap="chooseSort">出库金额</text><text class="{{sortBy=='deviance'?'active':''}}" data-value="deviance" bindtap="chooseSort">出库分摊偏差率</text><text class="{{sortBy=='devianceAmount'?'active':''}}" data-value="devianceAmount" bindtap="chooseSort">偏差金额</text></view>
-<view class="body"><scroll-view scroll-y class="cats"><view class="cat {{categoryId==item.id?'active':''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseCategory"><text class="icon">{{item.icon}}</text><text>{{item.name}}</text><text class="small">({{item.count}})</text></view></scroll-view><scroll-view scroll-y class="goods"><view class="category-summary"><view><text class="title">{{categoryName}}</text><text>按商品档案分类统计</text></view><view><text>商品数</text><text class="strong">{{rows.length}}</text></view><view><text>出库金额</text><text class="strong">¥{{summary.totalOutboundAmount||0}}</text></view></view><view class="card" wx:for="{{rows}}" wx:key="disGoodsId" data-index="{{index}}" bindtap="toDetail"><image src="{{item.imageUrl}}" mode="aspectFill"></image><view class="info"><view class="line"><text class="name">{{item.name}}</text><text class="badge {{item.tone}}">{{item.statusText}}</text><text class="go">›</text></view><text class="price">¥{{item.unitPrice||0}} / {{item.gbDgGoodsStandardname||'斤'}}</text><view class="metrics"><view><text class="small">出库金额</text><text class="strong">¥{{item.amountText}}</text></view><view><text class="small">偏差率</text><text class="strong {{item.tone}}">{{item.rateText}}</text></view><view><text class="small">关联菜品</text><text class="strong">{{item.dishCount}}道</text></view></view><text class="dishes">关联菜品：{{item.dishNames||'暂无关联菜品'}}</text></view></view><view class="empty" wx:if="{{!rows.length}}">当前分类暂无原料</view></scroll-view></view></view>
+<view class="page">
+  <back-navbar title="配料分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view style="height:{{navBarHeight}}rpx"></view>
+
+  <view class="toolbar">
+    <view class="date-picker" bindtap="toDatePage">
+      <image src="/images/calender.png"></image>
+      <text class="date-name">{{hanzi}}</text>
+      <text class="date-range">{{dateText}}</text>
+      <text class="date-arrow">⌄</text>
+    </view>
+    <view class="search-box">
+      <text class="search-icon">⌕</text>
+      <input value="{{search}}" placeholder="搜索商品名称" confirm-type="search" bindconfirm="searchInput"/>
+    </view>
+  </view>
+
+  <image class="analysis-banner" src="/images/ingredient-analysis/banner.png" mode="widthFix"></image>
+
+  <view class="filter-panel">
+    <view class="filter-step-head">
+      <text class="step-number">1</text>
+      <text class="step-title">先选查看范围</text>
+      <text class="step-help">选择要分析的出库范围</text>
+    </view>
+    <view class="scope-grid">
+      <view class="scope-option {{status=='all'?'active':''}}" data-value="all" bindtap="chooseStatus">
+        <image src="/images/ingredient-analysis/scope_all.png"></image>
+        <view><text>全部</text><text>查看全部出库</text></view>
+      </view>
+      <view class="scope-option {{status=='verified'?'active':''}}" data-value="verified" bindtap="chooseStatus">
+        <image src="/images/ingredient-analysis/scope_written_off.png"></image>
+        <view><text>已核销</text><text>已审核的出库</text></view>
+      </view>
+      <view class="scope-option {{status=='unverified'?'active':''}}" data-value="unverified" bindtap="chooseStatus">
+        <image src="/images/ingredient-analysis/scope_pending_write_off.png"></image>
+        <view><text>未核销</text><text>待审核的出库</text></view>
+      </view>
+      <view class="scope-option {{status=='employeeMeal'?'active':''}}" data-value="employeeMeal" bindtap="chooseStatus">
+        <image src="/images/ingredient-analysis/scope_staff_meal.png"></image>
+        <view><text>员工餐</text><text>员工使用的出库</text></view>
+      </view>
+    </view>
+
+    <view class="filter-divider"></view>
+
+    <view class="filter-step-head">
+      <text class="step-number">2</text>
+      <text class="step-title">再选统计指标</text>
+      <text class="step-help">选择要查看的数据指标</text>
+    </view>
+    <view class="sort-grid">
+      <view class="sort-option {{sortBy=='outbound'?'active':''}}" data-value="outbound" bindtap="chooseSort">
+        <image src="/images/ingredient-analysis/outbound_amount.png"></image>
+        <view><text>出库金额</text><text>查看出库总金额</text></view>
+      </view>
+      <view class="sort-option {{sortBy=='deviance'?'active':''}}" data-value="deviance" bindtap="chooseSort">
+        <image src="/images/ingredient-analysis/allocation_deviation_rate.png"></image>
+        <view><text>分摊偏差率</text><text>查看成本偏差情况</text></view>
+      </view>
+      <view class="sort-option {{sortBy=='devianceAmount'?'active':''}}" data-value="devianceAmount" bindtap="chooseSort">
+        <image src="/images/ingredient-analysis/deviation_amount.png"></image>
+        <view><text>偏差金额</text><text>查看偏差金额</text></view>
+      </view>
+    </view>
+    <view class="current-filter">
+      <text>▥</text>
+      <text>当前：{{statusLabel}} · 按{{sortLabel}}{{sortOrder=='desc'?'从高到低':'从低到高'}}查看</text>
+    </view>
+  </view>
+
+  <view class="body">
+    <scroll-view scroll-y class="cats">
+      <view class="cat {{categoryId==item.id?'active':''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseCategory">
+        <text class="icon">{{item.icon}}</text>
+        <text class="category-name">{{item.name}}</text>
+        <text class="category-count">({{item.count}})</text>
+      </view>
+    </scroll-view>
+
+    <scroll-view scroll-y class="goods">
+      <view class="card" wx:for="{{rows}}" wx:key="disGoodsId" data-index="{{index}}" bindtap="toDetail">
+        <image class="goods-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
+        <view class="info">
+          <view class="line">
+            <text class="name">{{item.name}}</text>
+            <text class="go">›</text>
+            <text wx:if="{{item.tone!='ok'}}" class="badge {{item.tone}}">{{item.statusText}}</text>
+          </view>
+          <text class="price">¥{{item.unitPrice||0}} / {{item.gbDgGoodsStandardname||'斤'}}</text>
+          <view class="metrics">
+            <view>
+              <image src="/images/ingredient-analysis/outbound_amount.png"></image>
+              <view><text>出库金额</text><text>¥{{item.amountText}}</text></view>
+            </view>
+            <view>
+              <image src="/images/ingredient-analysis/allocation_deviation_rate.png"></image>
+              <view><text>偏差率</text><text class="{{item.tone}}">{{item.rateText}}</text></view>
+            </view>
+            <view>
+              <text class="dish-icon">菜</text>
+              <view><text>关联菜品</text><text>{{item.dishCount}}道</text></view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="empty" wx:if="{{!rows.length}}">
+        <text>当前分类暂无原料</text>
+        <text>可以切换左侧分类查看</text>
+      </view>
+      <view class="goods-bottom"></view>
+    </scroll-view>
+  </view>
+</view>

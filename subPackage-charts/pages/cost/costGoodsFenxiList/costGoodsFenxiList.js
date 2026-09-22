@@ -72,7 +72,9 @@ Page({
     hanzi: '本月',
     dateText: '',
     status: 'all',
+    statusLabel: '全部出库',
     sortBy: 'outbound',
+    sortLabel: '出库金额',
     sortOrder: 'desc',
     categoryId: '',
     categoryName: '',
@@ -217,7 +219,14 @@ Page({
   },
 
   chooseStatus: function (event) {
-    this.setData({ status: event.currentTarget.dataset.value });
+    var value = event.currentTarget.dataset.value;
+    var labels = {
+      all: '全部出库',
+      verified: '已核销',
+      unverified: '未核销',
+      employeeMeal: '员工餐'
+    };
+    this.setData({ status: value, statusLabel: labels[value] || '全部出库' });
     this.loadData();
   },
 
@@ -226,7 +235,12 @@ Page({
     if (value === this.data.sortBy) {
       this.setData({ sortOrder: this.data.sortOrder === 'desc' ? 'asc' : 'desc' });
     } else {
-      this.setData({ sortBy: value, sortOrder: 'desc' });
+      var labels = {
+        outbound: '出库金额',
+        deviance: '出库分摊偏差率',
+        devianceAmount: '偏差金额'
+      };
+      this.setData({ sortBy: value, sortOrder: 'desc', sortLabel: labels[value] || '出库金额' });
     }
     this.loadData();
   },
