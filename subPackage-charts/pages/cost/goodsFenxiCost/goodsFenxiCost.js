@@ -151,6 +151,11 @@ Page({
 
   viewRow: function (raw) {
     var row = raw || {};
+    var relatedDishes = row.supportedDishes || [];
+    var relatedDishNamesText = relatedDishes.slice(0, 4).map(function (dish) {
+      return dish.dishName || '';
+    }).filter(Boolean).join('、');
+    if (relatedDishes.length > 4) relatedDishNamesText += '等' + relatedDishes.length + '道菜';
     var unit = row.gbDgGoodsStandardname || row.unit || '斤';
     var verified = num(row.verifiedAmount);
     var pending = hasOwn(row, 'businessPendingUseAmount') ? num(row.businessPendingUseAmount) : num(row.nonVerifiedAmount);
@@ -178,9 +183,11 @@ Page({
     return Object.assign({}, row, {
       name: row.name || row.gbDgGoodsName || '原料详情',
       initial: String(row.name || row.gbDgGoodsName || '原').slice(0, 1),
+      relatedDishNamesText: relatedDishNamesText,
       unit: unit,
       imageUrl: imageUrl(row.gbDgGoodsFileImg || row.imageUrl),
       unitPriceText: money(row.unitPrice),
+      priceRecordCount: Number(row.purchaseCount || 0),
       totalText: money(row.businessDestinationTotalAmount || row.outboundTotalAmount),
       totalQtyText: money(row.businessDestinationTotalQty || row.outboundTotalQty),
       theoryText: money(row.theoryUsage),

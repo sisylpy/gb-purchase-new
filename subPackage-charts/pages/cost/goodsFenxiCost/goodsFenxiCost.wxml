@@ -17,12 +17,7 @@
         </view>
         <view class="ingredient-main">
           <text class="ingredient-name">{{row.name}}</text>
-          <text class="ingredient-sub">采购、库存、出库和菜品，一页看清楚</text>
-        </view>
-        <view class="current-price">
-          <text>当前单价</text>
-          <text class="price-value">¥{{row.unitPriceText}}</text>
-          <text>/{{row.unit}}</text>
+          <text class="ingredient-sub">关联菜品：{{row.relatedDishNamesText || '暂无关联菜品'}}</text>
         </view>
       </view>
       <view class="hero-metrics">
@@ -42,10 +37,14 @@
           <text class="metric-help">现值 ¥{{purchase.currentStockAmountText || '--'}}</text>
         </view>
         <view class="hero-metric average-tone">
-          <text class="metric-label">平均采购价</text>
+          <text class="metric-label">本期加权均价</text>
           <text class="metric-value">¥{{purchase.averagePriceText || 0}}</text>
-          <text class="metric-help">每 {{row.unit}}</text>
+          <text class="metric-help">{{dateText}}</text>
         </view>
+      </view>
+      <view class="price-explanation">
+        <text class="price-explanation-title">加权均价统计：{{dateText}}</text>
+        <text>采购总金额 ¥{{purchase.totalAmountText || 0}} ÷ 到货 {{purchase.totalQuantityText || 0}}{{row.unit}} = ¥{{purchase.averagePriceText || 0}}/{{row.unit}}，代表本期实际每{{row.unit}}采购成本。</text>
       </view>
       <view class="conclusion-strip"><text class="bulb">💡</text><text>{{row.conclusion}}</text></view>
     </view>
@@ -58,7 +57,7 @@
       <view class="purchase-summary">
         <view><text>采购批次</text><text class="big">{{purchase.batchCount || 0}} 批</text></view>
         <view><text>采购数量</text><text class="big">{{purchase.totalQuantityText || 0}} {{row.unit}}</text></view>
-        <view><text>平均单价</text><text class="big">¥{{purchase.averagePriceText || 0}}/{{row.unit}}</text></view>
+        <view><text>加权平均价</text><text class="big">¥{{purchase.averagePriceText || 0}}/{{row.unit}}</text></view>
       </view>
       <view class="source-list" wx:if="{{purchaseSources.length}}">
         <view class="source-row" wx:for="{{purchaseSources}}" wx:key="indexNo">
@@ -135,9 +134,9 @@
         <text class="section-note">元 / {{row.unit}}</text>
       </view>
       <view class="trend-summary">
-        <view><text>本期均价</text><text>¥{{purchase.averagePriceText || row.unitPriceText}}</text></view>
-        <view><text>上期均价</text><text>¥{{row.previousPrice || 0}}</text></view>
-        <view><text>本期采购</text><text>{{purchase.batchCount || 0}} 批</text></view>
+        <view><text>本期记录均价</text><text>¥{{row.unitPriceText}}</text></view>
+        <view><text>上期记录均价</text><text>¥{{row.previousPrice || 0}}</text></view>
+        <view><text>本期采购记录</text><text>{{row.priceRecordCount || 0}} 条</text></view>
       </view>
       <view class="chart-wrap"><ec-canvas id="trend" canvas-id="goods-price-trend" ec="{{ecTrend}}" class="trend-chart"></ec-canvas></view>
     </view>
