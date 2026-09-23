@@ -5,7 +5,9 @@ var util = require('../../../../utils/franchiseInspection');
 Page({
   data: {
     navBarHeight: 0,
-    restaurantName: '',
+    organizationName: '',
+    storeCount: 0,
+    storeNames: [],
     loading: false,
     upgradeCode: '',
     expiresAt: '',
@@ -13,10 +15,20 @@ Page({
   },
 
   onLoad: function () {
-    var mendian = wx.getStorageSync('mendianInfo') || {};
+    var disInfo = wx.getStorageSync('disInfo') || {};
+    var stores = Array.isArray(disInfo.mendianDepartmentList)
+      ? disInfo.mendianDepartmentList
+      : [];
+    var storeNames = stores.map(function (store) {
+      return String(store.gbDepartmentName || '').trim();
+    }).filter(function (name) {
+      return !!name;
+    });
     this.setData({
       navBarHeight: app.globalData.navBarHeight * app.globalData.rpxR,
-      restaurantName: mendian.gbDepartmentName || '当前餐馆',
+      organizationName: disInfo.gbDistributerName || '当前经营组织',
+      storeCount: stores.length,
+      storeNames: storeNames,
     });
   },
 

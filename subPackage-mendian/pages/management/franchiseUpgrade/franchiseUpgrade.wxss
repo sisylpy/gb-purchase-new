@@ -1,7 +1,16 @@
 .page { min-height: 100vh; background: #f5f6f8; color: #1f2933; }
 .content { padding: 24rpx; }
 .card { margin-bottom: 24rpx; padding: 32rpx; background: #fff; border-radius: 22rpx; box-shadow: 0 6rpx 24rpx rgba(23, 35, 45, .06); }
+.eyebrow { margin-bottom: 8rpx; color: #1b8878; font-size: 24rpx; font-weight: 600; }
 .title { font-size: 36rpx; font-weight: 700; line-height: 1.45; }
+.scope-tip { margin-top: 18rpx; padding: 20rpx 22rpx; color: #176f63; background: #edf8f5; border-left: 6rpx solid #1b8878; border-radius: 12rpx; font-size: 27rpx; line-height: 1.6; }
+.store-scope { margin-top: 24rpx; padding: 24rpx; background: #f7f9fa; border-radius: 16rpx; }
+.scope-header { display: flex; align-items: center; justify-content: space-between; }
+.scope-title { color: #34414d; font-size: 27rpx; font-weight: 600; }
+.scope-count { color: #1b8878; font-size: 26rpx; font-weight: 700; }
+.store-list { display: flex; flex-wrap: wrap; margin-top: 14rpx; }
+.store-tag { margin: 10rpx 12rpx 0 0; padding: 10rpx 18rpx; color: #43515d; background: #fff; border: 1rpx solid #dce5e3; border-radius: 999rpx; font-size: 25rpx; }
+.empty-store { margin-top: 16rpx; color: #8a949e; font-size: 25rpx; line-height: 1.6; }
 .desc, .steps { margin-top: 20rpx; color: #66717d; font-size: 28rpx; line-height: 1.75; }
 .primary { margin-top: 34rpx; background: #1b8878; color: #fff; border-radius: 14rpx; font-size: 30rpx; }
 .code-card { text-align: center; }

@@ -2,9 +2,23 @@
   <back-navbar style="height: {{navBarHeight}}rpx;" title="升级加盟" show-back="{{true}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view class="content">
     <view class="card">
-      <view class="title">将“{{restaurantName}}”升级为加盟总部</view>
-      <view class="desc">升级只增加加盟公司、品牌和总部管理关系。原采购、库存、菜品、门店和历史数据全部保留，不会新建第二套餐馆数据。</view>
-      <button class="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="createCode">生成加盟升级码</button>
+      <view class="eyebrow">当前经营组织</view>
+      <view class="title">将“{{organizationName}}”升级为加盟总部</view>
+      <view class="scope-tip">本次升级针对整个经营组织，不是当前正在查看的某一家门店。</view>
+
+      <view class="store-scope">
+        <view class="scope-header">
+          <text class="scope-title">纳入加盟总部的现有门店</text>
+          <text class="scope-count">{{storeCount}} 家</text>
+        </view>
+        <view class="store-list" wx:if="{{storeNames.length}}">
+          <text class="store-tag" wx:for="{{storeNames}}" wx:key="*this">{{item}}</text>
+        </view>
+        <view class="empty-store" wx:else>暂无可展示的门店名称，升级时将按经营组织校验。</view>
+      </view>
+
+      <view class="desc">升级后会建立加盟公司、品牌和总部管理关系。现有门店及其采购、库存、菜品和历史数据全部保留，不会重复创建经营数据。</view>
+      <button class="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="createCode">生成组织加盟升级码</button>
     </view>
 
     <view class="card code-card" wx:if="{{upgradeCode}}">
