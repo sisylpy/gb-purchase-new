@@ -75,6 +75,7 @@
       <view class="cat {{categoryId==item.id?'active':''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" aria-label="{{item.name}}" bindtap="chooseCategory">
         <image wx:if="{{item.imageUrl}}" class="category-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
         <text wx:else class="icon">{{item.icon}}</text>
+        <text class="category-count">{{item.count}}个</text>
       </view>
     </scroll-view>
 
