@@ -39,7 +39,17 @@
   <view class="main">
     <scroll-view scroll-y enhanced class="category-rail" show-scrollbar="false">
       <view class="category {{activeCategory==index?'active':''}}" wx:for="{{categories}}" wx:key="gbDistributerFatherGoodsId" data-index="{{index}}" bindtap="chooseCategory">
-        <view class="category-icon-wrap"><text class="category-icon">{{item.icon}}</text></view>
+        <view class="category-icon-wrap">
+          <image
+            wx:if="{{item.categoryImagePath&&!item.categoryImageError}}"
+            class="category-image"
+            src="{{imgUrl.resolve(url,item.categoryImagePath)}}"
+            mode="aspectFill"
+            data-index="{{index}}"
+            binderror="onCategoryImageError"
+          ></image>
+          <text wx:else class="category-icon">{{item.icon}}</text>
+        </view>
         <text class="category-name">{{item.gbDfgFatherGoodsName}}</text>
         <text class="category-count">{{item.goodsCount}}种</text>
       </view>

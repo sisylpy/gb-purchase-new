@@ -107,6 +107,8 @@ Page({
       var categories = (data.arr || []).map(function (item) {
         return Object.assign({}, item, {
           icon: categoryIcon(item.gbDfgFatherGoodsName),
+          categoryImagePath: item.gbDfgFatherGoodsImg || item.gbDfgFatherGoodsImgLarge || '',
+          categoryImageError: false,
           amountText: money(item.fatherStockTotalString),
           goodsCount: number(item.fatherStockManyString),
           attentionCount: number(item.fatherWasteRateString)
@@ -246,6 +248,14 @@ Page({
     this.setData({ activeCategory: index });
     wx.showLoading({ title: '加载分类', mask: true });
     this.loadGoods();
+  },
+
+  onCategoryImageError: function (e) {
+    var index = Number(e.currentTarget.dataset.index);
+    if (isNaN(index) || !this.data.categories[index]) return;
+    var patch = {};
+    patch['categories[' + index + '].categoryImageError'] = true;
+    this.setData(patch);
   },
 
   chooseFilter: function (e) { this.setData({ activeFilter: e.currentTarget.dataset.value }); this.applyGoods(); },
