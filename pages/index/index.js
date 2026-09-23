@@ -440,8 +440,37 @@ Page({
             if (result.code === 0 && data.identityState === 'SUPPLIER_ACTIVE') {
               this._redirectToSupplierHome();
             } else if (result.code === 0 && data.identityState === 'RESTAURANT_ACTIVE' && data.depUserInfo) {
-                wx.setStorageSync('disInfo', res.result.data.disInfo);
-                wx.setStorageSync('userInfo', res.result.data.depUserInfo);
+                var disInfo = res.result.data.disInfo || {};
+                var userInfo = res.result.data.depUserInfo;
+                var loginDepInfo = res.result.data.depInfo;
+                var admin = Number(userInfo.gbDuAdmin);
+                var activeMendianInfo = loginDepInfo;
+
+                wx.setStorageSync('disInfo', disInfo);
+                wx.setStorageSync('userInfo', userInfo);
+
+                if (admin === 0) {
+                  var selectedStore = wx.getStorageSync('purDepInfo');
+                  var storeList = disInfo.mendianDepartmentList || [];
+                  var matchedStore = null;
+                  for (var i = 0; i < storeList.length; i++) {
+                    if (selectedStore
+                      && String(storeList[i].gbDepartmentId) === String(selectedStore.gbDepartmentId)) {
+                      matchedStore = storeList[i];
+                      break;
+                    }
+                  }
+                  activeMendianInfo = matchedStore || storeList[0] || loginDepInfo;
+                  if (activeMendianInfo && activeMendianInfo.gbDepartmentId) {
+                    purchaseContext.setGroupSelectedStoreDepartment(activeMendianInfo);
+                  }
+                } else if (admin === 11) {
+                  // 门店店长只能使用登录接口返回的所属门店，不能沿用总部人员的代选门店缓存。
+                  wx.removeStorageSync('purDepInfo');
+                  wx.setStorageSync('mendianInfo', loginDepInfo);
+                } else {
+                  wx.setStorageSync('mendianInfo', loginDepInfo);
+                }
 
                 if (res.result.data.token) {
                   wx.setStorageSync('token', 'Bearer ' + res.result.data.token);
@@ -452,24 +481,19 @@ Page({
                   });
                 }
 
-                wx.setStorageSync('mendianInfo', res.result.data.depInfo);
-                var admin = res.result.data.depUserInfo.gbDuAdmin;
                 this.setData({ authChecking: false });
                
-                if ( admin == 0 || admin == 11 ) {
+                if (admin === 0 || admin === 11) {
                   this.setData({
-                    disInfo: res.result.data.disInfo,
-                    userInfo: res.result.data.depUserInfo,
-                    depId: res.result.data.depInfo.gbDepartmentId,
-                    mendianInfo: res.result.data.depInfo,
+                    disInfo: disInfo,
+                    userInfo: userInfo,
+                    depId: activeMendianInfo.gbDepartmentId,
+                    mendianInfo: activeMendianInfo,
                   }, function () {
                     this._getInitData();
                     this._loadHomeClaimableCoupons();
                   }.bind(this));
                 } else {
-                  wx.setStorageSync('disInfo', res.result.data.disInfo);
-                  wx.setStorageSync('userInfo', res.result.data.depUserInfo);
-                  wx.setStorageSync('mendianInfo', res.result.data.depInfo);
                   wx.setStorageSync('orderDepInfo', res.result.data.orderDepInfo);
                   wx.redirectTo({
                     url: '/subPackage-mendian/pages/order/chefOrderDep/chefOrderDep',

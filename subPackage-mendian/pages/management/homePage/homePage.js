@@ -1,5 +1,6 @@
 var globalData = getApp().globalData;
 var apiUrl = require('../../../../config/index');
+var purchaseContext = require('../../../../lib/purchaseContext');
 
 Page({
   data: {
@@ -25,6 +26,13 @@ Page({
   },
 
   _loadMendianInfo: function () {
+    var userInfo = wx.getStorageSync('userInfo') || {};
+    var isGroupManager = purchaseContext.isGroupManagerUser(userInfo);
+    this.setData({
+      userInfo: userInfo,
+      isGroupManager: isGroupManager,
+      isStoreManager: Number(userInfo.gbDuAdmin) === 11,
+    });
     var value = wx.getStorageSync('mendianInfo');
     if (value) {
       this.setData({
@@ -60,7 +68,12 @@ Page({
       { icon: H + 'icon_franchise_upgrade.png', iconBg: '#F2EAFE', name: '升级加盟', sub: '保留本店数据升级', bind: 'toFranchiseUpgrade' },
         { icon: H + 'icon_reports.png', iconBg: '#FFF8E1', name: '报表', sub: '经营报表', bind: 'toReportStock' },
     ];
-    if (mendianList.length > 1) {
+    if (!d.isGroupManager) {
+      baseItems = baseItems.filter(function(item) {
+        return item.bind !== 'toGroup' && item.bind !== 'toFranchiseUpgrade';
+      });
+    }
+    if (d.isGroupManager && mendianList.length > 1) {
       baseItems.unshift({ icon: H + 'icon_store_management.png', iconBg: '#E8F4FD', name: '选择分店', sub: '切换分店', bind: 'showMendianPicker' });
     }
 
@@ -105,19 +118,30 @@ Page({
     }
   },
 
+  _requireGroupManager() {
+    if (this.data.isGroupManager) return true;
+    wx.showToast({ title: '店长只能管理本店', icon: 'none' });
+    return false;
+  },
+
   showMendianPicker() {
+    if (!this._requireGroupManager()) return;
     this.setData({ showMendianPicker: true });
   },
   hideMendianPicker() {
     this.setData({ showMendianPicker: false });
   },
   selectMendian(e) {
+    if (!this._requireGroupManager()) {
+      this.hideMendianPicker();
+      return;
+    }
     var item = e.currentTarget.dataset.item;
     if (item.gbDepartmentId === this.data.mendianInfo.gbDepartmentId) {
       this.hideMendianPicker();
       return;
     }
-    wx.setStorageSync('mendianInfo', item);
+    purchaseContext.setGroupSelectedStoreDepartment(item);
     var disInfo = wx.getStorageSync('disInfo');
     if (disInfo && disInfo.mendianDepartmentList) {
       for (var i = 0; i < disInfo.mendianDepartmentList.length; i++) {
@@ -137,6 +161,7 @@ Page({
   },
 
   toGroup() {
+    if (!this._requireGroupManager()) return;
     wx.navigateTo({ url: '/subPackage-group/pages/account/disEdit/disEdit' });
   },
   toStock() {
@@ -188,6 +213,7 @@ Page({
     wx.navigateTo({ url: '/subPackage-charts/pages/sales/dailyTurnover/dailyTurnover' });
   },
   toFranchiseUpgrade() {
+    if (!this._requireGroupManager()) return;
     wx.navigateTo({ url: '/subPackage-mendian/pages/management/franchiseUpgrade/franchiseUpgrade' });
   },
   toOrder() {
