@@ -207,7 +207,7 @@ Page({
       { key: 'discount', name: '折扣餐', hint: '含会员优惠和赠送', amountText: money(discount), qtyText: money(row.businessDiscountMealQty), color: '#4388f7' },
       { key: 'employee', name: '员工餐', hint: '菜品和原料员工餐', amountText: money(employee), qtyText: money(hasOwn(row, 'businessEmployeeMealQty') ? row.businessEmployeeMealQty : row.employeeMealQty), color: '#f39b25' },
       { key: 'pending', name: '待确认用途', hint: '出库了，还没对应到菜品', amountText: money(pending), qtyText: money(hasOwn(row, 'businessPendingUseQty') ? row.businessPendingUseQty : row.nonVerifiedQty), color: '#ef5b64' },
-      { key: 'loss', name: '损耗', hint: '清洗、切配等已登记损耗', amountText: money(loss), qtyText: money(row.lossQty), color: '#8f79d9' },
+      { key: 'loss', name: '损耗', hint: '破损、人为损坏等意外减少', amountText: money(loss), qtyText: money(row.lossQty), color: '#8f79d9' },
       { key: 'waste', name: '废弃', hint: '保鲜商品超过保鲜时间后登记', amountText: money(waste), qtyText: money(row.wasteQty), color: '#d86677' }
     ].map(function (item) {
       var amount = num(item.amountText);
