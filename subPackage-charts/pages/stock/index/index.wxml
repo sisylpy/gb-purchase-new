@@ -5,7 +5,16 @@
   <view style="height:{{navBarHeight}}rpx;flex-shrink:0"></view>
 
   <view class="overview-panel">
-    <scroll-view scroll-x enhanced class="day-tabs" show-scrollbar="false" scroll-into-view="day-{{activeDay}}">
+    <scroll-view
+      scroll-x
+      enhanced
+      class="day-tabs"
+      show-scrollbar="false"
+      scroll-left="{{dayScrollLeft}}"
+      scroll-with-animation="{{true}}"
+      bindscroll="onDayTabsScroll"
+      bindscrollend="onDayTabsScrollEnd"
+    >
       <view class="day-tabs-inner">
         <view id="day-{{index}}" class="day-tab {{activeDay==index?'active has-art':''}}" wx:for="{{dayTabs}}" wx:key="whichDay" data-index="{{index}}" bindtap="chooseDay">
           <view class="day-copy">

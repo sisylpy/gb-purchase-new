@@ -51,6 +51,7 @@ Page({
   data: {
     navBarHeight: 0,
     activeDay: 0,
+    dayScrollLeft: 0,
     whichDay: 99,
     activeCategory: 0,
     activeFilter: 'all',
@@ -193,8 +194,50 @@ Page({
     var index = Number(e.currentTarget.dataset.index);
     var tab = this.data.dayTabs[index];
     if (!tab || index === this.data.activeDay) return;
-    this.setData({ activeDay: index, whichDay: tab.whichDay, activeCategory: 0 });
-    this.loadSummary();
+    var that = this;
+    this.setData({ activeDay: index, whichDay: tab.whichDay, activeCategory: 0 }, function () {
+      that._centerSelectedDayNearRightEdge(index);
+      that.loadSummary();
+    });
+  },
+
+  onDayTabsScroll: function (e) {
+    var scrollLeft = Number(e.detail && e.detail.scrollLeft);
+    if (!isNaN(scrollLeft)) this._dayTabsScrollLeft = scrollLeft;
+  },
+
+  onDayTabsScrollEnd: function (e) {
+    var scrollLeft = Number(e.detail && e.detail.scrollLeft);
+    if (isNaN(scrollLeft)) return;
+    this._dayTabsScrollLeft = scrollLeft;
+    if (Math.abs(number(this.data.dayScrollLeft) - scrollLeft) > 1) {
+      this.setData({ dayScrollLeft: scrollLeft });
+    }
+  },
+
+  _centerSelectedDayNearRightEdge: function (index) {
+    var that = this;
+    var query = wx.createSelectorQuery().in(this);
+    query.select('.day-tabs').boundingClientRect();
+    query.select('#day-' + index).boundingClientRect();
+    query.exec(function (rects) {
+      var viewport = rects && rects[0];
+      var selected = rects && rects[1];
+      if (!viewport || !selected) return;
+
+      // 卡片仍在舒适可视范围内时保持当前位置，避免每次点击都跳到最左侧。
+      var rightGuard = Math.min(28, viewport.width * 0.08);
+      if (selected.right < viewport.right - rightGuard) return;
+
+      var current = typeof that._dayTabsScrollLeft === 'number'
+        ? that._dayTabsScrollLeft : number(that.data.dayScrollLeft);
+      var selectedOffset = selected.left - viewport.left;
+      var target = current + selectedOffset - (viewport.width - selected.width) / 2;
+      target = Math.max(0, Math.round(target));
+      if (Math.abs(target - current) < 4) return;
+      that._dayTabsScrollLeft = target;
+      that.setData({ dayScrollLeft: target });
+    });
   },
 
   chooseCategory: function (e) {
