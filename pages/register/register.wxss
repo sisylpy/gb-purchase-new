@@ -6,6 +6,41 @@
   flex-direction: column;
 }
 
+/* 桌面端复制的加盟邀请码入口 */
+.invitation-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24rpx 30rpx 4rpx;
+  padding: 24rpx;
+  border: 1rpx solid #b9d8cb;
+  border-radius: 16rpx;
+  background: #f1f8f5;
+}
+.invitation-entry-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-right: 18rpx;
+}
+.invitation-entry-title {
+  color: #245b49;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.invitation-entry-description {
+  margin-top: 8rpx;
+  color: #6c7b75;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+.invitation-entry-action {
+  color: #167056;
+  font-size: 25rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* 表单容器 */
 .form-container {
   padding: 0 30rpx;

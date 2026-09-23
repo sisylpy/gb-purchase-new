@@ -159,28 +159,75 @@ function refreshIdentity() {
   return refreshToken().then(function () { return get('me'); });
 }
 
+var FRANCHISEE_OWNER_ROLE = 'FRANCHISEE_OWNER';
+var STORE_MANAGER_ROLE = 'STORE_MANAGER';
+
+function invitationLookup(lookup) {
+  return encodeURIComponent(String(lookup || '').trim());
+}
+
+function invitationSummaryWithRole(summary, fallbackRole) {
+  var normalized = Object.assign({}, summary || {});
+  normalized.targetRole = String(normalized.targetRole || fallbackRole || '').trim().toUpperCase();
+  normalized.invitationStatus = normalized.invitationStatus || normalized.status || '';
+  return normalized;
+}
+
+function shouldTryFranchiseeOwnerSummary(error) {
+  return error && (error.errorCode === 'INVITATION_NOT_FOUND' || Number(error.status) === 404);
+}
+
 function getStoreOwnerInvitationSummary(lookup) {
-  return get('store-owner-invitations/' + encodeURIComponent(String(lookup || '').trim()) + '/summary');
+  return get('store-owner-invitations/' + invitationLookup(lookup) + '/summary').then(function (summary) {
+    // 兼容尚未返回 targetRole 的历史店长邀请摘要。
+    return invitationSummaryWithRole(summary, STORE_MANAGER_ROLE);
+  });
+}
+
+function getFranchiseeOwnerInvitationSummary(lookup) {
+  return get('franchisee-owner-invitations/' + invitationLookup(lookup) + '/summary').then(function (summary) {
+    return invitationSummaryWithRole(summary, FRANCHISEE_OWNER_ROLE);
+  });
+}
+
+function getRoleInvitationSummary(lookup) {
+  // 旧链接没有角色参数，先按原店长接口查询；只有明确“未找到”时才尝试经营主体负责人接口。
+  return getStoreOwnerInvitationSummary(lookup).catch(function (error) {
+    if (!shouldTryFranchiseeOwnerSummary(error)) return Promise.reject(error);
+    return getFranchiseeOwnerInvitationSummary(lookup);
+  });
+}
+
+function saveInvitationAcceptance(accepted) {
+  if (accepted && accepted.token) {
+    wx.setStorageSync('token', 'Bearer ' + accepted.token);
+    wx.setStorageSync('franchiseTokenExpiresAt', accepted.tokenExpiresAt || '');
+    if (accepted.currentUser) wx.setStorageSync('franchiseCurrentUser', accepted.currentUser);
+  }
+  // 接受邀请已经建立正式餐饮用户；再次按原登录主链取得完整门店、部门和经营资料。
+  return refreshToken().then(function (loginData) {
+    return { invitation: accepted, login: loginData };
+  });
 }
 
 function acceptStoreOwnerInvitation(lookup, profile) {
   var input = profile || {};
   return wxLoginCode().then(function (code) {
-    return post('store-owner-invitations/' + encodeURIComponent(String(lookup || '').trim()) + ':accept', {
+    return post('store-owner-invitations/' + invitationLookup(lookup) + ':accept', {
       code: code,
       userName: String(input.userName || '').trim(),
     });
-  }).then(function (accepted) {
-    if (accepted && accepted.token) {
-      wx.setStorageSync('token', 'Bearer ' + accepted.token);
-      wx.setStorageSync('franchiseTokenExpiresAt', accepted.tokenExpiresAt || '');
-      if (accepted.currentUser) wx.setStorageSync('franchiseCurrentUser', accepted.currentUser);
-    }
-    // 接受邀请已经建立正式门店用户；再次按原登录主链取得完整门店、部门和经营资料。
-    return refreshToken().then(function (loginData) {
-      return { invitation: accepted, login: loginData };
+  }).then(saveInvitationAcceptance);
+}
+
+function acceptFranchiseeOwnerInvitation(lookup, profile) {
+  var input = profile || {};
+  return wxLoginCode().then(function (code) {
+    return post('franchisee-owner-invitations/' + invitationLookup(lookup) + ':accept', {
+      code: code,
+      userName: String(input.userName || '').trim(),
     });
-  });
+  }).then(saveInvitationAcceptance);
 }
 
 function normalizeRelatedMedia(rows) {
@@ -302,8 +349,14 @@ module.exports = {
   ensureToken: ensureToken,
   bootstrapIdentity: bootstrapIdentity,
   refreshIdentity: refreshIdentity,
+  getRoleInvitationSummary: getRoleInvitationSummary,
   getStoreOwnerInvitationSummary: getStoreOwnerInvitationSummary,
+  getFranchiseeOwnerInvitationSummary: getFranchiseeOwnerInvitationSummary,
   acceptStoreOwnerInvitation: acceptStoreOwnerInvitation,
+  acceptFranchiseeOwnerInvitation: acceptFranchiseeOwnerInvitation,
+  approveWebLogin: function (userCode) {
+    return post('auth/web-login-sessions/' + encodeURIComponent(String(userCode || '').trim()) + ':approve', {});
+  },
   getMe: function () { return get('me'); },
   createRestaurantUpgradeTicket: function (body) {
     return post('onboarding/restaurant-upgrade-ticket', body);

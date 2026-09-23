@@ -1,7 +1,7 @@
 <view class="inspection-page">
-  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{isFranchiseeOwner ? '加盟商经营' : '总部任务'}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="{{isFranchiseeOwner ? '加盟经营工作台' : '门店整改任务'}}" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
 
-  <view class="loading" wx:if="{{loading}}">正在加载总部任务…</view>
+  <view class="loading" wx:if="{{loading}}">正在加载工作台…</view>
   <view class="error" wx:elif="{{error}}">
     <view class="empty-title">暂时无法进入</view>
     <text>{{error}}</text>
@@ -10,8 +10,10 @@
 
   <scroll-view wx:else scroll-y class="home-scroll">
     <view class="identity-bar">
-      <view><text class="identity-name">{{identity.displayName}}</text><text class="identity-role">{{isFranchiseeOwner ? '加盟商负责人' : '门店整改负责人'}}</text></view>
+      <view><text class="identity-name">{{identity.displayName}}</text><text class="identity-role">{{isFranchiseeOwner ? '经营主体负责人' : '门店整改负责人'}}</text></view>
     </view>
+
+    <button class="computer-login-button" wx:if="{{isFranchiseeOwner}}" bindtap="openComputerLogin">电脑端登录 · 加盟经营工作台</button>
 
     <view class="owner-scope" wx:if="{{isFranchiseeOwner}}">
       <view class="section-title">我的门店</view>

@@ -1,0 +1,12 @@
+<view class="computer-login-page">
+  <back-navbar style="height: {{navBarHeight}}rpx;" title="电脑端登录" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <view class="computer-login-card">
+    <view class="scan-icon">⌗</view>
+    <view class="page-title">扫描电脑上的登录二维码</view>
+    <view class="page-description">请确认电脑页面显示“精彩账本·加盟经营工作台”。二维码五分钟内有效且只能使用一次。</view>
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+    <view class="success" wx:if="{{approved}}">已确认登录，可以返回电脑继续使用。</view>
+    <button class="approve-button" disabled="{{submitting || approved}}" bindtap="scanLoginQrCode">{{submitting ? '正在确认…' : (approved ? '已确认' : '扫描二维码登录')}}</button>
+    <view class="security-tip">如果你没有在电脑端发起登录，请不要扫描或确认任何登录二维码。</view>
+  </view>
+</view>

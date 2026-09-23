@@ -158,6 +158,31 @@ Page({
   preventClose: function () {},
 
   /**
+   * 桌面端生成的是可转发的 8 位邀请码；在这里进入统一邀请接收页，
+   * 再由服务端摘要决定注册为经营主体负责人还是门店店长。
+   */
+  openFranchiseInvitation: function () {
+    wx.showModal({
+      title: '输入加盟邀请码',
+      content: '',
+      editable: true,
+      placeholderText: '请输入 8 位邀请码',
+      confirmText: '继续',
+      success: function (result) {
+        if (!result.confirm) return;
+        var inviteCode = String(result.content || '').trim().toUpperCase();
+        if (!/^[23456789A-HJ-NP-Z]{8}$/.test(inviteCode)) {
+          wx.showToast({ title: '请输入正确的 8 位邀请码', icon: 'none' });
+          return;
+        }
+        wx.navigateTo({
+          url: '/pages/storeOwnerInvite/storeOwnerInvite?inviteCode=' + encodeURIComponent(inviteCode),
+        });
+      },
+    });
+  },
+
+  /**
    * 取消注册。
    *
    * 未注册用户由首页通过 redirectTo 进入本页时，页面栈只剩本页，

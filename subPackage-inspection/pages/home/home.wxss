@@ -3,6 +3,8 @@
 .identity-bar { align-items: center; background: #fff; display: flex; justify-content: space-between; padding: 20rpx 24rpx; }
 .identity-name { font-size: 29rpx; font-weight: 600; margin-right: 14rpx; }
 .identity-role { color: #66817a; font-size: 22rpx; }
+.computer-login-button { margin: 20rpx 22rpx 8rpx; border: 1rpx solid #b9d8cb; border-radius: 16rpx; color: #245b49; background: #f1f8f5; font-size: 28rpx; font-weight: 600; }
+.computer-login-button::after { border: 0; }
 .stats-grid { display: grid; gap: 10rpx; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 18rpx 22rpx; }
 .stat-card { background: #fff; border-radius: 16rpx; display: flex; flex-direction: column; min-height: 112rpx; padding: 17rpx 13rpx; }
 .stat-card.primary { background: #187e6e; color: #fff; }

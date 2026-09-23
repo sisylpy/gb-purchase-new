@@ -79,7 +79,7 @@ Page({
       });
     }).catch(function (error) {
       that.ready = false;
-      that.setData({ loading: false, error: error.message || '总部任务加载失败' });
+      that.setData({ loading: false, error: error.message || '工作台加载失败' });
       util.showError(error);
     });
   },
@@ -195,6 +195,11 @@ Page({
   openTask: function (event) {
     var item = this.data.items[Number(event.currentTarget.dataset.index)];
     if (item) wx.navigateTo({ url: '/subPackage-inspection/pages/taskDetail/taskDetail?taskId=' + item.rectificationTaskId });
+  },
+
+  openComputerLogin: function () {
+    if (!this.data.isFranchiseeOwner) return;
+    wx.navigateTo({ url: '/subPackage-inspection/pages/computerLogin/computerLogin' });
   },
 
   retry: function () { this.loadAll(); },

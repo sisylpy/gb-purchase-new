@@ -18,6 +18,7 @@
       "name": "inspection",
       "pages": [
         "pages/home/home",
+        "pages/computerLogin/computerLogin",
         "pages/taskDetail/taskDetail"
       ]
     },

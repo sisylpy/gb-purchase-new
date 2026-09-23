@@ -1,0 +1,10 @@
+.computer-login-page { min-height: 100vh; background: #f4f7f5; box-sizing: border-box; }
+.computer-login-card { margin: 40rpx 28rpx; padding: 42rpx 34rpx; border-radius: 22rpx; background: #fff; box-shadow: 0 12rpx 36rpx rgba(24, 67, 52, .08); }
+.scan-icon { display: flex; width: 112rpx; height: 112rpx; margin: 8rpx auto 26rpx; align-items: center; justify-content: center; border-radius: 28rpx; color: #fff; background: #245b49; font-size: 70rpx; font-weight: 500; }
+.page-title { color: #173f32; font-size: 38rpx; font-weight: 700; text-align: center; }
+.page-description { margin-top: 18rpx; color: #6c7b75; font-size: 27rpx; line-height: 1.7; text-align: center; }
+.approve-button { margin-top: 30rpx; color: #fff; background: #245b49; font-size: 30rpx; font-weight: 700; }
+.approve-button[disabled] { color: #9ca8a3; background: #e5ebe8; }
+.error { margin-top: 20rpx; color: #b94840; font-size: 26rpx; }
+.success { margin-top: 20rpx; padding: 18rpx; border-radius: 12rpx; color: #167056; background: #e8f6ef; font-size: 27rpx; }
+.security-tip { margin-top: 34rpx; color: #8a9691; font-size: 24rpx; line-height: 1.6; }
