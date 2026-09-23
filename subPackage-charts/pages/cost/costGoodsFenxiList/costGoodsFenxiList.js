@@ -277,6 +277,7 @@ Page({
     wx.navigateTo({
       url: '../goodsFenxiCost/goodsFenxiCost?disGoodsId=' + row.disGoodsId
         + '&searchDepId=' + this.data.searchDepId
+        + '&depFatherId=' + this.data.depFatherId
     });
   },
 

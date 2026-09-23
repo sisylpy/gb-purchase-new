@@ -134,8 +134,12 @@ Page({
     var cachedId = Number(cached.disGoodsId || cached.gbDistributerGoodsId || 0);
     var source = target && cachedId !== target ? legacy : (cachedId ? cached : legacy);
     var dis = wx.getStorageSync('disInfo') || {};
+    var dep = wx.getStorageSync('depInfo') || {};
     var searchDepId = options.searchDepId || '-1';
-    var depFatherId = options.depFatherId || (searchDepId !== '-1' ? searchDepId : '');
+    var depFatherId = options.depFatherId
+      || (searchDepId !== '-1' ? searchDepId : '')
+      || dep.gbDepartmentId
+      || '';
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       disId: options.disId || dis.gbDistributerId,
@@ -415,12 +419,15 @@ Page({
     });
   },
 
-  toDish: function (event) {
+  toDishAnalysis: function (event) {
     var dish = this.data.dishes[event.currentTarget.dataset.index];
     if (!dish || !dish.dishId) return;
     wx.setStorageSync('foodGoodsFenxiDetailContext', { name: dish.dishName, image: dish.image });
     wx.navigateTo({
-      url: '../foodGoodsFenxiDetail/foodGoodsFenxiDetail?foodId=' + dish.dishId + '&disId=' + this.data.disId + '&depFatherId=' + this.data.depFatherId
+      url: '/subPackage-charts/pages/cost/foodGoodsFenxiDetail/foodGoodsFenxiDetail'
+        + '?foodId=' + dish.dishId
+        + '&disId=' + this.data.disId
+        + '&depFatherId=' + this.data.depFatherId
     });
   },
 

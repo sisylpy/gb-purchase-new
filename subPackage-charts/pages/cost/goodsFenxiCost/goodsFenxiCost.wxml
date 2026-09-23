@@ -118,7 +118,7 @@
         <view><text class="step step-purple">4</text><text class="section-title">哪些菜用了{{row.name}}</text></view>
         <text class="section-note">共 {{dishes.length}} 道</text>
       </view>
-      <view class="dish-card" wx:for="{{dishes}}" wx:key="dishId" data-index="{{index}}" bindtap="toDish">
+      <view class="dish-card" wx:for="{{dishes}}" wx:key="dishId">
         <view class="dish-top">
           <view class="dish-photo"><image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image><text wx:else>{{item.initial}}</text></view>
           <view class="dish-main">
@@ -185,7 +185,7 @@
           <text class="gross-profit-help">毛利只扣了配料成本，还没有扣人工、房租、水电等费用。</text>
         </view>
 
-        <view class="dish-detail-link">查看整道菜分析 <text>›</text></view>
+        <view class="dish-detail-link" data-index="{{index}}" catchtap="toDishAnalysis">查看整道菜分析 <text>›</text></view>
       </view>
       <view class="empty-box" wx:if="{{!dishes.length}}">还没有找到使用这项原料的菜品</view>
     </view>
