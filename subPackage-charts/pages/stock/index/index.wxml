@@ -7,13 +7,13 @@
   <view class="overview-panel">
     <scroll-view scroll-x enhanced class="day-tabs" show-scrollbar="false" scroll-into-view="day-{{activeDay}}">
       <view class="day-tabs-inner">
-        <view id="day-{{index}}" class="day-tab {{activeDay==index?'active':''}} {{item.whichDay==0?'has-art':''}}" wx:for="{{dayTabs}}" wx:key="whichDay" data-index="{{index}}" bindtap="chooseDay">
+        <view id="day-{{index}}" class="day-tab {{activeDay==index?'active has-art':''}}" wx:for="{{dayTabs}}" wx:key="whichDay" data-index="{{index}}" bindtap="chooseDay">
           <view class="day-copy">
             <text class="day-name">{{item.label}}</text>
             <text class="day-date">{{item.dateText}}</text>
             <view class="day-bottom"><text class="day-total">{{item.totalText}}</text><text class="day-currency">元</text></view>
           </view>
-          <image wx:if="{{item.whichDay==0}}" class="stock-period-art" src="/images/stock_peroid_icon.png" mode="aspectFit"></image>
+          <image wx:if="{{activeDay==index}}" class="stock-period-art" src="/images/stock_peroid_icon.png" mode="aspectFit"></image>
           <view class="day-indicator"></view>
         </view>
       </view>
