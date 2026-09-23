@@ -16,7 +16,7 @@
     </view>
 
   <!-- ========== 管理用户区域 ========== -->
-  <view class="section-card" wx:if="{{depUsers.length > 0}}">
+  <view class="section-card">
     <view class="card-header">
       <view class="header-left">
         <!-- <image src="/images/user-group.png" class="header-icon" mode="aspectFit" /> -->
@@ -29,7 +29,7 @@
     </view>
 
     <!-- 用户列表 -->
-    <view class="user-list">
+    <view class="user-list" wx:if="{{depUsers && depUsers.length > 0}}">
       <view class="user-item" wx:for="{{depUsers}}" wx:for-item="user" wx:key="gbDepartmentUserId"
             bindtap="openUserMenu" data-item="{{user}}">
         <image src="{{url + user.gbDuWxAvartraUrl}}" mode="aspectFill" class="user-avatar" lazy-load />
@@ -38,6 +38,9 @@
         </view>
         <image src="/images/points.png" class="icon" mode="aspectFit" />
       </view>
+    </view>
+    <view class="empty-tip" wx:else>
+      暂无管理员，请点击“邀请管理员”完成店长注册
     </view>
   </view>
 
