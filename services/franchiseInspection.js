@@ -108,18 +108,30 @@ function post(path, body, options) { return call(path, body || {}, 'POST', optio
 function put(path, body) { return call(path, body || {}, 'PUT'); }
 function remove(path, body) { return call(path, body || {}, 'DELETE'); }
 
+function clearLegacyStoreContext() {
+  ['disInfo', 'userInfo', 'mendianInfo', 'orderDepInfo', 'purDepInfo', 'franchiseCurrentUser']
+    .forEach(function (key) { wx.removeStorageSync(key); });
+}
+
 function saveLoginResult(result) {
   var body = result && result.result ? result.result : {};
   if (numericCode(body.code) !== 0 || !body.data || !body.data.token) {
     return Promise.reject(normalizeError({
       statusCode: 403,
-      data: body.code ? body : { code: 403, errorCode: 'AUTH_REQUIRED', msg: '请重新登录后查看总部任务' },
+      data: body.code ? body : { code: 403, errorCode: 'AUTH_REQUIRED', msg: '请重新登录后继续使用' },
     }));
   }
   var data = body.data;
   mediaDownloadCache = {};
   wx.setStorageSync('token', 'Bearer ' + data.token);
   wx.setStorageSync('franchiseTokenExpiresAt', data.tokenExpiresAt || '');
+  if (data.identityState === 'FRANCHISEE_OWNER_ACTIVE') {
+    // 经营主体负责人使用正式 franchise scope，绝不能恢复整个 distributor 的 legacy 门店缓存。
+    clearLegacyStoreContext();
+    if (data.depUserInfo) wx.setStorageSync('userInfo', data.depUserInfo);
+    if (data.currentUser) wx.setStorageSync('franchiseCurrentUser', data.currentUser);
+    return data;
+  }
   if (data.disInfo) wx.setStorageSync('disInfo', data.disInfo);
   if (data.depUserInfo) wx.setStorageSync('userInfo', data.depUserInfo);
   if (data.depInfo) wx.setStorageSync('mendianInfo', data.depInfo);

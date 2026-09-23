@@ -407,10 +407,39 @@ Page({
   // ============================================
 
 
-  /** 清除餐馆端登录缓存，避免切换为供货商身份后继续使用旧餐馆数据 */
-  _clearRestaurantSession: function () {
-    ['token', 'franchiseTokenExpiresAt', 'disInfo', 'userInfo', 'mendianInfo', 'orderDepInfo']
+  /** 清除旧门店经营上下文，避免新身份沿用之前缓存的门店范围。 */
+  _clearStoreContext: function () {
+    ['disInfo', 'userInfo', 'mendianInfo', 'orderDepInfo', 'purDepInfo', 'franchiseCurrentUser']
       .forEach(function (key) { wx.removeStorageSync(key); });
+  },
+
+  /** 清除餐馆端登录缓存，避免切换为供货商身份后继续使用旧餐馆数据。 */
+  _clearRestaurantSession: function () {
+    this._clearStoreContext();
+    ['token', 'franchiseTokenExpiresAt']
+      .forEach(function (key) { wx.removeStorageSync(key); });
+  },
+
+  /** 经营主体负责人只进入正式加盟经营工作台，不恢复 legacy distributor 门店上下文。 */
+  _redirectToFranchiseeOwnerHome: function (data) {
+    this._clearStoreContext();
+    if (!data || !data.token) {
+      this.setData({ authChecking: false });
+      wx.showToast({ title: '负责人登录凭证无效，请重试', icon: 'none' });
+      return;
+    }
+    wx.setStorageSync('token', 'Bearer ' + data.token);
+    wx.setStorageSync('franchiseTokenExpiresAt', data.tokenExpiresAt || '');
+    if (data.depUserInfo) wx.setStorageSync('userInfo', data.depUserInfo);
+    if (data.currentUser) wx.setStorageSync('franchiseCurrentUser', data.currentUser);
+    this.setData({
+      authChecking: false,
+      disInfo: null,
+      userInfo: data.depUserInfo || null,
+      mendianInfo: null,
+      depId: null,
+    });
+    wx.reLaunch({ url: '/subPackage-inspection/pages/home/home' });
   },
 
   /** 未注册用户进入餐馆注册页 */
@@ -437,7 +466,9 @@ Page({
             console.log("login====", res.result);
             var result = res.result || {};
             var data = result.data || {};
-            if (result.code === 0 && data.identityState === 'SUPPLIER_ACTIVE') {
+            if (result.code === 0 && data.identityState === 'FRANCHISEE_OWNER_ACTIVE') {
+              this._redirectToFranchiseeOwnerHome(data);
+            } else if (result.code === 0 && data.identityState === 'SUPPLIER_ACTIVE') {
               this._redirectToSupplierHome();
             } else if (result.code === 0 && data.identityState === 'RESTAURANT_ACTIVE' && data.depUserInfo) {
                 var disInfo = res.result.data.disInfo || {};
