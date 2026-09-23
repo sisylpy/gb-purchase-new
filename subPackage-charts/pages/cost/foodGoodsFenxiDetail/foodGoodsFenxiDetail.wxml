@@ -1,4 +1,3 @@
-<wxs src="/wxs/format.wxs" module="tool" />
 <view class="page">
   <back-navbar title="{{dish.name || '菜品成本明细'}}" avatar="/images/back.png" bindnavbuttontap="toBack"></back-navbar>
   <view style="height:{{navBarHeight}}rpx"></view>
@@ -7,7 +6,7 @@
     <image src="/images/calender.png"></image>
     <view>
       <text>{{hanzi}}</text>
-      <text>{{tool.transferDateString(startDate)}} - {{tool.transferDateString(stopDate)}}</text>
+      <text>{{dateText}}</text>
     </view>
   </view>
 
@@ -157,6 +156,6 @@
     </view>
   </view>
 
-  <view wx:elif="{{!loading}}" class="empty">暂无该菜品成本明细</view>
+  <view wx:elif="{{!loading}}" class="empty">{{emptyMessage}}</view>
   <view class="bottom"></view>
 </view>

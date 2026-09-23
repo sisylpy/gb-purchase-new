@@ -31,22 +31,54 @@ function percentText(v) {
   return v === null ? '—' : v.toFixed(1) + '%';
 }
 
+function positiveId(value) {
+  var resolved = Number(value || 0);
+  return resolved > 0 ? resolved : 0;
+}
+
+function storeRootDepartmentId(department) {
+  var row = department || {};
+  return positiveId(row.gbDepartmentFatherId) || positiveId(row.gbDepartmentId);
+}
+
+function shortDate(value) {
+  var parts = String(value || '').split('-');
+  return parts.length === 3 ? Number(parts[1]) + '月' + Number(parts[2]) + '日' : '';
+}
+
+function toast(message) {
+  wx.showToast({ title: message || '加载失败', icon: 'none' });
+}
+
+function requestErrorMessage(error) {
+  var body = error && error.data || {};
+  return body.msg || body.message || (error && error.errMsg) || '网络异常，请稍后重试';
+}
+
 Page({
   data: {
     navBarHeight: 0,
     loading: true,
     hasData: false,
     ingredients: [],
-    attention: []
+    attention: [],
+    dateText: '',
+    emptyMessage: '暂无该菜品成本明细'
   },
 
   onLoad: function (options) {
+    options = options || {};
     this.context = wx.getStorageSync('foodGoodsFenxiDetailContext') || {};
+    var dis = wx.getStorageSync('disInfo') || {};
+    var store = wx.getStorageSync('mendianInfo') || {};
+    var dep = wx.getStorageSync('depInfo') || {};
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       foodId: Number(options.foodId || 0),
-      disId: Number(options.disId || 0),
-      depFatherId: Number(options.depFatherId || 0)
+      disId: positiveId(options.disId) || positiveId(dis.gbDistributerId),
+      depFatherId: positiveId(options.depFatherId)
+        || storeRootDepartmentId(store)
+        || storeRootDepartmentId(dep)
     });
     this._syncDate();
     this._load();
@@ -71,12 +103,19 @@ Page({
       startDate: range.startDate,
       stopDate: range.stopDate,
       hanzi: saved && saved.hanzi || range.name || '本月',
-      dateType: saved ? saved.dateType : 'month'
+      dateType: saved ? saved.dateType : 'month',
+      dateText: shortDate(range.startDate) + ' - ' + shortDate(range.stopDate)
     });
   },
 
   _load: function () {
     var that = this;
+    if (!this.data.disId || !this.data.depFatherId || !this.data.foodId) {
+      var missingMessage = !this.data.depFatherId ? '缺少门店信息，无法加载菜品分析' : '缺少菜品信息，无法加载分析';
+      this.setData({ loading: false, hasData: false, emptyMessage: missingMessage });
+      toast(missingMessage);
+      return;
+    }
     this.setData({ loading: true });
     load.showLoading('加载菜品成本明细');
     chartsApi.getDishCostDetail({
@@ -89,15 +128,17 @@ Page({
       load.hideLoading();
       var body = res && res.result || {};
       if (body.code !== 0) {
-        that.setData({ loading: false, hasData: false });
-        load.showToast(body.msg || '加载失败');
+        var message = body.msg || '菜品分析加载失败';
+        that.setData({ loading: false, hasData: false, emptyMessage: message });
+        toast(message);
         return;
       }
       that._apply(body.data || {});
-    }).catch(function () {
+    }).catch(function (error) {
       load.hideLoading();
-      that.setData({ loading: false, hasData: false });
-      load.showToast('网络异常');
+      var message = requestErrorMessage(error);
+      that.setData({ loading: false, hasData: false, emptyMessage: message });
+      toast(message);
     });
   },
 

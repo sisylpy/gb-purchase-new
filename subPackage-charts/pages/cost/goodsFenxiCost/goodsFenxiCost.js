@@ -35,6 +35,16 @@ function hasOwn(row, key) {
   return row && Object.prototype.hasOwnProperty.call(row, key);
 }
 
+function positiveId(value) {
+  var resolved = Number(value || 0);
+  return resolved > 0 ? resolved : 0;
+}
+
+function storeRootDepartmentId(department) {
+  var row = department || {};
+  return positiveId(row.gbDepartmentFatherId) || positiveId(row.gbDepartmentId);
+}
+
 function receivedQuantity(purchaseRow) {
   var stocks = purchaseRow.gbDepartmentGoodsStockEntities || [];
   if (stocks.length) {
@@ -135,10 +145,12 @@ Page({
     var source = target && cachedId !== target ? legacy : (cachedId ? cached : legacy);
     var dis = wx.getStorageSync('disInfo') || {};
     var dep = wx.getStorageSync('depInfo') || {};
+    var store = wx.getStorageSync('mendianInfo') || {};
     var searchDepId = options.searchDepId || '-1';
-    var depFatherId = options.depFatherId
-      || (searchDepId !== '-1' ? searchDepId : '')
-      || dep.gbDepartmentId
+    var depFatherId = positiveId(options.depFatherId)
+      || positiveId(searchDepId !== '-1' ? searchDepId : 0)
+      || storeRootDepartmentId(store)
+      || storeRootDepartmentId(dep)
       || '';
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,

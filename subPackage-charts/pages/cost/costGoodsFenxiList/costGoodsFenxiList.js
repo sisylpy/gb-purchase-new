@@ -29,6 +29,16 @@ function idString(value) {
   return value == null ? '' : String(value);
 }
 
+function positiveId(value) {
+  var resolved = Number(value || 0);
+  return resolved > 0 ? resolved : 0;
+}
+
+function storeRootDepartmentId(department) {
+  var row = department || {};
+  return positiveId(row.gbDepartmentFatherId) || positiveId(row.gbDepartmentId);
+}
+
 function categoryIcon(name) {
   if (/蔬菜/.test(name)) return '♧';
   if (/肉|禽|蛋/.test(name)) return '◉';
@@ -96,10 +106,14 @@ Page({
     this._hasShownOnce = false;
     var dis = wx.getStorageSync('disInfo') || {};
     var dep = wx.getStorageSync('depInfo') || {};
+    var store = wx.getStorageSync('mendianInfo') || {};
     this.setData({
       navBarHeight: globalData.navBarHeight * globalData.rpxR,
       disId: options.disId || dis.gbDistributerId,
-      depFatherId: options.depFatherId || dep.gbDepartmentId || '',
+      depFatherId: positiveId(options.depFatherId)
+        || storeRootDepartmentId(store)
+        || storeRootDepartmentId(dep)
+        || '',
       searchDepId: options.searchDepId || '-1'
     });
     this.syncDate();
