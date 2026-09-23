@@ -61,28 +61,12 @@ Page({
 
     var mendianInfo = wx.getStorageSync('mendianInfo');
     var disInfo = wx.getStorageSync('disInfo');
-    var departmentList = Array.isArray(mendianInfo.gbDepartmentEntityList)
-      ? mendianInfo.gbDepartmentEntityList.filter(function(department) {
-          return department
-            && department.gbDepartmentId
-            && String(department.gbDepartmentName || '').trim().length > 0;
-        }).map(function(department) {
-          return Object.assign({}, department, {
-            gbDepartmentName: String(department.gbDepartmentName).trim()
-          });
-        })
-      : [];
-    var normalizedMendianInfo = Object.assign({}, mendianInfo, {
-      gbDepartmentSubAmount: departmentList.length,
-      gbDepartmentEntityList: departmentList
-    });
     this.setData({
-      mendianInfo: normalizedMendianInfo,
+      mendianInfo: mendianInfo,
       depFatherId: mendianInfo.gbDepartmentId,
       depId: mendianInfo.gbDepartmentId,
-      // 不依赖可能过期的 gbDepartmentSubAmount，按实际有效子部门判断页面结构。
-      depHasSubs: departmentList.length,
-      orderDepList: departmentList,
+      depHasSubs: mendianInfo.gbDepartmentSubAmount,
+      orderDepList: mendianInfo.gbDepartmentEntityList,
       mendianStoreList: (disInfo && disInfo.mendianDepartmentList) || [],
     });
 
