@@ -22,7 +22,7 @@
             <text class="day-date">{{item.dateText}}</text>
             <view class="day-bottom"><text class="day-total">{{item.totalText}}</text><text class="day-currency">元</text></view>
           </view>
-          <image wx:if="{{activeDay==index}}" class="stock-period-art" src="/images/stock_peroid_icon.png" mode="aspectFit"></image>
+          <image wx:if="{{activeDay==index}}" class="stock-period-art" src="/subPackage-charts/images/stock_peroid_icon.png" mode="aspectFit"></image>
           <view class="day-indicator"></view>
         </view>
       </view>
