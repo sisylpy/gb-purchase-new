@@ -82,7 +82,6 @@ page,.page{height:100%;background:#f3f8f7;color:#10213b}
 .plain-note{margin-top:17rpx;padding:16rpx 18rpx;border-radius:16rpx;background:#edf5f8;color:#586e83;font-size:24rpx;line-height:1.5}
 .usage-grid{display:grid;grid-template-columns:1fr 1fr;gap:14rpx;margin-top:22rpx}
 .usage-item{padding:20rpx;border-radius:20rpx;background:#f6f9f8;border:1rpx solid #e3ece9}
-.usage-item:last-child{grid-column:1/3}
 .usage-title-row{display:flex;align-items:center;gap:10rpx}
 .usage-dot{width:16rpx;height:16rpx;border-radius:50%}
 .usage-name{font-size:27rpx;font-weight:900}
@@ -93,7 +92,8 @@ page,.page{height:100%;background:#f3f8f7;color:#10213b}
 .usage-discount .usage-amount{color:#3276d5}
 .usage-employee .usage-amount{color:#df7e16}
 .usage-pending .usage-amount{color:#e63f4c}
-.usage-waste .usage-amount{color:#7461bd}
+.usage-loss .usage-amount{color:#7461bd}
+.usage-waste .usage-amount{color:#c94f63}
 .usage-bar{display:flex;height:22rpx;border-radius:13rpx;overflow:hidden;margin-top:23rpx;background:#edf1f0}
 .usage-bar view{height:100%}
 .pending-help{margin-top:17rpx;padding:17rpx 19rpx;border-radius:17rpx;background:#fff6e4;color:#755b27;font-size:24rpx;line-height:1.5}

@@ -199,14 +199,16 @@ Page({
     var normal = hasOwn(row, 'businessNormalSaleAmount') ? num(row.businessNormalSaleAmount) : verified;
     var discount = num(row.businessDiscountMealAmount);
     var employee = hasOwn(row, 'businessEmployeeMealAmount') ? num(row.businessEmployeeMealAmount) : num(row.employeeMealAmount);
-    var waste = hasOwn(row, 'businessWasteLossAmount') ? num(row.businessWasteLossAmount) : 0;
-    var destinationTotal = normal + discount + employee + pending + waste;
+    var loss = num(row.lossAmount);
+    var waste = num(row.wasteAmount);
+    var destinationTotal = normal + discount + employee + pending + loss + waste;
     var destinations = [
       { key: 'normal', name: '正常售卖', hint: '正常卖出的菜', amountText: money(normal), qtyText: money(row.businessNormalSaleQty), color: '#16a36a' },
       { key: 'discount', name: '折扣餐', hint: '含会员优惠和赠送', amountText: money(discount), qtyText: money(row.businessDiscountMealQty), color: '#4388f7' },
       { key: 'employee', name: '员工餐', hint: '菜品和原料员工餐', amountText: money(employee), qtyText: money(hasOwn(row, 'businessEmployeeMealQty') ? row.businessEmployeeMealQty : row.employeeMealQty), color: '#f39b25' },
       { key: 'pending', name: '待确认用途', hint: '出库了，还没对应到菜品', amountText: money(pending), qtyText: money(hasOwn(row, 'businessPendingUseQty') ? row.businessPendingUseQty : row.nonVerifiedQty), color: '#ef5b64' },
-      { key: 'waste', name: '损耗 / 废弃', hint: '已登记的损耗和废弃', amountText: money(waste), qtyText: money(row.businessWasteLossQty), color: '#8f79d9' }
+      { key: 'loss', name: '损耗', hint: '清洗、切配等已登记损耗', amountText: money(loss), qtyText: money(row.lossQty), color: '#8f79d9' },
+      { key: 'waste', name: '废弃', hint: '变质、报废等已登记废弃', amountText: money(waste), qtyText: money(row.wasteQty), color: '#d86677' }
     ].map(function (item) {
       var amount = num(item.amountText);
       item.percent = destinationTotal ? Math.round(amount * 100 / destinationTotal) : 0;
@@ -216,7 +218,9 @@ Page({
     var diff = num(row.diffUsage != null ? row.diffUsage : num(row.actualUsage) - num(row.theoryUsage));
     var conclusion = pending > 0
       ? '有 ¥' + money(pending) + ' 的出库还没对应到菜品，建议先核对出库和配方记录。'
-      : (waste > 0 ? '本期有 ¥' + money(waste) + ' 的损耗或废弃，建议查看登记原因。' : '本期出库用途已经基本对应清楚。');
+      : (loss > 0 || waste > 0
+        ? '本期登记损耗 ¥' + money(loss) + '、废弃 ¥' + money(waste) + '，建议查看登记原因。'
+        : '本期出库用途已经基本对应清楚。');
     return Object.assign({}, row, {
       name: row.name || row.gbDgGoodsName || '原料详情',
       initial: String(row.name || row.gbDgGoodsName || '原').slice(0, 1),
