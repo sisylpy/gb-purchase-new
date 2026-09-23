@@ -69,12 +69,16 @@ function ingredientRow(raw) {
   var rate = numberValue(raw.devianceRate);
   var tone = Math.abs(rate) >= 25 ? 'danger' : Math.abs(rate) >= 10 ? 'warn' : 'ok';
   var dishes = raw.supportedDishes || [];
+  var amountText = money(raw.outboundTotalAmount);
+  var rateText = (rate > 0 ? '+' : '') + money(rate) + '%';
   return Object.assign({}, raw, {
     name: raw.gbDgGoodsName || '未命名原料',
     imageUrl: imageUrl(raw.gbDgGoodsFileImg),
     categoryId: idString(raw.gbDgDfgGoodsGreatId),
-    amountText: money(raw.outboundTotalAmount),
-    rateText: (rate > 0 ? '+' : '') + money(rate) + '%',
+    amountText: amountText,
+    rateText: rateText,
+    amountCompact: amountText.length > 7,
+    rateCompact: rateText.length > 8,
     dishCount: dishes.length,
     dishNames: dishes.slice(0, 3).map(function (item) { return item.dishName; }).join('、'),
     statusText: tone === 'danger' ? '重点关注' : tone === 'warn' ? '建议核查' : '正常',
@@ -189,7 +193,11 @@ Page({
     rows.forEach(function (row) {
       known[row.categoryId].count += 1;
     });
-    return categories;
+    // 左侧只展示当前筛选结果里确实有商品的类别。分类点击只在已加载商品中筛选，
+    // 不再为 0 个商品的空类别保留入口，也不会触发无意义的空结果查询。
+    return categories.filter(function (item) {
+      return item.count > 0;
+    });
   },
 
   loadData: function () {
@@ -211,8 +219,7 @@ Page({
       var categories = that.buildCategories(rows);
       var selectedId = idString(that.data.categoryId);
       if (!rows.some(function (row) { return row.categoryId === selectedId; })) {
-        var firstWithGoods = categories.filter(function (item) { return item.count > 0; })[0];
-        selectedId = firstWithGoods ? firstWithGoods.id : (categories[0] ? categories[0].id : '');
+        selectedId = categories[0] ? categories[0].id : '';
       }
       var selectedCategory = categories.filter(function (item) { return item.id === selectedId; })[0];
       that.setData({

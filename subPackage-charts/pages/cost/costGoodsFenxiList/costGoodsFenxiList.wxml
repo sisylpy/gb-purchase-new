@@ -96,11 +96,11 @@
         <view class="metrics">
           <view>
             <image src="/images/ingredient-analysis/outbound_amount.png"></image>
-            <view><text>出库金额</text><text>¥{{item.amountText}}</text></view>
+            <view><text>出库金额</text><text class="{{item.amountCompact?'compact-number':''}}">¥{{item.amountText}}</text></view>
           </view>
           <view>
             <image src="/images/ingredient-analysis/allocation_deviation_rate.png"></image>
-            <view><text>偏差率</text><text class="{{item.tone}}">{{item.rateText}}</text></view>
+            <view><text>偏差率</text><text class="{{item.tone}} {{item.rateCompact?'compact-number':''}}">{{item.rateText}}</text></view>
           </view>
           <view>
             <text class="dish-icon">菜</text>
@@ -109,8 +109,8 @@
         </view>
       </view>
       <view class="empty" wx:if="{{!rows.length}}">
-        <text>当前分类暂无原料</text>
-        <text>可以切换左侧分类查看</text>
+        <text>{{categories.length ? '当前分类暂无原料' : '当前筛选没有原料'}}</text>
+        <text>{{categories.length ? '可以切换左侧分类查看' : '请调整出库范围或搜索条件'}}</text>
       </view>
       <view class="goods-bottom"></view>
     </view>
