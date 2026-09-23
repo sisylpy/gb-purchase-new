@@ -72,11 +72,9 @@
 
   <view class="body">
     <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="cats">
-      <view class="cat {{categoryId==item.id?'active':''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseCategory">
+      <view class="cat {{categoryId==item.id?'active':''}}" wx:for="{{categories}}" wx:key="id" data-id="{{item.id}}" aria-label="{{item.name}}" bindtap="chooseCategory">
         <image wx:if="{{item.imageUrl}}" class="category-image" src="{{item.imageUrl}}" mode="aspectFill"></image>
         <text wx:else class="icon">{{item.icon}}</text>
-        <text class="category-name">{{item.name}}</text>
-        <text class="category-count">({{item.count}})</text>
       </view>
     </scroll-view>
 
