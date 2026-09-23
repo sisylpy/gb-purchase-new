@@ -1,16 +1,19 @@
 <wxs module="imgUrl" src="/wxs/imgUrl.wxs" />
 <wxs src="/wxs/format.wxs" module="tool" />
 <view class="page">
-  <back-navbar title="库存" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
+  <back-navbar title="库存分析" avatar="/images/back-gray.png" bindnavbuttontap="toBack"></back-navbar>
   <view style="height:{{navBarHeight}}rpx;flex-shrink:0"></view>
 
   <view class="overview-panel">
     <scroll-view scroll-x enhanced class="day-tabs" show-scrollbar="false" scroll-into-view="day-{{activeDay}}">
       <view class="day-tabs-inner">
-        <view id="day-{{index}}" class="day-tab {{activeDay==index?'active':''}}" wx:for="{{dayTabs}}" wx:key="whichDay" data-index="{{index}}" bindtap="chooseDay">
-          <view class="day-top"><text class="day-name">{{item.label}}</text><view class="calendar-badge"><image src="/images/calender.png"></image></view></view>
-          <text class="day-date">{{item.dateText}}</text>
-          <view class="day-bottom"><text>{{item.amountLabel}}</text><text><text class="day-total">{{item.totalText}}</text>元</text></view>
+        <view id="day-{{index}}" class="day-tab {{activeDay==index?'active':''}} {{item.whichDay==0?'has-art':''}}" wx:for="{{dayTabs}}" wx:key="whichDay" data-index="{{index}}" bindtap="chooseDay">
+          <view class="day-copy">
+            <text class="day-name">{{item.label}}</text>
+            <text class="day-date">{{item.dateText}}</text>
+            <view class="day-bottom"><text class="day-total">{{item.totalText}}</text><text class="day-currency">元</text></view>
+          </view>
+          <image wx:if="{{item.whichDay==0}}" class="stock-period-art" src="/images/stock_peroid_icon.png" mode="aspectFit"></image>
           <view class="day-indicator"></view>
         </view>
       </view>
