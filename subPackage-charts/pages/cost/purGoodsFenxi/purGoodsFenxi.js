@@ -5,6 +5,7 @@ var dateUtils = require('../../../../lib/dateUtil');
 import apiUrl from '../../../../config/index.js';
 import apiDistributer from '../../../../services/apiDistributer.js';
 import * as echarts from '../../../../ec-canvas/echarts';
+var storeRootDepartmentId = require('../../../../lib/storeRootDepartment').storeRootDepartmentId;
 
 const PURCHASE_IMAGES = '/subPackage-charts/images/purchase/icon_pack/';
 
@@ -105,8 +106,19 @@ Page({
       url: apiUrl.server
     });
     var disInfo = wx.getStorageSync('disInfo');
-    if (disInfo) this.setData({ disInfo: disInfo, disId: disInfo.gbDistributerId });
+    var mendianInfo = wx.getStorageSync('mendianInfo') || {};
+    var depFatherId = storeRootDepartmentId(mendianInfo);
+    this.setData({ depFatherId: depFatherId });
+    if (disInfo) this.setData({
+      disInfo: disInfo,
+      disId: disInfo.gbDistributerId
+    });
     this._syncDatesFromMyDateStorage();
+    if (!this.data.disId || !depFatherId) {
+      load.showToast(!depFatherId ? '缺少门店信息' : '缺少分销商信息');
+      this.setData({ loading: false });
+      return;
+    }
     this._getSupplierStatistics();
     this._getBusinessStatistics();
   },
@@ -147,6 +159,7 @@ Page({
       purUserIds: this.data.purUserIds,
       supplierIds: this.data.supplierIds,
       disId: this.data.disId,
+      purDepId: this.data.depFatherId,
       startDate: startDate,
       stopDate: stopDate,
       greatId: -1
@@ -160,13 +173,15 @@ Page({
       stopDate: stopDate,
       greatId: -1,
       searchDepId: '-1',
+      depFatherId: this.data.depFatherId,
       includeDetails: !!includeDetails
     });
   },
 
   _getBusinessStatistics: function () {
+    if (!this.data.depFatherId) return;
     var that = this;
-    var requestKey = [this.data.disId, this.data.startDate, this.data.stopDate].join('-');
+    var requestKey = [this.data.disId, this.data.depFatherId, this.data.startDate, this.data.stopDate].join('-');
     this._businessRequestKey = requestKey;
     this._requestBusinessStatistics(this.data.startDate, this.data.stopDate, false)
       .then(function (res) {
@@ -227,8 +242,9 @@ Page({
   },
 
   _getSupplierStatistics: function () {
+    if (!this.data.depFatherId) return;
     var that = this;
-    var requestKey = [this.data.disId, this.data.startDate, this.data.stopDate].join('-');
+    var requestKey = [this.data.disId, this.data.depFatherId, this.data.startDate, this.data.stopDate].join('-');
     this._statisticsRequestKey = requestKey;
     this.setData({ loading: true });
     load.showLoading('获取数据中');

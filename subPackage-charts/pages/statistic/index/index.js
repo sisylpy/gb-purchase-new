@@ -5,6 +5,7 @@ var dateUtils = require('../../../../lib/dateUtil.js')
 var apiUrl = require('../../../../config/index');
 var api = require('../../../services/api.js');
 var echarts = require('../../../../ec-canvas/echarts');
+var storeRootDepartmentId = require('../../../../lib/storeRootDepartment').storeRootDepartmentId;
 
 Page({
 
@@ -73,12 +74,20 @@ Page({
       })
     }
     var disInfo = wx.getStorageSync('disInfo');
+    var mendianInfo = wx.getStorageSync('mendianInfo') || {};
+    var depFatherId = storeRootDepartmentId(mendianInfo);
+    this.setData({ depFatherId: depFatherId });
  
     if (disInfo) {
       this.setData({
         disInfo: disInfo,
         disId: disInfo.gbDistributerId,
       })
+    }
+
+    if (!this.data.disId || !depFatherId) {
+      wx.showToast({ title: !depFatherId ? '缺少门店信息' : '缺少分销商信息', icon: 'none' });
+      return;
     }
     
     this._initListData();
@@ -115,12 +124,20 @@ Page({
   // 1 swiper 
 
   _initListData() {
+    if (!this.data.disId || !this.data.depFatherId) {
+      wx.showToast({
+        title: !this.data.depFatherId ? '缺少门店信息' : '缺少分销商信息',
+        icon: 'none'
+      });
+      return;
+    }
     load.showLoading("获取数据中")
    
     var costData = {
       startDate: this.data.startDate,
       stopDate: this.data.stopDate,
       disId: this.data.disId,
+      depFatherId: this.data.depFatherId,
       purUserId: this.data.purUserId || -1,
       supplierId: this.data.supplierId || -1,
     }

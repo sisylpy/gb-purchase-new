@@ -86,6 +86,7 @@ var getGbPurGoodsStatisticsForDis = function (data) {
     purUserIds: data.purUserIds,
     supplierIds: data.supplierIds,
     disId: data.disId,
+    purDepId: data.purDepId,
     startDate: data.startDate,
     stopDate: data.stopDate,
     greatId: data.greatId || -1,
@@ -170,6 +171,7 @@ var getGbInventoryBusinessAnalysis = function (data) {
     stopDate: data.stopDate,
     greatId: data.greatId || -1,
     searchDepId: data.searchDepId || '-1',
+    depFatherId: data.depFatherId,
     includeDetails: !!data.includeDetails,
   };
   return requestUtil.post('gbdepartmentgoodsstockreduce/getGbInventoryBusinessAnalysis', params, { useUrlParams: true });
