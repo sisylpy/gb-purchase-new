@@ -21,7 +21,7 @@
 		<radio-group class="pr-10 pl-10 font-md" bindchange="radioChangeCankao">
 			<label class="radio">
 				<view class="flex-row p-20">
-					<radio value="1" checked="{{cankaoDepId != -1}}" />
+					<radio value="{{referenceDepId}}" checked="{{cankaoDepId != -1}}" />
 					<text class='wxNumber'>参考现有门店</text>
 				</view>
 			</label>

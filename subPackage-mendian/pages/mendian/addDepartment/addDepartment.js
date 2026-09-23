@@ -16,13 +16,15 @@ Page({
   data: {
     showNumber: false,
     selNumber: 1,
-    addFinished: true,
+    addFinished: false,
     hasSubs: 0,
     cankaoDep: 0,
+    cankaoDepId: -1,
+    referenceDepId: -1,
     resName:"",
     gbDepartmentEntities: [
     {
-        gbDepartmentName: null,
+        gbDepartmentName: '',
         gbDepartmentHasSubs: 0,
         gbDepartmentSubAmount: 0,
         gbDepartmentIsGroupDep: 0,
@@ -49,6 +51,7 @@ Page({
     var mendianInfo = wx.getStorageSync('mendianInfo');
     if(mendianInfo){
       this.setData({
+        referenceDepId: mendianInfo.gbDepartmentId,
         cankaoDepId: mendianInfo.gbDepartmentId,
       })
      
@@ -88,22 +91,22 @@ Page({
   },
   
   radioChangeCankao(e){
-    if(e.detail.value == -1){
-      if(this.data.gbDmPurchaseNumber == -1){
-        wx.showToast({
-          title: '无权限设置',
-          icon : 'none'
-        })
-      }
+    var selectedDepId = Number(e.detail.value);
+    if(selectedDepId == -1 && this.data.gbDmPurchaseNumber == -1){
+      wx.showToast({
+        title: '无权限设置',
+        icon : 'none'
+      })
       // 强制刷新 radio 选中状态，恢复到"参考现有门店"
       this.setData({
-        cankaoDepId: this.data.cankaoDepId,
+        cankaoDepId: this.data.referenceDepId,
       })
       return;
     }
     this.setData({
-      cankaoDepId: e.detail.value, 
+      cankaoDepId: selectedDepId,
     })  
+    this._ifCanSave();
 
   },
 
@@ -216,34 +219,22 @@ Page({
    * 检查可下一步状态
    */
    _ifCanSave(){
-     //resName
-     if(this.data.resName.length > 0){
-        var empty = 0;
-       if(this.data.gbDepartmentEntities.length == this.data.selNumber){
-        
-         var arr  = this.data.gbDepartmentEntities;
-         for(var i = 0; i < arr.length; i++){
-           if(arr[i].gbDepartmentName.length == 0){
-              empty = empty + 1;
-           }
-         }
-         if(empty  >  0){
-          this.setData({
-            addFinished: false
-          })
-         }else{
-          this.setData({
-            addFinished: true
-          })
-         }
-        
-       
-       } 
-     }else{
-       this.setData({
-         addFinished: false
-       })
+     if(!String(this.data.resName || '').trim()){
+       this.setData({ addFinished: false });
+       return;
      }
+
+     // 参考门店时，子部门完全由后端复制，不校验也不提交页面中的占位部门。
+     if(Number(this.data.cankaoDepId) > 0){
+       this.setData({ addFinished: true });
+       return;
+     }
+
+     var arr = this.data.gbDepartmentEntities || [];
+     var allNamed = arr.length == this.data.selNumber && arr.every(function(item){
+       return item && String(item.gbDepartmentName || '').trim().length > 0;
+     });
+     this.setData({ addFinished: allNamed });
     
    },
 
@@ -270,17 +261,24 @@ Page({
 
   saveDepartment(){
     var that = this;
+    var useReferenceStore = Number(this.data.cankaoDepId) > 0;
+    var departmentEntities = useReferenceStore ? [] : (this.data.gbDepartmentEntities || []).filter(function(item){
+      return item && String(item.gbDepartmentName || '').trim().length > 0;
+    }).map(function(item){
+      return Object.assign({}, item, {
+        gbDepartmentName: String(item.gbDepartmentName).trim()
+      });
+    });
     var  dep = {
       gbDepartmentDisId: this.data.disId,
       gbDepartmentFatherId: 0,
       gbDepartmentName: this.data.resName,
-      gbDepartmentName: this.data.resName,
-      gbDepartmentSubAmount: this.data.gbDepartmentEntities.length,
+      gbDepartmentSubAmount: departmentEntities.length,
       gbDepartmentIsGroupDep: 1,
       gbDepartmentType: 1,
-      cankaoDepId: this.data.cankaoDepId,
+      cankaoDepId: Number(this.data.cankaoDepId),
       fatherGoodsIds: "",
-      gbDepartmentEntityList: this.data.gbDepartmentEntities
+      gbDepartmentEntityList: departmentEntities
       }
       wx.showLoading({ title: "保存新店铺" });
       saveGbDepartment(dep)
