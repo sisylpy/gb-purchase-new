@@ -40,15 +40,20 @@ Page({
     // items:[
     //   {
     //     name: '2',
-    //     value: '集采',
+    //     value: '统一集采',
     //     checked: ""
     //   },
 
 
     // ],
     items: [{
+        name: '1',
+        value: '门店自采',
+        checked: ""
+      },
+      {
         name: '2',
-        value: '采购商品',
+        value: '统一集采',
         checked: ""
       },
 
@@ -62,7 +67,7 @@ Page({
     ],
     itemsSupplier: [{
         name: '2',
-        value: '集采',
+        value: '统一集采',
         checked: ""
       },
       {
@@ -220,13 +225,13 @@ Page({
         if (what == 2) {
           var item = {
             name: '2',
-            value: '集采',
+            value: '统一集采',
             checked: true,
           };
         } else {
           var item = {
             name: '2',
-            value: '集采',
+            value: '统一集采',
             checked: false,
           };
         }
@@ -240,13 +245,13 @@ Page({
         if (what == 3) {
           var item = {
             name: '3',
-            value: '库存',
+            value: '统一出库',
             checked: true
           };
         } else {
           var item = {
             name: '3',
-            value: '库存',
+            value: '统一出库',
             checked: false
           };
         }
@@ -281,13 +286,13 @@ Page({
         if (what == 5) {
           var item = {
             name: '5',
-            value: '配送商',
+            value: '配送商配送',
             checked: true
           };
         } else {
           var item = {
             name: '5',
-            value: '配送商',
+            value: '配送商配送',
             checked: false
           };
         }
@@ -297,7 +302,7 @@ Page({
       if (this.data.disInfo.appSupplierDepartment !== null) {
         var item = {
           name: '5',
-          value: '配送商',
+          value: '配送商配送',
           checked: false
         };
         items.push(item);
@@ -308,7 +313,7 @@ Page({
     if (this.data.disInfo.gbDistributerBusinessType < 20 && this.data.disInfo.mendianDepartmentList.length > 1) {
       var item = {
         name: '1',
-        value: '自采',
+        value: '门店自采',
       };
 
       items.push(item);
@@ -624,15 +629,19 @@ Page({
     })
 
 
-    if (type == "2") {
+    if (type == "1" || type == "2") {
 
       this.setData({
         gbDepId: this.data.purDepId,
-        showPurDeps: true,
+        showPurDeps: type == "2",
         showSupplier: false,
+        nxDisId: -1,
         nxGoodsId: -1,
         supplierId: -1,
+        'goods.gbDgGbDepartmentId': this.data.purDepId,
         'goods.gbDgGbSupplierId': -1,
+        'goods.gbDgNxDistributerId': -1,
+        'goods.gbDgNxDistributerGoodsId': -1,
         'goods.gbDistributerAppointSupplierEntity': null,
 
       })
@@ -643,6 +652,11 @@ Page({
         gbDepId: this.data.purDepId,
         showPurDeps: false,
         showSupplier: true,
+        nxDisId: -1,
+        nxGoodsId: -1,
+        'goods.gbDgGbDepartmentId': this.data.purDepId,
+        'goods.gbDgNxDistributerId': -1,
+        'goods.gbDgNxDistributerGoodsId': -1,
       })
     }
     

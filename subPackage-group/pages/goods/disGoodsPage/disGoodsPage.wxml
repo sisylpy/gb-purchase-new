@@ -51,20 +51,20 @@ avatar="/images/back-gray.png" button-text="设置" bindnavbuttontap="toBack"></
             <text class="">门店自采</text>
           </block>
           <block wx:if="{{goods.gbDgGoodsType == 2}}">
-            <text class="">集采</text>
+            <text class="">统一集采</text>
           </block>
           <block wx:if="{{goods.gbDgGoodsType == 21}}">
             <text class="">自动订货</text>
           </block>
           <block wx:if="{{goods.gbDgGoodsType == 3}}">
-            <text class="">库房</text>
+            <text class="">统一出库</text>
           </block>
 
           <block wx:if="{{goods.gbDgGoodsType == 4}}">
             <text class="">中央厨房</text>
           </block>
           <block wx:if="{{goods.gbDgGoodsType == 5}}">
-            <text class="">配送</text>
+            <text class="">配送商配送</text>
           </block>
         </view>
 

@@ -10,7 +10,11 @@
 
   <text class="" wx:if="{{goodsType == '99'}}">全部商品</text>
   <text class="" wx:elif="{{goodsType == '21'}}">自动订货</text>
-  <text class="" wx:elif="{{goodsType == '1'}}">自采商品</text>
+  <text class="" wx:elif="{{goodsType == '1'}}">门店自采</text>
+  <text class="" wx:elif="{{goodsType == '2'}}">统一集采</text>
+  <text class="" wx:elif="{{goodsType == '3'}}">统一出库</text>
+  <text class="" wx:elif="{{goodsType == '4'}}">中央厨房</text>
+  <text class="" wx:elif="{{goodsType == '5'}}">配送商配送</text>
   <text class="" wx:elif="{{goodsType == '101'}}">保鲜控制</text>
   <text class="" wx:elif="{{goodsType == '102'}}">停止送货</text>
 
@@ -249,7 +253,23 @@
 
     <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="1">
       <image src="../../../../images/gouwuche-4.png" class="icon mr-20 ml-20"></image>
-      <text class="mr-20 ml-20 {{goodsType == '1' ? 'mainColor' : ''}} ">采购商品</text>
+      <text class="mr-20 ml-20 {{goodsType == '1' ? 'mainColor' : ''}} ">门店自采</text>
+    </view>
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="2">
+      <image src="../../../../images/gouwuche-4.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '2' ? 'mainColor' : ''}} ">统一集采</text>
+    </view>
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="3">
+      <image src="../../../../images/goods.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '3' ? 'mainColor' : ''}} ">统一出库</text>
+    </view>
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="4">
+      <image src="../../../../images/goods.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '4' ? 'mainColor' : ''}} ">中央厨房</text>
+    </view>
+    <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="5">
+      <image src="../../../../images/goods.png" class="icon mr-20 ml-20"></image>
+      <text class="mr-20 ml-20 {{goodsType == '5' ? 'mainColor' : ''}} ">配送商配送</text>
     </view>
     <view class="flex-row p-30 border-bottom" bindtap="getGoodsType" data-type="101">
       <image src="../../../../images/toxicwaste.png" class="icon mr-20 ml-20"></image>
