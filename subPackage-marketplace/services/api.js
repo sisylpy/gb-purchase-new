@@ -12,6 +12,15 @@ function parse(res) {
   return body.data;
 }
 
+function isUnauthorized(error) {
+  return !!(error && Number(error.statusCode) === 401);
+}
+
+function clearResidentSession() {
+  wx.removeStorageSync('marketplaceResidentToken');
+  wx.removeStorageSync('marketplaceResident');
+}
+
 function post(path, data, authKind, loadingText) {
   var headers = {};
   if (authKind === 'resident') headers['X-Marketplace-Resident-Token'] = wx.getStorageSync('marketplaceResidentToken');
@@ -20,7 +29,14 @@ function post(path, data, authKind, loadingText) {
     headers: headers,
     showLoading: !!loadingText,
     loadingText: loadingText || ''
-  })).then(parse);
+  })).then(parse).catch(function (error) {
+    if (authKind === 'resident' && isUnauthorized(error)) {
+      clearResidentSession();
+      error.marketplaceUnauthorized = true;
+      error.message = '登录已失效，请重新登录';
+    }
+    throw error;
+  });
 }
 
 function marketId() {

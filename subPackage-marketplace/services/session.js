@@ -1,6 +1,15 @@
 var api = require('./api');
 var inflight = null;
 
+function clear() {
+  wx.removeStorageSync('marketplaceResidentToken');
+  wx.removeStorageSync('marketplaceResident');
+}
+
+function isUnauthorized(error) {
+  return !!(error && (error.marketplaceUnauthorized || Number(error.statusCode) === 401));
+}
+
 function ensureLogin() {
   if (wx.getStorageSync('marketplaceResidentToken')) return Promise.resolve(true);
   if (inflight) return inflight;
@@ -21,10 +30,14 @@ function ensureLogin() {
 }
 
 function requireLogin(action) {
-  return ensureLogin().then(action).catch(function (err) {
+  return ensureLogin().then(action).catch(function (error) {
+    if (!isUnauthorized(error)) throw error;
+    clear();
+    return ensureLogin().then(action);
+  }).catch(function (err) {
     wx.showModal({ title: '暂时无法登录', content: (err && err.message) || '请稍后重试', showCancel: false });
     throw err;
   });
 }
 
-module.exports = { ensureLogin: ensureLogin, requireLogin: requireLogin };
+module.exports = { ensureLogin: ensureLogin, requireLogin: requireLogin, clear: clear };

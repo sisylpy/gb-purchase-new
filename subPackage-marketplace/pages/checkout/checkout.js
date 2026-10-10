@@ -1,7 +1,6 @@
 var api = require('../../services/api');
 var session = require('../../services/session');
 var routes = require('../../utils/routes');
-var pageUtil = require('../../utils/page');
 
 function createKey() { return 'wx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10); }
 
@@ -23,9 +22,9 @@ Page({
     var ids = [];
     (that.data.cart.groups || []).forEach(function (group) { (group.lines || []).forEach(function (line) { ids.push(line.cartLineId); }); });
     that.setData({ submitting: true });
-    api.submitOrder({ idempotencyKey: that.data.idempotencyKey, cartLineIds: ids, remark: that.data.remark }).then(function (order) {
+    session.requireLogin(function () { return api.submitOrder({ idempotencyKey: that.data.idempotencyKey, cartLineIds: ids, remark: that.data.remark }); }).then(function (order) {
       wx.showToast({ title: '订单已提交并自动分单', icon: 'success' });
       setTimeout(function () { wx.redirectTo({ url: routes.ORDER_DETAIL + '?orderId=' + order.orderId }); }, 700);
-    }).catch(function (error) { that.setData({ submitting: false }); pageUtil.showError(error, '订单提交失败'); });
+    }).catch(function () { that.setData({ submitting: false }); });
   }
 });

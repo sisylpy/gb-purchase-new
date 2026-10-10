@@ -1,4 +1,5 @@
 var api = require('../../services/api');
+var session = require('../../services/session');
 var pageUtil = require('../../utils/page');
 
 Page({
@@ -6,11 +7,11 @@ Page({
   onLoad: function (options) { this.setData({ orderId: Number(options.orderId) }); this.load(); },
   load: function () {
     var that = this;
-    api.orderDetail(that.data.orderId).then(function (order) {
+    session.requireLogin(function () { return api.orderDetail(that.data.orderId); }).then(function (order) {
       order.statusText = pageUtil.orderStatus(order.orderStatus);
       (order.merchantOrders || []).forEach(function (child) { child.statusText = pageUtil.orderStatus(child.fulfillmentStatus); });
       that.setData({ order: order, loading: false });
-    }).catch(function (error) { that.setData({ loading: false }); pageUtil.showError(error); });
+    }).catch(function () { that.setData({ loading: false }); });
   },
   back: function () { wx.navigateBack({ fail: function () { wx.reLaunch({ url: '/subPackage-marketplace/pages/orders/orders' }); } }); }
 });

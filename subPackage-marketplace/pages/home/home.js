@@ -1,4 +1,5 @@
 var api = require('../../services/api');
+var session = require('../../services/session');
 var routes = require('../../utils/routes');
 var pageUtil = require('../../utils/page');
 
@@ -20,7 +21,7 @@ Page({
   refreshCartCount: function () {
     if (!wx.getStorageSync('marketplaceResidentToken')) return;
     var that = this;
-    api.cart().then(function (cart) { that.setData({ cartCount: cart.lineCount || 0 }); }).catch(function () {});
+    session.requireLogin(function () { return api.cart(); }).then(function (cart) { that.setData({ cartCount: cart.lineCount || 0 }); }).catch(function () {});
   },
   inputKeyword: function (e) { this.setData({ keyword: e.detail.value }); },
   search: function () { wx.navigateTo({ url: routes.MERCHANT_LIST + '?keyword=' + encodeURIComponent(this.data.keyword || '') }); },

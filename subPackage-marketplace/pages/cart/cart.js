@@ -15,14 +15,14 @@ Page({
     if (that.data.changingId) return;
     if (next <= 0) { that.removeLine(line.cartLineId); return; }
     that.setData({ changingId: line.cartLineId });
-    api.putCart(line.goodsId, next, line.remark || '').then(function (cart) { that.setData({ cart: cart, changingId: null }); }).catch(function (error) { that.setData({ changingId: null }); pageUtil.showError(error); });
+    session.requireLogin(function () { return api.putCart(line.goodsId, next, line.remark || ''); }).then(function (cart) { that.setData({ cart: cart, changingId: null }); }).catch(function () { that.setData({ changingId: null }); });
   },
   remove: function (e) { this.removeLine(e.currentTarget.dataset.id); },
   removeLine: function (id) {
     var that = this;
     wx.showModal({ title: '移除商品', content: '确认从购物车移除这件商品吗？', success: function (result) {
       if (!result.confirm) return;
-      api.removeCart(id).then(function (cart) { that.setData({ cart: cart }); }).catch(function (error) { pageUtil.showError(error); });
+      session.requireLogin(function () { return api.removeCart(id); }).then(function (cart) { that.setData({ cart: cart }); }).catch(function () {});
     }});
   },
   checkout: function () {

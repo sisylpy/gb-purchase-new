@@ -10,5 +10,5 @@ Page({
     session.ensureLogin().then(function () { that.onShow(); wx.showToast({ title: '登录成功', icon: 'success' }); }).catch(function (error) { pageUtil.showError(error, '登录失败'); });
   },
   orders: function () { wx.reLaunch({ url: routes.ORDERS }); },
-  clear: function () { wx.removeStorageSync('marketplaceResidentToken'); wx.removeStorageSync('marketplaceResident'); this.onShow(); }
+  clear: function () { session.clear(); this.onShow(); }
 });
