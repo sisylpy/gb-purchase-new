@@ -1,0 +1,7 @@
+<view class="page checkout-page"><view class="top-safe"></view><view class="nav"><view class="back" bindtap="back">‹</view><view class="nav-title">确认订单</view></view>
+  <view class="safety-notice"><view class="notice-title">受控 V1 联调订单</view><view>本次只验证总订单、自动分单和打印任务，不触发真实支付。配送、退款与商户结算尚未配置。</view></view>
+  <view wx:for="{{cart.groups}}" wx:key="merchantId" class="order-group"><view class="order-head">{{item.merchantName}} <text>{{item.lines.length}} 件</text></view><view wx:for="{{item.lines}}" wx:for-item="line" wx:key="cartLineId" class="order-line"><view class="grow"><view>{{line.goodsName}}</view><view class="muted">{{line.specification}} · {{line.quantity}}{{line.saleUnit}}</view></view><view>¥{{line.lineAmount}}</view></view><view class="group-total">档口小计 ¥{{item.subtotal}}</view></view>
+  <view class="card"><view class="field-label">居民备注（选填）</view><textarea class="remark" maxlength="512" placeholder="可填写商品或订单备注，不用于配送承诺" value="{{remark}}" bindinput="inputRemark"/></view>
+  <view class="card total-card"><view>{{cart.merchantCount}} 家档口，后台将自动生成 {{cart.merchantCount}} 张履约子订单</view><view class="amount">商品合计 ¥{{cart.totalAmount}}</view></view>
+  <view class="submit-bar"><view class="grow"><view class="amount small">¥{{cart.totalAmount}}</view><view class="muted tiny">不触发真实支付</view></view><view class="submit-button {{submitting?'disabled':''}}" bindtap="submit">{{submitting?'正在提交…':'一次提交订单'}}</view></view>
+</view>

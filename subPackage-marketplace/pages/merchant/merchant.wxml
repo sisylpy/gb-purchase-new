@@ -1,0 +1,10 @@
+<view class="page merchant-page"><view class="top-safe"></view><view class="hero"><view class="hero-actions"><view class="circle" bindtap="back">‹</view><view class="circle" bindtap="openCart">🛒</view></view><view class="merchant-summary"><image wx:if="{{merchant.logoUrl}}" class="hero-logo" src="{{merchant.logoUrl}}" mode="aspectFill"/><view class="grow"><view class="hero-name">{{merchant.merchantName || '档口商品'}}</view><view class="hero-intro">{{merchant.introduction || '本店商品均由该档口独立提供与履约'}}</view></view></view></view>
+  <view class="identity-note">当前页面只展示“{{merchant.merchantName}}”自己的商品，加入购物车后仍会保留明确商户归属。</view>
+  <view class="goods-search"><input class="input grow" placeholder="搜索本档口商品" value="{{keyword}}" bindinput="inputKeyword" bindconfirm="search"/><view class="search-button" bindtap="search">搜索</view></view>
+  <view wx:if="{{loading}}" class="empty">正在加载商品…</view><view wx:elif="{{!goods.length}}" class="empty">该档口暂无在售商品</view>
+  <view wx:else class="goods-grid"><view wx:for="{{goods}}" wx:key="goodsId" class="goods-card">
+    <image wx:if="{{item.imageUrl}}" class="goods-image" src="{{item.imageUrl}}" mode="aspectFill"/><view wx:else class="goods-image fallback">{{item.categoryName}}</view>
+    <view class="goods-body"><view class="goods-name">{{item.goodsName}}</view><view class="goods-spec">{{item.specification || '按实际规格销售'}} · {{item.saleUnit}}</view><view class="owner">商户：{{item.merchantName}}</view><view class="goods-bottom"><view class="price">¥{{item.salePrice}}</view><view class="add {{addingId===item.goodsId?'disabled':''}}" data-item="{{item}}" bindtap="add">＋</view></view></view>
+  </view></view>
+  <view class="cart-float" bindtap="openCart">查看统一购物车</view>
+</view>

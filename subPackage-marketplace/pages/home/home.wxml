@@ -1,0 +1,33 @@
+<view class="page home-page">
+  <view class="top-safe"></view>
+  <view class="home-head">
+    <view class="market-row"><view class="market-dot">⌖</view><view class="market-name">{{market.marketName || '当前农贸市场'}}</view></view>
+    <view class="search-row"><input class="search-input" placeholder="搜索档口商户" value="{{keyword}}" bindinput="inputKeyword" confirm-type="search" bindconfirm="search"/><view class="search-button" bindtap="search">搜索</view></view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">正在加载市场资料…</view>
+  <block wx:else>
+    <view class="category-card">
+      <view wx:for="{{categories}}" wx:key="categoryId" class="category-item" data-item="{{item}}" bindtap="openCategory">
+        <image wx:if="{{item.iconUrl}}" class="category-icon-image" src="{{item.iconUrl}}" mode="aspectFill"/>
+        <view wx:else class="category-icon">{{item.initial}}</view>
+        <view class="category-name">{{item.categoryName}}</view>
+        <view class="category-count">{{item.merchantCount || 0}} 家档口</view>
+      </view>
+      <view wx:if="{{!categories.length}}" class="empty small">市场尚未配置商品大类</view>
+    </view>
+
+    <view wx:if="{{notice}}" class="notice">业务联调说明：{{notice}}</view>
+
+    <view class="section-head"><view><view class="section-title reset">推荐档口</view><view class="section-sub">先选档口，再购买该档口自己的商品</view></view><view class="more" bindtap="search">查看全部 ›</view></view>
+    <view wx:if="{{merchants.length}}" class="merchant-grid">
+      <view wx:for="{{merchants}}" wx:key="merchantId" class="merchant-card" data-item="{{item}}" bindtap="openMerchant">
+        <image wx:if="{{item.logoUrl}}" class="merchant-cover" src="{{item.logoUrl}}" mode="aspectFill"/>
+        <view wx:else class="merchant-cover placeholder">档口</view>
+        <view class="merchant-info"><view class="merchant-name">{{item.merchantName}}</view><view class="merchant-intro">{{item.introduction || '本市场在营档口'}}</view><view class="merchant-meta">在售 {{item.goodsCount || 0}} 件商品</view></view>
+      </view>
+    </view>
+    <view wx:else class="empty">暂无在营档口，请联系市场管理员配置</view>
+  </block>
+  <market-tab-bar active="home" cart-count="{{cartCount}}"/>
+</view>

@@ -1,0 +1,12 @@
+<view class="page list-page"><view class="top-safe"></view><view class="nav"><view class="back" bindtap="back">‹</view><view class="nav-title">{{categoryName || '全部档口'}}</view></view>
+  <view class="search-box"><input class="input grow" placeholder="输入档口名称" value="{{keyword}}" bindinput="inputKeyword" bindconfirm="search"/><view class="search-button" bindtap="search">搜索</view></view>
+  <view class="flow-note" wx:if="{{categoryName}}">以下是经营“{{categoryName}}”的档口。进入档口后，只会看到该档口自己的商品。</view>
+  <view wx:if="{{loading}}" class="empty">正在查找档口…</view>
+  <view wx:elif="{{!merchants.length}}" class="empty">该分类下暂时没有在营档口</view>
+  <view wx:else class="merchant-list">
+    <view wx:for="{{merchants}}" wx:key="merchantId" class="merchant-row" data-item="{{item}}" bindtap="openMerchant">
+      <image wx:if="{{item.logoUrl}}" class="logo" src="{{item.logoUrl}}" mode="aspectFill"/><view wx:else class="logo fallback">商</view>
+      <view class="grow"><view class="name">{{item.merchantName}}</view><view class="intro">{{item.introduction || '本市场在营档口'}}</view><view class="meta">在售 {{item.goodsCount || 0}} 件商品</view></view><view class="arrow">›</view>
+    </view>
+  </view>
+</view>

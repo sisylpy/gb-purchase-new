@@ -1,0 +1,6 @@
+<view class="page mine-page"><view class="top-safe"></view><view class="mine-head"><view class="avatar">居</view><view><view class="mine-title">居民账户</view><view class="mine-sub">{{loggedIn ? '已通过微信身份进入当前农贸市场' : '登录后可使用购物车并查询订单'}}</view></view></view>
+  <view class="card"><view class="menu" bindtap="orders"><view>我的统一订单</view><view>›</view></view><view class="menu"><view>当前市场</view><view class="muted">ID {{resident.marketId || '-'}}</view></view><view class="menu"><view>居民身份</view><view class="muted">{{loggedIn ? '已登录' : '未登录'}}</view></view></view>
+  <view class="card policy"><view class="policy-title">V1 服务说明</view><view>当前版本用于验证跨档口统一购物车、自动分单和独立打印。正式支付、配送、退款和商户结算尚未启用。</view></view>
+  <view wx:if="{{!loggedIn}}" class="button action" bindtap="login">微信登录</view><view wx:else class="logout" bindtap="clear">退出本机测试会话</view>
+  <market-tab-bar active="mine"/>
+</view>

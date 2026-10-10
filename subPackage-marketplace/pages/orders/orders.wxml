@@ -1,0 +1,6 @@
+<view class="page orders-page"><view class="top-safe"></view><view class="nav"><view class="nav-title">我的订单</view></view>
+  <view class="orders-note">居民只看到一张统一订单；每个档口的履约进度会分别显示在订单详情中。</view>
+  <view wx:if="{{loading}}" class="empty">正在读取订单…</view><view wx:elif="{{!orders.length}}" class="empty"><view>还没有提交过订单</view><view class="empty-link" bindtap="goHome">去市场选购</view></view>
+  <view wx:else><view wx:for="{{orders}}" wx:key="orderId" class="order-card" data-id="{{item.orderId}}" bindtap="open"><view class="order-title"><view>统一订单 {{item.orderNo}}</view><view class="pill">{{item.statusText}}</view></view><view class="order-meta">{{item.merchantCount}} 家档口 · {{item.itemCount}} 种商品</view><view class="progress">已完成档口 {{item.completedMerchantCount || 0}} / {{item.merchantCount}}</view><view class="order-bottom"><view class="muted">{{item.createdAt}}</view><view class="amount">¥{{item.totalAmount}} ›</view></view></view></view>
+  <market-tab-bar active="orders"/>
+</view>

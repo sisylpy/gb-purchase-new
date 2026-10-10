@@ -1,0 +1,6 @@
+<view class="tabbar">
+  <view class="tab {{active==='home'?'on':''}}" data-key="home" bindtap="tap"><text class="icon">⌂</text><text>首页</text></view>
+  <view class="tab {{active==='cart'?'on':''}}" data-key="cart" bindtap="tap"><view class="badge-wrap"><text class="icon">🛒</text><text wx:if="{{cartCount}}" class="badge">{{cartCount}}</text></view><text>购物车</text></view>
+  <view class="tab {{active==='orders'?'on':''}}" data-key="orders" bindtap="tap"><text class="icon">▣</text><text>订单</text></view>
+  <view class="tab {{active==='mine'?'on':''}}" data-key="mine" bindtap="tap"><text class="icon">♙</text><text>我的</text></view>
+</view>

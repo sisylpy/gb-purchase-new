@@ -1,0 +1,16 @@
+<view class="page cart-page"><view class="top-safe"></view><view class="nav"><view class="nav-title">统一购物车</view></view>
+  <view class="cart-explain">不同档口的商品可以一起提交。系统会在后台自动按商品所属档口拆成履约子订单。</view>
+  <view wx:if="{{loading}}" class="empty">正在读取购物车…</view>
+  <view wx:elif="{{!cart.lineCount}}" class="empty"><view class="empty-icon">🛒</view><view>购物车还是空的</view><view class="empty-link" bindtap="goHome">去选档口商品</view></view>
+  <block wx:else><view wx:for="{{cart.groups}}" wx:key="merchantId" class="cart-group">
+    <view class="group-head"><view class="merchant-badge">档</view><view class="group-name">{{item.merchantName}}</view><view class="pill">该档口小计 ¥{{item.subtotal}}</view></view>
+    <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="cartLineId" class="cart-line">
+      <image wx:if="{{line.imageUrl}}" class="line-image" src="{{line.imageUrl}}" mode="aspectFill"/><view wx:else class="line-image fallback">商品</view>
+      <view class="grow"><view class="line-name">{{line.goodsName}}</view><view class="line-spec">{{line.specification || '实际规格'}} · {{line.saleUnit}}</view><view class="price">¥{{line.salePrice}}</view></view>
+      <view class="quantity"><view class="q-button" data-line="{{line}}" data-delta="-1" bindtap="change">−</view><view class="q-number">{{line.quantity}}</view><view class="q-button" data-line="{{line}}" data-delta="1" bindtap="change">＋</view><view class="remove" data-id="{{line.cartLineId}}" bindtap="remove">移除</view></view>
+    </view>
+  </view>
+  <view class="summary-card"><view>{{cart.merchantCount}} 家档口 · {{cart.lineCount}} 种商品</view><view class="total">合计 ¥{{cart.totalAmount}}</view><view class="pending">暂不含配送费；支付与配送规则尚待产品确认</view></view></block>
+  <view wx:if="{{cart.lineCount}}" class="checkout-bar"><view class="grow"><view class="bar-total">¥{{cart.totalAmount}}</view><view class="bar-sub">一次提交，系统自动分单</view></view><view class="checkout-button" bindtap="checkout">确认商品</view></view>
+  <market-tab-bar active="cart" cart-count="{{cart.lineCount}}"/>
+</view>

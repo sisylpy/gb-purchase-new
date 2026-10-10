@@ -1,0 +1,10 @@
+<view class="page detail-page"><view class="top-safe"></view><view class="nav"><view class="back" bindtap="back">‹</view><view class="nav-title">订单详情</view></view>
+  <view wx:if="{{loading}}" class="empty">正在读取订单…</view><block wx:else>
+    <view class="master-card"><view class="status">{{order.statusText}}</view><view class="master-no">居民统一订单 {{order.orderNo}}</view><view class="master-explain">本次一次提交已自动拆分为 {{order.merchantCount}} 张档口履约子订单。</view><view class="master-total">商品合计 ¥{{order.totalAmount}}</view><view class="pending">支付状态：{{order.paymentStatus}}（V1 尚未接入真实支付）</view></view>
+    <view class="section-title">档口履约明细</view>
+    <view wx:for="{{order.merchantOrders}}" wx:key="merchantOrderId" class="child-card"><view class="child-head"><view><view class="merchant-name">{{item.merchantName}}</view><view class="child-no">子订单 {{item.merchantOrderNo}}</view></view><view class="pill">{{item.statusText}}</view></view>
+      <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="orderLineId" class="line"><view class="grow"><view>{{line.goodsName}}</view><view class="muted spec">{{line.specification}} · {{line.quantity}}{{line.saleUnit}}</view></view><view>¥{{line.lineAmount}}</view></view><view class="child-total">档口小计 ¥{{item.totalAmount}}</view>
+    </view>
+    <view wx:if="{{order.residentRemark}}" class="card"><view class="muted">居民备注</view><view class="remark">{{order.residentRemark}}</view></view>
+  </block>
+</view>
